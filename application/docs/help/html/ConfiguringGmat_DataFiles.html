@@ -1,0 +1,52 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Configuring Data Files</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ConfiguringGmat.html" title="Chapter&nbsp;4.&nbsp;Configuring GMAT"><link rel="prev" href="ConfiguringGmat.html" title="Chapter&nbsp;4.&nbsp;Configuring GMAT"><link rel="next" href="Tutorials.html" title="Tutorials"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Configuring Data Files</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ConfiguringGmat.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;4.&nbsp;Configuring GMAT</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Tutorials.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="ConfiguringGmat_DataFiles"></a>Configuring Data Files</h2></div></div></div><p>GMAT uses many emprical data files that are periodically updated. In
+    some cases files are updated by the owning organization as often as every
+    3 hours. GMAT is distributed with a python script
+    <code class="literal">\utilities\python\GMATDataFileManager.py</code> that automates
+    file updates, logs changes, and optionally archives old versions of data
+    files used by GMAT. See the help documentation contained in the Python
+    class for detailed usage instructions. Below we describe the emprical data
+    files used by GMAT, and which startup file variables are used to define
+    those files' locations on your system. The source of the data file and
+    comments describe where the files are obtained and how they are
+    used.</p><div class="informaltable"><table border="1"><colgroup><col width="28%"><col width="36%"><col width="36%"></colgroup><thead><tr><th align="center">Startup File Variable</th><th align="center">Data Source</th><th align="center">Comments</th></tr></thead><tbody><tr><td>EOP_FILE</td><td>ftp://hpiers.obspm.fr/iers/series/
+            opa/eopc04_IAU2000/</td><td>The EOP file used by GMAT&rsquo;s astrodynamics routines.</td></tr><tr><td>EOP_FILE_SPICE</td><td>https://naif.jpl.nasa.gov/pub/naif/ generic_kernels/pck/
+            earth_latest_high_prec.bpc</td><td>The EOP file used by SPICE&rsquo;s astrodynamics
+            routines.</td></tr><tr><td>PLANETARY_PCK _FILE</td><td>https://naif.jpl.nasa.gov/pub/naif/
+            generic_kernels/pck/</td><td>The SPICE planetary constants kernel containing
+            orientation, size and shape data. As of release R2017a, the
+            version is pck00010.pck. This can change and the file checks for
+            new versions.</td></tr><tr><td>LEAP_SECS_FILE</td><td>ftp://maia.usno.navy.mil/ser7/tai-utc.dat</td><td>The leap second file used by GMAT&rsquo;s astrodynamics
+            routines.</td></tr><tr><td>LSK_FILE</td><td>https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/</td><td>The leap second file used by SPICE's astrodynamics
+            routines. As of release R2017a, the version is naif0012.tls. This
+            can change and the file checks for new versions.</td></tr><tr><td>CSSI_FLUX_FILE</td><td>ftp://ftp.agi.com/pub/DynamicEarthData/SpaceWeather-All-v1.2.txt</td><td>The CSSI Space Weather File used for flux and geomagnetic
+            indeces in drag modelling when a propgator is configured to use
+            the CSSI file as the source for space weather modelling.</td></tr><tr><td>SCHATTEN_FILE</td><td>https://fdf.gsfc.nasa.gov/forms</td><td>Requires an account. Cannot be downloaded automatically.</td></tr><tr><td>IRI2007_APDATA</td><td>Constructed from CSSI_FLUX_FILE using
+            GMATDataManager.py</td><td>Geomagnetic indices used in the IRI2007 model.</td></tr><tr><td>EARTH_PCK _PREDICTED_FILE</td><td>https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/</td><td>The SPICE kernel containing predicted, precession, nutation
+            ,nutation corrections, UT1-TAI , and polar motion for the Earth.
+            Used in SPICE's astrodynamic routines.</td></tr><tr><td>EARTH_PCK _CURRENT_FILE</td><td>https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/</td><td>The SPICE kernel containing historical, precession,
+            nutation ,nutation corrections, UT1-TAI , and polar motion for the
+            Earth. Used in SPICE's astrodynamic routines.</td></tr><tr><td>LUNA_PCK _CURRENT_FILE</td><td>https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/</td><td>Kernel providing orientation of Lunar Principal Axis (PA)
+            reference frame. Used in SPICE's astrodynamic routines.</td></tr><tr><td>LUNA_FRAME _KERNEL_FILE</td><td>https://naif.jpl.nasa.gov/pub/naif/generic_kernels/fk/satellites/</td><td>This frame kernel contains the latest specifications of
+            lunar reference frames realizing the Lunar Principal Axis (PA) and
+            Mean Earth/Polar Axis (ME) reference systems. Used in SPICE's
+            astrodynamic routines.</td></tr></tbody></table></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10D5C"></a>Loading Custom Plugins</h3></div></div></div><p>Custom plugins are loaded by adding a line to the startup file
+      (<code class="filename">bin/gmat_startup_file.txt</code>) specifying the name and
+      location of the plugin file. In order for a plugin to work with GMAT,
+      the plugin library must be placed in the folder referenced in the
+      startup file. For all details, see the <a class="xref" href="StartupFile.html" title="Startup File"><span class="refentrytitle">Startup File</span></a>
+      reference.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10D67"></a>Configuring the MATLAB Inteface</h3></div></div></div><p>GMAT contains an interface to MATLAB. See the <a class="xref" href="MatlabInterface.html" title="MATLAB Interface"><span class="refentrytitle">MATLAB Interface</span></a> reference to configure the MATLAB
+      interface.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10D6F"></a>Configuring the Python Inteface</h3></div></div></div><p>GMAT contains an interface to Python. See the <a class="xref" href="PythonInterface.html" title="Python Interface"><span class="refentrytitle">Python Interface</span></a> reference to configure the MATLAB
+      interface.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10D77"></a>User-defined Function Paths</h3></div></div></div><p>If you create custom MATLAB functions, you can provide the path to
+      those files and GMAT will locate them at run time. The default startup
+      file is configured so you can place MATLAB functions (with a
+      <code class="filename">.m</code> extension) in the
+      <code class="filename">userfunctions/matlab</code> directory. GMAT automatically
+      searches that location at run time. You can change the location of the
+      search path to your MATLAB functions by changing these lines in your
+      startup file to reflect the location of your files with respect to the
+      GMAT <code class="filename">bin</code> folder:</p><pre class="programlisting">MATLAB_FUNCTION_PATH = ../userfunctions/matlab</pre><p>If you wish to organize your custom functions in multiple folders,
+      you can add multiple search paths to the startup file. For
+      example,</p><pre class="programlisting">MATLAB_FUNCTION_PATH = ../MyFunctions/utils
+MATLAB_FUNCTION_PATH = ../MyFunctions/StateConversion 
+MATLAB_FUNCTION_PATH = ../MyFunctions/TimeConversion</pre><p>GMAT will search the paths in the order specified in the startup
+      file and will use the first function with a matching name.</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ConfiguringGmat.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ConfiguringGmat.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Tutorials.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;4.&nbsp;Configuring GMAT&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Tutorials</td></tr></table></div></body></html>

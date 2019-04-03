@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -48,6 +48,7 @@
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested Atmosphere class
+ * in generic way.
  *
  * @param <ofType> the Atmosphere object to create and return.
  * @param <forBody> the body for which the atmospher model is requested.
@@ -60,10 +61,29 @@
  *       be useful in the future.
  */
 //------------------------------------------------------------------------------
+GmatBase* AtmosphereFactory::CreateObject(const std::string &ofType,
+                                          const std::string &withName)
+{
+   return CreateAtmosphereModel(ofType, withName);
+}
+
+//------------------------------------------------------------------------------
+//  CreateAtmosphereModel(std::string ofType, std::string withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates and returns an object of the requested Atmosphere class
+ *
+ * @param <ofType> the Atmosphere object to create and return.
+ * @param <forBody> the body for which the atmospher model is requested.
+ * @param <withName> the name to give the newly-created Atmosphere object.
+ *
+ * @note As of 2004/08/12, we are ignoring the withName parameter.  Use of this
+ *       parameter may be added later.
+ */
+//------------------------------------------------------------------------------
 AtmosphereModel*
 AtmosphereFactory::CreateAtmosphereModel(const std::string &ofType,
-                                         const std::string &withName,
-                                         const std::string &forBody)
+                                         const std::string &withName)
 {
 //   if (ofType == "Exponential")
 //      return new ExponentialAtmosphere(withName);

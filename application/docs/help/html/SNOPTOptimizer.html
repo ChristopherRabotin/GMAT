@@ -1,0 +1,158 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>SNOPT</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="Simulator.html" title="Simulator"><link rel="next" href="SolarPowerSystem.html" title="SolarPowerSystem"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">SNOPT</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Simulator.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="SolarPowerSystem.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="SNOPTOptimizer"></a><div class="titlepage"></div><a name="N1D1C6" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">SNOPT</span></h2><p>SNOPT &mdash; The Sequential Quadratic Programming (SQP) optimizer,
+    SNOPT</p></div><div class="refsection"><a name="N1D1D7"></a><h2>Description</h2><p>The <span class="guilabel">SNOPT</span> optimizer is a SQP-based Nonlinear
+    Programming solver developed by Stanford Business Software, Inc. It is a
+    proprietary component that is not distritbuted with GMAT and must be
+    obtained from the vendor. <span class="guilabel"> SNOPT</span> performs nonlinear
+    constrained optimization and supports both linear and nonlinear
+    constraints. To use this solver, you must configure the solver options
+    including convergence criteria, maximum iterations, among other options.
+    In the mission sequence, you implement an optimizer such as SNOPT by using
+    an <span class="guilabel">Optimize</span>/<span class="guilabel">EndOptimize</span>
+    sequence. Within this sequence, you define optimization variables by using
+    the <span class="guilabel">Vary</span> command, and define cost and constraints by
+    using the <span class="guilabel">Minimize</span> and
+    <span class="guilabel">NonlinearConstraint</span> commands respectively.</p><p>This resource cannot be modified in the Mission Sequence.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="FminconOptimizer.html" title="FminconOptimizer"><span class="refentrytitle">FminconOptimizer</span></a>,<a class="xref" href="Optimize.html" title="Optimize"><span class="refentrytitle">Optimize</span></a>,<a class="xref" href="Vary.html" title="Vary"><span class="refentrytitle">Vary</span></a>, <a class="xref" href="NonlinearConstraint.html" title="NonlinearConstraint"><span class="refentrytitle">NonlinearConstraint</span></a>, <a class="xref" href="Minimize.html" title="Minimize"><span class="refentrytitle">Minimize</span></a></p></div><div class="refsection"><a name="N1D206"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="26%"><col width="74%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">MajorFeasibilityTolerance</span></td><td><p> Specifies how accurately the nonlinear constraints
+            should be satisfied. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1e-5</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MajorIterationsLimit</span></td><td><p>The maximum number of major iterations allowed. It is
+            intended to guard against an excessive number of linearizations of
+            the constraints</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Integer &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1e-5</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MajorOptimalityTolerance</span></td><td><p>Specifies the final accuracy of the dual variables.&nbsp;
+            See the SNOPT user guide for further details.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1e-5</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">OutputFileName</span></td><td><p> Contains the path and file name of the report file.
+            This report contains data written by SNOPT regarding optimization
+            progress and information.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any user-defined file name</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">SNOPT.out</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">OverrideSpecsFileValues</span></td><td><p>Flag to indicate if options settable in the GMAT
+            script/GUI should override values set in the
+            <span class="guilabel">SNOPT</span> Specs file. Note that if the specs file
+            is not found during initialization, GMAT configurations are
+            applied even if the <span class="guilabel">OverrideSpecsFileValues</span>
+            field is set to <span class="guilabel">false</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">true</code>,
+                    <code class="literal">false</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">true</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ReportFile</span></td><td><p> Contains the path and file name of the report file.
+            This report contains data written by GMAT regarding optimization
+            progress and information.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any user-defined file name</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><code class="literal">SNOPTSNOPT1.data</code></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI,script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ReportStyle</span></td><td><p>Determines the amount and type of data written to the
+            message window and to the report specified by field
+            <span class="guilabel">ReportFile</span> for each iteration of the solver
+            (When <span class="guilabel">ShowProgress</span> is true).&nbsp; Currently, the
+            <span class="guilabel">Normal</span>, <span class="guilabel">Debug</span>, and
+            <span class="guilabel">Concise</span> options contain the same information:
+            the values for the control variables, the constraints, and the
+            objective function.&nbsp; In addition to this information, the
+            <span class="guilabel">Verbose</span> option also contains values of the
+            optimizer-scaled control variables.&nbsp; </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Normal</span>,
+                    <span class="guilabel">Concise</span>,
+                    <span class="guilabel">Verbose</span>,
+                    <span class="guilabel">Debug</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Normal</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ShowProgress</span></td><td><p>Determines whether data pertaining to iterations of
+            the solver is both displayed in the message window and written to
+            the report specified by the <span class="guilabel">ReportFile</span> field.
+            When <span class="guilabel">ShowProgress</span> is true, the amount of
+            information contained in the message window and written in the
+            report&nbsp;is controlled by the <span class="guilabel">ReportStyle</span>
+            field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">true</code>,
+                    <code class="literal">false</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">true</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SpecsFileName</span></td><td><p> File read by SNOPT to configure all settings of the
+            optimizer. The GMAT script/gui interface only supportsa small
+            subset of the SNOPT configuration options. This file allows you to
+            set any options supported by SNOPT. This file is only loaded if it
+            is found during initialization and selected values set on the file
+            can be overwritten by the GMAT configuration by
+            <span class="guilabel">OverrideSpecsFileValues = true. </span> See the
+            <a class="xref" href="SNOPTOptimizer.html#SNOPTOptimizer_Remarks" title="Remarks">Remarks</a>
+            section for more information.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any user-defined file name</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">SNOPT.spec</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">TotalIterationsLimit</span></td><td><p>The maximum number of minor iterations allowed.&nbsp;
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Integer &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>100000</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1D429"></a><h2>GUI</h2><p>The <span class="guilabel">SNOPT</span> dialog box allows you to specify
+    properties of a <span class="guilabel">SNOPT</span> such as as maximum iterations,
+    cost function tolerance, feasibility tolerance, choice of reporting
+    options, and choice of whether or not to use the central difference
+    derivative method.</p><p>To create a <span class="guilabel">SNOPT</span> resource, navigate to the
+    <span class="guilabel">Resources</span> tree, expand the
+    <span class="guilabel">Solvers</span> folder, highlight and then right-click on the
+    <span class="guilabel">Optimizers</span> sub-folder, point to <span class="guilabel">Add
+    </span>and then select <span class="guilabel">SNOPT</span>. This will create a
+    new <span class="guilabel">SNOPT</span> resource, <span class="guilabel">SNOPT1</span>.
+    Double-click on <span class="guilabel">SNOPT1</span> to bring up the
+    <span class="guilabel">SNOPT</span> dialog box shown below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SNOPTOptimizer_GUI.png" align="middle" height="575"></td></tr></table></div></div></div><div class="refsection"><a name="SNOPTOptimizer_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N1D461"></a><h3>SNOPT Optimizer Version and Availability</h3><p>GMAT currently uses SNOPT 7.2-12.2. This optimizer is not included
+      as part of the nominal GMAT installation and is only available if you
+      have created and installed the SNOPT plug-in or obtained SNOPT from the
+      vendor.</p></div><div class="refsection"><a name="N1D466"></a><h3>SPECS File Configuration</h3><p>The Specs file contains a list of options and values in the
+      following general form:.</p><pre class="programlisting">Begin options
+   Iterations limit 500
+   Minor feasibility tolerance 1.0e-7
+   Solution Yes
+End options  </pre><p>The file starts with the keyword Begin and ends with End. The file
+      is in free format. Each line specifies a single option, using one or
+      more items as follows:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>A keyword (required for all options).</p></li><li class="listitem"><p>A phrase (one or more words) that qualifies the keyword (only
+          for some options).</p></li><li class="listitem"><p>A number that specifies an integer or real value (only for
+          some options). Such numbers may be up to 16 contiguous characters in
+          Fortran 77&rsquo;s I, F, E or D formats, terminated by a space or new
+          line.</p></li></ol></div><p>The items may be entered in upper or lower case or a mixture of
+      both. Some of the keywords have synonyms, and certain abbreviations are
+      allowed, as long as there is no ambiguity. Blank lines and comments may
+      be used to improve readability. A comment begins with an asterisk (*)
+      anywhere on a line. All subsequent characters on the line are ignored.
+      The Begin line is echoed to the Summary file.</p><p>For a complete list of SNOPT options, see the SNOPT user
+      guide.</p></div><div class="refsection"><a name="N1D47D"></a><h3>Configuring SNOPT for Effective Optimization</h3><p>When using <span class="guilabel">SNOPT</span>, the
+      <span class="guilabel">Upper</span> and <span class="guilabel">Lower</span> bounds in the
+      <span class="guilabel">Vary</span> commands are required fields. By setting these
+      values appropriately for your problem, you reduce the likelihood that
+      <span class="guilabel">SNOPT</span> will try values that are unphysical or that
+      can result in numerical singularities in the physical models. It is
+      important to set bounds carefully when using
+      <span class="guilabel">SNOPT</span>.</p><p>Aditionally, <span class="guilabel">SNOPT</span> is quite senstive to
+      scaling and care must be taken to provide acceptable values of
+      <span class="guilabel">AdditiveScaleFactor</span> and
+      <span class="guilabel">MultiplicativeScaleFactor</span> in the
+      <span class="guilabel">Vary</span> commands. When using
+      <span class="guilabel">SNOPT</span>, derivatives are computed by
+      <span class="guilabel">SNOPT</span> via the optimizer's built-in finite
+      differencing. If an optimization problem is not appropriately scaled,
+      optimization may fail, or take an un-nesessarily long time. Note that
+      SNOPT has built-in scaling options that can be set via the Specs file
+      and are described in further detail in the SNOPT user guide.</p></div><div class="refsection"><a name="N1D4A8"></a><h3>Resource and Command Interactions</h3><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>GMAT's <span class="guilabel">Vary</span> command is a generic interface
+        designed to support many optimizers and not all settings supported by
+        the <span class="guilabel">Vary</span> command are supported by
+        <span class="guilabel">SNOPT</span>. See the <a class="xref" href="Vary.html" title="Vary"><span class="refentrytitle">Vary</span></a> command
+        documentation for details on the which <span class="guilabel">Vary</span>
+        command settings are supported by <span class="guilabel">SNOPT</span>.</p></div><p>The <span class="guilabel">SNOPT</span> resource can only be used in the
+      context of optimization-type commands. Please see the documentation for
+      <span class="guilabel">Optimize</span>, <span class="guilabel">Vary</span>,
+      <span class="guilabel">NonlinearConstraint</span>, and
+      <span class="guilabel">Minimize</span> for more information and worked
+      examples.</p></div></div><div class="refsection"><a name="N1D4D1"></a><h2>Examples</h2><div class="informalexample"><p>A simple mathematical optimization problem using SNOPT.</p><pre class="programlisting">Create SNOPT NLP
+GMAT NLP.ShowProgress = true
+GMAT NLP.ReportStyle = Normal
+GMAT NLP.ReportFile = output.report
+GMAT NLP.MajorOptimalityTolerance = 0.001
+GMAT NLP.MajorFeasibilityTolerance = 0.0001
+GMAT NLP.MajorIterationsLimit = 456
+GMAT NLP.TotalIterationsLimit = 789012
+GMAT NLP.OutputFileName = 'SNOPTName123.out'
+GMAT NLP.SpecsFileName = 'SNOPT.spec'
+GMAT NLP.OverrideSpecsFileValues = true
+
+Create Variable X1 X2 J G
+
+BeginMissionSequence
+
+Optimize NLP {SolveMode = Solve, ExitMode = DiscardAndContinue}
+   
+   %  Vary the independent variables
+   Vary 'Vary X1' NLP(X1 = 0, {Perturbation = 0.0000001, Upper = 10, ...
+   Lower = -10, AdditiveScaleFactor = 0.0, ...
+   MultiplicativeScaleFactor = 1.0})
+   Vary 'Vary X2' NLP(X2 = 0, {Perturbation = 0.0000001, Upper = 10, ...
+   Lower = -10, AdditiveScaleFactor = 0.0, ...
+   MultiplicativeScaleFactor = 1.0})
+   
+   %  The cost function and Minimize command
+   J = ( X1 - 2 )^2 + ( X2 - 2 )^2
+   Minimize 'Minimize Cost (J)' NLP(J)
+   
+   %  Calculate constraint and use NonLinearConstraint command
+   GMAT G = X2 + X1
+   NonlinearConstraint NLP(G&lt;=8)
+
+EndOptimize   </pre></div><p></p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Simulator.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="SolarPowerSystem.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Simulator&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;SolarPowerSystem</td></tr></table></div></body></html>

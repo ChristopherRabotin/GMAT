@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -131,6 +131,12 @@ private:
    /// Map of coordinate system of data
    std::map<std::string, CoordinateSystem*> coordSysMap;
    
+   //   // Data buffers used to avoid repeated points
+   //   /// The data last published
+   //   Real *dataBuffer;
+   //   /// Count for the last published data
+   //   Integer countBuffer;
+
    /// published data info
    struct DataType
    {

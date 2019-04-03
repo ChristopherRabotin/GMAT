@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -102,7 +102,6 @@ public:
    // Subscriber
    Subscriber* CreateSubscriber(const std::string &type,
                                 const std::string &name,
-                                const std::string &filename = "",
                                 bool createDefault = true);
    Integer GetNumberOfActivePlots();
    
@@ -162,6 +161,7 @@ public:
    Gmat::RunState GetDetailedRunState(Integer sandboxNum = 1);
    
    // Script
+   void ClearScript();
    bool InterpretScript(const char *filename, bool readBack = false,
                         const char *newPath = "");
    bool InterpretScript(const std::string &filename, bool readBack = false,

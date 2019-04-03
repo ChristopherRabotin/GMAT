@@ -29,14 +29,27 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  PhysicalModel* ProductionPropagatorFactory::(const std::string &ofType,
+//  GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * @see CreatePropagator()
+ */
+//------------------------------------------------------------------------------
+GmatBase* ProductionPropagatorFactory::CreateObject(const std::string &ofType,
+                                    const std::string &withName)
+{
+   return CreatePropagator(ofType, withName);
+}
+
+//------------------------------------------------------------------------------
+//  Propagator* CreatePropagator(const std::string &ofType,
 //                               const std::string &withName)
 //------------------------------------------------------------------------------
 /**
- * This method creates and returns a PhysicalModel object.
+ * This method creates and returns a Propagator object.
  *
- * @param <ofType> type of PhysicalModel object to create and return.
- * @param <withName> the name for the newly-created PhysicalModel object.
+ * @param <ofType> type of Propagator object to create and return.
+ * @param <withName> the name for the newly-created Propagator object.
  *
  * @return A pointer to the created object.
  */

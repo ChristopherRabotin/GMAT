@@ -233,12 +233,11 @@ bool SignalBase::SetTransmitParticipantName(std::string name)
    MessageInterface::ShowMessage("SignalBase<%p>::SetTransmitParticipantName('%s')\n", this, name.c_str());
 #endif
 
+   theData.transmitParticipant = name;
    bool retval = false;
    if (name != "")
-   {
-      theData.transmitParticipant = name;
       retval = true;
-   }
+
    return retval;
 }
 
@@ -260,12 +259,11 @@ bool SignalBase::SetReceiveParticipantName(std::string name)
    MessageInterface::ShowMessage("SignalBase<%p>::SetReceivrParticipantName('%s')\n", this, name.c_str());
 #endif
 
+   theData.receiveParticipant = name;
    bool retval = false;
    if (name != "")
-   {
-      theData.receiveParticipant = name;
       retval = true;
-   }
+
    return retval;
 }
 
@@ -458,7 +456,8 @@ bool SignalBase::Add(SignalBase* signalToAdd)
    else
    {
       next = signalToAdd;
-      theData.next = &(signalToAdd->GetSignalData());
+      //theData.next = &(signalToAdd->GetSignalData());              
+      theData.next = signalToAdd->GetSignalDataObject();
       signalToAdd->SetPrevious(this);
    }
 
@@ -568,7 +567,18 @@ bool SignalBase::Initialize()
             theData.tPrecTime = theData.rPrecTime;
          else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
             theData.rPrecTime = theData.tPrecTime;
+         
+         retval = true;
+      }
+      else if (theData.rNode)
+      {
+         // For GPS position measurement
+         // 1. Set value for theData.stationParticipant
+         theData.stationParticipant = theData.rNode->IsOfType(Gmat::GROUND_STATION);
 
+         // 2. Update theData.rPrecTime
+         theData.rPrecTime = theData.rNode->GetEpoch();
+         
          retval = true;
       }
 
@@ -619,19 +629,19 @@ std::string SignalBase::GetPathDescription(bool fullList)
 }
 
 
-//------------------------------------------------------------------------------
-// SignalData& GetSignalData()
-//------------------------------------------------------------------------------
-/**
- * Retrieves the most recently calculated data set for the signal
- *
- * @return The data set
- */
-//------------------------------------------------------------------------------
-SignalData& SignalBase::GetSignalData()
-{
-   return theData;
-}
+////------------------------------------------------------------------------------
+//// SignalData& GetSignalData()
+////------------------------------------------------------------------------------
+///**
+// * Retrieves the most recently calculated data set for the signal
+// *
+// * @return The data set
+// */
+////------------------------------------------------------------------------------
+//SignalData& SignalBase::GetSignalData()
+//{
+//   return theData;
+//}
 
 
 //------------------------------------------------------------------------------
@@ -759,7 +769,9 @@ void SignalBase::UsesLighttime(const bool tf)
 void SignalBase::InitializeSignal(bool chainForwards)
 {
    #ifdef DEBUG_INITIALIZATION
-   MessageInterface::ShowMessage("SignalBase<%p>::InitializeSignal() for leg %s to %s\n", this, theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
+   MessageInterface::ShowMessage("SignalBase<%p>::InitializeSignal() for leg %s to %s\n", this, 
+      (theData.tNode == NULL?"":theData.tNode->GetName().c_str()), 
+      (theData.rNode == NULL?"":theData.rNode->GetName().c_str()));
    #endif
 
    if (isInitialized)
@@ -773,85 +785,122 @@ void SignalBase::InitializeSignal(bool chainForwards)
 
    GmatTime gsPrecEpoch = theData.tPrecTime;
 
-   #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Initializing with epoch %.12lf\n", satPrecEpoch.GetMjd());
-   #endif
-
-
-   // 2. Set tcs, rcs, ocs, and j2k coordinate systems
-   if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
+   // 1. processing for GSP measurement
+   if ((theData.tNode == NULL) && (theData.rNode != NULL))
    {
-      BodyFixedPoint *bf = (BodyFixedPoint*)theData.tNode;
-      tcs = bf->GetBodyFixedCoordinateSystem();
+      if (theData.rNode->IsOfType(Gmat::SPACEOBJECT))
+      {
+         theData.tPrecTime = theData.rPrecTime = theData.rNode->GetEpoch();
+         gsPrecEpoch = theData.tPrecTime;
+         satPrecEpoch = theData.rPrecTime;
+         
+#ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("case 1: Initializing with epoch %.12lf\n", satPrecEpoch.GetMjd());
+#endif
 
-      spObj  = (SpaceObject*) theData.rNode;
-      origin = spObj->GetOrigin();
+         origin = ((SpaceObject*)theData.rNode)->GetOrigin();
+         if (rcs)
+            delete rcs;
+         rcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
+            origin, NULL, NULL, earth, solarSystem);
 
-      if (rcs)
-         delete rcs;
-      rcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
-               origin, NULL, NULL, earth, solarSystem);
-      if (ocs)
-         delete ocs;
-      ocs = CoordinateSystem::CreateLocalCoordinateSystem("OCS","Topocentric",
-               bf, NULL, NULL, bf->GetJ2000Body(), solarSystem);
-      
-      if (j2k)
-         delete j2k;
-      j2k = CoordinateSystem::CreateLocalCoordinateSystem("j2k", "MJ2000Eq",
-               tcs->GetOrigin(), NULL, NULL, earth, solarSystem);
-   }
-   else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
-   {
-      gsPrecEpoch = theData.rPrecTime;
-      BodyFixedPoint *bf = (BodyFixedPoint*)theData.rNode;
-      rcs = bf->GetBodyFixedCoordinateSystem();
+         if (tcs)
+            delete tcs;
+         tcs = CoordinateSystem::CreateLocalCoordinateSystem("TCS", "MJ2000Eq",
+            origin, NULL, NULL, earth, solarSystem);
 
-      spObj  = (SpaceObject*) theData.tNode;
-      origin = spObj->GetOrigin();
-      
-      if (tcs)
-         delete tcs;
-      tcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
-               origin, NULL, NULL, earth, solarSystem);
-      
-      if (ocs)
-         delete ocs;
-      ocs = CoordinateSystem::CreateLocalCoordinateSystem("OCS","Topocentric",
-               bf, NULL, NULL, earth, solarSystem);
-      
-      if (j2k)
-         delete j2k;
-      j2k = CoordinateSystem::CreateLocalCoordinateSystem("j2k", "MJ2000Eq",
-               rcs->GetOrigin(), NULL, NULL, earth, solarSystem);
+         if (ocs)
+            delete ocs;
+         ocs = CoordinateSystem::CreateLocalCoordinateSystem("OCS", "MJ2000Eq",
+            origin, NULL, NULL, earth, solarSystem);
+
+         if (j2k)
+            delete j2k;
+         j2k = CoordinateSystem::CreateLocalCoordinateSystem("j2k", "MJ2000Eq",
+            origin, NULL, NULL, earth, solarSystem);
+      }
+      else
+         throw MeasurementException("Error: GMAT cannot handle GPS tracking position of an object other than spacecraft.\n");
    }
    else
    {
-      origin = ((SpaceObject*)theData.tNode)->GetOrigin();
-      if (rcs)
-         delete rcs;
-      rcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
-              origin, NULL, NULL, earth, solarSystem);
-      
-      if (tcs)
-         delete tcs;
-      tcs = CoordinateSystem::CreateLocalCoordinateSystem("TCS", "MJ2000Eq",
-              origin, NULL, NULL, earth, solarSystem);
-      
-      if (ocs)
-         delete ocs;
-      ocs = CoordinateSystem::CreateLocalCoordinateSystem("OCS","MJ2000Eq",
-              origin, NULL, NULL, earth, solarSystem);
+#ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("case 2: Initializing with epoch %.12lf\n", satPrecEpoch.GetMjd());
+#endif
 
-      if (j2k)
-         delete j2k;
-      j2k = CoordinateSystem::CreateLocalCoordinateSystem("j2k", "MJ2000Eq",
-              origin, NULL, NULL, earth, solarSystem);
+      // 2. Set tcs, rcs, ocs, and j2k coordinate systems
+      if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
+      {
+         BodyFixedPoint *bf = (BodyFixedPoint*)theData.tNode;
+         tcs = bf->GetBodyFixedCoordinateSystem();
+
+         spObj = (SpaceObject*)theData.rNode;
+         origin = spObj->GetOrigin();
+
+         if (rcs)
+            delete rcs;
+         rcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
+            origin, NULL, NULL, earth, solarSystem);
+         if (ocs)
+            delete ocs;
+         ocs = CoordinateSystem::CreateLocalCoordinateSystem("OCS", "Topocentric",
+            bf, NULL, NULL, bf->GetJ2000Body(), solarSystem);
+
+         if (j2k)
+            delete j2k;
+         j2k = CoordinateSystem::CreateLocalCoordinateSystem("j2k", "MJ2000Eq",
+            tcs->GetOrigin(), NULL, NULL, earth, solarSystem);
+      }
+      else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
+      {
+         gsPrecEpoch = theData.rPrecTime;
+         BodyFixedPoint *bf = (BodyFixedPoint*)theData.rNode;
+         rcs = bf->GetBodyFixedCoordinateSystem();
+
+         spObj = (SpaceObject*)theData.tNode;
+         origin = spObj->GetOrigin();
+
+         if (tcs)
+            delete tcs;
+         tcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
+            origin, NULL, NULL, earth, solarSystem);
+
+         if (ocs)
+            delete ocs;
+         ocs = CoordinateSystem::CreateLocalCoordinateSystem("OCS", "Topocentric",
+            bf, NULL, NULL, earth, solarSystem);
+
+         if (j2k)
+            delete j2k;
+         j2k = CoordinateSystem::CreateLocalCoordinateSystem("j2k", "MJ2000Eq",
+            rcs->GetOrigin(), NULL, NULL, earth, solarSystem);
+      }
+      else
+      {
+         origin = ((SpaceObject*)theData.tNode)->GetOrigin();
+         if (rcs)
+            delete rcs;
+         rcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
+            origin, NULL, NULL, earth, solarSystem);
+
+         if (tcs)
+            delete tcs;
+         tcs = CoordinateSystem::CreateLocalCoordinateSystem("TCS", "MJ2000Eq",
+            origin, NULL, NULL, earth, solarSystem);
+
+         if (ocs)
+            delete ocs;
+         ocs = CoordinateSystem::CreateLocalCoordinateSystem("OCS", "MJ2000Eq",
+            origin, NULL, NULL, earth, solarSystem);
+
+         if (j2k)
+            delete j2k;
+         j2k = CoordinateSystem::CreateLocalCoordinateSystem("j2k", "MJ2000Eq",
+            origin, NULL, NULL, earth, solarSystem);
+      }
    }
-
    // 3. Update all rotation matrixes at gs time (or at transmit time when both nodes are spacecrafts
    std::string updateAll = "All";
-
    UpdateRotationMatrix(gsPrecEpoch.GetMjd(), updateAll);
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("Late Binding Initialization complete:\n"
@@ -998,14 +1047,14 @@ void SignalBase::CalculateRangeRateVectorObs()
 //   theData.j2kOriginVel = origin2->GetMJ2000PrecVelocity(theData.rPrecTime) -
 //                          origin1->GetMJ2000PrecVelocity(theData.tPrecTime);
 
-   theData.tVel = theData.tNode->GetMJ2000PrecVelocity(theData.tPrecTime);
-   theData.rVel = theData.rNode->GetMJ2000PrecVelocity(theData.rPrecTime);
+//   theData.tVel = theData.tNode->GetMJ2000PrecVelocity(theData.tPrecTime);    // fix bug. It is incorrect because tVel is velocity of the transmited participant coordinate system MJ2000Eq. It has origin different from MJ2000 body
+//   theData.rVel = theData.rNode->GetMJ2000PrecVelocity(theData.rPrecTime);    // fix bug. It is incorrect because tVel is velocity of the received participant coordinate system MJ2000Eq. It has origin different from MJ2000 body
    theData.rangeRateVecInertial = theData.rVel - theData.j2kOriginVel - theData.tVel;
 
    // 2. Compute the velocities of the participants in their own frames
    CalculateRangeVectorObs();                              // R_Transmitter_j2k, R_receiver_j2k, and R_Obs_j2k matrixes are updated in CalculateRangevectorObs() function
-   theData.tVelTcs = theData.tJ2kRotation * theData.tVel;
-   theData.rVelRcs = theData.rJ2kRotation * theData.rVel;
+   //theData.tVelTcs = theData.tJ2kRotation * theData.tVel;
+   //theData.rVelRcs = theData.rJ2kRotation * theData.rVel;
 
    // 3. Compute rangeRateVecObs
    if (theData.stationParticipant)
@@ -1216,9 +1265,12 @@ void SignalBase::GetRangeVectorDerivative(GmatBase *forObj, bool wrtR,
       for (Integer j = 0; j < 3; ++j)
       {
          if (wrtR)
-            A(i,j) = phi(i,j);
-         if(wrtV)
-            B(i,j) = phi(i,j+3);
+            A(i, j) = phi(i, j);              // sub-matrix A of state transition matrix Phi in Equation 6.31 in GMAT MathSpec
+         if (wrtV)
+         {
+            //B(i,j) = phi(i+3,j+3);     // ekf mod 12/16
+            B(i, j) = phi(i, j + 3);     // sub-matrix B of state transition matrix Phi in Equation 6.31 in GMAT MathSpec
+         }
       }
    }
    Real sign = (forTransmitter ? -1.0 : 1.0);
@@ -1261,6 +1313,24 @@ void SignalBase::GetRangeVectorDerivative(GmatBase *forObj, bool wrtR,
 //------------------------------------------------------------------------------
 void SignalBase::UpdateRotationMatrix(Real atEpoch, const std::string& whichOne)
 {
+   if ((theData.tNode == NULL) && (theData.rNode != NULL))
+   {
+      // for GPS measurement
+      R_j2k_Receiver = I33;
+      theData.rJ2kRotation = I33;
+      R_j2k_Transmitter = I33;
+      theData.tJ2kRotation = I33;
+      R_Obs_Receiver = I33;
+      R_Obs_Transmitter = I33;
+      R_Obs_j2k = I33;
+
+      RDot_Obs_Receiver = zero33;
+      RDot_Obs_Transmitter = zero33;
+      RDot_Obs_j2k = zero33;
+
+      return;
+   }
+
    if ((theData.tNode->IsOfType(Gmat::GROUND_STATION)) ||
        (theData.rNode->IsOfType(Gmat::GROUND_STATION)))
    {

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -49,7 +49,7 @@
  */
 //------------------------------------------------------------------------------
 Diag::Diag(const std::string &name)
-   : NumericFunction("Diag", name),
+   : NumericFunctionNode("Diag", name),
      numRows(0),
      numCols(0)
 {
@@ -77,7 +77,7 @@ Diag::~Diag()
  */
 //------------------------------------------------------------------------------
 Diag::Diag(const Diag &func) :
-   NumericFunction (func),
+   NumericFunctionNode (func),
    numRows (func.numRows),
    numCols (func.numCols)
 {
@@ -99,7 +99,7 @@ Diag& Diag::operator=(const Diag &func)
    if (this == &func)
       return *this;
    
-   NumericFunction::operator=(func);
+   NumericFunctionNode::operator=(func);
    numRows = func.numRows;
    numCols = func.numCols;
    return *this;

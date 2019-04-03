@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -96,6 +96,31 @@ Rmatrix::Rmatrix(const Rmatrix &m)
 {
 }
 
+// ekf mod 12/16
+//------------------------------------------------------------------------------
+//  Rmatrix::Identity(unsigned int size)
+// Return an identity matrix of the passed in size
+//------------------------------------------------------------------------------
+Rmatrix Rmatrix::Identity(unsigned int size)
+{
+   Rmatrix tmp(size, size);
+   for (unsigned int i = 0; i < size; ++i)
+   {
+      tmp(i,i) = 1.0;
+   }
+   return tmp;
+}
+
+Rmatrix Rmatrix::Diagonal(unsigned int size, Rvector data)
+{
+   Rmatrix tmp(size, size);
+   for (unsigned int i = 0; i < size; ++i)
+   {
+      tmp(i,i) = data(i);
+   }
+   return tmp;
+}
+// end ekf mod
 
 //------------------------------------------------------------------------------
 //  ~Rmatrix()
@@ -565,6 +590,41 @@ Rmatrix::operator/=(const Rmatrix &m)
    return (*this) *= m.Inverse();
 }
 
+//------------------------------------------------------------------------------
+//  Rmatrix ElementWiseMultiply(const Rmatrix &m)
+//------------------------------------------------------------------------------
+Rmatrix Rmatrix::ElementWiseMultiply(const Rmatrix &m)
+{
+   if ((isSizedD == false) || (m.IsSized() == false))
+      throw TableTemplateExceptions::UnsizedTable();
+   Integer mr, mc;
+   m.GetSize(mr, mc);
+   if ((mr != rowsD) || (mc != colsD))
+      throw TableTemplateExceptions::DimensionError();
+   
+   Rmatrix result(*this);
+   for (int i = 0; i < rowsD*colsD; i++)
+      result.elementD[i] *= m.elementD[i];
+   return result;
+}
+
+//------------------------------------------------------------------------------
+//  Rmatrix ElementWiseDivide(const Rmatrix &m)
+//------------------------------------------------------------------------------
+Rmatrix Rmatrix::ElementWiseDivide(const Rmatrix &m)
+{
+   if ((isSizedD == false) || (m.IsSized() == false))
+      throw TableTemplateExceptions::UnsizedTable();
+   Integer mr, mc;
+   m.GetSize(mr, mc);
+   if ((mr != rowsD) || (mc != colsD))
+      throw TableTemplateExceptions::DimensionError();
+   
+   Rmatrix result(*this);
+   for (int i = 0; i < rowsD*colsD; i++)
+      result.elementD[i] /= m.elementD[i];
+   return result;
+}
 
 //------------------------------------------------------------------------------
 //  Rmatrix operator+(Real scalar) const
@@ -1027,7 +1087,7 @@ Rmatrix Rmatrix::Transpose() const
 //------------------------------------------------------------------------------
 //  Rmatrix Inverse() const
 //------------------------------------------------------------------------------
-Rmatrix Rmatrix::Inverse() const
+Rmatrix Rmatrix::Inverse(Real zeroValue) const  //ekf mod 12/16 added Real zeroValue
 {
    if (isSizedD == false)
    {
@@ -1113,7 +1173,7 @@ Rmatrix Rmatrix::Inverse() const
          } 
       }
         
-      if (GmatMathUtil::IsZero(PivotElement,0.000000000001)){
+      if (GmatMathUtil::IsZero(PivotElement,zeroValue)){   // ekf mod 12/16
          throw Rmatrix::IsSingular(); }
 
       PivotRowList(n) = PivotRow;
@@ -1158,6 +1218,15 @@ Rmatrix Rmatrix::Inverse() const
       }
    }
    return A;
+}
+
+
+//------------------------------------------------------------------------------
+//  Rmatrix Inverse() const      ekf mod 12/16
+//------------------------------------------------------------------------------
+Rmatrix Rmatrix::Inverse() const
+{
+   return Inverse(0.000000000001);
 }
 
 

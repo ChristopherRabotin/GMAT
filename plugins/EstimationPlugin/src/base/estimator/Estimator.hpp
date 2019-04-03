@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -143,7 +143,7 @@ public:
          Integer updatedParameterId);
 
    void                SetDelayInitialization(bool delay); 
-
+   
 protected:
 ///// TBD: Do we need to separate TS and MM like this going forward?
    /// Names of measurements and tracking systems used in the estimation
@@ -246,6 +246,12 @@ protected:
    /// The observation ID for the residual
    IntegerArray            measurementResidualID;
 
+   RealArray               measurementTimes;
+   IntegerArray            observationID;
+   /// List of residual vector (each element is a residual vector = O_vector - C_vector)
+   std::vector<RealArray>  measurementResVectors;
+
+
    /// Flag set to show all residuals during processing
    bool                    showAllResiduals;
    /// Flag used to only display a specific set of residuals
@@ -280,17 +286,24 @@ protected:
    /// A string as a line/lines buffer to store a line/lines for writing to report file
    std::string linesBuff;
 
-   /// Solar system         // It needs to display information of central bodies in estimation report file
+   std::string linesDataBuff;
+
+   /// Solar system      // It needs to display information of central bodies in estimation report file
    SolarSystem *solarSystem;
 
    // EOP time range. It needs to check measurement epoch to be inside that range.
    Real      eopTimeMin;        // EOP time min
    Real      eopTimeMax;        // EOP time max
-   Integer   warningCount;      // count number of warning message when check measurement epoch to be inside or outside  EOP time range 
+   Integer   warningCount;      // count number of warning message when check measurement epoch to be inside or outside EOP time range
 
-   /// Media correction QA
-   StringArray ionoWarningList;            // list contains all measurement passes with ionosphere correction to be outside acceptable range [0m, 20m]
-   StringArray tropoWarningList;           // list contians all measurement passes with troposphere correction to be outside acceptable range [0m, 60m]
+   // Media correction QA
+   StringArray ionoWarningList;   // list contains all measurement passes with ionosphere correction to be outside acceptable range [0m, 20m]
+   StringArray tropoWarningList;  // list contains all measurement passes with troposphere correction to be outside acceptable range [0m, 60m]
+
+   /// List of estimation data filters
+   StringArray dataFilterStrings;
+   ObjectArray dataFilterObjs;
+   IntegerArray editedRecords;             // flag indicating an observation data record used for calculating estimation
 
    /// Parameters associated with the Estimators
    enum
@@ -306,6 +319,7 @@ protected:
       CONSTANT_MULTIPLIER,
       ADDITIVE_CONSTANT,
       RESET_BEST_RMS,
+      DATA_FILTERS,
       CONVERGENT_STATUS,
       EstimatorParamCount
    };
@@ -333,9 +347,12 @@ protected:
                                             const std::string&);
    virtual void            SetResultValue(Integer, Real, const std::string&);
 
+   virtual ObservationData*
+                           FilteringData(ObservationData* obsData, Integer obDataId, Integer& filterIndex);
+
+
 ///// TBD: Do simulators need this too?  If so, move to base class
-   virtual bool            ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement);
-   virtual void            GetEstimationState(GmatState& outputState);
+   virtual bool            ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Rvector &inputStateElement, Rvector &outputStateElement);
    virtual void            GetEstimationStateForReport(GmatState& outputState);
 
    /// Estimation status contains all status of an estimation

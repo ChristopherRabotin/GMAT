@@ -1,0 +1,753 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Spacecraft Attitude</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="Spacecraft.html" title="Spacecraft"><link rel="next" href="SpacecraftBallisticMass.html" title="Spacecraft Ballistic/Mass Properties"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Spacecraft Attitude</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Spacecraft.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="SpacecraftBallisticMass.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="SpacecraftAttitude"></a><div class="titlepage"></div><a name="N1DAE8" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Spacecraft Attitude</span></h2><p>Spacecraft Attitude &mdash; The spacecraft attitude model</p></div><div class="refsection"><a name="N1DAF9"></a><h2>Description</h2><p>GMAT models the orientation and rate of rotation of a spacecraft
+    using several different mathematical models. Currently, GMAT assumes that
+    a <span class="guilabel">Spacecraft</span> is a rigid body. The currently supported
+    attitude models are <span class="guilabel">Spinner</span>,
+    <span class="guilabel">CoordinateSystemFixed</span>, and
+    <span class="guilabel">SpiceAttitude</span>. The <span class="guilabel">Spinner</span> model
+    is a simple, inertially fixed spin axis model. The
+    <span class="guilabel">CoordinateSystemFixed</span> model allows you to use any
+    <span class="guilabel">CoordinateSystem</span> supported by GMAT as the attitude of
+    a <span class="guilabel">Spacecraft</span>. The <span class="guilabel">SpiceAttitude</span>
+    model allows you to define the <span class="guilabel">Spacecraft</span> attitude
+    based on SPICE attitude kernels.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a></p></div><div class="refsection"><a name="N1DB23"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AngularVelocityX</span></td><td><p>The x-component of <span class="guilabel">Spacecraft</span>
+            body angular velocity expressed in the inertial frame.
+            <span class="guilabel">AngularVelocityX</span> is used for the following
+            Attitude models: <span class="guilabel">Spinner</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real&lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg/sec</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AngularVelocityY</span></td><td><p>The y-component of <span class="guilabel">Spacecraft</span>
+            body angular velocity expressed in the inertial frame.
+            <span class="guilabel">AngularVelocityY</span> is used for the following
+            Attitude models: <span class="guilabel">Spinner</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real&lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg/sec</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AngularVelocityZ</span></td><td><p>The z-component of <span class="guilabel">Spacecraft</span>
+            body angular velocity expressed in the inertial frame.
+            <span class="guilabel">AngularVelocityZ</span> is used for the following
+            Attitude models: <span class="guilabel">Spinner</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real&lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg/sec</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Attitude</span></td><td><p>The attitude mode for the
+            <span class="guilabel">Spacecraft</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">CoordinateSystemFixed</span>,
+                    <span class="guilabel">Spinner</span>, <span class="guilabel">SpiceAttitude,
+                    NadirPointing, CCSDS-AEM,
+                    PrecessingSpinner</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">CoordinateSystemFixed</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AttitudeConstraintType</span></td><td><p>The constraint type for resolving attitude ambiguity.
+            The attitude is computed such that the angle between the
+            <span class="guilabel">BodyConstraintVector</span> and the constraint
+            defined by <span class="guilabel">AttitudeConstraintType</span> is
+            minimized. A <span class="guilabel">Velocity</span> constraint uses the
+            inertial velocity vector expressed with respect to the
+            <span class="guilabel">AttitudeReferenceBody</span>. An
+            <span class="guilabel">OrbitNormal</span> constraint uses the orbit normal
+            vector expressed with respect to the
+            <span class="guilabel">AttitudeReferenceBody</span>. <span class="guilabel">
+            AttitudeConstraintType</span> is used for the following
+            attitude models: <span class="guilabel">NadirPointing</span>. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Velocity</span>,
+                    <span class="guilabel">OrbitNormal</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>OrbitNormal</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AttitudeCoordinateSystem</span></td><td><p>The <span class="guilabel">CoordinateSystem</span> used in
+            attitude computations. The
+            <span class="guilabel">AttitudeCoordinateSystem</span> field is only used
+            for the following attitude models:
+            <span class="guilabel">CoordinateSystemFixed</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">CoordinateSystem</span>
+                    resource.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">EarthMJ2000Eq</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AttitudeFileName</span></td><td><p>Path (optional) and name of CCSDS attitude ephemeris
+            message file. If a path is not provided, and GMAT does not find
+            the file in the current directory, then an error occurs and
+            execution is halted.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>AEM File</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AttitudeRate-DisplayStateType</span></td><td><p>The attitude rate representation to display in the
+            GUI and script file. <span class="guilabel">AttitudeRateDisplayType</span>
+            is used for the following attitude models:
+            <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">AngularVelocity</span>,
+                    <span class="guilabel">EulerAngleRates</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">AngularVelocity</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AttitudeReferenceBody</span></td><td><p>The celestial body used to define nadir.
+            <span class="guilabel">AttitudeReferenceBody</span> is used for the
+            following attitude models:
+            <span class="guilabel">NadirPointing</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Resource</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Celestial Body</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Earth</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AttitudeSpiceKernelName</span></td><td><p>SPK Kernels for <span class="guilabel">Spacecraft</span>
+            attitude. SPK atttitude kernels have extension ".BC". This field
+            cannot be set in the Mission Sequence. An empty list unloads all
+            kernels of this type on the
+            <span class="guilabel">Spacecraft</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Array of attitude kernel files</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>empty array</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">BodyAlignmentVectorX</span></td><td><p>The x-component of the alignment vector, expressed in
+            the body frame, to align with the opposite of the radial vector.
+            <span class="guilabel">BodyAlignmentVectorX</span> is used for the
+            following attitude models:
+            <span class="guilabel">NadirPointing</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">BodyAlignmentVectorY</span></td><td><p>The y-component of the alignment vector, expressed in
+            the body frame, to align with the opposite of the radial vector.
+            <span class="guilabel">BodyAlignmentVectorY</span> is used for the
+            following attitude models:
+            <span class="guilabel">NadirPointing</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">BodyAlignmentVectorZ</span></td><td><p>The z-component of the alignment vector, expressed in
+            the body frame, to align with the opposite of the radial vector.
+            <span class="guilabel">BodyAlignmentVectorZ</span> is used for the
+            following attitude models:
+            <span class="guilabel">NadirPointing</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">BodyConstraintVectorX</span></td><td><p>The x-component of the constraint vector, expressed
+            in the body frame. See <a class="link" href="SpacecraftAttitude.html#AttitudeNadirPointing" title="Nadir Pointing Model">NadirPointing</a> description
+            for further details. <span class="guilabel">BodyConstraintVectorX</span> is
+            used for the following attitude models:
+            <span class="guilabel">NadirPointing</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">BodyConstraintVectorY</span></td><td><p>The y-component of the constraint vector, expressed
+            in the body frame. See <a class="link" href="SpacecraftAttitude.html#AttitudeNadirPointing" title="Nadir Pointing Model">NadirPointing</a> description
+            for further details. <span class="guilabel">BodyConstraintVectorY</span> is
+            used for the following attitude models:
+            <span class="guilabel">NadirPointing</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">BodyConstraintVectorZ</span></td><td><p>The z-component of the constraint vector, expressed
+            in the body frame. See <a class="link" href="SpacecraftAttitude.html#AttitudeNadirPointing" title="Nadir Pointing Model">NadirPointing</a> description
+            for further details. <span class="guilabel">BodyConstraintVectorZ</span> is
+            used for the following attitude models:
+            <span class="guilabel">NadirPointing</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">BodySpinAxisX</span></td><td><p>The x-component of the spin axis, expressed in the
+            body frame. <span class="guilabel">BodySpinAxisX</span> is used for the
+            following attitude models:
+            <span class="guilabel">PrecessingSpinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">BodySpinAxisY</span></td><td><p>The y-component of the spin axis, expressed in the
+            body frame. <span class="guilabel">BodySpinAxisY</span> is used for the
+            following attitude models:
+            <span class="guilabel">PrecessingSpinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">BodySpinAxisZ</span></td><td><p>The z-component of the spin axis, expressed in the
+            body frame. <span class="guilabel">BodySpinAxisZ</span> is used for the
+            following attitude models:
+            <span class="guilabel">PrecessingSpinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DCM11</span></td><td><p>Component (1,1) of the Direction Cosine Matrix.
+            <span class="guilabel">DCM11</span> is used for the following Attitude
+            models: <span class="guilabel">Spinner</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-1 &lt;= Real &lt;=1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DCM12</span></td><td><p>Component (1,2) of the Direction Cosine Matrix.
+            <span class="guilabel">DCM12</span> is used for the following Attitude
+            models: <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-1 &lt;= Real &lt;=1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DCM13</span></td><td><p>Component (1,3) of the Direction Cosine Matrix.
+            <span class="guilabel">DCM13</span> is used for the following Attitude
+            models: <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-1 &lt;= Real &lt;=1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DCM21</span></td><td><p>Component (2,1) of the Direction Cosine Matrix.
+            <span class="guilabel">DCM21</span> is used for the following Attitude
+            models: <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-1 &lt;= Real &lt;=1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DCM22</span></td><td><p>Component (2,2) of the Direction Cosine Matrix.
+            <span class="guilabel">DCM22</span> is used for the following Attitude
+            models: <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-1 &lt;= Real &lt;=1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DCM23</span></td><td><p>Component (2,3) of the Direction Cosine Matrix.
+            <span class="guilabel">DCM23</span> is used for the following Attitude
+            models: <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-1 &lt;= Real &lt;=1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DCM31</span></td><td><p>Component (3,1) of the Direction Cosine Matrix.
+            <span class="guilabel">DCM31</span> is used for the following Attitude
+            models: <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-1 &lt;= Real &lt;=1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DCM32</span></td><td><p>Component (3,2) of the Direction Cosine Matrix.
+            <span class="guilabel">DCM32</span> is used for the following Attitude
+            models: <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-1 &lt;= Real &lt;=1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DCM33</span></td><td><p>Component (3,3) of the Direction Cosine Matrix.
+            <span class="guilabel">DCM33</span> is used for the following Attitude
+            models: <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-1 &lt;= Real &lt;=1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EulerAngle1</span></td><td><p>The value of the first Euler angle.
+            <span class="guilabel">EulerAngle1</span> is used for the following
+            Attitude models: <span class="guilabel">Spinner</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EulerAngle2</span></td><td><p>The value of the second Euler angle.
+            <span class="guilabel">EulerAngle2</span> is used for the following
+            Attitude models: <span class="guilabel">Spinner</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EulerAngle3</span></td><td><p>The value of the third Euler angle.
+            <span class="guilabel">EulerAngle3</span> is used for the following
+            Attitude models: <span class="guilabel">Spinner</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EulerAngleRate1</span></td><td><p>The value of the first Euler angle rate.
+            <span class="guilabel">EulerAngleRate1</span> is used for the following
+            Attitude models: <span class="guilabel">Spinner</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg./sec.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EulerAngleRate2</span></td><td><p>The value of the second Euler angle rate.
+            <span class="guilabel">EulerAngleRate2</span> is used for the following
+            Attitude models: <span class="guilabel">Spinner</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg./sec.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EulerAngleRate3</span></td><td><p>The value of the third Euler angle rate.
+            <span class="guilabel">EulerAngleRate3 </span>is used for the following
+            Attitude models: <span class="guilabel">Spinner</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg./sec.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FrameSpiceKernelName</span></td><td><p>SPK Kernels for <span class="guilabel">Spacecraft</span> body
+            frame. SPK Frame kernels have extension ".TF". This field cannot
+            be set in the Mission Sequence. An empty list unloads all kernels
+            of this type on the <span class="guilabel">Spacecraft</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Array of .tf files.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>emtpy array</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EulerAngleSequence</span></td><td><p>The Euler angle sequence used for Euler angle input
+            and output..</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">123</span>,<span class="guilabel">231</span>,<span class="guilabel">312</span>,<span class="guilabel">132</span>,<span class="guilabel">321</span>,<span class="guilabel">213</span>,<span class="guilabel">121</span>,<span class="guilabel">
+                    232</span>,<span class="guilabel">313</span>,<span class="guilabel">131</span>,<span class="guilabel">323</span>,<span class="guilabel">212</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>321</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">InitialPrecessionAngle</span></td><td><p>The initial precession angle.
+            <span class="guilabel">InitialPrecessionAngle</span> is used for the
+            following attitude models:
+            <span class="guilabel">PrecessingSpinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">InitialSpinAngle</span></td><td><p>The initial attitude spin angle.
+            <span class="guilabel">InitialSpinAngle</span> is used for the following
+            attitude models: <span class="guilabel">PrecessingSpinner</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">NAIFIdReferenceFrame</span></td><td><p>The Id of the spacecraft body frame used in SPICE
+            kernels.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Integer &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>-9000001</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">NutationAngle</span></td><td><p>The attitude nutation angle.
+            <span class="guilabel">NutationAngle</span> is used for the following
+            attitude models: <span class="guilabel">PrecessingSpinner</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>15</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">NutationReferenceVectorX</span></td><td><p>The x-component of the nutation reference vector,
+            expressed in the inertial frame.
+            <span class="guilabel">NutationReferenceVectorX</span> is used for the
+            following attitude models:
+            <span class="guilabel">PrecessingSpinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">NutationReferenceVectorY</span></td><td><p>The y-component of the nutation reference vector,
+            expressed in the inertial frame.
+            <span class="guilabel">NutationReferenceVectorY</span> is used for the
+            following attitude models:
+            <span class="guilabel">PrecessingSpinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">NutationReferenceVectorZ</span></td><td><p>The z-component of the nutation reference vector,
+            expressed in the inertial frame.
+            <span class="guilabel">NutationReferenceVectorZ</span> is used for the
+            following attitude models:
+            <span class="guilabel">PrecessingSpinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MRP1</span></td><td><p>The value of the first modified Rodrigues parameter.
+            <span class="guilabel">MRP1</span> is used for the following Attitude
+            models: <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MRP2</span></td><td><p>The value of the second modified Rodrigues parameter.
+            <span class="guilabel">MRP2</span> is used for the following Attitude
+            models: <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MRP3</span></td><td><p>The value of the second modified Rodrigues parameter.
+            <span class="guilabel">MRP2</span> is used for the following Attitude
+            models: <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">PrecessionRate</span></td><td><p>The rate of attitude precession.
+            <span class="guilabel">InitialPrecessionAngle</span> is used for the
+            following attitude models:
+            <span class="guilabel">PrecessingSpinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg./s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Q1</span></td><td><p>First component of quaternion. GMAT&rsquo;s quaternion
+            representation includes the three &ldquo;vector&rdquo; components as the first
+            three elements in the quaternion and the &ldquo;rotation&rdquo; component as
+            the last element in the quaternion. <span class="guilabel">Q1</span> is
+            used for the following Attitude models:
+            <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Q2</span></td><td><p>Second component of quaternion. GMAT&rsquo;s quaternion
+            representation includes the three &ldquo;vector&rdquo; components as the first
+            three elements in the quaternion and the &ldquo;rotation&rdquo; component as
+            the last element in the quaternion. <span class="guilabel">Q2</span> is
+            used for the following Attitude models:
+            <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Q3</span></td><td><p>Third component of quaternion. GMAT&rsquo;s quaternion
+            representation includes the three &ldquo;vector&rdquo; components as the first
+            three elements in the quaternion and the &ldquo;rotation&rdquo; component as
+            the last element in the quaternion. <span class="guilabel">Q3</span> is
+            used for the following Attitude models:
+            <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Q4</span></td><td><p>Fourth component of quaternion. GMAT&rsquo;s quaternion
+            representation includes the three &ldquo;vector&rdquo; components as the first
+            three elements in the quaternion and the &ldquo;rotation&rdquo; component as
+            the last element in the quaternion. <span class="guilabel">Q4</span> is
+            used for the following Attitude models:
+            <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Quaternion</span></td><td><p>The quaternion vector. GMAT&rsquo;s quaternion
+            representation includes the three &ldquo;vector&rdquo; components as the first
+            three elements in the quaternion and the &ldquo;rotation&rdquo; component as
+            the last element in the quaternion.
+            <span class="guilabel">Quaternion</span> is used for the following Attitude
+            models: <span class="guilabel">Spinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real array (length four)</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>[0 0 0 1];</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SCClockSpiceKernelName</span></td><td><p>SPK Kernels for spacecraft clock. SPK clock kernels
+            have extension ".TSC". This field cannot be set in the Mission
+            Sequence. An empty list unloads all kernels of this type on the
+            <span class="guilabel">Spacecraft</span>. An empty list unloads all kernels
+            of this type on the <span class="guilabel">Spacecraft</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Array of .tsc file names</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>empty array</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SpinRate</span></td><td><p>The attitude spin rate. <span class="guilabel">SpinRate</span>
+            is used for the following attitude models:
+            <span class="guilabel">PrecessingSpinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>10</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg./s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1E64B"></a><h2>Remarks</h2><div class="refsection"><a name="N1E64E"></a><h3>Overview of Availble Attitude Models</h3><p>GMAT supports many attitude models including the following:
+      <span class="guilabel">CoordinateSystemFixed,</span>
+      <span class="guilabel">SpiceAttitude</span>, <span class="guilabel">NadirPointing</span>,
+      <span class="guilabel">CCSDS-AEM</span>, <span class="guilabel">PrecessingSpinner</span>,
+      and <span class="guilabel">Spinner</span> (we recommend using thew new
+      PrecessingSpinner model instead of Spinner). Different attitude models
+      require different information to fully configure the model. For example,
+      when you select the <span class="guilabel">CoordinateSystemFixed</span> model,
+      the attitude and body rates are entirely determined by the
+      <span class="guilabel">CoordinateSystem</span> model and defining Euler angles or
+      angular velocity components are not required and have no effect. The
+      reference tables above, and the detailed examples for each model type
+      below, describe which fields are used for each model.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>GMAT attitude parameterizations such as the DCM rotate from
+        inertial to body.</p></div></div><div class="refsection"><a name="N1E66E"></a><h3>Overview of State Representations</h3><div class="refsection"><a name="N1E671"></a><h4>Quaternion</h4><p>The quaternion is a four element, non-singular attitude
+        representation. GMAT&rsquo;s quaternion representation includes the three
+        &ldquo;vector&rdquo; components as the first three elements in the quaternion and
+        the &ldquo;rotation&rdquo; component as the last element in the quaternion. In
+        assignment mode, you can set the quaternions element by element like
+        this</p><pre class="programlisting"><code class="code">aSpacecraft.Q1 = 0.5
+aSpacecraft.Q2 = 0.5
+aSpacecraft.Q3 = 0.5
+aSpacecraft.Q4 = 0.5        </code>        </pre><p>or simultaneously set the entire quaternion like this</p><pre class="programlisting"><code class="code">aSpacecraft.Quaternion = [0.5 0.5 0.5 0.5]         </code>
+</pre><p>GMAT normalizes the quaternion before use. In command mode, you
+        must enter the entire quaternion as a single vector to avoid scaling
+        components of the quaternion before the entire quaternion is
+        set.</p></div><div class="refsection"><a name="N1E682"></a><h4>DirectionCosineMatrix (DCM)</h4><p>The Direction Cosine Matrix is a 3x3 array that contains cosines
+        of the angles that rotate from the x, y, and z inertial axes to the x,
+        y, and z body axes. The direction cosine matrix must be ortho-normal
+        and you define the DCM element by element. Here is an example that
+        shows how to define the attitude using the DCM.</p><pre class="programlisting"><code class="code">aSpacecraft.DCM11 = 1
+aSpacecraft.DCM12 = 0
+aSpacecraft.DCM13 = 0
+aSpacecraft.DCM21 = 0
+aSpacecraft.DCM22 = 1
+aSpacecraft.DCM23 = 0
+aSpacecraft.DCM31 = 0
+aSpacecraft.DCM32 = 0
+aSpacecraft.DCM33 = 1</code>        </pre></div><div class="refsection"><a name="N1E68B"></a><h4>Euler Angles</h4><p>Euler angles are a sequence of three rotations about coordinate
+        axes to transform from one system to another system. GMAT supports all
+        12 Euler angle sequences. Here is an example setting attitude using a
+        &ldquo;321&rdquo; sequence.</p><pre class="programlisting"><code class="code">aSpacecraft.EulerAngleSequence = '321'
+aSpacecraft.EulerAngle1 = 45
+aSpacecraft.EulerAngle2 = 45
+aSpacecraft.EulerAngle3 = 90</code>      </pre><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>Caution: The Euler angles have singularities that can cause
+          issues during modeling. We recommend using other representations for
+          this reason.</p></div></div><div class="refsection"><a name="N1E697"></a><h4>Modified Rogriques parameters</h4><p>The modified Rodgriques parameters are a modification of the
+        Euer Axis/Angle representation. Specifically, the MRP vector is equal
+        to nhat* tan(Euler Angle/4) where nhat is the unitized Euler
+        Axis.</p><pre class="programlisting"><code class="code">aSpacecraft.MRP1 = 0.2928932188134525
+aSpacecraft.MRP2 = 0.2928932188134524
+aSpacecraft.MRP3 = 1.149673585146546e-017</code></pre></div><div class="refsection"><a name="N1E69F"></a><h4>Euler Angles Rates</h4><p>The Euler angle rates are the first time derivative of the Euler
+        angles and can be used to define the body rates. Euler angle rates use
+        the same sequence as the EulerAngles. The example below shows how to
+        define the Euler angle rates for a spacecraft.</p><pre class="programlisting"><code class="code">aSpacecraft.EulerAngleSequence = '321'
+aSpacecraft.EulerAngleRate1 = -5
+aSpacecraft.EulerAngleRate2 = 20
+aSpacecraft.EulerAngleRate3 = 30      </code></pre></div><div class="refsection"><a name="N1E6A7"></a><h4>Angular Velocity</h4><p>The angular velocity is the angular velocity of the spacecraft
+        body with respect to the inertial frame, expressed in the inertial
+        frame. The example below shows how to define the angular velocity for
+        a spacecraft.</p><pre class="programlisting"><code class="code">aSpacecraft.AngularVelocityX = 5;
+aSpacecraft.AngularVelocityY = 10;
+aSpacecraft.AngularVelocityZ = 5;</code></pre></div></div><div class="refsection"><a name="N1E6AF"></a><h3>Coordinate System Fixed Attitude Model</h3><p>The <span class="guilabel">CoordinateSystemFixed</span> model allows you to
+      use any existing <span class="guilabel">CoordinateSystem</span> to define the
+      attitude of a <span class="guilabel">Spacecraft</span>. The attitude uses the
+      axes defined on the <span class="guilabel">CoordinateSystem</span> to compute the
+      body fixed to inertial matrix and attitude rate parameters such as the
+      angular velocity. To configure this attitude mode, select<span class="guilabel">
+      CoordinateSystemFixed</span>, for <span class="guilabel">Attitude</span>. You
+      can define the <span class="guilabel">EulerAngleSequence</span> used when
+      outputting <span class="guilabel">EulerAngles</span> and <span class="guilabel">EulerAngle
+      rates</span>.</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>For the <span class="guilabel">CoordinateSystemFixed</span> attitude
+        model, the attitude is completely described by the selected coordinate
+        system. If you are working in the script, setting attitude parameters
+        (Euler Angles, Quaternion etc.) or setting attitude rate parameters
+        such as (Euler Angle Rates etc.) has no effect.</p></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftAttitude_GUI_1.png" align="middle" height="439"></td></tr></table></div></div><p>The script example below shows how to configure a
+      <span class="guilabel">Spacecraft</span> to use a spacecraft VNB attitude
+      system.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+aSat.Attitude                 = CoordinateSystemFixed
+aSat.ModelRotationZ           = -90
+aSat.AttitudeCoordinateSystem = 'attCoordSys'
+
+Create ForceModel Propagator1_ForceModel
+Create Propagator Propagator1
+Propagator1.FM        = Propagator1_ForceModel
+Propagator1.MaxStep   = 10
+
+Create CoordinateSystem attCoordSys
+attCoordSys.Origin    = Earth
+attCoordSys.Axes      = ObjectReferenced
+attCoordSys.XAxis     = V
+attCoordSys.YAxis     = N
+attCoordSys.Primary   = Earth
+attCoordSys.Secondary = aSat
+
+Create OrbitView OrbitView1;
+OrbitView1.Add                = {aSat, Earth}
+OrbitView1.ViewPointReference = Earth
+OrbitView1.ViewPointVector    = [ 30000 0 0 ]
+
+BeginMissionSequence
+
+Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0}</code></pre></div><div class="refsection"><a name="N1E6E6"></a><h3>Spinner Attitude Model</h3><p>The <span class="guilabel">Spinner</span> attitude model propagates the
+      attitude assuming the spin axis direction is fixed in inertial space. We
+      recommend using the newer PrecessingSpinner model instead of Spinner,
+      and this model is maintained primarily for backwards compatibility. You
+      define the attitude by providing initial body orientation and rates.
+      GMAT propagates the attitude by computing the angular velocity and then
+      rotates the <span class="guilabel">Spacecraft</span> about that angular velocity
+      vector at a constant rate defined by the magnitude of the angular
+      velocity. You can define the initial attitude using quaternions, Euler
+      angles, the DCM, or the modified Rodriques parameters. You can define
+      the attitude rates using Euler angles rates or angular velocity. When
+      working with Euler angles, the rotation sequence is determined by the
+      <span class="guilabel">EulerAngleSequence</span> field.</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>Caution: If you are working in the script, setting the
+        <span class="guilabel">CoordinateSystem</span> for the Spinner attitude model
+        has no effect.</p></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftAttitude_GUI_2.png" align="middle" height="439"></td></tr></table></div></div><p>The example below configures a <span class="guilabel">s</span>pacecraft to
+      spin about the inertial z axis.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat;
+aSat.Attitude         = Spinner
+aSat.ModelRotationZ   = -90
+aSat.AngularVelocityZ = 5
+
+Create ForceModel Propagator1_ForceModel
+Create Propagator Propagator1
+GMAT Propagator1.FM        = Propagator1_ForceModel
+GMAT Propagator1.MaxStep   = 10
+
+Create CoordinateSystem attCoordSys
+attCoordSys.Origin    = Earth
+attCoordSys.Axes      = ObjectReferenced
+attCoordSys.XAxis     = V
+attCoordSys.YAxis     = N
+attCoordSys.Primary   = Earth
+attCoordSys.Secondary = aSat
+
+Create OrbitView OrbitView1;
+OrbitView1.Add                = {aSat, Earth}
+OrbitView1.ViewPointReference = Earth
+OrbitView1.ViewPointVector    = [ 30000 0 0 ]
+
+BeginMissionSequence
+
+Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0}</code></pre></div><div class="refsection"><a name="N1E70B"></a><h3>SPK Attitude Model</h3><p>The <span class="guilabel">SpiceAttitude</span> model propagates the
+      attitude using attitude SPICE kernels. To configure a
+      <span class="guilabel">Spacecraft</span> to use SPICE kernels select
+      <span class="guilabel">SpiceAttitude</span> for the <span class="guilabel">Attitude</span>
+      field as shown below.</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>Caution: For the <span class="guilabel">SpiceAttitude</span> model, the
+        attitude is completely described by the spice kernels. When working in
+        the script, setting the <span class="guilabel">CoordinateSystem</span>,
+        attitude parameters (<span class="guilabel">EulerAngles</span>,
+        <span class="guilabel">Quaternion</span> etc.) or attitude rate parameters such
+        as (<span class="guilabel">EulerAngleRates</span> etc.) has no effect.</p></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftAttitude_GUI_3.png" align="middle" height="439"></td></tr></table></div></div><p>You must provide three SPICE kernel types for the
+      <span class="guilabel">SpiceAttitude</span> model: the attitude kernel (.bc
+      file), the frame kernel (.tf file) and the spacecraft clock kernel (.tsc
+      file). These files are defined on the <span class="guilabel">Spacecraft</span>
+      SPICE tab as shown below. In addition to the kernels, you must also
+      provide the <span class="guilabel">Spacecraft </span><span class="guilabel">NAIFId</span>
+      and the <span class="guilabel">NAIFIdReferenceFrame</span>. Below is an
+      illustration of the SPICE tab configured for MarsExpress script found
+      later in this section.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftAttitude_GUI_4.png" align="middle" height="531"></td></tr></table></div></div><p>The example below configures a <span class="guilabel">Spacecraft</span> to
+      use SPK kernels to propagator the attitude for Mars Express. The SPK
+      kernels are distributed with GMAT.</p><pre class="programlisting"><code class="code">Create Spacecraft MarsExpress
+MarsExpress.NAIFId = -41
+MarsExpress.NAIFIdReferenceFrame = -41001
+MarsExpress.Attitude = 'SpiceAttitude'
+MarsExpress.OrbitSpiceKernelName = ...
+{'../data/vehicle/ephem/spk/MarsExpress_Short.BSP'}
+MarsExpress.AttitudeSpiceKernelName = ...
+{'../data/vehicle/ephem/spk/MarsExpress_ATNM_PTR00012_100531_002.BC'}
+MarsExpress.SCClockSpiceKernelName = ...
+{'../data/vehicle/ephem/spk/MarsExpress_MEX_100921_STEP.TSC'}
+MarsExpress.FrameSpiceKernelName = ...
+{'../data/vehicle/ephem/spk/MarsExpress_MEX_V10.TF'}
+
+Create Propagator spkProp
+spkProp.Type = SPK
+spkProp.StepSize = 60
+spkProp.CentralBody = Mars
+spkProp.EpochFormat = 'UTCGregorian'
+spkProp.StartEpoch = '01 Jun 2010 16:59:09.815'
+
+Create CoordinateSystem MarsMJ2000Eq
+MarsMJ2000Eq.Origin = Mars
+MarsMJ2000Eq.Axes = MJ2000Eq
+
+Create OrbitView Enhanced3DView1
+Enhanced3DView1.Add = {MarsExpress, Mars}
+Enhanced3DView1.CoordinateSystem = MarsMJ2000Eq
+Enhanced3DView1.ViewPointReference = Mars
+Enhanced3DView1.ViewPointVector = [ 10000 10000 10000 ]
+Enhanced3DView1.ViewDirection = Mars
+
+BeginMissionSequence
+
+Propagate spkProp(MarsExpress) {MarsExpress.ElapsedDays = 0.2}</code></pre></div><div class="refsection"><a name="AttitudeNadirPointing"></a><h3>Nadir Pointing Model</h3><p>The <span class="guilabel">NadirPointing</span> attitude mode configures
+      the attitude of a spacecraft to point a specified vector in the
+      spacecraft body system in the nadir direction. The ambiguity in angle
+      about the nadir vector is resolved by minimizing the angle between two
+      constraint vectors. Note: the nadir pointing mode points the attitude in
+      the negative radial direction (not opposite the planetodetic
+      normal).</p><p>To configure which axis points to nadir, set the
+      <span class="guilabel">AttitudeReferenceBody</span> field to the desired
+      celestial body and define the body components of the alignment vector
+      using the <span class="guilabel">BodyAlignmentVector</span> fields. To configure
+      the constraint, set the <span class="guilabel">AttitudeConstraintType</span>
+      field to the desired constraint type, and define the body components of
+      the constraint using the <span class="guilabel">BodyConstraintVector</span>
+      fields. GMAT supports two constraint types,
+      <span class="guilabel">OrbitNormal</span> and <span class="guilabel">Velocity</span>, and
+      in both cases the vectors are constructed using the inertial spacecraft
+      state with respect to the
+      <span class="guilabel">AttitudeReferenceBody</span>.</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>Attitude rates are not computed for the
+        <span class="guilabel">NadirPointing</span> model. If you perform a computation
+        that requires attitude rate information when using the
+        <span class="guilabel">NadirPointing</span> mode, GMAT will throw an error
+        message and execution will stop. Similarly, if the definitions of the
+        <span class="guilabel">BodyAlignmentVector</span> and
+        <span class="guilabel">BodyConstraintVector</span> fields result in an
+        undefined attitude, an error message is thrown and execution will
+        stop.</p></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftAttitude_GUI_6.png" align="middle" height="551"></td></tr></table></div></div><p>The script example below shows how to configure a
+      <span class="guilabel">Spacecraft</span> to use an Earth
+      <span class="guilabel">NadirPointing</span> attitude system where the body y-axis
+      points nadir and the angle between the body x-axis and the orbit normal
+      vector is a minimum.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat;
+GMAT aSat.Attitude                 = NadirPointing;
+GMAT aSat.AttitudeReferenceBody    = Earth
+GMAT aSat.AttitudeConstraintType   = OrbitNormal
+GMAT aSat.BodyAlignmentVectorX  = 0
+GMAT aSat.BodyAlignmentVectorY  = 1
+GMAT aSat.BodyAlignmentVectorZ  = 0
+GMAT aSat.BodyConstraintVectorX = 1
+GMAT aSat.BodyConstraintVectorX = 0
+GMAT aSat.BodyConstraintVectorX = 0
+
+Create ForceModel Propagator1_ForceModel
+Create Propagator Propagator1
+Propagator1.FM        = Propagator1_ForceModel
+Propagator1.MaxStep   = 10
+
+Create OrbitView OrbitView1;
+OrbitView1.Add                = {aSat, Earth}
+OrbitView1.ViewPointReference = Earth
+OrbitView1.ViewPointVector    = [ 30000 0 0 ]
+
+BeginMissionSequence
+
+Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0}</code></pre></div><div class="refsection"><a name="AttitudeCCSDS"></a><h3>CCSDS Attitude Ephemeris Message</h3><p>The CCSDS Attitude Ephemeris Message (AEM) is an ASCII standard
+      for attitude ephemerides documented in &ldquo;ATTITUDE DATA MESSAGES&rdquo;
+      RECOMMENDED STANDARD CCSDS 504.0-B-1. GMAT supports some, but not all,
+      of the attitude messages defined in the standard. According to the CCSDS
+      AEM specification, &ldquo;The set of attitude data messages described in this
+      Recommended Standard is the baseline concept for attitude representation
+      in data interchange applications that are cross-supported between
+      Agencies of the CCSDS.&rdquo; Additionally, the forward of the standard states
+      &ldquo;Derived Agency standards may implement only a subset of the optional
+      features allowed by the Recommended Standard and may incorporate
+      features not addressed by this Recommended Standard. See the details
+      below for supported keyword types and details for creating AEM files
+      that GMAT can use for attitude modelling.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftAttitude_GUI_CCSDS.png" align="middle" height="551"></td></tr></table></div></div><p>An AEM file must have the format illustrated below described in
+      Table 4-1 of the standard. The header section contains high level
+      information on the version, originator, and date. The body of the file
+      is composed of paired blocks of Metadata and data. The Metadata sections
+      contain information on the data such as the first and last epoch of the
+      block, the time system employed, the reference frames, the attitude type
+      (quaternion, Euler Angle, etc.) and many other items documented in later
+      sections. The data sections contain lines of epoch and attitude
+      data.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftAttitude_CCSDS_Format.png" align="middle" height="355"></td></tr></table></div></div><p>An example CCSDS AEM file is shown below</p><pre class="programlisting"><code class="code">CCSDS_AEM_VERS = 1.0
+CREATION_DATE = 2002-11-04T17:22:31
+ORIGINATOR = NASA/JPL
+
+META_START
+COMMENT This file was produced by M.R. Somebody, MSOO NAV/JPL, 2002 OCT 04.
+COMMENT It is to be used for attitude reconstruction only.
+COMMENT  The relative accuracy of these attitudes is 0.1 degrees per axis.
+OBJECT_NAME = MARS GLOBAL SURVEYOR
+OBJECT_ID = 1996-062A
+CENTER_NAME = mars barycenter
+REF_FRAME_A = EME2000
+REF_FRAME_B = SC_BODY_1
+ATTITUDE_DIR = A2B
+TIME_SYSTEM = UTC
+START_TIME = 1996-11-28T21:29:07.2555
+USEABLE_START_TIME = 1996-11-28T22:08:02.5555
+USEABLE_STOP_TIME = 1996-11-30T01:18:02.5555
+STOP_TIME = 1996-11-30T01:28:02.5555
+ATTITUDE_TYPE = QUATERNION
+QUATERNION_TYPE = LAST
+INTERPOLATION_METHOD = hermite
+INTERPOLATION_DEGREE = 7
+META_STOP
+
+DATA_START
+1996-11-28T21:29:07.2555 0.56748 0.03146 0.45689 0.68427
+1996-11-28T22:08:03.5555 0.42319 -0.45697 0.23784 0.74533
+1996-11-28T22:08:04.5555 -0.84532 0.26974 -0.06532 0.45652
+&lt; intervening data records omitted here &gt;
+1996-11-30T01:28:02.5555 0.74563 -0.45375 0.36875 0.31964
+DATA_STOP
+
+META_START
+COMMENT This block begins after trajectory correction maneuver TCM-3.
+OBJECT_NAME = mars global surveyor
+OBJECT_ID = 1996-062A
+CENTER_NAME = MARS BARYCENTER
+REF_FRAME_A = EME2000
+REF_FRAME_B = SC_BODY_1
+ATTITUDE_DIR = A2B
+TIME_SYSTEM = UTC
+START_TIME = 1996-12-18T12:05:00.5555
+USEABLE_START_TIME = 1996-12-18T12:10:00.5555
+USEABLE_STOP_TIME = 1996-12-28T21:23:00.5555
+STOP_TIME = 1996-12-28T21:28:00.5555
+ATTITUDE_TYPE = QUATERNION
+QUATERNION_TYPE = LAST
+META_STOP
+
+DATA_START
+1996-12-18T12:05:00.5555 -0.64585 0.018542 -0.23854 0.72501
+1996-12-18T12:10:05.5555 0.87451 -0.43475 0.13458 -0.16767
+1996-12-18T12:10:10.5555 0.03125 -0.65874 0.23458 -0.71418
+&lt; intervening records omitted here &gt;
+1996-12-28T21:28:00.5555 -0.25485 0.58745 -0.36845 0.67394
+DATA_STOP</code></pre><p>CCSDS files require many keywords and fields, some are required
+      for all file types, others are Situationally Required (SR) depending
+      upon the type of file (i.e. If ATTITUDE_TYPE = QUATERNION, then
+      QUATERNION_TYPE must be included). The tables below describe GMAT&rsquo;s
+      implementation starting with header keywords</p><div class="informaltable"><table border="1"><colgroup><col width="26%"><col width="7%"><col width="67%"></colgroup><thead><tr><th>Keyword</th><th>Required</th><th>Description and Supported Values</th></tr></thead><tbody><tr><td><span class="guilabel">CCSDS_AEM_VERS</span></td><td><p>Y</p></td><td><p>Format version in the form of &lsquo;x.y&rsquo;, where &lsquo;y&rsquo; is
+              incremented for corrections and minor changes, and &lsquo;x&rsquo; is
+              incremented for major changes. This particular line must be the
+              first non-blank line in the file. In GMAT the version must be
+              set to 1.0. If the version is not set to a supported version,
+              then GMAT throws an exception. </p><p>Example:
+              </p><p>CCSDS_AEM_VERS =1.0</p></td></tr><tr><td><span class="guilabel">COMMENT</span></td><td><p>N</p></td><td><p>Comments (allowed after AEM version number and
+              META_START and before a data block of ephemeris lines). Each
+              comment line shall begin with this keyword. GMAT does not use
+              this field.</p></td></tr><tr><td><span class="guilabel">CREATION_DATE</span></td><td><p>Y</p></td><td><p>File creation date/time in one of the following
+              formats: YYYY-MM-DDThh:mm:ss[.d?d] or YYYY-DDDThh:mm:ss[.d?d]
+              where &lsquo;YYYY&rsquo; is the year, &lsquo;MM&rsquo; is the two-digit month, &lsquo;DD&rsquo; is
+              the two-digit day, &lsquo;DDD&rsquo; is the threedigit day of year, &lsquo;T&rsquo; is
+              constant, &lsquo;hh:mm:ss[.d?d]&rsquo; is the UTC time in hours, minutes,
+              seconds, and optional fractional seconds. As many &lsquo;d&rsquo; characters
+              to the right of the period as required may be used to obtain the
+              required precision. All fields require leading zeros. GMAT does
+              not use this field.</p></td></tr><tr><td><span class="guilabel">ORIGINATOR</span></td><td><p>Y</p></td><td><p>Creating agency (value should be specified in an
+              ICD). GMAT does not use this field.</p></td></tr></tbody></table></div><p>MetaData Keywords are described in the table below.</p><div class="informaltable"><table border="1"><colgroup><col width="26%"><col width="7%"><col width="67%"></colgroup><thead><tr><th>Keyword</th><th>Required</th><th>Description and Supported Values</th></tr></thead><tbody><tr><td><span class="guilabel">META_START</span></td><td><p>Y</p></td><td><p>The AEM message contains both metadata and attitude
+              ephemeris data; this keyword is used to delineate the start of a
+              metadata block within the message (metadata are provided in a
+              block, surrounded by &lsquo;META_START&rsquo; and &lsquo;META_STOP&rsquo; markers to
+              facilitate file parsing). This keyword must appear on a line by
+              itself.</p></td></tr><tr><td><span class="guilabel">COMMENT</span></td><td><p>N</p></td><td><p>Comments allowed only at the beginning of the
+              Metadata section. Each comment line shall begin with this
+              keyword. GMAT does not use this.</p><p> Example:
+              </p><p>COMMENT This is a comment</p></td></tr><tr><td><span class="guilabel">OBJECT_NAME</span></td><td><p>Y</p></td><td><p>Spacecraft name of the object corresponding to the
+              attitude data to be given. There is no CCSDS-based restriction
+              on the value for this keyword, but it is recommended to use
+              names from the SPACEWARN Bulletin, which include the Object name
+              and international designator of the participant.
+              </p><p>Example: </p><p>OBJECT_NAME = EUTELSAT
+              </p><p> Note: GMAT does not use this field. In GMAT, you
+              associate a file with a particular spacecraft by configuring a
+              particular spacecraft to use the file as shown below.
+              </p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+aSat.Attitude = CCSDS-AEM
+aSat.AttitudeFileName = myFile.aem</code></pre></td></tr><tr><td><span class="guilabel">OBJECT_ID</span></td><td><p>Y</p></td><td><p>Spacecraft identifier of the object corresponding
+              to the attitude data to be given. See the AEM specification for
+              recommendations for spacecraft Ids. GMAT does not use this
+              field.</p></td></tr><tr><td><span class="guilabel">CENTER_NAME</span></td><td><p>N</p></td><td><p>Origin of reference frame, which may be a natural
+              solar system body (planets, asteroids, comets, and natural
+              satellites), including any planet barycenter or the solar system
+              barycenter, or another spacecraft (in this the value for
+              &lsquo;CENTER_NAME&rsquo; is subject to the same rules as for
+              &lsquo;OBJECT_NAME&rsquo;). There is no CCSDS-based restriction on the value
+              for this keyword, but for natural bodies it is recommended to
+              use names from the NASA/JPL Solar System Dynamics Group . GMAT
+              does not use this field.</p></td></tr><tr><td><span class="guilabel">REF_FRAME_A</span></td><td><p>Y</p></td><td><p>The name of the reference frame specifying one
+              frame of the transformation, whose direction is specified using
+              the keyword ATTITUDE_DIR. The full set of values is enumerated
+              in annex A of the AEM standard, with an excerpt provided in the
+              &lsquo;Values / Examples&rsquo; column. </p><p>In GMAT, REF_FRAME_A
+              can be any of the following and must be different than
+              REF_FRAME_B: EME2000,
+              SC_BODY_1</p><p>Example:</p><p>REF_FRAME_A =
+              EME2000</p><p>REF_FRAME_A = SC_Body_1</p></td></tr><tr><td><span class="guilabel">REF_FRAME_B</span></td><td><p>Y</p></td><td><p>The name of the reference frame specifying one
+              frame of the transformation, whose direction is specified using
+              the keyword ATTITUDE_DIR. The full set of values is enumerated
+              in annex A of the AEM standard, with an excerpt provided in the
+              &lsquo;Values / Examples&rsquo; column. </p><p>In GMAT, REF_FRAME_B
+              can be any of the following and must be different than
+              REF_FRAME_A: EME2000,
+              SC_BODY_1</p><p>Example:</p><p>REF_FRAME_A =
+              EME2000</p><p>REF_FRAME_A = SC_Body_1</p></td></tr><tr><td><span class="guilabel">ATTITUDE_DIR</span></td><td><p>Y</p></td><td><p>Rotation direction of the attitude specifying from
+              which frame the transformation is to: A2B specifies a
+              transformation from the REF_FRAME_A to the REF_FRAME_B; B2A
+              specifies a transformation from the REF_FRAME_B to the
+              REF_FRAME_A. </p><p>Examples: </p><p>ATTITUDE_DIR =
+              A2B </p><p>ATTITUDE_DIR = B2A</p></td></tr><tr><td><span class="guilabel">TIME_SYSTEM</span></td><td><p>Y</p></td><td><p>Time system used for both attitude ephemeris data
+              and metadata. GMAT supports the following options:
+              UTC</p><p> Example:</p><p> TIME_SYSTEM =
+              UTC</p></td></tr><tr><td><span class="guilabel">START_TIME</span></td><td><p>Y</p></td><td><p>Start of TOTAL time span covered by attitude
+              ephemeris data immediately following this metadata block. The
+              START_TIME time tag at a new block of attitude ephemeris data
+              must be equal to or greater than the STOP_TIME time tag of the
+              previous block. See the CREATION_DATE specification for detailed
+              information on time formats. Note: precision in the seconds
+              place is only preserved to a few microseconds.
+              </p><p>Example:</p><p>START_TIME =
+              1996-12-18T14:28:15.117</p></td></tr><tr><td><span class="guilabel">USEABLE_ START_TIME, USEABLE_
+              STOP_TIME</span></td><td><p>N</p></td><td><p> Optional start and end of USEABLE time span
+              covered by attitude ephemeris data immediately following this
+              metadata block. To allow for proper interpolation near the ends
+              of the attitude ephemeris data block, it may be necessary,
+              depending upon the interpolation method to be used, to utilize
+              these keywords with values within the time span covered by the
+              attitude ephemeris data records as denoted by the
+              START/STOP_TIME time tags. If this is provided, GMAT only uses
+              data in the USEABLE timespan for interpolation. If it is not
+              provided, GMAT uses the data in the START_TIME/STOP_TIME segment
+              for interpolation. See the CREATION_DATE specification for
+              detailed information on time formats.
+              </p><p>Example:</p><p>USEABLE_ START_TIME =
+              1996-12-18T14:28:15.117</p><p>USEABLE_ STOP_TIME =
+              1996-12-18T14:28:15.117</p></td></tr><tr><td><span class="guilabel">STOP_TIME</span></td><td><p>Y</p></td><td><p>End of TOTAL time span covered by the attitude
+              ephemeris data immediately following this metadata block. The
+              STOP_TIME time tag for the block of attitude ephemeris data must
+              be equal to or less than the START_TIME time tag of the next
+              block. See the CREATION_DATE specification for detailed
+              information on time formats. Note: precision in the seconds
+              place is only preserved to a few microseconds.
+              </p><p>Example:</p><p>STOP_TIME =
+              1996-12-18T14:28:15.117</p></td></tr><tr><td><span class="guilabel">ATTITUDE_TYPE</span></td><td><p>Y</p></td><td><p>The format of the data lines in the message. GMAT
+              supports the following types</p><p>ATTITUDE_TYPE =
+              QUATERNION </p><p>ATTITUDE_TYPE =
+              EULER_ANGLE</p></td></tr><tr><td><span class="guilabel">QUATERNION_TYPE</span></td><td><p>SR</p></td><td><p>The placement of the scalar portion of the
+              quaternion (QC) in the attitude data. This keyword is only used
+              if ATTITUDE_TYPE denotes quaternion and in that case the field
+              is required.</p><p>Example:</p><p>QUATERNION_TYPE =
+              FIRST</p><p>QUATERNION_TYPE = LAST</p></td></tr><tr><td><span class="guilabel">EULER_ROT_SEQ</span></td><td><p>SR</p></td><td><p> The rotation sequence of the Euler angles that
+              rotate from REF_FRAME_A to REF_FRAME_B, or vice versa, as
+              specified using the ATTITUDE_DIR keyword. This keyword is only
+              used if ATTITUDE_TYPE denotes EulerAngles and in that case the
+              field is required.
+              </p><p>Example:</p><p>EULER_ROT_SEQ =
+              321</p></td></tr><tr><td><span class="guilabel">RATE_FRAME</span></td><td><p>N</p></td><td><p>GMAT does not use this field.</p></td></tr><tr><td><span class="guilabel">INTERPOLATION _METHOD</span></td><td><p>N</p></td><td><p> Recommended interpolation method for attitude
+              ephemeris data in the block immediately following this metadata
+              block. Note. GMAT uses spherical linear interpolation when
+              ATTITUDE_TYPE = QUATERNION. GMAT uses lagrange interpolation for
+              ATTITUDE_TYPE =
+              EULER_ANGLE.</p><p>Examples:</p><p>INTERPOLATION
+              _METHOD = LINEAR</p><p>INTERPOLATION _METHOD =
+              LAGRANGE</p></td></tr><tr><td><span class="guilabel">INTERPOLATION _DEGREE</span></td><td><p>SR</p></td><td><p> Recommended interpolation degree for attitude
+              ephemeris data in the block immediately following this metadata
+              block. It must be an integer value. This keyword must be used if
+              the &lsquo;INTERPOLATION_METHOD&rsquo; keyword is used. The field is only
+              used for Lagrange Interpolation and in that case the value must
+              be between 0 and 9. In the case order is zero for Lagrange
+              interpolation, no interpolation is performed, and the attitude
+              returned is the value immediately before the requested epoch.
+              </p><p>Example:</p><p>INTERPOLATION _DEGREE =
+              7</p></td></tr><tr><td><span class="guilabel">META_STOP</span></td><td><p>Y</p></td><td><p> The end of a metadata block within the message.
+              The AEM message contains both metadata and attitude ephemeris
+              data; this keyword is used to delineate the end of a metadata
+              block within the message (metadata are provided in a block,
+              surrounded by &lsquo;META_START&rsquo; and &lsquo;META_STOP&rsquo; markers to facilitate
+              file parsing). This keyword must appear on a line by
+              itself.</p></td></tr></tbody></table></div><p>Data Keywords are described in the table below.</p><div class="informaltable"><table border="1"><colgroup><col width="26%"><col width="7%"><col width="67%"></colgroup><thead><tr><th>Keyword</th><th>Required</th><th>Description and Supported Values</th></tr></thead><tbody><tr><td><span class="guilabel">DATA_START</span></td><td><p>Y</p></td><td>The start of an attitude data block within the message.
+              The AEM message contains both metadata and attitude ephemeris
+              data; this keyword is used to delineate the start of a data
+              block within the message (data are provided in a block,
+              surrounded by &lsquo;DATA_START&rsquo; and &lsquo;DATA_STOP&rsquo; markers to facilitate
+              file parsing). This keyword must appear on a line by
+              itself.</td></tr><tr><td><span class="guilabel">DATA_STOP</span></td><td><p>Y</p></td><td><p> The end of an attitude data block within the
+              message. The AEM message contains both metadata and attitude
+              ephemeris data; this keyword is used to delineate the end of a
+              data block within the message (data are provided in a block,
+              surrounded by &lsquo;DATA_START&rsquo; and &lsquo;DATA_STOP&rsquo; markers to facilitate
+              file parsing). This keyword must appear on a line by itself.
+              </p></td></tr><tr><td><span class="guilabel">QUATERNION</span></td><td><p>SR</p></td><td><p>Required when ATTITUDE_TYPE = QUATERNION. The
+              general format of a quaternion data line is: Epoch, QC, Q1, Q2,
+              Q3 or Epoch, Q1, Q2, Q3,
+              QC</p><p>Example:</p><p>2000-01-01T11:59:28.000
+              0.195286 -0.079460 0.3188764 0.92404936</p></td></tr><tr><td><span class="guilabel">EULER ANGLE</span></td><td><p>SR</p></td><td><p>Required when ATTITUDE_TYPE = EULER_ANGLE. The
+              general format of an Euler angle data line is: Epoch, X_Angle,
+              Y_Angle, Z_Angle.
+              </p><p>Example:</p><p>2000-001T11:59:28.000 35.45409
+              -15.74726 18.803877</p></td></tr></tbody></table></div><p>Propagate a spacecraft's attitude using a CCSDS AEM file</p><pre class="programlisting"><code class="code">Create Spacecraft aSat ;
+GMAT aSat.Attitude = CCSDS-AEM;
+GMAT aSat.AttitudeFileName = ...
+         '../data/vehicle/ephem/ccsds/CCSDS_BasicEulerFile.aem'
+
+Create Propagator aProp;
+
+Create OrbitView a3DView
+a3DView.Add = {aSat,Earth}
+
+BeginMissionSequence;
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 3600};</code></pre></div><div class="refsection"><a name="AttitudePrecessingSpinner"></a><h3>Precessing Spinner Model</h3><p>The <span class="guilabel">PrecessingSpinner</span> attitude mode
+      configures the attitude of a spacecraft to have steady-state precession
+      motion with respect to a specified vector defined in the inertial frame.
+      The spin axis must be provided in the spacecraft body frame.</p><p>To configure the spin axis of the spacecraft body, set the
+      <span class="guilabel">BodySpinAxis</span>, which is expressed in the body frame,
+      and define the reference vector of the steady-state precession motion
+      using the <span class="guilabel">NutationReferenceVector</span>, which is
+      expressed in the inertial frame. To configure the initial attitude of
+      the spacecraft, set <span class="guilabel">InitialPrecessionAngle</span> to
+      define the initial angle of the precession, set
+      <span class="guilabel">InitialSpinAngle</span> to define the initial angle of the
+      spin, and set <span class="guilabel">NutationAngle</span> to define the nutation
+      angle which is constant. To configure the rate of precession and spin
+      rate, set <span class="guilabel">PrecessingRate</span> and
+      <span class="guilabel">SpinRate</span> which are constant.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>The <span class="guilabel">PrecessingSpinner</span> model uses the cross
+        product of the <span class="guilabel">BodySpinAxis</span> axis and the inertial
+        x-axis as a reference for the initial attitude. To avoid an undefined
+        attitude when the spin axis is aligned, or nearly aligned, with the
+        inertial x-axis, a different reference vector is used in that case. In
+        the event that the cross product of <span class="guilabel">BodySpinAxis</span>
+        and the inertial x-axis is less than 1e-5, the inertial y-axis is used
+        as the reference vector. For further details see the
+        engineering/mathematical specifications.</p></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftAttitude_GUI_PrecessingSpinner.png" align="middle" height="551"></td></tr></table></div></div><p>The script example below shows how to configure a Spacecraft to
+      have <span class="guilabel">PrecessingSpinner</span> attitude mode where the body
+      z-axis spins with respect to the inertial z-axis.
+      <span class="guilabel">PrecessionRate</span> is set to 1 deg./sec.,
+      <span class="guilabel">InitialPrecessionAngle</span> is set to 0 deg./sec.,
+      <span class="guilabel">SpinRate</span> is set to 2 deg./sec.,
+      <span class="guilabel">InitialSpinAngle</span> is set to 0 deg./sec., and
+      <span class="guilabel">NutationAngle</span> is set to 30 deg.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat; 
+GMAT aSat.Attitude = PrecessingSpinner;
+GMAT aSat.NutationReferenceVectorX = 0;
+GMAT aSat.NutationReferenceVectorY = 0;
+GMAT aSat.NutationReferenceVectorZ = 1;
+GMAT aSat.BodySpinAxisX = 0;
+GMAT aSat.BodySpinAxisY = 0;
+GMAT aSat.BodySpinAxisZ = 1;
+GMAT aSat.InitialPrecessionAngle = 0;
+GMAT aSat.PrecessionRate = 1;
+GMAT aSat.NutationAngle = 30;
+GMAT aSat.InitialSpinAngle = 0;
+GMAT aSat.SpinRate = 2;
+
+Create OrbitView OrbitView1;
+OrbitView1.Add = {aSat, Earth}
+OrbitView1.ViewPointReference = Earth
+OrbitView1.ViewPointVector = [ 30000 0 0 ]
+
+Create Propagator aProp
+aProp.MaxStep = 10
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 12000.0}
+</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Spacecraft.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="SpacecraftBallisticMass.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Spacecraft&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Spacecraft Ballistic/Mass Properties</td></tr></table></div></body></html>

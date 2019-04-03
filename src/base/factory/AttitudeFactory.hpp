@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,7 +38,7 @@
 class GMAT_API AttitudeFactory : public Factory
 {
 public:
-   // method to create Solver object
+   // method to create Attitude object
    virtual GmatBase*    CreateObject(const std::string &ofType,
                                      const std::string &withName = "");        
    virtual Attitude*    CreateAttitude(const std::string &ofType,

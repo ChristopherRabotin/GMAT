@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -459,8 +459,7 @@ Solver* Factory::CreateSolver(const std::string &ofType,
  */
 //------------------------------------------------------------------------------
 Subscriber* Factory::CreateSubscriber(const std::string &ofType,
-                                      const std::string &withName,
-                                      const std::string &fileName)
+                                      const std::string &withName)
 {
    throw FactoryException("requested object must be of type Subscriber");
 }
@@ -517,8 +516,7 @@ GmatCommand* Factory::CreateCommand(const std::string &ofType,
 
 //------------------------------------------------------------------------------
 //  AtmosphereModel* CreateAtmosphereModel(const std::string &ofType,
-//                                         const std::string &withName,
-//                                         const std::string &forBody)
+//                                         const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create  AtmosphereModel objects -
@@ -527,7 +525,6 @@ GmatCommand* Factory::CreateCommand(const std::string &ofType,
  * type  AtmosphereModel.
  *
  * @param <ofType>   specific type of  AtmosphereModel object to create.
- * @param <forBody>  body of specific type of AtmosphereModel object to create.
  * @param <withName> name to give to the newly created  AtmosphereModel object.
  *
  * @return pointer to a new  AtmosphereModel object.
@@ -537,8 +534,7 @@ GmatCommand* Factory::CreateCommand(const std::string &ofType,
  */
 //------------------------------------------------------------------------------
 AtmosphereModel* Factory::CreateAtmosphereModel(const std::string &ofType,
-                                                const std::string &withName,
-                                                const std::string &forBody)
+                                                const std::string &withName)
 {
    throw FactoryException
       ("Factory::CreateAtmosphereModel() must be implemented by AtmosphereFactory()\n");

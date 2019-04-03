@@ -245,7 +245,9 @@ SET(BASE_SRCS
     function/FunctionManager.cpp
     function/GetEphemStates.cpp
     function/GetLastState.cpp
+    function/ObjectManagedFunction.cpp
     function/SetSeed.cpp
+    function/UserDefinedFunction.cpp
     hardware/ChemicalTank.cpp
     hardware/ChemicalThruster.cpp
     hardware/ElectricTank.cpp
@@ -282,7 +284,7 @@ SET(BASE_SRCS
     math/Asinh.cpp
     math/Atan.cpp
     math/Atan2.cpp
-    math/BuiltinFunction.cpp
+    math/BuiltinFunctionNode.cpp
     math/Ceil.cpp
     math/Cos.cpp
     math/Cosh.cpp
@@ -307,7 +309,7 @@ SET(BASE_SRCS
     math/Multiply.cpp
     math/Negate.cpp
     math/Norm.cpp
-    math/NumericFunction.cpp
+    math/NumericFunctionNode.cpp
     math/Power.cpp
     math/RadToDeg.cpp
     math/Rand.cpp
@@ -316,7 +318,7 @@ SET(BASE_SRCS
     math/Sinh.cpp
     math/Sprintf.cpp
     math/Sqrt.cpp
-    math/StringFunction.cpp
+    math/StringFunctionNode.cpp
     math/Strcat.cpp
     math/Strcmp.cpp
     math/Strfind.cpp

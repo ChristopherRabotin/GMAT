@@ -1,0 +1,167 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>FiniteBurn</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="FileInterface.html" title="FileInterface"><link rel="next" href="FminconOptimizer.html" title="FminconOptimizer"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">FiniteBurn</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="FileInterface.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="FminconOptimizer.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="FiniteBurn"></a><div class="titlepage"></div><a name="N18F48" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">FiniteBurn</span></h2><p>FiniteBurn &mdash; A finite burn</p></div><div class="refsection"><a name="N18F59"></a><h2>Description</h2><p>The <span class="guilabel">FiniteBurn</span> resource is used when continuous
+    propulsion is desired. Impulsive burns happen instantaneously through the
+    use of the <span class="guilabel">Maneuver</span> command, while finite burns occur
+    continuously starting at the <span class="guilabel">BeginFiniteBurn</span> command
+    and lasting until the <span class="guilabel">EndFiniteBurn</span> command is
+    reached in the mission sequence. In order to apply a non-zero
+    <span class="guilabel">Finite Burn</span>, there must be a
+    <span class="guilabel">Propagate</span> command between the
+    <span class="guilabel">BeginFiniteBurn</span> and
+    <span class="guilabel">EndFiniteBurn</span> commands.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="FuelTank.html" title="ChemicalTank"><span class="refentrytitle">ChemicalTank</span></a>, <a class="xref" href="Thruster.html" title="ChemicalThruster"><span class="refentrytitle">ChemicalThruster</span></a>, <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a>, <a class="xref" href="BeginFiniteBurn.html" title="BeginFiniteBurn"><span class="refentrytitle">BeginFiniteBurn</span></a>, <a class="xref" href="EndFiniteBurn.html" title="EndFiniteBurn"><span class="refentrytitle">EndFiniteBurn</span></a>, <a class="xref" href="CalculationParameters.html" title="Calculation Parameters"><span class="refentrytitle">Calculation Parameters</span></a></p></div><div class="refsection"><a name="N18F8C"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Thrusters</span></td><td><p>The <span class="guilabel">Thruster</span> field allows the
+            selection of which <span class="guilabel">Thruster</span>, from a list of
+            previously created thrusters, to use when applying a finite burn.
+            Currently, using the GUI, you can only select&nbsp; one
+            <span class="guilabel">Thruster</span> to attach to a
+            <span class="guilabel">FiniteBurn</span> resource. Using the scripting
+            interface, you may attach multiple thrusters to a
+            <span class="guilabel">FiniteBurn</span> resource. Using the scripting
+            interface, you may attach multiple thrusters to a
+            <span class="guilabel">FiniteBurn</span> resource. In a script command, an
+            empty list, e.g., <code class="literal">FiniteBurn1.Thruster={}</code>, is
+            allowed but is of limited utility since the GUI will automatically
+            associate a <span class="guilabel">ChemicalThruster</span>, if one has been
+            created, with the <span class="guilabel">FiniteBurn</span>. This field
+            cannot be modified in the Mission Sequence. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>A list of <span class="guilabel">Thrusters</span> created by
+                    user. Can be a list of
+                    <span class="guibutton">ChemicalThruster</span><span class="guibutton">s</span>
+                    or <span class="guibutton">ElectricThrusters</span> but you cannot
+                    mix chemical and electric thrusters.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>No Default</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script, or only one</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">VectorFormat</span></td><td><p>Deprecated. Allows you to define the format of the
+            finite burn thrust direction. This field has no affect. The finite
+            burn thrust direction, as specified in the
+            <span class="guilabel">Thruster</span> resource, is always given in
+            <code class="literal">Cartesian</code> format. Note: You can use GMAT
+            scripting to covert from other representations to Cartesian and
+            then set the Cartesian format.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">Cartesian</code>,
+                    <code class="literal">Spherical</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">Cartesian</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1902E"></a><h2>GUI</h2><p>The <span class="guilabel">FiniteBurn</span> dialog box allows you to specify
+    which thruster to use for the finite burn. The layout of the
+    <span class="guilabel">FiniteBurn</span> dialog box is shown below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_FiniteBurn_GUI.png" align="middle" height="141"></td></tr></table></div></div></div><div class="refsection"><a name="N19042"></a><h2>Remarks</h2><div class="refsection"><a name="N19045"></a><h3>Configuring a FiniteBurn</h3><p>To perform a finite burn, the <span class="guilabel">FiniteBurn</span>
+      resource itself and a number of related resources and commands must be
+      properly configured. You must associate a specific
+      <span class="guilabel">ChemicalThruster</span> hardware resource with a created
+      <span class="guilabel">FiniteBurn</span>. You must associate a specific
+      <span class="guilabel">ChemicalTank</span> hardware resource with the chosen
+      <span class="guilabel">ChemicalThruster</span>. Finally, you must attach both the
+      chosen <span class="guilabel">Thruster</span>s and <span class="guilabel">Tanks</span> to
+      the desired <span class="guilabel">Spacecraft</span>. See the example below for
+      additional details.</p></div><div class="refsection"><a name="N19062"></a><h3>FiniteBurn Using Multiple Thrusters</h3><p>Using the GUI, a <span class="guilabel">FiniteBurn</span> resource must be
+      associated with exactly one <span class="guilabel">Thruster</span>.</p><p>Using the scripting interface, one can assign multiple thrusters
+      to a single <span class="guilabel">FiniteBurn</span> resource.</p></div></div><div class="refsection"><a name="N19072"></a><h2>Interactions</h2><div class="informaltable"><table border="1"><colgroup><col width="20%"><col width="80%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Spacecraft resource</span></td><td><p> Must be created in order to apply any
+            burn.</p></td></tr><tr><td><span class="guilabel">Thruster resource</span></td><td><p> As discussed in the <span class="guilabel">Remarks</span>,
+            every <span class="guilabel">FiniteBurn</span> resource must be associated
+            with at least one <span class="guilabel">ChemicalThruster</span> or
+            <span class="guilabel">ElectricThruster</span>. Any thruster created in the
+            resource tree can be incorporated into a
+            <span class="guilabel">FiniteBurn</span> but thruster types cannot be
+            mixed.</p></td></tr><tr><td><span class="guilabel">ChemicalTank resource</span></td><td><p> To perform a finite burn, a
+            <span class="guilabel">Tank</span> must be attached to the
+            <span class="guilabel">Spacecraft</span>. (A
+            <span class="guilabel">ChemicalTank</span> is needed to provide pressure
+            and temperature data used when modeling the thrust and specific
+            impulse. A <span class="guilabel">Tank</span> is also needed if you want to
+            model mass depletion.) </p></td></tr><tr><td><span class="guilabel">BeginFiniteBurn and EndFiniteBurn
+            command</span></td><td><p> After a <span class="guilabel">FiniteBurn</span> is created,
+            to apply it in the mission sequence, a
+            <span class="guilabel">BeginFiniteBurn</span> and
+            <span class="guilabel">EndFiniteBurn</span> command must be appended to the
+            mission tree. </p></td></tr><tr><td><span class="guilabel">Propagate command</span></td><td><p> In order to apply a non-zero finite burn, there must
+            be a <span class="guilabel">Propagate</span> command between the
+            <span class="guilabel">BeginFiniteBurn</span> and
+            <span class="guilabel">EndFiniteBurn</span> commands. </p></td></tr></tbody></table></div><div class="refsection"><a name="N190D7"></a><h3>Reporting FiniteBurn Parameters</h3><p>GMAT now supports finite burn parameters that report the thrust
+      component data for a finite burn. The parameters include total thrust
+      from all thrusters in the three coordinate directions, the total
+      acceleration from all thrusters in the three coordinate directions, and
+      the total mass flow rate from all thrusters. Currently, by default the
+      total thrust and total acceleration parameters in the three coordinate
+      directions are reported only in the J2000 system and do not support any
+      other coordinate system dependency. Furthermore, you can now also report
+      out any thruster's individual parameters such as thrust magnitude, Isp
+      and mass flow rate. See the <a class="xref" href="CalculationParameters.html" title="Calculation Parameters"><span class="refentrytitle">Calculation Parameters</span></a>
+      reference for definitions of these finite burn and thruster specific
+      parameters. Also see the <a class="xref" href="FiniteBurn.html#FiniteBurn_Examples" title="Examples">Examples</a> section for an example that shows how to
+      report the finite burn and individual thruster specific parameters to a
+      report file.</p></div></div><div class="refsection"><a name="FiniteBurn_Examples"></a><h2>Examples</h2><div class="informalexample"><p>Configure a chemical finite burn. Create a default
+      <span class="guilabel">Spacecraft</span> and <span class="guilabel">ChemicalTank</span>
+      Resource; Create a default <span class="guilabel">ChemicalThruster</span> that
+      allows for fuel depletion from the default
+      <span class="guilabel">ChemicalTank</span>; Attach
+      <span class="guilabel">ChemicalTank</span> and
+      <span class="guilabel">ChemicalThruster</span> to the
+      <span class="guilabel">Spacecraft</span>; Create default
+      <span class="guilabel">ForceModel</span> and <span class="guilabel">Propagator</span>;
+      Create a <span class="guilabel">Finite Burn</span> that uses the default thruster
+      and apply a 30 minute finite burn to the spacecraft.</p><pre class="programlisting">% Create a default Spacecraft and ChemicalTank Resource
+Create Spacecraft DefaultSC
+Create ChemicalTank FuelTank1
+
+% Create a default ChemicalThruster.  Allow for fuel depletion from 
+% the default ChemicalTank.
+Create ChemicalThruster Thruster1
+Thruster1.DecrementMass = true
+Thruster1.Tank = {FuelTank1}
+
+%  Attach ChemicalTank and ChemicalThruster to the spacecraft
+DefaultSC.Thrusters = {Thruster1}
+DefaultSC.Tanks = {FuelTank1}
+
+%  Create default ForceModel and Propagator
+Create ForceModel DefaultProp_ForceModel
+Create Propagator DefaultProp
+DefaultProp.FM = DefaultProp_ForceModel
+
+%  Create a Finite Burn that uses the default thruster
+Create FiniteBurn FiniteBurn1
+FiniteBurn1.Thrusters = {Thruster1}
+
+BeginMissionSequence
+
+%  Implement 30 minute finite burn
+BeginFiniteBurn FiniteBurn1(DefaultSC)
+Propagate DefaultProp(DefaultSC) {DefaultSC.ElapsedSecs = 1800}
+EndFiniteBurn FiniteBurn1(DefaultSC)  </pre></div><div class="informalexample"><p>This example shows how to report finite burn parameters such as
+      total acceleration (from all thrusters), total thrust (from all
+      thrusters) in the three coordinate directions. We also report total mass
+      flow rate from all thrusters. Additionally, individual thruster specific
+      parameters such as thruster mass flow rate, thrust magnitude and
+      thruster Isp are also reported. Note that in the generated report, all
+      finite burn and thruster parameters are reported as zeros when thrusters
+      are not turned on.</p><pre class="programlisting">Create Spacecraft aSat
+
+Create ChemicalTank aFuelTank
+
+Create ChemicalThruster aThruster
+aThruster.DecrementMass = true
+aThruster.Tank = {aFuelTank}
+aThruster.C1 = 1000  % Constant Thrust
+aThruster.K1 = 300 % Constant Isp
+
+aSat.Thrusters = {aThruster}
+aSat.Tanks = {aFuelTank}
+
+Create ForceModel aFM
+aFM.CentralBody = Earth
+aFM.PointMasses = {Earth}
+
+Create Propagator aProp
+aProp.FM = aFM
+
+Create FiniteBurn aFB
+aFB.Thrusters = {aThruster}
+
+Create ReportFile rf
+rf.Add = {aSat.UTCGregorian, aFB.TotalAcceleration1, aFB.TotalAcceleration2, ...
+aFB.TotalAcceleration3, aFB.TotalMassFlowRate, aFB.TotalThrust1, ...
+aFB.TotalThrust2, aFB.TotalThrust3, aSat.aThruster.MassFlowRate, ...
+aSat.aThruster.ThrustMagnitude, aSat.aThruster.Isp}
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1000}
+
+% Do a Finite-Burn for 1800 Secs
+BeginFiniteBurn aFB(aSat)
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1800}
+EndFiniteBurn aFB(aSat)
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1000}</pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="FileInterface.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="FminconOptimizer.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">FileInterface&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;FminconOptimizer</td></tr></table></div></body></html>

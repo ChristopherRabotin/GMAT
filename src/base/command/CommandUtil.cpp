@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1228,7 +1228,7 @@ std::string GmatCommandUtil::
 GetCommandSeqString(GmatCommand *cmd, bool showAddr, bool showGenStr,
                     bool showSummaryName, const std::string &indentStr)
 {
-   char buf[13];
+   char buf[18];
    GmatCommand *current = cmd;
    std::string cmdseq, cmdstr, genStr;
    cmdstr = "\n---------- Mission Sequence ----------\n";
@@ -1298,7 +1298,7 @@ GetSubCommandString(GmatCommand* brCmd, Integer level, std::string &cmdseq,
                     bool showAddr, bool showGenStr, bool showSummaryName,
                     const std::string &indentStr)
 {
-   char buf[13];
+   char buf[18];
    GmatCommand* current = brCmd;
    Integer childNo = 0;
    GmatCommand* nextInBranch;

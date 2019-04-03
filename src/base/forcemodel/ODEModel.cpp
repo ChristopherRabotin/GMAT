@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1204,6 +1204,7 @@ bool ODEModel::BuildModelFromMap()
    Integer start = 0, objectCount = 0;
    Gmat::StateElementId id = Gmat::UNKNOWN_STATE;
    GmatBase *currentObject = NULL;
+   GmatBase *indexObj      = NULL;
 
    dynamicProperties = false;
    dynamicsIndex.clear();
@@ -1261,11 +1262,17 @@ bool ODEModel::BuildModelFromMap()
       }
 
       applyErrorControl.push_back(ecActive);
+      
+      indexObj = (*map)[index]->object;
+      if (!indexObj)
+         throw ODEModelException(
+               "ODEModel::BuildModelFromMap(): Error in map\n");
+
 
       // Increment the count for each new object
-      if (currentObject != (*map)[index]->object)
+      if (currentObject != indexObj)
       {
-         currentObject = (*map)[index]->object;
+         currentObject = indexObj;
          if (currentObject->IsOfType(Gmat::FORMATION))
          {
             FormationInterface *form = (FormationInterface*)currentObject;

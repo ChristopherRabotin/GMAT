@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1153,10 +1153,16 @@ void BatchEstimator::CompleteInitialization()
    // Show all residuals plots
    if (showAllResiduals)
    {
-      StringArray plotMeasurements;
+      // Remove all existing residual plots
+      for (UnsignedInt i = 0; i < residualPlots.size(); ++i)
+         delete residualPlots[i];
+      residualPlots.clear();
+
+      //StringArray plotMeasurements;
       for (UnsignedInt i = 0; i < modelNames.size(); ++i)
       {
-         plotMeasurements.clear();
+         //plotMeasurements.clear();
+         StringArray plotMeasurements;
          plotMeasurements.push_back(modelNames[i]);
          std::string plotName = instanceName + "_" + modelNames[i] +
                "_Residuals";
@@ -1209,6 +1215,11 @@ void BatchEstimator::CompleteInitialization()
 
    measurementResiduals.clear();
    measurementEpochs.clear();
+   measurementResidualID.clear();
+
+   measurementTimes.clear();
+   measurementResVectors.clear();
+   observationID.clear();
    
    for (Integer i = 0; i < information.GetNumRows(); ++i)
    {
@@ -1265,6 +1276,8 @@ void BatchEstimator::CompleteInitialization()
    numRemovedRecords["B"] = 0;
    numRemovedRecords["OLSE"] = 0;
    numRemovedRecords["IRMS"] = 0;
+   numRemovedRecords["USER"] = 0;
+   numRemovedRecords["N"]    = 0;           // Edit status "-"
 
    if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
       currentState = CALCULATING;
@@ -1395,7 +1408,9 @@ void BatchEstimator::CalculateData()
    // Update the STM
    esm.MapObjectsToSTM();
    
-   if (measManager.CalculateMeasurements() == false)
+   // We need to run CalculateMeasurements() with event in order to get correct result in signal block status
+   //if (measManager.CalculateMeasurements() == false)
+   if (measManager.CalculateMeasurements(false, true, false) == false)
    {
       currentState = ACCUMULATING;
    }
@@ -1551,6 +1566,10 @@ void BatchEstimator::CheckCompletion()
       measurementEpochs.clear();
       measurementResidualID.clear();
 
+      measurementResVectors.clear();
+      measurementTimes.clear();
+      observationID.clear();
+
       for (UnsignedInt i = 0; i <  stateSize; ++i)
          for (UnsignedInt j = 0; j <  stateSize; ++j)
             if (i == j)
@@ -1598,6 +1617,8 @@ void BatchEstimator::CheckCompletion()
       numRemovedRecords["B"] = 0;
       numRemovedRecords["OLSE"] = 0;
       numRemovedRecords["IRMS"] = 0;
+      numRemovedRecords["USER"] = 0;
+      numRemovedRecords["N"]    = 0;
 
       // reset value for statistics table
       statisticsTable.clear();
@@ -1672,6 +1693,10 @@ void BatchEstimator::RunComplete()
    measurementResiduals.clear();
    measurementEpochs.clear();
    measurementResidualID.clear();
+
+   measurementResVectors.clear();
+   measurementTimes.clear();
+   observationID.clear();
 
    statisticsTable.clear();
    statisticsTable1.clear();
@@ -1943,7 +1968,7 @@ std::string BatchEstimator::GetProgressString()
                   for (UnsignedInt j = 0; j < finalCovariance.GetNumRows(); ++j)
                      finalCovariance(j, i) *= Cr0;
                }
-               if ((*map)[i]->elementName == "Cd_Epsilon")
+               else if ((*map)[i]->elementName == "Cd_Epsilon")
                {
                   // Get Cd0
                   Real Cd0 = (*map)[i]->object->GetRealParameter("Cd") / (1 + (*map)[i]->object->GetRealParameter("Cd_Epsilon"));
@@ -2157,7 +2182,7 @@ std::string BatchEstimator::GetElementUnit(ListItem* infor) const
          // Get full name for Bias
          MeasurementModel* mm = (MeasurementModel*)(infor->object);
 
-         // Get Bias unit. It is Km for Range_KM, RU for DSNRange, Km/s for Doppler_RangeRate, and for Doppler_HZ 
+         // Get Bias unit:
          if (mm->IsOfType("DSNTwoWayRange"))
             unit = "RU";
          else if (mm->IsOfType("DSNTwoWayDoppler"))
@@ -2171,17 +2196,22 @@ std::string BatchEstimator::GetElementUnit(ListItem* infor) const
       }
       else
       {
+         // Get Bias unit:
          std::string measType = infor->object->GetStringParameter("Type");
-         if (measType == "Range_RU")
+         if (measType == "DSN_SeqRange")
             unit = "RU";
-         else if (measType == "Range_KM")
+         else if (measType == "Range")                        //else if (measType == "Range_KM")
             unit = "km";
-         else if (measType == "Doppler_RangeRate")
+         else if (measType == "SN_Range")
+            unit = "km";
+         else if (measType == "RangeRate")                    //else if (measType == "Doppler_RangeRate")
             unit = "km/s";
-         else if (measType == "Doppler_HZ")
+         else if (measType == "DSN_TCP")
             unit = "Hz";
-         else if (measType == "TDRSDoppler_HZ")
+         else if (measType == "SN_Doppler")                  //else if (measType == "TDRSDoppler_HZ")
             unit = "Hz";
+         else if (measType == "GPS_PosVec")
+            unit = "km";
       }
    }
    else if ((infor->elementName == "Cr_Epsilon") || (infor->elementName == "Cd_Epsilon"))
@@ -2551,7 +2581,7 @@ std::string BatchEstimator::GetDayOfWeek(Integer day, Integer month, Integer yea
       sweekday = "Wednesday";
       break;
    case 4:
-      sweekday = "Thusday";
+      sweekday = "Thursday";
       break;
    case 5:
       sweekday = "Friday";
@@ -2850,13 +2880,19 @@ void BatchEstimator::WriteReportFileHeaderPart2()
          paramValues.push_back("");
          paramValues.push_back(sc->GetEpochString());
          paramValues.push_back(sc->GetStringParameter("CoordinateSystem"));
-         paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("CartesianX"), false, false, true, 8, 22));
-         paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("CartesianY"), false, false, true, 8, 22));
-         paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("CartesianZ"), false, false, true, 8, 22));
-         paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("CartesianVX"), false, false, true, 12, 22));
-         paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("CartesianVY"), false, false, true, 12, 22));
-         paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("CartesianVZ"), false, false, true, 12, 22));
-         
+         //paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("CartesianX"), false, false, true, 8, 22));
+         //paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("CartesianY"), false, false, true, 8, 22));
+         //paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("CartesianZ"), false, false, true, 8, 22));
+         //paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("CartesianVX"), false, false, true, 12, 22));
+         //paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("CartesianVY"), false, false, true, 12, 22));
+         //paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("CartesianVZ"), false, false, true, 12, 22));
+         paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("X"), false, false, true, 8, 22));
+         paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("Y"), false, false, true, 8, 22));
+         paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("Z"), false, false, true, 8, 22));
+         paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("VX"), false, false, true, 12, 22));
+         paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("VY"), false, false, true, 12, 22));
+         paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("VZ"), false, false, true, 12, 22));
+
          s = GmatStringUtil::RealToString(sc->GetRealParameter("Cr"), false, false, false, 8, 22);
          if (s.find('.') == s.npos)
             s = s + ".00";
@@ -2991,8 +3027,7 @@ void BatchEstimator::WriteReportFileHeaderPart2b()
             for (Integer col = 0; col < aprioriCov.GetNumColumns(); ++col)
                aprioriCov(i, col) = aprioriCov(i, col) *ratio;
          }
-
-         if ((*map)[i]->elementName == "Cd_Epsilon")
+         else if ((*map)[i]->elementName == "Cd_Epsilon")
          {
             // Convert covariance from CdEpsilon to Cd
             Real ratio = obj->GetRealParameter("Cd");
@@ -3042,7 +3077,7 @@ void BatchEstimator::WriteReportFileHeaderPart2b()
             ss << sa[j] << (((j + 1) != sa.size()) ? "," : " Bias.");
          ss << (*map)[i]->subelement;
 
-         // Get Bias unit. It is km for Range_KM, RU for DSNRange, km/s for Doppler_RangeRate, and Hz for Doppler_HZ 
+         // Get Bias unit. It is km for (Range_KM) Range, RU for DSN_SeqRange, km/s for (Doppler_RangeRate) RangeRate, and Hz for DSN_TCP 
       }
       else
       {
@@ -3839,6 +3874,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
 * Write information about measurement ErrorModel to estimation report file
 */
 //-------------------------------------------------------------------------
+#include "Receiver.hpp"
 void BatchEstimator::WriteReportFileHeaderPart4_3()
 {
    // 1. Get a list of all error models
@@ -3871,6 +3907,40 @@ void BatchEstimator::WriteReportFileHeaderPart4_3()
             if (!found)
                emList.push_back(errorModels[j]);
          }
+      }
+      else if (obj->IsOfType(Gmat::SPACECRAFT))
+      {
+         // 1.1. Get a spacecraft
+         Spacecraft *sc = (Spacecraft *)obj;
+
+         // 1.2. Get GPS receiver used by that spacecraft
+         StringArray hwList = sc->GetStringArrayParameter("AddHardware");
+         for (UnsignedInt j1 = 0; j1 < hwList.size(); ++j1)
+         {
+            GmatBase* hw = GetConfiguredObject(hwList[j1]);
+            if (hw->IsOfType("Receiver"))
+            {
+               // 1.3. Get ErrnorModel from GPS receiver
+               StringArray errorModels = ((Receiver*)hw)->GetStringArrayParameter("ErrorModels");
+               // 1.4. Add those error models to list of all error models
+               for (Integer j = 0; j < errorModels.size(); ++j)
+               {
+                  bool found = false;
+                  for (Integer k = 0; k < emList.size(); ++k)
+                  {
+                     if (emList[k] == errorModels[j])
+                     {
+                        found = true;
+                        break;
+                     }
+                  }
+
+                  if (!found)
+                     emList.push_back(errorModels[j]);
+               }
+            }
+         }
+
       }
    }
 
@@ -4302,9 +4372,9 @@ void BatchEstimator::WriteIterationHeader()
       << "                                                                  Measurement and Residual Units\n"
       << "\n"
       << "              Obs-Type            Obs/Computed Units   Residual Units                      Obs-Type            Obs/Computed Units   Residual Units\n"
-      << "              Doppler_RangeRate   kilometers/second    kilometers/second                   Range_KM            kilometers           kilometers\n"
-      << "              Doppler             Hertz                Hertz                               DSNRange            Range Units          Range Units\n";
-
+      << "              RangeRate           kilometers/second    kilometers/second                   Range               kilometers           kilometers\n"
+      << "              DSN_TCP             Hertz                Hertz                               DSN_SeqRange        Range Units          Range Units\n"
+      << "              GPS_PosVec          km                   km                                                                                      \n";
    textFile.flush();
 
    WritePageHeader();
@@ -4324,11 +4394,11 @@ void BatchEstimator::WritePageHeader()
    textFile << "\n";
    if (textFileMode == "Normal")
    {
-      textFile << "Iter RecNum  UTCGregorian-Epoch        Obs-Type            " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit           Observed(O)          Computed (C)       Residual (O-C)  Elev.\n";
+      textFile << "Iter RecNum  UTCGregorian-Epoch        Obs-Type            " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit          Observed (O)          Computed (C)       Residual (O-C)  Elev.\n";
    }
    else
    {
-      textFile << "Iter   RecNum  UTCGregorian-Epoch        TAIModJulian-Epoch Obs Type            Units  " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit               Obs (O)     Obs-Correction(O)               Cal (C)     Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|    Elevation-Angle Partial-Derivatives";
+      textFile << "Iter   RecNum  UTCGregorian-Epoch        TAIModJulian-Epoch Obs Type            Units  " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit               Obs (O)    Obs-Correction (O)               Cal (C)     Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|    Elevation-Angle Partial-Derivatives";
       // fill out N/A for partial derivative
       for (int i = 0; i < esm.GetStateMap()->size() - 1; ++i)
          textFile << GmatStringUtil::GetAlignmentString(" ", 20);
@@ -4473,17 +4543,21 @@ void BatchEstimator::WriteIterationSummaryPart1(Solver::SolverState sState)
 std::string BatchEstimator::GetUnit(std::string type)
 {
    std::string unit = "";
-   if (type == "DSNRange")
-      unit = "RU";
-   else if (type == "Doppler")
-      unit = "Hz";
-   else if (type == "Range_KM")
+   if (type == "GPS_PosVec")
       unit = "km";
-   else if (type == "Doppler_HZ")
+   else if (type == "DSN_SeqRange")
+      unit = "RU";
+   else if (type == "DSN_TCP")
       unit = "Hz";
-   else if (type == "Doppler_RangeRate")
+   else if (type == "Range")            //else if (type == "Range_KM")
+      unit = "km";
+   else if (type == "SN_Range")
+      unit = "km";
+   else if (type == "DSN_TCP")
+      unit = "Hz";
+   else if (type == "RangeRate")        //else if (type == "Doppler_RangeRate")
       unit = "km/s";
-   else if (type == "TDRSDoppler_HZ")
+   else if (type == "SN_Doppler")       //else if (type == "TDRSDoppler_HZ")
       unit = "Hz";
    else if (type == "DSNTwoWayRange")
       unit = "RU";
@@ -5511,7 +5585,7 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
             for (UnsignedInt j = 0; j < covar.GetNumRows(); ++j)
                covar(j, i) *= Cr0;
          }
-         if ((*map)[i]->elementName == "Cd_Epsilon")
+         else if ((*map)[i]->elementName == "Cd_Epsilon")
          {
             // Get Cd0
             Real Cd0 = (*map)[i]->object->GetRealParameter("Cd") / (1 + (*map)[i]->object->GetRealParameter("Cd_Epsilon"));
@@ -5522,9 +5596,40 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
             for (UnsignedInt j = 0; j < covar.GetNumRows(); ++j)
                covar(j, i) *= Cd0;
          }
+         else if ((*map)[i]->elementName == "CartesianState")
+         {
+            // Get sub-covariance matrix for spacecraft state 
+            Rmatrix66 mat1;
+            //MessageInterface::ShowMessage("*****    mat1 = [\n");
+            for (Integer r = 0; r < 6; ++r)
+            {
+               for (Integer c = 0; c < 6; ++c)
+               {
+                  mat1(r, c) = covar(i + r, i + c);
+                  //MessageInterface::ShowMessage("%le   ", mat1(r, c));
+               }
+               //MessageInterface::ShowMessage("\n");
+            }
+            //MessageInterface::ShowMessage("]\n");
+
+            // Get transformation matrix which is used to convert from spacecraft's internal coordinate system to its coordinate system            
+            Spacecraft *sc = (Spacecraft*)((*map)[i]->object);
+            Rmatrix transfMatrix = sc->GetCoordinateSystemTransformMatrix().Inverse();
+
+            // Calculate spacecraft state covariance in its coordinate system 
+            Rmatrix mat2 = transfMatrix * mat1 * transfMatrix.Transpose();
+
+            // Set value to apriori covariance 
+            for (Integer r = 0; r < 6; ++r)
+               for (Integer c = 0; c < 6; ++c)
+                  covar(i + r, i + c) = mat2(r, c);
+
+            i = i + 5;
+         }
+         // Nothing is needed to change for Bias
       }
 
-      
+
       for (Integer i = 0; i < map->size(); ++i)
       {
          std::stringstream ss;
@@ -5539,7 +5644,7 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
                ss << sa[j] << (((j + 1) != sa.size()) ? "," : " Bias.");
             ss << (*map)[i]->subelement;
 
-            // Get Bias unit. It is km for Range_KM, RU for DSNRange, km/s for Doppler_RangeRate, and Hz for Doppler_HZ 
+            // Get Bias unit. It is km for Range (Range_KM), RU for DSN_SeqRange, km/s for (Doppler_RangeRate) RangeRate, and Hz for DSN_TCP 
          }
          else
          {
@@ -5789,7 +5894,7 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
             for (UnsignedInt j = 0; j < finalCovariance.GetNumRows(); ++j)
                finalCovariance(j, i) *= Cr0;
          }
-         if ((*map)[i]->elementName == "Cd_Epsilon")
+         else if ((*map)[i]->elementName == "Cd_Epsilon")
          {
             // Get Cd0
             Real Cd0 = (*map)[i]->object->GetRealParameter("Cd") / (1 + (*map)[i]->object->GetRealParameter("Cd_Epsilon"));
@@ -5893,7 +5998,7 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
                for (UnsignedInt j = 0; j < finalKeplerCovariance.GetNumRows(); ++j)
                   finalKeplerCovariance(j, i) *= Cr0;
             }
-            if ((*map)[i]->elementName == "Cd_Epsilon")
+            else if ((*map)[i]->elementName == "Cd_Epsilon")
             {
                // Get Cd0
                Real Cd0 = (*map)[i]->object->GetRealParameter("Cd") / (1 + (*map)[i]->object->GetRealParameter("Cd_Epsilon"));
@@ -6069,12 +6174,17 @@ std::map<GmatBase*, RealArray> BatchEstimator::CalculateAncillaryElements(const 
       {
          Rvector6 cState;
          RealArray elements;
-         // 1. Get spacecraft cartisian state
+         // 1. Get spacecraft cartesian state
          cState.Set(state[i], state[i + 1], state[i + 2], state[i + 3], state[i + 4], state[i + 5]);
 
          // 2. Calculation
-         GmatBase* cs = ((Spacecraft*)((*map)[i]->object))->GetRefObject(Gmat::COORDINATE_SYSTEM, "");
-         CelestialBody * body = (CelestialBody*)(((CoordinateSystem*)cs)->GetOrigin());
+         CoordinateSystem * cs = (CoordinateSystem*)(((Spacecraft*)((*map)[i]->object))->GetRefObject(Gmat::COORDINATE_SYSTEM, ""));
+         CelestialBody * body = (CelestialBody*)(cs->GetOrigin());
+         CelestialBody * J2000body = (CelestialBody*)(cs->GetJ2000Body());
+         CoordinateSystem* bodyFixedCs = CoordinateSystem::CreateLocalCoordinateSystem("bodyfixedCS", "BodyFixed",
+            body, NULL, NULL, J2000body, solarSystem);
+         Real epoch  = ((Spacecraft*)((*map)[i]->object))->GetEpoch();
+
          Real originMu = body->GetRealParameter(body->GetParameterID("Mu"));
          Real originRadius = body->GetRealParameter(body->GetParameterID("EquatorialRadius"));
          Real originFlattening = body->GetRealParameter(body->GetParameterID("Flattening"));
@@ -6141,7 +6251,8 @@ std::map<GmatBase*, RealArray> BatchEstimator::CalculateAncillaryElements(const 
          elements.push_back(0.0);                    // Apofocal Height                unit: km
          elements.push_back(0.0);                    // Apofocal Radius                unit: km
 
-         elementValue = GmatCalcUtil::CalculateKeplerianData("MeanMotion", cState, originMu)*GmatTimeConstants::SECS_PER_DAY;
+         elementValue = GmatCalcUtil::CalculateKeplerianData("MeanMotion", cState, originMu);   // unit: rad/s
+         elementValue = elementValue*GmatMathConstants::DEG_PER_RAD*GmatTimeConstants::SECS_PER_DAY;  // unit: degree/day
          elements.push_back(elementValue);           // Mean Motion                    unit: deg/day
 
          elements.push_back(0.0);                    // Arg Perigee Dot                unit: deg/day
@@ -6149,16 +6260,22 @@ std::map<GmatBase*, RealArray> BatchEstimator::CalculateAncillaryElements(const 
          elements.push_back(0.0);                    // Velocity at Apogee             unit: km/s
          elements.push_back(0.0);                    // Velocity at Perigee            unit: km/s
          
-         elementValue = GmatCalcUtil::CalculatePlanetData("Latitude", cState, originRadius, 0.0, 0.0);    // set flattenning = 0
+         // To calculate planet data, It needs to have state in body fixed cooedinate system
+         // Convert cState to bodyFixed coordinate system
+         Rvector6 cStateBodyFix;
+         CoordinateConverter* cv = new CoordinateConverter();
+         cv->Convert(A1Mjd(epoch), cState, cs, cStateBodyFix, bodyFixedCs);
+
+         elementValue = GmatCalcUtil::CalculatePlanetData("Latitude", cStateBodyFix, originRadius, 0.0, 0.0);    // set flattenning = 0
          elements.push_back(elementValue);           // Geocentric Latitude            unit: deg
 
-         elementValue = GmatCalcUtil::CalculatePlanetData("Latitude", cState, originRadius, originFlattening, 0.0);
+         elementValue = GmatCalcUtil::CalculatePlanetData("Latitude", cStateBodyFix, originRadius, originFlattening, 0.0);
          elements.push_back(elementValue);           // Geodetic Latitude              unit: deg
 
-         elementValue = GmatCalcUtil::CalculatePlanetData("Longitude", cState, originRadius, originFlattening, 0.0);
+         elementValue = GmatCalcUtil::CalculatePlanetData("Longitude", cStateBodyFix, originRadius, originFlattening, 0.0);
          elements.push_back(elementValue);           // Longitude                      unit: deg
          
-         elementValue = GmatCalcUtil::CalculatePlanetData("Altitude", cState, originRadius, originFlattening, 0.0);
+         elementValue = GmatCalcUtil::CalculatePlanetData("Altitude", cStateBodyFix, originRadius, originFlattening, 0.0);
          elements.push_back(elementValue);           // Height                         unit: km
 
          elementValue = GmatCalcUtil::CalculateKeplerianData("C3Energy", cState, originMu);
@@ -6166,6 +6283,10 @@ std::map<GmatBase*, RealArray> BatchEstimator::CalculateAncillaryElements(const 
 
          // 4. Set value to state map
          stateMap[(*map)[i]->object] = elements;
+
+         // Clean up memory
+         delete bodyFixedCs;
+         delete cv;
 
          // 5. Skip to the next spacecraft
          i = i + 5;
@@ -6271,7 +6392,7 @@ bool BatchEstimator::DataFilter()
    if (iterationsTaken == 0)
    {
       for (Integer i=0; i < currentObs->value.size(); ++i)
-     {
+      {
          // 1. Data filtered based on OLSEInitialRMSSigma
          // 1.1. Specify Weight
          Real weight = 1.0;

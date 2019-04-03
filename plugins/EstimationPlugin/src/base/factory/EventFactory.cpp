@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -133,6 +133,24 @@ EventFactory & EventFactory::operator=(const EventFactory& fact)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates the Event objects for the Estimation plugin.
+ *
+ * @param ofType   specific type of Event object to create.
+ * @param withName name to give to the newly created Event object.
+ *
+ * @return pointer to a new Event object.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* EventFactory::CreateObject(const std::string &ofType,
+      const std::string &withName)
+{
+   return CreateEvent(ofType, withName);
+}
 
 //------------------------------------------------------------------------------
 // Event* CreateEvent(const std::string &ofType, const std::string &withName)

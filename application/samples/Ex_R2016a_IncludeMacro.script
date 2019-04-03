@@ -1,7 +1,7 @@
 
 
 %  Load the propagator from an external file
-#Include '.\Ex_IncludeFile.script'
+#Include './Ex_IncludeFile.script'
 
 Create Spacecraft DefaultSC;
 

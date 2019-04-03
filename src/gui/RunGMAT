@@ -1,62 +1,72 @@
 #!/bin/bash
 # Sets up the environment for GMAT, then runs the executable.
 #
-#  Copyright (c) 2002-2016 United States Government as represented by the
+#  Copyright (c) 2002-2017 United States Government as represented by the
 #  Administrator of The National Aeronautics and Space Administration.
 #  All Other Rights Reserved.
 #
-# This assumes that the user has set the MATLAB_APP_PATH in her/his gmat_startup_file.txt file and that
-# the gmat_startup_file.txt resides in the bin folder where the GMAT.app bundle resides.
-# MATLAB_APP_PATH should point to the MATLAB app in the directory where MATLAB has been installed, e.g.
-#     /Applications/MATLAB_R2010a/MATLAB_R2012a.app
-# NOTE that currently, we are running 64-bit GUI versions of GMAT and therefore, we need to use 64-bit
-# version(s) of MATLAB here.
+# This assumes that the user has set the MATLAB_APP_PATH in her/his
+# MATLABConfigure.txt file and that this file resides in the
+# bin folder where the GMAT.app bundle resides.
+# MATLAB_APP_PATH should point to the MATLAB app in the directory where MATLAB
+# has been installed, e.g.
+#     /Applications/MATLAB_R2017a.app
+# NOTE that currently, we are running 64-bit GUI versions of GMAT and therefore,
+# we need to use 64-bit version(s) of MATLAB here.
 #
-# To debug errors, set the debugit flag to 'true'.  By default, debug is written to a file inside
-# the bundle in the directory from which this script is run.  This may be changed to write to a
-# different file by setting debugfile (see below).
+# To debug errors, set the debugit flag to 'yesdoit'.  By default, debug is
+# written to a file inside the bundle in the directory from which this script is
+# run.  This may be changed to write to a different file by setting debugfile
+# (see below).
 #
-
 # First, we want to find out exactly where this script is, relative
 # to where it was invoked (when running the app bundle from the Finder,
 # this should be the absolute path).
-here="${0%/*}"
-# if we need the absolute path every time
-hereTwo="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+hereTwo="${0%/*}"
 
-# Set debug flag and file here ......................
-debugit='false'
-if [ $debugit = 'true' ]
+# but maybe we need the absolute path every time
+here="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Set debug file and flag here ......................
+debugfile="$here/debugrungmat.txt"
+# uncomment the next line for debug output
+# debugit='yesdoit'
+if [ $debugit = 'yesdoit' ]
 then
-   debugfile="$here/debugrungmat.txt"
-   echo "The value of debugfile is "$debugfile"" > $debugfile
+   echo "The value of debugfile is "$debugfile"" > "$debugfile"
 fi
-# ...................................................
-
-# Set architecture flag here ........................
-# archflag='32bit'
-archflag='64bit'
 # ...................................................
 
 
 # What do we want to run?
-cmd=`ls $here/GMAT* | xargs basename` # Supports release & debug GMAT
-# Where is the startup file?
-FILE="$here/../../../gmat_startup_file.txt"
+#cmd="$( ls -1 "$here"/GMAT* | xargs basename )" # Supports release & debug GMAT
+# NOTE - the debug app GMATd does not work here yet!!!
+if [ -f "$here/GMAT" ]
+then
+cmd="GMAT"
+elif [ -f "$here/GMATd" ]
+then
+cmd="GMATd"
+else
+   echo "CANNOT find GMAT executable!!!" >> "$debugfile"
+   exit 1
+fi
+# Where is the MATLAB config file?  It has to be in the bin directory for now
+FILE="$here/../../../MATLABConfigure.txt"
 
 # begin debugging
-if [ $debugit = 'true' ]
+if [ $debugit = 'yesdoit' ]
 then
-   echo "DEBUG " >> $debugfile
-   echo "The meaning of hereTwo is "$hereTwo"" >> $debugfile
-   echo "The meaning of here is "$here"" >> $debugfile
-   echo "The meaning of cmd is "$cmd"" >> $debugfile
-   pwd >> $debugfile
-   if [ -f $FILE ]
+   echo "DEBUG " >> "$debugfile"
+   echo "The meaning of here is "$here"" >> "$debugfile"
+   echo "The meaning of hereTwo is "$hereTwo"" >> "$debugfile"
+   echo "The meaning of cmd is "$cmd"" >> "$debugfile"
+   pwd >> "$debugfile"
+   if [ -f "$FILE" ]
    then
-      echo "Now about to read file $FILE" >> $debugfile
+      echo "Now about to read file $FILE" >> "$debugfile"
    else
-      echo "DOES NOT EXIST -  file $FILE" >> $debugfile
+      echo "DOES NOT EXIST -  file $FILE" >> "$debugfile"
       exit 1
    fi
 fi
@@ -82,35 +92,38 @@ while read line
          matlabloc=${matlabloc%%+([[:space:]])}
       ;;
       esac
-   done < $FILE
+   done < "$FILE"
 
 # begin debugging
-if [ $debugit = 'true' ]
+if [ $debugit = 'yesdoit' ]
 then
-   echo "value is |$value|"  >> $debugfile
-   echo "setting matlab location to |$matlabloc|"  >> $debugfile
+   echo "value is |$value|"  >> "$debugfile"
+   echo "setting matlab location to |$matlabloc|"  >> "$debugfile"
 fi
 # end debugging
 
-if [ -n $matlabloc ]
+if [ -n "$matlabloc" ]
 then
-   if [ -d $matlabloc ]
+   if [ -d "$matlabloc" ]
    then
-      if [ $archflag = '32bit' ]
-      then
-         export DYLD_LIBRARY_PATH=$matlabloc/bin/maci:$matlabloc/sys/os/maci:$DYLD_LIBRARY_PATH
-      else   # 64-bit 
-         export DYLD_LIBRARY_PATH=$matlabloc/bin/maci64:$matlabloc/sys/os/maci64:$DYLD_LIBRARY_PATH
-      fi
+      export DYLD_LIBRARY_PATH="$matlabloc/bin/maci64:$matlabloc/sys/os/maci64:$DYLD_LIBRARY_PATH"
+      export PATH="$matlabloc/bin:$PATH"
    fi
 fi
 
-export PATH=$matlabloc/bin:$PATH
 
 # turn OFF extended globbing
 shopt -u extglob
 
 # for CSPICE
 ulimit -s 61440
+
+# begin debugging
+if [ $debugit = 'yesdoit' ]
+then
+   echo "NOW running GMAT at location |$here/$cmd|"  >> "$debugfile"
+fi
+# end debugging
+
 # We need this dollar-sign-at-sign thing here in order to pass arguments into GMAT!!!
 exec "$here/$cmd" "$@"

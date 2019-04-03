@@ -46,7 +46,7 @@
 
 
 //------------------------------------------------------------------------------
-// StatisticRejectFilter(const std::string name)
+// StatisticRejectFilter(const std::string &ofType, const std::string name)
 //------------------------------------------------------------------------------
 /**
  * Constructor for StatisticRejectFilter objects
@@ -54,20 +54,22 @@
  * @param name The name of the object
  */
 //------------------------------------------------------------------------------
-StatisticRejectFilter::StatisticRejectFilter(const std::string name) :
-   DataFilter        (name)
+StatisticRejectFilter::StatisticRejectFilter(const std::string &ofType, const std::string name) :
+   DataFilter        (ofType, name)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("StatisticRejectFilter default constructor <%s,%p>\n", GetName().c_str(), this);
 #endif
 
-   objectTypes.push_back(Gmat::DATA_FILTER);
    objectTypeNames.push_back("StatisticsRejectFilter");
 
    parameterCount = StatisticRejectFilterParamCount;
 
-   //finalEpoch = initialEpoch;
-   //epochEnd   = epochStart;
+   // Set initial value:
+   //observers.clear();
+   //fileNames.clear();
+   //trackers.clear();
+   //dataTypes.clear();
 }
 
 
@@ -380,44 +382,53 @@ ObservationData* StatisticRejectFilter::FilteringData(ObservationData* dataObjec
    rejectedReason = 0;             // no reject
 
    // 0. File name verify: It will be passed the test when observation data does not contain any file name in "FileNames" array
-   if (!HasFile(dataObject))
+   if (!fileNames.empty())
    {
+      if (!HasFile(dataObject))
+      {
 #ifdef DEBUG_FILTER
-      MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit11 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
+         MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit11 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
 #endif
-      return dataObject;             // return dataObject when name of the file specified in dataObject does not match to any file in FileNames list. The value of rejectedReason has to be 0 
+         return dataObject;             // return dataObject when name of the file specified in dataObject does not match to any file in FileNames list. The value of rejectedReason has to be 0 
+      }
    }
 
-
    // 1. Observated objects verify: It will be passed the test when observation data does not contain any spacecraft in "observers" array
-   if (!HasObserver(dataObject))
+   if (!observers.empty())
    {
-      #ifdef DEBUG_FILTER
-          MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit1 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
-      #endif
-      return dataObject;             // return dataObject when it does not have any spacecraft matching to observers list. The value of rejectedReason has to be 0 
+      if (!HasObserver(dataObject))
+      {
+#ifdef DEBUG_FILTER
+         MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit1 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
+#endif
+         return dataObject;             // return dataObject when it does not have any spacecraft matching to observers list. The value of rejectedReason has to be 0 
+      }
    }
 
    // 2. Trackers verify: It will be passed the test when observation data contains one ground station in "trackers" array
-   if (!HasTracker(dataObject))
+   if (!trackers.empty())
    {
-      #ifdef DEBUG_FILTER
-          MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit2 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
-      #endif
-      return dataObject;             // return dataObject when it does not have any spacecraft matching to observers list. The value of rejectedReason has to be 0 
+      if (!HasTracker(dataObject))
+      {
+#ifdef DEBUG_FILTER
+         MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit2 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
+#endif
+         return dataObject;             // return dataObject when it does not have any spacecraft matching to observers list. The value of rejectedReason has to be 0 
+      }
    }
-
    
 
    // 3. Measurement type verify: It will be passed the test when data type of observation data is found in "dataTypes" array
-   if (!HasDataType(dataObject))
+   if (!dataTypes.empty())
    {
-      #ifdef DEBUG_FILTER
-          MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit3 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
-      #endif
-      return dataObject;             // return dataObject when it does not have any spacecraft matching to observers list. The value of rejectedReason has to be 0 
+      if (!HasDataType(dataObject))
+      {
+#ifdef DEBUG_FILTER
+         MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit3 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
+#endif
+         return dataObject;             // return dataObject when it does not have any spacecraft matching to observers list. The value of rejectedReason has to be 0 
+      }
    }
-
    // Strands verify:
 
    // Time interval verify:

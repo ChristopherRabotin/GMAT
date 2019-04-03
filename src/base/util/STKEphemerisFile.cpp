@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -49,6 +49,8 @@
 //#define DEBUG_WRITE_DATA_SEGMENT
 //#define DEBUG_FINALIZE
 //#define DEBUG_INITIAL_FINAL
+//#define DEBUG_WRITE_POSVEL
+//#define DEBUG_DISTANCEUNIT
 
 //----------------------------
 // static data
@@ -127,7 +129,8 @@ void STKEphemerisFile::InitializeData()
    scenarioEpochA1Mjd  = 0.0;
    coordinateSystemEpochA1Mjd = 0.0;
    beginSegmentTime = 0.0;
-   lastEpochWrote = -999.999;
+   lastEpochWritten = -999.999;
+
    beginSegmentArray.clear();
    numberOfEphemPoints = 0;
    interpolationOrder = 0;
@@ -137,7 +140,8 @@ void STKEphemerisFile::InitializeData()
    centralBody = "";
    coordinateSystem = "";
    coordinateSystemEpochStr = "";
-   distanceUnit = "";
+   // STK ephems default to meters
+   distanceUnit = "Meters";
    ephemTypeForRead = "";
    ephemTypeForWrite = "";
    stkTempFileName = "";
@@ -170,6 +174,7 @@ bool STKEphemerisFile::OpenForRead(const std::string &filename,
    
    // Check ephem type
    // Currently only TimePos and TimePosVel are allowed
+   /// @todo Do we allow TimePos?  ReadDataRecords seems to say no
    if (ephemType != "TimePos" && ephemType != "TimePosVel")
    {
       UtilityException ue;
@@ -342,314 +347,19 @@ bool STKEphemerisFile::GetInitialAndFinalStates(Real &initialA1Mjd, Real &finalA
    cbName = "Earth";
    csName = "J2000";
    
-   // Read headers
-   std::string line1, line;
-   std::string stkVersionKeyword = "stk.v.";
-   std::string beginEphemKeyword = "BEGIN Ephemeris";
-   std::string numEphemPointsKeyword = "NumberOfEphemerisPoints";
-   std::string scenarioEpochKeyword = "ScenarioEpoch";
-   std::string centralBodyKeyword = "CentralBody";
-   std::string coordSystemKeyword = "CoordinateSystem";
-   std::string timePosVelKeyword = "EphemerisTimePosVel";
-   std::string distanceUnitKeyword = "DistanceUnit";
-   std::string item;
-   std::string::size_type index1;
-   
-   // Required header fields
-   bool stkVersionFound = false;
-   bool beginEphemFound = false;
-   bool numEphemPointsFound = false;
-   bool scenarioEpochFound = false;
-   bool timePosVelFound = false;
-   
-   while (!stkInStream.eof())
-   {
-      getline(stkInStream, line1);
-      #ifdef DEBUG_INITIAL_FINAL_MORE
-      MessageInterface::ShowMessage
-         ("   ............... line = %s\n", line1.c_str());
-      #endif
-      
-      line = GmatStringUtil::Strip(line1);
-      
-      // Skip comment line
-      if ((line.size() > 1) && (line[0] == '#'))
-         continue;
-      
-      // Now go through each keyword
-      if (line.find(stkVersionKeyword) != line.npos)
-      {
-         index1 = line.find(stkVersionKeyword);
-         item = line.substr(index1 + stkVersionKeyword.size());
-         item = GmatStringUtil::Strip(item);
-         #ifdef DEBUG_INITIAL_FINAL
-         MessageInterface::ShowMessage
-            ("   %24s%s\n", stkVersionKeyword.c_str(), item.c_str());
-         #endif
-         if (item.size() > 0)
-            stkVersionFound = true;
-      }
-      else if (line.find(beginEphemKeyword) != line.npos)
-      {
-         index1 = line.find(beginEphemKeyword);
-         item = line.substr(index1 + beginEphemKeyword.size());
-         item = GmatStringUtil::Strip(item);
-         #ifdef DEBUG_INITIAL_FINAL
-         MessageInterface::ShowMessage
-            ("   %24s%s\n", beginEphemKeyword.c_str(), item.c_str());
-         #endif
-         if (item == "")
-            beginEphemFound = true;
-      }
-      else if (line.find(numEphemPointsKeyword) != line.npos)
-      {
-         numEphemPointsFound = true;
-         index1 = line.find(numEphemPointsKeyword);
-         item = line.substr(index1 + numEphemPointsKeyword.size());
-         item = GmatStringUtil::Strip(item);
-         #ifdef DEBUG_INITIAL_FINAL
-         MessageInterface::ShowMessage
-            ("   %24s : %s\n", numEphemPointsKeyword.c_str(), item.c_str());
-         #endif
-      }
-      else if (line.find(scenarioEpochKeyword) != line.npos)
-      {
-         scenarioEpochFound = true;
-         index1 = line.find(scenarioEpochKeyword);
-         item = line.substr(index1 + scenarioEpochKeyword.size());
-         item = GmatStringUtil::Strip(item);
-         #ifdef DEBUG_INITIAL_FINAL
-         MessageInterface::ShowMessage
-            ("   %24s : %s\n", scenarioEpochKeyword.c_str(), item.c_str());
-         #endif
-         scenarioEpochUtcGreg = item;
-         // Convert epoch from UTCGregorian to A1Mjd
-         if (UTCGregorianToA1ModJulian(item, scenarioEpochA1Mjd))
-         {
-            #ifdef DEBUG_INITIAL_FINAL
-            MessageInterface::ShowMessage
-               ("         scenarioEpochA1Mjd : %.12f\n", scenarioEpochA1Mjd);
-            #endif
-         }
-         else
-         {
-            MessageInterface::ShowMessage
-               ("*** ERROR *** Cannot convet ScenarioEpoch '%s' to A1ModJulian read "
-                "from ephemeris file '%s'\n", item.c_str(), stkFileNameForRead.c_str());
-            return false;
-            // UtilityException ue;
-            // ue.SetDetails("STKEphemerisFile::GetInitialAndFinalStates() Error converting "
-            //               "ScenarioEpoch: '%s' to A1ModJulian on input STK "
-            //               "ephemeris file '%s'.", stkFileNameForRead.c_str());
-            // throw ue;
-         }
-      }
-      else if (line.find(centralBodyKeyword) != line.npos)
-      {
-         index1 = line.find(centralBodyKeyword);
-         item = line.substr(index1 + centralBodyKeyword.size());
-         item = GmatStringUtil::Strip(item);
-         #ifdef DEBUG_INITIAL_FINAL
-         MessageInterface::ShowMessage
-            ("   %24s : %s\n", centralBodyKeyword.c_str(), item.c_str());
-         #endif
-         centralBody = item;
-         cbName = item;
-      }
-      else if (line.find(coordSystemKeyword) != line.npos)
-      {
-         index1 = line.find(coordSystemKeyword);
-         item = line.substr(index1 + coordSystemKeyword.size());
-         item = GmatStringUtil::Strip(item);
-         #ifdef DEBUG_INITIAL_FINAL
-         MessageInterface::ShowMessage
-            ("   %24s : %s\n", coordSystemKeyword.c_str(), item.c_str());
-         #endif
-         coordinateSystem = item;
-         csName = item;
-      }
-      else if (line.find(distanceUnitKeyword) != line.npos)
-      {
-         index1 = line.find(distanceUnitKeyword);
-         item = line.substr(index1 + distanceUnitKeyword.size());
-         item = GmatStringUtil::Strip(item);
-         #ifdef DEBUG_INITIAL_FINAL
-         MessageInterface::ShowMessage
-            ("   %24s : %s\n", distanceUnitKeyword.c_str(), item.c_str());
-         #endif
-         distanceUnit = item;		// The reader will use this in propagation
-      }
-      // This field shoud be the last one before reading actual ephem states
-      else if (line.find(timePosVelKeyword) != line.npos)
-      {
-         index1 = line.find(timePosVelKeyword);
-         item = line.substr(index1 + timePosVelKeyword.size());
-         item = GmatStringUtil::Strip(item);
-         #ifdef DEBUG_INITIAL_FINAL
-         MessageInterface::ShowMessage
-            ("   %24s%s\n", timePosVelKeyword.c_str(), item.c_str());
-         #endif
-         if (item == "")
-            timePosVelFound = true;
-         
-         break;
-      }
-   }
-   
-   if (!stkVersionFound || !beginEphemFound || !numEphemPointsFound ||
-       !scenarioEpochFound || !timePosVelFound)
-   {
-      MessageInterface::ShowMessage
-         ("*** ERROR *** Cannot find required header info from '%s'. "
-          "Missing one or more of the following keywords:\n   "
-          "\" '%s'  '%s'  '%s'  '%s'  '%s' \"\n", stkFileNameForRead.c_str(),
-          stkVersionKeyword.c_str(), beginEphemKeyword.c_str(),
-          numEphemPointsKeyword.c_str(), scenarioEpochKeyword.c_str(),
-          timePosVelKeyword.c_str());
-      return false;
-   }
-   
-   // Read initial TimePosVel
-   bool firstStateFound = false;
-   StringArray items;
-   while (!stkInStream.eof())
-   {
-      // Use cross-platform GetLine
-      //GmatFileUtil::GetLine(&stkInStream, line);
-      getline(stkInStream, line);
-      if (line != "")
-      {
-         #ifdef DEBUG_INITIAL_FINAL
-         MessageInterface::ShowMessage("   first line =\n   '%s'\n", line.c_str());
-         #endif
-         // Check if line has 7 items
-         items = GmatStringUtil::SeparateBy(line, " ");
-         if (items.size() != 7)
-         {
-            MessageInterface::ShowMessage
-               ("*** ERROR *** Did not find correct number of elements in the first data\n");
-            break;
-         }
-         else
-         {
-            if (GetEpochAndState(line, initialSecsFromEpoch, initialState))
-            {
-               firstStateFound = true;
-               #ifdef DEBUG_INITIAL_FINAL
-               MessageInterface::ShowMessage
-                  ("   initialSecsFromEpoch = %.12f\n   initialState = %s\n",
-                   initialSecsFromEpoch, initialState.ToString().c_str());
-               #endif
-            }
-            break;
-         }
-      }
-   }
-   
-   if (!firstStateFound)
-   {
-      MessageInterface::ShowMessage("*** ERROR *** There are no ephemeris data points\n");
-      return false;
-   }
-   
-   // Read final TimePosVel
-   // Last line should be 'END Ephemeris', how can I read last non-blank line before this?
-   // This may not be efficient for huge file
-   std::string lastLine;
-   bool badDataFound = false;
    bool lastStateFound = false;
-   while (!stkInStream.eof())
+   
+   if (ReadDataRecords())
    {
-      getline(stkInStream, line);
-      if (line != "")
-      {
-         #ifdef DEBUG_INITIAL_FINAL_MORE
-         MessageInterface::ShowMessage("   line =\n   '%s'\n", line.c_str());
-         #endif
-         if (line.find("END Ephemeris") != line.npos)
-         {
-            #ifdef DEBUG_INITIAL_FINAL
-            MessageInterface::ShowMessage("   'END Ephemeris' found\n");
-            #endif
-            break;
-         }
-         else
-         {
-            // Check if line has 7 items
-            StringArray items = GmatStringUtil::SeparateBy(line, " ");
-            if (items.size() != 7)
-            {
-               // Has bad data points
-               badDataFound = true;
-               MessageInterface::ShowMessage
-                  ("*** ERROR *** Did not find correct number of elements in the data\n");
-               break;
-            }
-            else
-            {
-               lastLine = line;
-               lastStateFound = true;
-            }
-         }
-      }
+      int numRecords = ephemRecords.size();
+      initialA1Mjd = scenarioEpochA1Mjd + ephemRecords[0].timeFromEpoch / 86400.0;
+      finalA1Mjd = scenarioEpochA1Mjd + ephemRecords[numRecords - 1].timeFromEpoch / 86400.0;
+      initialState = ephemRecords[0].theState;
+      finalState = ephemRecords[numRecords - 1].theState;
+      
+      lastStateFound = true;
    }
    
-   if (!badDataFound)
-   {
-      if (lastStateFound)
-      {
-         GetEpochAndState(lastLine, finalSecsFromEpoch, finalState);
-         #ifdef DEBUG_INITIAL_FINAL
-         MessageInterface::ShowMessage
-            ("   finalSecsFromEpoch = %.12f\n   finalState = %s\n", finalSecsFromEpoch,
-             finalState.ToString().c_str());
-         #endif
-      }
-      else
-      {
-         // If there is only one line, set initial to final
-         #ifdef DEBUG_INITIAL_FINAL
-         MessageInterface::ShowMessage("There are only one ephemeris data point\n");
-         #endif
-         finalSecsFromEpoch = initialSecsFromEpoch;
-         finalState = initialState;
-         lastStateFound = true;
-      }
-   }
-   
-   // This code block looks more efficient, but how can I read backward so I can
-   // get good ephemeris data. There may be blank lines between data lines
-   #if 0
-   line = GetLastLine();
-   bool lastStateFound = false;
-   if (line != "")
-   {
-      #ifdef DEBUG_INITIAL_FINAL
-      MessageInterface::ShowMessage("   last line =\n   '%s'\n", line.c_str());
-      #endif
-      // Check if line has 7 items
-      StringArray items = GmatStringUtil::SeparateBy(line, " ");
-      if (items.size() != 7)
-      {
-         MessageInterface::ShowMessage
-            ("*** ERROR *** Did not find correct number of elements in the last data\n");
-      }
-      else
-      {
-         if (GetEpochAndState(line, finalSecsFromEpoch, finalState))
-            lastStateFound = true;
-      }
-   }
-   #endif
-   
-   // Convert initial and final epoch to A1ModJulian
-   initialA1Mjd = scenarioEpochA1Mjd + initialSecsFromEpoch/86400.0;
-   finalA1Mjd = scenarioEpochA1Mjd + finalSecsFromEpoch/86400.0;
-   
-   #ifdef DEBUG_INITIAL_FINAL
-   MessageInterface::ShowMessage
-      ("STKEphemerisFile::GetInitialAndFinalState() returning %d\n", lastStateFound);
-   #endif
    return lastStateFound;
 }
 
@@ -699,6 +409,8 @@ bool STKEphemerisFile::SetHeaderForWriting(const std::string &fieldName,
       coordinateSystem = value;
    else if (fieldName == "CoordinateSystemEpoch")
       coordinateSystemEpochStr = value;
+   else if (fieldName == "DistanceUnit")
+      distanceUnit = value;
    else
       throw UtilityException
          ("The field \"" + fieldName + "\" is not valid STK header field.\n"
@@ -768,19 +480,21 @@ bool STKEphemerisFile::WriteHeader()
    ss << "CoordinateSystem        " << coordinateSystem << std::endl;
    
    // GMAT writes in km only for now
-   ss << "DistanceUnit            Kilometers" << std::endl;
+   ss << "DistanceUnit            " << distanceUnit << std::endl;
 
    // Write begin segment times if not empty
-   if (!beginSegmentArray.empty())
-   {
-      char strBuff[200];
-      ss << "BEGIN SegmentBoundaryTimes" << std::endl;
-      for (unsigned int i = 0; i < beginSegmentArray.size(); i++)
-      {
-         sprintf(strBuff, "   %1.15e\n", beginSegmentArray[i]);
-         ss << strBuff;
-      }
-      ss << "END SegmentBoundaryTimes" << std::endl;
+   if (includeEventBoundaries){
+       if (!beginSegmentArray.empty())
+       {
+           char strBuff[200];
+           ss << "BEGIN SegmentBoundaryTimes" << std::endl;
+           for (unsigned int i = 0; i < beginSegmentArray.size(); i++)
+           {
+               sprintf(strBuff, "   %1.15e\n", beginSegmentArray[i]);
+               ss << strBuff;
+           }
+           ss << "END SegmentBoundaryTimes" << std::endl;
+       }
    }
    
    ss << std::endl;
@@ -854,8 +568,8 @@ bool STKEphemerisFile::WriteDataSegment(const EpochArray &epochArray,
    #ifdef DEBUG_WRITE_DATA_SEGMENT
    MessageInterface::ShowMessage
       ("============================================================\n"
-       "STKEphemerisFile::WriteDataSegment() entered, numPoints=%d, canFinalize=%d\n",
-       numPoints, canFinalize);
+       "STKEphemerisFile::WriteDataSegment() entered, numPoints=%d, canFinalize=%d, "
+       "firstTimeWriting=%d\n", numPoints, canFinalize, firstTimeWriting);
    #endif
    
    if (numPoints == 0)
@@ -905,13 +619,20 @@ bool STKEphemerisFile::WriteDataSegment(const EpochArray &epochArray,
    else
    {
       // Indicate new segment starting by writing blank line and the last data
-      WriteBlankLine();
+      if (includeEventBoundaries)
+      {
+          WriteBlankLine();
+      }
+
       #ifdef DEBUG_WRITE_DATA_SEGMENT
       WriteString("# ============================== new segment");
       #endif
+
       Integer last = numPoints - 1;
       Real lastEpoch = (epochArray[last])->GetReal();
-      WriteTimePosVel(lastEpoch, stateArray[last]);
+      
+      // Don't write last line of code from previous segment
+//      WriteTimePosVel(lastEpoch, stateArray[last]);
       if (firstTimeWriting)
          beginSegmentArray.push_back(0.0);
       beginSegmentTime = (lastEpoch - scenarioEpochA1Mjd) * 86400.0;
@@ -1014,24 +735,35 @@ std::istream& STKEphemerisFile::IgnoreLine(std::ifstream::pos_type& pos)
 void STKEphemerisFile::WriteTimePosVel(const EpochArray &epochArray,
                                        const StateArray &stateArray)
 {
+   #ifdef DEBUG_WRITE_POSVEL
+   MessageInterface::ShowMessage
+      ("STKEphemerisFile::WriteTimePosVel() entered, epochArray.size()=%d, "
+       "stateArray.size()=%d\n", epochArray.size(), stateArray.size());
+   #endif
+   
    Integer numPoints = stateArray.size();
    
    // Write out to stream
    for (int i = 0; i < numPoints; i++)
    {
       // For multiple segments, end epoch of previous segment may be the same as
-      // beginning epoch of new segmnet, so check for duplicate epoch and use the
+      // beginning epoch of new segment, so check for duplicate epoch and use the
       // state of new epoch since any maneuver or some spacecraft property update
       // may happened.
       Real epoch = (epochArray[i])->GetReal();
-      if (epoch == lastEpochWrote)
-         continue;
+      if (!includeEventBoundaries && (epoch == lastEpochWritten && i > 1))
+      {
+          continue;
+      }
       
       WriteTimePosVel(epoch, stateArray[i]);
-      
-      // lastEpochWrote = epoch;
-      // numberOfEphemPoints++;
    }
+   
+   #ifdef DEBUG_WRITE_POSVEL
+   MessageInterface::ShowMessage
+      ("STKEphemerisFile::WriteTimePosVel() leaving, epochArray.size()=%d, "
+       "stateArray.size()=%d\n", epochArray.size(), stateArray.size());
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -1043,17 +775,38 @@ void STKEphemerisFile::WriteTimePosVel(Real epoch, const Rvector6 *state)
    const Real *outState = state->GetDataVector();
    Real timeIntervalInSecs = (epoch - scenarioEpochA1Mjd) * 86400.0;
    char strBuff[200];
-   sprintf(strBuff, "%1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e\n",
-           timeIntervalInSecs, outState[0], outState[1], outState[2], outState[3],
-           outState[4], outState[5]);
-   stkOutStream << strBuff;
+
+   #ifdef DEBUG_DISTANCEUNIT
+   MessageInterface::ShowMessage
+      ("WriteTimePosVel DistanceUnit: %s\n", distanceUnit.c_str());
+   #endif
+
+   if (distanceUnit == "Meters")
+   {
+      sprintf(strBuff, "%1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e\n",
+               timeIntervalInSecs, outState[0]*1000.0, outState[1]*1000.0,
+               outState[2]*1000.0, outState[3]*1000.0, outState[4]*1000.0,
+               outState[5]*1000.0);
+
+   }
+   else
+   {
+      sprintf(strBuff, "%1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e\n",
+               timeIntervalInSecs, outState[0], outState[1], outState[2], outState[3],
+               outState[4], outState[5]);
+   }
    
-   lastEpochWrote = epoch;
+   if (includeEventBoundaries || (!includeEventBoundaries && (epoch != lastEpochWritten)))
+   {
+      stkOutStream << strBuff;
+   }
+
+   lastEpochWritten = epoch;
    numberOfEphemPoints++;
    
    #ifdef DEBUG_WRITE_POSVEL
-   std::string epochStr = A1ModJulianToUtcGregorian(epochArray[i], 2);
-   MessageInterface::ShowMessage("   %s  % 1.15e\n", epochStr, outState[0]);
+   std::string epochStr = A1ModJulianToUtcGregorian(epoch, 2);
+   MessageInterface::ShowMessage("   %s  % 1.15e\n", epochStr.c_str(), outState[0]);
    #endif
 }
 
@@ -1073,19 +826,20 @@ void STKEphemerisFile::WriteTimePos(const EpochArray &epochArray,
    for (int i = 0; i < numPoints; i++)
    {
       // For multiple segments, end epoch of previous segment may be the same as
-      // beginning epoch of new segmnet, so check for duplicate epoch and use the
+      // beginning epoch of new segment, so check for duplicate epoch and use the
       // state of new epoch since any maneuver or some spacecraft property update
       // may happened.
       Real epoch = (epochArray[i])->GetReal();
-      if (epoch == lastEpochWrote)
+      if (!includeEventBoundaries & (epoch == lastEpochWritten))
          continue;
       
       WriteTimePos(epoch, stateArray[i]);
       
-      lastEpochWrote = epoch;
+      lastEpochWritten = epoch;
       numberOfEphemPoints++;
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void WriteTimePos(Real epoch, const Rvector6 *state)
@@ -1101,8 +855,8 @@ void STKEphemerisFile::WriteTimePos(Real epoch, const Rvector6 *state)
    stkOutStream << strBuff;
    
    #ifdef DEBUG_WRITE_POSVEL
-   std::string epochStr = A1ModJulianToUtcGregorian(epochArray[i], 2);
-   MessageInterface::ShowMessage("   %s  % 1.15e\n", epochStr, outState[0]);
+   std::string epochStr = A1ModJulianToUtcGregorian(epoch, 2);
+   MessageInterface::ShowMessage("   %s  % 1.15e\n", epochStr.c_str(), outState[0]);
    #endif
 }
 
@@ -1156,7 +910,7 @@ void STKEphemerisFile::FinalizeEphemeris()
    }
    else
    {
-      MessageInterface::ShowMessage("Failed to open temp file\n");
+      MessageInterface::ShowMessage("Failed to open temp file %s\n", stkTempFileName.c_str());
    }
          
    #ifdef DEBUG_FINALIZE
@@ -1223,9 +977,36 @@ bool STKEphemerisFile::UTCGregorianToA1ModJulian(const std::string &utcGreg, Rea
    std::string epochStr;
    std::string fromType = "UTCGregorian";
    std::string toType = "A1ModJulian";
-   
-   // Convert current epoch to specified format
-   TimeConverterUtil::Convert(fromType, fromMjd, utcGreg, toType, toMjd, epochStr, 1);
+  
+
+   // Time converter currently only handles millisecond precision in Gregorian epochs.
+   // So, split out part of epoch more precise than millisecond, perform time conversion
+   // using time converter, then add the precision beyond a millisecond back in.  
+   // NOTE, this will work when going from A1 to UTC, as is done here, because they 
+   // only differ by a step function and the extra precision cannot cause a jump from 
+   // one step to the next.  (i.e. don't do this for TDB)
+   std::string timetemp = utcGreg;
+   std::string dateToMilliSecond;
+   Real submillisec = 0.0;
+
+   if (timetemp.size() > 24)
+   {
+      dateToMilliSecond = timetemp.substr(0, 24);
+
+      std::string precBeyondMilliSecond = "0.000";
+      precBeyondMilliSecond += timetemp.substr(24);
+
+      submillisec = atof(precBeyondMilliSecond.c_str()) /
+            GmatTimeConstants::SECS_PER_DAY;
+   }
+   else
+       dateToMilliSecond = utcGreg;
+
+   // Build the base epoch.  Note that the return from this call may differ from
+   // the returned a1Mjd value by the submillisecond value, so the epochStr
+   // returned here is not necessarily the final ephem epoch.
+   TimeConverterUtil::Convert(fromType, fromMjd, dateToMilliSecond, toType,
+         toMjd, epochStr, 1);
    
    if (epochStr == "")
    {
@@ -1234,7 +1015,372 @@ bool STKEphemerisFile::UTCGregorianToA1ModJulian(const std::string &utcGreg, Rea
           "to A1ModJulian\n", utcGreg.c_str());
       retval = false;
    }
-   
-   a1Mjd = toMjd;
+
+   //  Add in any precision beyond millisecond in the epoch for the return value
+   a1Mjd = toMjd + submillisec;
+
+   #ifdef DEBUG_PRECISION_STARTTIME
+      MessageInterface::ShowMessage("Epoch %.13lf = %.13lf + %.13lf\n", a1Mjd,
+            toMjd, submillisec);
+   #endif
+
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ReadDataRecords(int numRecordsToRead, int logOption)
+//------------------------------------------------------------------------------
+/**
+ * Reads the header and checks for required elements, and loads data records
+ *
+ * @param logOption Flag used to trigger writing the data to the log and message
+ *                  window (not used)
+ *
+ * @return true if state data was read, false if not
+ */
+//------------------------------------------------------------------------------
+bool STKEphemerisFile::ReadDataRecords(int logOption)
+{
+   bool retval = false;
+
+   // Read headers
+   std::string line;
+   int headerCount = 0;
+
+   /// @todo Replace this list with a StringArray so it can easily grow?
+   std::string stkVersionKeyword   = "stk.v.";
+   std::string beginEphemKeyword   = "BEGIN Ephemeris";
+   std::string numPointsKeyword    = "NumberOfEphemerisPoints";
+   std::string epochKeyword        = "ScenarioEpoch";
+   std::string centralBodyKeyword  = "CentralBody";
+   std::string coordSysKeyword     = "CoordinateSystem";
+   std::string timePosVelKeyword   = "EphemerisTimePosVel";
+   std::string distanceUnitKeyword = "DistanceUnit";
+
+   std::string item;
+   std::string::size_type index1;
+
+   // Define flags for required keywords 
+   bool stkVersionFound     = false;
+   bool beginEphemFound     = false;
+   bool numEphemPointsFound = false;
+   bool scenarioEpochFound  = false;
+   bool timePosVelFound     = false;
+
+   // Flag used to toggle time/pos/vel processing off and on
+   bool readingTPV = false;
+
+   // Parse the file header
+   while (!stkInStream.eof())
+   {
+      getline(stkInStream, line);
+      if (line.find(numPointsKeyword) != line.npos)
+      {
+         index1 = line.find(numPointsKeyword);
+         item = line.substr(index1 + numPointsKeyword.size());
+         item = GmatStringUtil::Strip(item);
+         numEphemPointsFound = true;
+         headerCount++;
+      }
+      else if (line.find(epochKeyword) != line.npos)
+      {
+         index1 = line.find(epochKeyword);
+         item = line.substr(index1 + epochKeyword.size());
+         item = GmatStringUtil::Strip(item);
+         scenarioEpochUtcGreg = item;
+         // Convert epoch from UTCGregorian to A1Mjd
+         if (UTCGregorianToA1ModJulian(item, scenarioEpochA1Mjd))
+         {
+            scenarioEpochFound = true;
+            headerCount++;
+         }
+         else
+         {
+            MessageInterface::ShowMessage
+               ("*** ERROR *** Cannot convert ScenarioEpoch '%s' to "
+                "A1ModJulian read from ephemeris file '%s'\n", item.c_str(),
+                stkFileNameForRead.c_str());
+            retval = false;
+            break;
+         }
+      }
+      else if (line.find(centralBodyKeyword) != line.npos)
+      {
+         index1 = line.find(centralBodyKeyword);
+         item = line.substr(index1 + centralBodyKeyword.size());
+         item = GmatStringUtil::Strip(item);
+         centralBody = item;
+         headerCount++;
+      }
+      else if (line.find(coordSysKeyword) != line.npos)
+      {
+         index1 = line.find(coordSysKeyword);
+         item = line.substr(index1 + coordSysKeyword.size());
+         item = GmatStringUtil::Strip(item);
+         coordinateSystem = item;
+         headerCount++;
+      }
+      else if (line.find(distanceUnitKeyword) != line.npos)
+      {
+         index1 = line.find(distanceUnitKeyword);
+         item = line.substr(index1 + distanceUnitKeyword.size());
+         item = GmatStringUtil::Strip(item);
+         distanceUnit = item;
+         headerCount++;
+      }
+      else if (line.find(beginEphemKeyword) != line.npos)
+      {
+          headerCount++;
+          beginEphemFound = true;
+      }
+      else if (line.find(stkVersionKeyword) != line.npos)
+      {
+          headerCount++;
+          stkVersionFound = true;
+      }
+      else if (line.find(timePosVelKeyword) != line.npos)
+      {
+         index1 = line.find(timePosVelKeyword);
+         item = line.substr(index1 + timePosVelKeyword.size());
+         item = GmatStringUtil::Strip(item);
+         headerCount++;
+         timePosVelFound = true;
+         readingTPV = true;
+         break;
+      }
+
+   }
+
+   // Check that all required keywords in the file header were found
+   bool foundAllRequiredHeaderElements = true;
+   std::stringstream missingElements;
+
+   if (!numEphemPointsFound)
+   {
+      missingElements << "   The required keyword "
+            "\"NumberOfEphemerisPoints\" was not found\n";
+      foundAllRequiredHeaderElements = false;
+   }
+   if(!scenarioEpochFound)
+   {
+      missingElements << "   The required keyword \"ScenarioEpoch\" "
+            "was not found\n";
+      foundAllRequiredHeaderElements = false;
+   }
+   if (!stkVersionFound)
+   {
+      missingElements << "   The required keyword \"stk.v.\" was "
+            "not found\n";
+       foundAllRequiredHeaderElements = false;
+   }
+   if (!timePosVelFound)
+   {
+      missingElements << "   The required keyword "
+            "\"EphemerisTimePosVel\" was not found\n";
+       foundAllRequiredHeaderElements = false;
+   }
+   if (!beginEphemFound)
+   {
+      missingElements << "   The required string \"BEGIN "
+            "Ephemeris\" was not found\n";
+       foundAllRequiredHeaderElements = false;
+   }
+
+   // If all required elements were found then parse data, otherwise raise exception
+   if (!foundAllRequiredHeaderElements) 
+   {
+       throw UtilityException("*** ERROR *** Error reading the STK ephemeris "
+             "file " + stkFileNameForRead + ":\n" + missingElements.str());
+   }
+   else
+   {
+      // Read initial TimePosVel
+      StringArray items;
+      ephemRecords.clear();
+
+      while (!stkInStream.eof())
+      {
+         // Use cross-platform GetLine
+         //GmatFileUtil::GetLine(&stkInStream, line);
+         getline(stkInStream, line);
+
+         if (line.find("END Ephemeris") != line.npos)
+            break;
+         if (line.find("CovarianceTimePosVel") != line.npos)
+            readingTPV = false;
+         if (line.find(timePosVelKeyword) != line.npos)
+            readingTPV = true;
+
+         if (readingTPV)
+         {
+            if (line != "")
+            {
+               #ifdef DEBUG_INITIAL_FINAL
+                  MessageInterface::ShowMessage("   data line =\n   '%s'\n",
+                        line.c_str());
+               #endif
+               // Check if line has 7 items
+               items = GmatStringUtil::SeparateBy(line, " ");
+               if (items.size() != 7)
+               {
+                  MessageInterface::ShowMessage
+                     ("*** ERROR *** Did not find correct number of elements in "
+                           "the first data\n");
+                  break;
+               }
+               else
+               {
+                  Real time;
+                  Rvector6 posvel;
+                  if (!GetEpochAndState(line, time, posvel))
+                  {
+                     throw UtilityException("Error reading the STK ephemeris file " +
+                           stkFileNameForRead);
+                  }
+
+                  EphemData ed;
+                  ed.timeFromEpoch = time;
+
+                  #ifdef DEBUG_DISTANCEUNIT
+                     MessageInterface::ShowMessage("distanceUnit in ReadDataRecords: %s\n",s
+                           distanceUnit.c_str());
+                  #endif
+
+                  if(distanceUnit == "Meters")
+                  {
+                     ed.theState[0] = posvel[0]/1000.0;
+                     ed.theState[1] = posvel[1]/1000.0;
+                     ed.theState[2] = posvel[2]/1000.0;
+                     ed.theState[3] = posvel[3]/1000.0;
+                     ed.theState[4] = posvel[4]/1000.0;
+                     ed.theState[5] = posvel[5]/1000.0;
+                  }
+                  else
+                  {
+                     ed.theState[0] = posvel[0];
+                     ed.theState[1] = posvel[1];
+                     ed.theState[2] = posvel[2];
+                     ed.theState[3] = posvel[3];
+                     ed.theState[4] = posvel[4];
+                     ed.theState[5] = posvel[5];
+                  }
+
+                  ephemRecords.push_back(ed);
+                  retval = true;
+               }
+            }
+         }
+
+         if (logOption == 1)
+         {
+            MessageInterface::ShowMessage("Ephemeris Epoch:  %s\nData Size: %d\n"
+                  "\nData:\n", scenarioEpochUtcGreg.c_str(), ephemRecords.size());
+            for (UnsignedInt i = 0; i < ephemRecords.size(); ++i)
+               MessageInterface::ShowMessage("   %lf  [%lf %lf %lf %.12lf %.12lf "
+                     "%.12lf]\n", ephemRecords[i].timeFromEpoch,
+                     ephemRecords[i].theState[0], ephemRecords[i].theState[1],
+                     ephemRecords[i].theState[2], ephemRecords[i].theState[3],
+                     ephemRecords[i].theState[4], ephemRecords[i].theState[5]);
+         }
+      }
+   }
+
+   if (ephemRecords.size() == 0)
+   {
+      MessageInterface::ShowMessage("*** ERROR *** There are no ephemeris data "
+            "points\n");
+   }
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// void GetStartAndEndEpochs(GmatEpoch& startEpoch, GmatEpoch& endEpoch,
+//       std::vector<EphemData>** records)
+//------------------------------------------------------------------------------
+/**
+ * Accesses the start and end epochs as contained in the header data
+ *
+ * @param startEpoch The start epoch
+ * @param endEpoch The end epoch
+ * @param records The ephem data
+ */
+//------------------------------------------------------------------------------
+void STKEphemerisFile::GetStartAndEndEpochs(GmatEpoch& startEpoch,
+      GmatEpoch& endEpoch, std::vector<EphemData>** records)
+{
+   if (ephemRecords.size() > 0)
+   {
+      startEpoch = scenarioEpochA1Mjd + ephemRecords[0].timeFromEpoch /
+            GmatTimeConstants::SECS_PER_DAY;
+      endEpoch = scenarioEpochA1Mjd + ephemRecords[ephemRecords.size()-1].timeFromEpoch /
+            GmatTimeConstants::SECS_PER_DAY;;
+   }
+   else
+      MessageInterface::ShowMessage("Warning: STK Ephemeris file %s contains "
+            "zero records: has the file been read?\n",
+            stkFileNameForRead.c_str());
+   *records   = &ephemRecords;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetDistanceUnit()
+//------------------------------------------------------------------------------
+/**
+ * Returns the distance units used in the ephem
+ *
+ * @note Supported units are Meters and Kilometers
+ *
+ * @return The units in use
+ */
+//------------------------------------------------------------------------------
+std::string STKEphemerisFile::GetDistanceUnit()
+{
+   return distanceUnit;
+}
+
+//------------------------------------------------------------------------------
+// void SetDistanceUnit(const std::string &dU)
+//------------------------------------------------------------------------------
+/**
+ * Returns the distance units used in the ephem
+ *
+ * @note Supported units are Meters and Kilometers
+ *
+ * @param Sets the distance units that are used
+ */
+//------------------------------------------------------------------------------
+void STKEphemerisFile::SetDistanceUnit(const std::string &dU)
+{
+   distanceUnit = dU;
+}
+
+//------------------------------------------------------------------------------
+// bool STKEphemerisFile::GetIncludeEventBoundaries()
+//------------------------------------------------------------------------------
+/**
+ * Method used to access the event boundary setting for ephem writing
+ *
+ * @return The setting for the flag
+ */
+//------------------------------------------------------------------------------
+bool STKEphemerisFile::GetIncludeEventBoundaries()
+{
+   return includeEventBoundaries;
+}
+
+//------------------------------------------------------------------------------
+// void SetIncludeEventBoundaries(bool iEB)
+//------------------------------------------------------------------------------
+/**
+ * Method used to toggle event boundary writing to the ephem
+ *
+ * @param iEB The new flag setting
+ */
+//------------------------------------------------------------------------------
+void STKEphemerisFile::SetIncludeEventBoundaries(bool iEB)
+{
+   includeEventBoundaries = iEB;
 }

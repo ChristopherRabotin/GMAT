@@ -51,12 +51,16 @@ public:
    static TFSMagicNumbers *Instance();
 
    StringArray GetKnownTypes();
+   StringArray GetAvailableTypes();
+
+   ///@todo: this function will be removed when users no longer use
+   ///       type names DSNRange, Doppler in their script and data files
+   std::map<std::string,std::string> GetDeprecatedTypeMap();
+
    Integer     GetMagicNumber(const std::vector<StringArray> &nodelist,
                               const std::string &type);
-//   Integer     FillMagicNumber(ObsData* theObs);
    Integer     FillMagicNumber(ObservationData* theObs);
    Real        GetMNMultiplier(Integer magicNumber);
-//   void        SetType(ObsData* forData);
    void        SetType(ObservationData* forData);
 
 private:
@@ -91,6 +95,10 @@ private:
    std::map<Integer,Real> factorMap;
    /// List of known measurement types (might be temporary)
    StringArray knownTypes;
+   /// List of available types
+   StringArray availableTypes;
+   /// Map of deprecated types
+   std::map<std::string, std::string> depTypeMap;
 
    TFSMagicNumbers();
    ~TFSMagicNumbers();

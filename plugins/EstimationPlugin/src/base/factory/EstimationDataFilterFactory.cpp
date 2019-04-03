@@ -23,8 +23,8 @@
 #include "EstimationDataFilterFactory.hpp"
 #include "StatisticAcceptFilter.hpp"
 #include "StatisticRejectFilter.hpp"
-//#include "EstimationAcceptFilter.hpp"
-//#include "EstimationRejectFilter.hpp"
+#include "AcceptFilter.hpp"
+#include "RejectFilter.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_CONSTRUCTOR
@@ -47,8 +47,8 @@ EstimationDataFilterFactory::EstimationDataFilterFactory() :
    {
       creatables.push_back("StatisticsAcceptFilter");
       creatables.push_back("StatisticsRejectFilter");
-      //creatables.push_back("EstimationAcceptFilter");
-      //creatables.push_back("EstimationRejectFilter");
+      creatables.push_back("AcceptFilter");
+      creatables.push_back("RejectFilter");
    }
 }
 
@@ -85,8 +85,8 @@ EstimationDataFilterFactory::EstimationDataFilterFactory(StringArray createList)
    {
       creatables.push_back("StatisticsAcceptFilter");
       creatables.push_back("StatisticsRejectFilter");
-      //creatables.push_back("EstimationAcceptFilter");
-      //creatables.push_back("EstimationRejectFilter");
+      creatables.push_back("AcceptFilter");
+      creatables.push_back("RejectFilter");
    }
 }
 
@@ -111,8 +111,8 @@ EstimationDataFilterFactory::EstimationDataFilterFactory(const EstimationDataFil
    {
       creatables.push_back("StatisticsAcceptFilter");
       creatables.push_back("StatisticsRejectFilter");
-      //creatables.push_back("EstimationAcceptFilter");
-      //creatables.push_back("EstimationRejectFilter");
+      creatables.push_back("AcceptFilter");
+      creatables.push_back("RejectFilter");
    }
 }
 
@@ -142,8 +142,8 @@ EstimationDataFilterFactory& EstimationDataFilterFactory::operator= (const Estim
       {
          creatables.push_back("StatisticsAcceptFilter");
          creatables.push_back("StatisticsRejectFilter");
-         //creatables.push_back("EstimationAcceptFilter");
-         //creatables.push_back("EstimationRejectFilter");
+         creatables.push_back("AcceptFilter");
+         creatables.push_back("RejectFilter");
       }
    }
 
@@ -174,13 +174,22 @@ DataFilter* EstimationDataFilterFactory::CreateDataFilter(const std::string &ofT
    DataFilter *retval = NULL;
 
    if (ofType == "StatisticsAcceptFilter")
-      retval = new StatisticAcceptFilter(withName);
+   {
+      MessageInterface::ShowMessage("Warning: StatisticsAcceptFilter is deprecated and will be removed in a future GMAT build. Use AcceptFilter instead.\n");
+      retval = new StatisticAcceptFilter(ofType, withName);
+   }
+   
    if (ofType == "StatisticsRejectFilter")
-      retval = new StatisticRejectFilter(withName);
-   //if (ofType == "EstimationAcceptFilter")
-   //   retval = new EstimationAcceptFilter(withName);
-   //if (ofType == "EstimationRejectFilter")
-   //   retval = new EstimationRejectFilter(withName);
+   {
+      MessageInterface::ShowMessage("Warning: StatisticsRejectFilter is deprecated and will be removed in a future GMAT build. Use RejectFilter instead.\n");
+      retval = new StatisticRejectFilter(ofType, withName);
+   }
+
+   if (ofType == "AcceptFilter")
+      retval = new AcceptFilter(ofType, withName);
+   
+   if (ofType == "RejectFilter")
+      retval = new RejectFilter(ofType, withName);
 
    return retval;
 }

@@ -96,9 +96,10 @@ GmatTime GmatTime::operator+(const GmatTime& gt) const
    GmatTime gt1(*this);
 
    gt1.FracSec = gt1.FracSec + gt.FracSec;
-   if (FracSec >= 1.0)
+   // if (FracSec >= 1.0)                   // Fix bug
+   if (gt1.FracSec >= 1.0)
    {
-	  gt1.FracSec = gt1.FracSec - 1.0;
+	  gt1.FracSec = gt1.FracSec - 1.0;       // set value of FracSec within [0,1)
       gt1.Sec = gt1.Sec + gt.Sec + 1.0;
    }
    else
@@ -202,19 +203,19 @@ GmatTime* GmatTime::Clone()
 }
 
 
-const GmatEpoch GmatTime::GetMjd()
+GmatEpoch GmatTime::GetMjd()
 {
    return (Sec+FracSec)/GmatTimeConstants::SECS_PER_DAY;  
 }
 
 
-const Real GmatTime::GetSec()
+Real GmatTime::GetSec()
 {
    return Sec;
 }
 
 
-const Real GmatTime::GetFracSec()
+Real GmatTime::GetFracSec()
 {
    return FracSec;
 }
@@ -227,7 +228,7 @@ void GmatTime::SetTimeInSec(const Real sec)
 }
 
 
-const Real GmatTime::GetTimeInSec() 
+Real GmatTime::GetTimeInSec()
 { 
    return Sec+FracSec;
 }

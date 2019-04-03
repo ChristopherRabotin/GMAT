@@ -1,0 +1,188 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Spacecraft Ballistic/Mass Properties</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="SpacecraftAttitude.html" title="Spacecraft Attitude"><link rel="next" href="SpacecraftEpoch.html" title="Spacecraft Epoch"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Spacecraft Ballistic/Mass Properties</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="SpacecraftAttitude.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="SpacecraftEpoch.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="SpacecraftBallisticMass"></a><div class="titlepage"></div><a name="N1E9C0" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Spacecraft Ballistic/Mass Properties</span></h2><p>Spacecraft Ballistic/Mass Properties &mdash; The physical properties of the spacecraft</p></div><div class="refsection"><a name="N1E9D1"></a><h2>Description</h2><p>The <span class="guilabel">Spacecraft</span> ballistic and mass properties
+    include the drag and SRP areas and coefficients as well as the spacecraft
+    dry mass. These quantities are used primarily in orbital dynamics
+    modelling. GMAT supports a spherical SRP model, and higher fidelity SRP
+    file option.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Propagate.html" title="Propagate"><span class="refentrytitle">Propagate</span></a>, <a class="xref" href="Propagator.html" title="Propagator"><span class="refentrytitle">Propagator</span></a>,<a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a></p></div><div class="refsection"><a name="N1E9E6"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Cd</span></td><td><p>The coefficent of drag used to compute the
+            acceleration due to drag.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt;= 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>2.2</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Cr</span></td><td><p>The coefficent of reflectivity used to compute the
+            acceleration due to SRP.  A value of zero means the spacecraft is translucent to incoming radiation.  
+			A value of 1.0 indicates all radiaion is absorbed and all the force is transmitted to the spacecraft. 
+			A value of 2.0 indicates all radiation is reflected and twice the force is transmitted to the spacecraft.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0 &lt;= Cr &lt;= 2.0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1.8</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Drag Area</span></td><td><p>The area used to compute acceleration due to
+            atmospheric drag.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; = 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>15</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>m^2</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DryMass</span></td><td><p>The dry mass of the <span class="guilabel">Spacecraft</span>
+            (does not include fuel mass).</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt;=0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>850</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>kg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SPADSRPFile</span></td><td><p>Name ( and optionally path information) of SPAD
+            file.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>valid path and SPAD file</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SPADSRPScaleFactor</span></td><td><p>Scale factor applied to SRP force when using a
+            SPADModel in the propagation.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt;= 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SRPArea</span></td><td><p>The area used to compute acceleration due to solar
+            radiation pressure.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>m^2</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1EB32"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Spacecraft_BallisticMass_GUI.png" align="middle" height="508"></td></tr></table></div></div><p>The GUI interface for ballistic and mass properties is contained on
+    the<span class="guilabel"> Ballistic/Mass</span> tab of the
+    <span class="guilabel">Spacecraft</span> resource. You can enter physical
+    properties such as the drag and SRP areas and coefficients and the
+    <span class="guilabel">Spacecraft</span> dry mass which are used in orbital
+    dynamics modelling. GMAT supports a spherical SRP model and a SPAD (Solar
+    Pressure and Aerodynamic Drag) file.</p></div><div class="refsection"><a name="N1EB49"></a><h2>Remarks</h2><div class="refsection"><a name="N1EB4C"></a><h3>Configuring Ballistic and Mass Properties for the Spherical
+      Model</h3><p>GMAT supports a cannonball model for drag and SRP modeling. In the
+      cannonball model, the area is assumed to be independent of the
+      spacecraft&rsquo;s orientation with respect to the local velocity vector and
+      the sun vector. For more details on the computation and configuration of
+      drag and SRP models see the <a class="xref" href="Propagator.html#Propagator_ForceModel" title="Force Model">Force Model</a> documentation.</p></div><div class="refsection"><a name="N1EB55"></a><h3>Configuring Ballistic and Mass Properties for the SRP
+      File</h3><p>The (SPAD) SRP file can be used for high fidelity SRP modelling
+      taking into account the physical properties of the spacecraft (shape and
+      reflectivity) and the spacecraft attitude. SPAD stands for Solar
+      Pressure and Aerodynamic Drag. SPAD files are tabulated data that
+      contain the spacecraft area scaled by physical properties like Cr
+      including specular, diffuse, and reflective properties. Data is
+      expressed as a function of azimuth and elevation in the spacecraft body
+      frame. Note: the azimuth and elevation tabulated on the file are the
+      azimuth and elevation of the vector from the Sun, to the Spacecraft,
+      expressed in the body frame. To compute the SRP acceleration, GMAT
+      computes the sun vector&rsquo;s azimuth and elevation in the spacecraft body
+      frame, and then interpolates the SPAD data using bi-linear
+      interpolation. Note that this formulation results in an attitude
+      dependent SRP acceleration. For more details on the computation and
+      configuration of drag and SRP models see the <a class="xref" href="Propagator.html#Propagator_ForceModel" title="Force Model">Force Model</a>
+      documentation.</p><div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Caution</h3><p>When using a SPAD SRP file, GMAT uses the attitude defined on
+        the <span class="guilabel">Spacecraft</span> resource to compute the Sun's
+        positon in the body frame. If the attitude uses a coordinate system
+        with <span class="guilabel">Axes</span> set to
+        <span class="guilabel">ObjectReferenced</span>, and those axes refer back to
+        the <span class="guilabel">Spacecraft</span> orbit state (i.e. VNB or LVLH
+        systems), GMAT holds the attitude constant over a given integration
+        step. In those cases, we recommend carefully choosing a maximum step
+        size small enough to ensure the resulting approximation is acceptable
+        for your application.</p></div><p>A valid SPAD file header, and the first three lines of data are
+      shown below for illustrative purposes. Note, GMAT does not use all
+      values provide on the file and GMAT's usage of SPAD files is described
+      in detail in the table below the example.</p><pre class="programlisting"><code class="code">Version            : 4.21
+System             : sphericalSat
+Analysis Type      : Area
+Pixel Size         : 5
+Spacecraft Size    : 436.2
+Pressure           : 1
+Center of Mass     :  (50.9, 184.9, -49)
+Current time       : May  7, 2009  15:53:38.00
+
+Motion    : 1
+  Name    : Azimuth
+  Method  : Step
+  Minimum : -180
+  Maximum : 180
+  Step    : 5
+Motion    : 2
+  Name    : Elevation
+  Method  : Step
+  Minimum : -90
+  Maximum : 90
+  Step    : 5
+: END
+
+Record count       : 2701
+
+ AzimuthElevatio  Force(X)  Force(Y)  Force(Z)  
+ degrees degrees      m^2      m^2      m^2      
+ ------- ------- --------- --------- --------- --------- 
+ -180.00   -90.00 -0.00000000000000 -0.00000000000000 -8.94500000000000 
+ -180.00   -85.00 -0.77960811887780 -0.00000000000000 -8.91096157443066 
+ -180.00   -80.00 -1.55328294923069 -0.00000000000000 -8.80910535069420 </code></pre><p>A SPAD file contains three sections as illustrated below. Data
+      specifications for items in each section are described in the tables
+      below</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Spacecraft_BallisticMass_SPADLayout.png" align="middle" height="360"></td></tr></table></div></div><p>A SPAD file header may contain many fields but only a few are used
+      by GMAT as described below. Other fields are ignored.</p><div class="informaltable"><table border="1"><colgroup><col width="26%"><col width="7%"><col width="67%"></colgroup><thead><tr><th>Keyword</th><th>Required</th><th>Description and Supported Values</th></tr></thead><tbody><tr><td><span class="guilabel">Analysis Type</span></td><td><p>Y</p></td><td><p>The SPAD software can creates files with Analysis
+              Types of Solar Pressure, Area, and Drag. GMAT only supports the
+              Area option. </p><p>Example: </p><p>Analysis Type :
+              Area</p></td></tr><tr><td><span class="guilabel">Pressure</span></td><td><p>N</p></td><td><p>SPAD supports the ability to apply a pressure scale
+              factor for SRP files. GMAT does not read this value, but the SRP
+              properties on the file have been scaled by the Pressure factor.
+              The value is usually &ldquo;1&rdquo;. However, when not 1, it is possible to
+              apply an SRP scale factor twice, once from the value applied in
+              SPAD, and once from <span class="guilabel">SPADSRPScaleFactor</span>.
+              Care should be taken to ensure that if the desired scale factor
+              was applied during file creation that it is not reapplied in
+              GMAT. </p></td></tr></tbody></table></div><p>The SPAD file Motion Data section describes the data contained in
+      the body of the file. The Motion Data fields used by GMAT are described
+      below. Others are ingored.</p><div class="informaltable"><table border="1"><colgroup><col width="26%"><col width="7%"><col width="67%"></colgroup><thead><tr><th>Keyword</th><th>Required</th><th>Description and Supported Values</th></tr></thead><tbody><tr><td><span class="guilabel">Motion</span></td><td><p>Y</p></td><td><p>Together, the Motion and Name fields specify the
+              type of data in the first two columns of the body of the file.
+              GMAT currently supports Azimuth and Elevation Motion only (no
+              articulating appendages) and requires that the first Motion is
+              Azimuth and the second Motion is Elevation as shown
+              below.</p><p> Examples:</p><p> Motion :
+              1</p><p> Name : Azimuth
+              </p><p>and</p><p>Motion : 2 </p><p> Name :
+              Elevation</p></td></tr><tr><td><span class="guilabel">Name</span></td><td><p>Y</p></td><td><p>Together, the Motion and Name fields specify the
+              type of data in the first two columns of the body of the file.
+              GMAT currently supports Azimuth and Elevation Motion only (no
+              articulating appendages) and requires that the first Motion is
+              Azimuth and the second Motion is Elevation as shown
+              below.</p><p> Examples:</p><p> Motion :
+              1</p><p> Name : Azimuth
+              </p><p>and</p><p>Motion : 2 </p><p> Name :
+              Elevation</p></td></tr><tr><td><span class="guilabel">Method</span></td><td><p>Y</p></td><td><p>The step size in the independent variable. The only
+              supported value is Step.</p><p>Example:</p><p>Motion
+              : 1 </p><p> Method : Step </p></td></tr><tr><td><span class="guilabel">Maximum</span></td><td><p>Y</p></td><td><p>The maximum value for an independent variable
+              (Motion Type). For Azimuth, Maximum must be 180, and for
+              Elevation Maximum must be
+              90.</p><p>Example:</p><p>Motion : 1 </p><p>
+              Name : Azimuth </p><p> Maximum : 180 </p><p>Motion :
+              2 </p><p> Name : Elevation </p><p> Maximum : 90
+              </p></td></tr><tr><td><span class="guilabel">Minimum</span></td><td><p>Y</p></td><td><p>The minimum value for an independent variable.
+              (Motion Type). For Azimuth, minimum must be -180, and for
+              Elevation minimum must be -90.
+              </p><p>Example:</p><p>Motion : 1 </p><p> Name
+              : Azimuth </p><p> Minimum : -180 </p><p>Motion : 2
+              </p><p> Name : Elevation </p><p> Minimum :
+              -90</p></td></tr><tr><td><span class="guilabel">Step</span></td><td><p>Y</p></td><td><p>The step size for the independent variable (Motion
+              Type). If Step does not divide evenly into the variable range,
+              then errors may occur because the maximum and/or minimum values
+              may not be on the file. </p><p>Example:</p><p>Motion
+              : 1 </p><p> Step : 15</p></td></tr><tr><td><span class="guilabel">Record count </span></td><td><p>Y</p></td><td><p>Record count is the number of rows of data in the
+              data segment. Record count = (360/(Azimuth Step)
+              +1)*(180/(Elevation Step)
+              +1).</p><p>Example:</p><p>Record count : 325
+              </p></td></tr></tbody></table></div><p>The SPAD file data block contains tabulated acceleration data as
+      described below.</p><div class="informaltable"><table border="1"><colgroup><col width="26%"><col width="7%"><col width="67%"></colgroup><thead><tr><th>Keyword</th><th>Required</th><th>Description and Supported Values</th></tr></thead><tbody><tr><td><span class="guilabel">Azimuth</span></td><td><p>Y</p></td><td><p>Azimuth data column. Must be first column in the
+              data. Units must be degrees. Azimuth is the azimuth of the
+              vector from spacecraft to sun, expressed in the body frame:
+              atan2(ySun,xSun)).</p><p>Example:
+              </p><p>AzimuthElevatio </p><p>degrees degrees
+              </p><p>------- ------- </p><p>-180.00 -90.00
+              </p><p>-180.00 -75.00 </p><p>-180.00 -60.00
+              </p></td></tr><tr><td><span class="guilabel">Elevation</span></td><td><p>N</p></td><td><p>Elevation data column. Must be second column in the
+              data. Units must be degrees. Elevation is the elevation of the
+              vector from spacecraft to sun, expressed in the body frame:
+              atan2(zSun,sqrt(xSun^2 + ySun^2)).</p><p>Example:
+              </p><p>AzimuthElevatio </p><p>degrees degrees
+              </p><p>------- ------- </p><p>-180.00 -90.00
+              </p><p>-180.00 -75.00 </p><p>-180.00 -60.00
+              </p></td></tr><tr><td><span class="guilabel">Force(*)</span></td><td><p>N</p></td><td><p>Area vector columns. Must be columns 3-5 in the
+              data. Quantities must be in base units of
+              m^2,mm^2,cm^2,in^2,ft^2. If another unit is provided in the
+              header lines, an exception is thrown. The area vector is the
+              direction of the resulting SRP force, scaled by area and Cr
+              properties. </p><p>Example: See code listing
+              above.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1ECA9"></a><h3>Total Mass Computation</h3><p>The <span class="guilabel">TotalMass</span> property of a
+      <span class="guilabel">Spacecraft</span> is a read-only property that is the sum
+      of the <span class="guilabel">DryMass</span> value and the sum of the fuel mass
+      in all attached fuel tanks. GMAT&rsquo;s propagators will not allow the total
+      mass of a spacecraft to be negative. However, GMAT will allow the mass
+      of a <span class="guilabel">ChemicalTank</span> to be negative. See the <a class="xref" href="FuelTank.html" title="ChemicalTank"><span class="refentrytitle">ChemicalTank</span></a> documentation for
+      details.</p></div></div><div class="refsection"><a name="N1ECBE"></a><h2>Examples</h2><div class="informalexample"><p>Configure physical properties for a spherical SRP model.</p><pre class="programlisting"><code class="code">Create Spacecraft aSpacecraft
+aSpacecraft.Cd        = 2.2
+aSpacecraft.Cr        = 1.8
+aSpacecraft.DragArea  = 40
+aSpacecraft.SRPArea   = 35
+aSpacecraft.DryMass   = 2000
+Create Propagator aPropagator
+
+BeginMissionSequence
+
+Propagate   aPropagator(aSpacecraft, {aSpacecraft.ElapsedSecs = 600})</code></pre></div><div class="informalexample"><p>Configure a SPAD SRP model.</p><pre class="programlisting"><code class="code">Create Spacecraft aSpacecraft;
+aSpacecraft.DryMass   = 2000
+aSpacecraft.SPADSRPFile = '..\data\vehicle\spad\SphericalModel.spo'
+aSpacecraft.SPADSRPScaleFactor = 1;
+
+Create ForceModel aFM;
+aFM.SRP = On;
+aFM.SRP.SRPModel = SPADFile
+
+Create Propagator aProp;
+aProp.FM = aFM;
+
+BeginMissionSequence
+
+Propagate aProp(aSpacecraft) {aSpacecraft.ElapsedDays = 0.2}</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="SpacecraftAttitude.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="SpacecraftEpoch.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Spacecraft Attitude&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Spacecraft Epoch</td></tr></table></div></body></html>

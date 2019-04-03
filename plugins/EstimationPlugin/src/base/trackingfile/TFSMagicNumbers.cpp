@@ -163,7 +163,7 @@ Integer TFSMagicNumbers::GetMagicNumber(
  * complete the data needed in an ObsData record.
  *
  * @todo The implementation here hard codes the mapping for two data types:
- *       DSNRange and DSNDoppler.  We need to refactor this code so that new
+ *       DSN_SeqRange and DSNDoppler.  We need to refactor this code so that new
  *       data types can be added -- for example, in a plugin -- without the need
  *       to edit this file.
  *
@@ -234,6 +234,42 @@ StringArray TFSMagicNumbers::GetKnownTypes()
 
 
 //------------------------------------------------------------------------------
+// StringArray GetAvailableTypes()
+//------------------------------------------------------------------------------
+/**
+* Returns list of available measurement type keywords
+*
+* @return The list
+*/
+//------------------------------------------------------------------------------
+StringArray TFSMagicNumbers::GetAvailableTypes()
+{
+   availableTypes.clear();
+
+   availableTypes.push_back("DSN_SeqRange");
+   availableTypes.push_back("DSN_TCP");
+   availableTypes.push_back("GPS_PosVec");
+   availableTypes.push_back("Range");
+   availableTypes.push_back("RangeRate");
+
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();        // fix bug: GMT-5955
+   if (runmode == GmatGlobal::TESTING)                                   // fix bug: GMT-5955
+   {
+      availableTypes.push_back("SN_Range");
+      availableTypes.push_back("SN_Doppler");
+   }
+
+   return availableTypes;
+}
+
+
+std::map<std::string, std::string> TFSMagicNumbers::GetDeprecatedTypeMap()
+{
+   return depTypeMap;
+}
+
+
+//------------------------------------------------------------------------------
 // Real GetMNMultiplier(Integer magicNumber)
 //------------------------------------------------------------------------------
 /**
@@ -289,9 +325,15 @@ void TFSMagicNumbers::SetType(ObservationData* forData)
             {
                /// Current TDM is in MHz, not the spec'd Hz; try to fix that here:
                if (forData->value[i] > 1.0e6)
-                  forData->uplinkFreq = (Integer)forData->value[i];
+               {
+                  //forData->uplinkFreq = (Integer)forData->value[i];                 // ObservationData.uplinkFreq is no longer in use
+                  forData->uplinkFreqAtRecei = (Integer)forData->value[i];            // use ObservationData.uplinkFreqAtRecei instead
+               }
                else
-                  forData->uplinkFreq = (Integer)forData->value[i] * 1.0e6;
+               {
+                  //forData->uplinkFreq = (Integer)forData->value[i] * 1.0e6;         // ObservationData.uplinkFreq is no longer in use
+                  forData->uplinkFreqAtRecei = (Integer)forData->value[i] * 1.0e6;    // use ObservationData.uplinkFreqAtRecei instead
+               }
             }
          }
          forData->dataMap.clear();
@@ -385,21 +427,47 @@ void TFSMagicNumbers::SetType(ObservationData* forData)
  * Constructor
  */
 //------------------------------------------------------------------------------
+/// Generic measurement types
+#define   GENERIC_RANGEKM_TYPE_INDEX      MAGIC_NUMBER_BASE+15
+#define   GENERIC_RANGERU_TYPE_INDEX      MAGIC_NUMBER_BASE+3
+#define   GENERIC_RANGERATE_TYPE_INDEX    MAGIC_NUMBER_BASE+10
+#define   GENERIC_DOPPLER_TYPE_INDEX      MAGIC_NUMBER_BASE+5
+/// 1-way measurement types
+#define   ONEWAY_RANGEKM_TYPE_INDEX       MAGIC_NUMBER_BASE+1
+#define   ONEWAY_RANGERU_TYPE_INDEX
+#define   ONEWAY_RANGERATE_TYPE_INDEX     MAGIC_NUMBER_BASE+11
+#define   ONEWAY_DOPPLER_TYPE_INDEX
+/// 2-way measurement types
+#define   GN_RANGE_TYPE_INDEX             MAGIC_NUMBER_BASE+2
+#define   DSN_SEQRANGE_TYPE_INDEX         MAGIC_NUMBER_BASE+4
+#define   GN_DOPPLER_TYPE_INDEX           MAGIC_NUMBER_BASE+12
+#define   DSN_TCP_TYPE_INDEX              MAGIC_NUMBER_BASE+6
+
+#define   RANGERATEKPS_TYPE_INDEX         MAGIC_NUMBER_BASE+8
+#define   POINT_RANGERATE_TYPE_INDEX      MAGIC_NUMBER_BASE+9
+
+#define   SN_RANGE_TYPE_INDEX             MAGIC_NUMBER_BASE
+#define   SN_DOPPLER_TYPE_INDEX           MAGIC_NUMBER_BASE+13
+
+#define   GPS_POSVEC_TYPE_INDEX           MAGIC_NUMBER_BASE+14
+
 TFSMagicNumbers::TFSMagicNumbers() :
    lastNumber        (MAGIC_NUMBER_BASE)
 {
    // Load in the defined magic number maps.  In the long run, we should move
    // these to a config file.
-   LookupEntry *lue = new LookupEntry;
+   LookupEntry *lue = NULL; // new LookupEntry;
 
    // Generic range entry.  Other range entries take precedence
+   lastNumber = GENERIC_RANGEKM_TYPE_INDEX;  // MAGIC_NUMBER_BASE;
    lue = new LookupEntry;
    lue->arbitraryCount = true;
    lue->signalPathCount = 1;
    lue->nodeCount = -1;             // Arbitrary
    StringArray nodes;
    lue->nodes.push_back(nodes);     // Empty for this one
-   lue->type = "Range_KM";               // "Range";
+   //lue->type = "Range_KM";               // "Range";
+   lue->type = "Range";               // "Range";
    lue->multFactor = 1.0;
    lue->magicNumber = lastNumber;
 
@@ -409,9 +477,10 @@ TFSMagicNumbers::TFSMagicNumbers() :
 
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
-   ++lastNumber;
+   //++lastNumber;
 
    // One way range, 2 participants
+   lastNumber = ONEWAY_RANGEKM_TYPE_INDEX;
    lue = new LookupEntry;
    lue->arbitraryCount = false;
    lue->signalPathCount = 1;
@@ -420,7 +489,8 @@ TFSMagicNumbers::TFSMagicNumbers() :
    nodes.push_back("S1");
    nodes.push_back("T1");
    lue->nodes.push_back(nodes);
-   lue->type = "Range_KM";              // "Range";
+   //lue->type = "Range_KM";
+   lue->type = "Range";                         // 1-way Range in km
    lue->multFactor = 1.0;
    lue->magicNumber = lastNumber;
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
@@ -428,9 +498,10 @@ TFSMagicNumbers::TFSMagicNumbers() :
 
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
-   ++lastNumber;
+   //++lastNumber;
 
    // Two way range
+   lastNumber = GN_RANGE_TYPE_INDEX;
    lue = new LookupEntry;
    lue->arbitraryCount = false;
    lue->signalPathCount = 1;
@@ -440,7 +511,8 @@ TFSMagicNumbers::TFSMagicNumbers() :
    nodes.push_back("S1");
    nodes.push_back("T1");
    lue->nodes.push_back(nodes);
-   lue->type = "Range_KM";              // "Range";
+   //lue->type = "Range_KM";
+   lue->type = "Range";                         // GN Range measurement
    lue->multFactor = 1.0;          // 0.5;
    lue->magicNumber = lastNumber;
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
@@ -448,17 +520,44 @@ TFSMagicNumbers::TFSMagicNumbers() :
 
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
-   ++lastNumber;
+   //++lastNumber;
 
    
-   // Generic DSNRange entry.  Other DSN Range entries take precedence
+   // SN Range entry.  Other range entries take precedence
+   lastNumber = SN_RANGE_TYPE_INDEX;
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 3;
+   nodes.clear();
+   nodes.push_back("T1");
+   nodes.push_back("S1");
+   nodes.push_back("S2");
+   nodes.push_back("S1");        //nodes.push_back("S1");
+   nodes.push_back("T1");
+   lue->nodes.push_back(nodes);
+   lue->type = "SN_Range";               // TDRS Range measurement
+   lue->multFactor = 1.0;
+   lue->magicNumber = lastNumber;
+
+   // Yeah, yeah, the list is empty here, but in case code is cut and pasted...
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+   //++lastNumber;
+
+
+   // Generic DSN_SeqRange entry.  Other DSN Range entries take precedence
+   lastNumber = GENERIC_RANGERU_TYPE_INDEX;
    lue = new LookupEntry;
    lue->arbitraryCount = true;
    lue->signalPathCount = 1;
    lue->nodeCount = -1;             // Arbitrary
    lue->nodes.clear();
    lue->nodes.push_back(nodes);     // Empty for this one
-   lue->type = "DSNRange";
+   lue->type = "DSN_SeqRange";
    lue->multFactor = 1.0;
    lue->magicNumber = lastNumber;
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
@@ -466,9 +565,10 @@ TFSMagicNumbers::TFSMagicNumbers() :
 
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
-   ++lastNumber;
+   //++lastNumber;
 
    // DSN two way range
+   lastNumber = DSN_SEQRANGE_TYPE_INDEX;
    lue = new LookupEntry;
    lue->arbitraryCount = false;
    lue->signalPathCount = 1;
@@ -478,7 +578,7 @@ TFSMagicNumbers::TFSMagicNumbers() :
    nodes.push_back("S1");
    nodes.push_back("T1");
    lue->nodes.push_back(nodes);
-   lue->type = "DSNRange";
+   lue->type = "DSN_SeqRange";
    lue->multFactor = 1.0;   //-1.0;
    lue->magicNumber = lastNumber;
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
@@ -486,25 +586,27 @@ TFSMagicNumbers::TFSMagicNumbers() :
 
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
-   ++lastNumber;
+   //++lastNumber;
 
    // Generic doppler entry.  Other doppler entries take precedence
+   lastNumber = GENERIC_DOPPLER_TYPE_INDEX;
    lue = new LookupEntry;
    lue->arbitraryCount = true;
    lue->signalPathCount = 1;
    lue->nodeCount = -1;             // Arbitrary
    nodes.clear();
    lue->nodes.push_back(nodes);     // Empty for this one
-   lue->type = "Doppler";
+   lue->type = "DSN_TCP";
    lue->multFactor = 1.0;
    lue->magicNumber = lastNumber;
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
       knownTypes.push_back(lue->type);
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
-   ++lastNumber;
+   //++lastNumber;
 
    // DSN two way doppler
+   lastNumber = DSN_TCP_TYPE_INDEX;
    lue = new LookupEntry;
    lue->arbitraryCount = false;
    lue->signalPathCount = 1;
@@ -514,7 +616,7 @@ TFSMagicNumbers::TFSMagicNumbers() :
    nodes.push_back("S1");
    nodes.push_back("T1");
    lue->nodes.push_back(nodes);
-   lue->type = "Doppler";
+   lue->type = "DSN_TCP";
    lue->multFactor = 1.0;   // -1.0;
    lue->magicNumber = lastNumber;
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
@@ -522,9 +624,10 @@ TFSMagicNumbers::TFSMagicNumbers() :
 
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
-   ++lastNumber;
+   //++lastNumber;
 
    // DSN two way range as used in the TDM file
+   lastNumber = MAGIC_NUMBER_BASE + 7;
    lue = new LookupEntry;
    lue->arbitraryCount = false;
    lue->signalPathCount = 1;
@@ -543,9 +646,10 @@ TFSMagicNumbers::TFSMagicNumbers() :
 
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
-   ++lastNumber;
+   //++lastNumber;
 
    // DSN two way doppler as used in the TDM file
+   //lastNumber = MAGIC_NUMBER_BASE + 8;
    lue = new LookupEntry;
    lue->arbitraryCount = false;
    lue->signalPathCount = 1;
@@ -562,9 +666,14 @@ TFSMagicNumbers::TFSMagicNumbers() :
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
       knownTypes.push_back(lue->type);
 
+   //lookupTable.push_back(lue);
+   //magicNumbers.push_back(lastNumber);
+   ////++lastNumber;
+
 
 
    //Two way range-rate
+   lastNumber = RANGERATEKPS_TYPE_INDEX;
    lue = new LookupEntry;
    lue->arbitraryCount = false;
    lue->signalPathCount = 1;
@@ -574,7 +683,8 @@ TFSMagicNumbers::TFSMagicNumbers() :
    nodes.push_back("S1");
    nodes.push_back("T1");
    lue->nodes.push_back(nodes);
-   lue->type = "RangeRate";
+   //lue->type = "RangeRate";
+   lue->type = "RangeRateKps";
    // Note that: when multFactor is a non positive number, multiplier factor is a function.
    lue->multFactor = -1.0;
    lue->magicNumber = lastNumber;
@@ -583,9 +693,10 @@ TFSMagicNumbers::TFSMagicNumbers() :
 
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
-   ++lastNumber;
+   //++lastNumber;
    
    // Single point Two way range-rate
+   lastNumber = POINT_RANGERATE_TYPE_INDEX;
    lue = new LookupEntry;
    lue->arbitraryCount = false;
    lue->signalPathCount = 1;
@@ -604,16 +715,18 @@ TFSMagicNumbers::TFSMagicNumbers() :
 
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
-   ++lastNumber;
+   //++lastNumber;
 
-   // Generic range entry.  Other range entries take precedence
+   // Generic range rate entry.  Other range rate entries take precedence
+   lastNumber = GENERIC_RANGERATE_TYPE_INDEX;
    lue = new LookupEntry;
    lue->arbitraryCount = true;
    lue->signalPathCount = 1;
    lue->nodeCount = -1;             // Arbitrary
    nodes.clear();
    lue->nodes.push_back(nodes);     // Empty for this one
-   lue->type = "Doppler_RangeRate";
+   //lue->type = "Doppler_RangeRate";
+   lue->type = "RangeRate";
    lue->multFactor = 1.0;
    lue->magicNumber = lastNumber;
 
@@ -623,9 +736,10 @@ TFSMagicNumbers::TFSMagicNumbers() :
 
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
-   ++lastNumber;
+   //++lastNumber;
 
-   // One way doppler, 2 participants
+   // One-way range rate, 2 participants
+   lastNumber = ONEWAY_RANGERATE_TYPE_INDEX;
    lue = new LookupEntry;
    lue->arbitraryCount = false;
    lue->signalPathCount = 1;
@@ -634,7 +748,8 @@ TFSMagicNumbers::TFSMagicNumbers() :
    nodes.push_back("S1");
    nodes.push_back("T1");
    lue->nodes.push_back(nodes);
-   lue->type = "Doppler_RangeRate";
+   //lue->type = "Doppler_RangeRate";
+   lue->type = "RangeRate";
    lue->multFactor = 1.0;
    lue->magicNumber = lastNumber;
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
@@ -642,9 +757,10 @@ TFSMagicNumbers::TFSMagicNumbers() :
 
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
-   ++lastNumber;
+   //++lastNumber;
 
    // Two way doppler
+   lastNumber = GN_DOPPLER_TYPE_INDEX;
    lue = new LookupEntry;
    lue->arbitraryCount = false;
    lue->signalPathCount = 1;
@@ -654,7 +770,8 @@ TFSMagicNumbers::TFSMagicNumbers() :
    nodes.push_back("S1");
    nodes.push_back("T1");
    lue->nodes.push_back(nodes);
-   lue->type = "Doppler_RangeRate";
+   //lue->type = "Doppler_RangeRate";
+   lue->type = "RangeRate";
    lue->multFactor = 0.5;
    lue->magicNumber = lastNumber;
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
@@ -662,9 +779,10 @@ TFSMagicNumbers::TFSMagicNumbers() :
 
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
-   ++lastNumber;
+   //++lastNumber;
 
    // TDRS Two way doppler
+   lastNumber = SN_DOPPLER_TYPE_INDEX;
    lue = new LookupEntry;
    lue->arbitraryCount = false;
    lue->signalPathCount = 1;
@@ -676,7 +794,8 @@ TFSMagicNumbers::TFSMagicNumbers() :
    nodes.push_back("S1");
    nodes.push_back("T1");
    lue->nodes.push_back(nodes);
-   lue->type = "TDRSDoppler_HZ";
+   //lue->type = "TDRSDoppler_HZ";
+   lue->type = "SN_Doppler";
    lue->multFactor = -1.0;
    lue->magicNumber = lastNumber;
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
@@ -684,14 +803,37 @@ TFSMagicNumbers::TFSMagicNumbers() :
 
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
-   ++lastNumber;
+   //++lastNumber;
 
    
+   // GPS position vector, 1 participant
+   lastNumber = GPS_POSVEC_TYPE_INDEX;
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 1;
+   nodes.clear();
+   nodes.push_back("S1");
+   lue->nodes.push_back(nodes);
+   //lue->type = "ECFVec";
+   lue->type = "GPS_PosVec";
+   lue->multFactor = 1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+   //++lastNumber;
+
    // Build the factor map
    factorMap.clear();
    for (UnsignedInt i = 0; i < lookupTable.size(); ++i)
       factorMap[lookupTable[i]->magicNumber] = lookupTable[i]->multFactor;
 
+   // Define deprecated type map
+   depTypeMap["DSNRange"] = "DSN_SeqRange";
+   depTypeMap["Doppler"]  = "DSN_TCP";
 }
 
 

@@ -1,0 +1,124 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>ErrorModel</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="EphemerisFile.html" title="EphemerisFile"><link rel="next" href="FileInterface.html" title="FileInterface"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">ErrorModel</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="EphemerisFile.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="FileInterface.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="ErrorModel"></a><div class="titlepage"></div><a name="N18BEA" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ErrorModel</span></h2><p>ErrorModel &mdash; Used to specify measurement noise for simulation and
+    estimation, and to apply or estimate measurement biases.</p></div><div class="refsection"><a name="N18BFB"></a><h2>Description</h2><p>An <span class="guilabel">ErrorModel</span> is assigned on the
+    <span class="guilabel">ErrorModels</span> field of an instance of
+    <span class="guilabel">GroundStation</span> or a spacecraft-attached
+    <span class="guilabel">Receiver</span> to model biases and noise, and optionally to
+    estimate biases on each measurement type provided by the ground station or
+    receiver. An error model must be specified for each data type employed by
+    each tracking station or receiver, but a single instance of
+    <span class="guilabel">ErrorModel</span> may be used by multiple ground stations or
+    spacecraft receivers.</p><p>An error model is only assigned to a receiver if
+    <span class="guilabel">GPS_PosVec</span> data is employed. The
+    <span class="guilabel">GPS_PosVec</span> observation type models position estimates
+    provided by an on-board GPS receiver. Since this type of data is not
+    derived from ground station measurement modeling, the error model for
+    <span class="guilabel">GPS_PosVec</span> data is specified on the
+    <span class="guilabel">ErrorModels</span> field of a <span class="guilabel">Receiver</span>
+    resource instead. The receiver must be attached to the corresponding
+    <span class="guilabel">Spacecraft</span> object. Error models for all other
+    observation types should be specified on the
+    <span class="guilabel">ErrorModels</span> field of the relevant ground station
+    resources. Error models cannot be assigned on receivers attached to ground
+    stations.</p><p>The <span class="guilabel">ErrorModel</span> is used by both the simulator
+    and the estimator. For a data simulation run, the
+    <span class="guilabel">ErrorModel</span> specifies the measurement type and noise
+    employed when generating the simulated measurement. A bias may optionally
+    be applied to the simulated observations.</p><p>For an estimation run, the <span class="guilabel">ErrorModel</span> specifies
+    the observation type, presumed observation noise, and an optional bias to
+    be applied to the observation. An observation bias may also be estimated
+    by adding the keyword <span class="guilabel">Bias</span> to the
+    <span class="guilabel">ErrorModel.SolveFors</span> list. If the
+    <span class="guilabel">SolveFors</span> list is empty, no bias will be estimated.
+    The <span class="guilabel">SolveFors</span> list is ignored by the
+    simulator.</p><p>The <span class="guilabel">ErrorModel</span> resource does not currently
+    support application or estimation of biases for the
+    <span class="guilabel">GPS_PosVec</span> data type.</p><p>See Also <a class="xref" href="GroundStation.html" title="GroundStation"><span class="refentrytitle">GroundStation</span></a>, <a class="xref" href="Receiver.html" title="Receiver"><span class="refentrytitle">Receiver</span></a></p></div><div class="refsection"><a name="N18C4E"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Bias</span></td><td><p>The constant bias associated with the measurement.
+            For simulations, this bias is added to the measurement. As shown
+            below, the units used depend upon measurement type,
+            <span class="guilabel">ErrorModel.Type</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any Real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">0.0</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>See Remarks section</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">BiasSigma</span></td><td><p>Standard deviation of <span class="guilabel">Bias</span>. This
+            field, which only has a function if both (1)
+            <span class="guilabel">BatchEstimatorInv.UseInitialCovariance = true</span>
+            and (2) <span class="guilabel">Bias</span> is a solve-for parameter, is
+            used to constrain the estimated value of
+            <span class="guilabel">Bias</span>. As shown below, the units used depend
+            upon measurement type, <span class="guilabel">ErrorModel.Type</span>. This
+            parameter is not implemented for <span class="guilabel">GPS_PosVec</span>
+            data.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">1e+70</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>See Remarks section</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">NoiseSigma</span></td><td><p>One sigma value of Gaussian noise. For simulations,
+            if <span class="guilabel">Sim.AddNoise</span> = true, this noise is added
+            to the measurements. For estimation, this value is used to as part
+            of the batch processing algorithms to calculate the measurement
+            type weighting. As shown below, the units used depend upon
+            measurement type, <span class="guilabel">ErrorModel.Type</span>. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">103</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>See Remarks section</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SolveFors</span></td><td><p>List of parameters to estimate. This parameter is not
+            implemented for <span class="guilabel">GPS_PosVec</span> data.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>StringArray</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>{} or {Bias}</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">{}</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Type</span></td><td><p>Measurement data type. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>DSN_SeqRange, DSN_TCP, GPS_PosVec, Range,
+                    RangeRate</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DSN_SeqRange</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N18D71"></a><h2>Remarks</h2><div class="refsection"><a name="N18D74"></a><h3>Units for Bias, BiasSigma, and NoiseSigma</h3><p>The following table shows the units to be used for
+      <span class="guilabel">Bias</span>, <span class="guilabel">BiasSigma</span>, and
+      <span class="guilabel">NoiseSigma</span> for each measurement data type that GMAT
+      supports.</p><div class="informaltable"><table border="1"><colgroup><col width="50%"><col width="50%"></colgroup><thead><tr><th align="center">GMAT Measurement Type</th><th align="center">Units</th></tr></thead><tbody><tr><td>DSN_SeqRange</td><td>Range Units</td></tr><tr><td>DSN_TCP</td><td>Hertz</td></tr><tr><td>GPS_PosVec</td><td>Kilometers</td></tr><tr><td>Range</td><td>Kilometers</td></tr><tr><td>RangeRate</td><td>Kilometers/sec</td></tr></tbody></table></div></div><div class="refsection"><a name="N18DA7"></a><h3>Deprecated Measurement Type Names</h3><p>This version of GMAT deprecates the DSNRange/Range_RU and
+      Doppler/Doppler_HZ measurement type names. These have been replaced by
+      the <span class="guilabel">DSN_SeqRange</span> and <span class="guilabel">DSN_TCP</span>
+      types. These new names are employed identically in the GMAT Measurement
+      Data (GMD) data file, the <span class="guilabel">ErrorModel.Type</span>
+      parameter, and the
+      <span class="guilabel">TrackingFileSet.AddTrackingConfig</span> parameter.
+      Scripts employing the deprecated measurement type names will still work
+      in this version of GMAT, but future versions will remove this support.
+      Users are encouraged to update their scripts to use the new
+      names.</p><p>The new data type names employ the same name in the GMD file,
+      error model, and tracking file set tracking configuration, eliminating
+      the need for a mapping between the names employed in each resource. For
+      those still using the deprecated data type names, the following table
+      provides a guide.</p><div class="informaltable"><table border="1"><colgroup><col width="50%"><col width="50%"></colgroup><thead><tr><th align="center">Deprecated GMD File and
+              TrackingFileSet.AddTrackingConfig Measurement Type Name</th><th align="center">Deprecated ErrorModel Measurement Type
+              Name</th></tr></thead><tbody><tr><td>DSNRange</td><td>Range_RU</td></tr><tr><td>Doppler</td><td>Doppler_HZ</td></tr></tbody></table></div></div></div><div class="refsection"><a name="N18DD0"></a><h2>Examples</h2><div class="informalexample"><p>This example shows how to create an error model for DSN Sequential
+      Range observations and illustrates estimation of a range bias
+      parameter.</p><pre class="programlisting">%   Create an ErrorModel
+%   Measurement noise is in Range Units
+ 
+Create ErrorModel RangeModel;
+  
+RangeModel.Type       = 'DSN_SeqRange';
+RangeModel.NoiseSigma = 11.;
+RangeModel.Bias       = 0.;
+RangeModel.SolveFors  = {Bias};
+ 
+%   Assign it to a ground station
+ 
+Create GroundStation DSN;
+ 
+DSN.ErrorModels = {RangeModel};
+
+BeginMissionSequence;</pre></div><div class="informalexample"><p>This example shows how to create an error model for on-board GPS
+      observations.</p><pre class="programlisting">%   Create an ErrorModel
+%   Measurement noise is in kilometers. Bias estimation is not permitted.
+ 
+Create ErrorModel PosVecModel;
+  
+PosVecModel.Type       = 'GPS_PosVec';
+PosVecModel.NoiseSigma = 0.010;
+ 
+%   Assign the error model to a receiver and add that receiver to a spacecraft.
+ 
+Create Antenna GpsAntenna;
+Create Receiver GpsReceiver;
+
+GpsReceiver.Id             = 800;
+GpsReceiver.PrimaryAntenna = GpsAntenna;
+GpsReceiver.ErrorModels    = {PosVecModel};
+
+Create Spacecraft Sat;
+
+Sat.AddHardware = {GpsReceiver, GpsAntenna};
+
+BeginMissionSequence;</pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="EphemerisFile.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="FileInterface.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">EphemerisFile&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;FileInterface</td></tr></table></div></body></html>

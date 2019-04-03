@@ -1,0 +1,66 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>BeginScript</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="BeginMissionSequence.html" title="BeginMissionSequence"><link rel="next" href="CallGmatFunction.html" title="CallGmatFunction"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">BeginScript</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="BeginMissionSequence.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="CallGmatFunction.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="BeginScript"></a><div class="titlepage"></div><a name="N22F59" class="indexterm"></a><a name="N22F5C" class="indexterm"></a><a name="N22F5F" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">BeginScript</span></h2><p>BeginScript &mdash; Execute free-form script commands</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><code class="literal">BeginScript</code>
+    [<em class="replaceable"><code>script statements</code></em>]
+    &hellip;
+<code class="literal">EndScript</code></pre></div><div class="refsection"><a name="N22F7C"></a><h2>Description</h2><p>The <span class="guilabel">BeginScript</span> and
+    <span class="guilabel">EndScript</span> commands (<span class="guilabel">ScriptEvent</span>
+    in the GUI) allow you to write free-form script statements in the mission
+    sequence without the statements being shown as individual commands in the
+    GMAT GUI. This is useful as a way to group and label a complex sequence of
+    statements as one unit, or to write small sequences of script statements
+    when otherwise using the GUI to create the mission sequence. Within the
+    script itself, there is no difference in the execution of statements
+    within a <span class="guilabel">BeginScript</span>/<span class="guilabel">EndScript</span>
+    block and those outside of it.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="ScriptEditor.html" title="Script Editor">the section called &ldquo;Script Editor&rdquo;</a></p></div><div class="refsection"><a name="N22F97"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_ScriptEvent_Default.png" align="middle" height="466"></td></tr></table></div></div><p>The <span class="guilabel">ScriptEvent</span> GUI window divides the command
+    into three parts: an initial comment, fixed
+    <span class="guilabel">BeginScript</span> and <span class="guilabel">EndScript</span>
+    commands, and the content of the block itself. The scripting window is a
+    miniature version of the main script editor, and features line numbers,
+    syntax highlighting, code folding, and all of the editing tools available
+    in the full editor. See the <a class="xref" href="ScriptEditor.html" title="Script Editor">the section called &ldquo;Script Editor&rdquo;</a> documentation
+    for more information. The <span class="guilabel">ScriptEvent</span> window performs
+    script syntax validation when changes are applied. Nested
+    <span class="guilabel">BeginScript</span>/<span class="guilabel">EndScript</span> blocks in
+    the script language are collapsed into a single
+    <span class="guilabel">ScriptEvent</span> when loaded into the GUI, and are saved
+    to a single
+    <span class="guilabel">BeginScript</span>/<span class="guilabel">EndScript</span> block when
+    saved to a script.</p></div><div class="refsection"><a name="N22FC3"></a><h2>Examples</h2><div class="informalexample"><p>Perform a calculation inside a
+      <span class="guilabel">BeginScript</span>/<span class="guilabel">EndScript</span> block.
+      When loaded into the GUI, the calculations within the
+      <span class="guilabel">BeginScript</span>/<span class="guilabel">EndScript</span> block
+      will be contained within a single <span class="guilabel">ScriptEvent</span>
+      command.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+Create ImpulsiveBurn aBurn
+Create Variable a_init v_init
+Create Variable a_transfer v_transfer_1 v_transfer_2
+Create Variable a_target v_final mu
+Create Variable dv_1 dv_2
+mu = 398600.4415
+a_target = 42164
+
+BeginMissionSequence
+
+% calculate Hohmann burns
+BeginScript
+    a_init = aSat.SMA
+    v_init = aSat.VMAG
+    a_transfer = (a_init + a_target) / 2
+    v_transfer_1 = sqrt(2*mu/a_init - mu/a_transfer)
+    v_transfer_2 = sqrt(2*mu/a_target - mu/a_transfer)
+    v_final = sqrt(mu/a_target)
+    dv_1 = v_transfer_1 - v_init
+    dv_2 = v_final - v_transfer_2
+EndScript
+
+% perform burn 1
+aBurn.Element1 = dv_1
+Maneuver aBurn(aSat)
+
+Propagate aProp(aSat) {aSat.Apoapsis}
+
+% perform burn 2
+aBurn.Element1 = dv_2
+Maneuver aBurn(aSat)
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = aSat.OrbitPeriod}</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="BeginMissionSequence.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="CallGmatFunction.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">BeginMissionSequence&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;CallGmatFunction</td></tr></table></div></body></html>

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -76,7 +76,10 @@ Publisher::Publisher() :
    maneuvering         (false),
    internalCoordSystem (NULL),
    dataCoordSystem     (NULL),
-   dataMJ2000EqOrigin  (NULL)
+   dataMJ2000EqOrigin  (NULL) //,
+   // Buffers used to avoid publishing repeated data
+   //   dataBuffer          (NULL),
+   //   countBuffer         (0)
 {
 }
 
@@ -104,6 +107,9 @@ Publisher::~Publisher()
       }
       iter++;
    }
+   // Buffers used to avoid publishing repeated data
+   //   if (dataBuffer)
+   //      delete [] dataBuffer;
 }
 
 //------------------------------------------------------------------------------
@@ -231,9 +237,14 @@ bool Publisher::UnsubscribeAll()
  *
  * @param provider The command who is calling this method
  * @param id       The id given by the Publisher
- * @param dadta    The real type data to publish
+ * @param data     The real type data to publish
  * @param count    Number of data points to publish
- * @param propDir  The direction of propagation (1.0 = forward, -1.0 = backward)
+ * @param propDir  The direction of propagation (1.0 = forward, -1.0 = backward,
+ *
+ * Settings to only publish to ephems in step mode.  Remove these cases to
+ * implement GMT-6110
+ *                                               2.0 = forward, ephems only,
+ *                                               -2.0 = backwards, ephems only)
  */
 //------------------------------------------------------------------------------
 bool Publisher::Publish(GmatBase *provider, Integer id, Real *data, Integer count,
@@ -247,124 +258,164 @@ bool Publisher::Publish(GmatBase *provider, Integer id, Real *data, Integer coun
    MessageInterface::ShowMessage("   providerMap.size()=%d\n", providerMap.size());
    #endif
 
-   // No subscribers
-   if (subscriberList.empty())
-   {
+   //   // Trap and do not publish identical data twice in a row
+   //   bool isRepeated = false;
+   //
+   // The commented code here ensures that repeated data is not published,  This
+   // is turned off in the current implementation
+   //   if (count != 0)
+   //   {
+   //      if (countBuffer != count)
+   //      {
+   //         if (dataBuffer)
+   //            delete [] dataBuffer;
+   //         dataBuffer = new Real[count];
+   //         countBuffer = count;
+   //         memcpy(dataBuffer, data, count*sizeof(Real));
+   //      }
+   //      else
+   //      {
+   //         if (memcmp(data, dataBuffer, count*sizeof(Real)) == 0)
+   //            isRepeated = true;
+   //         else
+   //            memcpy(dataBuffer, data, count*sizeof(Real));
+   //      }
+   //   }
+   //
+   //   if (!isRepeated)
+   //   {
+      // No subscribers
+      if (subscriberList.empty())
+      {
+         #if DBGLVL_PUBLISHER_PUBLISH
+         MessageInterface::ShowMessage
+            ("*** WARNING *** Publisher::Publish() There are no subscribers, "
+             "so just returning false\n");
+         #endif
+         return false;
+      }
+
+      // Check for no providers
+      std::map<GmatBase*, std::vector<DataType>* >::iterator iter = providerMap.find(provider);
+      if (iter == providerMap.end())
+      {
+         #if DBGLVL_PUBLISHER_PUBLISH
+         MessageInterface::ShowMessage
+            ("*** WARNING *** Publisher::Publish() There are no registered providers, "
+             "so just returning false\n");
+         #endif
+         return false;
+      }
+
+      if (id != currProviderId)
+      {
+         currProviderId = id;
+         UpdateProviderId(id);
+      }
+
+
+      // Get data labels
+      std::vector<DataType>* dataList = iter->second;
+   
+      #if DBGLVL_PUBLISHER_PUBLISH > 1
+      MessageInterface::ShowMessage("   dataList->size()=%d\n", dataList->size());
+      #endif
+
+      // Convert the data into a string for distribution
+      Integer length = count*25 + 1;
+      char *stream = new char[length];
+   
+      #ifdef DEBUG_PUBLISHER_BUFFERS
+         MessageInterface::ShowMessage("Allocated %d chars at %p\n", length,
+               stream);
+      #endif
+   
+      stream[0] = '\0';    // Init to empty string
+
+      for (Integer i = 0; i < count; ++i)
+      {
+         #ifdef DEBUG_PUBLISHER_BUFFERS
+            MessageInterface::ShowMessage("   %d: %12lf\n", i, data[i]);
+         #endif
+         sprintf(stream, "%s%16le", stream, data[i]);
+         if (i < count - 1)
+            strcat(stream, ", ");
+         else
+            strcat(stream, "\n");
+         #ifdef DEBUG_PUBLISHER_BUFFERS
+               MessageInterface::ShowMessage("   used %d\n", strlen(stream));
+         #endif
+      }
+   
+      #ifdef DEBUG_PUBLISHER_BUFFERS
+         MessageInterface::ShowMessage("   Data:  %s\n", stream);
+      #endif
+   
       #if DBGLVL_PUBLISHER_PUBLISH
       MessageInterface::ShowMessage
-         ("*** WARNING *** Publisher::Publish() There are no subscribers, "
-          "so just returning false\n");
-      #endif      
-      return false;
-   }
-   
-   // Check for no providers
-   std::map<GmatBase*, std::vector<DataType>* >::iterator iter = providerMap.find(provider);
-   if (iter == providerMap.end())
-   {
-      #if DBGLVL_PUBLISHER_PUBLISH
-      MessageInterface::ShowMessage
-         ("*** WARNING *** Publisher::Publish() There are no registered providers, "
-          "so just returning false\n");
-      #endif      
-      return false;
-   }
-   
-   if (id != currProviderId)
-   {
-      currProviderId = id;
-      UpdateProviderId(id);
-   }
-   
-   
-   // Get data labels
-   std::vector<DataType>* dataList = iter->second;
+         ("Publisher::Publish() calling ReceiveData() number of subsbribers = %d\n",
+          subscriberList.size());
+      #endif
+      
+      // Code to only publish to ephems in step mode.  Remove this to
+      // implement GMT-6110
+      bool ephemsOnly = ((propDir == 2.0) || (propDir == -2.0));
 
-   #if DBGLVL_PUBLISHER_PUBLISH > 1
-   MessageInterface::ShowMessage("   dataList->size()=%d\n", dataList->size());
-   #endif
-   
-   // Convert the data into a string for distribution
-   Integer length = count*25 + 1;
-   char *stream = new char[length];
+      std::list<Subscriber*>::iterator current = subscriberList.begin();
+      while (current != subscriberList.end())
+      {
+         #ifdef DEBUG_PUBLISHER_BUFFERS
+            MessageInterface::ShowMessage("   Publishing to %s\n",
+                  (*current)->GetName().c_str());
+         #endif
 
-   #ifdef DEBUG_PUBLISHER_BUFFERS
-      MessageInterface::ShowMessage("Allocated %d chars at %p\n", length,
-            stream);
-   #endif
+         #if DBGLVL_PUBLISHER_PUBLISH > 1
+         MessageInterface::ShowMessage
+            ("Publisher::Publish() sub = <%p><%p>'%s'\n", (*current),
+             (*current)->GetTypeName().c_str(), (*current)->GetName().c_str());
+         #endif
 
-   stream[0] = '\0';    // Init to empty string
-   
-   for (Integer i = 0; i < count; ++i)
-   {
+         // Set labels
+         #if DBGLVL_PUBLISHER_PUBLISH > 1
+         MessageInterface::ShowMessage
+            ("Publisher::Publish() Setting data labels:\n");
+         StringArray dataLabels = (*dataList)[id].labels;
+         for (unsigned int ii = 0; ii < dataLabels.size(); ii++)
+            MessageInterface::ShowMessage("%s ", dataLabels[ii].c_str());
+         MessageInterface::ShowMessage("\n");
+         #endif
+
+         // Code to only publish to ephems in step mode.  Remove this to
+         // implement GMT-6110
+         if (ephemsOnly && !((*current)->IsOfType(Gmat::EPHEMERIS_FILE)))
+         {
+            ++current;
+            continue;
+         }
+
+         (*current)->SetDataLabels((*dataList)[id].labels);
+
+         // Set provider
+         if (count > 0)
+            (*current)->SetProvider(provider, data[0]);
+         else
+            (*current)->SetProvider(provider);
+
+         // Set propagation direction
+         (*current)->SetPropagationDirection((propDir > 0.0 ? 1.0 : -1.0));
+
+         if (!(*current)->ReceiveData(stream))
+            return false;
+         if (!(*current)->ReceiveData(data, count))
+            return false;
+         current++;
+      }
+
       #ifdef DEBUG_PUBLISHER_BUFFERS
-         MessageInterface::ShowMessage("   %d: %12lf\n", i, data[i]);
+         MessageInterface::ShowMessage("   Cleaning up\n");
       #endif
-      sprintf(stream, "%s%16le", stream, data[i]);
-      if (i < count - 1)
-         strcat(stream, ", ");
-      else
-         strcat(stream, "\n");
-      #ifdef DEBUG_PUBLISHER_BUFFERS
-            MessageInterface::ShowMessage("   used %d\n", strlen(stream));
-      #endif
-   }   
-
-   #ifdef DEBUG_PUBLISHER_BUFFERS
-      MessageInterface::ShowMessage("   Data:  %s\n", stream);
-   #endif
-
-   #if DBGLVL_PUBLISHER_PUBLISH
-   MessageInterface::ShowMessage
-      ("Publisher::Publish() calling ReceiveData() number of subsbribers = %d\n",
-       subscriberList.size());
-   #endif
-   
-   std::list<Subscriber*>::iterator current = subscriberList.begin();
-   while (current != subscriberList.end())
-   {
-      #ifdef DEBUG_PUBLISHER_BUFFERS
-         MessageInterface::ShowMessage("   Publishing to %s\n",
-               (*current)->GetName().c_str());
-      #endif
-
-      #if DBGLVL_PUBLISHER_PUBLISH > 1
-      MessageInterface::ShowMessage
-         ("Publisher::Publish() sub = <%p><%p>'%s'\n", (*current),
-          (*current)->GetTypeName().c_str(), (*current)->GetName().c_str());
-      #endif
-      
-      // Set labels
-      #if DBGLVL_PUBLISHER_PUBLISH > 1
-      MessageInterface::ShowMessage
-         ("Publisher::Publish() Setting data labels:\n");
-      StringArray dataLabels = (*dataList)[id].labels;
-      for (unsigned int ii = 0; ii < dataLabels.size(); ii++)
-         MessageInterface::ShowMessage("%s ", dataLabels[ii].c_str());
-      MessageInterface::ShowMessage("\n");
-      #endif
-      (*current)->SetDataLabels((*dataList)[id].labels);
-      
-      // Set provider
-      if (count > 0)
-         (*current)->SetProvider(provider, data[0]);
-      else
-         (*current)->SetProvider(provider);
-      
-      // Set propagation direction
-      (*current)->SetPropagationDirection(propDir);
-      
-      if (!(*current)->ReceiveData(stream))
-         return false;
-      if (!(*current)->ReceiveData(data, count))
-         return false;
-      current++;
-   }
-   
-   #ifdef DEBUG_PUBLISHER_BUFFERS
-      MessageInterface::ShowMessage("   Cleaning up\n");
-   #endif
-   delete [] stream;
+      delete [] stream;
+      //   }  End of the repeated data check block
 
    #if DBGLVL_PUBLISHER_PUBLISH
    MessageInterface::ShowMessage("Publisher::Publish() returning true\n");

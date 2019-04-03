@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -88,11 +88,6 @@
 #include <sys/stat.h>               // for mkdir
 #endif
 
-// This symbol is only needed for static link build
-#ifdef __INCLUDE_BUILTIN_PLUGINS__
-#include "BuiltinPluginManager.hpp"
-#endif
-
 //#define DEBUG_ONLY_FOR_SCRIPT
 //#define DEBUG_ONLY_FOR_FUNCTION
 
@@ -100,15 +95,18 @@
 //#define DEBUG_FINALIZE 1
 //#define DEBUG_INTERPRET 1
 //#define DEBUG_RUN 1
+//#define DEBUG_CREATE_OBJECT 1
+//#define DEBUG_CREATE_COMMAND 1
 //#define DEBUG_CREATE_COORDSYS 1
 //#define DEBUG_CREATE_RESOURCE 2
 //#define DEBUG_CREATE_DEFAULT_RESOURCE 1
 //#define DEBUG_CREATE_OTHER_RESOURCE 1
-//#define DEBUG_CREATE_COMMAND 1
 //#define DEBUG_CREATE_CALC_POINT
 //#define DEBUG_CREATE_PARAMETER 1
 //#define DEBUG_CREATE_EPHEMFILE 1
+//#define DEBUG_CREATE_SUBSCRIBER 1
 //#define DEBUG_CREATE_FUNCTION 1
+//#define DEBUG_CREATE_VAR 1
 //#define DEBUG_PARAMETER_REF_OBJ 1
 //#define DEBUG_DEFAULT_COMMAND 1
 //#define DEBUG_COMMAND_APPEND 1
@@ -122,7 +120,6 @@
 //#define DEBUG_SEQUENCE_CLEARING 1
 //#define DEBUG_CONFIG 1
 //#define DEBUG_CONFIG_CHANGE 1
-//#define DEBUG_CREATE_VAR 1
 //#define DEBUG_GMAT_FUNCTION 1
 //#define DEBUG_OBJECT_MAP 1
 //#define DEBUG_FIND_OBJECT 2
@@ -288,10 +285,6 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui,
       theFactoryManager->RegisterFactory(new SubscriberFactory());
       theFactoryManager->RegisterFactory(new CelestialBodyFactory());
       
-      #ifdef __INCLUDE_BUILTIN_PLUGINS__
-      ForStaticLinkBuild::RegisterBuiltinPluginFactories(theFactoryManager);
-      #endif
-      
       // Create publisher
       thePublisher = Publisher::Instance();
       
@@ -308,6 +301,7 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui,
          (".....created  (%p)theScriptInterpreter\n", theScriptInterpreter);
       #endif
       
+      // Load plugins listed in the startup file
       LoadPlugins();
       
       // Create default SolarSystem
@@ -787,7 +781,7 @@ void Moderator::LoadPlugins()
    
    if (theUiInterpreter != NULL)
       theUiInterpreter->BuildCreatableObjectMaps();
-   theScriptInterpreter->BuildCreatableObjectMaps();
+   theScriptInterpreter->BuildCreatableObjectMaps(true);
 }
 
 //------------------------------------------------------------------------------
@@ -1094,10 +1088,7 @@ void (*Moderator::GetDynamicFunction(const std::string &funName,
 //------------------------------------------------------------------------------
 std::string Moderator::GetObjectTypeString(Gmat::ObjectType type)
 {
-   if (type >= Gmat::SPACECRAFT && type <= Gmat::PROP_SETUP)
-      return GmatBase::OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT];
-   else
-      return "UnknownObject";
+   return GmatBase::GetObjectTypeString(type);
 }
 
 //----- interpreter
@@ -1362,6 +1353,20 @@ const StringArray& Moderator::GetListOfUnviewableItems(Gmat::ObjectType type)
    return theFactoryManager->GetListOfUnviewableItems(type);
 }
 
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArrayMap& GetAllObjectTypeArrayMap()
+//------------------------------------------------------------------------------
+/**
+ * Return a map of all items that can be created.
+ *
+ * @return map of all creatable items with object type as a key
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArrayMap& Moderator::GetAllObjectTypeArrayMap()
+{
+   return theFactoryManager->GetAllObjectTypeArrayMap();
+}
 
 //------------------------------------------------------------------------------
 // bool DoesObjectTypeMatchSubtype(const std::string &theType,
@@ -2182,23 +2187,117 @@ bool Moderator::SetSolarSystemInUse(const std::string &name)
 
 // Create object
 //------------------------------------------------------------------------------
-// GmatBase* CreateOtherObject(Gmat::ObjectType objType, const std::string &type,
+// GmatBase* CreateObject(Gmat::ObjectType objTypeId, const std::string &type,
+//                        const std::string &name, bool createDefault)
+//------------------------------------------------------------------------------
+GmatBase* Moderator::CreateObject(Gmat::ObjectType objTypeId, const std::string &type,
+                                  const std::string &name, bool createDefault)
+{
+   #if DEBUG_CREATE_OBJECT
+   MessageInterface::ShowMessage
+      ("Moderator::CreateObject() objTypeId=%d<%s>, type='%s', name='%s', createDefault=%d, "
+       "objectManageOption=%d\n", objTypeId, GetObjectTypeString(objTypeId).c_str(),
+       type.c_str(), name.c_str(), createDefault, objectManageOption);
+   #endif
+   
+   // Call specific medthods for setting ref objects, eop file, creating a container,
+   // creating non-configurable object, or display deprecated messages
+   if (objTypeId == Gmat::SPACECRAFT)
+      return CreateSpacecraft(type, name, createDefault);
+   else if (objTypeId == Gmat::AXIS_SYSTEM)
+      return CreateAxisSystem(type, name, objectManageOption);
+   else if (objTypeId == Gmat::CALCULATED_POINT)
+      return CreateCalculatedPoint(type, name, true);
+   else if (objTypeId == Gmat::CELESTIAL_BODY)
+      return CreateCelestialBody(type, name);
+   else if (objTypeId == Gmat::COORDINATE_SYSTEM)
+      return CreateCoordinateSystem(name, createDefault, false, objectManageOption);
+   // For displaying Hardware deprecated message.
+   // When we clean up deprecated fields this special creation can be removed
+   else if (objTypeId == Gmat::EVENT_LOCATOR)  
+      return CreateEventLocator(type, name, createDefault);
+   else if (objTypeId == Gmat::HARDWARE)  
+      return CreateHardware(type, name);
+   else if (objTypeId == Gmat::FUNCTION)
+      return CreateFunction(type, name, objectManageOption);
+   else if (objTypeId == Gmat::ODE_MODEL)
+      return CreateODEModel(type, name);
+   else if (objTypeId == Gmat::PHYSICAL_MODEL)
+      return CreatePhysicalModel(type, name);
+   else if (objTypeId == Gmat::PROPAGATOR) // Propagators are non-configurable
+      return CreatePropagator(type, name);
+   else if (objTypeId == Gmat::PROP_SETUP)
+      return CreatePropSetup(name);
+   
+   
+   GmatBase *obj = FindObject(name);
+   if (obj == NULL)
+   {      
+      obj = theFactoryManager->CreateObject(objTypeId, type, name);
+      
+      if (obj == NULL)
+      {
+         throw GmatBaseException
+            ("The Moderator cannot create an object of type \"" + type + "\"\n");
+      }
+      
+      #ifdef DEBUG_MEMORY
+      if (obj)
+      {
+         std::string funcName;
+         funcName = currentFunction ? "function: " + currentFunction->GetName() : "";
+         MemoryTracker::Instance()->Add
+            (obj, name, "Moderator::CreateObject()", funcName);
+      }
+      #endif
+      
+      // Add object to object map in use
+      AddObjectToObjectMapInUse(name, obj, objTypeId);
+      
+      // @todo Set defaults if creating default object
+      
+      
+      #if DEBUG_CREATE_OBJECT
+      MessageInterface::ShowMessage
+         ("Moderator::CreateObject() returning <%p>\n", obj);
+      #endif
+      return obj;
+   }
+   else
+   {
+      #if DEBUG_CREATE_OBJECT
+      MessageInterface::ShowMessage
+         ("Moderator::CreateObject() Unable to create an object. "
+          "<%p><%s>'%s' already exist\n", obj,
+          obj->GetTypeName().c_str(), obj->GetName().c_str());
+      #endif
+      // Return obj if same type
+      if (obj->GetTypeName() == type)
+         return obj;
+      else
+         return NULL;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* CreateOtherObject(Gmat::ObjectType objTypeId, const std::string &type,
 //                             const std::string &name, bool createDefault)
 //------------------------------------------------------------------------------
-GmatBase* Moderator::CreateOtherObject(Gmat::ObjectType objType, const std::string &type,
+GmatBase* Moderator::CreateOtherObject(Gmat::ObjectType objTypeId, const std::string &type,
                                        const std::string &name, bool createDefault)
 {
    #if DEBUG_CREATE_OTHER_RESOURCE
    MessageInterface::ShowMessage
-      ("Moderator::CreateOtherObject() objType=%d, type='%s', name='%s', createDefault=%d, "
-       "objectManageOption=%d\n", objType, type.c_str(), name.c_str(), createDefault,
+      ("Moderator::CreateOtherObject() objTypeId=%d, type='%s', name='%s', createDefault=%d, "
+       "objectManageOption=%d\n", objTypeId, type.c_str(), name.c_str(), createDefault,
        objectManageOption);
    #endif
    
    GmatBase *obj = NULL;
    if (FindObject(name) == NULL)
    {
-      obj = theFactoryManager->CreateObject(objType, type, name);
+      obj = theFactoryManager->CreateObject(objTypeId, type, name);
       
       if (obj == NULL)
       {
@@ -2217,32 +2316,8 @@ GmatBase* Moderator::CreateOtherObject(Gmat::ObjectType objType, const std::stri
       #endif
       
       // Add object to object map in use
-      AddObjectToObjectMapInUse(name, obj, objType);
-      
-      #if 0
-      // Manage it if it is a named object
-      try
-      {
-         if (name != "")
-         {
-            if (objectManageOption == 1)
-            {
-               theConfigManager->AddObject(objType, obj);
-               #if DEBUG_CREATE_RESOURCE
-               MessageInterface::ShowMessage("   ==> '%s' added to configuration\n", name.c_str());
-               #endif
-            }
-            else if (objectManageOption == 2)
-               AddObject(obj);
-         }
-      }
-      catch (BaseException &e)
-      {
-         MessageInterface::ShowMessage("In Moderator::CreateOtherObject()\n" +
-                                       e.GetFullMessage());
-      }
-      #endif
-      
+      AddObjectToObjectMapInUse(name, obj, objTypeId);
+            
       #if DEBUG_CREATE_OTHER_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateOtherObject() returning <%p>\n", obj);
@@ -2940,22 +3015,22 @@ Propagator* Moderator::CreatePropagator(const std::string &type,
          ("The Moderator cannot create a Propagator type \"" + type + "\"\n");
       
    #ifdef DEBUG_MEMORY
-      if (obj)
-      {
-         std::string funcName;
-         funcName = currentFunction ? "function: " + currentFunction->GetName() : "";
-         MemoryTracker::Instance()->Add
-            (obj, name, "Moderator::CreatePropagator()", funcName);
-      }
+   if (obj)
+   {
+      std::string funcName;
+      funcName = currentFunction ? "function: " + currentFunction->GetName() : "";
+      MemoryTracker::Instance()->Add
+         (obj, name, "Moderator::CreatePropagator()", funcName);
+   }
    #endif
       
    #if DEBUG_CREATE_RESOURCE
-      MessageInterface::ShowMessage
-         ("Moderator::CreatePropagator() returning new Propagator <%p>'%s'\n",
-          obj, obj->GetName().c_str());
-      #endif
-      
-      return obj;
+   MessageInterface::ShowMessage
+      ("Moderator::CreatePropagator() returning new Propagator <%p>'%s'\n",
+       obj, obj->GetName().c_str());
+   #endif
+   
+   return obj;
 }
 
 //------------------------------------------------------------------------------
@@ -3184,8 +3259,7 @@ PhysicalModel* Moderator::GetPhysicalModel(const std::string &name)
 // AtmosphereModel
 //------------------------------------------------------------------------------
 // AtmosphereModel* CreateAtmosphereModel(const std::string &type,
-//                                        const std::string &name,
-//                                        const std::string &body = "Earth")
+//                                        const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Creates an atmosphere model object by given type and name and add to
@@ -3193,26 +3267,24 @@ PhysicalModel* Moderator::GetPhysicalModel(const std::string &name)
  *
  * @param <type> object type
  * @param <name> object name
- * @param <body> the body for which the atmosphere model is requested
  *
  * @return a atmosphereModel object pointer
  */
 //------------------------------------------------------------------------------
 AtmosphereModel* Moderator::CreateAtmosphereModel(const std::string &type,
-                                                  const std::string &name,
-                                                  const std::string &body)
+                                                  const std::string &name)
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
-      ("Moderator::CreateAtmosphereModel() type = '%s', name = '%s', body = '%s'\n",
-       type.c_str(), name.c_str(), body.c_str());
+      ("Moderator::CreateAtmosphereModel() type = '%s', name = '%s'\n",
+       type.c_str(), name.c_str());
    #endif
    
    // if AtmosphereModel name doesn't exist, create AtmosphereModel
-   if (GetAtmosphereModel(name) == NULL)
+   AtmosphereModel *obj = GetAtmosphereModel(name);
+   if (obj == NULL)
    {
-      AtmosphereModel *obj =
-         theFactoryManager->CreateAtmosphereModel(type, name, body);
+      obj = theFactoryManager->CreateAtmosphereModel(type, name);
       
       if (obj ==  NULL)
          throw GmatBaseException
@@ -3254,7 +3326,7 @@ AtmosphereModel* Moderator::CreateAtmosphereModel(const std::string &type,
          ("Moderator::CreateAtmosphereModel() Unable to create AtmosphereModel "
           "name: %s already exist\n", name.c_str());
       #endif
-      return GetAtmosphereModel(name);
+      return obj;
    }
 }
 
@@ -4000,57 +4072,13 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
       ("Moderator::CreateDefaultPropSetup() entered, name='%s'\n", name.c_str());
    #endif
    
-   // create PropSetup, PropSetup constructor creates default RungeKutta89 Integrator
+   // Create PropSetup, PropSetup constructor creates default RungeKutta89 Integrator
    // and Earth PointMassForce
-   PropSetup *propSetup = CreatePropSetup(name);
-   
-//   // Create default force model with Earth primary body with JGM2
-//   // Changed back to unnamed ForceModel, since FinalPass() should not be called
-//   // from ScriptInterpreter::Interpret(GmatCommand *inCmd, ...) when parsing
-//   // commands in ScriptEvent for Bug 2436 fix (LOJ: 2011.07.05)
-//   // Why unnamed FM? Changed back to named FM, since it causes error in
-//   // Interpreter::FinalPass() when parsing ScriptEvent (Begin/EndScript) from GUI.
-//   // The error is about undefined DefaultProp_ForceModel(LOJ: 2011.01.12)
-//   //ODEModel *fm= CreateODEModel("ForceModel", name + "_ForceModel");
-//   // Create unnamed ODEModel when creating default PropSetup (LOJ: 2009.11.23)
-//   // and delete fm after setting it to PropSetup (see below)
-//   ODEModel *fm = CreateODEModel("ForceModel", "");
-//   fm->SetName(name + "_ForceModel");
-
-   // Hiding the force model from the configuration is causing issues, so I'm
-   // changing the behavior described above, which seems to have been changed
-   // back and forth several times.  The behavior, by design and customer
-   // buy-in, is to always place force models (ODEModel objects) into the
-   // configuration.  Let's adapt the other code that has issues with this to
-   // match this design pattern, rather than changing the design pattern
-   // differently in different portions of the code.
+   PropSetup *propSetup = CreatePropSetup(name);   
    std::string theFmName = name + "_ForceModel";
-   ODEModel *fm = CreateODEModel("ForceModel", theFmName);
-   
-   //=======================================================
-   #if 0
-   //=======================================================
-   GravityField *gravForce = new GravityField("", "Earth");
-   
-   #ifdef DEBUG_MEMORY
-   std::string funcName;
-   funcName = currentFunction ? "function: " + currentFunction->GetName() : "";
-   MemoryTracker::Instance()->Add
-      (gravForce, gravForce->GetName(),
-       "Moderator::CreateDefaultPropSetup(), *gravForce = new GravityField", funcName);
-   #endif
-   
-   gravForce->SetName("Earth");
-   gravForce->SetSolarSystem(theSolarSystemInUse);
-   gravForce->SetBody("Earth");
-   gravForce->SetBodyName("Earth");
-   gravForce->SetStringParameter("PotentialFile", GetFileName("JGM2_FILE"));
-   //=======================================================
-   #endif
-   //=======================================================
-   
+   ODEModel *fm = CreateODEModel("ForceModel", theFmName);   
    propSetup->SetODEModel(fm);
-     
+   
    #if DEBUG_CREATE_PROP_SETUP
    MessageInterface::ShowMessage
       ("Moderator::CreateDefaultPropSetup() returning new DefaultPropSetup <%p>\n", propSetup);
@@ -4925,15 +4953,21 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
          // or creating inside a function (LOJ: 2015.02.19 - to fix ACE script)
          if (createDefault || manage == 2)
          {
-            // create MJ2000Eq AxisSystem with Earth as origin
-            AxisSystem *axis = CreateAxisSystem("MJ2000Eq", "MJ2000Eq_Earth");
+            AxisSystem *axis;
+            if (name.find("Fixed") == std::string::npos)
+               // create MJ2000Eq AxisSystem with Earth as origin
+               axis = CreateAxisSystem("MJ2000Eq", "MJ2000Eq_Earth");
+            else
+               // create body fixed AxisSystem with Earth as origin
+               axis = CreateAxisSystem("BodyFixed", "EarthFixed");
+            
             obj->SetJ2000BodyName("Earth");
             obj->SetStringParameter("Origin", "Earth");
             obj->SetRefObject(earth, Gmat::SPACE_POINT, "Earth");
             obj->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
             obj->SetSolarSystem(ss);
             obj->Initialize();
-            
+
             // Since CoordinateSystem clones AxisSystem, delete it from here
             #ifdef DEBUG_MEMORY
             MemoryTracker::Instance()->Remove
@@ -5015,7 +5049,6 @@ bool Moderator::IsDefaultCoordinateSystem(const std::string &name)
 // Subscriber
 //------------------------------------------------------------------------------
 // Subscriber* CreateSubscriber(const std::string &type, const std::string &name,
-//                              const std::string &fileName = "",
 //                              bool createDefault = false)
 //------------------------------------------------------------------------------
 /**
@@ -5031,14 +5064,12 @@ bool Moderator::IsDefaultCoordinateSystem(const std::string &name)
 //------------------------------------------------------------------------------
 Subscriber* Moderator::CreateSubscriber(const std::string &type,
                                         const std::string &name,
-                                        const std::string &fileName,
                                         bool createDefault)
 {
-   #if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_SUBSCRIBER
    MessageInterface::ShowMessage
-      ("Moderator::CreateSubscriber() type='%s', name='%s', fileName='%s'\n"
-       "   createDefault=%d\n", type.c_str(), name.c_str(), fileName.c_str(),
-       createDefault);
+      ("Moderator::CreateSubscriber() type='%s', name='%s'\n"
+       "   createDefault=%d\n", type.c_str(), name.c_str(), createDefault);
    MessageInterface::ShowMessage
       ("   currentFunction = <%p>'%s', objectManageOption=%d\n", currentFunction,
        currentFunction ? currentFunction->GetName().c_str() : "NULL",
@@ -5047,7 +5078,7 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
    
    if (GetSubscriber(name) == NULL)
    {      
-      Subscriber *obj = theFactoryManager->CreateSubscriber(type, name, fileName);
+      Subscriber *obj = theFactoryManager->CreateSubscriber(type, name);
       
       if (obj == NULL)
       {
@@ -5083,7 +5114,7 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
                AddObject(obj);
          }
          
-         #if DEBUG_CREATE_RESOURCE
+         #if DEBUG_CREATE_SUBSCRIBER
          MessageInterface::ShowMessage
             ("Moderator::CreateSubscriber() Creating default Subscriber...\n");
          #endif
@@ -5138,7 +5169,7 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
                                        e.GetFullMessage());
       }
       
-      #if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_SUBSCRIBER
       MessageInterface::ShowMessage
          ("Moderator::CreateSubscriber() returning new Subscriber <%p><%s>'%s'\n",
           obj, obj->GetTypeName().c_str(), obj->GetName().c_str());
@@ -5148,7 +5179,7 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
    }
    else
    {
-      #if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_SUBSCRIBER
       MessageInterface::ShowMessage
          ("Moderator::CreateSubscriber() Unable to create Subscriber "
           "name: %s already exist\n", name.c_str());
@@ -6900,15 +6931,15 @@ Integer Moderator::RunMission(Integer sandboxNum)
 			isRunReady = false;
 		}
 		#ifdef DEBUG_SHOW_SYSTEM_EXCEPTIONS
-        catch (const std::exception& ex) 
-        {
-           status = -3;
-           MessageInterface::ShowMessage("**** ERROR **** Moderator caught a "
+      catch (const std::exception& ex) 
+      {
+         status = -3;
+         MessageInterface::ShowMessage("**** ERROR **** Moderator caught a "
               "system level exception:\n    %s\nduring Sandbox initialization\n",
               ex.what());
-           isRunReady = false;
-        }
-        #endif
+         isRunReady = false;
+      }
+      #endif
 		catch (...)
 		{
 			status = -3;
@@ -7227,6 +7258,16 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    endOfInterpreter = false;
    runState = Gmat::IDLE;
    
+   // If the log file is from a previously-read script in this session,
+   // reset the log file to the one specified in the startup file
+   GmatGlobal *gg    = GmatGlobal::Instance();
+   Integer    logSrc = gg->GetLogfileSource();
+   if (logSrc == GmatGlobal::SCRIPT)
+   {
+      gg->SetLogfileSource(GmatGlobal::STARTUP);
+      std::string logName = gg->GetLogfileName(GmatGlobal::STARTUP);
+      MessageInterface::SetLogFile(logName);
+   }
    //MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage
       ("\nInterpreting scripts from the file.\n***** file: " + filename + "\n");
@@ -7410,6 +7451,17 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    return isGoodScript;
 }
 
+//------------------------------------------------------------------------------
+// void ClearScript()
+//------------------------------------------------------------------------------
+/**
+ * Clears scirpt related data
+ */
+//------------------------------------------------------------------------------
+void Moderator::ClearScript()
+{
+   theScriptInterpreter->Clear();
+}
 
 //------------------------------------------------------------------------------
 // bool InterpretScript(std::istringstream *ss, bool clearObjs)
@@ -8869,8 +8921,7 @@ void Moderator::CheckParameterType(Parameter **param, const std::string &type,
 //      if ((*param)->GetOwnerType() != obj->GetType())
       if (!obj->IsOfType(paramType))
       {
-         std::string paramOwnerType =
-            GmatBase::GetObjectTypeString((*param)->GetOwnerType());
+         std::string paramOwnerType = GetObjectTypeString((*param)->GetOwnerType());
          
          #ifdef DEBUG_PARAMETER_TYPE
          MessageInterface::ShowMessage
@@ -8928,7 +8979,7 @@ void Moderator::CheckParameterType(Parameter **param, const std::string &type,
                if (paramInfo->IsForAttachedObject(type))
                {
                   Gmat::ObjectType ownedObjType = paramInfo->GetOwnedObjectType(type);
-                  subMsg = GmatBase::GetObjectTypeString(ownedObjType) + " attached to ";
+                  subMsg = GetObjectTypeString(ownedObjType) + " attached to ";
                }
                
                throw GmatBaseException
@@ -9312,10 +9363,10 @@ GmatBase* Moderator::FindObject(const std::string &name)
 
 //------------------------------------------------------------------------------
 // void AddObjectToObjectMapInUse(const std::string &name, GmatBase *obj,
-//                                Gmat::ObjectType objType)
+//                                Gmat::ObjectType objTypeId)
 //------------------------------------------------------------------------------
 void Moderator::AddObjectToObjectMapInUse(const std::string &name, GmatBase *obj,
-                                          Gmat::ObjectType objType)
+                                          Gmat::ObjectType objTypeId)
 {
    try
    {
@@ -9323,7 +9374,7 @@ void Moderator::AddObjectToObjectMapInUse(const std::string &name, GmatBase *obj
       {
          if (objectManageOption == 1)
          {
-            theConfigManager->AddObject(objType, obj);
+            theConfigManager->AddObject(objTypeId, obj);
             #if DEBUG_ADD_OBJECT
             MessageInterface::ShowMessage
                ("   ==> '%s' added to configuration\n", name.c_str());
@@ -9651,6 +9702,11 @@ Hardware* Moderator::GetDefaultHardware(const std::string &type)
 Subscriber* Moderator::GetDefaultSubscriber(const std::string &type, bool addObjects,
                                             bool createIfNoneFound)
 {
+   #ifdef DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage
+      ("Moderator::GetDefaultSubscriber() entered, type='%s'\n", type.c_str());
+   #endif
+   
    StringArray configList = GetListOfObjects(Gmat::SUBSCRIBER);
    int subSize = configList.size();
    Subscriber *sub = NULL;
@@ -9767,6 +9823,11 @@ Subscriber* Moderator::GetDefaultSubscriber(const std::string &type, bool addObj
           type.c_str());
    }
 
+   #ifdef DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage
+      ("Moderator::GetDefaultSubscriber() returning, <%p>'%s'\n", sub,
+       sub->GetName().c_str());
+   #endif
    return sub;
 }
 
@@ -10091,6 +10152,10 @@ void Moderator::HandleCcsdsEphemerisFile(ObjectMap *objMap, bool deleteOld)
    for (ObjectMap::iterator i = objMap->begin(); i != objMap->end(); ++i)
    {
       obj = i->second;
+      
+      if (!obj)
+         throw GmatBaseException
+               ("Moderator::AddSubscriberToSandbox() Error in objMap\n");
       
       //==============================================================
       // Special handling for CcsdsEphemerisFile plug-in

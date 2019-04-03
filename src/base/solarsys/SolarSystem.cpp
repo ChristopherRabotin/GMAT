@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -871,12 +871,7 @@ SolarSystem::~SolarSystem()
       MessageInterface::ShowMessage
          ("   deleting theDefaultDeFile=%p\n", theDefaultDeFile);
       #endif
-
-      // This call crashes Linux
-      /// @todo Track down and fix the solar system destructor call for DeFile
-      #ifndef __linux
-          delete theDefaultDeFile;
-      #endif
+      delete theDefaultDeFile;
    }
 
 #ifdef __USE_SPICE__

@@ -1,0 +1,65 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Configure and Run the Contact Locator</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Tut_EventLocation.html" title="Chapter&nbsp;11.&nbsp;Finding Eclipses and Station Contacts"><link rel="prev" href="ch11s04.html" title="Configure and Run the Eclipse Locator"><link rel="next" href="ch11s06.html" title="Further Exercises"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Configure and Run the Contact Locator</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ch11s04.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;11.&nbsp;Finding Eclipses and Station Contacts</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ch11s06.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N13B8D"></a>Configure and Run the Contact Locator</h2></div></div></div><p>Finding ground station contact times is a very similar process, but
+    we'll use the ContactLocator resource instead. First we need to add a
+    GroundStation, then we can configure the locator to find contact times
+    between it and our spacecraft.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N13B92"></a>Create and Configure a Ground Station</h3></div></div></div><p>Let's create a ground station that will be in view from the final
+      geostationary orbit. By looking at the DefaultGroundTrackPlot window,
+      our spacecraft is positioned over the Indian Ocean. A ground station in
+      India should be in view. We can choose the Hyderabad facility, which has
+      the following properties:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Latitude: 17.0286 deg</p></li><li class="listitem"><p>Longitude: 78.1883 deg</p></li><li class="listitem"><p>Altitude: 0.541 km</p></li></ul></div><p>Let's create this ground station in GMAT:</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>First, close all graphics and solver windows, to allow full
+          manipulation of resources.</p></li><li class="step"><p>On the <span class="guilabel">Resources</span> tab, right-click the
+          <span class="guilabel">Ground Station</span> folder and click <span class="guilabel">Add
+          Ground Station</span>. This will create a new resource called
+          <span class="guilabel">GroundStation1</span>.</p></li><li class="step"><p>Rename <span class="guilabel">GroundStation1</span> to
+          <span class="guilabel">Hyderabad</span>.</p></li><li class="step"><p>Double-click <span class="guilabel">Hyderabad</span> to edit its
+          configuration.</p><p>The following values are configured appropriately by default,
+          so we won't change them:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="guilabel">Min. Elevation</span>: This is the minimum
+              elevation angle from the ground station for a valid contact. The
+              current value (7 deg) is appropriate for this case.</p></li><li class="listitem"><p><span class="guilabel">Central Body</span>: Earth is the only
+              allowed value at this time.</p></li></ul></div></li><li class="step"><p>In the <span class="guilabel">State Type</span> list, select
+          <span class="guilabel">Spherical</span>. This allows input in latitude,
+          longitude, and altitude.</p></li><li class="step"><p>In the <span class="guilabel">Horizon Reference</span> list, select
+          <span class="guilabel">Ellipsoid</span>.</p></li><li class="step"><p>In the <span class="guilabel">Latitude</span> box, type
+          <code class="literal">17.0286</code>.</p></li><li class="step"><p>In the <span class="guilabel">Longitude</span> box, type
+          <code class="literal">78.1883</code>.</p></li><li class="step"><p>In the <span class="guilabel">Altitude</span> box, type
+          <code class="literal">0.541</code>.</p></li><li class="step"><p>Click <span class="guilabel">OK</span> to accept these changes.</p></li></ol></div><p>The configured <span class="guilabel">GroundStation</span> should look like
+      the following screenshot:</p><div class="informalfigure"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_EventLocation_GroundStation.png" align="middle" height="430"></td></tr></table></div></div></div><p>If you add the <span class="guilabel">GroundStation</span> to the
+      <span class="guilabel">DefaultGroundTrackPlot</span>, you can see the location
+      visually:</p><div class="informalfigure"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_EventLocation_GroundTrackPlot.png" align="middle" height="340"></td></tr></table></div></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N13C26"></a>Create and Configure the ContactLocator</h3></div></div></div><p>Now we can create a ContactLocator that will search for contact
+      times between our spacecraft and the Hyderabad station.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>On the <span class="guilabel">Resources</span> tab, right-click the
+          <span class="guilabel">Event Locators</span> folder, point to
+          <span class="guilabel">Add</span>, and click
+          <span class="guilabel">ContactLocator</span>. This will create
+          <span class="guilabel">ContactLocator1</span>.</p></li><li class="step"><p>Double-click <span class="guilabel">ContactLocator1</span> to edit the
+          configuration.</p><p>Many of the default values are identical to the
+          <span class="guilabel">EclipseLocator</span>, so we don't need to explain
+          them again. There are a couple new properties that we'll note, but
+          won't change:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="guilabel">Occulting Bodies</span>: These are celestial
+              bodies that GMAT will search for occultations of the line of
+              sight between the spacecraft and the ground station. Since our
+              spacecraft is orbiting the Earth, we don't need to choose any
+              occulting bodies. Note that Earth is considered automatically
+              because it is the central body of the ground station.</p></li><li class="listitem"><p><span class="guilabel">Light-time direction</span>: This is the
+              signal sense of the ground station. You can choose to calculate
+              light-time delay as if the ground station is transmitting, or if
+              it is receiving.</p></li></ul></div></li><li class="step"><p>In the <span class="guilabel">Observers</span> list, enable
+          <span class="guilabel">Hyderabad</span>. This will cause GMAT to search for
+          contacts to this station.</p></li><li class="step"><p>In the <span class="guilabel">Step size</span> box, type
+          <code class="literal">600</code>. Since we're not using third-body
+          occultations, this step size can be increased significantly without
+          missing events. See the <a class="xref" href="ContactLocator.html" title="ContactLocator"><span class="refentrytitle">ContactLocator</span></a>
+          documentation for details.</p></li><li class="step"><p>Click <span class="guibutton">OK</span> to accept the changes.</p></li></ol></div><p>When fully configured, the GroundStation1 window will look like
+      the following screenshot:</p><div class="informalfigure"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_EventLocation_ContactLocator.png" align="middle" height="461"></td></tr></table></div></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N13C7B"></a>Run the Mission</h3></div></div></div><p>Now it's time to run the mission again and look at these new
+      results.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Click <span class="guilabel">Run</span> (<span class="inlinemediaobject"><img src="../files/images/icons/RunMission.png" align="middle" height="10"></span>) to run the mission.</p><p>The contact search will take much less time than the eclipse
+          search, since we're using a larger step size. As it progresses,
+          you'll see the following message in the message window at the bottom
+          of the screen:</p><pre class="programlisting">Finding events for ContactLocator ContactLocator1 ...
+Celestial body properties are provided by SPICE kernels.</pre></li><li class="step"><p>When the run is complete, click the
+          <span class="guilabel">Output</span> tab to view the available output.</p></li><li class="step"><p>Double-click <span class="guilabel">ContactLocator1</span> to view the
+          report.</p></li></ol></div><p>You'll see a report that looks similar to this:</p><div class="informalfigure"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_EventLocation_ContactReport.png" align="middle" height="337"></td></tr></table></div></div></div><p>Notice that two contact intervals were found: one about 6 minutes
+      long at the very beginning of the mission (it starts at the Spacecraft's
+      initial epoch), and a second one about 29 hours long, starting once it
+      gets into geosynchronous orbit and extending to the end of the
+      simulation.</p><div class="procedure"><ul class="procedure"><li class="step"><p>Click <span class="guilabel">Close</span> to close the report. The
+          report text is still available as
+          <code class="filename">ContactLocator1.txt</code> in the GMAT
+          <code class="filename">output</code> folder.</p></li></ul></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ch11s04.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Tut_EventLocation.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ch11s06.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Configure and Run the Eclipse Locator&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Further Exercises</td></tr></table></div></body></html>

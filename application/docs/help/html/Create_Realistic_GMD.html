@@ -1,0 +1,278 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Create a more realistic GMAT Measurement Data (GMD)</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Tut_Simulate_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;13.&nbsp;Simulate DSN Range and Doppler Data"><link rel="prev" href="Run_the_mission_and_analyze_the_results.html" title="Run the mission and analyze the results"><link rel="next" href="ch13s09.html" title="References"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Create a more realistic GMAT Measurement Data (GMD)</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Run_the_mission_and_analyze_the_results.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;13.&nbsp;Simulate DSN Range and Doppler Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ch13s09.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="Create_Realistic_GMD"></a>Create a more realistic GMAT Measurement Data (GMD)</h2></div></div></div><p>We have run a short simple simulation and generated a sample GMD
+    file. Our next goal is to generate a realistic GMD file that a different
+    script can read in and generate an orbit determination solution. To add
+    more realism, we will do the following:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Generate data from additional ground stations</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Add the use of a ramp table</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Perform a longer simulation</p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Add measurement noise</p></li></ul></div><p>In order to generate measurement data from additional ground
+    stations, we must first create and configure additional
+    <span class="guilabel">GroundStation</span> objects. Below, we create and configure
+    two new ground stations, <span class="guilabel">GDS</span> and
+    <span class="guilabel">MAD</span>.</p><pre class="programlisting">Create GroundStation GDS;  
+GDS.CentralBody           = Earth;
+GDS.StateType             = Cartesian;
+GDS.HorizonReference      = Ellipsoid;
+GDS.Location1             = -2353.621251;
+GDS.Location2             = -4641.341542;
+GDS.Location3             = 3677.052370;
+GDS.Id                    = '33333';
+GDS.AddHardware           = {DSNTransmitter, DSNAntenna, DSNReceiver};
+GDS.MinimumElevationAngle = 7.0;
+GDS.IonosphereModel       = 'IRI2007';
+GDS.TroposphereModel      = 'HopfieldSaastamoinen';
+
+Create GroundStation MAD;  
+MAD.CentralBody           = Earth;
+MAD.StateType             = Cartesian;
+MAD.HorizonReference      = Ellipsoid;
+MAD.Location1             = 4849.519988;
+MAD.Location2             = -0360.641653;
+MAD.Location3             = 4114.504590;
+MAD.Id                    = '44444';
+MAD.AddHardware           = {DSNTransmitter, DSNAntenna, DSNReceiver};
+MAD.MinimumElevationAngle = 7.0;
+MAD.IonosphereModel       = 'IRI2007';
+MAD.TroposphereModel      = 'HopfieldSaastamoinen';</pre><p>Now that we have defined two additional ground stations, we must
+    specify the measurement noise associated with these new ground stations.
+    This can be done using the previously created
+    <span class="guilabel">ErrorModel</span> resources as shown below.</p><pre class="programlisting">GDS.ErrorModels           = {DSNrange, DSNdoppler};
+MAD.ErrorModels           = {DSNrange, DSNdoppler};</pre><p>Next, we must add the corresponding two way range and Doppler
+    measurements associated with our new ground stations to our
+    <span class="guilabel">TrackingFileSet</span> object,
+    <span class="guilabel">DSNsimData</span>, as shown below.</p><pre class="programlisting">DSNsimData.AddTrackingConfig = {{GDS, Sat, GDS}, 'DSN_SeqRange'};   
+DSNsimData.AddTrackingConfig = {{GDS, Sat, GDS}, 'DSN_TCP'};
+
+DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'DSN_SeqRange'};   
+DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'DSN_TCP'};</pre><p>We now create our ramp table that many but not all missions use. A
+    ramp table is a table that allows GMAT to calculate the transmit frequency
+    of all the ground stations involved in our simulation. Recall that GMAT
+    needs to know the transmit frequency, as a function of time, in order to
+    calculate the value of the observations. The term &ldquo;ramp&rdquo; is used because
+    the transmit frequency increases linearly with time and a graph of
+    transmit frequency vs. time would typically show a ramp. A mission that
+    does not use a ramp table simply uses a constant transmit frequency for a
+    given ground station.</p><p>To modify our script to accommodate the use of a ramp table, we
+    modify our <span class="guilabel">TrackingFileSet</span> object,
+    <span class="guilabel">DSNsimData</span>, as shown below.</p><pre class="programlisting">DSNsimData.RampTable = ...
+{'../output/Simulate DSN Range and Doppler Data 3 weeks.rmp'};</pre><p>We must now create a file with the name shown above in the GMAT
+    &lsquo;output&rsquo; directory. Refer to the <span class="guilabel">TrackingFileSet</span> Help
+    for a description of the ramp table file format. In order for GMAT to
+    determine the transmit frequencies of all the ground stations, the ramp
+    table must have at least one row of data for every ground station
+    providing measurement data. The contents of our ramp table is shown
+    below.</p><div class="literallayout"><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27252&nbsp;&nbsp;&nbsp;22222&nbsp;&nbsp;&nbsp;11111&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;7.2e09&nbsp;&nbsp;&nbsp;0.2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27252&nbsp;&nbsp;&nbsp;33333&nbsp;&nbsp;&nbsp;11111&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;7.3e09&nbsp;&nbsp;&nbsp;0.3<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27252&nbsp;&nbsp;&nbsp;44444&nbsp;&nbsp;&nbsp;11111&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;7.4e09&nbsp;&nbsp;&nbsp;0.4</p></div><p>Each row of data above is called a ramp record. Let&rsquo;s analyze the
+    first ramp record. The first field, 27252, is the TAIMJD date of the ramp
+    record.</p><p>The second field, 22222, is the ground station ID of the
+    <span class="guilabel">GroundStation</span> object whose frequency is being
+    specified. We note that the ID 22222 corresponds to the
+    <span class="guilabel">CAN</span> ground station. The third field, 11111, is the ID
+    of the spacecraft that the <span class="guilabel">CAN</span> ground station is
+    transmitting to. We recognize 11111 as the ID of the
+    <span class="guilabel">Sat</span> spacecraft.</p><p>The 4th field, 2, is an integer representing the uplink band of the
+    transmission. The integer 2 represents X-band. The 5th field, 1, is an
+    integer describing the ramp type. The integer 1 represents the start of a
+    new ramp.</p><p>The 6th field, 7.2e9, is the transmission frequency in Hz, from
+    <span class="guilabel">CAN</span> to <span class="guilabel">Sat</span> at the time given by
+    the first field. The 7th input is the ramp rate in Hz/s.</p><p>We now describe how GMAT uses the ramp record to determine the
+    transmit frequency of <span class="guilabel">CAN</span> to <span class="guilabel">Sat</span>
+    at a given time. We let TAIMJD be the time associated with the ramp
+    record. Then GMAT will calculate the value of the transmit frequency at
+    t&nbsp;=&nbsp;27252.5 TAIMJD as shown below.</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+        <m:mrow>
+          <m:mi>f</m:mi>
+
+          <m:mo stretchy="false">(</m:mo>
+
+          <m:mi>t</m:mi>
+
+          <m:mo stretchy="false">)</m:mo>
+
+          <m:mo>=</m:mo>
+
+          <m:mi>f</m:mi>
+
+          <m:mo stretchy="false">(</m:mo>
+
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mi>o</m:mi>
+          </m:msub>
+
+          <m:mo stretchy="false">)</m:mo>
+
+          <m:mo>+</m:mo>
+
+          <m:mi>R</m:mi>
+
+          <m:mi>a</m:mi>
+
+          <m:mi>m</m:mi>
+
+          <m:mi>p</m:mi>
+
+          <m:mi>R</m:mi>
+
+          <m:mi>a</m:mi>
+
+          <m:mi>t</m:mi>
+
+          <m:mi>e</m:mi>
+
+          <m:mo>*</m:mo>
+
+          <m:mn>86400</m:mn>
+
+          <m:mo>*</m:mo>
+
+          <m:mrow>
+            <m:mo>(</m:mo>
+
+            <m:mrow>
+              <m:mi>t</m:mi>
+
+              <m:mo>&minus;</m:mo>
+
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mi>o</m:mi>
+              </m:msub>
+            </m:mrow>
+
+            <m:mo>)</m:mo>
+          </m:mrow>
+        </m:mrow>
+      </m:math></div><p>where</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mi>f</m:mi>
+
+        <m:mo stretchy="false">(</m:mo>
+
+        <m:msub>
+          <m:mi>t</m:mi>
+
+          <m:mi>o</m:mi>
+        </m:msub>
+
+        <m:mo stretchy="false">)</m:mo>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>Transmit&nbsp;Frequency&nbsp;at&nbsp;the&nbsp;start&nbsp;of&nbsp;the&nbsp;ramp&nbsp;record</m:mtext>
+      </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mi>f</m:mi>
+
+        <m:mo stretchy="false">(</m:mo>
+
+        <m:mi>t</m:mi>
+
+        <m:mo stretchy="false">)</m:mo>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>Transmit&nbsp;Frequency&nbsp;at&nbsp;a&nbsp;later&nbsp;time,&nbsp;</m:mtext>
+
+        <m:mi>t</m:mi>
+
+        <m:mo>&gt;</m:mo>
+
+        <m:msub>
+          <m:mi>t</m:mi>
+
+          <m:mi>o</m:mi>
+        </m:msub>
+      </m:math></div><p>Note that, in the typical case where there are numerous ramp
+    records, it is assumed that <m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+          <m:mrow>
+            <m:msub>
+              <m:mi>t</m:mi>
+
+              <m:mi>o</m:mi>
+            </m:msub>
+
+            <m:mo>&lt;</m:mo>
+
+            <m:mi>t</m:mi>
+          </m:mrow>
+        </m:math> is chosen as close to time t as possible. For our case
+    above, the transmit frequency from <span class="guilabel">CAN</span> to
+    <span class="guilabel">Sat</span> at time t is</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+        <m:mrow>
+          <m:mi>f</m:mi>
+
+          <m:mo stretchy="false">(</m:mo>
+
+          <m:mi>t</m:mi>
+
+          <m:mo stretchy="false">)</m:mo>
+
+          <m:mo>=</m:mo>
+
+          <m:mn>7.2</m:mn>
+
+          <m:mi>e</m:mi>
+
+          <m:mn>9</m:mn>
+
+          <m:mo>+</m:mo>
+
+          <m:mn>0.2</m:mn>
+
+          <m:mo>*</m:mo>
+
+          <m:mn>86400</m:mn>
+
+          <m:mo>*</m:mo>
+
+          <m:mrow>
+            <m:mo>(</m:mo>
+
+            <m:mrow>
+              <m:mn>27252.5</m:mn>
+
+              <m:mo>&minus;</m:mo>
+
+              <m:mn>27252</m:mn>
+            </m:mrow>
+
+            <m:mo>)</m:mo>
+          </m:mrow>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>7200008640&nbsp;Hz</m:mtext>
+        </m:mrow>
+      </m:math></div><p>The second and third rows of the ramp table allow GMAT to calculate
+    the transmit frequency from <span class="guilabel">GDS</span> to
+    <span class="guilabel">Sat</span> and <span class="guilabel">MAD</span> to
+    <span class="guilabel">Sat</span>, respectively. We now create a file,
+    <code class="filename">Simulate DSN Range and Doppler Data Realistic
+    GMD.rmp</code>, with the contents shown above and place it in GMAT&rsquo;s
+    &lsquo;output&rsquo; folder.</p><p>We make one final comment about the use of a ramp table. We note
+    that when a ramp table is used, GMAT uses the various script inputs (e.g.,
+    <span class="guilabel">SatTransponder.TurnAroundRatio</span> and
+    <span class="guilabel">DSNTransmitter.Frequency</span>) differently. See the
+    <span class="guilabel">RunSimulator</span> Help for details.</p><p>We only have two steps remaining in order to create a script that
+    generates more realistic measurement data. The first step is to increase
+    the simulation time from 10 minutes to the more realistic 3 weeks worth of
+    data that is typically needed to generate an orbit determination solution
+    for a spacecraft in this type of deep space orbit. The second step is to
+    turn on the measurement noise. These two steps are accomplished by making
+    the following changes to our <span class="guilabel">TrackingFileSet</span> object,
+    <span class="guilabel">DSNsimData</span>.</p><pre class="programlisting">Sim.FinalEpoch          = '09 Sep 2015 00:00:00.000';
+Sim.AddNoise            = On;
+Sim.MeasurementTimeStep = 3600;</pre><p>Note that above, in addition to implementing the two needed steps,
+    we also changed the measurement time step from 600 seconds to 3600
+    seconds. This is not a realistic time step as many missions would use a
+    time step that might even be less than 600 seconds. We used this larger
+    time step for tutorial purposes only so that the script would not take too
+    long to run.</p><p>A complete script, containing all the changes we have made in the
+    <a class="xref" href="Create_Realistic_GMD.html" title="Create a more realistic GMAT Measurement Data (GMD)">Create a more realistic GMAT Measurement Data (GMD)</a> section,
+    is contained in the file,
+    <code class="filename">Tut_Simulate_DSN_Range_and_Doppler_Data_3_weeks.script</code>.
+    Note that in this file, in addition to the changes above, we have also
+    changed the GMD output file name to <code class="filename">Simulate DSN Range and
+    Doppler Data 3 weeks.gmd</code>.</p><p>Now run the script which should take approximately 1-2 minutes since
+    we are generating much more data than previously. We will use the GMD file
+    we have created here as input to an estimation script we will build in the
+    next tutorial, <span class="bold"><strong>Orbit Estimation using DSN Range and
+    Doppler Data</strong></span>.</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Run_the_mission_and_analyze_the_results.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Tut_Simulate_DSN_Range_and_Doppler_Data.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ch13s09.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Run the mission and analyze the results&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;References</td></tr></table></div></body></html>

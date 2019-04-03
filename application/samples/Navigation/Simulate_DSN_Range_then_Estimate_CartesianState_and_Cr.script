@@ -169,7 +169,7 @@ SunMJ2000Eq.Axes = MJ2000Eq;
 %----------------------------------------
 
 Create ErrorModel DSNRange_ErrorModel;
-DSNRange_ErrorModel.Type = 'Range_RU';
+DSNRange_ErrorModel.Type = 'DSN_SeqRange';
 DSNRange_ErrorModel.NoiseSigma = 35.375;         % unit: RU
 DSNRange_ErrorModel.Bias = 0;                    % unit: RU
 DSNRange_ErrorModel.SolveFors = {};

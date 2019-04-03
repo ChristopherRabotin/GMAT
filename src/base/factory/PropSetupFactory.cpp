@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,6 +38,25 @@
 //---------------------------------
 //  public methods
 //---------------------------------
+
+//------------------------------------------------------------------------------
+//  GmatBase* CreatePropSetup(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+* This method creates and returns an object of the requested PropSetup class
+ *
+ * @param <ofType> the PropSetup object to create and return.
+ * @param <withName> the name to give the newly-created PropSetup object.
+ *
+ * @note As of 2003/10/14, we are ignoring the ofType parameter.  Use of this
+ *       parameter may be added later.
+ */
+//------------------------------------------------------------------------------
+GmatBase* PropSetupFactory::CreateObject(const std::string &ofType,
+                                         const std::string &withName)
+{
+   return CreatePropSetup(ofType, withName);
+}
 
 //------------------------------------------------------------------------------
 //  CreatePropSetup(const std::string &ofType, const std::string &withName)

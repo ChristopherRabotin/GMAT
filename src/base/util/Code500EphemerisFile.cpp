@@ -58,6 +58,7 @@
 //#define DEBUG_SET
 //#define DEBUG_READ_DATA
 //#define DEBUG_WRITE_HEADERS
+//#define DEBUG_READ_HEADERS
 //#define DEBUG_WRITE_DATA_SEGMENT
 //#define DEBUG_WRITE_DATA_SEGMENT_MORE
 //#define DEBUG_WRITE_DATA
@@ -92,7 +93,7 @@ const double Code500EphemerisFile::DUT_TO_SEC        = 864.0;
  * @param  satId        Spacecraft ID [123.0]
  * @param  timeSystem   Time system used "UTC" or "A1" ["UTC"]
  * @param  sourceId     Source ID ["GMAT"]
- * @param  centralBody  Central body name used ["Earth"]
+ * @param  centralBody  Central body name of output ephem used ["Earth"]
  * @param  fileMode     1 = input, 2 = output [2]
  * @param  fileFormat   1 = PC, 2 = UNIX [1]
  * @param  yearFormat   1 = YYY, 2 = YYYY
@@ -116,9 +117,10 @@ Code500EphemerisFile::Code500EphemerisFile(const std::string &fileName, double s
    mSatId       = satId;
    mTimeSystem  = timeSystem;
    mSourceId    = sourceId;
-   mCentralBody = centralBody;
+   mOutputCentralBody = centralBody;
    mFileMode    = fileMode;
-   mCentralBodyIndicator = -99.99;
+   mCentralBodyOfIntegration = -99.99;
+   mCentralBodyOfOutputEphem = -99.99;
    if (mFileMode == 1)
    {
       mInputFileName = fileName;
@@ -132,8 +134,8 @@ Code500EphemerisFile::Code500EphemerisFile(const std::string &fileName, double s
       mOutputYearFormat = yearFormat;
       
       // Just for testing
-//      mInputYearFormat = 2;
-//      mOutputYearFormat = 2;
+      // mInputYearFormat = 2;
+      // mOutputYearFormat = 2;
    }
    
    mPrecNutIndicator = 1.0; // hardcoded
@@ -181,8 +183,9 @@ Code500EphemerisFile::Code500EphemerisFile(const Code500EphemerisFile &ef)
    mSatId = ef.mSatId;
    mTimeSystem = ef.mTimeSystem;
    mSourceId = ef.mSourceId;
-   mCentralBody = ef.mCentralBody;
-   mCentralBodyIndicator = ef.mCentralBodyIndicator;
+   mOutputCentralBody = ef.mOutputCentralBody;
+   mCentralBodyOfIntegration = ef.mCentralBodyOfIntegration;
+   mCentralBodyOfOutputEphem = ef.mCentralBodyOfOutputEphem;
    mFileMode = ef.mFileMode;
    mInputFileFormat = ef.mInputFileFormat;
    mOutputFileFormat = ef.mOutputFileFormat;
@@ -211,8 +214,9 @@ Code500EphemerisFile& Code500EphemerisFile::operator=(const Code500EphemerisFile
       mSatId = ef.mSatId;
       mTimeSystem = ef.mTimeSystem;
       mSourceId = ef.mSourceId;
-      mCentralBody = ef.mCentralBody;
-      mCentralBodyIndicator = ef.mCentralBodyIndicator;
+      mOutputCentralBody = ef.mOutputCentralBody;
+      mCentralBodyOfIntegration = ef.mCentralBodyOfIntegration;
+      mCentralBodyOfOutputEphem = ef.mCentralBodyOfOutputEphem;
       mFileMode = ef.mFileMode;
       mInputFileFormat = ef.mInputFileFormat;
       mOutputFileFormat = ef.mOutputFileFormat;
@@ -236,41 +240,22 @@ void Code500EphemerisFile::Initialize()
 {
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage
-      ("Code500EphemerisFile::Initialize() entered, mCentralBody='%s', mSwapInputEndian=%d, "
-       "mSwapOutputEndian=%d\n", mCentralBody.c_str(), mSwapInputEndian, mSwapOutputEndian);
+      ("Code500EphemerisFile::Initialize() entered, mOutputCentralBody='%s', mSwapInputEndian=%d, "
+       "mSwapOutputEndian=%d\n", mOutputCentralBody.c_str(), mSwapInputEndian, mSwapOutputEndian);
    #endif
    
    mProductId = "EPHEM   ";
    mCoordSystem = "2000";
    mTapeId = "STANDARD";
    
-   // Set central body indicator
-   // 1.0 = Earth, 2.0 = Luna(Earth Moon), 3.0 = Sun, 4.0 = Mars, 5.0 = Jupiter,
-   // 6.0 = Saturn, 7.0 = Uranus, 8.0 = Neptune, 9.0 = Pluto, 10.0 = Mercury, 11.0 = Venus
-   if (mCentralBody == "Earth")
-      mCentralBodyIndicator = 1.0;
-   else if (mCentralBody == "Luna")
-      mCentralBodyIndicator = 2.0;
-   else if (mCentralBody == "Sun")
-      mCentralBodyIndicator = 3.0;
-   else if (mCentralBody == "Mars")
-      mCentralBodyIndicator = 4.0;
-   else if (mCentralBody == "Jupiter")
-      mCentralBodyIndicator = 5.0;
-   else if (mCentralBody == "Saturn")
-      mCentralBodyIndicator = 6.0;
-   else if (mCentralBody == "Uranus")
-      mCentralBodyIndicator = 7.0;
-   else if (mCentralBody == "Neptune")
-      mCentralBodyIndicator = 8.0;
-   else if (mCentralBody == "Pluto")
-      mCentralBodyIndicator = 9.0;
-   else if (mCentralBody == "Mercury")
-      mCentralBodyIndicator = 10.0;
-   else if (mCentralBody == "Venus")
-      mCentralBodyIndicator = 11.0;
+   // Set central body of output ephem
+   mCentralBodyOfOutputEphem = GetBodyIndicator(mOutputCentralBody, 2);
+   
+   // Set central body of integration indicator same body as output for now
+   if (mCentralBodyOfOutputEphem == -99.99)
+      mCentralBodyOfIntegration = -99.99;
    else
-      mCentralBodyIndicator = -99.99;
+      mCentralBodyOfIntegration = mCentralBodyOfOutputEphem + 1;
    
    // Time System Indicator: 0.0 = A.1, Atomic Time, 1.0 = UTC, Universal Time Coordinated
    mInputTimeSystem = 0.0;
@@ -297,10 +282,7 @@ void Code500EphemerisFile::Initialize()
    mEndUtcMjd = 0.0;
    mLeapSecsInput = 0.0;
    
-   //mCentralBodyMu = 0.0;
-   //@todo Add GetOriginMu() to Spacecraft to get central body mu to
-   // do cartesian to keplerian state conversion
-   mCentralBodyMu = 398600.4415; // Set to earth mu for now for testing
+   mOutputCentralBodyMu = 0.0;
    
    mSwapInputEndian = false;
    mSwapOutputEndian = false;
@@ -320,8 +302,10 @@ void Code500EphemerisFile::Initialize()
    }
    
    #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage("Code500EphemerisFile::Initialize() leaving, "
-         "mCentralBody = %s\n", mCentralBody.c_str());
+   MessageInterface::ShowMessage
+      ("Code500EphemerisFile::Initialize() leaving, mOutputCentralBody='%s', "
+       "mCentralBodyOfIntegration=%f, mCentralBodyOfOutputEphem=%f\n", mOutputCentralBody.c_str(),
+       mCentralBodyOfIntegration, mCentralBodyOfOutputEphem);
    #endif
 }
 
@@ -339,10 +323,10 @@ void Code500EphemerisFile::Validate()
    if (mFileMode == 1)
    {
       // Check for uninitialized central body indicator
-      if (mCentralBodyIndicator == -99.99)
+      if (mCentralBodyOfOutputEphem == -99.99)
          throw UtilityException
-            ("Code 500 ephemeris header field error: central body indicator "
-             "is uninitialized for the file \"" + mOutputFileName + "\"");
+            ("Code 500 ephemeris header field error: central body of output ephem "
+             "indicator is uninitialized for the file \"" + mOutputFileName + "\"");
    }
 }
 
@@ -499,7 +483,7 @@ void Code500EphemerisFile::CloseForWrite()
  * @param finalEpoch    Final epoch on the file
  * @param initialState  Initial state on the file
  * @param finalState    Final state on the file
- * @param centralBody   Central body on the file
+ * @param centralBody   Central body of output on the file
  * @param coordSystem   Coordinate system on the file
  *                      ("2000" for J2000, "INER" for true of reference, "MEAN" for B1950)
  * @param coordSysIndicator  Coordinate system indicator
@@ -568,33 +552,8 @@ bool Code500EphemerisFile::GetInitialAndFinalStates(Real &initialEpoch, Real &fi
    initialState = mInitialState;
    finalState   = mFinalState;
    
-   // Set central body
-   // 1.0 = Earth, 2.0 = Moon, 3.0 = Sun, 4.0 = Mars, 5.0 = Jupiter, 6.0 = Saturn, 
-   // 7.0 = Uranus, 8.0 = Neptune, 9.0 = Pluto, 10.0 = Mercury, 11.0 = Venus
-   if (mCentralBodyIndicator == 1.0)
-      centralBody = "Earth";
-   else if (mCentralBodyIndicator == 2.0)
-      centralBody = "Moon";
-   else if (mCentralBodyIndicator == 3.0)
-      centralBody = "Sun";
-   else if (mCentralBodyIndicator == 4.0)
-      centralBody = "Mars";
-   else if (mCentralBodyIndicator == 5.0)
-      centralBody = "Jupiter";
-   else if ( mCentralBodyIndicator == 6.0)
-      centralBody = "Saturn";
-   else if (mCentralBodyIndicator == 7.0)
-      centralBody = "Uranus";
-   else if (mCentralBodyIndicator == 8.0)
-      centralBody = "Neptune";
-   else if (mCentralBodyIndicator == 9.0)
-      centralBody = "Pluto";
-   else if (mCentralBodyIndicator == 10.0)
-      centralBody = "Mercury";
-   else if (mCentralBodyIndicator == 11.0)
-      centralBody = "Venus";
-   else
-      centralBody = "Unknown";
+   // Set central body name of output ephem
+   centralBody = GetBodyName(mCentralBodyOfOutputEphem, 2);
    
    // Set coordiante system
    // "2000" for J2000, "INER" for true of reference, "MEAN" for B1950
@@ -686,8 +645,11 @@ bool Code500EphemerisFile::ReadHeader1(int logOption)
             TimeConverterUtil::A1MJD);
    }
    
+   // Save central body of integration indicator
+   mCentralBodyOfIntegration = mEphemHeader1.centralBodyIndicator;
+   
    // Save central body and coordinate system needed by GetInitialAndFinalState()
-   mCentralBodyIndicator = mEphemHeader1.centralBodyIndicator;
+   mCentralBodyOfOutputEphem = mEphemHeader1.coordinateCenterIndicator;
    std::string coordSystemStr = mEphemHeader1.coordSystemIndicator1;
    mCoordSystem = coordSystemStr.substr(0,4);
    mCoordSystemIndicator = mEphemHeader1.coordSystemIndicator2;
@@ -710,6 +672,7 @@ bool Code500EphemerisFile::ReadHeader1(int logOption)
    #ifdef DEBUG_READ_HEADERS
    MessageInterface::ShowMessage("A.1 Start Epoch: %.12lf\n", a1StartEpoch);
    MessageInterface::ShowMessage("A.1 End Epoch:   %.12lf\n", a1EndEpoch);
+   MessageInterface::ShowMessage("A.1 Step Size:   %.12lf\n", mEphemHeader1.stepSize_SEC);
 
    MessageInterface::ShowMessage
       ("Code500EphemerisFile::ReadHeader1() returning true, mInputTimeSystem=%d\n",
@@ -1234,7 +1197,8 @@ void Code500EphemerisFile::InitializeHeaderRecord1()
    CopyString(mEphemHeader1.sourceId, mSourceId, 8);
    WriteDoubleField(&mEphemHeader1.timeSystemIndicator, mOutputTimeSystem);
    WriteDoubleField(&mEphemHeader1.refTimeForDUT_YYMMDD, mRefTimeForDUT_YYMMDD);
-   WriteDoubleField(&mEphemHeader1.centralBodyIndicator, mCentralBodyIndicator);
+   WriteDoubleField(&mEphemHeader1.centralBodyIndicator, mCentralBodyOfIntegration);
+   WriteDoubleField(&mEphemHeader1.coordinateCenterIndicator, mCentralBodyOfOutputEphem);
    CopyString(mEphemHeader1.coordSystemIndicator1, mCoordSystem, 4); // "2000" for J2000
    WriteIntegerField(&mEphemHeader1.coordSystemIndicator2, 4); // 2 = Mean of 1950, 3 = True of reference, 4 = J2000
    
@@ -1308,7 +1272,7 @@ void Code500EphemerisFile::InitializeDataRecord()
    for (int i = 0; i < NUM_STATES_PER_RECORD - 1; i++)
    {
       for (int j = 0; j < 6; j++)
-         WriteDoubleField(&mEphemData.stateVector2Thru50_DULT[i-1][j], mSentinelData);
+         WriteDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j], mSentinelData);
    }
    
    // Blank out spares
@@ -1506,9 +1470,17 @@ void Code500EphemerisFile::SetTimeIntervalBetweenPoints(double secs)
 //------------------------------------------------------------------------------
 // void SetCentralBodyMu(double mu)
 //------------------------------------------------------------------------------
+/**
+ * Sets central body mu for ephem output cartesian to keplerian conversion
+ */
+//------------------------------------------------------------------------------
 void Code500EphemerisFile::SetCentralBodyMu(double mu)
 {
-   mCentralBodyMu = mu;
+   #ifdef DEBUG_CENTRALBODY_MU
+   MessageInterface::ShowMessage
+      ("Code500EphemerisFile::SetCentralBodyMu() entered, mu=%.15f\n", mu);
+   #endif
+   mOutputCentralBodyMu = mu;
 }
 
 
@@ -1566,7 +1538,7 @@ void Code500EphemerisFile::SetInitialState(Rvector6 *kmsec)
    SetInitialCartesianState(cartState);
    
    Rvector6 kepState =
-      StateConversionUtil::Convert(cartState, "Cartesian", "Keplerian", mCentralBodyMu);  // flat, radius, "TA");
+      StateConversionUtil::Convert(cartState, "Cartesian", "Keplerian", mOutputCentralBodyMu);  // flat, radius, "TA");
    SetInitialKeplerianState(kepState);
 }
 
@@ -1589,7 +1561,6 @@ void Code500EphemerisFile::SetInitialCartesianState(const Rvector6 &cartState)
    
    for (int i = 0; i < 6; i++)
    {
-      //mEphemHeader1.cartesianElementsAtEpoch_DULT[i] = cartStateDULT[i];
       WriteDoubleField(&mEphemHeader1.cartesianElementsAtEpoch_DULT[i], cartStateDULT[i]);
    }
    
@@ -1949,6 +1920,7 @@ void Code500EphemerisFile::UnpackHeader1()
    MessageInterface::ShowMessage("sourceId                            = '%s'\n", sourceIdStr.substr(0,8).c_str());
    MessageInterface::ShowMessage("headerTitle                         = '%s'\n", headerTitleStr.substr(0,56).c_str());
    DebugDouble("centralBodyIndicator                = % f\n", mEphemHeader1.centralBodyIndicator, swap);
+   DebugDouble("coordinateCenterIndicator           = % f\n", mEphemHeader1.coordinateCenterIndicator, swap);
    DebugDouble("refTimeForDUT_YYMMDD                = % f\n", mEphemHeader1.refTimeForDUT_YYMMDD, swap);
    MessageInterface::ShowMessage("coordSystemIndicator1               = '%s'\n", coordSystemStr.substr(0,4).c_str());
    DebugInteger("coordSystemIndicator2               = %d\n", mEphemHeader1.coordSystemIndicator2, swap);
@@ -2315,49 +2287,18 @@ Real Code500EphemerisFile::GetTimeSystem()
 
 
 //------------------------------------------------------------------------------
-// std::string Code500EphemerisFile::GetCentralBody()
+// std::string GetCentralBody()
 //------------------------------------------------------------------------------
 /**
- * Retrieves the name of the central body
+ * Retrieves the name of the central body of output ephem
  *
  * @return The central body name
  */
 //------------------------------------------------------------------------------
 std::string Code500EphemerisFile::GetCentralBody()
 {
-   // Default to body used in the constructor call
-   std::string retval = mCentralBody;
-
-   // Find central body name from central body indicator
-   // 1.0 = Earth, 2.0 = Luna(Earth Moon), 3.0 = Sun, 4.0 = Mars, 5.0 = Jupiter,
-   // 6.0 = Saturn, 7.0 = Uranus, 8.0 = Neptune, 9.0 = Pluto, 10.0 = Mercury,
-   // 11.0 = Venus
-   if (mCentralBodyIndicator == 1.0)
-      retval = "Earth";
-   if (mCentralBodyIndicator == 2.0)
-      retval = "Luna";
-   if (mCentralBodyIndicator == 3.0)
-      retval = "Sun";
-   if (mCentralBodyIndicator == 4.0)
-      retval = "Mars";
-   if (mCentralBodyIndicator == 5.0)
-      retval = "Jupiter";
-   if (mCentralBodyIndicator == 6.0)
-      retval = "Saturn";
-   if (mCentralBodyIndicator == 7.0)
-      retval = "Uranus";
-   if (mCentralBodyIndicator == 8.0)
-      retval = "Neptune";
-   if (mCentralBodyIndicator == 9.0)
-      retval = "Pluto";
-   if (mCentralBodyIndicator == 10.0)
-      retval = "Mercury";
-   if (mCentralBodyIndicator == 11.0)
-      retval = "Venus";
-
-   // Should we also set mCentralBody here?  Not sure why it wasn't set on read.
-
-   return retval;
+   mOutputCentralBody = GetBodyName(mCentralBodyOfOutputEphem, 2);
+   return mOutputCentralBody;
 }
 
 
@@ -2735,6 +2676,130 @@ std::string Code500EphemerisFile::ToUtcGregorian(const A1Mjd &a1Mjd, bool forOut
    return epochStr;
 }
 
+//------------------------------------------------------------------------------
+// double GetBodyIndicator(const std::string &bodyName, int forWhich)
+//------------------------------------------------------------------------------
+/**
+ * Returns body indicator for integration or ephemeris output
+ *
+ * @param forWhich body indicator for integration = 1
+ *                 body indicator for ephemeris output = 2
+ */
+//------------------------------------------------------------------------------
+double Code500EphemerisFile::GetBodyIndicator(const std::string &bodyName, int forWhich)
+{
+   // Central body name from central body of integration
+   // 1.0 = Earth, 2.0 = Luna(Earth Moon), 3.0 = Sun, 4.0 = Mars, 5.0 = Jupiter,
+   // 6.0 = Saturn, 7.0 = Uranus, 8.0 = Neptune, 9.0 = Pluto, 10.0 = Mercury,
+   // 11.0 = Venus
+   
+   // Central body name from central body of ephem output
+   // 0.0 = Earth, 1.0 = Luna(Earth Moon), 2.0 = Sun, 3.0 = Mars, 4.0 = Jupiter,
+   // 5.0 = Saturn, 6.0 = Uranus, 7.0 = Neptune, 8.0 = Pluto, 9.0 = Mercury,
+   // 10.0 = Venus
+   
+   double bodyIndicator = -99.99;
+   if (bodyName == "Earth")
+      bodyIndicator = 1.0;
+   else if (bodyName == "Luna")
+      bodyIndicator = 2.0;
+   else if (bodyName == "Sun")
+      bodyIndicator = 3.0;
+   else if (bodyName == "Mars")
+      bodyIndicator = 4.0;
+   else if (bodyName == "Jupiter")
+      bodyIndicator = 5.0;
+   else if (bodyName == "Saturn")
+      bodyIndicator = 6.0;
+   else if (bodyName == "Uranus")
+      bodyIndicator = 7.0;
+   else if (bodyName == "Neptune")
+      bodyIndicator = 8.0;
+   else if (bodyName == "Pluto")
+      bodyIndicator = 9.0;
+   else if (bodyName == "Mercury")
+      bodyIndicator = 10.0;
+   else if (bodyName == "Venus")
+      bodyIndicator = 11.0;
+   else
+      bodyIndicator = -99.99;
+   
+   if (forWhich == 2)
+      if (bodyIndicator != -99.99)
+         bodyIndicator = bodyIndicator - 1;
+   
+   return bodyIndicator;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetBodyName(double bodyInd, int forWhich)
+//------------------------------------------------------------------------------
+/**
+ * Returns body name for integration or ephemeris output
+ *
+ * @param bodyInd  body index
+ * @param forWhich body string for integration = 1
+ *                 body string for ephemeris output = 2
+ */
+//------------------------------------------------------------------------------
+std::string Code500EphemerisFile::GetBodyName(double bodyInd, int forWhich)
+{
+   #ifdef DEBUG_BODY_NAME
+   MessageInterface::ShowMessage
+      ("Code500EphemerisFile::GetBodyName() entered, bodyInd=%f, forWhich=%d\n",
+       bodyInd, forWhich);
+   #endif
+   
+   std::string bodyName = "Unknown";
+   double bodyIndicator = bodyInd;
+   
+   // Central body name from central body of integration
+   // 1.0 = Earth, 2.0 = Luna(Earth Moon), 3.0 = Sun, 4.0 = Mars, 5.0 = Jupiter,
+   // 6.0 = Saturn, 7.0 = Uranus, 8.0 = Neptune, 9.0 = Pluto, 10.0 = Mercury,
+   // 11.0 = Venus
+
+   // Central body name from central body of ephem output
+   // 0.0 = Earth, 1.0 = Luna(Earth Moon), 2.0 = Sun, 3.0 = Mars, 4.0 = Jupiter,
+   // 5.0 = Saturn, 6.0 = Uranus, 7.0 = Neptune, 8.0 = Pluto, 9.0 = Mercury,
+   // 10.0 = Venus
+   
+   if (forWhich == 2)
+      bodyIndicator = bodyInd + 1;
+   
+   #ifdef DEBUG_BODY_NAME
+   MessageInterface::ShowMessage("   bodyIndicator=%d\n", bodyIndicator);
+   #endif
+   
+   if (bodyIndicator == 1.0)
+      bodyName = "Earth";
+   else if (bodyIndicator == 2.0)
+      bodyName = "Luna";
+   else if (bodyIndicator == 3.0)
+      bodyName = "Sun";
+   else if (bodyIndicator == 4.0)
+      bodyName = "Mars";
+   else if (bodyIndicator == 5.0)
+      bodyName = "Jupiter";
+   else if (bodyIndicator == 6.0)
+      bodyName = "Saturn";
+   else if (bodyIndicator == 7.0)
+      bodyName = "Uranus";
+   else if (bodyIndicator == 8.0)
+      bodyName = "Neptune";
+   else if (bodyIndicator == 9.0)
+      bodyName = "Pluto";
+   else if (bodyIndicator == 10.0)
+      bodyName = "Mercury";
+   else if (bodyIndicator == 11.0)
+      bodyName = "Venus";
+   
+   #ifdef DEBUG_BODY_NAME
+   MessageInterface::ShowMessage
+      ("Code500EphemerisFile::GetBodyName() returning '%s'\n", bodyName.c_str());
+   #endif
+   
+   return bodyName;
+}
 
 //------------------------------------------------------------------------------
 // void CopyString(char *to, const std::string &from, int numChars)

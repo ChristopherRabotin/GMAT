@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -311,6 +311,49 @@ ArrayTemplate<T>::SetSize(int size)
    }
    init(size);   
 }
+
+// ekf mod 12/16
+//------------------------------------------------------------------------------
+//  void Resize(Integer size)
+//------------------------------------------------------------------------------
+template <class T>
+void ArrayTemplate<T>::Resize(Integer size)
+{
+   if (size < 0)
+   {
+       throw ArrayTemplateExceptions::IllegalSize();
+   }
+   // if already sized, then resize
+   if (isSizedD)
+   {
+      // copy from existing storage into temp storage
+	  Integer originalSize = sizeD;
+      T* tmp = new T[size];
+      T* myElementD = &elementD[0];
+      for (Integer i = 0; i < originalSize; ++i)
+      {
+         tmp[i] = myElementD[i];
+      }
+	  
+	  // Reset the size (deletes original data)
+      SetSize(size);
+
+      // copy from temp storage into new storage
+      for (Integer i = 0; i < originalSize; ++i)
+      {
+         elementD[i] = tmp[i];
+      }
+
+      // delete temp storage
+      delete [] tmp;
+
+      // all done
+      return;
+   }
+   // else size as if new
+   SetSize(size);
+}
+// end ekf mod
 
 //------------------------------------------------------------------------------
 //  int GetSize() const

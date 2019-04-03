@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -648,13 +648,18 @@ std::string MathParser::FindLowestOperator(const std::string &str,
       {
          #if DEBUG_FIND_LOWEST_OPERATOR > 1
          MessageInterface::ShowMessage
-            ("   ===> There is no ( found after %d, so exiting while loop\n", close1);
+            ("   ===> There is no ( found after %d, so setting done to true\n", close1);
          #endif
-         break;
+         // Need to go through next steps when no more open parenthesis found,
+         // so setting done = true instead of break
+         // (LOJ: 2016.11.04 for GMT-5896 fix)
+         //break;
+         done = true;
       }
       
       start1 = (Integer)start2;
       #if DEBUG_FIND_LOWEST_OPERATOR > 1
+      MessageInterface::ShowMessage("   last close paren is at %u\n", close1);
       MessageInterface::ShowMessage("   found next open parenthesis at %u\n", start1);
       #endif
       

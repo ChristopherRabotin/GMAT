@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -42,7 +42,7 @@
 class ESTIMATION_API Transmitter : public RFHardware
 {
 public:
-   Transmitter(const std::string &name);
+   Transmitter(const std::string &ofType, const std::string &name);
    virtual ~Transmitter();
    Transmitter(const Transmitter& trans);
    Transmitter& operator=(const Transmitter& trans);

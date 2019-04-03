@@ -29,6 +29,27 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
+// GmatBase *CreateObject(const std::string & ofType, const std::string & withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates and returns an object of the MeasurementModel class
+ *
+ * @param ofType the MeasurementModel object to create and return.
+ * @param withName the name to give the newly-created MeasurementModel object.
+ *
+ * @return The MeasurementModel
+ *
+ * @note We are ignoring the ofType parameter.  Use of this parameter may be
+ * added later.
+ */
+//------------------------------------------------------------------------------
+GmatBase* AdapterFactory::CreateObject(
+      const std::string & ofType, const std::string & withName)
+{
+   return CreateMeasurementModel(ofType, withName);
+}
+/*
+//------------------------------------------------------------------------------
 // MeasurementModel *CreateMeasurementModel(const std::string & ofType,
 //      const std::string & withName)
 //------------------------------------------------------------------------------

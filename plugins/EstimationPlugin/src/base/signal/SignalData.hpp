@@ -88,12 +88,12 @@ public:
    Rvector3 rLocRcs;
    /// MJ2000Eq transmitter velocity
    Rvector3 tVel;
-   /// Transmitter velocity in its coordinate system
-   Rvector3 tVelTcs;
+   ///// Transmitter velocity in its coordinate system
+   //Rvector3 tVelTcs;
    /// MJ2000Eq receiver velocity
    Rvector3 rVel;
-   /// Receiver velocity in its coordinate system
-   Rvector3 rVelRcs;
+   ///// Receiver velocity in its coordinate system
+   //Rvector3 rVelRcs;
    /// Displacement of origins from the transmit node at time tTime and receive node at time rTime
    Rvector3 j2kOriginSep;
    /// Relative velocity of the origin of the receive node at time rTime w.r.t. the origin of the transmit node at time tTime

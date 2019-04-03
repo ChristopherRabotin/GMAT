@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -150,7 +150,7 @@ void WelcomePanel::Create()
 
    // website and contact email
    wxStaticText *webText = new wxStaticText(this, -1, "Website: ");
-   wxString gmatUrl = "http://gmat.gsfc.nasa.gov";
+   wxString gmatUrl = "http://gmatcentral.org";
    wxHyperlinkCtrl *webLink = new wxHyperlinkCtrl(this, -1, gmatUrl, gmatUrl);
    
    wxFlexGridSizer *contactSizer = new wxFlexGridSizer(2);

@@ -1,0 +1,183 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>GroundTrackPlot</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="GroundStation.html" title="GroundStation"><link rel="next" href="ImpulsiveBurn.html" title="ImpulsiveBurn"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">GroundTrackPlot</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="GroundStation.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ImpulsiveBurn.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="GroundTrackPlot"></a><div class="titlepage"></div><a name="N19F86" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">GroundTrackPlot</span></h2><p>GroundTrackPlot &mdash; A user-defined resource that draws longitude and latitude
+    time-history of a spacecraft</p></div><div class="refsection"><a name="N19F97"></a><h2>Description</h2><p>The <span class="guilabel">GroundTrackPlot</span> resource allows you to draw
+    spacecraft&rsquo;s longitude and latitude time-history onto the texture map of a
+    user-selected central body. GMAT allows you to draw ground track plots of
+    any number of spacecrafts onto a single texture map. You can also create
+    multiple <span class="guilabel">GroundTrackPlot</span> resources by using either
+    the GUI or script interface of GMAT. GMAT also provides the option of when
+    to plot and stop plotting ground track of a spacecraft to a
+    <span class="guilabel">GroundTrackPlot</span> through the <span class="guilabel">Toggle
+    On</span>/<span class="guilabel">Off</span> command. See the <a class="xref" href="GroundTrackPlot.html#GroundTrackPlot_Remarks" title="Remarks">Remarks</a> section below
+    for detailed discussion of the interaction between
+    <span class="guilabel">GroundTrackPlot</span> resource and the
+    <span class="guilabel">Toggle</span> command. <span class="guilabel">GroundTrackPlot</span>
+    resource also allows you to display any number of user-defined ground
+    stations onto the texture map of the central body.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Toggle.html" title="Toggle"><span class="refentrytitle">Toggle</span></a>, <a class="xref" href="GroundStation.html" title="GroundStation"><span class="refentrytitle">GroundStation</span></a>, <a class="xref" href="Color.html" title="Color"><span class="refentrytitle">Color</span></a></p></div><div class="refsection"><a name="N19FC5"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="29%"><col width="71%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Add</span></td><td><p>Allows the user to pick selected resources such as
+            <span class="guilabel">Spacecrafts</span> or
+            <span class="guilabel">GroundStations</span>. The
+            <span class="guilabel">GroundTrackPlot</span> object is used to draw
+            spacecraft's longtitude and latitude time-history on a
+            two-dimensional texture map of a central body that you select.
+            After creating <span class="guilabel">GroundStation</span> object, you can
+            also add ground stations onto the the texture map of the central
+            body. To select multiple <span class="guilabel">Spacecrafts</span> or
+            <span class="guilabel">GroundStations</span>, seperate the list by comma
+            and enclose the list in curly brackets. For Example:
+            <code class="literal">DefaultGroundTrackPlot.Add = {aSat, bSat, aGroundStaton,
+            bGroundStation}.</code> This field cannot be modified in the
+            Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Spacecraft</span>,
+                    <span class="guilabel">GroundStation</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DefaultSC</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">CentralBody</span></td><td><p> The central body of the Ground track plot. This
+            field cannot be modified in the Mission Sequence.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Resource reference</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>
+                      <span class="guilabel">CelestialBody</span>
+                    </p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Earth</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DataCollectFrequency</span></td><td><p> The number of integration steps to skip between plot
+            points. This field cannot be modified in the Mission
+            Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>integer &gt;= 1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Maximized</span></td><td><p>Allows the user to maximize the
+            <span class="guilabel">GroundTrackPlot</span> window. This field cannot be
+            modified in the Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true,false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>false</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">NumPointsToRedraw</span></td><td><p> The number of plot points to retain and redraw
+            during propagation and animation. 0 indicates to redraw all. This
+            field cannot be modified in the Mission Sequence.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>integer &gt;= 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RelativeZOrder</span></td><td><p>Allows the user to select which
+            <span class="guilabel">GroundTrackPlot</span> window to display first on
+            the screen. The <span class="guilabel">GroundTrackPlot</span> with lowest
+            <span class="guilabel">RelativeZOrder</span> value will be displayed last
+            while <span class="guilabel">GroundTrackPlot</span> with highest
+            <span class="guilabel">RelativeZOrder</span> value will be displayed first.
+            This field cannot be modified in the Mission Sequence.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Integer &ge; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ShowPlot</span></td><td><p>This field specifies whether to show ground track
+            plot during a mission run. This field cannot be modified in the
+            Mission Sequence. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>True, False</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>True</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Size</span></td><td><p>Allows the user to control the display size of
+            <span class="guilabel">GroundTrackPlot</span> window. First value in [0 0]
+            matrix controls horizonal size and second value controls vertical
+            size of <span class="guilabel">GroundTrackPlot</span> display window. This
+            field cannot be modified in the Mission Sequence.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any Real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>[ 0 0 ]</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SolverIterations</span></td><td><p>This field determines whether or not ground track
+            data associated with perturbed trajectories during a solver
+            (<span class="guilabel">Targeter</span>, <span class="guilabel">Optimize</span>)
+            sequence is displayed in the <span class="guilabel">GroundTrackPlot</span>.
+            When <span class="guilabel">SolverIterations</span> is set to
+            <span class="guilabel">All</span>, all perturbations/iterations are plotted
+            in the <span class="guilabel">GroundTrackPlot</span>. When
+            <span class="guilabel">SolverIterations</span> is set to
+            <span class="guilabel">Current</span>, only the current solution or
+            perturbation is plotted in <span class="guilabel">GroundTrackPlot</span>.
+            When <span class="guilabel">SolverIterations</span> is set to
+            <span class="guilabel">None</span>, only the final nominal run is plotted
+            on the <span class="guilabel">GroundTrackPlot</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">All</span>,
+                    <span class="guilabel">Current</span>,
+                    <span class="guilabel">None</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Current</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces, </span><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">TextureMap</span></td><td><p>Allows you to enter or select any user-defined
+            texture map image for the central body. This field cannot be
+            modified in the Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Valid File Path and Name</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">../data/graphics/texture/ModifiedBlueMarble.jpg</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">UpdatePlotFrequency</span></td><td><p> The number of plot points to collect before updating
+            a ground track plot. This field cannot be modified in the Mission
+            Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>integer &gt; 1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>50</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Upperleft</span></td><td><p>Allows the user to pan the
+            <span class="guilabel">GroundTrackPlot</span> display window in any
+            direction. First value in [0 0] matrix helps to pan the
+            <span class="guilabel">GroundTrackPlot</span> window horizontally and
+            second value helps to pan the window vertically. This field cannot
+            be modified in the Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any Real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>[ 0 0 ]</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1A269"></a><h2>GUI</h2><p>Default Name and Settings for the
+    <span class="guilabel">GroundTrackPlot</span> Resource:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_GroundTrackPlot_4.png" align="middle" height="525"></td></tr></table></div></div></div><div class="refsection"><a name="GroundTrackPlot_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N1A27E"></a><h3>Behavior when using GroundTrackPlot Resource &amp; Toggle
+      Command</h3><p>The <span class="guilabel">GroundTrackPlot</span> resource draws the
+      longitude and latitude time-history of a spacecraft at each propagation
+      step of the entire mission duration. If you want to report data to a
+      <span class="guilabel">GroundTrackPlot</span> at specific points in your mission,
+      then a <span class="guilabel">Toggle On</span>/<span class="guilabel">Off</span> command
+      can be inserted into the mission sequence to control when the
+      <span class="guilabel">GroundTrackPlot</span> is to draw data. When
+      <span class="guilabel">Toggle Off</span> command is issued for a
+      <span class="guilabel">GroundTrackPlot</span>, no ground track data is drawn
+      until a <span class="guilabel">Toggle On</span> command is issued. Similarly when
+      a <span class="guilabel">Toggle On</span> command is used, ground track data is
+      drawn at each integration step until a <span class="guilabel">Toggle Off</span>
+      command is used.</p><p>Below is an example script snippet that shows how to use
+      <span class="guilabel">Toggle Off</span> and <span class="guilabel">Toggle On</span>
+      command while using the <span class="guilabel">GroundTrackPlot</span> resource.
+      <span class="guilabel">GroundTrackPlot</span> is turned off for the first 2 days
+      of the propagation:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create GroundTrackPlot aGroundTrackPlot
+aGroundTrackPlot.Add = {aSat}
+
+BeginMissionSequence
+
+Toggle aGroundTrackPlot Off
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+Toggle aGroundTrackPlot On
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></pre></div><div class="refsection"><a name="N1A2B2"></a><h3>Behavior when Plotting Data in Iterative Processes</h3><p>GMAT allows you to specify how data is plotted onto a plot during
+      iterative processes such as differential correction or optimization. The
+      <span class="guilabel">SolverIterations</span> field of
+      <span class="guilabel">GroundTrackPlot</span> resource supports 3 options which
+      are described in the table below:</p><div class="informaltable"><table border="1"><colgroup><col width="20%"><col width="80%"></colgroup><thead><tr><th>SolverIterations options</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Current</span></td><td><p> Shows only current iteration/perturbation in an
+              iterative process and draws current iteration to a
+              plot</p></td></tr><tr><td><span class="guilabel">All</span></td><td><p> Shows all iterations/perturbations in an iterative
+              process and draws all iterations/perturbations to a
+              plot</p></td></tr><tr><td><span class="guilabel">None</span></td><td><p> Shows only the final solution after the end of an
+              iterative process and draws only final solution to a
+              plot</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1A2E4"></a><h3>Behavior when Plotting Longitude and Latitude time-history of a
+      Spacecraft</h3><p>GMAT&rsquo;s <span class="guilabel">GroundTrackPlot</span> resource allows you to
+      draw longitude and latitude time-history of a spacecraft. You can choose
+      to draw ground track plot of multiple spacecrafts onto a single texture
+      map of a central body.</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>The longitude and latitude of a spacecraft is drawn as an
+        approximation that includes straight line segments and
+        longitude/latitude data does not takes into account central body shape
+        or its oblateness.</p></div></div><div class="refsection"><a name="N1A2EF"></a><h3>Behavior When Specifying Empty Brackets in GroundTrackPlot's Add
+      Field</h3><p>When using <span class="guilabel">GroundTrackPlot.Add</span> field, if
+      brackets are not populated with user-defined spacecrafts, then GMAT
+      turns off <span class="guilabel">GroundTrackPlot</span> resource and no plot is
+      generated. If you run the script with <span class="guilabel">Add</span> field
+      having empty brackets, then GMAT throws in a warning message in the
+      Message Window indicating that <span class="guilabel">GroundTrackPlot</span>
+      resource will be turned off since no SpacePoints were added to the plot.
+      Below is a sample script snippet that generates such a warning
+      message:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat aSat2
+Create Propagator aProp
+Create GroundTrackPlot aGroundTrackPlot
+
+aGroundTrackPlot.Add = {}
+
+BeginMissionSequence;
+Propagate aProp(aSat, aSat2) {aSat.ElapsedDays = 1}</code></pre></div></div><div class="refsection"><a name="N1A303"></a><h2>Examples</h2><div class="informalexample"><p>This example shows how to use <span class="guilabel">GroundTrackPlot</span>
+      resource. A single spacecraft and a ground station is added to the
+      <span class="guilabel">GroundTrackPlot</span>. Spacecraft&rsquo;s ground track is
+      plotted for one day of propagation:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create GroundStation aGroundStation
+
+Create GroundTrackPlot aGroundTrackPlot
+aGroundTrackPlot.Add = {aSat, aGroundStation}
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></pre></div><div class="informalexample"><p>Propagate a spacecraft for two days around a non-default central
+      body. Spacecraft&rsquo;s ground track is plotted on planet Mars:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+aSat.CoordinateSystem = MarsJ2000Eq
+aSat.SMA = 8000
+aSat.ECC = 0.0003
+
+Create ForceModel aFM
+aFM.CentralBody = Mars
+aFM.PointMasses = {Mars}
+
+Create Propagator aProp
+aProp.FM = aFM
+
+Create CoordinateSystem MarsJ2000Eq
+MarsJ2000Eq.Origin = Mars
+MarsJ2000Eq.Axes = MJ2000Eq
+
+Create GroundTrackPlot aGroundTrackPlot
+aGroundTrackPlot.Add = {aSat}
+aGroundTrackPlot.CentralBody = Mars
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="GroundStation.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ImpulsiveBurn.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">GroundStation&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;ImpulsiveBurn</td></tr></table></div></body></html>

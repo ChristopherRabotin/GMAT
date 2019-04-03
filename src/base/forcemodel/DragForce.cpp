@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -2648,7 +2648,6 @@ std::string DragForce::CheckFluxFile(const std::string &filename, bool isHistori
    tags.clear();
 
    // Schatten
-   tags.push_back("PREDICTED SOLAR DATA");
    tags.push_back("BEGIN_DATA");
    tags.push_back("END_DATA");
    keywords.push_back(tags);
@@ -2658,16 +2657,21 @@ std::string DragForce::CheckFluxFile(const std::string &filename, bool isHistori
    std::string fluxPath = fm->GetAbsPathname("ATMOSPHERE_PATH");
 
    std::string weatherfile = filename;
-
+   #ifdef DEBUG_FLUX_FILE
    MessageInterface::ShowMessage("%d %s\n", ++loc, weatherfile.c_str());
+   #endif
 
    if (fm->DoesFileExist(weatherfile) == false)
    {
+      #ifdef DEBUG_FLUX_FILE
       MessageInterface::ShowMessage("No file; adding path %s\n", fluxPath.c_str());
+      #endif
       weatherfile = fluxPath + filename;
    }
 
+   #ifdef DEBUG_FLUX_FILE
    MessageInterface::ShowMessage("%d %s\n", ++loc, weatherfile.c_str());
+   #endif
 
    if (fm->DoesFileExist(weatherfile) == false)
    {
@@ -2679,7 +2683,9 @@ std::string DragForce::CheckFluxFile(const std::string &filename, bool isHistori
             filename + ", nor the file at the location " + weatherfile);
    }
 
+   #ifdef DEBUG_FLUX_FILE
    MessageInterface::ShowMessage("The file %s exists\n", weatherfile.c_str());
+   #endif
 
    // File exists; check for keywords
    UnsignedInt count = (isHistoric ? 1 : keywords.size());
@@ -2691,8 +2697,9 @@ std::string DragForce::CheckFluxFile(const std::string &filename, bool isHistori
    std::ifstream inStream(weatherfile.c_str());
    std::string line;
 
+   #ifdef DEBUG_FLUX_FILE
    MessageInterface::ShowMessage("Checking for the header:\n");
-
+   #endif
 
    // Check headers to determine the index of the keywork list
    while (!inStream.eof() && (index == 9999))
@@ -2746,9 +2753,10 @@ std::string DragForce::CheckFluxFile(const std::string &filename, bool isHistori
 
    if (fileIsValid)
       retval = weatherfile;
-
-   MessageInterface::ShowMessage("The file %s; returning \"%s\"\n",
+      #ifdef DEBUG_FLUX_FILE
+      MessageInterface::ShowMessage("The file %s; returning \"%s\"\n",
          (fileIsValid ? "is valid" : "is NOT valid"), retval.c_str());
+      #endif
 
    return retval;
 }

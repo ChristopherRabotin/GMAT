@@ -1,0 +1,77 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>NonlinearConstraint</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="Minimize.html" title="Minimize"><link rel="next" href="Optimize.html" title="Optimize"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">NonlinearConstraint</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Minimize.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Optimize.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="NonlinearConstraint"></a><div class="titlepage"></div><a name="N23E00" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">NonlinearConstraint</span></h2><p>NonlinearConstraint &mdash; Specify a constraint used during optimization</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><code class="literal">NonlinearConstraint</code> <em class="replaceable"><code>OptimizerName</code></em> ({logical expression})    </pre></div><div class="refsection"><a name="N23E1B"></a><h2>Description</h2><p>The <span class="guilabel">NonlinearConstraint</span> command is used within
+    an <span class="guilabel">Optimize</span>/<span class="guilabel">EndOptimize</span>
+    optimization sequence to apply a linear or nonlinear constraint.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Vary.html" title="Vary"><span class="refentrytitle">Vary</span></a>, <a class="xref" href="Optimize.html" title="Optimize"><span class="refentrytitle">Optimize</span></a>, <a class="xref" href="Minimize.html" title="Minimize"><span class="refentrytitle">Minimize</span></a></p></div><div class="refsection"><a name="N23E36"></a><h2>Options</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">LHS</span></td><td><p>Allows you to select any single element user defined
+            parameter, except a number, to define the constraint variable.&nbsp;
+            The constraint function is of the form <span class="guilabel">LHS Operator
+            RHS</span> </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Spacecraft parameter, Array element, Variable, or
+                    any other single element user defined parameter, excluding
+                    numbers</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">DefaultSC.SMA</code>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Operator</span></td><td><p> logical operator used to specify the constraint
+            function.&nbsp; The constraint function is of the form <span class="guilabel">LHS
+            Operator RHS</span> </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">&gt;=</code>, &nbsp;<code class="literal">&lt;=</code>,
+                    <code class="literal">=</code></p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">=</code>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">OptimizerName</span></td><td><p> Specifies the solver/optimizer object&nbsp;used to apply
+            a constraint.&nbsp; </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any <span class="guilabel">VF13ad</span> or
+                    <span class="guilabel">fminconOptimizer</span> object.</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DefaultSQP</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RHS</span></td><td><p> Allows you to select any single element user defined
+            parameter,&nbsp;including a number, to&nbsp;specify the desired value of&nbsp;the
+            constraint variable.&nbsp; The constraint function is of the form
+            <span class="guilabel">LHS Operator RHS</span> </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Spacecraft parameter, Array element, Variable, or
+                    any other single element user defined parameter, including
+                    numbers</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>7000</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N23F06"></a><h2>GUI</h2><p>You use a <span class="guilabel">NonlinearConstraint</span> command, within
+    an Optimize/EndOptimize sequence as shown below, to define an equality or
+    inequality constraint that you want to be satisfied at the end of the
+    optimization process.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_NonLinearConstraint_GUI_1.png" align="middle" height="67"></td></tr></table></div></div><p>Double click on <span class="guilabel">NonlinearConstraint1</span> to bring
+    up the <span class="guilabel">NonlinearConstraint</span> command dialog box, shown
+    below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_NonLinearConstraint_GUI_2.png" align="middle" height="154"></td></tr></table></div></div><p>You must provide four inputs for the
+    <span class="guilabel">NonlinearConstraint</span> command dialog box above:
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Choice of <span class="guilabel">Optimizer</span>.</p></li><li class="listitem"><p><span class="guilabel">Constraint</span> Object. Click the
+          <span class="guilabel">Edit</span> button to the right of this field to
+          select the type of constraint object from three possible choices,
+          <span class="guilabel">Spacecraft</span>, <span class="guilabel">Variable</span>, or
+          <span class="guilabel">Array</span>.</p></li><li class="listitem"><p>Logical operator. Select one from three choices, =, &lt;=, or
+          &gt;=.</p></li><li class="listitem"><p><span class="guilabel">Constraint Value</span>.</p></li></ul></div><p>Note that Inputs 2-4 define a logical expression. In the example
+    above, we have: <code class="literal">DefaultSC.SMA = 7000</code></p></div><div class="refsection"><a name="N23F51"></a><h2>Remarks</h2><div class="refsection"><a name="N23F54"></a><h3>Number of Vary, NonlinearConstraint, and Minimize Commands Within
+      an Optimization Sequence</h3><p>An Optimization sequence must contain one or more
+      <span class="guilabel">Vary</span> commands. <span class="guilabel">Vary</span> commands
+      must occur before any <span class="guilabel">Minimize</span> or
+      <span class="guilabel">NonlinearConstraint</span> commands.</p><p>Multiple <span class="guilabel">NonlinearConstraint</span> commands are
+      allowed. There is exactly one <span class="guilabel">NonlinearConstraint</span>
+      command for every constraint.</p><p>It is possible for an <span class="guilabel">Optimize/EndOptimize</span>
+      optimization sequence to contain no
+      <span class="guilabel">NonlinearConstraint</span> commands. In this case, since
+      every optimization sequence must contain (a) one or more
+      <span class="guilabel">NonlinearConstraint</span> commands and/or (b) a single
+      <span class="guilabel">Minimize</span> command, the optimization sequence must
+      contain a single <span class="guilabel">Minimize</span> command.</p></div><div class="refsection"><a name="N23F7E"></a><h3>Command Interactions</h3><p>The <span class="guilabel">Minimize</span> command is only used within an
+      <span class="guilabel">Optimize/EndOptimize</span> Optimization sequence. See the
+      <span class="guilabel">Optimize</span> command documentation for a complete
+      worked example using the <span class="guilabel">NonlinearConstraint</span>
+      command.</p><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><tbody><tr><td><span class="guilabel">Optimize command</span></td><td><p> <span class="guilabel">NonlinearConstraint</span> commands
+              can only occur within an
+              <span class="guilabel">Optimize/EndOptimize</span> command sequence.
+              </p></td></tr><tr><td><span class="guilabel">Vary command</span></td><td><p> Every Optimization sequence must contain at least
+              one <span class="guilabel">Vary</span> command. <span class="guilabel">Vary</span>
+              commands are used to define the control variables associated
+              with an Optimization sequence. </p></td></tr><tr><td><span class="guilabel">Minimize command</span></td><td><p> A <span class="guilabel">Minimize</span> command is used
+              within an Optimization sequence to define the objective function
+              that will be minimized. Note that an optimization sequence is
+              allowed to contain, at most, one <span class="guilabel">Minimize</span>
+              command. (An Optimization sequence is not required to contain a
+              <span class="guilabel">Minimize</span> command) &nbsp; </p></td></tr></tbody></table></div></div></div><div class="refsection"><a name="N23FC5"></a><h2>Examples</h2><div class="informalexample"><pre class="programlisting"><code class="code">% Constrain SMA of Sat to be 7000 km, using SQP1
+NonlinearConstraint SQP1( Sat.SMA = 7000 )
+
+% Constrain SMA of Sat to be less than or equal to 7000 km,
+% using SQP1
+NonlinearConstraint SQP1( Sat.SMA &lt;= 7000 )
+
+% Constrain the SMA of Sat to be greater than or equal to 7000 km,
+% using VF13ad1
+NonlinearConstraint VF13ad1( Sat.SMA &gt;= 7000 )</code>      </pre></div><p>As mentioned above, the <span class="guilabel">NonlinearConstraint</span>
+    command only occurs within an <span class="guilabel">Optimize</span> sequence. See
+    the <span class="guilabel"><a class="xref" href="Optimize.html" title="Optimize"><span class="refentrytitle">Optimize</span></a></span> command help for
+    complete examples showing the use of the
+    <span class="guilabel">NonlinearConstraint</span> command.</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Minimize.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Optimize.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Minimize&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Optimize</td></tr></table></div></body></html>

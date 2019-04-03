@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -51,6 +51,7 @@
 #include "StringUtil.hpp"               // for GmatStringUtil::
 #include "Assignment.hpp"
 #include "ParameterInfo.hpp"            // for IsSettable()
+#include "UserDefinedFunction.hpp"    // for AddAutomaticObject()
 
 //#define DEBUG_HANDLE_ERROR
 //#define DEBUG_VALIDATE_COMMAND
@@ -2280,8 +2281,12 @@ Parameter* Validator::CreateSystemParameter(bool &paramCreated,
             // If automatic parameter is in the objectMap, set flag so that
             // it won't be deleted in the function since it is deleted in the
             // Sandbox. (LOJ: 2009.03.16)
-            theFunction->AddAutomaticObject(param->GetName(), (GmatBase*)param,
-                                            alreadyManaged);
+            if (theFunction->IsOfType("UserDefinedFunction"))
+            {
+               UserDefinedFunction *udf = (UserDefinedFunction*)theFunction;
+               udf->AddAutomaticObject(param->GetName(), (GmatBase*)param,
+                                       alreadyManaged);
+            }
             
             // Parameter is created inside a function, so set it local
             if (!alreadyManaged)
@@ -3114,6 +3119,12 @@ ElementWrapper* Validator::CreateSubPropertyWrapper(GmatBase *obj,
       #endif
       
       if (ownedId != -1)
+   /*     
+      // This code creates a new wrapper to set parameter on owned object,
+      // if the paramater is not valid for the parent object.  This should not
+      // be allowed and creates undesirabel side effects for GMT-5928 so
+      // disallowing.  Now code throws exception if the owned object dependency
+      // is ommitted - SPH
       {
          ew = new ObjectPropertyWrapper();
          #ifdef DEBUG_MEMORY
@@ -3130,10 +3141,11 @@ ElementWrapper* Validator::CreateSubPropertyWrapper(GmatBase *obj,
              type.c_str(), ownedObj->GetTypeName().c_str(),
              ownedObj->GetName().c_str(), theDescription.c_str());
          #endif
-         
-         ew->SetRefObjectName(ownedObj->GetName(), 0);
-         ew->SetRefObject(ownedObj);
-         
+   */
+//         
+//         ew->SetRefObjectName(ownedObj->GetName(), 0);
+//         ew->SetRefObject(ownedObj);
+//         
          // Removed to address bug 2203
 //         // @note
 //         // Handle special case for GmatFunction(loj: 2008.07.07)
@@ -3147,8 +3159,8 @@ ElementWrapper* Validator::CreateSubPropertyWrapper(GmatBase *obj,
 //             (obj->IsOfType(Gmat::PROP_SETUP) &&
 //              ownedObj->IsOfType(Gmat::PROPAGATOR)))
 //            ew->ClearRefObjectNames();
-      }
-      else
+//      }
+//      else
       {
          theErrorMsg = "\"" + theDescription + "\"" + 
             " does not have a valid field of object or owned object";

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -126,13 +126,16 @@ public:
                            const std::string &name);
    
    //----- factory
-   const StringArray& GetListOfFactoryItems(Gmat::ObjectType type, const std::string &qualifier = "");
+   const StringArray& GetListOfFactoryItems(Gmat::ObjectType type,
+                         const std::string &qualifier = "");
    const StringArray& GetListOfAllFactoryItems();
    const StringArray& GetListOfAllFactoryItemsExcept(const ObjectTypeArray &types);
    const StringArray& GetListOfViewableItems(Gmat::ObjectType type);
    const StringArray& GetListOfViewableItems(const std::string &typeName);
    const StringArray& GetListOfUnviewableItems(Gmat::ObjectType type);
    const StringArray& GetListOfUnviewableItems(const std::string &typeName);
+   const ObjectTypeArrayMap& GetAllObjectTypeArrayMap();
+   
    bool               DoesObjectTypeMatchSubtype(
                             const Gmat::ObjectType coreType,
                             const std::string &theType,
@@ -207,8 +210,7 @@ public:
    
    // AtmosphereModel
    AtmosphereModel* CreateAtmosphereModel(const std::string &type,
-                                          const std::string &name,
-                                          const std::string &body = "Earth");
+                                          const std::string &name);
    AtmosphereModel* GetAtmosphereModel(const std::string &name);
    
    // Burn
@@ -305,7 +307,6 @@ public:
    // Subscriber
    Subscriber* CreateSubscriber(const std::string &type,
                                 const std::string &name,
-                                const std::string &fileName = "",
                                 bool createDefault = false);
    Subscriber* GetSubscriber(const std::string &name);
    Integer GetNumberOfActivePlots();
@@ -322,8 +323,10 @@ public:
                             Integer manage = 1);
    Function* GetFunction(const std::string &name);
    
-   // Create other object
-   GmatBase* CreateOtherObject(Gmat::ObjectType objType, const std::string &type,
+   // Create object
+   GmatBase* CreateObject(Gmat::ObjectType objTypeId, const std::string &type,
+                          const std::string &name, bool createDefault = false);
+   GmatBase* CreateOtherObject(Gmat::ObjectType objTypeId, const std::string &type,
                                const std::string &name, bool createDefault = false);
    
    //----- Non-Configurable Items
@@ -412,6 +415,7 @@ public:
    
    // Script
    std::string GetMainScriptFileName();
+   void ClearScript();
    bool InterpretScript(const std::string &filename, bool readBack = false,
                         const std::string &newPath = "");
    bool InterpretScript(std::istringstream *ss, bool clearObjs);
@@ -456,7 +460,7 @@ private:
    // Object map
    GmatBase* FindObject(const std::string &name);
    void AddObjectToObjectMapInUse(const std::string &name, GmatBase *obj,
-                                  Gmat::ObjectType objType = Gmat::UNKNOWN_OBJECT);
+                                  Gmat::ObjectType objTypeId = Gmat::UNKNOWN_OBJECT);
    bool AddObject(GmatBase *obj);
    void SetSolarSystemAndObjectMap(SolarSystem *ss, ObjectMap *objMap,
                                    bool forFunction,

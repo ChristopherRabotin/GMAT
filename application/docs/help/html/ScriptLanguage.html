@@ -1,0 +1,347 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Script Language</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="System.html" title="System"><link rel="prev" href="PythonInterface.html" title="Python Interface"><link rel="next" href="StartupFile.html" title="Startup File"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Script Language</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="PythonInterface.html">Prev</a>&nbsp;</td><th align="center" width="60%">System</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="StartupFile.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="ScriptLanguage"></a><div class="titlepage"></div><a name="N29083" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Script Language</span></h2><p>Script Language &mdash; The GMAT script language</p></div><div class="refsection"><a name="N29094"></a><h2>Script Structure</h2><p>A GMAT script is a text file consisting of valid script syntax
+    elements, such as initialization statements, Mission Sequence commands,
+    and comments. These syntax elements are described later in this
+    specification.</p><p>At the highest level, a GMAT script is made up of two sections:
+    Initialization and the Mission Sequence. These sections each contain
+    statements, but they have different rules about which sorts of statements
+    are valid. The <span class="guilabel">BeginMissionSequence</span> command defines
+    the beginning of the Mission Sequence section.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ScriptLanguage_GUI_1.png" align="middle" height="306"></td></tr></table></div></div><div class="refsection"><a name="N290A7"></a><h3>Initialization</h3><p>The first section in a script file, referred to as Initialization,
+      is responsible for creating resources and setting their initial state.
+      The Initialization section can contain the following types of
+      statements:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>resource creation statements (the <span class="guilabel">Create</span>
+          statement)</p></li><li class="listitem"><p>initialization statements</p></li></ul></div><p>Only literal assignments are allowed in this section; no execution
+      of commands or evaluation of parameters is done. In the GUI, the
+      Initialization section maps directly to the Resources tree. All
+      resources created, and all fields set, in this section appear as
+      resources in the GUI when the script is loaded.</p></div><div class="refsection"><a name="N290B8"></a><h3>Mission Sequence</h3><p>The Mission Sequence section contains the Mission Sequence, or the
+      list of GMAT commands that are executed sequentially when the mission is
+      run. The Mission Sequence section can contain the following types of
+      statements:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>command statements</p></li></ul></div><p>The Mission Sequence begins at the first instance of the
+      <span class="guilabel">BeginMissionSequence</span> command; therefore, this must
+      be the first command statement in the script file. For backwards
+      compatibility, if the <span class="guilabel">BeginMissionSequence</span> command
+      is missing, the Mission Sequence begins with the first command
+      encountered.</p><p>In the GUI, the Mission Sequence section maps directly to the
+      Mission tree. Each statement in the script (with the exception of the
+      <span class="guilabel">BeginScript</span>/<span class="guilabel">EndScript</span> compound
+      command) is displayed as a single element in the tree.</p></div></div><div class="refsection"><a name="N290D1"></a><h2>Basic Syntax</h2><div class="refsection"><a name="N290D4"></a><h3>Source Text</h3><p>A GMAT script consists of a single file containing characters from
+      the 7-bit US-ASCII character set. The script language is case-sensitive,
+      so this line creates four different Variable resources:</p><p><code class="code">Create Variable x X y Y</code></p><p>The script language is made up of lines. A line can be:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>empty</p></li><li class="listitem"><p>a comment (see <a class="xref" href="ScriptLanguage.html#ScriptLanguage_Comments" title="Comments">Comments</a>, below)</p></li><li class="listitem"><p>a statement (see <a class="xref" href="ScriptLanguage.html#ScriptLanguage_Statements" title="Statements">Statements</a>)</p></li></ul></div><p>Statement lines can be split over multiple physical lines with the
+      continuation marker (&ldquo;<code class="literal">...</code>&rdquo;).</p></div><div class="refsection"><a name="N290F5"></a><h3>Line Termination</h3><p>Script lines are terminated by any of the following ASCII
+      character sequences:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>line feed (hex: 0A)</p></li><li class="listitem"><p>carriage return (hex: 0D)</p></li><li class="listitem"><p>carriage return followed by line feed (hex: 0D0A)</p></li></ul></div></div><div class="refsection"><a name="N29104"></a><h3>White Space</h3><p>White space can appear above or below any line, before or after
+      any statement within a line, and many other places in a script. The
+      following characters are recognized as white space:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>space (hex: 20)</p></li><li class="listitem"><p>horizontal tab (hex: 09)</p></li></ul></div><p>Horizontal tab characters are preserved in string literals, but
+      are replaced by spaces in some other contexts (e.g. equations,
+      comments).</p></div><div class="refsection"><a name="ScriptLanguage_Comments"></a><h3>Comments</h3><p>Comments begin with the percent symbol (&ldquo;<code class="literal">%</code>&rdquo;,
+      hex: 25) and extend to the end of the line. There is no multi-line or
+      embedded comment in the script language.</p></div><div class="refsection"><a name="N2911B"></a><h3>File Paths</h3><p>Several resource types have fields that accept file paths as
+      input. The general syntax of such paths is common to the language, but
+      some specific behavior is specified by each resource.</p><p>Forward slashes and backslashes can be used interchangeably within
+      GMAT, and can be mixed in a single path. The following three paths are
+      considered identical:</p><pre class="programlisting"><code class="code">data/planetary_ephem/spk/de421.bsp
+data\planetary_ephem\spk\de421.bsp
+data\planetary_ephem/spk\de421.bsp</code></pre><p>Absolute paths are passed to the underlying operating system
+      as-is, aside from normalizing the slashes.</p><p>For input files, relative paths are first considered relative to
+      the script file, then to a location defined by each resource type
+      separately, and usually defined in the GMAT startup file. For details,
+      see the reference documentation for each resource type.</p><p>For output files, relative paths are considered relative to the
+      script file. If only a filename is specified, the file is placed into
+      the output location defined in the GMAT startup file (usually GMAT's
+      <code class="filename">output</code> folder).</p><p>File paths are written as string literals (see <a class="xref" href="ScriptLanguage.html#ScriptLanguage_Strings" title="Strings">Strings</a> under <a class="xref" href="ScriptLanguage.html#ScriptLanguage_DataTypes" title="Data Types">Data Types</a>). Quotes
+      are mandatory if the path contains spaces, but are optional
+      otherwise.</p></div></div><div class="refsection"><a name="ScriptLanguage_DataTypes"></a><h2>Data Types</h2><div class="refsection"><a name="N2913C"></a><h3>Literals</h3><div class="refsection"><a name="N2913F"></a><h4>Integers</h4><p>Integers are written as a sequence of literal digits, with no
+        decimal. Preceding zeros and prepended signs (<code class="literal">+</code> or
+        <code class="literal">-</code>) are allowed. Scientific notation is not
+        permitted.</p></div><div class="refsection"><a name="N2914A"></a><h4>Real Numbers</h4><p>Real numbers can be written in any of the following
+        formats:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><code class="literal">12</code> (whole number)</p></li><li class="listitem"><p><code class="literal">12.5</code> (decimal)</p></li><li class="listitem"><p><code class="literal">1.25e1</code> or <code class="literal">1.25e-1</code>
+            (scientific notation)</p></li></ul></div><p>In all formats, the base can contain preceding or trailing
+        zeros. In scientific notation, the exponent can be prepended by a sign
+        (<code class="literal">+</code> or <code class="literal">-</code>) and can contain
+        preceding zeros, but cannot contain a decimal. The exponent delimiter
+        is case-insensitive (e.g. "<code class="literal">e</code>" or
+        "<code class="literal">E</code>").</p></div><div class="refsection"><a name="ScriptLanguage_Strings"></a><h4>Strings</h4><p>String literals are delimited by single-quote characters
+        (&ldquo;<code class="literal">'</code>&rdquo;, hex: 27).</p><p>All language-supported characters are allowed in strings, with
+        the exceptions below. There are no escape characters or character
+        substitute sequences (such as &ldquo;<code class="literal">\n</code>&rdquo; for line
+        feed).</p><p>In Initialization, the following characters are not allowed in
+        string literals:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>some non-printable characters (NUL, SUB) (hex: 00,
+            1A)</p></li><li class="listitem"><p>line termination characters (LF, CR) (hex: 0A, 0D)</p></li><li class="listitem"><p>percent character (&ldquo;<code class="literal">%</code>&rdquo;) (hex: 25)</p></li></ul></div><p>In the Mission Sequence, the following characters are not
+        allowed in string literals:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>some non-printable characters (NUL, SUB) (hex: 00,
+            1A)</p></li><li class="listitem"><p>line termination characters (LF, CR) (hex: 0A, 0D)</p></li><li class="listitem"><p>percent character (&ldquo;<code class="literal">%</code>&rdquo;) (hex: 25)</p></li></ul></div><p>Quotes are generally optional, but are mandatory in
+        Initialization if the string contains whitespace, any script language
+        symbols, or any GMAT-recognized elements (e.g. keywords, resource
+        names). They are mandatory in the Mission Sequence in the same
+        instances, and additionally if the string contains mathematical
+        operators and certain non-printable characters. We recommend quoting
+        all string literals.</p></div><div class="refsection"><a name="N2919E"></a><h4>Booleans</h4><p>The following boolean values are supported:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><code class="literal">true</code> (alias:
+            <code class="literal">on</code>)</p></li><li class="listitem"><p><code class="literal">false</code> (alias:
+            <code class="literal">off</code>)</p></li></ul></div><p>Boolean literals are case-insensitive.</p></div><div class="refsection"><a name="N291B6"></a><h4>Enumerated Values</h4><p>Many resource fields accept enumerated values. For example,
+        <span class="guilabel">Spacecraft</span>.<span class="guilabel">DateFormat</span>
+        accepts one of 10 values (<span class="guilabel">A1ModJulian</span>,
+        <span class="guilabel">A1Gregorian</span>, etc.). Enumerated values are written
+        as string literals. Quotes are always optional, as none contain spaces
+        or special characters.</p></div><div class="refsection"><a name="N291C7"></a><h4>References</h4><p>References to resources and resource parameters are indicated by
+        the name of the resource or resource parameter. References are written
+        as string literals. Quotes are always optional, as resource names and
+        parameters cannot contain spaces or special characters.</p></div></div><div class="refsection"><a name="N291CC"></a><h3>Resources</h3><div class="refsection"><a name="N291CF"></a><h4>Resource Types</h4><p>Resources in GMAT are instances of a base resource type that are
+        given user-defined names and store data independently of other
+        resources of the same type. Resource types include
+        <span class="guilabel">Spacecraft</span>, <span class="guilabel">GroundStation</span>,
+        and <span class="guilabel">Variable</span>. They cannot be used directly; they
+        must first be instantiated with the <span class="guilabel">Create</span>
+        statement. For example:</p><p><code class="code">Create Spacecraft aSat</code></p><p>In the example, <code class="code">Spacecraft</code> is the resource type and
+        <code class="code">aSat</code> is the resource. This is similar to the concept of
+        classes and objects in object-oriented programming, where GMAT&rsquo;s
+        resource types are analogous to classes and its resources are
+        analogous to objects.</p></div><div class="refsection"><a name="N291EB"></a><h4>Naming Rules</h4><p>Resources must be named according to these rules:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Name must be made up of ASCII letters, numbers, or the
+            underscore character (&ldquo;<code class="literal">_</code>&rdquo;). This corresponds to
+            hex values 30&ndash;39, 41&ndash;5A, 5F, and 61&ndash;7A.</p></li><li class="listitem"><p>Name must begin with a letter
+            (<code class="literal">A</code>&ndash;<code class="literal">Z</code> or
+            <code class="literal">a</code>&ndash;<code class="literal">z</code>, hex: 41&ndash;5A or
+            61&ndash;7A)</p></li><li class="listitem"><p>Name cannot be a reserved keyword or command name</p></li></ul></div></div><div class="refsection"><a name="N29209"></a><h4>Shadowing</h4><p>When the same name is used for multiple purposes in a script,
+        the shadowing rules apply to determine how a reference to the name is
+        interpreted.</p><p>Resource names must be unique within a script. If a script
+        attempts to create multiple resources that have the same
+        case-sensitive name, the first <span class="guilabel">Create</span> statement
+        in the script with that name is executed and all subsequent ones are
+        ignored. The conflict is noted in a warning message.</p><div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Caution</h3><p>GMAT does not test to ensure that
+          <span class="guilabel">Resource</span> names and function names are unique.
+          Care should be taken to use unique names for user-defined GMAT,
+          MATLAB, and Python functions to avoid name clashes. </p></div><p>Command names and keywords are reserved. They cannot be used as
+        resource names. See the <a class="xref" href="ScriptLanguage.html#ScriptLanguage_Keywords" title="Keywords">Keywords</a> section for a list of keywords.</p><p>Built-in function names (like <code class="literal">sin</code> or
+        <code class="literal">cos</code>) can be used as resource names with one
+        exception: a reference to, for example, &ldquo;<code class="literal">sin(1)</code>&rdquo; on
+        the right-hand side of an equal sign will be interpreted as a call to
+        the <code class="literal">sin</code> built-in function, not element 1 of an
+        <span class="guilabel">Array</span> resource named <span class="guilabel">sin</span>.
+        The same is true for the other built-in functions.</p><p>Resource type names (like &ldquo;<span class="guilabel">Spacecraft</span>&rdquo;) can
+        be used as resource names. In such an instance, the conflict is
+        resolved by the context. For example:</p><pre class="programlisting"><code class="code">Create Spacecraft Spacecraft
+Create Spacecraft aSat</code></pre><p>In the example, GMAT knows by context that in the second
+        <span class="guilabel">Create</span> statement, the argument
+        &ldquo;<code class="code">Spacecraft</code>&rdquo; refers to the resource type, not the
+        resource instance created in the first statement.</p></div></div><div class="refsection"><a name="N29243"></a><h3>Compound Types</h3><div class="refsection"><a name="N29246"></a><h4>Array of Literals</h4><p>Arrays of literals are accepted as input by some resources.
+        Arrays of booleans, integers, and real numbers are surrounded by
+        square brackets (&ldquo;[&ldquo; and &ldquo;]&rdquo;, hex: 5B and 5D). Arrays of strings are
+        surrounded by curly brackets (&ldquo;{&ldquo; and &ldquo;}&rdquo;, hex: 7B and 7D). In all
+        cases, the values are separated by whitespace or commas. Only
+        one-dimensional arrays of literals are supported. See the following
+        examples.</p><pre class="programlisting"><code class="code">anOrbitView.DrawObject = [true true]             % boolean array
+aSat.OrbitColor = [255 0 0]                      % integer array
+anOrbitView.ViewPointVector = [3e4, 1.2, -14]    % real array
+aSpacecraft.OrbitSpiceKernelName = ...
+    {'file1.bsp', 'file2.bsp'}                   % string array</code></pre></div><div class="refsection"><a name="N2924E"></a><h4>Arrays of References</h4><p>Some resources accept arrays of references to other resources or
+        resource fields. These reference arrays are surrounded by curly
+        brackets (&ldquo;{&ldquo; and &ldquo;}&rdquo;, hex: 7B and 7D) and the values are separated by
+        whitespace or commas. Only one-dimensional arrays of references are
+        supported. The values can optionally be surrounded by single quotes.
+        See the following example.</p><pre class="programlisting"><code class="code">aForceModel.PointMasses = {'Luna', Mars}  % array of resource references
+aReport.Add = {Sat1.X, 'Sat1.Y', Sat1.Z}  % array of parameter references</code></pre></div><div class="refsection"><a name="N29256"></a><h4>Conversion</h4><p>In contexts that accept a real number, integer literals (those
+        with no fractional value) are automatically converted to the
+        equivalent floating-point value upon execution.</p><p>There is no built-in conversion between string values and
+        numeric values, though such a conversion may be implemented by
+        individual commands.</p></div><div class="refsection"><a name="ScriptLanguage_Keywords"></a><h4>Keywords</h4><p>The script language recognized these reserved keywords:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><code class="literal">Create</code></p></li><li class="listitem"><p><code class="literal">GMAT</code></p></li><li class="listitem"><p><code class="literal">function</code></p></li></ul></div><p>In addition, all command names are reserved, including commands
+        created by active plugins.</p></div></div></div><div class="refsection"><a name="N29272"></a><h2>Expressions</h2><p>The only types of expressions common to multiple commands are
+    logical expressions, which are used by the
+    <span class="guilabel">If</span>/<span class="guilabel">Else</span> and
+    <span class="guilabel">While</span> commands. They are documented here instead of
+    in both command references.</p><div class="refsection"><a name="N29280"></a><h3>Relational Operators</h3><p>The following relational operators are supported in logical
+      expressions:</p><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><tbody><tr><td><code class="literal">&lt;</code></td><td><p> less than </p></td></tr><tr><td><code class="literal">&lt;=</code></td><td><p> less than or equal to </p></td></tr><tr><td><code class="literal">&gt;</code></td><td><p> greater than </p></td></tr><tr><td><code class="literal">&gt;</code></td><td><p> greater than or equal to </p></td></tr><tr><td><code class="literal">==</code></td><td><p> equal to </p></td></tr><tr><td><code class="literal">~=</code></td><td><p> not equal to </p></td></tr></tbody></table></div><p>The relational operators are scalar operators; they do not operate
+      on <span class="guilabel">Array</span> resources (only individual
+      elements).</p><p>Each relational operator operates on the values of its arguments,
+      not on their identity. Consider the example:</p><pre class="programlisting"><code class="code">Create Variable x y
+x = 5
+y = 5
+
+BeginMissionSequence
+
+If x == y
+    % body
+EndIf</code> </pre></div><div class="refsection"><a name="N292C6"></a><h3>Logical Operators</h3><p>The following logical operators are supported in logical
+      expressions:</p><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><tbody><tr><td><code class="literal">&amp;</code></td><td><p> logical AND (short-circuit operator)
+              </p></td></tr><tr><td><code class="literal">|</code></td><td><p> logical OR </p></td></tr></tbody></table></div><p>The logical AND operator exhibits short-circuit behavior. That is,
+      if the left-hand side of the operator evaluates to false, the right-hand
+      side is not evaluated, though it is still parsed for syntactic
+      validity.</p></div><div class="refsection"><a name="N292E7"></a><h3>Logical Expressions</h3><p>Logical expressions are composed of relational expressions
+      combined with logical operators.</p><p>Relational expressions must contain one relational operator and
+      two valid arguments. Literal boolean values are not supported, and
+      numeric values are not interpreted as truth or falsehood. See the
+      following examples:</p><pre class="programlisting"><code class="code">1 == 5          % false
+1 ~= 5          % true
+true            % error
+1               % error
+A               % where "A" is an Array resource; error
+1 == 5 &lt;= 3     % error</code></pre><p>Logical expressions must contain at least one relational
+      expression. Multiple relational expressions are combined using logical
+      operators. All relational expressions are evaluated first, from left to
+      right, then the full logical expression is evaluated from left to right,
+      though the short-circuit AND operator (&ldquo;<code class="literal">&amp;</code>&rdquo;) may
+      terminate the full evaluation. Parentheses are not allowed. See the
+      following examples:</p><pre class="programlisting"><code class="code">1 == 1                   % true
+2 ~= 4 | 3 == 3          % true
+8 &gt;= 3 &amp; 3 &lt; 4           % true
+2 &lt; 4 &amp; 1 &gt; 3 | 5 == 5   % true
+2 &lt; 4 &amp; (1 &gt; 3 | 5 == 5) % error
+1 &amp; 1                    % error
+true | false             % error</code>      </pre></div></div><div class="refsection"><a name="ScriptLanguage_Statements"></a><h2>Statements</h2><div class="refsection"><a name="N292FE"></a><h3>Statement Structure</h3><p>Script statements consist of (in order):</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Optional "<code class="literal">GMAT </code>" prefix</p></li><li class="listitem"><p>Valid statement syntax (with optional line
+          continuation)</p></li><li class="listitem"><p>Optional semicolon</p></li><li class="listitem"><p>Line termination sequence</p></li></ol></div><p>Any statement in the script may be prefixed by the characters
+      &ldquo;<code class="literal">GMAT </code>&ldquo;. This prefix is optional and has no effect,
+      but is supported for backward compatibility.</p><p>A statement can be split over multiple physical lines by using the
+      line continuation marker, three sequential period characters
+      (&ldquo;<code class="literal">...</code>&rdquo;, hex: 2E2E2E), before each line break within
+      the statement.</p><p>Any statement may be terminated with a semicolon character
+      (&ldquo;<code class="literal">;</code>&rdquo;, hex: 3B). The semicolon is optional and has no
+      effect, but is supported for backward compatibility. Multiple statements
+      cannot be combined on a line.</p><p>White space may occur before or after a statement, or between any
+      of the components listed above. It is also generally allowed anywhere
+      inside of a statement, and any exceptions are noted in the documentation
+      specific to that statement.</p></div><div class="refsection"><a name="N29324"></a><h3>The Create Statement</h3><p>The <span class="guilabel">Create</span> statement is a special statement
+      that creates resources and assigns them names. It is only valid in the
+      Initialization section of the script. It has the following
+      components:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p><code class="literal">Create</code> keyword</p></li><li class="listitem"><p>Resource type</p></li><li class="listitem"><p>Resource name(s)</p></li></ol></div><p>The <code class="literal">Create</code> keyword indicates the start of the
+      statement. It is followed by the resource type, which indicates the type
+      of resource to create. This is followed by a resource name, a
+      user-defined name that is then used to refer to that particular
+      resource. This name must follow the resource naming rules, listed
+      previously.</p><p>The only exception to this syntax is when creating an
+      <span class="guilabel">Array</span> resource, in which case the dimension of the
+      resource must also be specified</p><p>Multiple resource names are allowed, in which case multiple
+      resources of the same type will be created. Multiple names are separated
+      by white space or by commas (&ldquo;<code class="literal">,</code>&rdquo;, hex: 2C).</p><p>See the following examples:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat  % creates a resource "aSat" of type Spacecraft
+Create ForceModel aFM
+Create Propagator aProp
+Create Variable x y     % creates two Variable resources: "x" and "y"
+Create String s1, s2    % creates two String resources: "s1" and "s2"
+Create Array A[2,2]     % creates a 2x2 Array resource named "A"</code></pre></div><div class="refsection"><a name="N2934C"></a><h3>Initialization Statements</h3><p>Initialization statements are special statements that assign
+      initial values to resource fields. They are only valid in the
+      Initialization section of the script, and generally take the following
+      form:</p><pre class="programlisting"><code class="code"><em class="replaceable"><code>resource</code></em>.<em class="replaceable"><code>field</code></em> = <em class="replaceable"><code>value</code></em></code></pre><p>Some fields, like those on ForceModel resources, have a
+      multiple-dotted form:</p><pre class="programlisting"><code class="code"><em class="replaceable"><code>ForceModel</code></em>.GravityField.<em class="replaceable"><code>PrimaryBody</code></em>.Degree = <em class="replaceable"><code>value</code></em></code></pre><p>All initialization statements are composed of the following
+      elements:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Resource name</p></li><li class="listitem"><p>Period character (&ldquo;<code class="literal">.</code>&rdquo;, hex: 2E)</p></li><li class="listitem"><p>Field name, potentially in multiple-dotted form</p></li><li class="listitem"><p>Equal character (&ldquo;<code class="literal">=</code>&rdquo;, hex: 3D)</p></li><li class="listitem"><p>Initial field value</p></li></ol></div><p>The resource name must refer to a resource created previously in
+      same script.</p><p>The field name must refer to a valid field that exists for the
+      associated resource type. Parameters cannot be set with an
+      initialization statement, though it is valid to set a dual-mode field
+      (one that can also be a parameter). Fields and parameters are listed in
+      the documentation for each resource type.</p><p>All values are taken literally; no evaluation is performed.
+      Therefore, numeric and string values must be specified as literals, and
+      resource names and parameters are stored as references. See the
+      following example:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create XYPlot aPlot
+Create Variable x y z
+
+x = 7100                   % valid
+aSat.X = 7100              % valid
+aSat.X = 7100 + 2          % error (mathematical expression)
+
+aSat.X = x                 % error (field accepts literal, and variable
+                           % evaluation does not occur)
+aPlot.XVariable = x        % valid (field accepts reference to Variable x)
+aPlot.YVariables = {y, z}  % valid (field accepts array of references to
+                           % Variables y and z)</code></pre><p>For backwards compatibility, there is one exception to the
+      literal-value rule: <span class="guilabel">Spacecraft</span> resources can copied
+      with an initialization statement like:</p><pre class="programlisting">Create Spacecraft aSat1 aSat2
+aSat2 = aSat1                   % Valid only for Spacecraft resources</pre><p>Fields that have no assigned value in the Initialization section
+      of the script remain at their default values, as specified in the
+      documentation for each resource type.</p></div><div class="refsection"><a name="N29391"></a><h3>Command Statements</h3><p>Command statements invoke GMAT commands. They must appear in the
+      Mission Sequence section of the script. One special command,
+      <span class="guilabel">BeginMissionSequence</span>, initiates the Mission
+      Sequence.</p><p>Command statements are displayed by the GUI as individual line
+      items in the Mission tree. The only exception is the
+      <span class="guilabel">BeginScript</span>/<span class="guilabel">EndScript</span> compound
+      command; this is displayed as a single <span class="guilabel">ScriptEvent</span>
+      item by the GUI.</p><p>Command statements are composed of the following elements:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Command name (except assignment commands)</p></li><li class="listitem"><p>Optional label</p></li><li class="listitem"><p>Command arguments</p></li></ol></div><p>The command name is the name of the command being invoked (e.g.
+      <span class="guilabel">Propagate</span> or <span class="guilabel">BeginFiniteBurn</span>).
+      The command name is mandatory with one exception: the assignment command
+      is indicated by its structure (&ldquo;<code class="code"><em class="replaceable"><code>LHS</code></em> =
+      <em class="replaceable"><code>RHS</code></em></code>&rdquo;) instead of its name.</p><p>A command label is an optional string literal that can be added
+      immediately after the command name. This label is used by the GUI to
+      &ldquo;name&rdquo; the statement in the Mission tree, and is intended for a short
+      text description to aid the user. It must be single-quoted, whether or
+      not it contains spaces. The command label may contain any ASCII
+      character except certain non-printable characters (NUL, SUB), line
+      termination characters (LF, CR), the percent sign
+      (&ldquo;<code class="literal">%</code>&rdquo;), and the single quote (&ldquo;<code class="literal">'</code>&ldquo;).
+      If the command label is omitted, the Mission tree statement is given a
+      default label made up of the command name and an ID number. For example,
+      if the third <span class="guilabel">Propagate</span> command in the script is
+      unlabeled, it will be given the default label
+      &ldquo;<span class="guilabel">Propagate3</span>&rdquo;.</p><p>The command arguments control the behavior of the command. The
+      syntax of the arguments is specified by each command individually, and
+      is documented separately. Some commands, such as
+      <span class="guilabel">Stop</span>, have no arguments.</p><p>See the following example:</p><pre class="programlisting"><code class="code">Propagate 'Prop to periapsis' aProp(aSat) {aSat.Periapsis}</code></pre><p>In the example, &ldquo;<code class="code">Propagate</code>&rdquo; is the command name,
+      &ldquo;<code class="code">'Prop to periapsis'</code>&rdquo; is the command label, and
+      &ldquo;<code class="code">aProp(aSat) {aSat.Periapsis}</code>&rdquo; is the argument
+      string.</p></div><div class="refsection"><a name="N293E2"></a><h3>Compound Statements</h3><p>Compound statements are command statements that control the
+      execution of other command statements. Compound statements are composed
+      of three elements:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Begin statement</p></li><li class="listitem"><p>Body</p></li><li class="listitem"><p>End statement</p></li></ol></div><p>The begin statement carries the name of the command itself, while
+      the end statement begins with the string &ldquo;End&rdquo;. For example, the
+      <span class="guilabel">While</span> command is a compound command composed of two
+      statements:</p><pre class="programlisting"><code class="code">While ['<em class="replaceable"><code>label</code></em>'] <em class="replaceable"><code>arguments</code></em>
+    [<em class="replaceable"><code>body</code></em>]
+EndWhile</code></pre><p>The <span class="guilabel">If</span>/<span class="guilabel">Else</span> compound
+      command is composed of three statements:</p><pre class="programlisting"><code class="code">If ['<em class="replaceable"><code>label</code></em>'] <em class="replaceable"><code>arguments</code></em>
+    [<em class="replaceable"><code>body</code></em>]
+Else
+    [<em class="replaceable"><code>body</code></em>]
+EndIf</code> </pre><p>The body of a compound command may consist of independent command
+      statements, possibly including other compound statements. Certain
+      compound commands may limit the commands that can be present in the
+      body, while other commands may only be contained within certain compound
+      commands. These limitations are documented separately for each
+      command.</p></div></div><div class="refsection"><a name="N2941C"></a><h2>Processing</h2><p>GMAT processes a script in two phases: interpretation and execution.
+    This section gives an overview of the processing sequence; low-level
+    details are documented in Chapter 17 of the GMAT Architectural
+    Specification.</p><div class="refsection"><a name="N29421"></a><h3>Interpretation</h3><p>GMAT interprets a script in two stages: a parsing stage and a
+      validation stage. In the parsing stage, GMAT reads and interprets each
+      line of the script sequentially. As it interprets a line, it checks it
+      for syntactic correctness and performs any initialization needed by the
+      line. For example, if the line being interpreted is a
+      <span class="guilabel">Create</span> statement, the related resource is created.
+      If GMAT encounters an initialization line, it assigns the appropriate
+      value to the indicated resource field. And if it encounters a command
+      statement, it creates the command structure and interprets its
+      arguments. All language, resource initialization, and command syntax
+      errors are caught during this parsing stage.</p><p>In the validation stage, GMAT checks that all references between
+      resources are valid. For example, if the script indicates that a
+      <span class="guilabel">Spacecraft</span> resource should be defined in relation
+      to a specific <span class="guilabel">CoordinateSystem</span> resource, the
+      reference is validated during this stage. The validation checks that all
+      referenced resources exist and are of the correct type.</p><p>The two-stage interpretation method affects the order of
+      statements in the script. For example, <span class="guilabel">Create</span>
+      statements must appear in the script above any initialization statements
+      that reference the resource being created. But because validation is
+      performed separately, the <span class="guilabel">Create</span> statement for a
+      <span class="guilabel">CoordinateSystem</span> resource can appear in the script
+      below an initialization line that references this resource. See the
+      following examples:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+
+% This is valid; the aSat resource has been created by the line above.
+aSat.DateFormat = TAIGregorian
+
+% This is invalid; the aReport resource has not yet been created.
+aReport.Filename = 'report.txt'
+Create ReportFile aReport</code></pre><pre class="programlisting"><code class="code">Create XYPlot aPlot
+
+% This is valid; the reference to aSat is validated
+% after all resources are created.
+aPlot.XVariable = aSat.A1ModJulian
+
+Create Spacecraft aSat</code></pre><p>Once both stages have completed, the script has been loaded into
+      GMAT. In the GUI, if any, the Resources tree is populated with the
+      resources created in the Initialization section of the script, and the
+      Mission tree is populated with the command statements in the Mission
+      Sequence.</p><p>The interpretation phase is also sometimes called the &ldquo;build&rdquo;
+      phase or the &ldquo;load&rdquo; phase.</p></div><div class="refsection"><a name="N29446"></a><h3>Execution</h3><p>When a mission is run, GMAT first builds interconnections between
+      resources, then performs command execution. In this phase, all commands
+      in the Mission Sequence are executed sequentially, in the order of
+      definition in the script. When a command statement is executed, its
+      arguments are fully processed by the command, and any remaining errors
+      are reported. Examples of execution-phase errors include mismatched data
+      types, out-of-bounds array references, and divide-by-zero errors.</p></div><div class="refsection"><a name="N2944B"></a><h3>Processing Errors</h3><p>If GMAT encounters an error during the interpretation stage
+      (parsing or validation), the mission is not loaded. Instead, GMAT
+      reverts to a minimum mission consisting of:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="guilabel">SolarSystem</span></p></li><li class="listitem"><p>Default <span class="guilabel">CoordinateSystem</span> resources:
+          <span class="guilabel">EarthMJ2000Eq</span>,
+          <span class="guilabel">EarthMJ2000Ec</span>, <span class="guilabel">EarthFixed</span>,
+          <span class="guilabel">EarthICRF</span></p></li></ul></div><p>If an error is encountered during the execution stage (linking or
+      command execution), execution of the mission stops at the point of the
+      error.</p></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="PythonInterface.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="System.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="StartupFile.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Python Interface&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Startup File</td></tr></table></div></body></html>

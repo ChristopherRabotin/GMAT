@@ -5,7 +5,7 @@
 
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -111,8 +111,7 @@ public:
    Solver*                CreateSolver(const std::string &ofType,
                                        const std::string &withName = "");
    Subscriber*            CreateSubscriber(const std::string &ofType,
-                                           const std::string &withName = "",
-                                           const std::string &fileName = "");
+                                           const std::string &withName = "");
    EphemerisFile*         CreateEphemerisFile(const std::string &ofType,
                                               const std::string &withName = "");
    GmatCommand*           CreateCommand(const std::string &ofType,
@@ -120,8 +119,7 @@ public:
    Burn*                  CreateBurn(const std::string &ofType,
                                      const std::string &withName = "");
    AtmosphereModel*       CreateAtmosphereModel(const std::string &ofType,
-                                                const std::string &withName = "",
-                                                const std::string &forBody = "Earth");
+                                                const std::string &withName = "");
    Function*              CreateFunction(const std::string &ofType,
                                          const std::string &withName = "");
    Hardware*              CreateHardware(const std::string &ofType,
@@ -175,7 +173,7 @@ public:
    const StringArray&     GetListOfAllItemsExcept(const ObjectTypeArray &types);
    const StringArray&     GetListOfViewableItems(Gmat::ObjectType byType);
    const StringArray&     GetListOfUnviewableItems(Gmat::ObjectType byType);
-   
+   const ObjectTypeArrayMap& GetAllObjectTypeArrayMap();
    bool                   DoesObjectTypeMatchSubtype(
                                 const Gmat::ObjectType coreType,
                                 const std::string &theType,
@@ -195,6 +193,8 @@ private:
    std::list<Factory*> factoryList;
    /// the list of object types that factory can create
    std::list<Gmat::ObjectType> factoryTypeList;
+   /// the map of object types that factory can create
+   ObjectTypeArrayMap objectTypeArrayMap;
    /// pointer to the only instance allowed for this singleton class
    static FactoryManager* onlyInstance;
    

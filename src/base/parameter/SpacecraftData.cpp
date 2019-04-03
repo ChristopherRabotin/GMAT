@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -37,6 +37,7 @@
 
 //#define DEBUG_SPACECRAFTDATA_INIT
 //#define DEBUG_SC_OWNED_OBJ
+//#define DEBUG_SETREAL
 
 
 const std::string
@@ -252,6 +253,9 @@ Real SpacecraftData::GetReal(Integer item)
 //------------------------------------------------------------------------------
 Real SpacecraftData::SetReal(Integer item, Real val)
 {
+   #ifdef DEBUG_SETREAL
+      MessageInterface::ShowMessage("Setting %s\n", mActualParamName.c_str());
+   #endif
    if (mSpacecraft == NULL)
       InitializeRefObjects();
    
@@ -489,7 +493,7 @@ Real SpacecraftData::GetOwnedObjectProperty(Gmat::ObjectType objType,
    #endif
    
    GmatBase *ownedObj = mSpacecraft->GetRefObject(objType, dep);
-   
+
    #ifdef DEBUG_SC_OWNED_OBJ
    MessageInterface::ShowMessage
       ("   ownedObj=<%p><%s>'%s'\n", ownedObj, ownedObj ? ownedObj->GetTypeName().c_str() : "NULL",
@@ -552,6 +556,11 @@ Real SpacecraftData::SetOwnedObjectProperty(Gmat::ObjectType objType,
    #endif
    
    GmatBase *ownedObj = mSpacecraft->GetRefObject(objType, dep);
+
+   #ifdef DEBUG_SETREAL
+      MessageInterface::ShowMessage("   dep == %s points to %p\n", dep.c_str(),
+            ownedObj);
+   #endif
    
    #ifdef DEBUG_SC_OWNED_OBJ
    MessageInterface::ShowMessage

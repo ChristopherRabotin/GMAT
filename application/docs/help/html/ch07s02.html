@@ -1,0 +1,83 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Create and Configure Spacecraft Hardware and Finite Burn</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Tut_TargetFiniteBurn.html" title="Chapter&nbsp;7.&nbsp;Target Finite Burn to Raise Apogee"><link rel="prev" href="Tut_TargetFiniteBurn.html" title="Chapter&nbsp;7.&nbsp;Target Finite Burn to Raise Apogee"><link rel="next" href="ch07s03.html" title="Create the Differential Corrector and Target Control Variable"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Create and Configure Spacecraft Hardware and Finite Burn</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Tut_TargetFiniteBurn.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;7.&nbsp;Target Finite Burn to Raise Apogee</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ch07s03.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N11539"></a>Create and Configure Spacecraft Hardware and Finite Burn</h2></div></div></div><p>For this tutorial, you&rsquo;ll need GMAT open with the default mission
+    loaded. To load the default mission, click <span class="guibutton">New
+    Mission</span> (<span class="inlinemediaobject"><img src="../files/images/icons/NewMission.png" align="middle" height="10"></span>) or start a new GMAT session. We will use the
+    default configurations for the spacecraft (<span class="guilabel">DefaultSC</span>)
+    and the propagator (<span class="guilabel">DefaultProp</span>).
+    <span class="guilabel">DefaultSC</span> is configured by default to a near-circular
+    orbit, and <span class="guilabel">DefaultProp</span> is configured to use Earth as
+    the central body with a nonspherical gravity model of degree and order 4.
+    You may want to open the dialog boxes for these objects and inspect them
+    more closely as we will leave them at their default settings.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N11555"></a>Create a Thruster and a Fuel Tank</h3></div></div></div><p>To model thrust and fuel use associated with a finite burn, we
+      must create a <span class="guilabel">ChemicalThruster</span> and a
+      <span class="guilabel">ChemicalTank</span> and then attach the newly created
+      <span class="guilabel">ChemicalTank</span> to the
+      <span class="guilabel">ChemicalThruster</span>.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>In the <span class="guilabel">Resources</span> tree, right-click on the
+          <span class="guilabel">Hardware</span> folder, point to
+          <span class="guilabel">Add</span>, and click
+          <span class="guilabel">ChemicalThruster</span>. &nbsp;A resource named
+          <span class="guilabel">ChemicalThruster1</span> will be created.</p></li><li class="step"><p>In the <span class="guilabel">Resources</span> tree, right-click on the
+          <span class="guilabel">Hardware</span> folder, point to
+          <span class="guilabel">Add</span>, and click
+          <span class="guilabel">ChemicalTank</span>. &nbsp;A resource named
+          <span class="guilabel">ChemicalTank1</span> will be created.</p></li><li class="step"><p>Double-click<span class="guilabel"> ChemicalThruster1</span> to edit
+          its properties.</p></li><li class="step"><p>Select the <span class="guilabel">Decrement Mass</span> box so that
+          GMAT will model fuel use associated with a finite burn.</p></li><li class="step"><p>Use the drop down menu to the right of the
+          <span class="guilabel">Tank</span> field to select
+          <span class="guilabel">ChemicalTank1</span> as the fuel source for
+          <span class="guilabel">ChemicalThruster1</span>. &nbsp;Click
+          <span class="guilabel">OK</span>. &nbsp;</p></li></ol></div><p><a class="xref" href="ch07s02.html#Tut_TargetFiniteBurn_Fig1_FuelTank1_Configuration" title="Figure&nbsp;7.1.&nbsp;ChemicalTank1 Configuration">Figure&nbsp;7.1, &ldquo;<span class="guilabel">ChemicalTank1</span> Configuration&rdquo;</a> below
+      shows the default <span class="guilabel">ChemicalTank1</span> configuration that
+      we will use and <a class="xref" href="ch07s02.html#Tut_TargetFiniteBurn_Fig2_Thruster1_Configuration" title="Figure&nbsp;7.2.&nbsp;ChemicalThruster1 Configuration">Figure&nbsp;7.2, &ldquo;<span class="guilabel">ChemicalThruster1</span> Configuration&rdquo;</a> shows the
+      finished <span class="guilabel">ChemicalThruster1</span> configuration.</p><div class="figure"><a name="Tut_TargetFiniteBurn_Fig1_FuelTank1_Configuration"></a><p class="title"><b>Figure&nbsp;7.1.&nbsp;<span class="guilabel">ChemicalTank1</span> Configuration</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_TargetFiniteBurn_Fig1_FuelTank1_Configuration.png" align="middle" height="477" alt="ChemicalTank1 Configuration"></td></tr></table></div></div></div></div><br class="figure-break"><div class="figure"><a name="Tut_TargetFiniteBurn_Fig2_Thruster1_Configuration"></a><p class="title"><b>Figure&nbsp;7.2.&nbsp;<span class="guilabel">ChemicalThruster1</span> Configuration</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_TargetFiniteBurn_Fig2_Thruster1_Configuration_better.png" align="middle" height="536" alt="ChemicalThruster1 Configuration"></td></tr></table></div></div></div></div><br class="figure-break"><p>Note that the default <span class="guilabel">Thruster1 Coordinate
+      System</span>, as shown in <a class="xref" href="ch07s02.html#Tut_TargetFiniteBurn_Fig2_Thruster1_Configuration" title="Figure&nbsp;7.2.&nbsp;ChemicalThruster1 Configuration">Figure&nbsp;7.2, &ldquo;<span class="guilabel">ChemicalThruster1</span> Configuration&rdquo;</a>, is
+      Earth-based Velocity, Normal, Bi-normal (VNB) and that the default
+      <span class="guilabel">Thrust Vector</span> of (1,0,0) represents our desired
+      velocity oriented maneuver direction.</p><p>For a general finite burn, if desired, we can specify how both the
+      thrust and the fuel use depend upon fuel tank pressure. The user does
+      this by inputting coefficients of certain pre-defined polynomials. To
+      view the values for the thrust coefficients, click the <span class="guilabel">Edit
+      Thruster Coef.</span> button and to view the ISP coefficients which
+      determine fuel use, click the <span class="guilabel">Edit Impulse Coef.</span>
+      button. For this tutorial, we will use the default ISP polynomial
+      coefficient values but we will change the
+      <span class="guilabel">ChemicalThruster1</span> polynomial coefficients as
+      follows.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N115E7"></a>Modify Thruster1 Thrust Coefficients</h3></div></div></div><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>In the <span class="guilabel">Resources</span> tree, double-click
+          <span class="guilabel">ChemicalThruster1</span> to edit its properties</p></li><li class="step"><p>Click the <span class="guilabel">Edit Thruster Coef.</span> button to
+          bring up the <span class="guilabel">ThrusterCoefficientDialog</span> box,
+          shown in <a class="xref" href="ch07s02.html#Tut_TargetFiniteBurn_Fig3_Thruster1_Thrust_Coefficients" title="Figure&nbsp;7.3.&nbsp;ChemicalThruster1 Thrust Coefficients">Figure&nbsp;7.3, &ldquo;<span class="guilabel">ChemicalThruster1</span> Thrust
+        Coefficients&rdquo;</a>.
+          Replace the default <span class="guilabel">C1</span> coefficient value of
+          <code class="literal">10</code> with <code class="literal">1000</code>. Click
+          <span class="guilabel">OK</span>.</p></li></ol></div><div class="figure"><a name="Tut_TargetFiniteBurn_Fig3_Thruster1_Thrust_Coefficients"></a><p class="title"><b>Figure&nbsp;7.3.&nbsp;<span class="guilabel">ChemicalThruster1</span> Thrust
+        Coefficients</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_TargetFiniteBurn_Fig3_Thruster1_Thrust_Coefficients.png" align="middle" height="583" alt="ChemicalThruster1 Thrust Coefficients"></td></tr></table></div></div></div></div><br class="figure-break"><p>The exact form of the pre-defined Thrust polynomial, associated
+      with the coefficients above, are given in the
+      <span class="guilabel">ChemicalThruster</span> help. We note that, by default,
+      all of the Thrust coefficients associated with terms that involve tank
+      pressure are zero. We have kept the default zero values for all of these
+      coefficients. We simply changed the constant term in the Thrust
+      polynomial from <code class="literal">10</code> to <code class="literal">1000</code> which
+      is much larger than the thrust for a typical chemical thruster. The
+      Thrust and ISP polynomials used in this tutorial are shown below.</p><p>Thrust = 1000 (Newtons)</p><p>ISP = 300 (seconds)</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N1162A"></a>Attach ChemicalTank1 and Thruster1 to DefaultSC</h3></div></div></div><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>In the <span class="guilabel">Resources</span> tree, double-click
+          <span class="guilabel">DefaultSC</span> to edit its properties.</p></li><li class="step"><p>Select the <span class="guilabel">Tanks</span> tab. In the
+          <span class="guilabel">Available Tanks</span> column, select
+          <span class="guilabel">ChemicalTank1</span>. Then click the right arrow
+          button to add <span class="guilabel">ChemicalTank1</span> to the
+          <span class="guilabel">SelectedTanks</span> list. Click
+          <span class="guilabel">Apply</span>.</p></li><li class="step"><p>Select the <span class="guilabel">Actuators</span> tab. In the
+          <span class="guilabel">Available Thrusters</span> column, select
+          <span class="guilabel">ChemicalThruster1</span>. Then click the right arrow
+          button to add <span class="guilabel">ChemicalThruster1</span> to the
+          <span class="guilabel">SelectedThrusters</span> list. Click
+          <span class="guilabel">OK</span>.</p></li></ol></div><div class="figure"><a name="Tut_TargetFiniteBurn_Fig4_Attach_FuelTank1_to_DefaultSC"></a><p class="title"><b>Figure&nbsp;7.4.&nbsp;Attach <span class="guilabel">ChemicalTank1</span> to
+        <span class="guilabel">DefaultSC</span></b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_TargetFiniteBurn_Fig4_Attach_FuelTank1_to_DefaultSC.png" align="middle" height="735" alt="Attach ChemicalTank1 to DefaultSC"></td></tr></table></div></div></div></div><br class="figure-break"><div class="figure"><a name="Tut_TargetFiniteBurn_Fig5_Attach_Thruster1_to_DefaultSC"></a><p class="title"><b>Figure&nbsp;7.5.&nbsp;Attach <span class="guilabel">ChemicalThruster1</span> to
+        <span class="guilabel">DefaultSC</span></b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_TargetFiniteBurn_Fig5_Attach_Thruster1_to_DefaultSC.png" align="middle" height="735" alt="Attach ChemicalThruster1 to DefaultSC"></td></tr></table></div></div></div></div><br class="figure-break"></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N11685"></a>Create the Finite Burn Maneuver</h3></div></div></div><p>We&rsquo;ll need a single <span class="guilabel">FiniteBurn</span> resource for
+      this tutorial.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>In the <span class="guilabel">Resources</span> tree, right-click the
+          <span class="guilabel">Burns</span> folder and add a
+          <span class="guilabel">FiniteBurn</span>. A resource named<span class="guilabel">
+          FiniteBurn1</span> will be created.</p></li><li class="step"><p>Double-click <span class="guilabel">FiniteBurn1</span> to edit its
+          properties.</p></li><li class="step"><p>Use the menu to the right of the <span class="guilabel">Thruster</span>
+          field to select <span class="guilabel">ChemicalThruster1</span> as the
+          thruster associated with <span class="guilabel">FiniteBurn1</span>. Click
+          <span class="guilabel">OK</span>.</p></li></ol></div><div class="figure"><a name="Tut_TargetFiniteBurn_Fig6_Creation_of_FiniteBurn_Resource_FiniteBurn1"></a><p class="title"><b>Figure&nbsp;7.6.&nbsp;Creation of <span class="guilabel">FiniteBurn</span> Resource
+        <span class="guilabel">FiniteBurn1</span></b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_TargetFiniteBurn_Fig6_Creation_of_FiniteBurn_Resource_FiniteBurn1.png" align="middle" height="170" alt="Creation of FiniteBurn Resource FiniteBurn1"></td></tr></table></div></div></div></div><br class="figure-break"></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Tut_TargetFiniteBurn.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Tut_TargetFiniteBurn.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ch07s03.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;7.&nbsp;Target Finite Burn to Raise Apogee&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Create the Differential Corrector and Target Control
+    Variable</td></tr></table></div></body></html>

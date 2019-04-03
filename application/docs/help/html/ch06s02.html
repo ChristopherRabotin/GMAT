@@ -1,0 +1,37 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Configure Maneuvers, Differential Corrector, and Graphics</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="SimpleOrbitTransfer.html" title="Chapter&nbsp;6.&nbsp;Simple Orbit Transfer"><link rel="prev" href="SimpleOrbitTransfer.html" title="Chapter&nbsp;6.&nbsp;Simple Orbit Transfer"><link rel="next" href="ch06s03.html" title="Configure the Mission Sequence"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Configure Maneuvers, Differential Corrector, and Graphics</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="SimpleOrbitTransfer.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;6.&nbsp;Simple Orbit Transfer</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ch06s03.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N110E8"></a>Configure Maneuvers, Differential Corrector, and Graphics</h2></div></div></div><p>For this tutorial, you&rsquo;ll need GMAT open, with the default mission
+    loaded. To load the default mission, click <span class="guiicon">New Mission</span>
+    (<span class="inlinemediaobject"><img src="../files/images/icons/NewMission.png" align="middle" height="10"></span>) or start a new GMAT session. We will
+    use the default configurations for the spacecraft
+    (<span class="guilabel">DefaultSC</span>), the propagator
+    (<span class="guilabel">DefaultProp</span>), and the two maneuvers.
+    <span class="guilabel">DefaultSC</span> is configured by default to a near-circular
+    orbit, and <span class="guilabel">DefaultProp</span> is configured to use Earth as
+    the central body with a nonspherical gravity model of degree and order 4.
+    You may want to open the dialog boxes for these objects and inspect them
+    more closely as we will leave them at their default settings.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N11104"></a>Create the Differential Corrector</h3></div></div></div><p>The <code class="function">Target</code> sequence we will create later
+      needs a <code class="classname">DifferentialCorrector</code> resource to
+      operate, so let&rsquo;s create one now. We'll leave the settings at their
+      defaults.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>In the <span class="guilabel">Resource</span> tree, expand the
+          <span class="guilabel">Solvers</span> folder if it isn&rsquo;t already.</p></li><li class="step"><p>Right-click the<span class="guilabel"> Boundary Value Solvers</span>
+          folder, point to <span class="guilabel">Add</span>, and click
+          <span class="guilabel">DifferentialCorrector</span>. A new resource called
+          <span class="guilabel">DC1</span> will be created.</p></li></ol></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N11128"></a>Modify the Default Orbit View</h3></div></div></div><p>We need to make minor modifications to
+      <span class="guibutton">DefaultOrbitView</span> so that the entire final orbit
+      will fit in the graphics window.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>In the <span class="guilabel">Resource Tree</span>,
+          double-click<span class="guibutton"> DefaultOrbitView</span> to edit its
+          properties.</p></li><li class="step"><p>Set the values shown in the table below.</p><div class="table"><a name="N1113E"></a><p class="title"><b>Table&nbsp;6.1.&nbsp;<span class="guilabel">DefaultOrbitView</span> settings</b></p><div class="table-contents"><table summary="DefaultOrbitView settings" border="1"><colgroup><col width="60%"><col width="40%"></colgroup><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td><span class="guilabel">Solver Iterations</span>, under
+                    <span class="guilabel">Drawing Option</span></td><td><span class="guilabel">Current</span></td></tr><tr><td><span class="guilabel">Axis</span>, under <span class="guilabel">View Up
+                    Defintion</span></td><td><span class="guilabel">X</span></td></tr><tr><td><span class="guilabel">View Point Vector</span> boxes, under
+                    <span class="guilabel">View Definition</span></td><td><strong class="userinput"><code>0</code></strong>, <strong class="userinput"><code>0</code></strong>,
+                    and <strong class="userinput"><code>120000</code></strong> respectively</td></tr></tbody></table></div></div><p><br class="table-break"></p><p></p></li><li class="step"><p>Click <span class="guilabel">OK</span> to save these changes.</p></li></ol></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N11180"></a>Create the Maneuvers.</h3></div></div></div><p>We&rsquo;ll need two <code class="classname">ImpulsiveBurn</code> resources for
+      this tutorial, both using default values. Below, we&rsquo;ll rename the
+      default <code class="classname">ImpulsiveBurn</code> and create a new
+      one.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>In the <span class="guilabel">Resources</span> tree, right-click
+          <span class="guilabel">DefaultIB</span> and click
+          <span class="guilabel">Rename</span>.</p></li><li class="step"><p>In the <span class="guilabel">Rename</span> box, type
+          <strong class="userinput"><code>TOI</code></strong>, an acronym for Transfer Orbit Insertion,
+          and click <span class="guibutton">OK</span>.</p></li><li class="step"><p>Right-click the <span class="guilabel">Burns</span> folder, point to
+          <span class="guilabel">Add</span>, and click
+          <span class="guilabel">ImpulsiveBurn</span>.</p></li><li class="step"><p>Rename the new <span class="guilabel">ImpulsiveBurn1</span> resource to
+          <strong class="userinput"><code>GOI</code></strong>, an acronym for Geosynchronous Orbit
+          Insertion.</p></li></ol></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="SimpleOrbitTransfer.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="SimpleOrbitTransfer.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ch06s03.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;6.&nbsp;Simple Orbit Transfer&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Configure the Mission Sequence</td></tr></table></div></body></html>

@@ -1,0 +1,547 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>CoordinateSystem</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="CelestialBody.html" title="CelestialBody"><link rel="next" href="ContactLocator.html" title="ContactLocator"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">CoordinateSystem</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="CelestialBody.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ContactLocator.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="CoordinateSystem"></a><div class="titlepage"></div><a name="N16609" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">CoordinateSystem</span></h2><p>CoordinateSystem &mdash; An axis and origin pair</p></div><div class="refsection"><a name="N1661A"></a><h2>Description</h2><p>A <span class="guilabel">CoordinateSystem</span> in GMAT is defined as an
+    origin and an axis system. You can select the origin of a
+    <span class="guilabel">CoordinateSystem</span> from various points such as a
+    <span class="guilabel">CelestialBody</span>, <span class="guilabel">Spacecraft</span>,
+    <span class="guilabel">GroundStation</span>, or <span class="guilabel">LibrationPoint</span>
+    to name a few. GMAT supports numerous axis systems such as J2000 equator,
+    J2000 ecliptic, <span class="guilabel">ICRF</span>, <span class="guilabel">ITRF</span>,
+    <span class="guilabel">Topocentric</span>, and
+    <span class="guilabel">ObjectReferenced</span> among others.
+    <span class="guilabel">CoordinateSystems</span> are tightly integrated into GMAT to
+    enable you to define, report, and visualize data in coordinate systems
+    relevant to your application. This resource cannot be modified in the
+    Mission Sequence.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a>, <a class="xref" href="CalculationParameters.html" title="Calculation Parameters"><span class="refentrytitle">Calculation Parameters</span></a>, <a class="xref" href="OrbitView.html" title="OrbitView"><span class="refentrytitle">OrbitView</span></a></p></div><div class="refsection"><a name="N1664D"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AlignmentVectorX</span></td><td><p>The x component of the
+            <span class="guibutton">AlignmentVector</span> expressed in the local
+            frame (for example, expressed in the
+            <span class="guibutton">LocalAlignedConstrained</span> frame). Used for
+            the following axis systems:
+            <span class="guibutton">LocalAlignedConstrained</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin; (norm of
+                    <span class="guibutton">AlignmentVector </span>&gt;= 1e-9)</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">1</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>gui,script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AlignmentVectorY</span></td><td><p>The y component of the
+            <span class="guibutton">AlignmentVector</span> expressed in the local
+            frame (for example, expressed in the
+            <span class="guibutton">LocalAlignedConstrained</span> frame). Used for
+            the following axis systems:
+            <span class="guibutton">LocalAlignedConstrained</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin; (norm of
+                    <span class="guibutton">AlignmentVector</span>&gt;= 1e-9)</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">0</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>gui, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AlignmentVectorZ</span></td><td><p>The z component of the
+            <span class="guibutton">AlignmentVector</span> expressed in the local
+            frame (for example, expressed in the
+            <span class="guibutton">LocalAlignedConstrained</span> frame). Used for
+            the following axis systems:
+            <span class="guibutton">LocalAlignedConstrained</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin; (norm of
+                    <span class="guibutton">AlignmentVector</span>&gt;= 1e-9)</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">0</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>gui,script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Axes </span></td><td><p> The axes of the
+            <span class="guilabel">CoordinateSystem</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">MJ2000Eq</span>,
+                    <span class="guilabel">MJ2000Ec</span>, <span class="guilabel">ICRF</span>,
+                    <span class="guilabel">ITRF</span>, <span class="guilabel">MODEq</span>,
+                    <span class="guilabel">MODEc</span>, <span class="guilabel">TODEq</span>,
+                    <span class="guilabel">TODEc</span>, <span class="guilabel">MOEEq</span>,
+                    <span class="guilabel">MOEEc</span>, <span class="guilabel">TOEEq</span>,
+                    <span class="guilabel">TOEEc</span>,
+                    <span class="guilabel">ObjectReferenced</span>,
+                    <span class="guilabel">Equator</span>,
+                    <span class="guilabel">BodyFixed</span>,
+                    <span class="guilabel">BodyInertial</span>,
+                    <span class="guilabel">GSE</span>,<span class="guilabel"> GSM</span>,
+                    <span class="guilabel">Topocentric</span>,
+                    <span class="guilabel">BodySpinSun</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">MJ2000Eq</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ConstraintVectorX</span></td><td><p>The x component of the
+            <span class="guibutton">ConstraintVector</span> expressed in the local
+            frame (for example, expressed in the
+            <span class="guibutton">LocalAlignedConstrained</span> frame). Used for
+            the following axis systems:
+            <span class="guibutton">LocalAlignedConstrained</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin; (norm of
+                    <span class="guibutton">ConstraintVector</span>&gt;= 1e-9)</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">0</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>gui,script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ConstraintVectorY</span></td><td><p>The y component of the
+            <span class="guibutton">ConstraintVector</span> expressed in the local
+            frame (for example, expressed in the
+            <span class="guibutton">LocalAlignedConstrained</span> frame). Used for
+            the following axis systems:
+            <span class="guibutton">LocalAlignedConstrained</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin; (norm of
+                    <span class="guibutton">ConstraintVector</span>&gt;= 1e-9)</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">0</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>gui,script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ConstraintVectorZ</span></td><td><p>The z component of the
+            <span class="guibutton">ConstraintVector</span> expressed in the local
+            frame (for example, expressed in the
+            <span class="guibutton">LocalAlignedConstrained</span> frame). Used for
+            the following axis systems:
+            <span class="guibutton">LocalAlignedConstrained</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin; (norm of
+                    <span class="guibutton">ConstraintVector</span>&gt;= 1e-9)</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">1</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>gui,script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ConstraintReferenceVectorX</span></td><td><p>The x component of the
+            <span class="guibutton">ConstraintReferenceVector</span> expressed in
+            the<span class="guibutton"> ConstraintCoordinateSystem</span>. Used for
+            the following axis systems:
+            <span class="guibutton">LocalAlignedConstrained</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin; (norm of
+                    <span class="guibutton">ConstraintReferenceVector</span>&gt;=
+                    1e-9)</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">0</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>gui,script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ConstraintReferenceVectorY</span></td><td><p>The y component of the
+            <span class="guibutton">ConstraintReferenceVector</span> expressed in the
+            <span class="guibutton">ConstraintCoordinateSystem</span>. Used for the
+            following axis systems:
+            <span class="guibutton">LocalAlignedConstrained</span>. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin; (norm of
+                    <span class="guibutton">ConstraintReferenceVector</span>&gt;=
+                    1e-9)</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">0</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>gui,script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ConstraintReferenceVectorZ</span></td><td><p>The z component of the
+            <span class="guibutton">ConstraintReferenceVector</span> expressed in the
+            <span class="guibutton">ConstraintCoordinateSystem</span>. Used for the
+            following axis systems:
+            <span class="guibutton">LocalAlignedConstrained</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin; (norm of
+                    <span class="guibutton">ConstraintReferenceVector</span>&gt;=
+                    1e-9)</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">1</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>gui,script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Constraint Coordinate System</span></td><td><p>The coordinate system for the
+            <span class="guibutton">ConstraintReferenceVector</span>. Used for the
+            following axis sytems:
+            <span class="guibutton">LocalAlignedConstrained</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Resource</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>
+                      <span class="guibutton">CoordinateSystem</span>
+                    </p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">EarthMJ2000Eq</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>gui,script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Epoch</span></td><td><p> The reference epoch for the
+            <span class="guilabel">CoordinateSystem</span>. This field is only used for
+            <span class="guilabel">TOE</span> amd <span class="guilabel">MOE</span> axis types.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>A1 Modified Julian epoch.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>21545</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Modified Julian Date</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Origin</span></td><td><p>The origin of the
+            <span class="guilabel">CoordinateSystem</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">CelestialBody</span>,
+                    <span class="guilabel">Spacecraft</span>,
+                    <span class="guilabel">LibrationPoint</span>,
+                    <span class="guilabel">Barycenter</span>,
+                    <span class="guilabel">SolarSystemBarycenter</span>,
+                    <span class="guilabel">GroundStation</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Earth</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Primary</span></td><td><p>The primary body for an
+            <span class="guilabel">ObjectReferenced</span> axis system. This field is
+            only used if <span class="guilabel">Axes</span> =
+            <span class="guilabel">ObjectReferenced</span>. See the discussion below
+            for more information on how <span class="guilabel">Primary</span> and
+            <span class="guilabel">Secondary</span> are used to compute
+            <span class="guilabel">ObjectReferenced</span> axes.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">CelestialBody</span>,
+                    <span class="guilabel">Spacecraft</span>,
+                    <span class="guilabel">LibrationPoint</span>,
+                    <span class="guilabel">Barycenter</span>,
+                    <span class="guilabel">SolarSystemBarycenter</span>,
+                    <span class="guilabel">GroundStation</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Earth</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ReferenceObject</span></td><td><p>The reference object for a
+            <span class="guibutton">LocalAlignedConstrained </span>axis system. The
+            axes are computed such that the
+            <span class="guibutton">AlignmentVector</span> in the body frame is
+            aligned with the vector pointing from the
+            <span class="guibutton">Origin</span> to the
+            <span class="guibutton">ReferenceObject</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Resource</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>A Resource that has coordinates. For example:
+                    <span class="guilabel">CelestialBody</span>,
+                    <span class="guilabel">Spacecraft</span>,
+                    <span class="guilabel">LibrationPoint</span>,
+                    <span class="guilabel">Barycenter</span>,
+                    <span class="guilabel">SolarSystemBarycenter</span>,
+                    <span class="guilabel">GroundStation.</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Luna</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>gui,script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Secondary</span></td><td><p> The secondary body for an
+            <span class="guilabel">ObjectReferenced</span> axis system. This field is
+            only used if <span class="guilabel">Axes</span> =
+            <span class="guilabel">ObjectReferenced</span>. See the discussion below
+            for more information on how <span class="guilabel">Primary</span> and
+            <span class="guilabel">Secondary</span> are used to compute
+            <span class="guilabel">ObjectReferenced</span> axes.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">CelestialBody</span>,
+                    <span class="guilabel">Spacecraft</span>,
+                    <span class="guilabel">LibrationPoint</span>,
+                    <span class="guilabel">Barycenter</span>,
+                    <span class="guilabel">SolarSystemBarycenter</span>,
+                    <span class="guilabel">GroundStation</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Luna</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">XAxis</span></td><td><p> The x-axis definition for an
+            <span class="guilabel">ObjectReferenced</span> axis system. This field is
+            only used if <span class="guilabel">Axes</span> =
+            <span class="guilabel">ObjectReferenced</span>. See the discussion below
+            for more information on how the axes are computed for
+            <span class="guilabel">ObjectReferenced</span> axis systems.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">R</span>,<span class="guilabel">V</span>,
+                    <span class="guilabel">N</span>, <span class="guilabel">-R</span>,
+                    <span class="guilabel">-V</span>,<span class="guilabel"> -N</span>, or
+                    empty</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">R</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">YAxis</span></td><td><p> The y-axis definition for an
+            <span class="guilabel">ObjectReferenced</span> axis system. This field is
+            only used if <span class="guilabel">Axes</span> =
+            <span class="guilabel">ObjectReferenced</span>. See the discussion below
+            for more information on how the axes are computed for
+            <span class="guilabel">ObjectReferenced</span> axis systems.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">R</span>,<span class="guilabel">V</span>,
+                    <span class="guilabel">N</span>, <span class="guilabel">-R</span>,
+                    <span class="guilabel">-V</span>,<span class="guilabel">-N</span>, or
+                    empty</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>No Default</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Zaxis</span></td><td><p> The z-axis for an
+            <span class="guilabel">ObjectReferenced</span> axis system. This field is
+            only used if <span class="guilabel">Axes</span> =
+            <span class="guilabel">ObjectReferenced</span>. See the discussion below
+            for more information on how the axes are computed for
+            <span class="guilabel">ObjectReferenced</span> axis systems.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">R</span>,<span class="guilabel">V</span>,
+                    <span class="guilabel">N</span>, <span class="guilabel">-R</span>,
+                    <span class="guilabel">-V</span>,<span class="guilabel">-N</span>, or
+                    empty</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">N</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N16B72"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_CoordinateSystems_GUI_1.png" align="middle" height="468"></td></tr></table></div></div><p>The <span class="guilabel">New Coordinate System</span> dialog box shown
+    above appears when you add a new coordinate system in the
+    <span class="guilabel">Resource Tree</span>. You provide a name for the new
+    <span class="guilabel">CoordinateSystem</span> in the <span class="guilabel">Coordinate System
+    Name</span> box and configure the
+    <span class="guilabel">CoordinateSystem</span> by selecting the
+    <span class="guilabel">Origin</span> and <span class="guilabel">Axes</span> types along with
+    other settings. Some settings, such as <span class="guilabel">Primary</span> and
+    <span class="guilabel">Secondary</span>, are only active for particular
+    <span class="guilabel">Axes</span> types and those dependencies are described
+    below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_CoordinateSystems_GUI_2.png" align="middle" height="429"></td></tr></table></div></div><p>When editing an existing <span class="guilabel">CoordinateSystem</span>, you
+    use the <span class="guilabel">CoordinateSystem</span> dialog box. The default
+    configuration is shown above.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_CoordinateSystems_GUI_3.png" align="middle" height="429"></td></tr></table></div></div><p>If you select <span class="guilabel">ObjectReferenced</span> for the
+    <span class="guilabel">Axes</span> type, then the <span class="guilabel">Primary</span>,
+    <span class="guilabel">Secondary</span>, <span class="guilabel">X</span>,
+    <span class="guilabel">Y</span>, and <span class="guilabel">Z</span> fields are activated.
+    You can use the <span class="guilabel">ObjectReferenced</span> axis system to
+    define coordinates based on the motion of two space objects such as
+    <span class="guilabel">Spacecraft</span>, <span class="guilabel">CelestialBodies</span>, or
+    <span class="guilabel">Barycenters</span> to name a few. See the discussion below
+    for a detailed definition of the <span class="guilabel">ObjectReferenced</span>
+    axis system.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_CoordinateSystems_GUI_4.png" align="middle" height="429"></td></tr></table></div></div><p>If you select <span class="guilabel">TOEEq</span>,
+    <span class="guilabel">TOEEc</span>, <span class="guilabel">MOEEq</span>, or
+    <span class="guilabel">MOEEc</span> as the axis type, then the<span class="guilabel"> A1MJd
+    Epoch</span> field is activated. Use the <span class="guilabel">A1MJd</span>
+    <span class="guilabel">Epoch</span> field to define the reference epoch of the
+    coordinate system.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_CoordinateSystems_GUI_LocalAlignedConstrained.png" align="middle" height="429"></td></tr></table></div></div><p>If you select <span class="guilabel">LocalAlignedConstrained</span> as the
+    axes <span class="guilabel">Type</span>, then <span class="guilabel">CoordinateSystem</span>
+    dialog displays the fields illustrated above for configuring the
+    axes.</p></div><div class="refsection"><a name="N16C12"></a><h2>Remarks</h2><div class="refsection"><a name="N16C15"></a><h3>Computation of J2000-Based Axes using IAU76/FK5 Reduction</h3><p>FK5 reduction is the transformation that rotates a vector
+      expressed in the <span class="guilabel">MJ2000Eq</span> system to the
+      <span class="guilabel">EarthFixed</span> <span class="guilabel">CoordinateSystem</span>.
+      There are many coordinate systems that are intermediate rotations in FK5
+      reduction and this section describes how the following axes types are
+      computed: <span class="guilabel">MJ2000Eq</span>, <span class="guilabel">MJ2000Ec</span>,
+      <span class="guilabel">EarthFixed</span>, <span class="guilabel">MODEq</span>,
+      <span class="guilabel">MODEc</span>,<span class="guilabel">TODEq</span>,<span class="guilabel">TODEc</span>,
+      <span class="guilabel">MODEq</span>, <span class="guilabel">MODEc</span>,
+      <span class="guilabel">TODEq</span>, and <span class="guilabel">TODEc</span> axes
+      systems.</p><p>The time varying orientation of the Earth is complex due to
+      interactions between the Earth and its external environment (the Sun and
+      Moon and Planets) and internal dynamics. The orientation cannot
+      currently be modelled to the accuracy required by many space
+      applications and FK5 reduction is a combination of dynamical modelling
+      along with daily corrections from empirical observations. The figure
+      below illustrates components of motion of the Earth with respect to
+      inertial space. The primary components of the motion of the Earth with
+      respect to inertial space are Precession, Nutation, Sidereal time and,
+      Polar Motion.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_CoordinateSystems_GUI_5.png" align="middle" height="408"></td></tr></table></div></div><p>The principal moment of inertia is defined as the Celestial
+      Ephemeris Pole. Due to the fact that Earth&rsquo;s mass distribution changes
+      with time, the Celestial Ephemeris Pole is not constant with respect to
+      the Earth&rsquo;s surface. Precession is defined as the coning motion that the
+      Celestial Ephemeris Pole makes around the ecliptic north pole. The other
+      principal component of the motion of the Celestial Ephemeris Pole is
+      called nutation and is the oscillation in the angle between the
+      Celestial Ephemeris Pole and the north ecliptic pole. The theory of
+      Precession and Nutation come from dynamical models of the Earth&rsquo;s
+      motion. The Sidereal time is the rotation of the Earth about the
+      Celestial Ephemeris Pole. The sidereal time model is a combination of
+      theory and observation. The Earth&rsquo;s spin axis direction is not constant
+      with respect to the Earth&rsquo;s crust and its motion is called Polar Motion.
+      A portion of polar motion is due to complicated dynamics, and a portion
+      is due to unmodelled errors in nutation. Polar motion is determined from
+      observation.</p><p>The True of Date (TOD) systems and Mean of Date (MOD) systems are
+      intermediate coordinate systems in FK5 reduction and are commonly used
+      in analysis. The details of the computations are contained in the GMAT
+      mathematical specification and the figure below is included here for
+      summary purposes. The following abbreviations are used in the figure.
+      PM: Polar Motion, ST: Sideral Time, NUT: Nutation, PREC: Precession,
+      ITRF: International Terrestrial Reference Frame (Earth Fixed), PEF:
+      Pseudo Earth Fixed, TODEq: True of Date Equator, TODEc: True of Date
+      Ecliptic, MODEc: Mean of Date Ecliptic, MODEq: Mean of Date Equator,
+      FK5: J2000 Equatorial Inertial (IAU-1976/1980).</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_CoordinateSystems_GUI_6.png" align="middle" height="309"></td></tr></table></div></div></div><div class="refsection"><a name="N16C5C"></a><h3>Computation of ICRF and ITRF Axes using IAU2000
+      Conventions</h3><p>The computation for the International Celestial Reference Frame
+      (<span class="guilabel">ICRF</span>) and the International Terestrial Reference
+      Fame (ITRF) are computed using the IAU 2000A theory with the 2006 update
+      to precession. GMAT uses the Celestial Intermediate Origin (CIO) method
+      of transformation which avoids issues associated with precession and
+      nutation. In the CIO model, the Celestial Intermediate Pole unit vector
+      is modeled using the variables X and S and the CIO locator, s. For
+      performance reasons, GMAT interpolates X, Y, and s, from precomputed
+      values stored in the file named ICRF_Table.txt distributed with
+      GMAT.</p><p>GMAT models the rotation from <span class="guilabel">ICRF</span> to
+      <span class="guilabel">MJ200Eq</span> by rotating through the
+      <span class="guilabel">EarthFixed</span> frame which is identical for both the
+      old (1976) and new (2000) theories. For performance reasons, the
+      conversion from <span class="guilabel">ICRF</span> to
+      <span class="guilabel">MJ2000Eq</span> is interplolated from pre-computed values
+      of the Euler axis and angle between those frames. Note that GMAT does
+      not currenty support the IAU2000 body fixed frame for Earth and that
+      model will be included in a future release.</p></div><div class="refsection"><a name="N16C75"></a><h3>Computation of ObjectReference Axis System</h3><p>An <span class="guilabel">ObjectReferenced</span> axis system is defined by
+      the motion of one object with respect to another object. The figure
+      below defines the six principal directions of an <span class="guilabel">Object
+      Referenced</span> axis system. One is the relative position of the
+      secondary object with respect to the primary object, denoted by r,
+      expressed in the inertial frame. The second is the relative velocity,
+      denoted here by v, of the secondary object with respect to the primary,
+      expressed in the inertial frame. The third direction is the vector
+      normal to the direction of motion which is denoted by n and is
+      calculated using n = r &times; v. The remaining three directions are the
+      negative of the first three yielding the complete set:
+      {<span class="guilabel">R</span>,-<span class="guilabel">R</span>,
+      <span class="guilabel">V</span>,-<span class="guilabel">V</span>,
+      <span class="guilabel">N</span>,-<span class="guilabel">N</span>}.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_CoordinateSystems_GUI_7.png" align="middle" height="324"></td></tr></table></div></div><p>You define an <span class="guilabel">Object Referenced</span> axis system
+      by defining two axes from the three available [X, Y, and Z] using the
+      six available options {<span class="guilabel">R</span>,-<span class="guilabel">R</span>,
+      <span class="guilabel">V</span>,-<span class="guilabel">V</span>,
+      <span class="guilabel">N</span>,-<span class="guilabel">N</span>}. Given two directions,
+      GMAT constructs an orthogonal, right-handed
+      <span class="guilabel">CoordinateSystem</span>. For example, if you choose the
+      x-axis to be in the direction of <span class="guilabel">R</span> and the z-axis
+      to be in the direction of <span class="guilabel">N</span>, GMAT completes the
+      right-handed set by setting the y-axis in the direction of
+      <span class="guilabel">N</span>x<span class="guilabel">R</span>. If you choose
+      permutations that result in a non-orthogonal or left-handed
+      <span class="guilabel">CoordinateSystem</span>, GMAT will throw an error
+      message.</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>GMAT currently assumes that terms involving the cross and dot
+        product of acceleration are zero when computing
+        <span class="guilabel">ObjectReferenced</span> rotation matrices.</p></div></div><div class="refsection"><a name="N16CCA"></a><h3>Overview of Built-in Coordinate Systems</h3><div class="informaltable"><table border="1"><colgroup><col width="19%"><col width="9%"><col width="14%"><col width="58%"></colgroup><thead><tr><th>Name</th><th>Origin</th><th>Axes</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">EarthMJ2000Eq</span></td><td><span class="guilabel">Earth</span></td><td><span class="guilabel">MJ2000Eq</span></td><td><p> An Earth equator inertial system based on
+              IAU-1976/FK5 theory with 1980 update to nutation.
+              </p></td></tr><tr><td><span class="guilabel">EarthMJ2000Ec</span></td><td><span class="guilabel">Earth</span></td><td><span class="guilabel">MJ2000Ec</span></td><td><p> An Earth ecliptic inertial system based on
+              IAU-1976/FK5 theory with 1980 update to nutation.
+              </p></td></tr><tr><td><span class="guilabel">EarthFixed</span></td><td><span class="guilabel">Earth</span></td><td><span class="guilabel">BodyFixed</span></td><td><p> An Earth fixed system based on IAU-1976/FK5 theory
+              with 1980 update to nutation. </p></td></tr><tr><td><span class="guilabel">EarthICRF</span></td><td><span class="guilabel">Earth</span></td><td><span class="guilabel">ICRF</span></td><td><p> An Earth equator inertial system based on IAU-2000
+              theory with 2006 update to precession. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N16D1D"></a><h3>Description of Axes Types</h3><div class="informaltable"><table border="1"><colgroup><col width="19%"><col width="9%"><col width="14%"><col width="58%"></colgroup><thead><tr><th>Axes Name</th><th>Origin Limitations</th><th>Base Type</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">MJ2000Eq</span></td><td>None</td><td>IAU-1976 FK5</td><td><p>An inertial coordinate system. The nominal x-axis
+              points along the line formed by the intersection of the Earth&rsquo;s
+              mean equatorial plane and the mean ecliptic plane (at the J2000
+              epoch), in the direction of Aries. The z-axis is normal to the
+              Earth&rsquo;s mean equator at the J2000 epoch and the y-axis completes
+              the right-handed system. The mean planes of the ecliptic and
+              equator, at the J2000 epoch, are computed using IAU-1976/FK5
+              theory with 1980 update for nutation. </p></td></tr><tr><td><span class="guilabel">MJ2000Ec</span></td><td>None</td><td>IAU-1976 FK5</td><td><p>An inertial coordinate system. The x-axis points
+              along the line formed by the intersection of the Earth&rsquo;s mean
+              equator and the mean ecliptic plane at the J2000 epoch. The
+              z-axis is normal to the mean ecliptic plane at the J2000 Epoch
+              and the y-axis completes the right-handed set. This system is
+              computed using IAU-1976/FK5 theory with 1980 update for
+              nutation. </p></td></tr><tr><td><span class="guilabel">ICRF</span></td><td>None</td><td>IAU-2000</td><td><p>An inertial coordinate system. The axes are close
+              to the mean Earth equator and pole at the J2000 epoch, and at
+              the Earth&rsquo;s surface, the RSS difference between vectors
+              expressed in <span class="guilabel">MJ2000Eq</span> and
+              <span class="guilabel">ICRF</span> is less than 1 m. Note that since
+              <span class="guilabel">MJ2000Eq</span> and <span class="guilabel">ICRF</span> are
+              imperfect realizations of inertial systems, the transformation
+              between them is time varying. This axis system is computed using
+              IAU-2000A theory with 2006 update for precession.
+              </p></td></tr><tr><td><span class="guilabel">LocalAlignedConstrained</span></td><td>None</td><td>IAU-1976 FK5</td><td><p>The <span class="guilabel">LocalAlignedConstrained</span>
+              axis system is an aligned constrained system based on the
+              position of the <span class="guilabel">ReferenceObject</span> with
+              respect to the <span class="guilabel">Origin</span> and is computed using
+              the well known Triad algorithm. The axes are computed such that
+              the <span class="guilabel">AlignmentVector</span>, defined as the
+              components of the alignment vector expressed in the
+              <span class="guilabel">LocalAlignedConstrained</span> system, is aligned
+              with the position of the <span class="guilabel">ReferenceBody</span>
+              w/r/t the origin. The rotation about the
+              <span class="guilabel">AlignmentVector</span> is resolved by minimizing
+              the angle between the <span class="guilabel">ContraintVector</span>,
+              defined as the constraint vector expressed in the
+              <span class="guilabel">LocalAlignedConstrained</span> system, and the
+              <span class="guilabel">ConstraintReferenceVector</span>, defined as the
+              constraint reference vector expressed in the
+              <span class="guilabel">ConstraintCoordinateSystem</span>. The alignment
+              vectors and the constraint vectors cannot have zero length.
+              Similarly, the cross products of the constraint vector and
+              alignment vector cannot have zero length. </p></td></tr><tr><td><span class="guilabel">MODEq</span></td><td>None</td><td>IAU-1976 FK5</td><td><p>A quasi-inertial coordinate system referenced to
+              Earth&rsquo;s mean equator at the current epoch. The current epoch is
+              defined by the context of use and usually comes from the
+              spacecraft or graphics epoch. This system is computed using
+              IAU-1976/FK5 theory with 1980 update for nutation.
+              </p></td></tr><tr><td><span class="guilabel">MODEc</span></td><td>None</td><td>IAU-1976 FK5</td><td><p>A quasi-inertial coordinate system referenced to
+              the mean ecliptic at the current epoch. The current epoch is
+              defined by the context of use and usually comes from the
+              spacecraft or graphics epoch. This system is computed using
+              IAU-1976/FK5 theory with 1980 update for nutation.
+              </p></td></tr><tr><td><span class="guilabel">TODEq</span></td><td>None</td><td>IAU-1976 FK5</td><td><p>A quasi-inertial coordinate system referenced to
+              Earth&rsquo;s true equator at the current epoch. The current epoch is
+              defined by the context of use and usually comes from the
+              spacecraft or graphics epoch. This system is computed using
+              IAU-1976/FK5 theory with 1980 update for nutation.
+              </p></td></tr><tr><td><span class="guilabel">TODEc</span></td><td>None</td><td>IAU-1976 FK5</td><td><p>A quasi-inertial coordinate system referenced to
+              Earth&rsquo;s true ecliptic at the current epoch. The current epoch is
+              defined by the context of use and usually comes from the
+              spacecraft or graphics epoch. This system is computed using
+              IAU-1976/FK5 theory with 1980 update for nutation.
+              </p></td></tr><tr><td><span class="guilabel">MOEEq</span></td><td>None</td><td>IAU-1976 FK5</td><td><p>A quasi-inertial coordinate system referenced to
+              Earth&rsquo;s mean equator at the reference epoch. The reference epoch
+              is defined on the <span class="guilabel">CoordinateSystem</span> object.
+              This system is computed using IAU-1976/FK5 theory with 1980
+              update for nutation. </p></td></tr><tr><td><span class="guilabel">MOEEc</span></td><td>None</td><td>IAU-1976 FK5</td><td><p>A quasi-inertial coordinate system referenced to
+              the mean ecliptic at the reference epoch. The reference epoch is
+              defined on the <span class="guilabel">CoordinateSystem</span> object.
+              This system is computed using IAU-1976/FK5 theory with 1980
+              update for nutation. </p></td></tr><tr><td><span class="guilabel">TOEEq</span></td><td>None</td><td>IAU-1976 FK5</td><td><p>A quasi-inertial coordinate system referenced to
+              Earth&rsquo;s true equator at the reference epoch. The reference epoch
+              is defined on the <span class="guilabel">CoordinateSystem</span> object.
+              This system is computed using IAU-1976/FK5 theory with 1980
+              update for nutation. </p></td></tr><tr><td><span class="guilabel">TOEEc</span></td><td>None</td><td>IAU-1976 FK5</td><td><p>A quasi-inertial coordinate system referenced to
+              the true ecliptic at the reference epoch. The reference epoch is
+              defined on the <span class="guilabel">CoordinateSystem</span> object.
+              This system is computed using IAU-1976/FK5 theory with 1980
+              update for nutation. </p></td></tr><tr><td><span class="guilabel">ObjectReferenced</span></td><td>None</td><td>IAU-1976 FK5</td><td><p>An <span class="guilabel">ObjectReferenced</span> system is
+              a <span class="guilabel">CoordinateSystem</span> whose axes are defined
+              by the motion of one object with respect to another object. See
+              the discussion above for a detailed description of the
+              <span class="guilabel">ObjectReferenced</span> axis system.
+              </p></td></tr><tr><td><span class="guilabel">Equator</span></td><td>Celestial Body</td><td>IAU-1976 FK5</td><td><p>A true of date equator axis system for the
+              celestial body selected as the origin. The
+              <span class="guilabel">Equator</span> system is defined by the body&rsquo;s
+              equatorial plane and its intersection with the ecliptic plane,
+              at the current epoch. The current epoch is defined by the
+              context of use and usually comes from the spacecraft or graphics
+              epoch. The <span class="guilabel">Equator</span> system for Earth is
+              computed using IAU-1976/FK5 theory. For the Moon, the
+              <span class="guilabel">Equator</span> system is computed using the theory
+              selected in the field
+              <span class="guilabel">Luna.RotationDataSource</span>. For other built-in
+              celestial bodies, the body fixed axes are computed using models
+              provided by the IAU in &ldquo;Report of the IAU/IAG Working Group on
+              Cartographic Coordinates and Rotational Elements of the Planets
+              and Satellites: 2000&rdquo;. </p></td></tr><tr><td><span class="guilabel">BodyFixed</span></td><td>Celestial Body or Spacecraft</td><td>IAU-1976 FK5</td><td><p>The <span class="guilabel">BodyFixed</span> axis system is
+              referenced to the body equator and the prime meridian of the
+              body. The <span class="guilabel">BodyFixed</span> system for Earth is
+              computed using IAU-1976/FK5 theory. For the Moon, the
+              <span class="guilabel">BodyFixed</span> system is computed using the
+              theory selected in the field Luna.RotationDataSource. For other
+              built-in celestial bodies, the body fixed axes are computed
+              using models provided by the IAU in &ldquo;Report of the IAU/IAG
+              Working Group on Cartographic Coordinates and Rotational
+              Elements of the Planets and Satellites: 2000&rdquo;. </p><p>When
+              <span class="guilabel">Origin</span> is a
+              <span class="guilabel">Spacecraft</span>, the axes are computed using the
+              <span class="guilabel">Spacecraft</span>&rsquo;s attitude model. Note: not all
+              attitude models compute body rates. In the case that body rates
+              are not available on a spacecraft, a request for velocity
+              transformations using a <span class="guilabel">BodyFixed</span> axis
+              system will result in an error.</p></td></tr><tr><td><span class="guilabel">BodyInertial</span></td><td>Celestial Body</td><td>IAU-1976 FK5</td><td><p>An inertial system referenced to the equator ( at
+              the J2000 epoch ) of the celestial body selected as the origin
+              of the <span class="guilabel">CoordinateSystem</span>. Because the
+              <span class="guilabel">BodyInertial</span> axis system uses different
+              theories for different bodies, the following definitions
+              describe only the nominal axis configurations. The x-axis points
+              along the line formed by the intersection of the bodies equator
+              and earth&rsquo;s mean equator at J2000. The z-axis points along the
+              body's spin axis direction at the J2000 epoch. The y-axis
+              completes the right-handed set. For Earth, the
+              <span class="guilabel">BodyInertial</span> axis system is identical to
+              the <span class="guilabel">MJ2000Eq</span> system. For the Moon, the
+              orientation at the J2000 epoch is computed using the theory
+              selected in the field
+              <span class="guilabel">Luna.RotationDataSource</span>. For all other
+              built-in celestial bodies, the <span class="guilabel">BodyInertial</span>
+              axis system is based upon the IAU report entitled &ldquo;Report of the
+              IAU/IAG Working Group on Cartographic Coordinates and Rotational
+              Elements of the Planets and Satellites: 2000&rdquo;</p></td></tr><tr><td><span class="guilabel">GSE</span></td><td>None</td><td>IAU-1976 FK5</td><td><p>The Geocentric Solar Ecliptic system. The x-axis
+              points from Earth to the Sun. The z-axis is defined as the cross
+              product RxV where R and V are earth&rsquo;s position and velocity with
+              respect to the sun respectively. The y-axis completes the
+              right-handed set. The <span class="guilabel">GSE</span> axes are computed
+              using the relative motion of the Earth and Sun even if the
+              origin is not Earth. </p></td></tr><tr><td><span class="guilabel">GSM</span></td><td>None</td><td>IAU-1976 FK5</td><td><p>The Geocentric Solar Magnetic system. The x-axis
+              points from Earth to the Sun. The z-axis is defined to be
+              orthogonal to the x-axis and lies in the plane of the x-axis and
+              Earth&rsquo;s magnetic dipole vector. The y-axis completes the
+              right-handed set. The <span class="guilabel">GSM</span> axes are computed
+              using the relative motion of the Earth and Sun even if the
+              origin is not Earth. </p></td></tr><tr><td><span class="guilabel">Topocentric</span></td><td>Earth</td><td>IAU-1976 FK5</td><td><p>A <span class="guilabel">GroundStation</span>-based
+              coordinate system. The y-axis points due East and the z-axis is
+              normal to the local horizon. The x-axis completes the right
+              handed set. </p></td></tr><tr><td><span class="guilabel">BodySpinSun</span></td><td>Celestial Body</td><td>IAU-1976 FK5</td><td><p>A celestial body spin-axis-referenced system. The
+              x-axis points from the celestial body to the Sun. The y-axis is
+              computed as the cross product of the x-axis and the body's spin
+              axis. The z-axis completes the right-handed set.</p></td></tr></tbody></table></div></div></div><div class="refsection"><a name="N16E98"></a><h2>Examples</h2><div class="informalexample"><p>Define a <span class="guilabel">Spacecraft</span>&rsquo;s state in
+      <span class="guilabel">EarthFixed</span> coordinates.</p><pre class="programlisting"><code class="code">Create Spacecraft aSpacecraft
+aSpacecraft.CoordinateSystem = EarthFixed
+aSpacecraft.X = 7100
+aSpacecraft.Y = 0
+aSpacecraft.Z = 1300
+aSpacecraft.VX = 0
+aSpacecraft.VY = 7.35
+aSpacecraft.VZ = 1</code></pre></div><div class="informalexample"><p>Report a <span class="guilabel">Spacecraft</span>&rsquo;s state in
+      <span class="guilabel">GroundStation</span> <span class="guilabel">Topocentric</span>
+      coordinates.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+Create GroundStation aStation
+
+Create CoordinateSystem stationTopo
+stationTopo.Origin = aStation
+stationTopo.Axes   = Topocentric
+
+Create ReportFile aReport
+aReport.Filename = 'ReportFile1.txt'
+aReport.Add = {aSat.stationTopo.X aSat.stationTopo.Y aSat.stationTopo.Z ... 
+               aSat.stationTopo.VX aSat.stationTopo.VY aSat.stationTopo.VZ}
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}</code></pre></div><div class="informalexample"><p>View a trajectory in an <span class="guilabel">ObjectReferenced</span>,
+      rotating-<span class="guilabel">LibrationPoint</span> system.</p><pre class="programlisting"><code class="code">%  Create the Earth-Moon Barycenter and Libration Point
+Create Barycenter EarthMoonBary
+EarthMoonBary.BodyNames = {Earth,Luna};
+
+Create LibrationPoint SunEarthMoonL1
+SunEarthMoonL1.Primary   = Sun;
+SunEarthMoonL1.Secondary = EarthMoonBary
+SunEarthMoonL1.Point     = L1;
+
+%  Create the coordinate system
+Create CoordinateSystem RotatingSEML1Coord
+RotatingSEML1Coord.Origin    = SunEarthMoonL1
+RotatingSEML1Coord.Axes      = ObjectReferenced
+RotatingSEML1Coord.XAxis     = R
+RotatingSEML1Coord.ZAxis     = N
+RotatingSEML1Coord.Primary   = Sun
+RotatingSEML1Coord.Secondary = EarthMoonBary
+
+%  Create the spacecraft and propagator
+Create Spacecraft aSpacecraft
+aSpacecraft.DateFormat       = UTCGregorian
+aSpacecraft.Epoch            = '09 Dec 2005 13:00:00.000'
+aSpacecraft.CoordinateSystem = RotatingSEML1Coord
+aSpacecraft.X  = -32197.88223741966
+aSpacecraft.Y  = 211529.1500044117
+aSpacecraft.Z  = 44708.57017366499
+aSpacecraft.VX = 0.03209516489451751
+aSpacecraft.VY = 0.06100386504053736
+aSpacecraft.VZ = 0.0550442738917212
+
+Create Propagator aPropagator
+aPropagator.FM           = aForceModel
+aPropagator.MaxStep = 86400
+Create ForceModel aForceModel
+aForceModel.PointMasses = {Earth,Sun,Luna}
+
+% Create a 3-D graphic
+Create OrbitView anOrbitView
+anOrbitView.Add                  = {aSpacecraft,  Earth, Sun, Luna}
+anOrbitView.CoordinateSystem     = RotatingSEML1Coord
+anOrbitView.ViewPointReference   = SunEarthMoonL1
+anOrbitView.ViewPointVector      = [-1500000 0 0 ]
+anOrbitView.ViewDirection        = SunEarthMoonL1
+anOrbitView.ViewUpCoordinateSystem = RotatingSEML1Coord
+anOrbitView.Axes                 = Off
+anOrbitView.XYPlane              = Off
+
+BeginMissionSequence
+
+Propagate aPropagator(aSpacecraft, {aSpacecraft.ElapsedDays = 180})</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="CelestialBody.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ContactLocator.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">CelestialBody&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;ContactLocator</td></tr></table></div></body></html>

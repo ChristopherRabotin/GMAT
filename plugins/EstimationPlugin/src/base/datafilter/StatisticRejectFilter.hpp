@@ -31,7 +31,7 @@
 class ESTIMATION_API StatisticRejectFilter : public DataFilter
 {
 public:
-   StatisticRejectFilter(const std::string name);
+   StatisticRejectFilter(const std::string &ofType, std::string name);
    virtual ~StatisticRejectFilter();
    StatisticRejectFilter(const StatisticRejectFilter& saf);
    StatisticRejectFilter& operator=(const StatisticRejectFilter& saf);

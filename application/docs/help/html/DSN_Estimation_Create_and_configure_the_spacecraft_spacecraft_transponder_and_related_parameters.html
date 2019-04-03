@@ -1,0 +1,79 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Create and configure the spacecraft, spacecraft transponder, and related parameters</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data"><link rel="prev" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data"><link rel="next" href="DSN_Estimation_Create_and_configure_the_Ground_Station_and_related_parameters.html" title="Create and configure the Ground Station and related parameters"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Create and configure the spacecraft, spacecraft transponder, and
+    related parameters</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="DSN_Estimation_Create_and_configure_the_Ground_Station_and_related_parameters.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="DSN_Estimation_Create_and_configure_the_spacecraft_spacecraft_transponder_and_related_parameters"></a>Create and configure the spacecraft, spacecraft transponder, and
+    related parameters</h2></div></div></div><p>For this tutorial, you&rsquo;ll need GMAT open, with a new empty script
+    open. To create a new script, click <span class="guibutton">New Script</span>,
+    (<span class="inlinemediaobject"><img src="../files/images/icons/NewScript.png" align="middle" height="11"></span>)</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N14CE0"></a>Create a satellite and set its epoch and Cartesian
+      coordinates</h3></div></div></div><p>Since this is a Sun-orbiting spacecraft, we choose to represent
+      the orbit in a Sun-centered coordinate frame which we define using the
+      scripting below.</p><pre class="programlisting">%  Create the Sun-centered J2000 frame.
+Create CoordinateSystem SunMJ2000Eq;
+SunMJ2000Eq.Origin = Sun;
+SunMJ2000Eq.Axes   = MJ2000Eq;  %Earth mean equator axes</pre><p>Next, we create a new spacecraft, <span class="guilabel">Sat</span>, and
+      set its epoch and Cartesian coordinates.</p><pre class="programlisting">Create Spacecraft Sat;
+Sat.DateFormat       = UTCGregorian;
+Sat.CoordinateSystem = SunMJ2000Eq;
+Sat.DisplayStateType = Cartesian;
+Sat.Epoch            = 19 Aug 2015 00:00:00.000;
+Sat.X                = -126544963   %-126544968
+Sat.Y                = 61978518     %61978514
+Sat.Z                = 24133225     %24133221
+Sat.VX               = -13.789
+Sat.VY               = -24.673
+Sat.VZ               = -10.662
+
+Sat.Id               = 11111;</pre><p>Note that, in addition to setting <span class="guilabel">Sat&rsquo;s</span>
+      coordinates, we also assigned it an ID number. When GMAT finds this
+      number in the GMD file that it reads in, it will know that the
+      associated data corresponds to the <span class="guilabel">Sat</span>
+      <span class="guilabel">Spacecraft</span>.</p><p>For the simulation tutorial, the Cartesian state above represented
+      the &ldquo;true&rdquo; state. Here, the Cartesian state represents the spacecraft
+      operator&rsquo;s best &ldquo;estimate&rdquo; of the state, the so-called <span class="emphasis"><em>a
+      priori</em></span> estimate. Because, one never has exact knowledge of
+      the true state, we have perturbed the Cartesian state above by a few km
+      in each component as compared to the simulated true state shown in the
+      comment field.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N14CFE"></a>Create a Transponder object and attach it to our
+      spacecraft</h3></div></div></div><p>To estimate an orbit state for a given spacecraft, GMAT requires
+      that a <span class="guilabel">Transponder</span> object, which receives the
+      ground station uplink signal and re-transmits it, typically, to a ground
+      station, be attached to the spacecraft. Below, we create the
+      <span class="guilabel">Transponder</span> object and attach it to our spacecraft.
+      Note that after we create the <span class="guilabel">Transponder</span> object,
+      there are three fields, <span class="guilabel">PrimaryAntenna</span>,
+      <span class="guilabel">HardwareDelay</span>, and
+      <span class="guilabel">TurnAroundRatio</span> that must be set.</p><pre class="programlisting">Create Antenna HGA;  %High Gain Antenna
+
+Create Transponder SatTransponder;
+SatTransponder.PrimaryAntenna   = HGA;
+SatTransponder.HardwareDelay    = 1e-06; %seconds
+SatTransponder.TurnAroundRatio  = '880/749';
+
+Sat.AddHardware                 = {SatTransponder, HGA};
+Sat.SolveFors                   = {CartesianState};</pre><p>The <span class="guilabel">PrimaryAntenna</span> is the antenna that the
+      spacecraft transponder, <span class="guilabel">SatTransponder</span>, uses to
+      receive and retransmit RF signals. In the example above, we set this
+      field to <span class="guilabel">HGA</span> which is an
+      <span class="guilabel">Antenna</span> object we have created. Currently the
+      <span class="guilabel">Antenna</span> resource has no function but in a future
+      release, it may have a function. <span class="guilabel">HardwareDelay</span>, the
+      transponder signal delay in seconds, is set to one micro-second.</p><p>We set <span class="guilabel">TurnAroundRatio</span>, which is the ratio of
+      the retransmitted to the input signal, to '880/749.' See the
+      <span class="guilabel">RunEstimator</span> Help for a discussion on how GMAT uses
+      this input field. Recall that, as part of their calculations, estimators
+      need to form a quantity called the observation residual, O-C, where O is
+      the &ldquo;Observed&rdquo; value of a measurement and C is the &ldquo;Computed,&rdquo; based
+      upon the current knowledge of the orbit state, value of a measurement.
+      As described in the Help, since our DSN data, for this tutorial, uses a
+      ramp table, this input turn around ratio is not used to calculate the
+      computed, C, Doppler measurements. Instead, the turn-around ratio used
+      to calculate the computed Doppler measurement will be inferred from the
+      value of the uplink band contained in the ramp table.</p><p>Note that in the second to last script command above, we attach
+      our newly created <span class="guilabel">Transponder</span> resource,
+      <span class="guilabel">SatTransponder</span>, and its related
+      <span class="guilabel">Antenna</span> resource, <span class="guilabel">HGA</span>, to our
+      spacecraft, <span class="guilabel">Sat</span>.</p><p>The last script line, which was not present in the simulation
+      script, is needed to tell GMAT what quantities the estimator will be
+      estimating, the so-called &ldquo;solve-fors.&rdquo; Here, we tell GMAT to solve for
+      the 6 components of our satellite&rsquo;s Cartesian state. Since we input the
+      <span class="guilabel">Sat</span> state in SunMJ2000 coordinates, this is the
+      coordinate system GMAT will use to solve for the Cartesian state.</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="DSN_Estimation_Create_and_configure_the_Ground_Station_and_related_parameters.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Create and configure the Ground Station and related
+    parameters</td></tr></table></div></body></html>

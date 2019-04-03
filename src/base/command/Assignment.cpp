@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -933,7 +933,7 @@ bool Assignment::Validate()
          {
             // Now it allows string function such as strcat() (LOJ: 2016.02.18)
             MathNode *topNode = mathTree->GetTopNode();
-            if (topNode && topNode->IsOfType("StringFunction"))
+            if (topNode && topNode->IsOfType("StringFunctionNode"))
             {
                #ifdef DEBUG_VALIDATION
                MessageInterface::ShowMessage
@@ -1491,7 +1491,7 @@ const StringArray& Assignment::GetWrapperObjectNameArray(bool completeSet)
    else
    {
       MathNode *topNode = mathTree->GetTopNode();
-      if (topNode && topNode->IsOfType("BuiltinFunction"))
+      if (topNode && topNode->IsOfType("BuiltinFunctionNode"))
       {
          #ifdef DEBUG_WRAPPER_CODE
          MessageInterface::ShowMessage("   It is a builtin function call\n");

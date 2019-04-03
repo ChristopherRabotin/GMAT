@@ -30,7 +30,7 @@
 % External References: fmincon, EvaluateGMATObjective, EvaluateGMATConstraints, 
 % CallGMATfminconSolver 
 %
-% Copyright (c) 2002 - 2015 United States Government as represented by the
+% Copyright (c) 2002 - 2017 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
 % All Other Rights Reserved.
 % 
@@ -45,4 +45,4 @@ GMAToptions = optimset(GMAToptions,'Algorithm','active-set');
 @EvaluateGMATConstraints, GMAToptions) 
 % Apply the converged variables 
 CallGMATfminconSolver(X)
-CloseGMAT
+%CloseGMAT

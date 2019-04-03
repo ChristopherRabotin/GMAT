@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -95,6 +95,8 @@ public:
    
    /// Who is involved in the measurement.  First one is the "anchor" node
    StringArray       participantIDs;
+   /// The id of sensor attached to participant in order to send or receive signal (use for GPS Point Solution)
+   StringArray       sensorIDs;
    /// The signal strands for the measurement
    std::vector<StringArray> strands;
    /// The observed value with correction.  Array to handle more than one value, like AZ_EL
@@ -120,10 +122,10 @@ public:
 
 ///// TBD: Determine if there is a more generic way to add these
 //   std::string dataFormat;			// Flag indicating which data format is used. Its value is either "GMATInternal" or "GMAT_OD"
-   /// Uplink band
+   /// Uplink band of the frequency at receiver
    Integer           uplinkBand;
-   /// Uplink frequency at transmit epoch
-   Real              uplinkFreq;                        // unit: Hz
+   ///// Uplink frequency at transmit epoch                                     // This variable is nolonger in use 
+   //Real              uplinkFreq;                        // unit: Hz           // This variable is nolonger in use
    /// Uplink frequency at receive epoch. For ramped frequency model, this frequency is different from uplinkFreq
    Real              uplinkFreqAtRecei;                 // unit: Hz
    /// Range modulo

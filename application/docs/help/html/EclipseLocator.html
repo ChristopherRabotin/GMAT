@@ -1,0 +1,310 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>EclipseLocator</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="ElectricThruster.html" title="ElectricThruster"><link rel="next" href="EphemerisFile.html" title="EphemerisFile"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">EclipseLocator</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ElectricThruster.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="EphemerisFile.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="EclipseLocator"></a><div class="titlepage"></div><a name="N18050" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">EclipseLocator</span></h2><p>EclipseLocator &mdash; A <span class="guilabel">Spacecraft</span> eclipse event
+    locator</p></div><div class="refsection"><a name="N18064"></a><h2>Description</h2><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p><span class="guilabel">EclipseLocator</span> is a SPICE-based subsystem
+      that uses a parallel configuration for the solar system and celestial
+      bodies from other GMAT components. For precision applications, care must
+      be taken to ensure that both configurations are consistent. See <a class="link" href="EclipseLocator.html#EclipseLocator_DataConfiguration" title="Data configuration">Remarks</a> for
+      details.</p></div><p>An <span class="guilabel">EclipseLocator</span> is an event locator used to
+    find solar eclipse events as seen by a <span class="guilabel">Spacecraft</span>. By
+    default, an <span class="guilabel">EclipseLocator</span> generates a text event
+    report listing the beginning and ending times of each event, along with
+    the duration, eclipsing body, shadow type, and information about
+    simultaneous and adjacent nested events. Eclipse location can be performed
+    over the entire propagation interval or over a subinterval, and can
+    optionally adjust for light-time delay and stellar aberration.</p><p>Eclipse location can be performed with one or more
+    <span class="guilabel">CelestialBody</span> resources as eclipsing (or occulting)
+    bodies. Any configured <span class="guilabel">CelestialBody</span> can be used as
+    an occulting body, including user-defined ones. Any type of eclipse can be
+    found, including total (umbra), partial (penumbra), and annular
+    (antumbra). All selected occulting bodies are searched using the same
+    selection for eclipse types, search interval, and search options; to
+    customize the options per body, use multiple
+    <span class="guilabel">EclipseLocator</span> resources.</p><p>By default, the <span class="guilabel">EclipseLocator</span> searches the
+    entire interval of propagation of the <span class="guilabel">Spacecraft</span>. To
+    search a custom interval, set <span class="guilabel">UseEntireInterval</span> to
+    <code class="literal">False</code> and set <span class="guilabel">InitialEpoch</span> and
+    <span class="guilabel">FinalEpoch</span> accordingly. Note that these epochs are
+    assumed to be <span class="guilabel">Spacecraft</span> epochs, and so must be valid
+    and within the <span class="guilabel">Spacecraft</span> ephemeris interval. If they
+    fall outside the propagation interval of the
+    <span class="guilabel">Spacecraft</span>, GMAT will display an error.</p><p>The contact locator can optionally adjust for both light-time delay
+    and stellar aberration, though stellar aberration currently has no
+    effect.</p><p>The event search is performed at a fixed step through the interval.
+    You can control the step size (in seconds) by setting the
+    <span class="guilabel">StepSize</span> field. An appropriate choice for step size
+    is no greater than the duration of the minimum event you wish to find, or
+    the minimum gap between events you want to resolve, whichever is smaller.
+    See <a class="link" href="EclipseLocator.html#EclipseLocator_SearchAlgorithm" title="Search algorithm">Remarks</a> for
+    details.</p><p>GMAT uses the SPICE library for the fundamental event location
+    algorithm. As such, all celestial body data is loaded from SPICE kernels
+    for this subsystem, rather than GMAT's own
+    <span class="guilabel">CelestialBody</span> shape and orientation configuration.
+    See <a class="link" href="EclipseLocator.html#EclipseLocator_Remarks" title="Remarks">Remarks</a> for
+    details.</p><p>Unless otherwise mentioned, <span class="guilabel">EclipseLocator</span>
+    fields cannot be set in the mission sequence.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="CelestialBody.html" title="CelestialBody"><span class="refentrytitle">CelestialBody</span></a>, <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a>, <a class="xref" href="ContactLocator.html" title="ContactLocator"><span class="refentrytitle">ContactLocator</span></a>, <a class="xref" href="FindEvents.html" title="FindEvents"><span class="refentrytitle">FindEvents</span></a></p></div><div class="refsection"><a name="N180CC"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">EclipseTypes</span></td><td><p>Types of eclipses (shadows) to search for. May be
+            <code class="literal">Umbra</code> (total eclipses),
+            <code class="literal">Penumbra</code> (partial eclipses), or
+            <code class="literal">Antumbra</code> (annular
+            eclipses).</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">Antumbra</code>,
+                    <code class="literal">Penumbra</code>,
+                    <code class="literal">Umbra</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><code class="filename">{Antumbra, Penumba,
+                    Umbra}</code></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Filename</span></td><td><p>Name and path of the eclipse report file. This field
+            can be set in the mission sequence.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Valid file path</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><code class="filename">'<em class="replaceable"><code>EclipseLocator</code></em>.txt'</code></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FinalEpoch</span></td><td><p>Last epoch to search for eclipses, in the format
+            specified by <span class="guilabel">InputEpochFormat</span>. The epoch must
+            be a valid epoch in the <span class="guilabel">Spacecraft</span> ephemeris
+            interval. This field can be set in the mission
+            sequence.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Valid epoch in available spacecraft ephemeris</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><code class="filename">'21545.138'</code></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>ModifiedJulian epoch formats: days</p><p>Gregorian epoch formats: N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">InitialEpoch</span></td><td><p>First epoch to search for eclipses, in the format
+            specified by <span class="guilabel">InputEpochFormat</span>. The epoch must
+            be a valid epoch in the <span class="guilabel">Spacecraft</span> ephemeris
+            interval. This field can be set in the mission
+            sequence.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Valid epoch in available spacecraft ephemeris</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><code class="filename">'21545'</code></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>ModifiedJulian epoch formats: days</p><p>Gregorian epoch formats: N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">OccultingBodies</span></td><td><p>List of occulting bodies to search for eclipses. Can
+            be any number of GMAT <span class="guilabel">CelestialBody</span>-type
+            resources, such as <span class="guilabel">Planet</span>,
+            <span class="guilabel">Moon</span>, <span class="guilabel">Asteroid</span>, etc.
+            Note that an occulting body must have a mass (e.g. not
+            <span class="guilabel">LibrationPoint</span> or
+            <span class="guilabel">Barycenter</span>).</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>List of <span class="guilabel">CelestialBody</span> resources
+                    (e.g. <span class="guilabel">Planet</span>,
+                    <span class="guilabel">Asteroid</span>, <span class="guilabel">Moon</span>,
+                    etc.)</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any existing
+                    <span class="guilabel">CelestialBody</span>-class resources</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Empty list</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RunMode</span></td><td><p>Mode of event location execution.
+            <code class="literal">'Automatic'</code> triggers event location to occur
+            automatically at the end of the run. <code class="literal">'Manual'</code>
+            limits execution only to the <span class="guilabel">FindEvents</span>
+            command. <code class="literal">'Disabled'</code> turns of event location
+            entirely.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">Automatic</code>,
+                    <code class="literal">Manual</code>,
+                    <code class="literal">Disabled</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><code class="filename">'Automatic'</code></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Spacecraft</span></td><td><p>The observing <span class="guilabel">Spacecraft</span>
+            resource to search for eclipses.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p><span class="guilabel">Spacecraft</span> resource</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any existing <span class="guilabel">Spacecraft</span>
+                    resource</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>First configured <span class="guilabel">Spacecraft</span>
+                    resource</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">StepSize</span></td><td><p>Step size of event locator. See <a class="link" href="EclipseLocator.html#EclipseLocator_SearchAlgorithm" title="Search algorithm">Remarks</a> for
+            discussion of appropriate values.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">StepSize</span> &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>10</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">UseEntireInterval</span></td><td><p>Search the entire available
+            <span class="guilabel">Target</span> ephemeris interval. This field can be
+            set in the mission sequence.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true, false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>true</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">UseLightTimeDelay</span></td><td><p>Use light-time delay in the event-finding
+            algorithm.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true, false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>true</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">UseStellarAberration</span></td><td><p>Use stellar aberration in addition to light-time
+            delay in the event-finding algorithm. Light-time delay must be
+            enabled. Stellar aberration currently has no effect on eclipse
+            searches.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true, false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>true</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">WriteReport</span></td><td><p>Write an event report when event location is
+            executed. This field can be set in the mission
+            sequence.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true, false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>true</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N18361"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_EclipseLocator_1.png" align="middle" height="461"></td></tr></table></div></div><p>The default <span class="guilabel">EclipseLocator</span> GUI for a new
+    resource is shown above. You can choose one
+    <span class="guilabel">Spacecraft</span> from the list, which is populated by all
+    the <span class="guilabel">Spacecraft</span> resources currently configured in the
+    mission. In the <span class="guilabel">Occulting Bodies</span> list, you can check
+    the box next to all <span class="guilabel">CelestialBody</span> resources you want
+    to search for eclipses. This list shows all celestial bodies currently
+    configured in the mission.</p><p>In the <span class="guilabel">Eclipse Types</span> list, choose the types of
+    eclipses to search for. Note that each selection will increase the
+    duration of the search.</p><p>You can configure the output via <span class="guilabel">Filename</span>,
+    <span class="guilabel">Run Mode</span>, and <span class="guilabel">Write Report</span> near
+    the bottom. If <span class="guilabel">Write Report</span> is enabled, a text report
+    will be written to the file specified in <span class="guilabel">Filename</span>.
+    The search will execute during <span class="guilabel">FindEvents</span> commands
+    (for <span class="guilabel">Manual</span> or <span class="guilabel">Automatic</span> modes)
+    and automatically at the end of the mission (for
+    <span class="guilabel">Automatic</span> mode), depending on the <span class="guilabel">Run
+    Mode</span>.</p><p>You can configure the search interval via the options in the upper
+    right. Uncheck <span class="guilabel">Use Entire Interval</span> to set the search
+    interval manually. See the <a class="link" href="EclipseLocator.html#EclipseLocator_SearchInterval" title="Search interval">Remarks</a> section for
+    considerations when setting the search interval.</p><p>You can control the search algorithm via the options in the bottom
+    right. Configure light-time and stellar aberration via the check boxes
+    next to each, and select the signal direction via the <span class="guilabel">Light-time
+    direction</span> selection.</p><p>To control the fidelity and execution time of the search, set the
+    <span class="guilabel">Step size</span> appropriately. See the <a class="link" href="ContactLocator.html#ContactLocator_Remarks" title="Remarks">Remarks</a> section for
+    details.</p></div><div class="refsection"><a name="EclipseLocator_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="EclipseLocator_DataConfiguration"></a><h3>Data configuration</h3><p>The <span class="guilabel">EclipseLocator</span> implementation is based on
+      the <a class="link" href="http://naif.jpl.nasa.gov/naif/" target="_top">NAIF SPICE
+      toolkit</a>, which uses a different mechanism for environmental data
+      such as celestial body shape and orientation, planetary ephemerides,
+      body-specific frame definitions, and leap seconds. Therefore, it is
+      necessary to maintain two parallel configurations to ensure that the
+      event location results are consistent with GMAT's own propagation and
+      other parameters. The specific data to be maintained is:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Planetary shape and orientation:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>GMAT core:
+              <span class="guilabel">CelestialBody</span>.<span class="guilabel">EquatorialRadius</span>,
+              <span class="guilabel">Flattening</span>,
+              <span class="guilabel">SpinAxisRAConstant</span>,
+              <span class="guilabel">SpinAxisRARate</span>, etc.</p></li><li class="listitem"><p>ContactLocator:
+              <span class="guilabel">SolarSystem</span>.<span class="guilabel">PCKFilename</span>,
+              <span class="guilabel">CelestialBody</span>.<span class="guilabel">PlanetarySpiceKernelName</span></p></li></ul></div></li><li class="listitem"><p>Planetary ephemeris:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>GMAT core:
+              <span class="guilabel">SolarSystem</span>.<span class="guilabel">DEFilename</span>,
+              or
+              (<span class="guilabel">SolarSystem</span>.<span class="guilabel">SPKFilename</span>,
+              <span class="guilabel">CelestialBody</span>.<span class="guilabel">OrbitSpiceKernelName</span>,
+              <span class="guilabel">CelestialBody</span>.<span class="guilabel">NAIFId</span>)</p></li><li class="listitem"><p>ContactLocator:
+              <span class="guilabel">SolarSystem</span>.<span class="guilabel">SPKFilename</span>,
+              <span class="guilabel">CelestialBody</span>.<span class="guilabel">OrbitSpiceKernelName</span>,
+              <span class="guilabel">CelestialBody</span>.<span class="guilabel">NAIFId</span></p></li></ul></div></li><li class="listitem"><p>Body-fixed frame:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>GMAT core: built-in</p></li><li class="listitem"><p>ContactLocator:
+              <span class="guilabel">CelestialBody</span>.<span class="guilabel">SpiceFrameId</span>,
+              <span class="guilabel">CelestialBody</span>.<span class="guilabel">FrameSpiceKernelName</span></p></li></ul></div></li><li class="listitem"><p>Leap seconds:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>GMAT core: startup file <code class="literal">LEAP_SECS_FILE</code>
+              setting</p></li><li class="listitem"><p>ContactLocator:
+              <span class="guilabel">SolarSystem</span>.<span class="guilabel">LSKFilename</span></p></li></ul></div></li></ul></div><p>See SolarSystem and <a class="link" href="CelestialBody.html#CelestialBody_ConfiguringForEventLocation" title="Configuring for event location">CelestialBody</a>
+      for more details.</p></div><div class="refsection"><a name="EclipseLocator_SearchInterval"></a><h3>Search interval</h3><p>The <span class="guilabel">EclipseLocator</span> search interval can be
+      specified either as the entire ephemeris interval of the
+      <span class="guilabel">Spacecraft</span>, or as a user-defined interval. If
+      <span class="guilabel">UseEntireInterval</span> is true, the search is performed
+      over the entire ephemeris interval of the
+      <span class="guilabel">Spacecraft</span>, including any gaps or discontinuities.
+      If <span class="guilabel">UseEntireInterval</span> is false, the provided
+      <span class="guilabel">InitialEpoch</span> and <span class="guilabel">FinalEpoch</span>
+      are used to form the search interval directly. The user must ensure than
+      the provided interval results in valid <span class="guilabel">Spacecraft</span>
+      and <span class="guilabel">CelestialBody</span> ephemeris epochs.</p></div><div class="refsection"><a name="EclipseLocator_RunModes"></a><h3>Run modes</h3><p>The <span class="guilabel">EclipseLocator</span> works in conjunction with
+      the <span class="guilabel">FindEvents</span> command: the
+      <span class="guilabel">EclipseLocator</span> resource defines the configuration
+      of the event search, and the <span class="guilabel">FindEvents</span> command
+      executes the search at a specific point in the mission sequence. The
+      mode of interaction is defined by
+      <span class="guilabel">EclipseLocator</span>.<span class="guilabel">RunMode</span>, which
+      has three options:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><code class="literal">Automatic</code>: All
+            <span class="guilabel">FindEvents</span> commands are executed as-is, plus
+            an additional <span class="guilabel">FindEvents</span> is executed
+            automatically at the end of the mission sequence.</p></li><li class="listitem"><p><code class="literal">Manual</code>: All
+            <span class="guilabel">FindEvents</span> commands are executed
+            as-is.</p></li><li class="listitem"><p><code class="literal">Disabled</code>: <span class="guilabel">FindEvents</span>
+            commands are ignored.</p></li></ul></div></div><div class="refsection"><a name="EclipseLocator_SearchAlgorithm"></a><h3>Search algorithm</h3><p>The <span class="guilabel">EclpseLocator</span> uses the NAIF SPICE GF
+      (geometry finder) subsystem to perform event location. Specifically, the
+      following call is used for the search:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><code class="literal"><a class="link" href="http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/gfoclt_c.html" target="_top">gfoclt_c</a></code>:
+            For third-body occultation searches</p></li></ul></div><p>This function implements a fixed-step search method through the
+      interval, with an embedded root-location step if an event is found.
+      <span class="guilabel">StepSize</span> should be set equal to the length of the
+      minimum-duration event to be found, or equal to the length of the
+      minimum-duration gap between events, whichever is smaller. To guarantee
+      location of 10-second eclipses, or 10-second gaps between adjacent
+      eclipses, set <span class="guilabel">StepSize</span> = 10.</p><p>For details, see the reference documentation for the function
+      linked above.</p></div><div class="refsection"><a name="EclipseLocator_ReportFormat"></a><h3>Report format</h3><p>When <span class="guilabel">WriteReport</span> is enabled, the
+      <span class="guilabel">EclipseLocator</span> outputs an event report at the end
+      of each search execution. The report contains the following
+      data:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Spacecraft name</p></li><li class="listitem"><p>For each event:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>Event start time (UTC)</p></li><li class="listitem"><p>Event stop time (UTC)</p></li><li class="listitem"><p>Event duration (s)</p></li><li class="listitem"><p>Occulting body name</p></li><li class="listitem"><p>Eclipse type</p></li><li class="listitem"><p>Total event number</p></li><li class="listitem"><p>Total duration</p></li></ul></div></li><li class="listitem"><p>Number of individual events</p></li><li class="listitem"><p>Number of total events</p></li><li class="listitem"><p>Maximum total duration</p></li><li class="listitem"><p>Eclipse number of total duration</p></li></ul></div><p>The report makes the distinction between an
+      <span class="emphasis"><em>individual</em></span> event and a <span class="emphasis"><em>total</em></span>
+      event.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>An <span class="emphasis"><em>individual event</em></span> is a single
+            continuous event of a single type (umbra, penumbra, etc.) from a
+            single occulting body. Individual events can be nested for a
+            single occulting body, such as a penumbra event followed
+            immediately by an umbra event, or they can be nested from multiple
+            occulting bodies, such as a Luna eclipse occuring in the middle of
+            an Earth eclipse.</p></li><li class="listitem"><p>A <span class="emphasis"><em>total event</em></span> is the entire set of
+            nested individual events. The total event is given a single
+            number, and the total duration is reported in the output
+            file.</p></li></ul></div></div><div class="refsection"><a name="N1850A"></a><h3>Event location with SPK propagator</h3><p>When using the SPK propagator, you load one or more SPK ephemeris
+      files using the Spacecraft.OrbitSpiceKernelName field. For the purposes
+      of event location, this field causes the appropriate ephemeris files to
+      be loaded automatically on run, and so use of the Propagation command is
+      not necessary. This is an easy way of performing event location on an
+      existing SPK ephemeris file. See the example below.</p></div></div><div class="refsection"><a name="N1850F"></a><h2>Examples</h2><div class="informalexample"><p>Perform a basic eclipse search in LEO:</p><pre class="programlisting">SolarSystem.EphemerisSource = 'DE421'
+
+Create Spacecraft sat
+sat.DateFormat = UTCGregorian
+sat.Epoch = '15 Sep 2010 16:00:00.000'
+sat.CoordinateSystem = EarthMJ2000Eq
+sat.DisplayStateType = Keplerian
+sat.SMA = 6678.14
+sat.ECC = 0.001
+sat.INC = 0
+sat.RAAN = 0
+sat.AOP = 0
+sat.TA = 180
+
+Create ForceModel fm
+fm.CentralBody = Earth
+fm.PrimaryBodies = {Earth}
+fm.GravityField.Earth.PotentialFile = 'JGM2.cof'
+fm.GravityField.Earth.Degree = 0
+fm.GravityField.Earth.Order = 0
+fm.GravityField.Earth.EarthTideModel = 'None'
+fm.Drag.AtmosphereModel = None
+fm.PointMasses = {}
+fm.RelativisticCorrection = Off
+fm.SRP = Off
+
+Create Propagator prop
+prop.FM = fm
+prop.Type = RungeKutta89
+
+Create EclipseLocator el
+el.Spacecraft = sat
+el.Filename = 'Simple.report'
+el.OccultingBodies = {Earth}
+el.EclipseTypes = {'Umbra', 'Penumbra', 'Antumbra'}
+
+BeginMissionSequence
+
+Propagate prop(sat) {sat.ElapsedSecs = 10800}
+</pre></div><div class="informalexample"><p>Perform an eclipse event search from a Mars orbiter, with Phobos,
+      Earth, and Moon eclipses:</p><pre class="programlisting"><code class="code">% Mars orbiter with annular eclipses of Earth and Moon.
+
+SolarSystem.EphemerisSource = 'SPICE'
+SolarSystem.SPKFilename = 'de421.bsp'
+
+Mars.NAIFId = 499
+Mars.OrbitSpiceKernelName = {'../data/planetary_ephem/spk/mar063.bsp'}
+
+Create Spacecraft sat
+sat.DateFormat = UTCGregorian
+sat.Epoch = '10 May 1984 00:00:00.000'
+sat.CoordinateSystem = MarsMJ2000Eq
+sat.DisplayStateType = Keplerian
+sat.SMA = 6792.38
+sat.ECC = 0
+sat.INC = 45
+sat.RAAN = 0
+sat.AOP = 0
+sat.TA = 0
+
+Create ForceModel fm
+fm.CentralBody = Mars
+fm.PrimaryBodies = {Mars}
+fm.GravityField.Mars.PotentialFile = 'Mars50c.cof'
+fm.GravityField.Mars.Degree = 0
+fm.GravityField.Mars.Order = 0
+fm.Drag.AtmosphereModel = None
+fm.PointMasses = {}
+fm.RelativisticCorrection = Off
+fm.SRP = Off
+
+Create Propagator prop
+prop.FM = fm
+prop.Type = RungeKutta89
+
+Create CoordinateSystem MarsMJ2000Eq
+MarsMJ2000Eq.Origin = Mars
+MarsMJ2000Eq.Axes = MJ2000Eq
+
+Create Moon Phobos
+Phobos.CentralBody = 'Mars'
+Phobos.PosVelSource = 'SPICE'
+Phobos.NAIFId = 401
+Phobos.OrbitSpiceKernelName = {'mar063.bsp'}
+Phobos.SpiceFrameId = 'IAU_PHOBOS'
+Phobos.EquatorialRadius = 13.5
+Phobos.Flattening = 0.3185185185185186
+Phobos.Mu = 7.093399e-004
+
+Create Moon Deimos
+Deimos.CentralBody = 'Mars'
+Deimos.PosVelSource = 'SPICE'
+Deimos.NAIFId = 402
+Deimos.OrbitSpiceKernelName = {'mar063.bsp'}
+Deimos.EquatorialRadius = 7.5
+Deimos.SpiceFrameId = 'IAU_DEIMOS'
+Deimos.Flattening = 0.30666666666666664
+Deimos.Mu = 1.588174e-004
+
+Create EclipseLocator ec
+ec.Spacecraft = sat
+ec.OccultingBodies = {Mercury, Venus, Earth, Luna, Mars, Phobos, Deimos}
+ec.Filename = 'EarthTransit.report'
+
+BeginMissionSequence
+
+Propagate prop(sat) {sat.ElapsedDays = 2}
+</code></pre></div><div class="informalexample"><p>Perform eclipse location on an existing SPK ephemeris file:</p><pre class="programlisting"><span class="emphasis"><em>SolarSystem.EphemerisSource = 'DE421'
+
+Create Spacecraft sat
+sat.OrbitSpiceKernelName = {'../data/vehicle/ephem/spk/Events_Simple.bsp'}
+
+Create EclipseLocator cl
+cl.Spacecraft = sat
+cl.OccultingBodies = {Earth}
+cl.Filename = 'SPKPropagation.report'
+
+BeginMissionSequence
+
+</em></span></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ElectricThruster.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="EphemerisFile.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">ElectricThruster&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;EphemerisFile</td></tr></table></div></body></html>

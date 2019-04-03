@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -307,6 +307,30 @@ bool RFHardware::SetStringParameter(const std::string &label,
 }
 
 
+std::string RFHardware::GetStringParameter(const Integer id, const Integer index) const
+{
+   return Sensor::GetStringParameter(id, index);
+}
+
+
+bool RFHardware::SetStringParameter(const Integer id, const std::string &value, const Integer index)
+{
+   return Sensor::SetStringParameter(id, value, index);
+}
+
+
+std::string RFHardware::GetStringParameter(const std::string &label, const Integer index) const
+{
+   return GetStringParameter(GetParameterID(label), index);
+}
+
+
+bool RFHardware::SetStringParameter(const std::string &label, const std::string &value, const Integer index)
+{
+   return SetStringParameter(GetParameterID(label), value, index);
+}
+
+
 //------------------------------------------------------------------------------
 // GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string & name)
 //------------------------------------------------------------------------------
@@ -329,6 +353,12 @@ GmatBase* RFHardware::GetRefObject(const Gmat::ObjectType type,
    }
 
    return Sensor::GetRefObject(type, name);
+}
+
+
+GmatBase* RFHardware::GetRefObject(const Gmat::ObjectType type, const std::string &name, const Integer index)
+{
+   return Sensor::GetRefObject(type, name, index);
 }
 
 
@@ -356,6 +386,13 @@ bool RFHardware::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    }
 
    return Sensor::SetRefObject(obj, type, name);
+}
+
+
+bool RFHardware::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   const std::string &name, const Integer index)
+{
+   return Sensor::SetRefObject(obj, type, name, index);
 }
 
 
@@ -393,23 +430,26 @@ std::string RFHardware::GetRefObjectName(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------
 const StringArray& RFHardware::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
+   Sensor::GetRefObjectNameArray(type);
+
    switch(type)
    {
    case Gmat::UNKNOWN_OBJECT:
    case Gmat::HARDWARE:
-      refObjectNames.clear();
+      //refObjectNames.clear();
       if (primaryAntennaName == "")
          throw HardwareException("Error: value of " + GetName() + ".PrimaryAntenna was not set in GMAT script.\n");
 
       refObjectNames.push_back(primaryAntennaName);
-      return refObjectNames;
+      //return refObjectNames;
         break;
 
    default:
       break;
    }
 
-   return Sensor::GetRefObjectNameArray(type);
+   //return Sensor::GetRefObjectNameArray(type);
+   return refObjectNames;
 }
 
 

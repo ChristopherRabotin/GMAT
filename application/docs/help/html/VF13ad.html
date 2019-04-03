@@ -1,0 +1,77 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>VF13ad</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="Variable.html" title="Variable"><link rel="next" href="XYPlot.html" title="XYPlot"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">VF13ad</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Variable.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="XYPlot.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="VF13ad"></a><div class="titlepage"></div><a name="N21FFB" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">VF13ad</span></h2><p>VF13ad &mdash; The Sequential Quadratic Programming (SQP) optimizer,
+    VF13ad</p></div><div class="refsection"><a name="N2200C"></a><h2>Description</h2><p>The <span class="guilabel">VF13ad</span> optimizer is a SQP-based Nonlinear
+    Programming solver available in the Harwell Subroutine Library.
+    <span class="guilabel">VF13ad</span> performs nonlinear constrained optimization
+    and supports both linear and nonlinear constraints. To use this solver,
+    you must configure the solver options including convergence criteria,
+    maximum iterations, and gradient computation method. In the mission
+    sequence, you implement an optimizer such as VF13ad by using an
+    <span class="guilabel">Optimize</span>/<span class="guilabel">EndOptimize</span> sequence.
+    Within this sequence, you define optimization variables by using the
+    <span class="guilabel">Vary</span> command, and define cost and constraints by
+    using the <span class="guilabel">Minimize</span> and
+    <span class="guilabel">NonlinearConstraint</span> commands respectively.</p><p>This resource cannot be modified in the Mission Sequence.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="FminconOptimizer.html" title="FminconOptimizer"><span class="refentrytitle">FminconOptimizer</span></a>,<a class="xref" href="Optimize.html" title="Optimize"><span class="refentrytitle">Optimize</span></a>,<a class="xref" href="Vary.html" title="Vary"><span class="refentrytitle">Vary</span></a>, <a class="xref" href="NonlinearConstraint.html" title="NonlinearConstraint"><span class="refentrytitle">NonlinearConstraint</span></a>, <a class="xref" href="Minimize.html" title="Minimize"><span class="refentrytitle">Minimize</span></a></p></div><div class="refsection"><a name="N2203B"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="26%"><col width="74%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">FeasibilityTolerance</span></td><td><p> Specifies the accuracy to which you want constraints
+            to be satisfied. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1e-3</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MaximumIterations</span></td><td><p>Specifies the maximum allowable number of nominal
+            passes through the Solver Control Sequence. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Integer &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>200</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ReportFile</span></td><td><p> Contains the path and file name of the report file.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any user-defined file name</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">VF13adVF13ad1.data</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ReportStyle</span></td><td><p>Determines the amount and type of data written to the
+            message window and to the report specified by field
+            <span class="guilabel">ReportFile</span> for each iteration of the solver
+            (When <span class="guilabel">ShowProgress</span> is true).&nbsp; Currently, the
+            <span class="guilabel">Normal</span>, <span class="guilabel">Debug</span>, and
+            <span class="guilabel">Concise</span> options contain the same information:
+            the values for the control variables, the constraints, and the
+            objective function.&nbsp; In addition to this information, the
+            <span class="guilabel">Verbose</span> option also contains values of the
+            optimizer-scaled control variables.&nbsp; </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Normal</span>,
+                    <span class="guilabel">Concise</span>,
+                    <span class="guilabel">Verbose</span>,
+                    <span class="guilabel">Debug</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Normal</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ShowProgress</span></td><td><p>Determines whether data pertaining to iterations of
+            the solver is both displayed in the message window and written to
+            the report specified by the <span class="guilabel">ReportFile</span> field.
+            When <span class="guilabel">ShowProgress</span> is true, the amount of
+            information contained in the message window and written in the
+            report&nbsp;is controlled by the <span class="guilabel">ReportStyle</span>
+            field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">true</code>,
+                    <code class="literal">false</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">true</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Tolerance</span></td><td><p>Specifies the measure the optimizer will use to
+            determine when an optimal solution has been found based on the
+            value of the goal set in a <span class="guilabel">Minimize</span> command.&nbsp;
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1e-5</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">UseCentralDifferences</span></td><td><p>Allows you to choose whether or not to use central
+            differencing for numerically determining the derivative.&nbsp;For the
+            default, 'false' value of this field, forward differencing is used
+            to calculate the derivative.&nbsp; </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">true</code>,
+                    <code class="literal">false</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">false</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N221C7"></a><h2>GUI</h2><p>The <span class="guilabel">VF13ad</span> dialog box allows you to specify
+    properties of a <span class="guilabel">VF13ad</span> such as as maximum iterations,
+    cost function tolerance, feasibility tolerance, choice of reporting
+    options, and choice of whether or not to use the central difference
+    derivative method.</p><p>To create a <span class="guilabel">VF13ad</span> resource, navigate to the
+    <span class="guilabel">Resources</span> tree, expand the
+    <span class="guilabel">Solvers</span> folder, highlight and then right-click on the
+    <span class="guilabel">Optimizers</span> sub-folder, point to <span class="guilabel">Add
+    </span>and then select <span class="guilabel">VF13</span>ad. This will create a
+    new <span class="guilabel">VF13ad</span> resource, VF13ad1. Double-click on VF13ad1
+    to bring up the <span class="guilabel">VF13ad</span> dialog box shown below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_VF13adOptimizer_GUI.png" align="middle" height="390"></td></tr></table></div></div></div><div class="refsection"><a name="N221F5"></a><h2>Remarks</h2><div class="refsection"><a name="N221F8"></a><h3>VF13ad Optimizer Availability</h3><p>This optimizer is not included as part of the nominal GMAT
+      installation and is only available if you have created and installed the
+      VF13ad plug-in.</p></div><div class="refsection"><a name="N221FD"></a><h3>Resource and Command Interactions</h3><p>The <span class="guilabel">VF13ad</span> resource can only be used in the
+      context of optimization-type commands. Please see the documentation for
+      <span class="guilabel">Optimize</span>, <span class="guilabel">Vary</span>,
+      <span class="guilabel">NonlinearConstraint</span>, and
+      <span class="guilabel">Minimize</span> for more information and worked
+      examples.</p></div></div><div class="refsection"><a name="N22211"></a><h2>Examples</h2><div class="informalexample"><p>Create a <span class="guilabel">VF13ad</span> resource named
+      VF13ad1.</p><pre class="programlisting"><code class="code">Create VF13ad VF13ad1
+VF13ad1.ShowProgress = true
+VF13ad1.ReportStyle = Normal
+VF13ad1.ReportFile = 'VF13adVF13ad1.data'
+VF13ad1.MaximumIterations = 200
+VF13ad1.Tolerance = 1e-005
+VF13ad1.UseCentralDifferences = false
+VF13ad1.FeasibilityTolerance = 1e-003</code>      </pre></div><p>For an example of how a <span class="guilabel">VF13ad</span> resource can be
+    used within an Optimization sequence, see the
+    <span class="guilabel">Optimize</span> command examples.</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Variable.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="XYPlot.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Variable&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;XYPlot</td></tr></table></div></body></html>

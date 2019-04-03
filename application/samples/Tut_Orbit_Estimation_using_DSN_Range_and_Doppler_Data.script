@@ -100,12 +100,12 @@ MAD.TroposphereModel      = 'HopfieldSaastamoinen';
 
 
 Create ErrorModel DSNrange;
-DSNrange.Type             = 'Range_RU';
+DSNrange.Type             = 'DSN_SeqRange';
 DSNrange.NoiseSigma       = 10.63;
 DSNrange.Bias             = 0.0;
 
 Create ErrorModel DSNdoppler;
-DSNdoppler.Type       		= 'Doppler_HZ';
+DSNdoppler.Type       		= 'DSN_TCP';
 DSNdoppler.NoiseSigma		= 0.0282;
 DSNdoppler.Bias  				= 0.0;
 
@@ -118,12 +118,12 @@ MAD.ErrorModels           = {DSNrange, DSNdoppler};
 %-----------------------------------------------------------------------------------------
 
 Create TrackingFileSet DSNsimData;
-DSNsimData.AddTrackingConfig = {{CAN, Sat, CAN}, 'DSNRange'};   
-DSNsimData.AddTrackingConfig = {{CAN, Sat, CAN}, 'Doppler'}; 
-DSNsimData.AddTrackingConfig = {{GDS, Sat, GDS}, 'DSNRange'};   
-DSNsimData.AddTrackingConfig = {{GDS, Sat, GDS}, 'Doppler'};
-DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'DSNRange'};   
-DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'Doppler'};
+DSNsimData.AddTrackingConfig = {{CAN, Sat, CAN}, 'DSN_SeqRange'};   
+DSNsimData.AddTrackingConfig = {{CAN, Sat, CAN},'DSN_TCP'}; 
+DSNsimData.AddTrackingConfig = {{GDS, Sat, GDS}, 'DSN_SeqRange'};   
+DSNsimData.AddTrackingConfig = {{GDS, Sat, GDS},'DSN_TCP'};
+DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'DSN_SeqRange'};   
+DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD},'DSN_TCP'};
 
                    
 DSNsimData.FileName 						= {'../data/navdata/Simulate DSN Range and Doppler Data 3 weeks.gmd'};

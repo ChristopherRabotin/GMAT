@@ -404,8 +404,8 @@ bool PolyhedronBody::IsInEdgesList(Edge& edge, bool& isAttachmentB)
    isAttachmentB = false;
 
    // Specify edge's indexKey 
-   Integer indexKey = GmatMathUtil::Min(edge.vertex1,edge.vertex2)*100000 +
-                      GmatMathUtil::Max(edge.vertex1,edge.vertex2);
+   Integer indexKey = (Integer)Min((Real)edge.vertex1,(Real)edge.vertex2)*100000 +
+                      (Integer)Max((Real)edge.vertex1,(Real)edge.vertex2);
 
    for (std::map<Integer, Edge>::iterator i = edgeMap.begin(); i != edgeMap.end(); ++i)
 	{ 
@@ -454,8 +454,8 @@ bool PolyhedronBody::Edges()
       e3.vertex1 = face[2]; e3.vertex2 = face[0];
 
 	   // Add e1 to edges list if it has not existed in edges list:
-      indexKey = GmatMathUtil::Min(e1.vertex1,e1.vertex2)*100000 +
-                 GmatMathUtil::Max(e1.vertex1,e1.vertex2);
+      indexKey = (Integer)Min((Real)e1.vertex1,(Real)e1.vertex2)*100000 +
+                 (Integer)Max((Real)e1.vertex1,(Real)e1.vertex2);
       if (!IsInEdgesList(e1, isAttachmentB))
       {
          edgeMap[indexKey] = e1;
@@ -469,8 +469,8 @@ bool PolyhedronBody::Edges()
       }
 
       // Add e2 to edges list if it has not existed in edges list:
-      indexKey = GmatMathUtil::Min(e2.vertex1,e2.vertex2)*100000 +
-                 GmatMathUtil::Max(e2.vertex1,e2.vertex2);
+      indexKey = (Integer)Min((Real)e2.vertex1,(Real)e2.vertex2)*100000 +
+                 (Integer)Max((Real)e2.vertex1,(Real)e2.vertex2);
       if (!IsInEdgesList(e2, isAttachmentB))
       {
          edgeMap[indexKey] = e2;
@@ -484,8 +484,8 @@ bool PolyhedronBody::Edges()
       }
 
       // Add e3 to edges list if it has not existed in edges list:
-      indexKey = GmatMathUtil::Min(e3.vertex1,e3.vertex2)*100000 +
-                 GmatMathUtil::Max(e3.vertex1,e3.vertex2);
+      indexKey = (Integer)Min((Real)e3.vertex1,(Real)e3.vertex2)*100000 +
+                 (Integer)Max((Real)e3.vertex1,(Real)e3.vertex2);
       if (!IsInEdgesList(e3, isAttachmentB))
       {
          edgeMap[indexKey] = e3;

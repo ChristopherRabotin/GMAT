@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -31,7 +31,11 @@
 //------------------------------------------------------------------------------
 
 #include "MessageReceiver.hpp"
-
+#include "FileManager.hpp"
+#include "FileUtil.hpp"
+#include "StringUtil.hpp"
+#include <fstream>                  // for checking GmatFunction declaration
+#include <sstream>                  // for checking GmatFunction declaration
 
 //---------------------------------
 //  protected methods
@@ -58,3 +62,48 @@ MessageReceiver::MessageReceiver()
 MessageReceiver::~MessageReceiver()
 {
 }
+
+//------------------------------------------------------------------------------
+// bool IsValidLogFile(const std::string fullLogFilePath)
+//------------------------------------------------------------------------------
+bool MessageReceiver::IsValidLogFile(const std::string fullLogFilePath)
+{
+   if (!GmatFileUtil::DoesFileExist(fullLogFilePath))
+      return true;
+   
+   std::ifstream inStream(fullLogFilePath.c_str());
+   std::string line;
+   
+   std::string logText = GetLogFileText();
+
+   while (!inStream.eof())
+   {
+      if (!GmatFileUtil::GetLine(&inStream, line))
+      {
+         return true;  // empty file is OK?
+      }
+      
+      line = GmatStringUtil::Trim(line, GmatStringUtil::BOTH, true, true);
+      
+      // Skip empty line or comment line
+      if (line[0] == '\0' || line[0] == '%')
+         continue;
+      // first non-empty line
+      if (line.find(logText.c_str()) != line.npos)
+         return true;
+      else
+         return false;
+   }
+
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetLogFileText()
+//------------------------------------------------------------------------------
+std::string MessageReceiver::GetLogFileText()
+{
+   return "GMAT Build Date:";
+}
+
+

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1140,6 +1140,7 @@ void CallMatlabFunction::UpdateObject(GmatBase *obj, char *buffer)
    {
       value = tokens[1];
       value = GmatStringUtil::Strip(value);
+      value = GmatStringUtil::RemoveEnclosingString(value,"'");
       #ifdef DEBUG_UPDATE_OBJECT
       MessageInterface::ShowMessage("   Received ans = %s\n", value.c_str());
       #endif

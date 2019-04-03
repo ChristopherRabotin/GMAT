@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -226,7 +226,7 @@ bool Ionosphere::Initialize()
 
       // Read all data files and store data to memmory
       integer errNo;
-      ftnlen len;
+      ftnlen len = 0;
       char errmsg[256]; 
       load_all_files__(&errNo, &errmsg[0], len);
       if (errNo >= 1000)
@@ -410,10 +410,14 @@ bool Ionosphere::SetEarthRadius(Real r)
  *
  */
 //---------------------------------------------------------------------------
-extern "C" int iri_web__(integer *jmag, logical *jf, real *alati, real *
-	along, integer *iyyyy, integer *mmdd, integer *iut, real *dhour, real 
-	*height, real *h_tec_max__, integer *ivar, real *vbeg, real *vend, 
-	real *vstp, real *a, real *b, integer *ier);
+//extern "C" int iri_web__(integer *jmag, logical *jf, real *alati, real *
+//	along, integer *iyyyy, integer *mmdd, integer *iut, real *dhour, real 
+//	*height, real *h_tec_max__, integer *ivar, real *vbeg, real *vend, 
+//	real *vstp, real *a, real *b, integer *ier);
+
+extern "C" int iri_sub__(logical *jf, integer *jmag, real *alati, real *
+   along, integer *iyyyy, integer *mmdd, real *dhour, real *heibeg, real
+   *heiend, real *heistp, real *outf, real *oarr, integer *ier);
 
 float Ionosphere::ElectronDensity(Rvector3 pos1)
 {
@@ -437,14 +441,19 @@ float Ionosphere::ElectronDensity(Rvector3 pos1)
    for (int i=1; i <= 30; ++i)
       jf[i] = TRUE_;
    
-   jf[5] = FALSE_;
-   jf[6] = FALSE_;
-   jf[23] = FALSE_;
-   jf[29] = FALSE_;
-   jf[30] = FALSE_;
+   //jf[1] = FALSE_;
+   jf[2] = FALSE_;           // FALSE_ for Te, Ti not computed
+   jf[3] = FALSE_;           // FALSE_ for Ni not computed
+
+   jf[5] = FALSE_;           // FALSE_ for foF2 - URSI
+   jf[6] = FALSE_;           // FALSE_ for Ni - DS-95 & TTS-03
+   jf[23] = FALSE_;          // FALSE_ for Te_topside (Intercosmos)
+   jf[29] = FALSE_;          // FALSE_ for new options as def. by JF(30)
+   jf[30] = FALSE_;          // FALSE_ for NeQuick topside model
    
-//   jf[21] = FALSE_;
-//   jf[28] = FALSE_;
+   jf[12] = FALSE_;          // FALSE_ for no messages to unit 6
+   jf[21] = FALSE_;          // FALSE_ for ion drift not computed
+   jf[28] = FALSE_;          // FALSE_ for spread-F probability not computed
    
    // iy,md        date as yyyy and mmdd (or -ddd)
    // hour         decimal hours LT (or UT+25)
@@ -478,9 +487,10 @@ float Ionosphere::ElectronDensity(Rvector3 pos1)
    MessageInterface::ShowMessage("coordinate system type = %s)\n",(jmag?"Geomagetic":"Geographic"));
 #endif
 
-   iri_web__(&jmag, &jf[1], &latitude, &longitude, &iy, &md, &iut, &hour, &hbeg, &hbeg, 
-      &ivar, &hbeg, &hend, &hstp, &outf[21], &oarr[1], &error);
-
+//   iri_web__(&jmag, &jf[1], &latitude, &longitude, &iy, &md, &iut, &hour, &hbeg, &hbeg, 
+//      &ivar, &hbeg, &hend, &hstp, &outf[21], &oarr[1], &error);
+   hour = hour + iut*25.0;
+   iri_sub__(&jf[1], &jmag, &latitude, &longitude, &iy, &md, &hour, &hbeg, &hend, &hstp, &outf[21], &oarr[1], &error);
    if (error != 0)
       throw MeasurementException("Ionosphere data files not found\n");
 

@@ -190,7 +190,11 @@ public:
 
    std::string          GetErrorMessage(){ return errMsg; };
 
+   StringArray          GetMeasurementDimension() { return dimNames;};
+
 protected:
+   /// Measurement dimesion
+   StringArray                   dimNames;
    /// The ordered list of participants in the measurement
    std::vector<StringArray*> participantLists;
    /// The measurement model that holds the raw data processed in this adapter
@@ -260,7 +264,7 @@ protected:
    Covariance                measErrorCovariance;
 
    /// Measurement type
-   std::string               measurementType;  // it's value could be "Range_KM", "DSNRange", "Doppler", "Doppler_RangeRate", "TDRSDoppler_HZ", etc
+   std::string               measurementType;  // it's value could be ("Range_KM") "Range", "SN_Range", "DSN_SeqRange", "DSN_TCP", ("Doppler_RangeRate") "RangeRate", ("TDRSDoppler_HZ") "SN_Doppler", etc
 
    /// A list of all objects used for measurement calculation (specificly it contains solve-for objects and consider objects)
    ObjectArray               forObjects;

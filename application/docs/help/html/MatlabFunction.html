@@ -1,0 +1,70 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>MatlabFunction</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="LibrationPoint.html" title="LibrationPoint"><link rel="next" href="NuclearPowerSystem.html" title="NuclearPowerSystem"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">MatlabFunction</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="LibrationPoint.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="NuclearPowerSystem.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="MatlabFunction"></a><div class="titlepage"></div><a name="N1A9A2" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">MatlabFunction</span></h2><p>MatlabFunction &mdash; Declaration of an external MATLAB function</p></div><div class="refsection"><a name="N1A9B3"></a><h2>Description</h2><p>The <span class="guilabel">MatlabFunction</span> resource declares to GMAT
+    that the name given refers to an existing external function in the MATLAB
+    language. This function can be called in the Mission Sequence like a
+    built-in function, with some limitations. See the <span class="guilabel"><a class="xref" href="CallMatlabFunction.html" title="CallMatlabFunction"><span class="refentrytitle">CallMatlabFunction</span></a></span> reference for details. Both
+    user-created functions and built-in functions (like cos or path) are
+    supported.</p><p>GMAT supports passing data to and from MATLAB through the function.
+    It requires that a supported and properly configured version of MATLAB
+    exist on the system. See the <a class="xref" href="MatlabInterface.html" title="MATLAB Interface"><span class="refentrytitle">MATLAB Interface</span></a>
+    documentation for general details on the interface.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="CallMatlabFunction.html" title="CallMatlabFunction"><span class="refentrytitle">CallMatlabFunction</span></a>, <a class="xref" href="MatlabInterface.html" title="MATLAB Interface"><span class="refentrytitle">MATLAB Interface</span></a></p></div><div class="refsection"><a name="N1A9CE"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">FunctionPath</span></td><td><p>Paths to add to the MATLAB search path when the
+            associated function is called. Separate multiple paths with
+            semicolons (on Windows) or colons (on other platforms).</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Valid file path(s)</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><code class="literal">MATLAB_FUNCTION_PATH</code> properties
+                    in the startup file</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1AA12"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_MatlabFunction_GUI.png" align="middle" height="155"></td></tr></table></div></div><p>The <span class="guilabel">MatlabFunction</span> GUI window is very simple;
+    it has a single file input box for the function path, and a Browse button
+    that lets you graphically select the path.</p></div><div class="refsection"><a name="N1AA23"></a><h2>Remarks</h2><div class="refsection"><a name="N1AA26"></a><h3>Search Path</h3><p>When a function declared as a <span class="guilabel">MatlabFunction</span>
+      is called, GMAT starts MATLAB in the background with a custom,
+      configurable search path. MATLAB then searches for the named function in
+      this search path. The search is case-sensitive, so the name of the
+      function name and the <span class="guilabel">MatlabFunction</span> resource must
+      be identical.</p><p>The search path consists of the following components, in
+      order:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p><span class="guilabel">FunctionPath</span> field of the associated
+          <span class="guilabel">MatlabFunction</span> resource (default: empty)</p></li><li class="listitem"><p><code class="literal">MATLAB_FUNCTION_PATH</code> entries in the GMAT
+          startup file (default:
+          <code class="filename"><em class="replaceable"><code>GMAT</code></em>\userfunctions\matlab</code>)</p></li><li class="listitem"><p>MATLAB search path (returned by the MATLAB
+          <code class="literal">path()</code> function)</p></li></ol></div><p>If multiple MATLAB functions are called within a run, the
+      <span class="guilabel">FunctionPath</span> fields for each are prepended to the
+      search path at the time of the function call.</p><p>Multiple paths can be combined in the
+      <span class="guilabel">FunctionPath</span> field by separating the paths with a
+      semicolon (on Windows) or a colon (on Mac OS X and Linux).</p></div><div class="refsection"><a name="N1AA56"></a><h3>Working Directory</h3><p>When MATLAB starts in the background, its working directory is set
+      to the GMAT <code class="filename">bin</code> directory.</p></div></div><div class="refsection"><a name="N1AA5E"></a><h2>Examples</h2><div class="informalexample"><p>Call a simple built-in MATLAB function:</p><pre class="programlisting"><code class="code">Create MatlabFunction sinh
+Create Variable x y
+
+BeginMissionSequence
+
+x = 1
+[y] = sinh(x)</code></pre></div><div class="informalexample"><p>Call an external custom MATLAB function:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create ImpulsiveBurn aBurn
+Create Propagator aProp
+
+Create MatlabFunction CalcHohmann
+CalcHohmann.FunctionPath = 'C:\path\to\functions'
+
+Create Variable a_target mu dv1 dv2
+mu = 398600.4415
+
+BeginMissionSequence
+
+% calculate burns for circular Hohmann transfer (example)
+[dv1, dv2] = CalcHohmann(aSat.SMA, a_target, mu)
+
+% perform first maneuver
+aBurn.Element1 = dv1
+Maneuver aBurn(aSat)
+
+% propagate to apoapsis
+Propagate aProp(aSat) {aSat.Apoapsis}
+
+% perform second burn
+aBurn.Element1 = dv2
+Maneuver aBurn(aSat)</code></pre></div><div class="informalexample"><p>Return the MATLAB search path and working directory:</p><pre class="programlisting"><code class="code">Create MatlabFunction path pwd
+Create String pathStr pwdStr
+Create ReportFile aReport
+
+BeginMissionSequence
+
+[pathStr] = path
+[pwdStr] = pwd
+
+Report aReport pathStr
+Report aReport pwdStr</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="LibrationPoint.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="NuclearPowerSystem.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">LibrationPoint&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;NuclearPowerSystem</td></tr></table></div></body></html>

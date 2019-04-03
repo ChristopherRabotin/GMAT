@@ -1,0 +1,153 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>ChemicalTank</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="Formation.html" title="Formation"><link rel="next" href="GmatFunction.html" title="GMATFunction"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">ChemicalTank</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Formation.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="GmatFunction.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="FuelTank"></a><div class="titlepage"></div><a name="N19527" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ChemicalTank</span></h2><p>ChemicalTank &mdash; Model of a chemical fuel tank</p></div><div class="refsection"><a name="N19538"></a><h2>Description</h2><p>A <span class="guilabel">ChemicalTank</span> is a thermodynamic model of a tank
+    and is required for finite burn modeling or for impulsive burns that use
+    mass depletion. The thermodynamic properties of the tank are modeled using
+    Boyle&rsquo;s law and assume that there is no temperature change in the tank as
+    fuel is depleted. To use a <span class="guilabel">ChemicalTank</span>, you must first
+    create the tank, and then attach it to the desired
+    <span class="guilabel">Spacecraft</span> and associate it with a
+    <span class="guilabel">ChemicalThruster</span> as shown in the example below.</p><p>See Also <a class="xref" href="ImpulsiveBurn.html" title="ImpulsiveBurn"><span class="refentrytitle">ImpulsiveBurn</span></a>,<a class="xref" href="Thruster.html" title="ChemicalThruster"><span class="refentrytitle">ChemicalThruster</span></a></p></div><div class="refsection"><a name="N19550"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AllowNegativeFuelMass </span></td><td><p>This field allows the <span class="guilabel">ChemicalTank</span>
+            to have negative fuel mass which can be useful in optimization and
+            targeting sequences before convergence has occurred. This field
+            cannot be modified in the Mission Sequence. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">true</code>,
+                    <code class="literal">false</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">false</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FuelDensity </span></td><td><p> The density of the fuel. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1260</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>kg/m^3</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FuelMass</span></td><td><p> The mass of fuel in the tank. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>756</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>kg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Pressure</span></td><td><p> The pressure in the tank. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1500</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>kPa</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">PressureModel</span></td><td><p>The pressure model describes how pressure in the
+            <span class="guilabel">ChemicalTank</span> changes as fuel is depleted. This
+            field cannot be modified in the Mission Sequence. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">PressureRegulated</span>,
+                    <span class="guilabel">BlowDown</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">PressureRegulated</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RefTemperature</span></td><td><p> The temperature of the tank when fuel was loaded.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; -273.15 and |Real| &gt; 0.01</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>20</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>C</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Temperature</span></td><td><p>The temperature of the fuel and ullage in the tank.
+            GMAT currently assumes ullage and fuel are always at the same
+            temperature.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; -273.15</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">20</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>C</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Volume </span></td><td><p>The volume of the tank. GMAT checks to ensure that
+            the input volume of the tank is larger than the calculated volume
+            of fuel loaded in the tank and throws an exception in the case
+            that the calculated fuel volume is larger than the input tank
+            volume. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0 such that calculated fuel volume is &lt;
+                    input tank Volume.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.75</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>m^3</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N196E4"></a><h2>GUI</h2><p>The <span class="guilabel">ChemicalTank</span> dialog box allows you to specify
+    properties of a fuel tank including fuel mass, density, and temperature as
+    well as tank pressure and volume. The layout of the
+    <span class="guilabel">ChemicalTank</span> dialog box is shown below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="75%"><tr><td align="center"><img src="../files/images/Resource_FuelTank_GUI_1.png" align="middle" height="477"></td></tr></table></div></div><p>The <span class="guilabel">ChemicalThruster</span> resource is closely related to the
+    <span class="guilabel">ChemicalTank</span> resource and thus, we also discuss it here.
+    The <span class="guilabel">ChemicalThruster</span> dialog box allows you to specify
+    properties of a thruster including the coordinate system of the Thrust
+    acceleration direction vector, the thrust magnitude and Isp. The layout of
+    the <span class="guilabel">ChemicalThruster</span> dialog box is shown below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="75%"><tr><td align="center"><img src="../files/images/Resource_FuelTank_GUI_2_better.png" align="middle" height="654"></td></tr></table></div></div><p>When performing a finite burn, you will typically want to model fuel
+    depletion. To do this, select the <span class="guibutton">Decrement Mass</span>
+    button and then select the previously created
+    <span class="guilabel">ChemicalTank</span> as shown below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_FuelTank_GUI_3_better.png" align="middle" height="654"></td></tr></table></div></div><p>Thus far, we have created both a <span class="guilabel">ChemicalTank</span> and a
+    <span class="guilabel">ChemicalThruster</span>, and we have associated a
+    <span class="guilabel">ChemicalTank</span> with our <span class="guilabel">ChemicalThruster</span>. We
+    are not done yet. We must tell GMAT that we want to attach both the
+    <span class="guibutton">ChemicalTank</span> and the <span class="guilabel">ChemicalThruster</span> to a
+    particular spacecraft. To do this, double click on the desired spacecraft
+    under the <span class="guilabel">Spacecraft</span> resource to bring up the
+    associated GUI panel. Then click on the <span class="guibutton">Tanks</span> tab
+    to bring up the following GUI display.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_FuelTank_GUI_4.png" align="middle" height="735"></td></tr></table></div></div><p>Next, select the desired <span class="guilabel">ChemicalTank</span> and use the
+    right arrow button to attach the <span class="guilabel">ChemicalTank</span> to the
+    spacecraft. Then, click the <span class="guibutton">Apply</span> button as shown
+    below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_FuelTank_GUI_5.png" align="middle" height="735"></td></tr></table></div></div><p>Similarly, to attach a <span class="guilabel">ChemicalThruster</span> to a
+    spacecraft, double click on the desired spacecraft under the
+    <span class="guilabel">Spacecraft</span> resource and then select the
+    <span class="guilabel">Actuators</span> tab. Then select the desired thruster and
+    use the right arrow to attach the thruster to the spacecraft. Finally,
+    click the <span class="guibutton">Apply</span> button as shown below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_FuelTank_GUI_6.png" align="middle" height="735"></td></tr></table></div></div></div><div class="refsection"><a name="N1976E"></a><h2>Remarks</h2><div class="refsection"><a name="N19771"></a><h3>Use of ChemicalTank Resource in Conjunction with Maneuvers</h3><p>A <span class="guilabel">ChemicalTank</span> is used in conjunction with both
+      impulsive and finite maneuvers. To implement an impulsive maneuver, one
+      must first create an <span class="guilabel">ImpulsiveBurn</span> resource and
+      (optionally) associate a <span class="guilabel">ChemicalTank</span> with it. The
+      actual impulsive maneuver is implemented using the
+      <span class="guilabel">Maneuver</span> command. See the
+      <span class="guilabel">Maneuver</span> command documentation for worked examples
+      on how the <span class="guilabel">ChemicalTank</span> resource is used in conjunction
+      with impulsive maneuvers.</p><p>To implement a finite maneuver, you must first create both a
+      <span class="guilabel">ChemicalThruster</span> and a <span class="guilabel">FiniteBurn</span>
+      resource. You must also associate a <span class="guilabel">ChemicalTank</span> with
+      the <span class="guilabel">ChemicalThruster</span> resource and you must associate a
+      <span class="guilabel">Thruste</span><span class="guilabel">r</span> with the
+      <span class="guilabel">FiniteBurn</span> resource. The actual finite maneuver is
+      implemented using the <span class="guilabel">BeginFiniteBurn/EndFiniteBurn</span>
+      commands. See the <span class="guilabel">BeginFiniteBurn/EndFiniteBurn</span>
+      command documentation for worked examples on how the
+      <span class="guilabel">ChemicalTank</span> resource is used in conjunction with
+      finite maneuvers.</p></div><div class="refsection"><a name="N197A7"></a><h3>Behavior When Configuring Tank and Attached Tank
+      Properties</h3><p>Create a default <span class="guilabel">ChemicalTank</span> and attach it to a
+      <span class="guilabel">Spacecraft</span> and
+      <span class="guilabel">ChemicalThruster</span>.</p><pre class="programlisting">%  Create the ChemicalTank Resource
+Create ChemicalTank aTank
+aTank.AllowNegativeFuelMass = false
+aTank.FuelMass = 756
+aTank.Pressure = 1500
+aTank.Temperature = 20
+aTank.RefTemperature = 20
+aTank.Volume = 0.75
+aTank.FuelDensity = 1260
+aTank.PressureModel = PressureRegulated
+%  Create a ChemicalThruster and assign it a ChemicalTank
+Create ChemicalThruster aThruster
+aThruster.Tank = {aTank}
+
+%  Add the ChemicalTank and ChemicalThruster to a Spacecraft
+Create Spacecraft aSpacecraft
+aSpacecraft.Tanks = {aTank}
+aSpacecraft.Thrusters = {aThruster}    </pre><p>As exhibited below, there are some subtleties associated with
+      setting and getting parent vs. cloned resources. In the example above,
+      <code class="literal">aTank </code>is the parent <span class="guilabel">ChemicalTank</span>
+      resource and the field <code class="literal">aSpacecraft.Tanks</code> is populated
+      with a cloned copy of <code class="literal">aTank</code>.</p><p>Create a second spacecraft and attach a fuel tank using the same
+      procedure used in the previous example. Set the
+      <span class="guilabel">FuelMass</span> in the parent resource,
+      <code class="literal">aTank</code>, to 900 kg.</p><pre class="programlisting">%  Add the ChemicalTank and ChemicalThruster to a second Spacecraft
+Create Spacecraft bSpacecraft
+bSpacecraft.Tanks = {aTank}
+bSpacecraft.Thrusters = {aThruster}
+aTank.FuelMass = 900    %Can be performed in both resource and 
+                        %command modes</pre><p>Note that, in the example above, setting the value of the parent
+      resource, <code class="literal">aTank</code>, changes the fuel mass value in both
+      cloned fuel tank resources. More specifically, the value of both
+      <code class="literal">aSpacecraft.aTank.FuelMass</code> and
+      <code class="literal">bSpacecraft.aTank.FuelMass</code> are both now equal to the
+      new value of 900 kg. We note that the assignment command for the parent
+      resource, <code class="literal">aTank.FuelMass</code>, can be performed in both
+      resource and command modes.</p><p>To change the value of the fuel mass in only the first created
+      spacecraft, <span class="guilabel">aSpacecraft</span>, we do the
+      following.</p><pre class="programlisting"><code class="code">%  Create the Fuel Tank Resource
+aTank.FuelMass = 756   %Fuel tank mass in both s/c set back to default
+aSpacecraft.aTank.FuelMass = 1000 %Can only be performed in command mode.</code>      </pre><p>As a result of the commands in the previous example, the value of
+      <code class="literal">aSpacecraft.aTank.FuelMass</code> is <code class="literal">1000</code>
+      kg and the value of <code class="literal">bSpacecraft.aTank.FuelMass</code> is 756
+      kg. We note that the assignment command for the cloned resource,
+      <code class="literal">aSpacecraft.aTank.FuelMass</code>, can only be performed in
+      command mode.</p><div class="refsection"><a name="N197F4"></a><h4>Caution: Value of AllowNegativeFuelMass Flag Can Affect
+        Iterative Processes</h4><p>By default, GMAT will not allow the fuel mass to be negative.
+        However, occasionally in iterative processes such as targeting, a
+        solver will try values of a maneuver parameter that result in total
+        fuel depletion. Using the default tank settings, this will throw an
+        exception stopping the run unless you set the AllowNegativeFuelMass
+        flag to true. GMAT will not allow the the total spacecraft mass to be
+        negative. If DryMass + FuelMass is negative GMAT will throw an
+        exception and stop.</p></div></div></div><div class="refsection"><a name="N197F9"></a><h2>Examples</h2><div class="informalexample"><p>Create a default <span class="guilabel">ChemicalTank</span> and attach it to a
+      <span class="guilabel">Spacecraft</span> and
+      <span class="guilabel">ChemicalThruster</span>.</p><pre class="programlisting">%  Create the Fuel Tank Resource
+Create ChemicalTank aTank
+aTank.AllowNegativeFuelMass = false
+aTank.FuelMass = 756
+aTank.Pressure = 1500
+aTank.Temperature = 20
+aTank.RefTemperature = 20
+aTank.Volume = 0.75
+aTank.FuelDensity = 1260
+aTank.PressureModel = PressureRegulated
+
+%  Create a ChemicalThruster and assign it a ChemicalTank
+Create ChemicalThruster aThruster
+aThruster.Tank = {aTank}
+
+%  Add the ChemicalTank and ChemicalThruster to a Spacecraft
+Create Spacecraft aSpacecraft
+aSpacecraft.Tanks = {aTank}
+aSpacecraft.Thrusters = {aThruster}
+
+BeginMissionSequence    </pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Formation.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="GmatFunction.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Formation&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;GMATFunction</td></tr></table></div></body></html>

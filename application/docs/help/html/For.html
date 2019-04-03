@@ -1,0 +1,104 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>For</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="FindEvents.html" title="FindEvents"><link rel="next" href="GetEphemStates_Function.html" title="GetEphemStates()"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">For</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="FindEvents.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="GetEphemStates_Function.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="For"></a><div class="titlepage"></div><a name="N235FA" class="indexterm"></a><a name="N235FD" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">For</span></h2><p>For &mdash; Execute a series of commands a specified number of
+    times</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><code class="literal">For</code> <em class="replaceable"><code>Index</code></em> = <em class="replaceable"><code>Start</code></em>:[<em class="replaceable"><code>Increment</code></em>:]<em class="replaceable"><code>End</code></em>
+    [<em class="replaceable"><code>script statement</code></em>]
+    &hellip;
+<code class="literal">EndFor</code></pre></div><div class="refsection"><a name="N23626"></a><h2>Description</h2><p>The <span class="guilabel">For</span> command is a control logic statement
+    that executes a series of commands a specified number of times. The
+    command argument must have one of the following forms:</p><p><code class="code"><em class="replaceable"><code>Index</code></em> =
+    <em class="replaceable"><code>Start</code></em>:<em class="replaceable"><code>End</code></em></code></p><p>This syntex increments <span class="guilabel">Index</span> from
+    <span class="guilabel">Start</span> to <span class="guilabel">End</span> in steps of 1,
+    repeating the script statements until <span class="guilabel">Index</span> is
+    greater than <span class="guilabel">End</span>. If <span class="guilabel">Start</span> is
+    greater than <span class="guilabel">End</span>, then the script statements do not
+    execute.</p><p><code class="code"><em class="replaceable"><code>Index</code></em> =
+    <em class="replaceable"><code>Start</code></em>:<em class="replaceable"><code>Increment</code></em>:<em class="replaceable"><code>End</code></em></code></p><p>This syntax increments <span class="guilabel">Index</span> from
+    <span class="guilabel">Start</span> to <span class="guilabel">End</span> in steps of
+    <span class="guilabel">Increment</span>, repeating the script statements until
+    <span class="guilabel">Index</span> is greater than <span class="guilabel">End</span> if
+    <span class="guilabel">Increment</span> is positive and less than
+    <span class="guilabel">End</span> if <span class="guilabel">Increment</span> is negative. If
+    <span class="guilabel">Start</span> is less than <span class="guilabel">End</span> and
+    <span class="guilabel">Increment</span> is negative, or if
+    <span class="guilabel">Start</span> is greater than <span class="guilabel">End</span> and
+    <span class="guilabel">Increment</span> is positive, then the script statements do
+    not execute.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="If.html" title="If"><span class="refentrytitle">If</span></a>,
+    <a class="xref" href="While.html" title="While"><span class="refentrytitle">While</span></a></p></div><div class="refsection"><a name="N23695"></a><h2>Options</h2><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Index</span></td><td><p>Independent variable in a for loop.
+            <span class="guilabel">Index</span> is computed according to the arithmetic
+            progression defined by the values for <span class="guilabel">Start</span>,
+            <span class="guilabel">Increment</span>, and <span class="guilabel">End</span>.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>
+                      <span class="guilabel">Variable</span>
+                    </p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">Index</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">Variable</span> named
+                    <span class="guilabel">I</span></p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Start</span></td><td><p>Initial value for the <span class="guilabel">Index</span>
+            parameter </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>parameter</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">Start</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Increment</span></td><td><p>The <span class="guilabel">Increment</span> parameter is used
+            to compute the arithmetic progression of the loop Index such that
+            pass <span class="mathphrase">i</span> through the loop is <span class="mathphrase"><span class="bold"><strong>Start</strong></span> +
+                i*</span><span class="bold"><strong>
+                 
+
+                <span class="mathphrase">Increment</span>
+
+                 
+              </strong></span> if the resulting value satisfies the constraint
+            defined by <span class="guilabel">End</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>parameter</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">Increment</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">End</span></td><td><p> The <span class="guilabel">End</span> parameter is the upper
+            (or lower if <span class="guilabel">Increment</span> is negative) bound for
+            the <span class="guilabel">Index</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>parameter</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">End</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>10</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N23789"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_For_GUI.png" align="middle" height="171"></td></tr></table></div></div><p>The <span class="guilabel">For</span> command GUI panel contains fields for
+    all of its parameters: <span class="guilabel">Index</span>,
+    <span class="guilabel">Start</span>, <span class="guilabel">Increment</span>, and
+    <span class="guilabel">End</span>. To edit the values, click the field value you
+    wish to change and type the new value (e.g. <strong class="userinput"><code>5</code></strong>,
+    <strong class="userinput"><code>anArray(1,5)</code></strong>, or
+    <strong class="userinput"><code>Spacecraft.X</code></strong>). Alternately, you can either
+    right-click the field value or click the ellipses (<span class="guilabel">&hellip;</span>)
+    button to the left of the field. This displays the
+    <span class="guilabel">ParameterSelectDialog</span> window, which allows you to
+    choose a parameter from a list.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_For_GUI_2.png" align="middle" height="416"></td></tr></table></div></div></div><div class="refsection"><a name="N237BE"></a><h2>Remarks</h2><p>The values of the <span class="guilabel">Index</span>,
+    <span class="guilabel">Start</span>, <span class="guilabel">Increment</span>, and
+    <span class="guilabel">End</span> parameters can be any of the following types:
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Literal numeric value (e.g. 1, 15.2, -6)</p></li><li class="listitem"><p><span class="guilabel">Variable</span> resource</p></li><li class="listitem"><p><span class="guilabel">Array</span> resource element</p></li><li class="listitem"><p>Resource parameter of numeric type (e.g.
+          <span class="guilabel">Spacecraft</span>.<span class="guilabel">X</span>,
+          <span class="guilabel">ChemicalThruster</span>.<span class="guilabel">K1</span>)</p></li></ul></div><p>with the extra requirement that if a Resource parameter is used for
+    <span class="guilabel">Index</span>, the parameter must be settable.</p><p>The index specification cannot contain mathematical operators or
+    parentheses. After execution of the <span class="guilabel">For</span> loop, the
+    value of <span class="guilabel">Index</span> retains its value from the last loop
+    iteration. If the loop does not execute, the value of
+    <span class="guilabel">Index</span> remains equal to its value before the loop was
+    encountered.</p><p>Changes made to the index variable inside of a
+    <span class="guilabel">For</span> loop are overwritten by the
+    <span class="guilabel">For</span> loop statement. For example, the output from the
+    following snippet:</p><pre class="programlisting"><code class="code">For I = 1:1:3
+    I = 100
+    Report aReport I
+EndFor</code></pre><p>is:</p><pre class="programlisting">100
+100
+100 </pre><p>Changes made to the the <span class="guilabel">Start</span>,
+    <span class="guilabel">Increment</span>, and <span class="guilabel">End</span> parameters
+    made inside of a loop do not affect the behavior of the loop. For example,
+    the output from the following snippet:</p><pre class="programlisting"><code class="code">J = 2
+K = 2
+L = 8
+For I = J:K:L
+    J = 1
+    K = 5
+    L = 100
+    Report aReport I
+EndFor</code></pre><p>is:</p><pre class="programlisting">2
+4
+6
+8   </pre></div><div class="refsection"><a name="N2381D"></a><h2>Examples</h2><div class="informalexample"><p>Propagate a spacecraft to apogee 3 times:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aPropagator
+Create Variable I
+
+BeginMissionSequence
+
+For I = 1:1:3
+    Propagate aPropagator(aSat, {aSat.Apoapsis})
+EndFor</code></pre></div><div class="informalexample"><p>Index into an array:</p><pre class="programlisting"><code class="code">Create Variable I J
+Create Array anArray[10,5]
+BeginMissionSequence
+
+For I = 1:10
+    For J = 1:5
+        anArray(I,J) = I*J
+    EndFor
+EndFor</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="FindEvents.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="GetEphemStates_Function.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">FindEvents&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;GetEphemStates()</td></tr></table></div></body></html>

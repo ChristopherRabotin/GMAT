@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -671,12 +671,16 @@ wxArrayString CompareFilesDialog::GetFilenamesContain(const wxString &dirname,
    while (cont)
    {
       if (filename.Contains(".report") || filename.Contains(".txt") ||
-          filename.Contains(".eph") || filename.Contains(".data") ||
-          filename.Contains(".truth"))
+          filename.Contains(".data") || filename.Contains(".script") ||
+          filename.Contains(".eph") || filename.Contains(".oem") ||
+          filename.Contains(".e") || filename.Contains(".truth"))
       {
-         // if not backup files
-         if (filename.Last() == 't' || filename.Last() == 'h' ||
-             filename.Last() == 'a' || filename.Last() == 'h')
+         // If not backup files
+         // Add files ending 't' for report, txt, and script
+         // 'a' for data, 'h' for eph and truth, 'm' for .oem, 'e' for .e
+         if (filename.Last() == 't' || filename.Last() == 'a' ||
+             filename.Last() == 'h' || filename.Last() == 'm' ||
+             filename.Last() == 'e')
          {
             if (filename.Contains(str))
             {

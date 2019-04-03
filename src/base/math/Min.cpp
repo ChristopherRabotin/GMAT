@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -46,7 +46,7 @@
  */
 //------------------------------------------------------------------------------
 Min::Min(const std::string &name)
-   : NumericFunction("Min", name)
+   : NumericFunctionNode("Min", name)
 {
 }
 
@@ -72,7 +72,7 @@ Min::~Min()
  */
 //------------------------------------------------------------------------------
 Min::Min(const Min &func) :
-   NumericFunction   (func)
+   NumericFunctionNode   (func)
 {
 }
 
@@ -92,7 +92,7 @@ Min& Min::operator=(const Min &func)
    if (this == &func)
       return *this;
    
-   NumericFunction::operator=(func);
+   NumericFunctionNode::operator=(func);
    return *this;
 }
 
@@ -128,7 +128,13 @@ Real Min::Evaluate()
    
    Real result;
    
-   for (unsigned int i = 0; i < inputArgWrappers.size(); i++)
+   unsigned int inputSz = inputArgWrappers.size();
+   
+   if (inputSz < 1)
+         throw MathException("Error evaluating \"" + GetName());
+   
+   
+   for (unsigned int i = 0; i < inputSz; i++)
    {
       ElementWrapper *wrapper = inputArgWrappers[i];
       #ifdef DEBUG_EVALUATE

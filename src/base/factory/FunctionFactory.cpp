@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -46,6 +46,24 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
+//  CreateObject(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates and returns an object of the requested Function class 
+ *
+ * @param <ofType>   the Function object to create and return.
+ * @param <withName> the name of the new object.
+ *
+ * @return The new object.
+ */
+//------------------------------------------------------------------------------
+Function* FunctionFactory::CreateObject(const std::string &ofType,
+                                        const std::string &withName)
+{
+   return CreateFunction(ofType, withName);
+}
+
+//------------------------------------------------------------------------------
 //  CreateFunction(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
@@ -68,12 +86,12 @@ Function* FunctionFactory::CreateFunction(const std::string &ofType,
        ofType.c_str(), newType.c_str(), withName.c_str());
    #endif
    
-   // Leaf node
+   // Create builtin function
    if (ofType == "GetLastState")
       builtinFunction = new GetLastState(ofType, withName);
-   if (ofType == "GetEphemStates")
+   else if (ofType == "GetEphemStates")
       builtinFunction = new GetEphemStates(ofType, withName);
-   if (ofType == "SetSeed")
+   else if (ofType == "SetSeed")
       builtinFunction = new SetSeed(ofType, withName);
    
    return builtinFunction;

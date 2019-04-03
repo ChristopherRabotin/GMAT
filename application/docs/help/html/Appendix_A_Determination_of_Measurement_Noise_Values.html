@@ -1,0 +1,1256 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Appendix A &ndash; Determination of Measurement Noise Values</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Tut_Simulate_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;13.&nbsp;Simulate DSN Range and Doppler Data"><link rel="prev" href="ch13s09.html" title="References"><link rel="next" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Appendix A &ndash; Determination of Measurement Noise Values</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ch13s09.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;13.&nbsp;Simulate DSN Range and Doppler Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="Appendix_A_Determination_of_Measurement_Noise_Values"></a>Appendix A &ndash; Determination of Measurement Noise Values</h2></div></div></div><p>We now say a few words on how we determined the values for
+    <span class="guilabel">NoiseSigma</span> for the two
+    <span class="guilabel">ErrorModel</span> resources we created. The computed value
+    of the DSN range measurement is given by (Moyer [2000]):</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mrow>
+          <m:mi>C</m:mi>
+
+          <m:mstyle displaystyle="true">
+            <m:mrow>
+              <m:munderover>
+                <m:mo>&int;</m:mo>
+
+                <m:mrow>
+                  <m:mi>t</m:mi>
+
+                  <m:mn>1</m:mn>
+                </m:mrow>
+
+                <m:mrow>
+                  <m:mi>t</m:mi>
+
+                  <m:mn>3</m:mn>
+                </m:mrow>
+              </m:munderover>
+
+              <m:mrow>
+                <m:msub>
+                  <m:mi>f</m:mi>
+
+                  <m:mi>T</m:mi>
+                </m:msub>
+
+                <m:mo stretchy="false">(</m:mo>
+
+                <m:mi>t</m:mi>
+
+                <m:mo stretchy="false">)</m:mo>
+
+                <m:mi>d</m:mi>
+
+                <m:mi>t</m:mi>
+              </m:mrow>
+            </m:mrow>
+          </m:mstyle>
+
+          <m:mo>,</m:mo>
+
+          <m:mtext>&nbsp;mod&nbsp;M&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(RU)</m:mtext>
+        </m:mrow>
+      </m:math></div><p>where</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:msub>
+          <m:mi>t</m:mi>
+
+          <m:mn>1</m:mn>
+        </m:msub>
+
+        <m:mo>,</m:mo>
+
+        <m:msub>
+          <m:mi>t</m:mi>
+
+          <m:mn>3</m:mn>
+        </m:msub>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>Transmission&nbsp;and&nbsp;Reception&nbsp;epoch,&nbsp;respectively</m:mtext>
+      </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:msub>
+          <m:mi>f</m:mi>
+
+          <m:mi>T</m:mi>
+        </m:msub>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>Ground&nbsp;Station&nbsp;transmit&nbsp;frequency</m:mtext>
+      </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mi>C</m:mi>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>transmitter&nbsp;dependent&nbsp;constant&nbsp;(221/1498&nbsp;for&nbsp;X-band&nbsp;and&nbsp;1/2&nbsp;for&nbsp;S-Band)</m:mtext>
+      </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mtext>M&nbsp;</m:mtext>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>&nbsp;length&nbsp;of&nbsp;the&nbsp;ranging&nbsp;code&nbsp;in&nbsp;RU</m:mtext>
+      </m:math></div><p>We note that M as defined above is equal to
+    <span class="guilabel">SimRangeModuloConstant</span> which was discussed in the
+    <span class="emphasis"><em><a class="xref" href="Define_the_types_of_measurements_to_be_simulated.html" title="Define the types of measurements to be simulated">Define the types of measurements to be simulated</a></em></span> section.</p><p>By manipulation of the equation above, we can find a relationship
+    between RU and meters, as shown below.</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mrow>
+          <m:mi>C</m:mi>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:mi>d</m:mi>
+
+              <m:mo stretchy="false">(</m:mo>
+
+              <m:mtext>in&nbsp;meters</m:mtext>
+
+              <m:mo stretchy="false">)</m:mo>
+            </m:mrow>
+
+            <m:mi>c</m:mi>
+          </m:mfrac>
+
+          <m:msub>
+            <m:mover accent="true">
+              <m:mi>f</m:mi>
+
+              <m:mo>&macr;</m:mo>
+            </m:mover>
+
+            <m:mi>T</m:mi>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>&nbsp;d(in&nbsp;RU)</m:mtext>
+        </m:mrow>
+      </m:math></div><p>where</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:msub>
+          <m:mover accent="true">
+            <m:mi>f</m:mi>
+
+            <m:mo>&macr;</m:mo>
+          </m:mover>
+
+          <m:mi>T</m:mi>
+        </m:msub>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>&nbsp;</m:mtext>
+
+        <m:mfrac>
+          <m:mrow>
+            <m:mstyle displaystyle="true">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>&int;</m:mo>
+
+                  <m:mrow>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:mrow>
+
+                  <m:mrow>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>3</m:mn>
+                  </m:mrow>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>f</m:mi>
+
+                    <m:mi>T</m:mi>
+                  </m:msub>
+
+                  <m:mo stretchy="false">(</m:mo>
+
+                  <m:mi>t</m:mi>
+
+                  <m:mo stretchy="false">)</m:mo>
+
+                  <m:mi>d</m:mi>
+
+                  <m:mi>t</m:mi>
+                </m:mrow>
+              </m:mrow>
+            </m:mstyle>
+          </m:mrow>
+
+          <m:mrow>
+            <m:mo stretchy="false">(</m:mo>
+
+            <m:mi>t</m:mi>
+
+            <m:mn>3</m:mn>
+
+            <m:mo>&minus;</m:mo>
+
+            <m:mi>t</m:mi>
+
+            <m:mn>1</m:mn>
+
+            <m:mo stretchy="false">)</m:mo>
+          </m:mrow>
+        </m:mfrac>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>average&nbsp;transmit&nbsp;frequency&nbsp;(between&nbsp;transmit&nbsp;and&nbsp;receive),</m:mtext>
+      </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mtext>c=speed&nbsp;of&nbsp;light&nbsp;in&nbsp;m/s</m:mtext>
+      </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mtext>d=&nbsp;round&nbsp;trip&nbsp;distance</m:mtext>
+      </m:math></div><p>If we assume the round trip distance is 1 meter, we have</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mrow>
+          <m:mtext>d(in&nbsp;RU)</m:mtext>
+
+          <m:mo>=</m:mo>
+
+          <m:mi>C</m:mi>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:msub>
+                <m:mover accent="true">
+                  <m:mi>f</m:mi>
+
+                  <m:mo>&macr;</m:mo>
+                </m:mover>
+
+                <m:mi>T</m:mi>
+              </m:msub>
+            </m:mrow>
+
+            <m:mi>c</m:mi>
+          </m:mfrac>
+        </m:mrow>
+      </m:math></div><p>Recall that in the <a class="xref" href="Create_and_configure_the_Ground_Station_and_related_parameters.html" title="Create and configure the Ground Station and related parameters">Create and configure the Ground Station and related
+    parameters</a> section, we set <code class="code">DSNTransmitter.Frequency
+    = 7200</code>; This corresponds to an X-band frequency (so, C=221/1498) of
+    7200e6 Hz. For the case where a ramp table is not used, we have a constant
+    frequency, <m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+          <m:mrow>
+            <m:msub>
+              <m:mover accent="true">
+                <m:mi>f</m:mi>
+
+                <m:mo>&macr;</m:mo>
+              </m:mover>
+
+              <m:mi>T</m:mi>
+            </m:msub>
+
+            <m:mo>=</m:mo>
+
+            <m:msub>
+              <m:mi>f</m:mi>
+
+              <m:mi>T</m:mi>
+            </m:msub>
+          </m:mrow>
+        </m:math>, and thus</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mrow>
+          <m:mtext>d(in&nbsp;RU)=&nbsp;</m:mtext>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:mn>221</m:mn>
+            </m:mrow>
+
+            <m:mrow>
+              <m:mn>1498</m:mn>
+            </m:mrow>
+          </m:mfrac>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:mn>7200</m:mn>
+
+              <m:mi>e</m:mi>
+
+              <m:mn>6</m:mn>
+            </m:mrow>
+
+            <m:mrow>
+              <m:mtext>299792458</m:mtext>
+            </m:mrow>
+          </m:mfrac>
+
+          <m:mtext>&nbsp;&nbsp;=&nbsp;3</m:mtext>
+
+          <m:mtext>.543172&nbsp;RU</m:mtext>
+        </m:mrow>
+      </m:math></div><p>For this example, for DSN range measurements, we want to use a 1
+    sigma noise bias of 3 meters (Schanzle [1995]). From the calculations
+    above, we determine that this corresponds to 3*3.543172 <m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+          <m:mo>&asymp;</m:mo>
+        </m:math> 10.63 RU.</p><p>We now turn our attention to the DSN Doppler measurement. The DSN
+    Doppler measurement that GMAT uses is actually a derived observation, O,
+    calculated using two successive Total Count Phase, <m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+          <m:mi>&#981;</m:mi>
+        </m:math> , (type 17 Trk 2-34 record) measurements as shown
+    below.</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mrow>
+          <m:mo>&nbsp;</m:mo>
+
+          <m:mtext>&nbsp;O&nbsp;</m:mtext>
+
+          <m:mo>&equiv;</m:mo>
+
+          <m:mo>&minus;</m:mo>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:mrow>
+                <m:mo>[</m:mo>
+
+                <m:mrow>
+                  <m:mi>&#981;</m:mi>
+
+                  <m:mo stretchy="false">(</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mrow>
+                      <m:mn>3</m:mn>
+
+                      <m:mi>e</m:mi>
+                    </m:mrow>
+                  </m:msub>
+
+                  <m:mo stretchy="false">)</m:mo>
+
+                  <m:mo>&minus;</m:mo>
+
+                  <m:mi>&#981;</m:mi>
+
+                  <m:mo stretchy="false">(</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mrow>
+                      <m:mn>3</m:mn>
+
+                      <m:mi>s</m:mi>
+                    </m:mrow>
+                  </m:msub>
+
+                  <m:mo stretchy="false">)</m:mo>
+                </m:mrow>
+
+                <m:mo>]</m:mo>
+              </m:mrow>
+            </m:mrow>
+
+            <m:mrow>
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mrow>
+                  <m:mn>3</m:mn>
+
+                  <m:mi>e</m:mi>
+                </m:mrow>
+              </m:msub>
+
+              <m:mo>&minus;</m:mo>
+
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mrow>
+                  <m:mn>3</m:mn>
+
+                  <m:mi>s</m:mi>
+                </m:mrow>
+              </m:msub>
+            </m:mrow>
+          </m:mfrac>
+
+          <m:mtext>&nbsp;&nbsp;(Hz)</m:mtext>
+        </m:mrow>
+      </m:math></div><p>where</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:msub>
+          <m:mi>t</m:mi>
+
+          <m:mrow>
+            <m:mn>1</m:mn>
+
+            <m:mi>s</m:mi>
+          </m:mrow>
+        </m:msub>
+
+        <m:mo>,</m:mo>
+
+        <m:msub>
+          <m:mi>t</m:mi>
+
+          <m:mrow>
+            <m:mn>1</m:mn>
+
+            <m:mi>e</m:mi>
+          </m:mrow>
+        </m:msub>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>start&nbsp;and&nbsp;end&nbsp;of&nbsp;transmission&nbsp;interval</m:mtext>
+      </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:msub>
+          <m:mi>t</m:mi>
+
+          <m:mrow>
+            <m:mn>3</m:mn>
+
+            <m:mi>s</m:mi>
+          </m:mrow>
+        </m:msub>
+
+        <m:mo>,</m:mo>
+
+        <m:msub>
+          <m:mi>t</m:mi>
+
+          <m:mrow>
+            <m:mn>3</m:mn>
+
+            <m:mi>e</m:mi>
+          </m:mrow>
+        </m:msub>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>start&nbsp;and&nbsp;end&nbsp;of&nbsp;reception&nbsp;interval</m:mtext>
+      </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mi>&#981;</m:mi>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>Total&nbsp;Count&nbsp;Phase&nbsp;(type&nbsp;17&nbsp;Trk&nbsp;2-34&nbsp;record)</m:mtext>
+      </m:math></div><p>In the absence of measurement noise, one can show (Moyer [2000]),
+    that the Observed value (O) above equals the Computed (C) value
+    below.</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mrow>
+          <m:mo>&nbsp;</m:mo>
+
+          <m:mi>C</m:mi>
+
+          <m:mo>=</m:mo>
+
+          <m:mo>&minus;</m:mo>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:msub>
+                <m:mi>M</m:mi>
+
+                <m:mn>2</m:mn>
+              </m:msub>
+            </m:mrow>
+
+            <m:mrow>
+              <m:mrow>
+                <m:mo>(</m:mo>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mrow>
+                      <m:mn>3</m:mn>
+
+                      <m:mi>e</m:mi>
+                    </m:mrow>
+                  </m:msub>
+
+                  <m:mo>&minus;</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mrow>
+                      <m:mn>3</m:mn>
+
+                      <m:mi>s</m:mi>
+                    </m:mrow>
+                  </m:msub>
+                </m:mrow>
+
+                <m:mo>)</m:mo>
+              </m:mrow>
+            </m:mrow>
+          </m:mfrac>
+
+          <m:mstyle displaystyle="true">
+            <m:mrow>
+              <m:munderover>
+                <m:mo>&int;</m:mo>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mrow/>
+
+                    <m:mi>s</m:mi>
+                  </m:msub>
+                </m:mrow>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mrow/>
+
+                    <m:mi>e</m:mi>
+                  </m:msub>
+                </m:mrow>
+              </m:munderover>
+
+              <m:mrow>
+                <m:msub>
+                  <m:mi>f</m:mi>
+
+                  <m:mi>T</m:mi>
+                </m:msub>
+
+                <m:mo stretchy="false">(</m:mo>
+
+                <m:msub>
+                  <m:mi>t</m:mi>
+
+                  <m:mn>1</m:mn>
+                </m:msub>
+
+                <m:mo stretchy="false">)</m:mo>
+
+                <m:mi>d</m:mi>
+
+                <m:msub>
+                  <m:mi>t</m:mi>
+
+                  <m:mn>1</m:mn>
+                </m:msub>
+              </m:mrow>
+            </m:mrow>
+          </m:mstyle>
+
+          <m:mtext>&nbsp;&nbsp;=</m:mtext>
+
+          <m:mo>&minus;</m:mo>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:msub>
+                <m:mi>M</m:mi>
+
+                <m:mn>2</m:mn>
+              </m:msub>
+
+              <m:mrow>
+                <m:mo>(</m:mo>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mrow>
+                      <m:mn>1</m:mn>
+
+                      <m:mi>e</m:mi>
+                    </m:mrow>
+                  </m:msub>
+
+                  <m:mo>&minus;</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mrow>
+                      <m:mn>1</m:mn>
+
+                      <m:mi>s</m:mi>
+                    </m:mrow>
+                  </m:msub>
+                </m:mrow>
+
+                <m:mo>)</m:mo>
+              </m:mrow>
+            </m:mrow>
+
+            <m:mrow>
+              <m:mi>D</m:mi>
+
+              <m:mi>C</m:mi>
+
+              <m:mi>I</m:mi>
+            </m:mrow>
+          </m:mfrac>
+
+          <m:msub>
+            <m:mover accent="true">
+              <m:mi>f</m:mi>
+
+              <m:mo>&macr;</m:mo>
+            </m:mover>
+
+            <m:mi>T</m:mi>
+          </m:msub>
+
+          <m:mtext>&nbsp;&nbsp;&nbsp;&nbsp;(Hz)</m:mtext>
+        </m:mrow>
+      </m:math></div><p>where</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:msub>
+          <m:mi>t</m:mi>
+
+          <m:mrow>
+            <m:mn>1</m:mn>
+
+            <m:mi>s</m:mi>
+          </m:mrow>
+        </m:msub>
+
+        <m:mo>,</m:mo>
+
+        <m:msub>
+          <m:mi>t</m:mi>
+
+          <m:mrow>
+            <m:mn>1</m:mn>
+
+            <m:mi>e</m:mi>
+          </m:mrow>
+        </m:msub>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>start&nbsp;and&nbsp;end&nbsp;of&nbsp;transmission&nbsp;interval</m:mtext>
+      </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:msub>
+          <m:mi>f</m:mi>
+
+          <m:mi>T</m:mi>
+        </m:msub>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>transmit&nbsp;frequency</m:mtext>
+      </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:msub>
+          <m:mi>M</m:mi>
+
+          <m:mn>2</m:mn>
+        </m:msub>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>Transponder&nbsp;turn&nbsp;around&nbsp;ratio&nbsp;(typically,&nbsp;240/221&nbsp;for&nbsp;S-band&nbsp;and&nbsp;880/749&nbsp;for&nbsp;X-band)</m:mtext>
+      </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mtext>DCI&nbsp;=&nbsp;</m:mtext>
+
+        <m:mrow>
+          <m:mo>(</m:mo>
+
+          <m:mrow>
+            <m:msub>
+              <m:mi>t</m:mi>
+
+              <m:mrow>
+                <m:mn>3</m:mn>
+
+                <m:mi>e</m:mi>
+              </m:mrow>
+            </m:msub>
+
+            <m:mo>&minus;</m:mo>
+
+            <m:msub>
+              <m:mi>t</m:mi>
+
+              <m:mrow>
+                <m:mn>3</m:mn>
+
+                <m:mi>s</m:mi>
+              </m:mrow>
+            </m:msub>
+          </m:mrow>
+
+          <m:mo>)</m:mo>
+        </m:mrow>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>&nbsp;Doppler&nbsp;Count&nbsp;Interval</m:mtext>
+      </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:msub>
+          <m:mover accent="true">
+            <m:mi>f</m:mi>
+
+            <m:mo>&macr;</m:mo>
+          </m:mover>
+
+          <m:mi>T</m:mi>
+        </m:msub>
+
+        <m:mo>&equiv;</m:mo>
+
+        <m:mfrac>
+          <m:mrow>
+            <m:mstyle displaystyle="true">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>&int;</m:mo>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mrow/>
+
+                      <m:mi>s</m:mi>
+                    </m:msub>
+                  </m:mrow>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mrow/>
+
+                      <m:mi>e</m:mi>
+                    </m:msub>
+                  </m:mrow>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>f</m:mi>
+
+                    <m:mi>T</m:mi>
+                  </m:msub>
+
+                  <m:mo stretchy="false">(</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+
+                  <m:mo stretchy="false">)</m:mo>
+
+                  <m:mi>d</m:mi>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:mrow>
+              </m:mrow>
+            </m:mstyle>
+          </m:mrow>
+
+          <m:mrow>
+            <m:mrow>
+              <m:mo>(</m:mo>
+
+              <m:mrow>
+                <m:msub>
+                  <m:mi>t</m:mi>
+
+                  <m:mrow>
+                    <m:mn>1</m:mn>
+
+                    <m:mi>e</m:mi>
+                  </m:mrow>
+                </m:msub>
+
+                <m:mo>&minus;</m:mo>
+
+                <m:msub>
+                  <m:mi>t</m:mi>
+
+                  <m:mrow>
+                    <m:mn>1</m:mn>
+
+                    <m:mi>s</m:mi>
+                  </m:mrow>
+                </m:msub>
+              </m:mrow>
+
+              <m:mo>)</m:mo>
+            </m:mrow>
+          </m:mrow>
+        </m:mfrac>
+
+        <m:mtext>&nbsp;</m:mtext>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>average&nbsp;transmit&nbsp;frequency&nbsp;</m:mtext>
+      </m:math></div><p>Neglecting ionospheric media corrections, further calculation
+    (Mesarch [2007]) shows that the values of O and C can be related to an
+    average range rate value, <m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+          <m:mover accent="true">
+            <m:mover accent="true">
+              <m:mi>&#961;</m:mi>
+
+              <m:mo>&#729;</m:mo>
+            </m:mover>
+
+            <m:mo>&macr;</m:mo>
+          </m:mover>
+        </m:math> , as shown below.</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mrow>
+          <m:msub>
+            <m:mover accent="true">
+              <m:mover accent="true">
+                <m:mi>&#961;</m:mi>
+
+                <m:mo>&#729;</m:mo>
+              </m:mover>
+
+              <m:mo>&macr;</m:mo>
+            </m:mover>
+
+            <m:mrow>
+              <m:mi>O</m:mi>
+
+              <m:mi>b</m:mi>
+
+              <m:mi>s</m:mi>
+
+              <m:mi>e</m:mi>
+
+              <m:mi>r</m:mi>
+
+              <m:mi>v</m:mi>
+
+              <m:mi>e</m:mi>
+
+              <m:mi>d</m:mi>
+            </m:mrow>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mi>c</m:mi>
+
+          <m:mrow>
+            <m:mo>(</m:mo>
+
+            <m:mrow>
+              <m:mn>1</m:mn>
+
+              <m:mo>+</m:mo>
+
+              <m:mfrac>
+                <m:mi>O</m:mi>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>M</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mover accent="true">
+                      <m:mi>f</m:mi>
+
+                      <m:mo>&macr;</m:mo>
+                    </m:mover>
+
+                    <m:mi>T</m:mi>
+                  </m:msub>
+                </m:mrow>
+              </m:mfrac>
+            </m:mrow>
+
+            <m:mo>)</m:mo>
+          </m:mrow>
+
+          <m:mo>,</m:mo>
+
+          <m:mtext>&nbsp;</m:mtext>
+
+          <m:msub>
+            <m:mover accent="true">
+              <m:mover accent="true">
+                <m:mi>&#961;</m:mi>
+
+                <m:mo>&#729;</m:mo>
+              </m:mover>
+
+              <m:mo>&macr;</m:mo>
+            </m:mover>
+
+            <m:mrow>
+              <m:mi>C</m:mi>
+
+              <m:mi>o</m:mi>
+
+              <m:mi>m</m:mi>
+
+              <m:mi>p</m:mi>
+
+              <m:mi>u</m:mi>
+
+              <m:mi>t</m:mi>
+
+              <m:mi>e</m:mi>
+
+              <m:mi>d</m:mi>
+            </m:mrow>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mi>c</m:mi>
+
+          <m:mrow>
+            <m:mo>(</m:mo>
+
+            <m:mrow>
+              <m:mn>1</m:mn>
+
+              <m:mo>+</m:mo>
+
+              <m:mfrac>
+                <m:mi>C</m:mi>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>M</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mover accent="true">
+                      <m:mi>f</m:mi>
+
+                      <m:mo>&macr;</m:mo>
+                    </m:mover>
+
+                    <m:mi>T</m:mi>
+                  </m:msub>
+                </m:mrow>
+              </m:mfrac>
+            </m:mrow>
+
+            <m:mo>)</m:mo>
+          </m:mrow>
+        </m:mrow>
+      </m:math></div><p>where</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mrow>
+          <m:mover accent="true">
+            <m:mover accent="true">
+              <m:mi>&#961;</m:mi>
+
+              <m:mo>&#729;</m:mo>
+            </m:mover>
+
+            <m:mo>&macr;</m:mo>
+          </m:mover>
+
+          <m:mo>&equiv;</m:mo>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:mrow>
+                <m:mo>(</m:mo>
+
+                <m:mrow>
+                  <m:mtext>Round&nbsp;Trip&nbsp;distance&nbsp;at&nbsp;</m:mtext>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mrow>
+                      <m:mn>3</m:mn>
+
+                      <m:mi>e</m:mi>
+                    </m:mrow>
+                  </m:msub>
+                </m:mrow>
+
+                <m:mo>)</m:mo>
+              </m:mrow>
+
+              <m:mo>&minus;</m:mo>
+
+              <m:mrow>
+                <m:mo>(</m:mo>
+
+                <m:mrow>
+                  <m:mtext>Round&nbsp;Trip&nbsp;distance&nbsp;at&nbsp;</m:mtext>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mrow>
+                      <m:mn>3</m:mn>
+
+                      <m:mi>s</m:mi>
+                    </m:mrow>
+                  </m:msub>
+                </m:mrow>
+
+                <m:mo>)</m:mo>
+              </m:mrow>
+            </m:mrow>
+
+            <m:mrow>
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mrow>
+                  <m:mn>3</m:mn>
+
+                  <m:mi>e</m:mi>
+                </m:mrow>
+              </m:msub>
+
+              <m:mo>&minus;</m:mo>
+
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mrow>
+                  <m:mn>3</m:mn>
+
+                  <m:mi>s</m:mi>
+                </m:mrow>
+              </m:msub>
+            </m:mrow>
+          </m:mfrac>
+        </m:mrow>
+      </m:math></div><p>Thus, we determine that</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+        <m:mrow>
+          <m:msub>
+            <m:mover accent="true">
+              <m:mover accent="true">
+                <m:mi>&#961;</m:mi>
+
+                <m:mo>&#729;</m:mo>
+              </m:mover>
+
+              <m:mo>&macr;</m:mo>
+            </m:mover>
+
+            <m:mrow>
+              <m:mi>O</m:mi>
+
+              <m:mi>b</m:mi>
+
+              <m:mi>s</m:mi>
+
+              <m:mi>e</m:mi>
+
+              <m:mi>r</m:mi>
+
+              <m:mi>v</m:mi>
+
+              <m:mi>e</m:mi>
+
+              <m:mi>d</m:mi>
+            </m:mrow>
+          </m:msub>
+
+          <m:mo>&minus;</m:mo>
+
+          <m:msub>
+            <m:mover accent="true">
+              <m:mover accent="true">
+                <m:mi>&#961;</m:mi>
+
+                <m:mo>&#729;</m:mo>
+              </m:mover>
+
+              <m:mo>&macr;</m:mo>
+            </m:mover>
+
+            <m:mrow>
+              <m:mi>C</m:mi>
+
+              <m:mi>o</m:mi>
+
+              <m:mi>m</m:mi>
+
+              <m:mi>p</m:mi>
+
+              <m:mi>u</m:mi>
+
+              <m:mi>t</m:mi>
+
+              <m:mi>e</m:mi>
+
+              <m:mi>d</m:mi>
+            </m:mrow>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mfrac>
+            <m:mi>c</m:mi>
+
+            <m:mrow>
+              <m:msub>
+                <m:mi>M</m:mi>
+
+                <m:mn>2</m:mn>
+              </m:msub>
+
+              <m:msub>
+                <m:mover accent="true">
+                  <m:mi>f</m:mi>
+
+                  <m:mo>&macr;</m:mo>
+                </m:mover>
+
+                <m:mi>T</m:mi>
+              </m:msub>
+            </m:mrow>
+          </m:mfrac>
+
+          <m:mrow>
+            <m:mo>(</m:mo>
+
+            <m:mrow>
+              <m:mi>O</m:mi>
+
+              <m:mo>&minus;</m:mo>
+
+              <m:mi>C</m:mi>
+            </m:mrow>
+
+            <m:mo>)</m:mo>
+          </m:mrow>
+        </m:mrow>
+      </m:math></div><p>The quantity, <m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+          <m:mrow>
+            <m:mrow>
+              <m:mo>(</m:mo>
+
+              <m:mrow>
+                <m:mi>O</m:mi>
+
+                <m:mo>&minus;</m:mo>
+
+                <m:mi>C</m:mi>
+              </m:mrow>
+
+              <m:mo>)</m:mo>
+            </m:mrow>
+          </m:mrow>
+        </m:math>, above represents the measurement noise and thus the
+    equation gives us a way to convert measurement noise in Hz to measurement
+    noise in mm/s. To convert from mm/s to Hz, simply multiply by
+    <m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+          <m:mrow>
+            <m:mfrac>
+              <m:mrow>
+                <m:msub>
+                  <m:mi>M</m:mi>
+
+                  <m:mn>2</m:mn>
+                </m:msub>
+
+                <m:msub>
+                  <m:mover accent="true">
+                    <m:mi>f</m:mi>
+
+                    <m:mo>&macr;</m:mo>
+                  </m:mover>
+
+                  <m:mi>T</m:mi>
+                </m:msub>
+              </m:mrow>
+
+              <m:mtext>c</m:mtext>
+            </m:mfrac>
+
+            <m:mo>=</m:mo>
+
+            <m:mfrac>
+              <m:mrow>
+                <m:msub>
+                  <m:mi>M</m:mi>
+
+                  <m:mn>2</m:mn>
+                </m:msub>
+
+                <m:msub>
+                  <m:mover accent="true">
+                    <m:mi>f</m:mi>
+
+                    <m:mo>&macr;</m:mo>
+                  </m:mover>
+
+                  <m:mi>T</m:mi>
+                </m:msub>
+              </m:mrow>
+
+              <m:mrow>
+                <m:mtext>299792458000</m:mtext>
+              </m:mrow>
+            </m:mfrac>
+          </m:mrow>
+        </m:math>. In our case, where we use a constant X-band frequency
+    of 7.2e9, the conversion factor is given by <m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+          <m:mrow>
+            <m:mfrac>
+              <m:mrow>
+                <m:mn>880</m:mn>
+              </m:mrow>
+
+              <m:mrow>
+                <m:mn>749</m:mn>
+              </m:mrow>
+            </m:mfrac>
+
+            <m:mfrac>
+              <m:mrow>
+                <m:mn>7.2</m:mn>
+
+                <m:mi>e</m:mi>
+
+                <m:mn>9</m:mn>
+              </m:mrow>
+
+              <m:mrow>
+                <m:mtext>299792458000</m:mtext>
+              </m:mrow>
+            </m:mfrac>
+
+            <m:mo>&asymp;</m:mo>
+
+            <m:mtext>0</m:mtext>
+
+            <m:mtext>.0282</m:mtext>
+          </m:mrow>
+        </m:math>. For this tutorial, we use a 1 sigma noise value of 1
+    mm/s (Schanzle [1995]) which corresponds to this value of 0.0282
+    Hz.</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ch13s09.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Tut_Simulate_DSN_Range_and_Doppler_Data.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">References&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data</td></tr></table></div></body></html>

@@ -160,6 +160,7 @@ TrackingDataAdapter::~TrackingDataAdapter()
 TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
    MeasurementModelBase (ma),
    measurementType      (ma.measurementType),
+   dimNames             (ma.dimNames),
    participantLists     (ma.participantLists),
    calcData             (NULL),
    navLog               (ma.navLog),
@@ -217,6 +218,7 @@ TrackingDataAdapter& TrackingDataAdapter::operator=(
       MeasurementModelBase::operator=(ma);
 
       measurementType    = ma.measurementType;
+      dimNames           = ma.dimNames;
       navLog             = ma.navLog;
       logLevel           = ma.logLevel;
       solarsys           = ma.solarsys;
@@ -1610,7 +1612,7 @@ void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName, con
       if (errmodel == NULL)
       {
          std::stringstream ss;
-         ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << " was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
+         ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << "' was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
          throw MeasurementException(ss.str());
       }
 
@@ -1709,7 +1711,7 @@ void TrackingDataAdapter::ComputeMeasurementNoiseSigma(const std::string noiseSi
       if (k >= errmodels.size())
       {
          std::stringstream ss;
-         ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << " was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
+         ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << "' was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
          throw MeasurementException(ss.str());
       }
 

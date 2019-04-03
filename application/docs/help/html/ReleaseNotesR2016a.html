@@ -1,0 +1,82 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>GMAT R2016a Release Notes</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ReleaseNotes.html" title="Release Notes"><link rel="prev" href="ReleaseNotes.html" title="Release Notes"><link rel="next" href="ReleaseNotesR2015a.html" title="GMAT R2015a Release Notes"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">GMAT R2016a Release Notes</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ReleaseNotes.html">Prev</a>&nbsp;</td><th align="center" width="60%">Release Notes</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ReleaseNotesR2015a.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="ReleaseNotesR2016a"></a>GMAT R2016a Release Notes</h2></div></div></div><p>The General Mission Analysis Tool (GMAT) version R2016a was released
+  Oct. 2016. This is the first public release since Nov. 2015, and is the 10th
+  release for the project. Note this will be <span class="guilabel">the last 32 bit version
+  of GMAT on Windows</span> (Mac and Linux are 64 bit only).</p><p>Below is a summary of key changes in this release. Please see the full
+  <a class="link" href="http://bugs.gmatcentral.org/secure/ReleaseNote.jspa?version=10600&amp;styleName=Html&amp;projectId=10000" target="_top">R2016a
+  Release Notes</a> on JIRA for a complete list.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N29C82"></a>New Features</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N29C85"></a>Orbit Determination</h4></div></div></div><p>GMAT now supports orbit determination with a focus on batch
+      estimation of DSN data types including range and Doppler. We&rsquo;ve been
+      working on navigation functionality for several releases, but this is
+      the first production release containing navigation functionality. Orbit
+      determination functionality has undergone a rigorous QA process
+      including shadow testing in GSFC&rsquo;s Flight Dynamics Facility and is
+      extensively documented in tutorials and reference material. Navigation
+      components include BatchEstimator, Simulator, ErrorModel,
+      StatisticsAcceptFilter, StatisticsRejectFilter, TrackingDataSet, and the
+      RunEstimator and RunSimulator Commands. We recommend taking the
+      tutorials first then reviewing the reference material for orbit
+      determination components to get started.</p><p>See the <a class="link" href="Tut_Simulate_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;13.&nbsp;Simulate DSN Range and Doppler Data">Simulation</a> and
+      <a class="link" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data">Estimation</a>
+      tutorials for more information.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N29C94"></a>Code 500 Ephemeris Propagator</h4></div></div></div><p>GMAT now supports a propagator that uses GSFC&rsquo;s Code 500 ephemeris
+      file format. The Code 500 file format is legacy format still used by
+      some systems at GSFC. This functionality allows users of GSFC legacy
+      systems to simulate and analyze trajectories computed in systems such as
+      GTDS.</p><p>See the <a class="link" href="Propagator.html" title="Propagator">Propagator</a> reference for
+      more information.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N29C9F"></a>Write Command</h4></div></div></div><p>You can now export GMAT resources to files during the mission
+      sequence execution. This is a powerful feature that allows you to save
+      configurations at any point in a session for use by in later sessions or
+      by other users.</p><p>See the <a class="link" href="Write.html" title="Write">Write Command</a> reference for
+      more information.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N29CAA"></a>#Include Macro</h4></div></div></div><p>You can now load GMAT resources and script snippets from external
+      files during the script initialization and mission execution. This is a
+      powerful feature that allows you to reuse configurations across multiple
+      users and/or scripts. This feature can also greatly simplify automation
+      for operations and Monte-Carlo and parametric scanning that have use
+      cases with a lot of common data but some data that changes from one
+      execution to the next.</p><p>See the <a class="link" href="IncludeMacro.html" title="#Include Macro">#Include</a> reference for
+      more information.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N29CB5"></a>GetEphemStates Built-in Function</h4></div></div></div><p>Using the built-in GetEphemStates function, you can now query
+      SPICE, Code-500 and STK .e ephemeris types and for a spacecraft&rsquo;s
+      initial epoch, initial state, final epoch and final state in any GMAT
+      supported epoch formats and coordinate systems. This allows you to
+      perform numerical propagation using states off of ephemiris files for
+      comparison and other analysis.</p><p>See the <a class="link" href="GetEphemStates_Function.html" title="GetEphemStates()">GetEphemStates</a> referece for
+      more information.</p></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N29CC0"></a>Improvements</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p>You can now define the EOP file location in a script.</p></li><li class="listitem"><p>The system now supports finite burn parameters that report the
+        thrust component data for a finite burn. The parameters include total
+        thrust from all thrusters in the three coordinate directions, the
+        total acceleration from all thrusters in the three coordinate
+        directions, and the total mass flow rate. Furthermore, you can now
+        also report individual thruster parameters such as thrust magnitude,
+        Isp and mass flow rate.</p></li><li class="listitem"><p>GMAT now contains built-in string manipulations functions
+        sprintf, strcmp, strcat, strfind, strrep.</p></li><li class="listitem"><p>Several new built in math functions are implemented including a
+        built-in cross product function. For manipulation of numeric data
+        we've implemented mod, ceil, floor, fix. For random number generation
+        we've implemented rand, randn, and SetSeed.</p></li><li class="listitem"><p>You can now model finite burns that employ multiple tanks.
+        Previous versions were limited to a single tank.</p></li><li class="listitem"><p>GMAT now supports generation of STK's &ldquo;.e&rdquo; ephemeris format in
+        addition those supported previously such as CCSDS-OEM, SPK and
+        Code-500 formats.</p></li><li class="listitem"><p>We've written over 130 pages of new, high-quality user
+        documentation!</p></li><li class="listitem"><p>The behavior of the GUI when using large fonts has been
+        improved.</p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N29CDD"></a>Compatibility Changes</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>You can now override the default <span class="guilabel">NAIFId</span> on
+        a <span class="guilabel">CelestialBody</span> to allow using body centers or
+        barycenters as the reference for built-in celestial bodies. Previously
+        this field was read-only.</p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N29CEA"></a>Development and Tools</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N29CED"></a>Developer Tools and Dependencies</h4></div></div></div><p>We updated the CMake-based build system that is used on all
+      platforms. The CMake configuration is maintained by the GMAT team and
+      distributed with the source code. Thanks to CMake, it is much easier to
+      compile GMAT. See the <a class="link" href="http://gmatcentral.org/display/GW/Compiling" target="_top">wiki
+      documentation for details</a>. Note that old build files are no
+      longer supported and are considered obsolete.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N29CF6"></a>GMAT Stuff</h4></div></div></div><p>Don't forget you can purchase clothing and other items with the
+      GMAT logo via &copy;Land's End, Inc at the <a class="link" href="http://ocs.landsend.com/cd/frontdoor?store_name=nasagsfc&amp;store_type=3" target="_top">GSFC
+      Store</a> . Once, you've chosen an item, make sure to select the GMAT
+      logo!</p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="../files/images/relnotes/r2015a/SWAG.png" width="587"></div></div></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N29D06"></a>Known &amp; Fixed Issues</h3></div></div></div><p>Over 100 bugs were closed in this release. See the <a class="link" href="http://bugs.gmatcentral.org/issues/?filter=13720" target="_top">"Critical
+    Issues Fixed in R2016a" report</a> for a list of critical bugs and
+    resolutions in R2016a. See the <a class="link" href="http://bugs.gmatcentral.org/issues/?filter=13721" target="_top">"Minor
+    Issues Fixed for R2016a" report</a> for minor issues addressed in
+    R2016a.</p><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N29D13"></a>Known Issues</h4></div></div></div><p>All known issues that affect this version of GMAT can be seen in
+      the <a class="link" href="http://bugs.gmatcentral.org/issues/?filter=13722" target="_top">"Known
+      Issues in R2016a" report</a> in JIRA.</p><p>There are several known issues in this release that we consider to
+      be significant:</p><div class="informaltable"><table border="1"><colgroup><col width="16%"><col width="84%"></colgroup><thead><tr><th align="left">ID</th><th align="left">Description</th></tr></thead><tbody><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-5269" target="_top">GMT-5269</a></td><td>Atmosphere model affects propagation at GEO.</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-2561" target="_top">GMT-2561</a></td><td>UTC Epoch Entry and Reporting During Leap Second is
+                incorrect.</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3043" target="_top">GMT-3043</a></td><td>Inconsistent validation when creating variables that
+                shadow built-in math functions</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3289" target="_top">GMT-3289</a></td><td>First step algorithm fails for backwards propagation
+                using SPK propagator</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3350" target="_top">GMT-3350</a></td><td>Single-quote requirements are not consistent across
+                objects and modes</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3669" target="_top">GMT-3669</a></td><td>Planets not drawn during optimization in
+                OrbitView</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3738" target="_top">GMT-3738</a></td><td>Cannot set standalone FuelTank, Thruster fields in
+                CallMatlabFunction</td></tr><tr><td><a class="link" href="http://bugs.gmatcentral.org/browse/GMT-4520" target="_top">GMT-4520</a></td><td>Unrelated script line in Optimize changes results
+                (causes crash)</td></tr><tr><td><a class="link" href="http://bugs.gmatcentral.org/browse/GMT-4398" target="_top">GMT-4520</a></td><td>Coordinate System Fixed attitudes are held constant in
+                SPAD SRP model during a propagation step</td></tr></tbody></table></div></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ReleaseNotes.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ReleaseNotes.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ReleaseNotesR2015a.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Release Notes&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;GMAT R2015a Release Notes</td></tr></table></div></body></html>

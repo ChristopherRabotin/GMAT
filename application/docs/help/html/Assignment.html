@@ -1,0 +1,365 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Assignment (=)</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="Achieve.html" title="Achieve"><link rel="next" href="BeginFiniteBurn.html" title="BeginFiniteBurn"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Assignment (<code class="literal">=</code>)</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Achieve.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="BeginFiniteBurn.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Assignment"></a><div class="titlepage"></div><a name="N226DB" class="indexterm"></a><a name="N226DE" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Assignment (<code class="literal">=</code>)</span></h2><p>Assignment (<code class="literal">=</code>) &mdash; Set a variable or resource field to a value, possibly using
+    mathematical expressions</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><em class="replaceable"><code>settable_item = expression</code></em></pre></div><div class="refsection"><a name="N226FB"></a><h2>Description</h2><p>The assignment command (in the GUI, the
+    <span class="guilabel">Equation</span> command) allows you to set a resource field
+    or parameter to a value, possibly using mathematical expressions. GMAT
+    uses the assignment operator ('=') to indicate an assignment command. The
+    assignment operator uses the following syntax, where LHS denotes the
+    left-hand side of the operator, and RHS denotes the right-hand side of the
+    operator:</p><pre class="programlisting"><code class="code"><em class="replaceable"><code>LHS</code></em> = <em class="replaceable"><code>RHS</code></em></code></pre><p>In this expression, the left-hand side
+    (<code class="code"><em class="replaceable"><code>LHS</code></em></code>) is being set to the value of
+    the right-hand side (<code class="code"><em class="replaceable"><code>RHS</code></em></code>). The
+    syntax of the <code class="code"><em class="replaceable"><code>LHS</code></em></code> and
+    <code class="code"><em class="replaceable"><code>RHS</code></em></code> expressions vary, but both
+    must evaluate to compatible data types for the command to succeed.</p><div class="refsection"><a name="N2271C"></a><h3>Left-hand side</h3><p>The left-hand side of the assignment command must be a single item
+      of any of the following types:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>allowed resource (e.g. <span class="guilabel">Spacecraft</span>,
+          <span class="guilabel">Variable</span>, <span class="guilabel">Array</span>)</p></li><li class="listitem"><p>resource field for allowed resources (e.g.
+          <span class="guilabel">Spacecraft</span>.<span class="guilabel">Epoch</span>,
+          <span class="guilabel">Spacecraft</span>.<span class="guilabel">DateFormat</span>)</p></li><li class="listitem"><p>settable resource parameter (e.g.
+          <span class="guilabel">Spacecraft</span>.<span class="guilabel">X</span>,
+          <span class="guilabel">ReportFile</span>.<span class="guilabel">Precision</span>)</p></li><li class="listitem"><p><span class="guilabel">Array</span> or <span class="guilabel">Array</span>
+          element</p></li></ul></div><p>See the documentation for a particular resource to determine which
+      fields and parameters can be set.</p></div><div class="refsection"><a name="N22756"></a><h3>Right-hand side</h3><p>The right-hand side of the assignment command can consist of any
+      of the following: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>literal value</p></li><li class="listitem"><p>resource (e.g. <span class="guilabel">Spacecraft</span>,
+            <span class="guilabel">Variable</span>, <span class="guilabel">Array</span>)</p></li><li class="listitem"><p>resource field (e.g.
+            <span class="guilabel">Spacecraft</span>.<span class="guilabel">Epoch</span>,
+            <span class="guilabel">Spacecraft</span>.<span class="guilabel">DateFormat</span>)</p></li><li class="listitem"><p>resource parameter (e.g.
+            <span class="guilabel">Spacecraft</span>.<span class="guilabel">X</span>,
+            <span class="guilabel">ChemicalThruster</span>.<span class="guilabel">K1</span>)</p></li><li class="listitem"><p><span class="guilabel">Array</span> or <span class="guilabel">Array</span>
+            element</p></li><li class="listitem"><p>mathematical expression (see below)</p></li></ul></div><p>MATLAB function calls are considered distinct from the
+      assignment command. See the reference pages for more information.</p></div></div><div class="refsection"><a name="N22795"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Assignment_GUI.png" align="middle" height="152"></td></tr></table></div></div><p>The assignment command in the script language corresponds to the
+    <span class="guilabel">Equation</span> command in the GUI. The
+    <span class="guilabel">Equation</span> properties box allows you to input both
+    sides of the expression into free-form text boxes. The default values on
+    each side are &ldquo;<code class="literal">Not_Set</code>&rdquo;; these are placeholders only,
+    and are not valid during the mission run. You can type into each box the
+    same syntax described above for the script language. When you click
+    <span class="guilabel">OK</span> or <span class="guilabel">Apply</span>, GMAT validates each
+    side of the expression and provides feedback for any warnings or
+    errors.</p></div><div class="refsection"><a name="N227B2"></a><h2>Remarks</h2><div class="refsection"><a name="N227B5"></a><h3>Data type compatibility</h3><p>In general, the data types of the left-hand side and the
+      right-hand side must match after all expressions are evaluated. This
+      means that a <span class="guilabel">Spacecraft</span> resource can only be set to
+      another <span class="guilabel">Spacecraft</span> resource, numeric parameters can
+      only be set to numeric values, and <span class="guilabel">String</span> resources
+      can only be set to string values. Additionally, the dimension of
+      <span class="guilabel">Array</span> instances must match for the command to
+      succeed. For numeric quantities, the assignment command does not
+      distinguish between integers and floating-point values.</p></div><div class="refsection"><a name="N227C6"></a><h3>Parameters</h3><p>Parameters can be used on either side of an assignment command,
+      but there may be certain restrictions.</p><p>On the right-hand side of the command, any parameter can be used.
+      If a parameter accepts a dependency (such as
+      <span class="guilabel">Spacecraft</span>.<span class="guilabel"><em class="replaceable"><code>CoordinateSystem</code></em></span>.<span class="guilabel">X</span>)
+      and the dependency is omitted, a default dependency value will be used.
+      For coordinate-system-dependent parameters, the default is
+      <span class="guilabel">EarthMJ2000Eq</span>. For central-body-dependent
+      parameters, the default is <span class="guilabel">Earth</span>.</p><p>On the left-hand side, only settable (writable) parameters can be
+      used. Furthermore, no dependency can be specified, except in the special
+      case that the dependencies on both sides of the assignment command are
+      equivalent. On the left-hand side, the default values of omitted
+      dependencies are automatically taken to be the current values of the
+      <span class="guilabel">CoordinateSystem</span> field of the referenced
+      <span class="guilabel">Spacecraft</span> and its origin.</p><div class="informalexample"><p>These examples show valid and invalid usage of
+        parameters:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat1 aSat2
+aSat2.CoordinateSystem = 'EarthFixed'
+Create Variable x
+BeginMissionSequence
+x = aSat1.EarthFixed.X       % Valid: Parameter with dependency on RHS
+x = aSat1.EarthMJ2000Eq.X    % Valid: This and next statement are equiv.
+x = aSat1.X                  % Valid: Default dep. value is EarthMJ2000Eq.
+
+x = aSat1.Mars.Altitude      % Valid: Parameter with dependency on RHS
+x = aSat1.Earth.Altitude     % Valid: This and next statement are equiv.
+x = aSat1.Altitude           % Valid: Default dependency value is Earth.
+
+aSat2.X = 1e5                % Valid: Default parameter value is EarthFixed.
+aSat2.EarthMJ2000Eq.X = 1e5  % INVALID: Dependencies not allowed on LHS.
+aSat2.EarthFixed.X = 1e5     % Valid: Special case because value = default.
+
+aSat2.EarthMJ2000Eq.X = aSat1.EarthFixed.X    % INVALID: Dependency on LHS
+aSat2.EarthMJ2000Eq.X = aSat1.EarthMJ2000Eq.X % INVALID: Dependency on LHS
+aSat2.EarthFixed.X = aSat1.EarthFixed.X       % Valid: Special case
+
+% DANGEROUS! Valid, but sets EarthMJ2000Eq RHS values to EarthFixed LHS param.
+aSat2.X = aSat1.EarthMJ2000Eq.X
+
+% DANGEROUS! RHS default is EarthMJ2000Eq, LHS default is current setting on
+% aSat2 (EarthFixed in this case).
+aSat2.X = aSat1.X</code>        </pre></div></div><div class="refsection"><a name="N227EC"></a><h3>Mathematical Expressions</h3><p>The assignment command supports the use of inline mathematical
+      expressions on the right-hand side of the command. These expressions
+      follow the general syntax rules of MATLAB expressions, and can use a
+      variety of operators and built-in functions.</p><div class="refsection"><a name="N227F1"></a><h4>Parsing</h4><p>Mathematical expressions are recognized by the presence of any
+        of the operators or built-in functions described below. Before
+        execution, all white space (e.g. spaces and tabs) is removed from the
+        expression.</p></div><div class="refsection"><a name="N227F6"></a><h4>Data Types</h4><p>Mathematical expressions operate on numeric values (integers or
+        floating-point numbers). This includes the following: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>literal values</p></li><li class="listitem"><p>numeric resources (<span class="guilabel">Variable</span>,
+              <span class="guilabel">Array</span>)</p></li><li class="listitem"><p>gettable resource parameters (e.g.
+              <span class="guilabel">Spacecraft</span>.<span class="guilabel">X</span>,
+              <span class="guilabel">ChemicalThruster</span>.<span class="guilabel">K1</span>)</p></li><li class="listitem"><p><span class="guilabel">Array</span> elements</p></li><li class="listitem"><p>calculation parameters (e.g.
+              <span class="guilabel">Spacecraft</span>.<span class="guilabel">OrbitPeriod</span>)</p></li><li class="listitem"><p>nested mathematical expressions</p></li></ul></div><p> Several of GMAT&rsquo;s operators and functions are
+        vectorized, so they operate on full <span class="guilabel">Array</span>
+        resources as well as scalar numeric values.</p></div><div class="refsection"><a name="N2282C"></a><h4>Operators</h4><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><tbody><tr><td><span class="guilabel">Vectorized operators</span></td><td><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term"><code class="literal">+</code></span></p></td><td><p>Addition or unary plus. <code class="literal">X+Y</code>
+                        adds <code class="literal">X</code> and <code class="literal">Y</code>.
+                        <code class="literal">X</code> and <code class="literal">Y</code> must
+                        have the same dimensions unless either is a
+                        scalar.</p></td></tr><tr><td><p><span class="term"><code class="literal">-</code></span></p></td><td><p>Subtraction or unary minus.
+                        <code class="literal">-X</code> is the negative of
+                        <code class="literal">X</code>, where <code class="literal">X</code> can
+                        be any size. <code class="literal">X-Y</code> subtracts
+                        <code class="literal">Y</code> from <code class="literal">X</code>.
+                        <code class="literal">X</code> and <code class="literal">Y</code> must
+                        have the same dimensions unless either is a
+                        scalar.</p></td></tr><tr><td><p><span class="term"><code class="literal">*</code></span></p></td><td><p>Multiplication. <code class="literal">X*Y</code> is the
+                        product of <code class="literal">X</code> and
+                        <code class="literal">Y</code>. If both <code class="literal">X</code> and
+                        <code class="literal">Y</code> are scalars, this is the simple
+                        algebraic product. If <code class="literal">X</code> is a matrix
+                        or vector and <code class="literal">Y</code> is a scalar, all
+                        elements of <code class="literal">X</code> are multiplied by
+                        <code class="literal">Y</code> (and vice versa). If both
+                        <code class="literal">X</code> and <code class="literal">Y</code> are
+                        non-scalar, <code class="literal">X*Y</code> performs matrix
+                        multiplication and the number of columns in
+                        <code class="literal">X</code> must equal the number of rows in
+                        <code class="literal">Y</code>.</p></td></tr><tr><td><p><span class="term"><code class="literal">'</code></span></p></td><td><p>Transpose. <code class="literal">X'</code> is the
+                        transpose of <code class="literal">X</code>. If
+                        <code class="literal">X</code> is a scalar,
+                        <code class="literal">X'</code> is equal to
+                        <code class="literal">X</code>.</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Scalar operators</span></td><td><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term"><code class="literal">/</code></span></p></td><td><p>Division. <code class="literal">X/Y</code> divides
+                        <code class="literal">X</code> by <code class="literal">Y</code>. If both
+                        <code class="literal">X</code> and <code class="literal">Y</code> are
+                        scalars, this is the simple algebraic quotient. If
+                        <code class="literal">X</code> is a matrix or vector, each
+                        element is divided by <code class="literal">Y</code>.
+                        <code class="literal">Y</code> must be a non-zero scalar
+                        quantity.</p></td></tr><tr><td><p><span class="term"><code class="literal">^</code></span></p></td><td><p>Power. <code class="literal">X^Y</code> raises
+                        <code class="literal">X</code> to the <code class="literal">Y</code>
+                        power. <code class="literal">X</code> and <code class="literal">Y</code>
+                        must be scalar quantities. A special case is
+                        <code class="literal">X^(-1)</code>, which when applied to a
+                        square matrix <code class="literal">X</code>, returns the
+                        inverse of <code class="literal">X</code>.</p></td></tr></tbody></table></div></td></tr></tbody></table></div><p>When multiple expressions are combined, GMAT uses the following
+        order of operations. Operations begin with those operators at the top
+        of the list and and continue downwards. Within each level, operations
+        proceed left-to-right. </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>parentheses <code class="literal">()</code></p></li><li class="listitem"><p>transpose (<code class="literal">'</code>), power
+              (<code class="literal">^</code>)</p></li><li class="listitem"><p>unary plus (<code class="literal">+</code>), unary minus
+              (<code class="literal">-</code>)</p></li><li class="listitem"><p>multiplication (<code class="literal">*</code>), division
+              (<code class="literal">/</code>)</p></li><li class="listitem"><p>addition (<code class="literal">+</code>), subtraction
+              (<code class="literal">-</code>)</p></li></ol></div></div><div class="refsection"><a name="N2292D"></a><h4>Built-in Functions</h4><p>GMAT supports the following built-in functions in mathematical
+        expressions. Supported functions include common scalar functions,
+        meaning they accept a single value only, such as sin and cos, matrix
+        functions that operate on an entire matrix or vector, and string
+        functions.</p><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><tbody><tr><td><span class="guilabel">Scalar Math Functions</span></td><td><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term"><code class="literal">sin</code></span></p></td><td><p>Sine. In <code class="literal">Y = sin(X)</code>,
+                        <code class="literal">Y</code> is the sine of the angle
+                        <code class="literal">X</code>. <code class="literal">X</code> must be in
+                        radians. <code class="literal">Y</code> will be in the range
+                        [-1, 1].</p></td></tr><tr><td><p><span class="term"><code class="literal">cos</code></span></p></td><td><p>Cosine. In <code class="literal">Y = cos(X)</code>,
+                        <code class="literal">Y</code> is the cosine of the angle
+                        <code class="literal">X</code>. <code class="literal">X</code> must be in
+                        radians. <code class="literal">Y</code> will be in the range
+                        [-1, 1].</p></td></tr><tr><td><p><span class="term"><code class="literal">tan</code></span></p></td><td><p>Tangent. In <code class="literal">Y = tan(X)</code>,
+                        <code class="literal">Y</code> is the tangent of the angle
+                        <code class="literal">X</code>. <code class="literal">X</code> must be in
+                        radians. The tangent function is undefined at angles
+                        that normalize to p/2 or -p/2.</p></td></tr><tr><td><p><span class="term"><code class="literal">asin</code></span></p></td><td><p>Arcsine. In <code class="literal">Y = asin(X)</code>,
+                        <code class="literal">Y</code> is the arcsine of
+                        <code class="literal">X</code>. <code class="literal">X</code> must be in
+                        the range [-1, 1], and <code class="literal">Y</code> will be in
+                        the range [-p/2, p/2].</p></td></tr><tr><td><p><span class="term"><code class="literal">acos</code></span></p></td><td><p>Arccosine. In <code class="literal">Y = acos(X)</code>,
+                        <code class="literal">Y</code> is the arccosine of
+                        <code class="literal">X</code>. <code class="literal">X</code> must be in
+                        the range [-1, 1], and <code class="literal">Y</code> will be in
+                        the range [0, p].</p></td></tr><tr><td><p><span class="term"><code class="literal">atan</code></span></p></td><td><p>Arctangent. In <code class="literal">Y = atan(X)</code>,
+                        <code class="literal">Y</code> is the arctangent of
+                        <code class="literal">X</code>. <code class="literal">Y</code> will be in
+                        the range (-p/2, p/2).</p></td></tr><tr><td><p><span class="term"><code class="literal">atan2</code></span></p></td><td><p>Four-quadrant arctangent. In <code class="literal">A =
+                        atan2(Y, X)</code>, <code class="literal">A</code> is the
+                        arctangent of <code class="literal">Y/X</code>.
+                        <code class="literal">A</code> will be in the range (-p, p].
+                        <code class="literal">atan2(Y, X)</code> is equivalent to
+                        <code class="literal">atan(Y/X)</code> except for the expanded
+                        range.</p></td></tr><tr><td><p><span class="term"><code class="literal">log</code></span></p></td><td><p>Natural logarithm. In <code class="literal">Y =
+                        log(X)</code>, <code class="literal">Y</code> is the natural
+                        logarithm of <code class="literal">X</code>.
+                        <code class="literal">X</code> must be non-zero positive.</p></td></tr><tr><td><p><span class="term"><code class="literal">log10</code></span></p></td><td><p>Common logarithm. In <code class="literal">Y =
+                        log10(X)</code>, <code class="literal">Y</code> is the common
+                        (base-10) logarithm of <code class="literal">X</code>.
+                        <code class="literal">X</code> must be non-zero positive.</p></td></tr><tr><td><p><span class="term"><code class="literal">exp</code></span></p></td><td><p>Exponential. In <code class="literal">Y = exp(X)</code>,
+                        <code class="literal">Y</code> is exponential of
+                        <code class="literal">X</code>
+                        (e<sup>X</sup>).</p></td></tr><tr><td><p><span class="term"><code class="literal">DegToRad</code></span></p></td><td><p>Radian conversion. In <code class="literal">Y =
+                        DegToRad(X)</code>, <code class="literal">Y</code> is the
+                        angle <code class="literal">X</code> in units of radians.
+                        <code class="literal">X</code> must be an angle in
+                        degrees.</p></td></tr><tr><td><p><span class="term"><code class="literal">RadToDeg</code></span></p></td><td><p>Degree conversion. In <code class="literal">Y =
+                        RadToDeg(X)</code>, <code class="literal">Y</code> is the
+                        angle <code class="literal">X</code> in units of degrees.
+                        <code class="literal">X</code> must be an angle in
+                        radians.</p></td></tr><tr><td><p><span class="term"><code class="literal">abs</code></span></p></td><td><p>Absolute value. In <code class="literal">Y =
+                        abs(X)</code>, <code class="literal">Y</code> is the absolute
+                        value of <code class="literal">X</code>.</p></td></tr><tr><td><p><span class="term"><code class="literal">sqrt</code></span></p></td><td><p>Square root. In <code class="literal">Y = sqrt(X)</code>,
+                        <code class="literal">Y</code> is the square root of
+                        <code class="literal">X</code>. <code class="literal">X</code> must be
+                        non-negative.</p></td></tr></tbody></table></div></td></tr></tbody></table></div><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><tbody><tr><td><span class="guilabel">Numeric Manipulation
+                Functions</span></td><td><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term"><code class="literal">mod</code></span></p></td><td><p>Modulus after division. <code class="literal">
+                        mod(x,y)</code> returns <code class="literal">x - n*y</code>,
+                        where <code class="literal">n = floor(x/y)</code> if <code class="literal">y
+                        ~= 0</code>. By convention,
+                        <code class="literal">mod(x,x)</code> is
+                        <code class="literal">x</code>.</p></td></tr><tr><td><p><span class="term"><code class="literal">ceil</code></span></p></td><td><p>Round towards plus infinity. <code class="literal">
+                        ceil(X)</code> rounds <code class="literal">X</code> to the
+                        nearest integer towards plus infinity.</p></td></tr><tr><td><p><span class="term"><code class="literal">floor</code></span></p></td><td><p>Round towards minus infinity. <code class="literal">
+                        floor(X)</code> rounds <code class="literal">X</code> to the
+                        nearest integer towards minus infinity.</p></td></tr><tr><td><p><span class="term"><code class="literal">fix</code></span></p></td><td><p>Round towards zero. <code class="literal"> fix(X)</code>
+                        rounds <code class="literal">X</code> to the nearest integer
+                        towards zero.</p></td></tr></tbody></table></div></td></tr></tbody></table></div><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><tbody><tr><td><span class="guilabel">Random Number Functions</span></td><td><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term"><code class="literal">randn</code></span></p></td><td><p>Normally distributed pseudorandom numbers.
+                        <code class="literal"> R = randn(N)</code> returns an
+                        <code class="literal">N</code>-by-<code class="literal">N</code> matrix
+                        containing pseudorandom values drawn from the standard
+                        normal distribution. <code class="literal"> R = randn()</code>
+                        returns a single random number.</p></td></tr><tr><td><p><span class="term"><code class="literal">rand</code></span></p></td><td><p>Uniformly distributed pseudorandom numbers.
+                        <code class="literal"> R = rand(N)</code> returns an
+                        <code class="literal">N</code>-by-<code class="literal">N</code> matrix
+                        containing pseudorandom values drawn from the standard
+                        uniform distribution on the open interval
+                        <code class="literal">(0,1)</code>. <code class="literal">R =
+                        rand()</code> returns a single random
+                        number.</p></td></tr><tr><td><p><span class="term"><code class="literal">SetSeed</code></span></p></td><td><p>Set seed for random number generation. <code class="literal">
+                        SetSeed(X)</code>sets the seed for the random
+                        number generator where <code class="literal">X</code> must b a
+                        postive real number. Note: <code class="literal">SetSeed</code>
+                        calls through to the C++ 11 random number generator
+                        seed algorithm that requires an unsigned integer.
+                        Since the GMAT script language only supports real
+                        numbers, casting is performed by the compiler which
+                        rounds the real number down to the nearest integer. We
+                        recommend passing in real numbers with zero mantissa
+                        (i.e "1.0" or "198.0").</p></td></tr></tbody></table></div></td></tr></tbody></table></div><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><tbody><tr><td><span class="guilabel">Matrix Functions</span></td><td><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term"><code class="literal">norm</code></span></p></td><td><p>2-norm. In <code class="literal">Y = norm(X)</code>,
+                        <code class="literal">Y</code> is the 2-norm of
+                        <code class="literal">X</code>, where <code class="literal">X</code> must
+                        be a vector (i.e. one dimension must be 1). If
+                        <code class="literal">X</code> is a scalar, <code class="literal">Y</code>
+                        is equal to <code class="literal">X</code>.</p></td></tr><tr><td><p><span class="term"><code class="literal">det</code></span></p></td><td><p>Determinant. In <code class="literal">Y = det(X)</code>,
+                        <code class="literal">Y</code> is tthe cross product of the
+                        vectors <code class="literal">A</code> and <code class="literal">B</code>.
+                        If <code class="literal">X</code> is a matrix, the number of
+                        rows must equal the number of columns. If
+                        <code class="literal">X</code> is a scalar, <code class="literal">Y</code>
+                        is equal to <code class="literal">X</code>. For efficiency,
+                        GMAT&rsquo;s implementation of the determinant is currently
+                        limited to matrices 9&times;9 or smaller.</p></td></tr><tr><td><p><span class="term"><code class="literal">cross</code></span></p></td><td><p>Vector cross product. In <code class="literal">C =
+                        cross(A,B)</code>, <code class="literal">C</code> is the
+                        vector cross product of <code class="literal">A</code> and
+                        <code class="literal">B</code> . <code class="literal">A</code> and
+                        <code class="literal">B</code> must be 3 element arrays.</p></td></tr><tr><td><p><span class="term"><code class="literal">inv</code></span></p></td><td><p>Inverse. In <code class="literal">Y = inv(X)</code>,
+                        <code class="literal">Y</code> is the inverse of
+                        <code class="literal">X</code>. <code class="literal">X</code> must be a
+                        matrix or a scalar. If <code class="literal">X</code> is a
+                        matrix, the number of rows must equal the number of
+                        columns. <code class="literal">X^(-1)</code> is an alternate
+                        syntax.</p></td></tr></tbody></table></div></td></tr></tbody></table></div><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><tbody><tr><td><span class="guilabel">String Manipulation
+                Functions</span></td><td><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term"><code class="literal">strcat</code></span></p></td><td><p>String concatenation. <code class="literal">STROUT =
+                        strcat(S1, S2, ..., SN)</code>concatenates strings.
+                        Inputs can be combinations of string variables and
+                        string literals.</p></td></tr><tr><td><p><span class="term"><code class="literal">strfind</code></span></p></td><td><p>String find. <code class="literal">INDEX =
+                        strfind(TEXT,PATTERN)</code> returns the starting
+                        index of the first instance of
+                        <code class="literal">PATTERN</code> in <code class="literal">TEXT</code>.
+                        If <code class="literal">PATTERN</code> is not found,
+                        <code class="literal">INDEX = -1</code>.</p></td></tr><tr><td><p><span class="term"><code class="literal">strrep</code></span></p></td><td><p>String replace. <code class="literal">NEWSTR =
+                        strrep(OLDSTR,OLDSUBSTR,NEWSUBSTR)</code> replaces
+                        all occurrences of the string
+                        <code class="literal">OLDSUBSTR</code> within string
+                        <code class="literal">OLDSTR</code> with the string
+                        <code class="literal">NEWSUBSTR</code>.</p></td></tr><tr><td><p><span class="term"><code class="literal">strcmp</code></span></p></td><td><p>String compare. <code class="literal">FLAG =
+                        strcmp(S1,S2)</code> compares the strings
+                        <code class="literal">S1</code> and <code class="literal">S2</code> and
+                        returns logical 1 (true) if they are identical, and
+                        returns logical 0 (false) otherwise.</p></td></tr><tr><td><p><span class="term"><code class="literal">sprintf</code></span></p></td><td><p>Write formatted data to a string.
+                        <code class="literal">STRING = sprintf(FORMATSPEC, A,
+                        ...)</code> formats data in
+                        <code class="literal">A,...</code> according to
+                        <code class="literal">FORMATSPEC</code> which is a C-style
+                        format spec.</p><p>Note: The GMAT <code class="code">sprintf</code> function
+                        calls through to the sprintf function in the c-library
+                        <code class="code">iostream</code>. Additionally, the GMAT script
+                        language does not support an integer data type, only
+                        doubles.</p><p>A format spec follows this prototype:</p><p><code class="literal">%[flags][width][.precision][length]specifier</code></p></td></tr></tbody></table></div></td></tr></tbody></table></div><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><tbody><tr><td><span class="guilabel">Specifiers</span></td><td><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term"><code class="literal">a</code></span></p></td><td><p>Hexadecimal floating point, lowercase.</p></td></tr><tr><td><p><span class="term"><code class="literal">A</code></span></p></td><td><p>Hexadecimal floating point, uppercase</p></td></tr><tr><td><p><span class="term"><code class="literal">e</code></span></p></td><td><p>Scientific notation (mantissa/exponent),
+                        lowercase</p></td></tr><tr><td><p><span class="term"><code class="literal">E</code></span></p></td><td><p>Scientific notation (mantissa/exponent),
+                        uppercase</p></td></tr><tr><td><p><span class="term"><code class="literal">f</code></span></p></td><td><p>Decimal floating point, lowercase</p></td></tr><tr><td><p><span class="term"><code class="literal">F</code></span></p></td><td><p>Decimal floating point, uppercase</p></td></tr><tr><td><p><span class="term"><code class="literal">g</code></span></p></td><td><p>Use the shortest representation: %e or %f</p></td></tr><tr><td><p><span class="term"><code class="literal">G</code></span></p></td><td><p>Use the shortest representation: %E or %F</p></td></tr><tr><td><p><span class="term"><code class="literal">o</code></span></p></td><td><p>Unsigned octal</p></td></tr><tr><td><p><span class="term"><code class="literal">x</code></span></p></td><td><p>Unsigned hexadecimal integer, lowercase</p></td></tr><tr><td><p><span class="term"><code class="literal">X</code></span></p></td><td><p>Unsigned hexadecimal integer, uppercase</p></td></tr></tbody></table></div></td></tr></tbody></table></div><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><tbody><tr><td><span class="guilabel">Flags</span></td><td><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term"><code class="literal">+</code></span></p></td><td><p>Forces to preceed the result with a plus or
+                          minus sign (+ or -) even for positive numbers. By
+                          default, only negative numbers are preceded with a -
+                          sign.</p></td></tr><tr><td><p><span class="term"><code class="literal">-</code></span></p></td><td><p>Left-justify within the given field width;
+                          Right justification is the default (see width
+                          sub-specifier).</p></td></tr><tr><td><p><span class="term"><code class="literal">#</code></span></p></td><td><p>Used with o, x or X specifiers the value is
+                          preceeded with 0, 0x or 0X respectively for values
+                          different than zero. Used with a, A, e, E, f, F, g
+                          or G it forces the written output to contain a
+                          decimal point even if no more digits follow. By
+                          default, if no digits follow, no decimal point is
+                          written.</p></td></tr><tr><td><p><span class="term"><code class="literal">0</code></span></p></td><td><p>Left-pads the number with zeroes (0) instead
+                          of spaces when padding is specified (see width
+                          sub-specifier).</p></td></tr><tr><td><p><span class="term"><code class="literal">(space)</code></span></p></td><td><p>If no sign is going to be written, a blank
+                          space is inserted before the value.</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Width</span></td><td><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term"><code class="literal"></code></span></p></td><td><p>Minimum number of characters to be printed. If
+                          the value to be printed is shorter than this number,
+                          the result is padded with blank spaces. The value is
+                          not truncated even if the result is larger.</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Precision</span></td><td><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term"><code class="literal"></code></span></p></td><td><p>For a, A, e, E, f and F specifiers: this is
+                          the number of digits to be printed after the decimal
+                          point (by default, this is 6).</p><p>For g and G specifiers: This is the maximum
+                          number of significant digits to be printed.</p><p>For s: this is the maximum number of
+                          characters to be printed. By default all characters
+                          are printed until the ending null character is
+                          encountered. If the period is specified without an
+                          explicit value for precision, 0 is assumed.</p><p>Integer specifiers are not supported as GMAT
+                          does not have an integer data type in the script
+                          language.</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div></div></div><div class="refsection"><a name="N22C9E"></a><h2>Examples</h2><div class="informalexample"><p>Evaluate a basic algebraic equation:</p><pre class="programlisting"><code class="code">Create Variable A B C x y
+x = 1
+Create ReportFile aReport
+
+BeginMissionSequence
+
+A = 10
+B = 20
+C = 2
+
+y = A*x^2 + B*x + C
+Report aReport y</code></pre></div><div class="informalexample"><p>Matrix manipulation:</p><pre class="programlisting"><code class="code">Create Array A[2,2] B[2,2] C[2,2] x[2,1] y[2,1]
+Create ReportFile aReport
+
+A(1,1) = 10
+A(2,1) = 5
+A(1,2) = .10
+A(2,2) = 1
+
+x(1,1) = 2
+x(2,1) = 3
+
+BeginMissionSequence
+
+B = inv(A)
+C = B'
+y = C*x
+Report aReport A B C x y</code></pre></div><div class="informalexample"><p>Cloning a resource:</p><pre class="programlisting"><code class="code">Create Spacecraft Sat1 Sat2
+Sat1.Cd = 1.87
+Sat1.DryMass = 123.456
+
+Create ReportFile aReport
+
+BeginMissionSequence
+
+Sat2 = Sat1
+Report aReport Sat2.Cd Sat2.DryMass</code></pre></div><div class="informalexample"><p>Using built-in functions:</p><pre class="programlisting"><code class="code">Create Variable pi x y1 y2 y3
+Create Array A[3,3]
+Create Spacecraft aSat
+Create ReportFile aReport
+
+BeginMissionSequence
+
+pi = acos(-1)
+
+aSat.TA = pi/4
+x = pi/4
+A(1,1) = pi/4
+
+y1 = sin(x)
+y2 = sin(aSat.TA)
+y3 = sin(A(1,1))
+
+Report aReport y1 y2 y3</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Achieve.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="BeginFiniteBurn.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Achieve&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;BeginFiniteBurn</td></tr></table></div></body></html>

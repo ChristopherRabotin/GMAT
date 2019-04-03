@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -116,11 +116,17 @@ Planet::Planet(std::string name) :
       #ifdef DEBUG_PLANET_CONSTRUCT
          MessageInterface::ShowMessage("In Planet constructor, setting default PCKs.\n");
       #endif
-      std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
-      attitudeSpiceKernelNames.push_back(path+"earth_070425_370426_predict.bpc");
-      attitudeSpiceKernelNames.push_back(path+"earth_720101_070426.bpc");
-      attitudeSpiceKernelNames.push_back(path+"earth_latest_high_prec.bpc");
-//      attitudeSpiceKernelNames.push_back(path+"earth_000101_161025_160803.bpc");
+      FileManager *fm  = FileManager::Instance();
+      std::string path = fm->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+      std::string earthLatest  = fm->GetFilename(FileManager::EARTH_LATEST_PCK_FILE);
+      std::string earthPredict = fm->GetFilename(FileManager::EARTH_PCK_PREDICTED_FILE);
+      std::string earthCurrent = fm->GetFilename(FileManager::EARTH_PCK_CURRENT_FILE);
+      attitudeSpiceKernelNames.push_back(path+earthPredict);
+      attitudeSpiceKernelNames.push_back(path+earthCurrent);
+      attitudeSpiceKernelNames.push_back(path+earthLatest);
+//      attitudeSpiceKernelNames.push_back(path+"earth_070425_370426_predict.bpc");
+//      attitudeSpiceKernelNames.push_back(path+"earth_720101_070426.bpc");
+//      attitudeSpiceKernelNames.push_back(path+"earth_latest_high_prec.bpc");
    }
 
    DeterminePotentialFileNameFromStartup();
@@ -166,11 +172,17 @@ Planet::Planet(std::string name, const std::string &cBody) :
       #ifdef DEBUG_PLANET_CONSTRUCT
          MessageInterface::ShowMessage("In Planet constructor, setting default PCKs.\n");
       #endif
-      std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
-      attitudeSpiceKernelNames.push_back(path+"earth_070425_370426_predict.bpc");
-      attitudeSpiceKernelNames.push_back(path+"earth_720101_070426.bpc");
-      attitudeSpiceKernelNames.push_back(path+"earth_latest_high_prec.bpc");
-      //      attitudeSpiceKernelNames.push_back(path+"earth_000101_161025_160803.bpc");
+      FileManager *fm  = FileManager::Instance();
+      std::string path = fm->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+      std::string earthLatest  = fm->GetFilename(FileManager::EARTH_LATEST_PCK_FILE);
+      std::string earthPredict = fm->GetFilename(FileManager::EARTH_PCK_PREDICTED_FILE);
+      std::string earthCurrent = fm->GetFilename(FileManager::EARTH_PCK_CURRENT_FILE);
+      attitudeSpiceKernelNames.push_back(path+earthPredict);
+      attitudeSpiceKernelNames.push_back(path+earthCurrent);
+      attitudeSpiceKernelNames.push_back(path+earthLatest);
+//      attitudeSpiceKernelNames.push_back(path+"earth_070425_370426_predict.bpc");
+//      attitudeSpiceKernelNames.push_back(path+"earth_720101_070426.bpc");
+//      attitudeSpiceKernelNames.push_back(path+"earth_latest_high_prec.bpc");
    }
 
    DeterminePotentialFileNameFromStartup();

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -60,7 +60,7 @@ Transmitter::PARAMETER_TYPE[TransmitterParamCount - RFHardwareParamCount] =
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// Transmitter(const std::string &name)
+// Transmitter(const std::string &ofType, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Default constructor
@@ -68,8 +68,8 @@ Transmitter::PARAMETER_TYPE[TransmitterParamCount - RFHardwareParamCount] =
  * @param name The name for the transmitter
  */
 //------------------------------------------------------------------------------
-Transmitter::Transmitter(const std::string &name) :
-   RFHardware     ("Transmitter", name),
+Transmitter::Transmitter(const std::string &ofType, const std::string &name) :
+   RFHardware     (ofType, name),
    frequencyModel ("constant"),
    frequency      (0.0)                            // unit: MHz
 {

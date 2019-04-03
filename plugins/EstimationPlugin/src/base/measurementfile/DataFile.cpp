@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,8 +35,10 @@
 #include "DateUtil.hpp"
 #include "GmatBase.hpp"
 #include "MessageInterface.hpp"
-#include "StatisticAcceptFilter.hpp"
-#include "StatisticRejectFilter.hpp"
+#include "StatisticAcceptFilter.hpp"             //@todo: StatisticsAcceptFilter is deprecated and will be removed in a future GMAT build
+#include "StatisticRejectFilter.hpp"             //@todo: StatisticsRejectFilter is deprecated and will be removed in a future GMAT build
+#include "AcceptFilter.hpp"
+#include "RejectFilter.hpp"
 #include <sstream>
 #include "MeasurementException.hpp"
 
@@ -878,11 +880,15 @@ ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject
    {
       for (UnsignedInt i = 0; i < filterList.size(); ++i)
       {
-         if (filterList[i]->IsOfType("StatisticsRejectFilter"))
+         if (filterList[i]->IsOfType("StatisticsRejectFilter")||               //@todo: StatisticsRejectFilter is deprecated and will be removed in a furure GMAT build.
+             filterList[i]->IsOfType("RejectFilter"))
          {
             rejReason = 0;
-            obdata = ((StatisticRejectFilter*)filterList[i])->FilteringData(dataObject, rejReason);
-
+            if (filterList[i]->IsOfType("RejectFilter"))
+               obdata = ((RejectFilter*)filterList[i])->FilteringData(dataObject, rejReason);
+            else
+               obdata = ((StatisticRejectFilter*)filterList[i])->FilteringData(dataObject, rejReason);
+            
             // it is rejected when it has been rejected by any reject filter
             if (obdata == NULL)
             {
@@ -901,12 +907,15 @@ ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject
       bool hasAcceptFilter = false;
       for (UnsignedInt i = 0; i < filterList.size(); ++i)
       {
-         if (filterList[i]->IsOfType("StatisticsAcceptFilter"))
+         if (filterList[i]->IsOfType("StatisticsAcceptFilter") ||               //@todo: StatisticsAcceptFilter is deprecated and will be removed in the future GMAT build.
+             filterList[i]->IsOfType("AcceptFilter"))
          {
             hasAcceptFilter = true;
-
             rejReason = 0;
-            od = ((StatisticAcceptFilter*)filterList[i])->FilteringData(dataObject, rejReason);
+            if (filterList[i]->IsOfType("AcceptFilter"))
+               od = ((AcceptFilter*)filterList[i])->FilteringData(dataObject, rejReason);
+            else
+               od = ((StatisticAcceptFilter*)filterList[i])->FilteringData(dataObject, rejReason);
 
             // it is accepted when it has been accepted by any accept filter
             if (od)
@@ -926,13 +935,6 @@ ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject
       }
    }
 
-   //// Increasing record counters in all accept filters
-   //for (UnsignedInt i = 0; i < filterList.size(); ++i)
-   //{
-   //   if (filterList[i]->IsOfType("StatisticsAcceptFilter"))
-   //      ((StatisticAcceptFilter*)filterList[i])->IncreasingRecordCounter();
-   //}
-   
 #ifdef DEBUG_FILTER_NEW
    MessageInterface::ShowMessage("Exit DataFile<%s,%p>::FilteringDataForNewSyntax(dataObject = <%p>, filterIndex = %d)  return obdata = <%p>\n", GetName().c_str(), this, dataObject, filterIndex, obdata);
 #endif

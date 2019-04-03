@@ -33,7 +33,6 @@
 //------------------------------------------------------------------------------
 EndFileThrust::EndFileThrust(const std::string &name) :
    GmatCommand             ("EndFileThrust"),
-   burnForce               (NULL),
    transientForces         (NULL),
    thfName                 (""),
    burnName                (""),
@@ -65,7 +64,6 @@ EndFileThrust::~EndFileThrust()
 //------------------------------------------------------------------------------
 EndFileThrust::EndFileThrust(const EndFileThrust& eft) :
    GmatCommand             (eft),
-   burnForce               (NULL),
    transientForces         (eft.transientForces),
    thfName                 (eft.thfName),
    burnName                (eft.burnName),
@@ -91,7 +89,6 @@ EndFileThrust& EndFileThrust::operator =(const EndFileThrust& eft)
    {
       GmatCommand::operator=(eft);
 
-      burnForce =NULL;
       transientForces = eft.transientForces;
       thfName = eft.thfName;
       burnName = eft.burnName;

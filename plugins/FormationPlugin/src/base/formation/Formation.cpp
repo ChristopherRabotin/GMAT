@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,11 +35,14 @@
 
 
 #include "Formation.hpp"
+#include "StringUtil.hpp"
 #include <algorithm>          // for find()
 #include <stdio.h>            // for sprintf()
 
 //#define DEBUG_FORMATION
 //#define DEBUG_FORMATION_ACTIONS
+//#define DEBUG_REF_OBJ
+//#define DEBUG_SET_STRING
 
 #include "MessageInterface.hpp"
 
@@ -548,6 +551,10 @@ std::string Formation::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool Formation::SetStringParameter(const Integer id, const std::string &value)
 {
+#ifdef DEBUG_SET_STRING
+   MessageInterface::ShowMessage("Formation::SetStringParameter(id = %d, value = <%s>) enter\n", id, value.c_str());
+#endif
+
    if (id == ADDED_SPACECRAFT)
    {
       if (find(componentNames.begin(), componentNames.end(), value) != 
@@ -657,9 +664,40 @@ Real Formation::SetRealParameter(const std::string &label, const Real value)
 bool Formation::SetStringParameter(const Integer id, const std::string &value,
                                    const Integer index)
 {
+#ifdef DEBUG_SET_STRING
+   MessageInterface::ShowMessage("Formation::SetStringParameter(id = %d, value = <%s>, index = %d) enter\n", id, value.c_str(), index);
+#endif
+
    if (id == ADDED_SPACECRAFT)
    {
-      return false;
+      // Add an empty list
+      if (index == -1)
+      {
+         parmsChanged = false;
+         return true;
+      }
+
+      // verify input value
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw GmatBaseException("Error: The value \'" + value 
+         + "' is invalid to set to " + GetName() + ".Add parameter.\n");
+
+      if ((0 <= index) && (index < componentNames.size()))
+      {
+         if (componentNames[index] == value)
+            parmsChanged = false;
+         else
+         {
+            componentNames[index] = value;
+            parmsChanged = true;
+         }
+      }
+      else
+      {
+         componentNames.push_back(value);
+         parmsChanged = true;
+      }
+      return true;
    }
    if (id == REMOVED_SPACECRAFT)
    {
@@ -753,6 +791,26 @@ const StringArray&
    if (label == "Add")
       return componentNames;
    return FormationInterface::GetStringArrayParameter(label);
+}
+
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+* Retrieves the list of reference object types used by this class.
+*
+* @return the list of object types.
+*
+*/
+//------------------------------------------------------------------------------
+const ObjectTypeArray& Formation::GetRefObjectTypeArray()
+{
+   MessageInterface::ShowMessage("Formation::GetRefObjectTypeArray() enter\n");
+
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::SPACECRAFT);
+   return refObjectTypes;
 }
 
 

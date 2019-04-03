@@ -149,7 +149,7 @@ public:
    const StringArray&   GetParticipants() const;
    std::vector<TrackingDataAdapter*> *GetAdapters();
 
-   bool                 GenerateTrackingConfigs(std::vector<StringArray> strandsList, StringArray typesList);
+   bool                 GenerateTrackingConfigs(std::vector<StringArray> strandsList, std::vector<StringArray> sensorsList, StringArray typesList);
 
 protected:
    /**
@@ -165,10 +165,12 @@ protected:
       MeasurementDefinition& operator=(const MeasurementDefinition& md);
 
       std::string GetDefinitionString() const;
-      bool        SetDefinitionString(StringArray strand, std::string measType);
+      bool        SetDefinitionString(StringArray strand, StringArray sensors, std::string measType);
 
       /// The strings describing signal paths
       std::vector<StringArray> strands;
+      /// The strings describing sensors
+      std::vector<StringArray> sensors;
       /// The measurement types associated with the signal paths
       StringArray types;
    };
@@ -218,8 +220,6 @@ protected:
    PropSetup *thePropagator;
    /// Pointers to ref objects that the adapters use
    ObjectArray references;
-   /// Pointers to the Datafile Objects specified for this TFS
-   std::vector<DataFile*> datafiles;
 
    /// Parameter IDs for the TrackingFileSets
    enum
@@ -252,6 +252,10 @@ protected:
          const std::string &type, Integer configIndex);
 
 private:
+   /// Warning messages
+   StringArray mesg;
+
+   std::string CheckTypeDeprecation(const std::string datatype);
    bool    ParseTrackingConfig(std::string value, Integer& configIndex, bool& start);
    bool    ParseStrand(std::string value, Integer configIndex, Integer strandIndex = 0);
    bool    AddToSignalPath(std::string participantName, Integer configIndex, Integer strandIndex);

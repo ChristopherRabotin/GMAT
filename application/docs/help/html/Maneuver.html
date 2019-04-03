@@ -1,0 +1,75 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Maneuver</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="If.html" title="If"><link rel="next" href="MarkPoint.html" title="MarkPoint"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Maneuver</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="If.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="MarkPoint.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Maneuver"></a><div class="titlepage"></div><a name="N23A58" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Maneuver</span></h2><p>Maneuver &mdash; Perform an impulsive (instantaneous) maneuver</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><code class="literal">Maneuver</code> <em class="replaceable"><code>BurnName</code></em> (<em class="replaceable"><code>SpacecraftName</code></em>)    </pre></div><div class="refsection"><a name="N23A76"></a><h2>Description</h2><p>The <span class="guilabel">Maneuver</span> command applies a selected
+    <span class="guilabel">ImpulsiveBurn</span> to a selected
+    <span class="guilabel">Spacecraft</span>. To perform an impulsive maneuver using
+    the <span class="guilabel">Maneuver</span> command, you must create an
+    <span class="guilabel">ImpulsiveBurn</span>. If you wish to model fuel depletion,
+    you must associate a specific <span class="guilabel">ChemicalTank</span> hardware
+    object with this <span class="guilabel">ImpulsiveBurn</span> and attach the
+    <span class="guilabel">ChemicalTank</span> to the desired
+    <span class="guilabel">Spacecraft</span>. See the Remarks and example shown below
+    for more details.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="FuelTank.html" title="ChemicalTank"><span class="refentrytitle">ChemicalTank</span></a>, <a class="xref" href="ImpulsiveBurn.html" title="ImpulsiveBurn"><span class="refentrytitle">ImpulsiveBurn</span></a>, <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a></p></div><div class="refsection"><a name="N23AA3"></a><h2>Options</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">ImpulsiveBurnName</span></td><td><p>Allows the user to select which
+            <span class="guilabel">ImpulsiveBurn</span> to apply. As an example, to
+            maneuver DefaultSC using DefaultIB, the script line would appear
+            as Maneuver DefaultIB(DefaultSC).</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any <span class="guilabel">ImpulsiveBurn</span> existing in
+                    the resource treet</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DefaultIB</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SpacecraftName</span></td><td><p>Allows the user to select which
+            <span class="guilabel">Spacecraft</span> to maneuver. The maneuver applied
+            is specified by the <span class="guilabel">ImpulsiveBurnName</span> option
+            above. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Spacecraft</span> resource</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DefaultSC</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N23B1A"></a><h2>GUI</h2><p>The <span class="guilabel">Maneuver</span> command dialog box, as shown
+    below, allows you to select which previously created
+    <span class="guilabel">ImpulsiveBurn</span> should be applied to which
+    <span class="guilabel">Spacecraft</span>.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Maneuver_GUI.png" align="middle" height="178"></td></tr></table></div></div></div><div class="refsection"><a name="N23B31"></a><h2>Remarks</h2><div class="refsection"><a name="N23B34"></a><h3>Fuel Depletion</h3><p>To model fuel depletion associated with your chosen
+      <span class="guilabel">ImpulsiveBurn</span>, you must configure the
+      <span class="guilabel">ImpulsiveBurn</span> object as follows:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Set the <span class="guilabel">ImpulsiveBurn</span> parameter,
+          <span class="guilabel">Decrement Mass</span>, equal to true.</p></li><li class="listitem"><p>Select a <span class="guilabel">ChemicalTank</span> for the
+          <span class="guilabel">ImpulsiveBurn </span>object and attach this
+          selected<span class="guilabel"> ChemicalTank </span>to the
+          <span class="guilabel">Spacecraft</span>.</p></li><li class="listitem"><p>Set values for the <span class="guilabel">ImpulsiveBurn</span>
+          parameters,<span class="guilabel"> Isp</span> and
+          <span class="guilabel">GravitationalAccel</span>, which are used to
+          calculate, via the Rocket Equation, the mass depleted.</p></li></ul></div></div><div class="refsection"><a name="N23B64"></a><h3>Interactions</h3><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><tbody><tr><td><span class="guilabel">ImpulsiveBurn</span></td><td><p> The <span class="guilabel">Maneuver</span> command applies
+              the specified <span class="guilabel">ImpulsiveBurn</span> to the
+              specified Spacecraft. </p></td></tr><tr><td><span class="guilabel">ChemicalTank</span></td><td><p> The <span class="guilabel">ChemicalTank</span> specified by
+              the<span class="guilabel"> ImpulsiveBurn</span> object is (optionally)
+              used to power the <span class="guilabel">ImpulsiveBurn</span>.
+              </p></td></tr><tr><td><span class="guilabel">Spacecraft</span></td><td><p> This is the object that the
+              <span class="guilabel">ImpulsiveBurn</span> is applied to.
+              </p></td></tr></tbody></table></div></div></div><div class="refsection"><a name="N23B9A"></a><h2>Examples</h2><div class="informalexample"><p>Create a default <span class="guilabel">Spacecraft</span> and
+      <span class="guilabel">ChemicalTank</span> and attach the
+      <span class="guilabel">ChemicalTank</span> to the <span class="guilabel">Spacecraft</span>.
+      Perform a 100 m/s impulsive maneuver in the Earth VNB-V
+      direction.</p><pre class="programlisting">%  Create default Spacecraft and ChemicalTank and attach the ChemicalTank 
+%  to the Spacecraft.
+Create Spacecraft DefaultSC
+Create ChemicalTank FuelTank1
+DefaultSC.Tanks = {FuelTank1}
+
+%  Set ChemicalTank1 parameters to default values
+FuelTank1.AllowNegativeFuelMass = false
+FuelTank1.FuelMass = 756
+FuelTank1.Pressure = 1500
+FuelTank1.Temperature = 20
+FuelTank1.RefTemperature = 20
+FuelTank1.Volume = 0.75
+FuelTank1.FuelDensity = 1260
+FuelTank1.PressureModel = PressureRegulated
+
+%  Create ImpulsiveBurn associated with the created ChemicalTank
+Create ImpulsiveBurn IB
+IB.CoordinateSystem = Local
+IB.Origin = Earth
+IB.Axes = VNB
+IB.Element1 = 0.1
+IB.Element2 = 0
+IB.Element3 = 0
+IB.DecrementMass = true
+IB.Tank = {FuelTank1}
+IB.Isp = 300
+IB.GravitationalAccel = 9.810000000000001
+
+BeginMissionSequence
+%  Apply impulsive maneuver to DefaultSC
+Maneuver IB(DefaultSC)</pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="If.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="MarkPoint.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">If&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;MarkPoint</td></tr></table></div></body></html>

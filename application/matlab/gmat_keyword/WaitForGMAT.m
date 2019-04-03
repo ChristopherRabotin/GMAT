@@ -6,7 +6,7 @@
 %
 % ** Legal **
 %
-% Copyright (c) 2002 - 2015 United States Government as represented by the
+% Copyright (c) 2002 - 2017 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
 % All Other Rights Reserved.
 %
@@ -56,10 +56,10 @@ else
       %% It could mean the Server is not responding to new Request so it has timed out.
       %% This happens when building and running a long script.
       if (isfloat(gmatRunState))
-         if (~isunix)
-            CloseGMAT;
-            OpenGMAT;
-         end
+       if (~isunix)
+           CloseGMAT;
+           OpenGMAT;
+        end
          continueWait = true;
       elseif(ischar(gmatRunState))
          if (strcmp(gmatRunState,'Idle'))

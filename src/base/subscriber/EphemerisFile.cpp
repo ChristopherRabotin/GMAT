@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -87,6 +87,8 @@ StringArray EphemerisFile::stateTypeList;
 StringArray EphemerisFile::writeEphemerisList;
 StringArray EphemerisFile::interpolatorTypeList;
 StringArray EphemerisFile::outputFormatList;
+StringArray EphemerisFile::distanceUnitList;
+StringArray EphemerisFile::eventBoundariesList;
 
 const std::string
 EphemerisFile::PARAMETER_TEXT[EphemerisFileParamCount - SubscriberParamCount] =
@@ -106,6 +108,8 @@ EphemerisFile::PARAMETER_TEXT[EphemerisFileParamCount - SubscriberParamCount] =
    "OutputFormat",          // OUTPUT_FORMAT
    "WriteEphemeris",        // WRITE_EPHEMERIS
    "FileName",              // FILE_NAME - deprecated
+   "DistanceUnit",          // DISTANCE_UNIT
+   "IncludeEventBoundaries" // INCLUDE_EVENT_BOUNDARIES
 };
 
 const Gmat::ParameterType
@@ -126,6 +130,8 @@ EphemerisFile::PARAMETER_TYPE[EphemerisFileParamCount - SubscriberParamCount] =
    Gmat::ENUMERATION_TYPE,  // OUTPUT_FORMAT
    Gmat::BOOLEAN_TYPE,      // WRITE_EPHEMERIS
    Gmat::STRING_TYPE,       // FILE_NAME - deprecated
+   Gmat::ENUMERATION_TYPE,  // DISTANCE_UNIT
+   Gmat::BOOLEAN_TYPE,      // INCLUDE_EVENT_BOUNDARIES
 };
 
 
@@ -137,50 +143,52 @@ EphemerisFile::PARAMETER_TYPE[EphemerisFileParamCount - SubscriberParamCount] =
  */
 //------------------------------------------------------------------------------
 EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
-   Subscriber           (type, name),
-   spacecraft           (NULL),
-   outCoordSystem       (NULL),
-   ephemWriter          (NULL),
-   fullPathFileName     (""),
-   spacecraftName       (""),
-   spacecraftId         (""),
-   prevFileName         (""),
-   fileName             (""),
-   fileFormat           ("CCSDS-OEM"),
-   epochFormat          ("UTCGregorian"),
-   initialEpochStr      ("InitialSpacecraftEpoch"),
-   finalEpochStr        ("FinalSpacecraftEpoch"),
-   stepSize             ("IntegratorSteps"),
-   interpolatorName     ("Lagrange"),
-   stateType            ("Cartesian"),
-   outCoordSystemName   ("EarthMJ2000Eq"),
-   outputFormat         ("PC"),
-   writeEphemeris       (true),
-   usingDefaultFileName (true),
-   generateInBackground (false),
-   allowMultipleSegments(true),
-   prevPropName         (""),
-   currPropName         (""),
-   interpolationOrder   (7),
-   toggleStatus         (0),
-   propIndicator        (0),
-   prevPropDirection    (0.0),
-   currPropDirection    (0.0),
-   initialEpochA1Mjd    (-999.999),
-   finalEpochA1Mjd      (-999.999),
-   blockBeginA1Mjd      (-999.999),
-   currEpochInDays      (-999.999),
-   currEpochInSecs      (-999.999),
-   prevEpochInSecs      (-999.999),
-   maneuverEpochInDays  (-999.999),
-   eventEpochInSecs     (-999.999),
-   stepSizeInSecs       (-999.999),
-   firstTimeWriting     (true),
-   useFixedStepSize     (false),
-   checkForLargeTimeGap (false),
-   isEphemFileOpened    (false),
-   canFinalize          (false),
-   fileType             (UNKNOWN_FILE_TYPE)
+   Subscriber              (type, name),
+   spacecraft              (NULL),
+   outCoordSystem          (NULL),
+   ephemWriter             (NULL),
+   fullPathFileName        (""),
+   spacecraftName          (""),
+   spacecraftId            (""),
+   prevFileName            (""),
+   fileName                (""),
+   fileFormat              ("CCSDS-OEM"),
+   epochFormat             ("UTCGregorian"),
+   initialEpochStr         ("InitialSpacecraftEpoch"),
+   finalEpochStr           ("FinalSpacecraftEpoch"),
+   stepSize                ("IntegratorSteps"),
+   interpolatorName        ("Lagrange"),
+   stateType               ("Cartesian"),
+   outCoordSystemName      ("EarthMJ2000Eq"),
+   outputFormat            ("PC"),
+   writeEphemeris          (true),
+   usingDefaultFileName    (true),
+   generateInBackground    (false),
+   allowMultipleSegments   (true),
+   prevPropName            (""),
+   currPropName            (""),
+   interpolationOrder      (7),
+   toggleStatus            (0),
+   propIndicator           (0),
+   prevPropDirection       (0.0),
+   currPropDirection       (0.0),
+   initialEpochA1Mjd       (-999.999),
+   finalEpochA1Mjd         (-999.999),
+   blockBeginA1Mjd         (-999.999),
+   currEpochInDays         (-999.999),
+   currEpochInSecs         (-999.999),
+   prevEpochInSecs         (-999.999),
+   maneuverEpochInDays     (-999.999),
+   eventEpochInSecs        (-999.999),
+   stepSizeInSecs          (-999.999),
+   firstTimeWriting        (true),
+   useFixedStepSize        (false),
+   checkForLargeTimeGap    (false),
+   isEphemFileOpened       (false),
+   canFinalize             (false),
+   fileType                (UNKNOWN_FILE_TYPE),
+   distanceUnit            ("Kilometers"),
+   includeEventBoundaries  (true)
 {
    #ifdef DEBUG_EPHEMFILE_INSTANCE
    MessageInterface::ShowMessage
@@ -253,6 +261,14 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    outputFormatList.push_back("PC");
    outputFormatList.push_back("UNIX");
    
+   distanceUnitList.clear();
+   distanceUnitList.push_back("Kilometers");
+   distanceUnitList.push_back("Meters");
+
+   eventBoundariesList.clear();
+   eventBoundariesList.push_back("Yes");
+   eventBoundariesList.push_back("No");
+
    #ifdef DEBUG_EPHEMFILE_INSTANCE
    MessageInterface::ShowMessage
       ("fileName='%s', fullPathFileName='%s'\n", fileName.c_str(), fullPathFileName.c_str());
@@ -291,49 +307,51 @@ EphemerisFile::~EphemerisFile()
  */
 //------------------------------------------------------------------------------
 EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
-   Subscriber           (ef),
-   spacecraft           (ef.spacecraft),
-   outCoordSystem       (ef.outCoordSystem),
-   ephemWriter          (NULL),
-   fullPathFileName     (ef.fullPathFileName),
-   spacecraftName       (ef.spacecraftName),
-   spacecraftId         (ef.spacecraftId),
-   prevFileName         (ef.prevFileName),
-   fileName             (ef.fileName),
-   fileFormat           (ef.fileFormat),
-   epochFormat          (ef.epochFormat),
-   initialEpochStr      (ef.initialEpochStr),
-   finalEpochStr        (ef.finalEpochStr),
-   stepSize             (ef.stepSize),
-   interpolatorName     (ef.interpolatorName),
-   stateType            (ef.stateType),
-   outCoordSystemName   (ef.outCoordSystemName),
-   outputFormat         (ef.outputFormat),
-   writeEphemeris       (ef.writeEphemeris),
-   usingDefaultFileName (ef.usingDefaultFileName),
-   generateInBackground (ef.generateInBackground),
-   allowMultipleSegments(ef.allowMultipleSegments),
-   prevPropName         (ef.prevPropName),
-   currPropName         (ef.currPropName),
-   interpolationOrder   (ef.interpolationOrder),
-   toggleStatus         (ef.toggleStatus),
-   propIndicator        (ef.propIndicator),
-   prevPropDirection    (ef.prevPropDirection),
-   currPropDirection    (ef.currPropDirection),
-   initialEpochA1Mjd    (ef.initialEpochA1Mjd),
-   finalEpochA1Mjd      (ef.finalEpochA1Mjd),
-   blockBeginA1Mjd      (ef.blockBeginA1Mjd),
-   currEpochInDays      (ef.currEpochInDays),
-   currEpochInSecs      (ef.currEpochInSecs),
-   prevEpochInSecs      (ef.prevEpochInSecs),
-   maneuverEpochInDays  (ef.maneuverEpochInDays),
-   eventEpochInSecs     (ef.eventEpochInSecs),
-   stepSizeInSecs       (ef.stepSizeInSecs),
-   firstTimeWriting     (ef.firstTimeWriting),
-   useFixedStepSize     (ef.useFixedStepSize),
-   checkForLargeTimeGap (ef.checkForLargeTimeGap),
-   isEphemFileOpened    (ef.isEphemFileOpened),
-   canFinalize          (ef.canFinalize)
+   Subscriber              (ef),
+   spacecraft              (ef.spacecraft),
+   outCoordSystem          (ef.outCoordSystem),
+   ephemWriter             (NULL),
+   fullPathFileName        (ef.fullPathFileName),
+   spacecraftName          (ef.spacecraftName),
+   spacecraftId            (ef.spacecraftId),
+   prevFileName            (ef.prevFileName),
+   fileName                (ef.fileName),
+   fileFormat              (ef.fileFormat),
+   epochFormat             (ef.epochFormat),
+   initialEpochStr         (ef.initialEpochStr),
+   finalEpochStr           (ef.finalEpochStr),
+   stepSize                (ef.stepSize),
+   interpolatorName        (ef.interpolatorName),
+   stateType               (ef.stateType),
+   outCoordSystemName      (ef.outCoordSystemName),
+   outputFormat            (ef.outputFormat),
+   writeEphemeris          (ef.writeEphemeris),
+   usingDefaultFileName    (ef.usingDefaultFileName),
+   generateInBackground    (ef.generateInBackground),
+   allowMultipleSegments   (ef.allowMultipleSegments),
+   prevPropName            (ef.prevPropName),
+   currPropName            (ef.currPropName),
+   interpolationOrder      (ef.interpolationOrder),
+   toggleStatus            (ef.toggleStatus),
+   propIndicator           (ef.propIndicator),
+   prevPropDirection       (ef.prevPropDirection),
+   currPropDirection       (ef.currPropDirection),
+   initialEpochA1Mjd       (ef.initialEpochA1Mjd),
+   finalEpochA1Mjd         (ef.finalEpochA1Mjd),
+   blockBeginA1Mjd         (ef.blockBeginA1Mjd),
+   currEpochInDays         (ef.currEpochInDays),
+   currEpochInSecs         (ef.currEpochInSecs),
+   prevEpochInSecs         (ef.prevEpochInSecs),
+   maneuverEpochInDays     (ef.maneuverEpochInDays),
+   eventEpochInSecs        (ef.eventEpochInSecs),
+   stepSizeInSecs          (ef.stepSizeInSecs),
+   firstTimeWriting        (ef.firstTimeWriting),
+   useFixedStepSize        (ef.useFixedStepSize),
+   checkForLargeTimeGap    (ef.checkForLargeTimeGap),
+   isEphemFileOpened       (ef.isEphemFileOpened),
+   canFinalize             (ef.canFinalize),
+   distanceUnit            (ef.distanceUnit),
+   includeEventBoundaries  (ef.includeEventBoundaries)
 {
    #ifdef DEBUG_EPHEMFILE_INSTANCE
    MessageInterface::ShowMessage
@@ -404,6 +422,8 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    checkForLargeTimeGap = ef.checkForLargeTimeGap;
    isEphemFileOpened    = ef.isEphemFileOpened;
    canFinalize          = ef.canFinalize;
+   distanceUnit         = ef.distanceUnit;
+   includeEventBoundaries = ef.includeEventBoundaries;
    return *this;
 }
 
@@ -551,9 +571,10 @@ bool EphemerisFile::Initialize()
    MessageInterface::ShowMessage
       ("EphemerisFile::Initialize() <%p>'%s' entered, spacecraftName='%s', active=%d, "
        "writeEphemeris=%d, isInitialized=%d\n   fileFormat='%s', stateType='%s', "
-       "outputFormat='%s', ephemWriter=<%p>\n", this, GetName().c_str(), spacecraftName.c_str(),
-       active, writeEphemeris, isInitialized, fileFormat.c_str(), stateType.c_str(),
-       outputFormat.c_str(), ephemWriter);
+       "outputFormat='%s', ephemWriter=<%p>\n   fileName='%s'\n   fullPathFileName='%s'\n",
+       this, GetName().c_str(), spacecraftName.c_str(), active, writeEphemeris,
+       isInitialized, fileFormat.c_str(), stateType.c_str(), outputFormat.c_str(),
+       ephemWriter, fileName.c_str(), fullPathFileName.c_str());
    #endif
    
    if (isInitialized)
@@ -621,7 +642,7 @@ bool EphemerisFile::Initialize()
       #endif
       remove(fullPathFileName.c_str());
    }
-   
+      
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
       ("EphemerisFile::Initialize() <%p>'%s' returning true, "
@@ -858,6 +879,12 @@ bool EphemerisFile::IsParameterReadOnly(const Integer id) const
       return true;
    if (id == FULLPATH_FILENAME)
       return true;
+   if (id == DISTANCE_UNIT)
+      if (fileFormat != "STK-TimePosVel")
+         return true;
+   if (id == INCLUDE_EVENT_BOUNDARIES)
+      if (fileFormat != "STK-TimePosVel")
+         return true;
    
    return Subscriber::IsParameterReadOnly(id);
 }
@@ -941,6 +968,8 @@ const StringArray& EphemerisFile::GetPropertyEnumStrings(const Integer id) const
       return interpolatorTypeList;
    case OUTPUT_FORMAT:
       return outputFormatList;
+   case DISTANCE_UNIT:
+      return distanceUnitList;
    default:
       return Subscriber::GetPropertyEnumStrings(id);
    }
@@ -956,6 +985,8 @@ bool EphemerisFile::GetBooleanParameter(const Integer id) const
    {
    case WRITE_EPHEMERIS:
       return writeEphemeris;
+   case INCLUDE_EVENT_BOUNDARIES:
+      return includeEventBoundaries;
    default:
       return Subscriber::GetBooleanParameter(id);
    }
@@ -973,6 +1004,9 @@ bool EphemerisFile::SetBooleanParameter(const Integer id, const bool value)
       writeEphemeris = value;
       active = value;
       return writeEphemeris;
+   case INCLUDE_EVENT_BOUNDARIES:
+      includeEventBoundaries = value;
+      return includeEventBoundaries;
    default:
       return Subscriber::SetBooleanParameter(id, value);
    }
@@ -1077,6 +1111,8 @@ std::string EphemerisFile::GetStringParameter(const Integer id) const
    case FILE_NAME:
       WriteDeprecatedMessage(id);
       return fileName;
+   case DISTANCE_UNIT:
+      return distanceUnit;
    default:
       return Subscriber::GetStringParameter(id);
    }
@@ -1161,6 +1197,23 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
       fullPathFileName =
          GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "EPHEM_OUTPUT_FILE",
                                        false, ".eph", false, true);
+      
+      // Check for directory name
+      std::string dirName = GmatFileUtil::ParsePathName(fileName);
+      #ifdef DEBUG_EPHEMFILE_SET
+      MessageInterface::ShowMessage("   dirName = '%s'\n", dirName.c_str());
+      #endif
+      
+      if (dirName != "")
+      {
+         if (!GmatFileUtil::DoesDirectoryExist(dirName))
+         {
+            SubscriberException se;
+            se.SetDetails("Cannot create an EphemerisFile with non-existing directory '%s'",
+                          dirName.c_str());
+            throw se;
+         }
+      }
       
       // If filename is set in resource mode, set prevFileName
       if (!isInitialized)
@@ -1308,7 +1361,17 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
    case FILE_NAME:
       WriteDeprecatedMessage(id);
       return SetStringParameter(FILENAME, value);
-      
+   case DISTANCE_UNIT:
+      if (find(distanceUnitList.begin(), distanceUnitList.end(), value) !=
+          distanceUnitList.end())
+      {
+         distanceUnit = value;
+         return true;
+      }
+      else
+      {
+         HandleError(DISTANCE_UNIT, value, distanceUnitList);
+      }
    default:
       return Subscriber::SetStringParameter(id, value);
    }
@@ -1694,8 +1757,9 @@ void EphemerisFile::CreateEphemerisWriter()
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
       ("EphemerisFile::CreateEphemerisWriter() <%p>'%s' entered, ephemWriter=<%p>, "
-       "fileFormat='%s',\n   fileName='%s'\n", this, GetName().c_str(), ephemWriter,
-       fileFormat.c_str(), fileName.c_str());
+       "fileFormat='%s',\n   fileName='%s'\n   fullPathFileName='%s'\n", this,
+       GetName().c_str(), ephemWriter, fileFormat.c_str(), fileName.c_str(),
+       fullPathFileName.c_str());
    #endif
    
    if (ephemWriter)
@@ -1716,7 +1780,11 @@ void EphemerisFile::CreateEphemerisWriter()
    else if (fileFormat == "Code-500")
       ephemWriter = new EphemWriterCode500(GetName(), fileFormat);
    else if (fileFormat == "STK-TimePosVel")
+   {
       ephemWriter = new EphemWriterSTK(GetName(), fileFormat);
+      ((EphemWriterSTK*)ephemWriter)->SetDistanceUnit(distanceUnit);
+      ((EphemWriterSTK*)ephemWriter)->SetIncludeEventBoundaries(includeEventBoundaries);
+   }
    else
    {
       SubscriberException se;
@@ -1795,7 +1863,7 @@ void EphemerisFile::HandleOrbitData()
    {
       #ifdef DEBUG_EPHEMFILE_ORBIT
       MessageInterface::ShowMessage
-         ("EphemerisFile::HandleOrbitData() <%p> entered\n", this);
+         ("EphemerisFile::HandleOrbitData() ephemWriter is NULL\n");
       #endif
    }
    #ifdef DEBUG_EPHEMFILE_ORBIT
@@ -1891,7 +1959,7 @@ bool EphemerisFile::HandleEndOfRun()
       #ifdef DEBUG_EPHEMFILE_FINISH
       MessageInterface::ShowMessage
          ("EphemerisFile::HandleEndOfRun() this=<%p>'%s' returning true, "
-          "ephemWriter is NULL\n");
+          "ephemWriter is NULL\n", this, GetName().c_str());
       #endif
       return true;
    }
@@ -1900,7 +1968,7 @@ bool EphemerisFile::HandleEndOfRun()
       #ifdef DEBUG_EPHEMFILE_FINISH
       MessageInterface::ShowMessage
          ("EphemerisFile::HandleEndOfRun() this=<%p>'%s' returning false, "
-          "ephemWriter is NULL\n");
+          "ephemWriter is NULL\n", this, GetName().c_str());
       #endif
       return false;
    }
@@ -1971,10 +2039,9 @@ bool EphemerisFile::RetrieveData(const Real *dat)
    {
       #ifdef DEBUG_EPHEMFILE_DATA
       MessageInterface::ShowMessage
-         ("EphemerisFile::RetrieveData() '%s' Just returning false, data index not found\n",
-          GetName().c_str());
+         ("EphemerisFile::RetrieveData() '%s' Just returning false, data index "
+          "not found for the spacecraft '%s'\n", GetName().c_str(), spacecraftName.c_str());
       #endif
-      //return true;
       return false;
    }
    
@@ -2568,8 +2635,8 @@ bool EphemerisFile::Distribute(const Real *dat, Integer len)
    #ifdef DEBUG_EPHEMFILE_DATA
    MessageInterface::ShowMessage
       ("======================================================================\n"
-       "EphemerisFile::Distribute() this=<%p>'%s' entered, ephemWriter=<%p>\n",
-       this, GetName().c_str(), ephemWriter);
+       "EphemerisFile::Distribute() this=<%p>'%s' entered, ephemWriter=<%p> for '%s'\n",
+       this, GetName().c_str(), ephemWriter, spacecraftName.c_str());
    MessageInterface::ShowMessage
       ("   len=%d, active=%d, writeEphemeris=%d, isEndOfReceive=%d, isEndOfDataBlock=%d, "
        "isEndOfRun=%d\n   runstate=%d, prevRunState=%d, isManeuvering=%d, firstTimeWriting=%d, "

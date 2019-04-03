@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,7 +38,7 @@
 #include "FileManager.hpp"     // for GetGmatIncludePath()
 #include "FileUtil.hpp"        // for IsPathAbsolute()
 #include "GmatGlobal.hpp"      // for SetIncludeFoundInScriptResource()
-
+#include "UserDefinedFunction.hpp" // for AddFunctionObject()
 #include <sstream>             // For stringstream, used to check for non-ASCII chars
 #include <algorithm>           // for find()
 
@@ -104,32 +104,10 @@ ScriptInterpreter::ScriptInterpreter() :
    #ifdef DEBUG_INSTANCE
    MessageInterface::ShowMessage("ScriptInterpreter::ScriptInterpreter() <%p> entered\n", this);
    #endif
-   logicalBlockCount = 0;
-   functionDefined = false;
-   ignoreRest = false;
    
-   functionDef         = "";
-   functionFilename    = "";
-   mainScriptFilename  = "";
-   savedIncludeComment = "";
-   currentBlock        = "";
-   headerComment       = "";
-   footerComment       = "";
-   
-   inCommandMode = false;
-   inRealCommandMode = false;
-   firstTimeCommandBlock = true;
-   firstTimeCommandMode = true;
-   includeFoundInResource = false;
-   
-   // Initialize the section delimiter comment
-   sectionDelimiterString.clear();
-   userParameterLines.clear();
-   sectionDelimiterString.push_back("\n%----------------------------------------\n");
-   sectionDelimiterString.push_back("%---------- ");
-   sectionDelimiterString.push_back("\n%----------------------------------------\n");
-   
+   InitializeScriptData();
    Initialize();
+   
    #ifdef DEBUG_INSTANCE
    MessageInterface::ShowMessage("ScriptInterpreter::ScriptInterpreter() <%p> leaving\n", this);
    #endif
@@ -147,6 +125,17 @@ ScriptInterpreter::~ScriptInterpreter()
 {
 }
 
+//------------------------------------------------------------------------------
+// void Clear()
+//------------------------------------------------------------------------------
+/**
+ * Clears scirpt related data
+ */
+//------------------------------------------------------------------------------
+void ScriptInterpreter::Clear()
+{
+   InitializeScriptData();
+}
 
 //------------------------------------------------------------------------------
 // bool Interpret()
@@ -299,11 +288,11 @@ bool ScriptInterpreter::Interpret(GmatCommand *inCmd, bool skipHeader,
    if (!inFunctionMode)
       inCommandMode = true;
    
-   #ifdef __OLD_FUNCTION__
-   inRealCommandMode = true;
-   #else
+   // #ifdef __OLD_FUNCTION__
+   // inRealCommandMode = true;
+   // #else
    inRealCommandMode = false;
-   #endif
+   // #endif
    
    //beginMissionSeqFound = true; // LOJ: Why set to true? 2014.12.10
    beginMissionSeqFound = false;
@@ -575,7 +564,7 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    
    // Set build function definition flag
    hasFunctionDefinition = true;
-   currentFunction->SetScriptErrorFound(false);
+   currentFunction->SetErrorFound(false);
    
    // Clear temporary object names which currently holding MatlabFunction names
    ClearTempObjectNames();
@@ -588,9 +577,9 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    // Set error found to function (loj: 2008.09.09)
    // Sandbox should check error flag before interpreting Function.
    if (retval)
-      currentFunction->SetScriptErrorFound(false);
+      currentFunction->SetErrorFound(false);
    else
-      currentFunction->SetScriptErrorFound(true);
+      currentFunction->SetErrorFound(true);
    
    funcFile.close();
    
@@ -903,6 +892,50 @@ bool ScriptInterpreter::ReadFirstPass()
 
 
 //------------------------------------------------------------------------------
+// void InitializeScriptData()
+//------------------------------------------------------------------------------
+/**
+ * Initializes script related data.
+ */
+//------------------------------------------------------------------------------
+void ScriptInterpreter::InitializeScriptData()
+{
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::InitializeScriptData() this=<%p> entered\n", this);
+   #endif
+   
+   logicalBlockCount = 0;
+   functionDefined = false;
+   ignoreRest = false;
+   
+   functionDef         = "";
+   functionFilename    = "";
+   mainScriptFilename  = "";
+   savedIncludeComment = "";
+   currentBlock        = "";
+   headerComment       = "";
+   footerComment       = "";
+   
+   inCommandMode = false;
+   inRealCommandMode = false;
+   firstTimeCommandBlock = true;
+   firstTimeCommandMode = true;
+   includeFoundInResource = false;
+   
+   // Initialize the section delimiter comment
+   sectionDelimiterString.clear();
+   userParameterLines.clear();
+   sectionDelimiterString.push_back("\n%----------------------------------------\n");
+   sectionDelimiterString.push_back("%---------- ");
+   sectionDelimiterString.push_back("\n%----------------------------------------\n");
+   
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage("ScriptInterpreter::InitializeScriptData() this=<%p> leaving\n", this);
+   #endif
+}
+
+//------------------------------------------------------------------------------
 // bool InterpretIncludeFile(GmatCommand *inCmd)
 //------------------------------------------------------------------------------
 /**
@@ -917,7 +950,10 @@ bool ScriptInterpreter::InterpretIncludeFile(GmatCommand *inCmd)
        "   lastIncludeFile='%s'\n   currentScriptBeingRead='%s'\n",
        inCmd, lastIncludeFile.c_str(), currentScriptBeingRead.c_str());
    #endif
-   
+
+   // Let the reader know it is parsing #Include, (for line counting)
+   theReadWriter->SetIsParsingIncludeFile(true);
+
    bool retval = false;
    #ifdef DEBUG_INCLUDE
    MessageInterface::ShowMessage("   ==> Setting isReadingIncludeFile to true\n");
@@ -1081,10 +1117,10 @@ bool ScriptInterpreter::InterpretIncludeFile(GmatCommand *inCmd)
       ("ScriptInterpreter::InterpretIncludeFile() returning %d,\n   "
        "lastIncludeFile='%s'\n\n", retval, lastIncludeFile.c_str());
    #endif
-   
+   // Let the reader know it is parsing #Include, (for line counting)
+   theReadWriter->SetIsParsingIncludeFile(false);
    return retval;
 }
-
 
 //------------------------------------------------------------------------------
 // bool ReadScript(GmatCommand *inCmd, bool skipHeader = false,
@@ -1138,16 +1174,16 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader,bool rein
       Initialize();
    }
    
-   #ifdef __OLD_FUNCTION__
-   if (inFunctionMode)
-   {
-      #ifdef DEBUG_COMMAND_MODE_TOGGLE
-         MessageInterface::ShowMessage("Line %s set inCommandMode to true\n",
-               inCmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
-      #endif
-      inCommandMode = true;
-   }
-   #endif
+   // #ifdef __OLD_FUNCTION__
+   // if (inFunctionMode)
+   // {
+   //    #ifdef DEBUG_COMMAND_MODE_TOGGLE
+   //       MessageInterface::ShowMessage("Line %s set inCommandMode to true\n",
+   //             inCmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+   //    #endif
+   //    inCommandMode = true;
+   // }
+   // #endif
    
    
    // Read header comment and first logical block.
@@ -1232,7 +1268,9 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader,bool rein
                #ifdef DBGLVL_SCRIPT_READING
                MessageInterface::ShowMessage("   Calling InterpretIncludeFile()\n");
                #endif
+               
                incRetval = InterpretIncludeFile(inCmd);
+               
                #ifdef DBGLVL_SCRIPT_READING
                MessageInterface::ShowMessage("   => %d Returned from InterpretIncludeFile()\n", incRetval);
                #endif
@@ -2299,16 +2337,23 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
             }
             else
             {
-               #if DBGLVL_GMAT_FUNCTION
-               MessageInterface::ShowMessage
-                  ("   ==> Adding object <%p>'%s' to function object map\n", obj,
-                   obj->GetName().c_str());
-               #endif
-               // If object is not an automatic global, set it to local
-               // This will fix crash during function object clearing (LOJ: 2015.03.19)
-               if (!obj->IsAutomaticGlobal())
-                  obj->SetIsLocal(true);
-               currentFunction->AddFunctionObject(obj);
+               if (currentFunction->IsOfType("UserDefinedFunction"))
+               {
+                  UserDefinedFunction *udf = (UserDefinedFunction*)currentFunction;
+                  #if DBGLVL_GMAT_FUNCTION
+                  MessageInterface::ShowMessage
+                     ("   ==> Adding object <%p>'%s' to function object map\n", obj,
+                      obj->GetName().c_str());
+                  #endif
+                  // If object is not an automatic global, set it to local
+                  // This will fix crash during function object clearing (LOJ: 2015.03.19)
+                  if (!obj->IsAutomaticGlobal())
+                     obj->SetIsLocal(true);
+                  
+                  // Add object to function object store
+                  ////currentFunction->AddFunctionObject(obj);
+                  udf->AddFunctionObject(obj);
+               }
             }
          }
       }
@@ -2664,7 +2709,22 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
          
          std::string fname = rhs;
          fname = GmatStringUtil::RemoveEnclosingString(fname, "'");
-         MessageInterface::SetLogFile(fname);
+         // Check to see if this log file name should be used
+         GmatGlobal *gg = GmatGlobal::Instance();
+         Integer logSrc = gg->GetLogfileSource();
+         if (logSrc == GmatGlobal::CMD_LINE)
+         {
+            // Command line takes precedence; so save file name (??)
+            // but don't use it
+            // Command line log file is already set
+            gg->SetLogfileName(GmatGlobal::SCRIPT, fname);
+         }
+         else // source is SCRIPT or STARTUP
+         {
+            // Set the scripted log file name
+            gg->SetLogfileSource(GmatGlobal::SCRIPT, fname);
+            MessageInterface::SetLogFile(fname);
+         }
          return true;
       }
    }

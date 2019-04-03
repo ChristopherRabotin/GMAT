@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -47,7 +47,7 @@ ExponentialAtmosphere::ExponentialAtmosphere(const std::string &name) :
    scaleHeight          (NULL),
    refHeight            (NULL),
    refDensity           (NULL),
-   altitudeBands        (28),
+   altitudeBands        (28),  // if changed, SetConstants must be adjusted!!
    smoothDensity        (false)
 {
     SetConstants();
@@ -185,6 +185,7 @@ bool ExponentialAtmosphere::Density(Real *position, Real *density, Real epoch,
  * Users that want to build other atmosphere models that have the same form as
  * Vallado's (and Wertz's) can derive a class from this one and override this
  * method with their choice of constants.
+ * NOTE: this code assumes that altitudeBands = 28
  */
 //------------------------------------------------------------------------------
 void ExponentialAtmosphere::SetConstants()

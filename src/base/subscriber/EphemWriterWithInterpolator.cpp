@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -73,6 +73,7 @@ EphemWriterWithInterpolator::EphemWriterWithInterpolator(const std::string &name
    initialCount         (0),
    waitCount            (0),
    afterFinalEpochCount (0),
+   isNextOutputEpochInLeapSecond (false),
    handleFinalEpoch     (true),
    processingLargeStep  (false),
    checkForLargeTimeGap (false),
@@ -134,6 +135,7 @@ EphemWriterWithInterpolator::EphemWriterWithInterpolator(const EphemWriterWithIn
    initialCount         (ef.initialCount),
    waitCount            (ef.waitCount),
    afterFinalEpochCount (ef.afterFinalEpochCount),
+   isNextOutputEpochInLeapSecond (ef.isNextOutputEpochInLeapSecond),
    handleFinalEpoch     (ef.handleFinalEpoch),
    processingLargeStep  (ef.processingLargeStep),
    checkForLargeTimeGap (ef.checkForLargeTimeGap),
@@ -163,6 +165,7 @@ EphemWriterWithInterpolator::operator=(const EphemWriterWithInterpolator& ef)
    initialCount         = ef.initialCount;
    waitCount            = ef.waitCount;
    afterFinalEpochCount = ef.afterFinalEpochCount;
+   isNextOutputEpochInLeapSecond = ef.isNextOutputEpochInLeapSecond;
    handleFinalEpoch     = ef.handleFinalEpoch;
    processingLargeStep  = ef.processingLargeStep;
    checkForLargeTimeGap = ef.checkForLargeTimeGap;
@@ -318,7 +321,8 @@ void EphemWriterWithInterpolator::FindNextOutputEpoch(Real reqEpochInSecs,
       
       // Erase requested epoch from the epochs on waiting list if found (LOJ: 2010.02.28)
       RemoveEpochAlreadyWritten(reqEpochInSecs, "   =====> WriteOrbit() now erasing ");
-      AddNextEpochToWrite(nextOutEpochInSecs, "   =====> Adding nextOutEpochInSecs to epochsOnWaiting");
+      AddNextEpochToWrite(nextOutEpochInSecs,
+                          "   ===== Adding current epoch: Adding nextOutEpochInSecs to epochsOnWaiting");
    }
    
    #ifdef DEBUG_EPHEMFILE_TIME
@@ -464,6 +468,12 @@ bool EphemWriterWithInterpolator::IsTimeToWrite(Real epochInSecs, const Real sta
          if (initialEpochA1Mjd != -999.999 && firstTimeWriting)
          {
             nextOutEpochInSecs = initialEpochA1Mjd * GmatTimeConstants::SECS_PER_DAY;
+            
+            // Add user defined initial epoch to epochsOnWaiting so that initial state
+            // can be interpolated
+            AddNextEpochToWrite(nextOutEpochInSecs,
+                                "   ===== First time writing: Adding nextOutEpochInSecs to epochsOnWaiting, ");
+            
             #ifdef DEBUG_EPHEMFILE_TIME
             MessageInterface::ShowMessage
                ("   Using user defined initial epoch and first time writing a segment\n");
@@ -496,16 +506,23 @@ bool EphemWriterWithInterpolator::IsTimeToWrite(Real epochInSecs, const Real sta
                                      ((epochInSecs <= nextOutEpochInSecs) && currPropDirection == -1.0)))
             {
                nextOutEpochInSecs = nextOutEpochInSecs + (stepSizeInSecs * currPropDirection);
-               AddNextEpochToWrite(nextOutEpochInSecs, "   ===== Adding nextOutEpochInSecs to epochsOnWaiting, ");
+               AddNextEpochToWrite(nextOutEpochInSecs,
+                                   "   ===== Using fixed step: Adding nextOutEpochInSecs to epochsOnWaiting, ");
                
                // Handle step size less than integrator step size
                Real nextOut = nextOutEpochInSecs;
+               #ifdef DEBUG_EPHEMFILE_TIME
+               MessageInterface::ShowMessage
+                  ("   ==========> Now handle output step size less than integrator step size\n");
+               DebugWriteTime("   ===> nextOut = ", nextOut);
+               #endif
                while (((nextOut <= epochInSecs) && currPropDirection == 1.0) ||
                       ((nextOut >= epochInSecs) && currPropDirection == -1.0))
                {
                   // Compute new output time
                   nextOut = nextOut + (stepSizeInSecs * currPropDirection);
-                  AddNextEpochToWrite(nextOut, "   ===== Adding nextOut to epochsOnWaiting, ");
+                  AddNextEpochToWrite(nextOut, "   ===== Using fixed step: Adding nextOut to epochsOnWaiting, ");
+                  nextOut = nextOutEpochInSecs;
                }
                retval = true;
             }
@@ -520,7 +537,8 @@ bool EphemWriterWithInterpolator::IsTimeToWrite(Real epochInSecs, const Real sta
             {
                nextOutEpochInSecs = finalEpochA1Mjd * GmatTimeConstants::SECS_PER_DAY;
                nextReqEpochInSecs = nextOutEpochInSecs;
-               AddNextEpochToWrite(nextOutEpochInSecs, "   ===== Adding nextOutEpochInSecs to epochsOnWaiting, ");
+               AddNextEpochToWrite(nextOutEpochInSecs,
+                                   "   ===== Interpolating final state: Adding nextOutEpochInSecs to epochsOnWaiting, ");
                #ifdef DEBUG_EPHEMFILE_TIME
                MessageInterface::ShowMessage
                   ("   ===== current epoch passed final epoch, so setting %f to nextOutEpochInSecs\n",
@@ -533,7 +551,7 @@ bool EphemWriterWithInterpolator::IsTimeToWrite(Real epochInSecs, const Real sta
    
    #ifdef DEBUG_EPHEMFILE_TIME
    MessageInterface::ShowMessage
-      ("EphemWriterWithInterpolator::IsTimeToWrite() returning %d\n", retval);
+      ("EphemWriterWithInterpolator::IsTimeToWrite() returning %d\n\n", retval);
    DebugWriteTime("   nextOutEpochInSecs = ", nextOutEpochInSecs);
    #endif
    return retval;
@@ -554,14 +572,24 @@ void EphemWriterWithInterpolator::WriteOrbitAt(Real reqEpochInSecs, const Real s
 {
    #ifdef DEBUG_EPHEMFILE_ORBIT
    MessageInterface::ShowMessage
-      ("EphemWriterWithInterpolator::WriteOrbitAt() <%p> entered, writingNewSegment=%d, "
-       "reqEpochInSecs=%.15f, %s, state[0]=%.15f\n", this, writingNewSegment, reqEpochInSecs,
+      ("EphemWriterWithInterpolator::WriteOrbitAt() <%p> entered, writingNewSegment=%d\n"
+       "   reqEpochInSecs=%.15f, %s, state[0]=%.15f\n", this, writingNewSegment, reqEpochInSecs,
        ToUtcGregorian(reqEpochInSecs).c_str(), state[0]);
    #endif
    
    if (writingNewSegment)
    {
-      WriteOrbit(reqEpochInSecs, state);
+      // If it needs to interpolate initial state, process it
+      if (interpolateInitialState)
+      {
+         #ifdef DEBUG_EPHEMFILE_ORBIT
+         MessageInterface::ShowMessage
+            ("   ===> Need to interpolate initial state, so calling ProcessEpochsOnWaiting()\n");
+         #endif
+         ProcessEpochsOnWaiting(false, false);
+      }
+      else
+         WriteOrbit(reqEpochInSecs, state);
    }
    else
    {
@@ -667,6 +695,12 @@ void EphemWriterWithInterpolator::ProcessFinalDataOnWaiting(bool canFinish)
                // For CCSDS, write out final data if current epoch is after last epoch
                if (currEpochInSecs > (lastEpochWrote + timeTolerance))
                   writeFinalData = true;
+            }
+            else if (fileType == STK_TIMEPOSVEL)
+            {
+                // For STK_TIMEPOSVEL, write out final data if current epoch is after last epoch
+                if (currEpochInSecs > (lastEpochWrote + timeTolerance))
+                    writeFinalData = true;
             }
             else if (fileType == CODE500_EPHEM)
             {
@@ -999,8 +1033,39 @@ void EphemWriterWithInterpolator::AddNextEpochToWrite(Real epochInSecs,
       #ifdef DEBUG_EPHEMFILE_TIME
       DebugWriteTime(msg + " epochInSecs = ", epochInSecs);
       #endif
-      epochsOnWaiting.push_back(epochInSecs);
-      nextOutEpochInSecs = epochInSecs;
+      
+      // Check if epoch is in leap second for Code500
+      if (fileType == CODE500_EPHEM)
+      {
+         Real a1Mjd = epochInSecs / 86400.0;
+         Real taiMjd = TimeConverterUtil::ConvertToTaiMjd(TimeConverterUtil::A1MJD, a1Mjd);
+         isNextOutputEpochInLeapSecond = TimeConverterUtil::IsInLeapSecond(taiMjd);
+         
+         if (isNextOutputEpochInLeapSecond)
+         {
+            #ifdef DEBUG_EPHEMFILE_TIME
+            MessageInterface::ShowMessage
+               ("=====> EphemWriterWithInterpolator::AddNextEpochToWrite() epochInSecs "
+                "%.15f is in leap second\n   So adding one time extra 1 sec to epochInSecs "
+                "for Code500\n",
+                epochInSecs);
+            DebugWriteTime("   ", epochInSecs + 1.0);
+            #endif
+            epochsOnWaiting.push_back(epochInSecs + 1.0);
+            nextOutEpochInSecs = epochInSecs + 1.0;
+            isNextOutputEpochInLeapSecond = false;
+         }
+         else
+         {
+            epochsOnWaiting.push_back(epochInSecs);
+            nextOutEpochInSecs = epochInSecs;
+         }
+      }
+      else
+      {
+         epochsOnWaiting.push_back(epochInSecs);
+         nextOutEpochInSecs = epochInSecs;
+      }
    }
    else
    {

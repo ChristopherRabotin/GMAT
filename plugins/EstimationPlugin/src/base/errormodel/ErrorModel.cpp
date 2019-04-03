@@ -49,7 +49,7 @@ const std::string ErrorModel::PARAMETER_TEXT[] =
 
 const Gmat::ParameterType ErrorModel::PARAMETER_TYPE[] =
 {
-   Gmat::STRING_TYPE,			// TYPE                  // Its value will be "Range_KM", "Range_RU", "Doppler_RangeRate", "Doppler_HZ", TDRSDoppler_HZ"
+   Gmat::STRING_TYPE,			// TYPE                  // Its value will be ("Range_KM") "Range", "SN_Range", "DSN_Seq_Range", ("Doppler_RangeRate") "RangeRate", "DSN_TCP", ("TDRSDoppler_HZ") "SN_Doppler"
 //   Gmat::INTEGER_TYPE,			// TRIP                  // Its value is 1 for one-way, 2 for two-way, 3 for three-way, and so on
 //   Gmat::STRINGARRAY_TYPE,    // STRAND                // containing a name list of participants along signal path
    Gmat::REAL_TYPE,			   // NOISE_SIGMA           // Measurement noise sigma value
@@ -72,7 +72,7 @@ const Gmat::ParameterType ErrorModel::PARAMETER_TYPE[] =
 //------------------------------------------------------------------------------
 ErrorModel::ErrorModel(const std::string name) :
    GmatBase          (Gmat::ERROR_MODEL, "ErrorModel", name),
-   measurementType   ("Range_RU"),
+   measurementType   ("DSN_SeqRange"),
 // measurementTrip   (2),
 // strand            (""),
    noiseSigma        (103.0),                 // (0.01),                  // 0.01 measurement unit (km, RU, Km/s, or Hz)
@@ -91,6 +91,10 @@ ErrorModel::ErrorModel(const std::string name) :
 
    covariance.AddCovarianceElement("Bias", this);
    covariance(0, 0) = biasSigma*biasSigma;
+
+   // define deprecated type map
+   depTypeMap["Range_RU"]   = "DSN_SeqRange";
+   depTypeMap["Doppler_HZ"] = "DSN_TCP";
 }
 
 
@@ -426,12 +430,16 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == TYPE)
    {
+      
+      std::string value1 = value;
+      value1 = CheckTypeDeprecation(value1);
+
       // Get a list of all available types
       StringArray typesList = GetAllAvailableTypes();
       bool found = false;
       for (Integer i = 0; i < typesList.size(); ++i)
       {
-         if (typesList[i] == value)
+         if (typesList[i] == value1)
          {
             found = true;
             break;
@@ -440,7 +448,7 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value)
       if (!found)
          throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".Type parameter is an invalid measurement type.\n");
 
-      measurementType = value;
+      measurementType = value1;
       return true;
    }
 
@@ -894,13 +902,23 @@ Real* ErrorModel::GetEstimationParameterValue(const Integer item)
 
 StringArray ErrorModel::GetAllAvailableTypes()
 {
-   StringArray sa;
+   static StringArray sa;
+   sa.clear();
 
-   sa.push_back("Range_KM");
-   sa.push_back("Range_RU");
-   sa.push_back("Doppler_HZ");
-   sa.push_back("Doppler_RangeRate");
-   sa.push_back("TDRSDoppler_HZ");
+   sa.push_back("DSN_SeqRange");
+   sa.push_back("DSN_TCP");
+   sa.push_back("GPS_PosVec");
+   //sa.push_back("Range_KM");
+   sa.push_back("Range");
+   //sa.push_back("Doppler_RangeRate");
+   sa.push_back("RangeRate");
+
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();        // fix bug: GMT-5955
+   if (runmode == GmatGlobal::TESTING)                                   // fix bug: GMT-5955
+   {
+      sa.push_back("SN_Range");
+      sa.push_back("SN_Doppler");                                        // fix bug: GMT-5955
+   }
 
    return sa;
 }
@@ -946,3 +964,24 @@ Rmatrix* ErrorModel::GetParameterCovariances(Integer parameterId)
       throw GmatBaseException("Error: cannot get " + GetName() + " spacecraft's covariance when it is not initialized.\n");
    return NULL;
 }
+
+
+std::string ErrorModel::CheckTypeDeprecation(const std::string datatype)
+{
+   std::string typeName = datatype;
+   for (std::map<std::string, std::string>::iterator i = depTypeMap.begin();
+      i != depTypeMap.end(); ++i)
+   {
+      if ((*i).first == datatype)
+      {
+         MessageInterface::ShowMessage("Warning: " + GetName() + ".Type name '" 
+            + datatype + "' is deprecated and will be removed in a future release. Use '"
+            + (*i).second + "' instead.\n");
+         typeName = (*i).second;
+         break;
+      }
+   }
+
+   return typeName;
+}
+

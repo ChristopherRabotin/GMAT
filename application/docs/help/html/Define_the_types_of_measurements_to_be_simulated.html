@@ -1,0 +1,50 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Define the types of measurements to be simulated</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Tut_Simulate_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;13.&nbsp;Simulate DSN Range and Doppler Data"><link rel="prev" href="Create_and_configure_the_Ground_Station_and_related_parameters.html" title="Create and configure the Ground Station and related parameters"><link rel="next" href="Create_and_configure_Force_model_and_propagator.html" title="Create and configure Force model and propagator"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Define the types of measurements to be simulated</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Create_and_configure_the_Ground_Station_and_related_parameters.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;13.&nbsp;Simulate DSN Range and Doppler Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Create_and_configure_Force_model_and_propagator.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="Define_the_types_of_measurements_to_be_simulated"></a>Define the types of measurements to be simulated</h2></div></div></div><p>Now we will create and configure a
+    <span class="guilabel">TrackingFileSet</span> resource. This resource defines the
+    type of data to be simulated, the ground stations that will be used, and
+    the file name of the output GMD file which will contain the simulated
+    data. In addition, the <span class="guilabel">TrackingFileSet</span> resource will
+    define needed simulation parameters for the various data types.</p><pre class="programlisting">Create TrackingFileSet DSNsimData;
+DSNsimData.AddTrackingConfig        = {{CAN, Sat, CAN}, 'DSN_SeqRange'};   
+DSNsimData.AddTrackingConfig        = {{CAN, Sat, CAN}, 'DSN_TCP'};                 
+DSNsimData.FileName                 = ...
+                     {'Sat_dsn_range_and_doppler_measurements.gmd'};
+
+DSNsimData.UseLightTi               = true;
+DSNsimData.UseRelativityCorrection  = true;
+DSNsimData.UseETminusTAI            = true;
+
+DSNsimData.SimDopplerCountInterval  = 10.0;
+DSNsimData.SimRangeModuloConstant   = 3.3554432e+07;</pre><p>The script lines above are broken into three sections. In the first
+    section, the resource name, <span class="guilabel">DSNsimData</span>, is declared,
+    the data types are defined, and the output file name is specified.
+    <span class="guilabel">AddTrackingConfig</span> is the field that is used to define
+    the data types. The first <span class="guilabel">AddTrackingConfig</span> line
+    tells GMAT to simulate DSN range two way measurements for the
+    <span class="guilabel">CAN</span> to <span class="guilabel">Sat</span> to
+    <span class="guilabel">CAN</span> measurement strand. The second
+    <span class="guilabel">AddTrackingConfig</span> line tells GMAT to simulate DSN
+    Doppler two way measurements for the <span class="guilabel">CAN</span> to
+    <span class="guilabel">Sat</span> to <span class="guilabel">CAN</span> measurement
+    strand.</p><p>The second section above sets some simulation parameters that apply
+    to both the range and Doppler measurements. We set
+    <span class="guilabel">UseLightTime</span> to True in order to generate realistic
+    measurements where GMAT takes into account the finite speed of light. The
+    last two parameters in this section,
+    <span class="guilabel">UseRelativityCorrection</span> and
+    <span class="guilabel">UseETminusTAI</span>, are set to True so that general
+    relativistic corrections, as described in Moyer [2000], are applied to the
+    light time equations.</p><p>The third section above sets simulation parameters that apply to a
+    specific measurement type. <span class="guilabel">SimDopplerCountInterval</span>
+    applies only to Doppler measurements and
+    <span class="guilabel">SimRangeModuloConstant</span> applies only to range
+    measurements. We note that the &ldquo;Sim&rdquo; in the field names is used to
+    indicate that these fields only are applicable when GMAT is in simulation
+    mode (i.e., when using the <span class="guilabel">RunSimulator</span> command) data
+    and not when GMAT is in estimation mode (i.e., when using the
+    <span class="guilabel">RunEstimator</span> command).
+    <span class="guilabel">SimDopplerCountInterval</span>, the Doppler Count Interval,
+    is set to 10 seconds and <span class="guilabel">SimRangeModuloConstant</span>, the
+    maximum possible range value, is set to 33554432. See the
+    <span class="guilabel">RunSimulator</span> Help and <span class="emphasis"><em><a class="xref" href="Appendix_A_Determination_of_Measurement_Noise_Values.html" title="Appendix A &ndash; Determination of Measurement Noise Values">Appendix A &ndash; Determination of Measurement Noise Values</a></em></span> for a description of how these
+    parameters are used to calculate the measurement values.</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Create_and_configure_the_Ground_Station_and_related_parameters.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Tut_Simulate_DSN_Range_and_Doppler_Data.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Create_and_configure_Force_model_and_propagator.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Create and configure the Ground Station and related
+    parameters&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Create and configure Force model and propagator</td></tr></table></div></body></html>

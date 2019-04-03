@@ -1,0 +1,40 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Create and configure Simulator object</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Tut_Simulate_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;13.&nbsp;Simulate DSN Range and Doppler Data"><link rel="prev" href="Create_and_configure_Force_model_and_propagator.html" title="Create and configure Force model and propagator"><link rel="next" href="Run_the_mission_and_analyze_the_results.html" title="Run the mission and analyze the results"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Create and configure Simulator object</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Create_and_configure_Force_model_and_propagator.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;13.&nbsp;Simulate DSN Range and Doppler Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Run_the_mission_and_analyze_the_results.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="Create_and_configure_Simulator_object"></a>Create and configure Simulator object</h2></div></div></div><p>As shown below, we create and configure the
+    <span class="guilabel">Simulator</span> object used to define our
+    simulation.</p><pre class="programlisting">Create Simulator Sim;
+Sim.AddData             = {DSNsimData};
+Sim.EpochFormat         = UTCGregorian;
+Sim.InitialEpoch        = '19 Aug 2015 00:00:00.000';
+Sim.FinalEpoch          = '19 Aug 2015 00:12:00.000';
+Sim.MeasurementTimeStep = 600;
+Sim.Propagator          = Prop;
+Sim.AddNoise            = Off;</pre><p>In the first script line above, we create a
+    <span class="guilabel">Simulator</span> object, <span class="guilabel">Sim</span>. The next
+    field set is <span class="guilabel">AddData</span> which is used to specify which
+    <span class="guilabel">TrackingFileSet</span> should be used. Recall that the
+    <span class="guilabel">TrackingFileSet</span> specifies the type of data to be
+    simulated and the file name specifying where to store the data. The
+    <span class="guilabel">TrackingFileSet</span>, <span class="guilabel">DSNsimData</span>,
+    that we created in the <a class="xref" href="Define_the_types_of_measurements_to_be_simulated.html" title="Define the types of measurements to be simulated">Define the types of measurements to be simulated</a> section, specified that we wanted to simulate
+    two way DSN range and Doppler data that involved the
+    <span class="guilabel">CAN</span> <span class="guilabel">GroundStation</span>.</p><p>The next three script lines, which set the
+    <span class="guilabel">EpochFormat</span>, <span class="guilabel">InitialEpoch</span>, and
+    <span class="guilabel">FinalEpoch</span> fields, specify the time period of the
+    simulation. Here, we choose a short 12 minute duration.</p><p>The next script line sets the
+    <span class="guilabel">MeasurementTimeStep</span> field which specifies the
+    requested time between measurements. We choose a value of 10 minutes. This
+    means that our data file will contain a maximum of two range measurements
+    and two Doppler measurements.</p><p>The next script line sets the <span class="guilabel">Propagator</span> field
+    which specifies which <span class="guilabel">Propagator</span> object should be
+    used. We set this field to the <span class="guilabel">Prop</span>
+    <span class="guilabel">Propagator</span> object which we created in the
+    <span class="emphasis"><em><a class="xref" href="Create_and_configure_Force_model_and_propagator.html" title="Create and configure Force model and propagator">Create and configure Force model and propagator</a></em></span> section.</p><p>Finally, in the last line of the script segment, we set the
+    <span class="guilabel">AddNoise</span> field which specifies whether or not we want
+    to add noise to our simulated measurements. The noise that can be added is
+    defined by the <span class="guilabel">ErrorModel</span> objects that we created in
+    the <a class="xref" href="Create_and_configure_the_Ground_Station_and_related_parameters.html" title="Create and configure the Ground Station and related parameters">Create and configure the Ground Station and related
+    parameters</a> section. As discussed in the <a class="xref" href="Create_and_configure_the_Ground_Station_and_related_parameters.html" title="Create and configure the Ground Station and related parameters">Create and configure the Ground Station and related
+    parameters</a> section and <span class="emphasis"><em><a class="xref" href="Appendix_A_Determination_of_Measurement_Noise_Values.html" title="Appendix A &ndash; Determination of Measurement Noise Values">Appendix A &ndash; Determination of Measurement Noise Values</a></em></span>, the noise added to the range
+    measurements would be Gaussian with a one sigma value of 10.63 Range Units
+    and the noise added to the Doppler measurements would be Gaussian with a
+    one sigma value of 0.0282 Hz. For this simulation, we choose not to add
+    noise.</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Create_and_configure_Force_model_and_propagator.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Tut_Simulate_DSN_Range_and_Doppler_Data.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Run_the_mission_and_analyze_the_results.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Create and configure Force model and propagator&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Run the mission and analyze the results</td></tr></table></div></body></html>

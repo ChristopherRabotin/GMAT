@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -155,6 +155,7 @@ Propagate::Propagate() :
    stopTrigger                 (-1),
    propAllSTMs                 (false),
    calcAllAmatrices            (false),
+   resetLoopDataFlag           (false),
    checkFirstStep              (true),
    state                       (NULL),
    j2kState                    (NULL),
@@ -279,6 +280,7 @@ Propagate::Propagate(const Propagate &prp) :
    currEpoch                   (prp.currEpoch),
    propAllSTMs                 (prp.propAllSTMs),
    calcAllAmatrices            (prp.calcAllAmatrices),
+   resetLoopDataFlag           (prp.resetLoopDataFlag),
    checkFirstStep              (true),
    state                       (NULL),
    j2kState                    (NULL),
@@ -364,6 +366,7 @@ Propagate& Propagate::operator=(const Propagate &prp)
    overrideSegmentColor    = prp.overrideSegmentColor;
    propAllSTMs             = prp.propAllSTMs;
    calcAllAmatrices        = prp.calcAllAmatrices;
+   resetLoopDataFlag       = prp.resetLoopDataFlag;
 
    isInitialized             = false;
 
@@ -1569,10 +1572,11 @@ bool Propagate::TakeAction(const std::string &action,
    }
    else if (action == "ResetLoopData")
    {
-      for (std::vector<Propagator*>::iterator i = p.begin(); i != p.end(); ++i)
-      {
-         (*i)->ResetInitialData();
-      }
+      resetLoopDataFlag = true;
+//      for (std::vector<Propagator*>::iterator i = p.begin(); i != p.end(); ++i)
+//      {
+//         (*i)->ResetInitialData();
+//      }
       return true;
    }
    else if (action == "IsInFunction")
@@ -3793,10 +3797,14 @@ void Propagate::PrepareToPropagate()
             dim = p[n]->GetDimension();
          }
 
+         if (resetLoopDataFlag)
+            p[n]->ResetInitialData();
          p[n]->Initialize();
+
          p[n]->Update(direction > 0.0);
       }
 
+      resetLoopDataFlag = false;
       baseEpoch.clear();
 
       for (Integer n = 0; n < (Integer)propagators.size(); ++n)
@@ -4044,6 +4052,8 @@ void Propagate::PrepareToPropagate()
    }
 
    #ifdef DEBUG_PUBLISH_DATA
+      if (fabs(pubdata[1]) + fabs(pubdata[2]) + fabs(pubdata[3]) < 100.0)
+         MessageInterface::ShowMessage(">>>>>>>>>>>>> P2P: BAD DATA BEING PUBLISHED!!! <<<<<<<<<<<<<<\n");
       MessageInterface::ShowMessage
          ("Propagate::PrepareToPropagate()\n   '%s'\nPublishing initial %d "
                "data to stream %d, 1st data = [",
@@ -4056,6 +4066,8 @@ void Propagate::PrepareToPropagate()
          else
             MessageInterface::ShowMessage("]\n");
       }
+      if (fabs(pubdata[1]) + fabs(pubdata[2]) + fabs(pubdata[3]) < 100.0)
+         MessageInterface::ShowMessage(">>>>>>>>>>>>>  P2P: BAD DATA WAS PUBLISHED!!!  <<<<<<<<<<<<<<\n");
    #endif
 
 // Start on a fix for bug 648; also uncomment the execute block for single
@@ -4282,13 +4294,13 @@ bool Propagate::Execute()
 
       while (!stopCondMet)
       {
-         // Update the epoch on the force models
+         // Update the epoch on the propagators
          for (UnsignedInt i = 0; i < fm.size(); ++i)
          {
             if (fm[i] != NULL)
                fm[i]->UpdateInitialData();
-//            else
-//               p[i]->LoadInitialData();
+            else
+               p[i]->UpdateFromSpaceObject();
          }
          #ifdef DEBUG_EPOCH_UPDATES
             for (UnsignedInt i = 0; i < fm.size(); ++i)
@@ -4353,27 +4365,50 @@ bool Propagate::Execute()
                   ("Propagate::Breaking for Single Step\n");
             #endif
 
-/**
- *         We are not publishing the final point when running in single step
- *         mode; this code does that, but then we end up with repeated points
- *         because the last point from one step is the first point in the next.
- *         If we publish here, the Publisher or all Subscribers need to be able
- *         to handle the repeated point issues.
- */
+            /*
+             * We are not publishing the final point when running in single step
+             * mode except for publishing to ephemeris files; this code does that,
+             * but we end up with repeated points in other subscribers if the ephem
+             * only setting is not used (dsetting |direction| = 2) because the last
+             * point from one step is the first point in the next.  GMT-6110
+             * addresses the possibility of publishing everywhere, as we do for
+             * stop mode propagation.
+             *
+             * The Publisher handles the repeated point issue by only sending step
+             * mode data to EphemerisFile subscribers.
+             */
+            pubdata[0] = currEpoch[0];
 
-//            pubdata[0] = currEpoch[0];
-//            memcpy(&pubdata[1], j2kState, dim*sizeof(Real));
-//            #ifdef DEBUG_PUBLISH_DATA
-//               MessageInterface::ShowMessage
-//                     ("***Propagate::Execute() SingleStep '%s' publishing current "
-//                      "%d data to stream %d, 1st data = [%.12lf %.12lf %.12lf "
-//                      "%.12lf %.12lf %.12lf %.12lf]\n",
-//                      GetGeneratingString(Gmat::NO_COMMENTS).c_str(), dim+1,
-//                      streamID, pubdata[0], pubdata[1], pubdata[2], pubdata[3],
-//                      pubdata[4], pubdata[5], pubdata[6]);
-//            #endif
-//
-//            publisher->Publish(this, streamID, pubdata, dim+1, direction);
+            // For each PropSetup, fill the appropriate array elements
+            Integer index = 1;
+            Integer size = 0;
+            for (UnsignedInt i = 0; i < propagators.size(); ++i)
+            {
+               j2kState = p[i]->GetJ2KState();
+               size = p[i]->GetDimension();
+               memcpy(&pubdata[index], j2kState, size*sizeof(Real));
+               index += size;
+            }
+
+            #ifdef DEBUG_PUBLISH_DATA
+               if (fabs(pubdata[1]) + fabs(pubdata[2]) + fabs(pubdata[3]) < 100.0)
+                  MessageInterface::ShowMessage(">>>>>>>>>>>>> Exec: BAD DATA BEING PUBLISHED!!! <<<<<<<<<<<<<<\n");
+               MessageInterface::ShowMessage
+                     ("***Propagate::Execute() SingleStep '%s' publishing current "
+                      "%d data to stream %d, 1st data = [%.12lf %.12lf %.12lf "
+                      "%.12lf %.12lf %.12lf %.12lf]\n",
+                      GetGeneratingString(Gmat::NO_COMMENTS).c_str(), dim+1,
+                      streamID, pubdata[0], pubdata[1], pubdata[2], pubdata[3],
+                      pubdata[4], pubdata[5], pubdata[6]);
+               if (fabs(pubdata[1]) + fabs(pubdata[2]) + fabs(pubdata[3]) < 100.0)
+                  MessageInterface::ShowMessage(">>>>>>>>>>>>>  Exec: BAD DATA WAS PUBLISHED!!!  <<<<<<<<<<<<<<\n");
+            #endif
+
+            // |Direction| is 2 here to indicate only ephems should get data
+            // This is the code to only publish to ephems in step mode.
+            //
+            // Remove the "2.0 * " piece to implement GMT-6110.
+            publisher->Publish(this, streamID, pubdata, dim+1, 2.0 * direction);
 
             // Set segment orbit color (LOJ: 2013.12.16 Added for propagation segment color)
             publisher->SetSegmentOrbitColor(this, overrideSegmentColor, segmentOrbitColor, fullSatList);

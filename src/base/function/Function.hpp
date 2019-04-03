@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -32,13 +32,10 @@
 #define Function_hpp
 
 #include "GmatBase.hpp"
-#include "FunctionException.hpp"
-#include "ElementWrapper.hpp"
+#include "SolarSystem.hpp"
+#include "CoordinateSystem.hpp"
 #include "PhysicalModel.hpp"
-#include "GmatCommand.hpp"
 #include "ObjectInitializer.hpp"
-#include "Validator.hpp"
-#include <map>
 
 /**
  * All function classes are derived from this base class.
@@ -50,7 +47,7 @@ public:
    virtual ~Function();
    Function(const Function &f);
    Function&            operator=(const Function &f);
-
+   
    virtual void         SetCallDescription(const std::string &desc);
    
    virtual WrapperTypeArray
@@ -59,51 +56,22 @@ public:
    virtual void         SetOutputTypes(WrapperTypeArray &outputTypes,
                                        IntegerArray &rowCounts,
                                        IntegerArray &colCounts);
+   
+   virtual void         SetErrorFound(bool errFlag);
+   virtual bool         ErrorFound();
+   
+   virtual std::string  GetFunctionPathAndName();
+   
    virtual bool         IsNewFunction();
    virtual void         SetNewFunction(bool flag);
+   
    virtual bool         Initialize(ObjectInitializer *objInit, bool reinitialize = false);
    virtual bool         Execute(ObjectInitializer *objInit, bool reinitialize = false);
    virtual void         Finalize(bool cleanUp = false);
-   virtual bool         IsFcsFinalized();
-   virtual void         SetObjectMap(ObjectMap *objMap);
-   virtual void         SetGlobalObjectMap(std::map<std::string, GmatBase *> *map);
+   
    virtual void         SetSolarSystem(SolarSystem *ss);
    virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
    virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
-   virtual void         SetScriptErrorFound(bool errFlag);
-   virtual bool         ScriptErrorFound();
-   virtual bool         WasFunctionBuilt();
-   virtual void         SetFunctionWasBuilt(bool built);
-   virtual bool         IsFunctionInputOutputSet();
-   virtual void         SetFunctionInputOutputIsSet(bool set);
-   virtual bool         IsFunctionControlSequenceSet();
-   virtual bool         SetFunctionControlSequence(GmatCommand *cmd);
-   virtual GmatCommand* GetFunctionControlSequence();
-   virtual std::string  GetFunctionPathAndName();
-   
-   virtual bool         SetInputElementWrapper(const std::string &forName,
-                                               ElementWrapper *wrapper);
-   virtual ElementWrapper* GetOutputArgument(Integer argNumber);
-   virtual ElementWrapper* GetOutputArgument(const std::string &byName);
-   virtual WrapperArray&   GetWrappersToDelete();
-   virtual void         ClearInOutArgMaps(bool deleteInputs, bool deleteOutputs);
-   
-   // Methods for objects created in the function via Create
-   virtual void         ClearFunctionObjects();
-   virtual void         AddFunctionObject(GmatBase *obj);
-   virtual GmatBase*    FindFunctionObject(const std::string &name);
-   virtual ObjectMap*   GetFunctionObjectMap();
-   
-   // methods to set/get the automatic objects
-   virtual void         ClearAutomaticObjects();
-   virtual void         AddAutomaticObject(const std::string &withName, GmatBase *obj,
-                                           bool alreadyManaged);
-   virtual GmatBase*    FindAutomaticObject(const std::string &name);
-   virtual ObjectMap*   GetAutomaticObjectMap();
-   
-   // Inherited (GmatBase) methods
-   virtual bool         TakeAction(const std::string &action,
-                                      const std::string &actionData = "");
    
    virtual bool         IsParameterReadOnly(const Integer id) const;
    virtual std::string  GetParameterText(const Integer id) const;
@@ -144,59 +112,24 @@ protected:
    StringArray          inputNames;
    /// Function output names
    StringArray          outputNames;
-   // @todo - should these next five items remain here or move to GmatFunction??
-   /// Function input name and element wrapper map  // @todo - is this needed?
-   WrapperMap           inputArgMap;
-   /// Function output name element wrapper map
-   WrapperMap           outputArgMap;
    /// Output wrapper type array
    WrapperTypeArray     outputWrapperTypes;
+   
    /// Output row count used for returning one Array type
    IntegerArray         outputRowCounts;
    /// Output column count used for returning one Array type
    IntegerArray         outputColCounts;
-   /// Old wrappers to delete
-   WrapperArray         wrappersToDelete;
-   /// Object array to delete
-   ObjectArray          objectsToDelete;
-   /// Objects already in the Sandbox object map
-   ObjectArray          sandboxObjects;
-   /// Object store for the Function 
-   ObjectMap            *objectStore;
-   /// Object store obtained from the Sandbox
-   ObjectMap            *globalObjectStore;
+   
    /// Solar System, set by the local Sandbox, to pass to the function
    SolarSystem          *solarSys;
    /// Internal CS, set by the local Sandbox, to pass to the function
    CoordinateSystem     *internalCoordSys;
    /// transient forces to pass to the function
-   std::vector<PhysicalModel *> 
-                        *forces;
-   // @todo - should these next four items remain here or move to GmatFunction??
-   /// the function control sequence
-   GmatCommand          *fcs;
-   /// have the commands in the FCS been initialized?
-   bool                 fcsInitialized;
-   /// have the commands in the FCS been finalized?
-   bool                 fcsFinalized;
-   /// Map to hold objects created in function
-   ObjectMap            functionObjectMap;
-   /// objects automatically created on parsing (but for whom a references object cannot be
-   /// set at that time)
-   ObjectMap            automaticObjectMap;
-   // Validator used to create the ElementWrappers
-   Validator            *validator;
-   /// Object store needed by the validator
-   ObjectMap            validatorStore;
-   /// the flag indicating if function has been built
-   bool                 wasFunctionBuilt;
-   /// the flag indicating if function input/output are set
-   bool                 isFunctionIOSet;
-   /// the flag indicating script error found in function, this flag is set by Interpreter
-   bool                 scriptErrorFound;
-   /// the flag indicating local objects are initialized
-   bool                 objectsInitialized;
-      
+   std::vector<PhysicalModel *> *forces;
+   
+   /// the flag indicating error found in function, this flag is set by Interpreter
+   bool                 errorFound;
+   
    enum
    {
       FUNCTION_PATH = GmatBaseParamCount,
@@ -211,13 +144,6 @@ protected:
    static const Gmat::ParameterType
       PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount];
    
-   GmatBase* FindObject(const std::string &name);
-   bool      IsAutomaticObjectGlobal(const std::string &autoObjName, GmatBase **owner);
-   
-   // for debug
-   void ShowObjectMap(ObjectMap *objMap, const std::string &title = "",
-                      const std::string &mapName = "");
-   void ShowObjects(const std::string &title);
 };
 
 

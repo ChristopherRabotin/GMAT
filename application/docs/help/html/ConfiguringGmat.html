@@ -1,0 +1,94 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter&nbsp;4.&nbsp;Configuring GMAT</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="UsingGmat.html" title="Using GMAT"><link rel="prev" href="ScriptEditor.html" title="Script Editor"><link rel="next" href="ConfiguringGmat_DataFiles.html" title="Configuring Data Files"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Chapter&nbsp;4.&nbsp;Configuring GMAT</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ScriptEditor.html">Prev</a>&nbsp;</td><th align="center" width="60%">Using GMAT</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ConfiguringGmat_DataFiles.html">Next</a></td></tr></table><hr></div><div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a name="ConfiguringGmat"></a>Chapter&nbsp;4.&nbsp;Configuring GMAT</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="section"><a href="ConfiguringGmat.html#N10C01">File Structure</a></span></dt><dd><dl><dt><span class="section"><a href="ConfiguringGmat.html#N10C1F"><code class="filename">bin</code></a></span></dt><dt><span class="section"><a href="ConfiguringGmat.html#N10C3D"><code class="filename">data</code></a></span></dt><dt><span class="section"><a href="ConfiguringGmat.html#N10C9C"><code class="filename">docs</code></a></span></dt><dt><span class="section"><a href="ConfiguringGmat.html#N10CA8"><code class="filename">extras</code></a></span></dt><dt><span class="section"><a href="ConfiguringGmat.html#N10CB1"><code class="filename">matlab</code></a></span></dt><dt><span class="section"><a href="ConfiguringGmat.html#N10CBD"><code class="filename">output</code></a></span></dt><dt><span class="section"><a href="ConfiguringGmat.html#N10CC6"><code class="filename">plugins</code></a></span></dt><dt><span class="section"><a href="ConfiguringGmat.html#N10CD2"><code class="filename">samples</code></a></span></dt><dt><span class="section"><a href="ConfiguringGmat.html#N10CE1"><code class="filename">userfunctions</code></a></span></dt></dl></dd><dt><span class="section"><a href="ConfiguringGmat_DataFiles.html">Configuring Data Files</a></span></dt><dd><dl><dt><span class="section"><a href="ConfiguringGmat_DataFiles.html#N10D5C">Loading Custom Plugins</a></span></dt><dt><span class="section"><a href="ConfiguringGmat_DataFiles.html#N10D67">Configuring the MATLAB Inteface</a></span></dt><dt><span class="section"><a href="ConfiguringGmat_DataFiles.html#N10D6F">Configuring the Python Inteface</a></span></dt><dt><span class="section"><a href="ConfiguringGmat_DataFiles.html#N10D77">User-defined Function Paths</a></span></dt></dl></dd></dl></div><p>Below we discuss the files and data that are distributed with GMAT and
+  are required for GMAT execution. GMAT uses many types of data files,
+  including planetary ephemeris files, Earth orientation data, leap second
+  files, and gravity coefficient files. This section describes how these files
+  are organized and the controls provided to customize them.</p><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N10C01"></a>File Structure</h2></div></div></div><p>The default directory structure for GMAT is broken into eight main
+    subdirectories, as shown in <a class="xref" href="ConfiguringGmat.html#GmatRootDirectoryStructure" title="Figure&nbsp;4.1.&nbsp;GMAT Root Directory Structure">Figure&nbsp;4.1, &ldquo;GMAT Root Directory Structure&rdquo;</a>.
+    These directories organize the files and data used to run GMAT, including
+    binary libraries, data files, texture maps, and 3D models. The only two
+    files in the GMAT root directory are <code class="filename">license.txt</code>,
+    which contains the text of the Apache License 2.0, and
+    <code class="filename">README.txt</code>, which contains user information for the
+    current GMAT release. A summary of the contents of each subdirectory is
+    provided in the sections below.</p><div class="figure"><a name="GmatRootDirectoryStructure"></a><p class="title"><b>Figure&nbsp;4.1.&nbsp;GMAT Root Directory Structure</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Util_DirectoryStructure.png" align="middle" height="240" alt="GMAT Root Directory Structure"></td></tr></table></div></div></div></div><br class="figure-break"><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10C1F"></a><code class="filename">bin</code></h3></div></div></div><p>The <code class="filename">bin</code> directory contains all binary files
+      required for the core functionality of GMAT. These libraries include the
+      executable file (<code class="filename">GMAT.exe</code> on Windows,
+      <code class="filename">GMAT.app</code> on the Mac, and <code class="filename">GMAT</code>
+      on Linux) and platform-specific support libraries. The
+      <code class="filename">bin</code> directory also contains two text files:
+      <code class="filename">gmat_startup_file.txt</code> and
+      <code class="filename">gmat.ini</code>. The startup file is discussed in detail
+      in a separate section below. The <code class="filename">gmat.ini</code> file is
+      used to configure some GUI panels, set paths to external web links, and
+      define GUI tooltip messages.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10C3D"></a><code class="filename">data</code></h3></div></div></div><p>The <code class="filename">data</code> directory contains all required data
+      files to run GMAT and is organized according to data type, as shown in
+      <a class="xref" href="ConfiguringGmat.html#GmatDataDirectoryStructure" title="Figure&nbsp;4.2.&nbsp;GMAT Data Directory Structure">Figure&nbsp;4.2, &ldquo;GMAT Data Directory Structure&rdquo;</a> and described below.</p><div class="figure"><a name="GmatDataDirectoryStructure"></a><p class="title"><b>Figure&nbsp;4.2.&nbsp;GMAT Data Directory Structure</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Util_DirectoryStructure_Data.png" align="middle" height="228" alt="GMAT Data Directory Structure"></td></tr></table></div></div></div></div><br class="figure-break"><p>The <code class="filename">graphics</code> directory contains data files
+      for GMAT&rsquo;s visualization utilities, as well as application icons and
+      images. The <code class="filename">splash</code> directory contains the GMAT
+      splash screen that is displayed briefly while GMAT is initializing. The
+      <code class="filename">stars</code> directory contains a star catalogue used for
+      displaying stars in 3D graphics. The texture folder contains texture
+      maps used for the 2D and 3D graphics resources. The
+      <code class="filename">icons</code> directory contains graphics files for icons
+      and images loaded at run time, such as the GMAT logo and GUI
+      icons.</p><p>The <code class="filename">gravity</code> directory contains gravity
+      coefficient files for each body with a default non-spherical gravity
+      model. Within each directory, the coefficient files are named according
+      to the model they represent, and use the extension
+      <code class="filename">.cof</code>.</p><p>The <code class="filename">gui_config</code> directory contains files for
+      configuring some of the GUI dialog boxes for GMAT resources and
+      commands. These files allow you to easily create a GUI panel for a
+      user-provided plugin, and are also used by some of the built-in GUI
+      panels.</p><p>The <code class="filename">planetary_coeff</code> directory contains the
+      Earth orientation parameters (EOP) provided by the International Earth
+      Rotation Service (IERS) and nutation coefficients for different nutation
+      theories.</p><p>The <code class="filename">planetary_ephem</code> directory contains
+      planetary ephemeris data in both DE and SPK formats. The
+      <code class="filename">de</code> directory contains the binary digital ephemeris
+      DE405 files for the 8 planets, the Moon, and Pluto developed and
+      distributed by JPL. The <code class="filename">spk</code> directory contains the
+      DE421 SPICE kernel and kernels for selected comets, asteroids and moons.
+      All ephemeris files distributed with GMAT are in the little-endian
+      format.</p><p>The <code class="filename">time</code> directory contains the JPL leap
+      second kernel <code class="filename">naif0010.tls</code> and the GMAT leap second
+      file <code class="filename">tai-utc.dat</code>.</p><p>The <code class="filename">vehicle</code> directory contains ephemeris data
+      and 3D models for selected spacecraft. The <code class="filename">ephem</code>
+      directory contains SPK ephemeris files, including orbit, attitude,
+      frame, and time kernels. The <code class="filename">models</code> directory
+      contains 3D model files in 3DS or POV format for use by GMAT&rsquo;s
+      <code class="classname">OrbitView</code> visualization resource.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10C9C"></a><code class="filename">docs</code></h3></div></div></div><p>The <code class="filename">docs</code> directory contains end-user
+      documentation, including draft PDF versions of the Mathematical
+      Specification, Architectural Specification, and Estimation
+      Specification. The GMAT User&rsquo;s Guide is available in the
+      <code class="filename">help</code> directory in PDF and HTML formats, and as a
+      Windows HTML Help file.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10CA8"></a><code class="filename">extras</code></h3></div></div></div><p>The <code class="filename">extras</code> directory contains various extra
+      convenience files that are helpful for working with GMAT but aren't part
+      of the core codebase. The only file here so far is a syntax coloring
+      file for the GMAT scripting language in the Notepad++ text
+      editor.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10CB1"></a><code class="filename">matlab</code></h3></div></div></div><p>The <code class="filename">matlab</code> directory contains M-files
+      required for GMAT&rsquo;s MATLAB interfaces, including the interface to the
+      fmincon optimizer. All files in the <code class="filename">matlab</code>
+      directory and its subdirectories must be included in your MATLAB path
+      for the MATLAB interfaces to function properly.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10CBD"></a><code class="filename">output</code></h3></div></div></div><p>The <code class="filename">output</code> directory is the default location
+      for file output such as ephemeris files and report files. If no path
+      information is provided for reports or ephemeris files created during a
+      GMAT session, then those files will be written to the output
+      folder.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10CC6"></a><code class="filename">plugins</code></h3></div></div></div><p>The <code class="filename">plugins</code> directory contains optional
+      plugins that are not required for use of GMAT. The
+      <code class="filename">proprietary</code> directory is used for for third-party
+      libraries that cannot be distributed freely and is an empty folder in
+      the open source distribution.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10CD2"></a><code class="filename">samples</code></h3></div></div></div><p>The <code class="filename">samples</code> directory contains sample
+      missions and scripts, ranging from a Hohmann transfer to libration point
+      station-keeping to Mars B-plane targeting. Example files begin with
+      "Ex_" and files that correspond to GMAT tutorials begin with "Tut_".
+      These files are intended to demonstrate GMAT&rsquo;s capabilities and to
+      provide you with a potential starting point for building common mission
+      types for your application and flight regime. Samples with specific
+      requirements are located in subdirectories such as
+      <code class="filename">NeedMatlab</code> and
+      <code class="filename">NeedVF13ad</code>.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10CE1"></a><code class="filename">userfunctions</code></h3></div></div></div><p>The <code class="filename">userfunctions</code> directory contains MATLAB,
+      Python, and GMAT functions that are included in the GMAT distribution.
+      You can also store your own custom functions in the subdirectories named
+      GMAT, Python, and MATLAB. GMAT includes those subdirectories in its
+      search path to locate functions referenced in GMAT scripts and GMAT
+      functions.</p></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ScriptEditor.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="UsingGmat.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ConfiguringGmat_DataFiles.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Script Editor&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Configuring Data Files</td></tr></table></div></body></html>

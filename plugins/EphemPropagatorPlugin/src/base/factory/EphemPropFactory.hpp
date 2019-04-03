@@ -36,6 +36,8 @@
 class EPHEM_PROPAGATOR_API EphemPropFactory : public Factory
 {
 public:
+   virtual GmatBase* CreateObject(const std::string &ofType,
+                                const std::string &withName /* = "" */);
    virtual Propagator* CreatePropagator(const std::string &ofType,
                                 const std::string &withName /* = "" */);
 

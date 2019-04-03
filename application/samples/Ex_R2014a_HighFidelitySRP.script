@@ -6,7 +6,7 @@
 %  Create the spacecraft and define the SRP file. 
 Create Spacecraft aSpacecraft;
 aSpacecraft.DryMass = 2000
-aSpacecraft.SPADSRPFile = '..\data\vehicle\spad\SphericalModel.spo'
+aSpacecraft.SPADSRPFile = '../data/vehicle/spad/SphericalModel.spo'
 aSpacecraft.SPADSRPScaleFactor = 1;
 
 %  Create force model and configure it to use SPAD file for SRP

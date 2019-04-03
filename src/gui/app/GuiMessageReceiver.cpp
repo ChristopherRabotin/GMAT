@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -49,6 +49,8 @@
 #include "GmatGlobal.hpp"          // for RunBachMode()
 #include "FileUtil.hpp"            // for ParsePathName()
 //#include "StringUtil.hpp"          // for GmatStringUtil::Replace()
+
+//#define DEBUG_SET_LOG_FILE
 
 //---------------------------------
 //  static data
@@ -628,11 +630,14 @@ void GuiMessageReceiver::SetLogPath(const std::string &pathname, bool append)
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::SetLogFile(const std::string &filename)
 {
+#ifdef DEBUG_SET_LOG_FILE
+   ShowMessage("Log file being set to: %s\n", filename.c_str());
+#endif
    std::string fname = filename;
+   FileManager *fm   = FileManager::Instance();
    
    if (GmatFileUtil::ParsePathName(fname) == "")
    {
-      FileManager *fm = FileManager::Instance();
       std::string outPath = fm->GetFullPathname(FileManager::OUTPUT_PATH);
       fname = outPath + fname;
    }
@@ -653,6 +658,17 @@ void GuiMessageReceiver::SetLogFile(const std::string &filename)
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::OpenLogFile(const std::string &filename, bool append)
 {
+   // Make sure we aren't stomping on an already existing non-log file
+   // Make sure we aren't stomping on an already existing non-log file
+   if (logFileName != filename)
+   {
+      if (!IsValidLogFile(filename))
+      {
+         throw GmatBaseException(
+               "ERROR - specified log file is not a valid log file.\n");
+      }
+   }
+
    logFileName = filename;
    
    if (logFile)
@@ -678,7 +694,9 @@ void GuiMessageReceiver::OpenLogFile(const std::string &filename, bool append)
    
    if (logFile)
    {
-      fprintf(logFile, "GMAT Build Date: %s %s\n\n",  __DATE__, __TIME__);
+      FileManager *fm          = FileManager::Instance();
+      std::string logFileStart = GetLogFileText();
+      fprintf(logFile, "%s %s %s\n\n",  logFileStart.c_str(), __DATE__, __TIME__);
       fprintf(logFile, "GMAT Log file set to %s\n", logFileName.c_str());
       
       logFileSet = true;

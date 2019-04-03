@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -494,6 +494,17 @@ GmatBase* RefData::GetRefObject(const Gmat::ObjectType type,
 bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                            const std::string &name)
 {
+   #ifdef DEBUG_REF_OBJECTS
+      if (obj->IsOfType(Gmat::COORDINATE_SYSTEM))
+      {
+         MessageInterface::ShowMessage("Does %s == %s @ %p?\n", name.c_str(),
+               obj->GetName().c_str(), obj);
+         if (name == "EarthFixed")
+            MessageInterface::ShowMessage("************\n%s\n************\n",
+                  obj->GetGeneratingString(Gmat::SCRIPTING).c_str());
+      }
+   #endif
+   
    bool status = false;
    #if DEBUG_REF_OBJECT
    MessageInterface::ShowMessage

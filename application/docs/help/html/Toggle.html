@@ -1,0 +1,106 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Toggle</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="Target.html" title="Target"><link rel="next" href="Vary.html" title="Vary"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Toggle</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Target.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Vary.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Toggle"></a><div class="titlepage"></div><a name="N25778" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Toggle</span></h2><p>Toggle &mdash; Allows you to turn data output off or on</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><code class="literal">Toggle</code>  <em class="replaceable"><code>OutputNames</code></em>  <em class="replaceable"><code>Arg</code></em>
+
+<em class="replaceable"><code>OutputNames</code></em>
+  <em class="replaceable"><code>OutputNames</code></em> is the list of subscribers that are to be toggled. 
+  When multiple subscribers are being toggled in the <em class="replaceable"><code>OutputNames</code></em>, 
+  then they need to be separated by a space.
+<em class="replaceable"><code>Arg</code></em>
+  <em class="replaceable"><code>Arg</code></em> option allows you to turn off or on the data output to 
+  the selected subscribers listed in the <em class="replaceable"><code>OutputNames</code></em>.</pre></div><div class="refsection"><a name="N257A8"></a><h2>Description</h2><p>The <span class="guilabel">Toggle</span> command allows you to turn data
+    output off or on for the subscribers that you select such as
+    <span class="guilabel">ReportFile</span>, <span class="guilabel">XYPlot</span>,
+    <span class="guilabel">OrbitView</span>, <span class="guilabel">GroundTrackPlot</span> and
+    <span class="guilabel">EphemerisFile</span>. GMAT allows you to insert
+    <span class="guilabel">Toggle</span> command into the <span class="guilabel">Mission</span>
+    tree at any location and data output can be turned off or on at any point
+    in your mission. <span class="guilabel">Toggle</span> command can be used through
+    GMAT&rsquo;s GUI or the script interface.</p></div><div class="refsection"><a name="N257C8"></a><h2>Options</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">OutputNames</span></td><td><p> The <span class="guilabel">Toggle</span> option allows the
+            user to assign subscribers such as
+            <span class="guilabel">ReportFile</span>, <span class="guilabel">XYPlot</span>,
+            <span class="guilabel">OrbitView</span>,
+            <span class="guilabel">GrounTrackPlot</span> or
+            <span class="guilabel">EphemerisFile</span> to be toggled. When more than
+            one subscriber is being toggled, they need to be separated by a
+            space. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Resource reference</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">ReportFile</span>,
+                    <span class="guilabel">XYPlot</span>,
+                    <span class="guilabel">OrbitView</span>,
+                    <span class="guilabel">GroundTrackPlot</span> or
+                    <span class="guilabel">EphemerisFile</span> resources</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DefaultOrbitView</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Arg</span></td><td><p> The <span class="guilabel">Arg</span> option allows the user
+            to turn off or on the data output to the selected subscriber.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>On, Off</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>On</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N25851"></a><h2>GUI</h2><p>Figure below shows default settings for <span class="guilabel">Toggle</span>
+    command:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Toggle_GUI_2.png" align="middle" height="189"></td></tr></table></div></div></div><div class="refsection"><a name="N25862"></a><h2>Remarks</h2><p>The subscribers such as <span class="guilabel">ReportFile</span>,
+    <span class="guilabel">XYPlot</span>, <span class="guilabel">OrbitView</span>,
+    <span class="guilabel">GroundTrackPlot</span> and
+    <span class="guilabel">EphemerisFile</span> report or plot data at each propagation
+    step of the entire mission duration. If you want to report data to any of
+    these subscribers at specific points in your mission, then a
+    <span class="guilabel">Toggle On</span>/<span class="guilabel">Off</span> command can be
+    inserted into the mission sequence to control when a subscriber reports or
+    plots data. For example, when a <span class="guilabel">Toggle Off</span> command is
+    issued for a <span class="guilabel">XYPlot</span>, no data is plotted onto the X
+    and Y axis of the graph until a <span class="guilabel">Toggle On</span> command is
+    issued. Similarly when a <span class="guilabel">Toggle On</span> command is used,
+    data is plotted onto the X and Y axis at each integration step until a
+    <span class="guilabel">Toggle Off</span> command is used.</p></div><div class="refsection"><a name="N2588B"></a><h2>Examples</h2><div class="informalexample"><p>This example shows how to use <span class="guilabel">Toggle Off</span> and
+      <span class="guilabel">Toggle On</span> commands while using the
+      <span class="guilabel">XYPlot</span> resource. Spacecraft&rsquo;s position magnitude
+      and semi-major-axis are plotted as a function of time.
+      <span class="guilabel">XYPlot</span> is turned off for the first 2 days of the
+      propagation:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create XYPlot aPlot
+aPlot.XVariable = aSat.ElapsedDays
+aPlot.YVariables = {aSat.Earth.RMAG, aSat.Earth.SMA}
+
+BeginMissionSequence
+
+Toggle aPlot Off
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+Toggle aPlot On
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}
+</code></pre></div><div class="informalexample"><p>This example shows how to use <span class="guilabel">Toggle Off</span> and
+      <span class="guilabel">Toggle On</span> commands while using the
+      <span class="guilabel">ReportFile</span> resource. Spacecraft&rsquo;s cartesian
+      position vector is reported to the report file. Report file is turned
+      off for the first day of the propagation:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create ReportFile aReport
+aReport.Filename = 'ReportFile1.txt'
+aReport.Add = {aSat.ElapsedDays aSat.EarthMJ2000Eq.X ...
+aSat.EarthMJ2000Eq.Y aSat.EarthMJ2000Eq.Z}
+
+BeginMissionSequence
+
+Toggle aReport Off
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+Toggle aReport On
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></pre></div><div class="informalexample"><p>This example shows how to toggle multiple subscribers.
+      <span class="guilabel">Toggle Off</span> and <span class="guilabel">Toggle On</span>
+      commands are used on multiple subscribers like
+      <span class="guilabel">ReportFile</span>, <span class="guilabel">XYPlot</span> and
+      <span class="guilabel">EphemerisFile</span>. Subscribers are turned off for first
+      3 days of the propagation:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create ReportFile aReport
+aReport.Filename = 'ReportFile1.txt'
+aReport.Add = {aSat.ElapsedDays aSat.EarthMJ2000Eq.X ...
+aSat.EarthMJ2000Eq.Y aSat.EarthMJ2000Eq.Z}
+
+Create XYPlot aPlot
+aPlot.XVariable = aSat.ElapsedDays
+aPlot.YVariables = {aSat.Earth.RMAG, aSat.Earth.SMA}
+
+Create EphemerisFile aEphemerisFile
+aEphemerisFile.Spacecraft = aSat
+
+BeginMissionSequence
+
+Toggle aReport aPlot aEphemerisFile Off
+Propagate aProp(aSat) {aSat.ElapsedDays = 3}
+Toggle aReport aPlot aEphemerisFile On
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Target.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Vary.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Target&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Vary</td></tr></table></div></body></html>

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -359,7 +359,8 @@ bool TextEphemFileDialog::CreateTextEphem()
    std::string ephemFileName = mEphemFileTextCtrl->GetValue().WX_TO_STD_STRING;
    
    TextEphemFile *ephemFile = (TextEphemFile*)(theGuiInterpreter->
-      CreateSubscriber("TextEphemFile", "TextEphemFile", ephemFileName, false));
+      //CreateSubscriber("TextEphemFile", "TextEphemFile", ephemFileName, false));
+      CreateSubscriber("TextEphemFile", "TextEphemFile", false));
    
    // get first spacecraft from the list
    std::string scName = mSelectedScListBox->GetString(0).WX_TO_STD_STRING;
@@ -406,7 +407,7 @@ bool TextEphemFileDialog::CreateTextEphem()
    // Set parameters to ephemeris file
    try
    {
-      //ephemFile->SetStringParameter("filename", ephemFileName);
+      ephemFile->SetStringParameter("filename", ephemFileName);
       ephemFile->SetStringParameter("Add", time);
       ephemFile->SetStringParameter("Add", xpos);
       ephemFile->SetStringParameter("Add", ypos);

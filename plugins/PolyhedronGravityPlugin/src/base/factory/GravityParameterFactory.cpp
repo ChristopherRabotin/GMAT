@@ -156,6 +156,19 @@ StringArray GravityParameterFactory::GetListOfCreatableObjects(
 }
 
 //------------------------------------------------------------------------------
+// GmatBase* CreateObject(const std::string& ofType, const std::string& withName)
+//------------------------------------------------------------------------------
+/**
+ * @see CreateParameter()
+ */
+//------------------------------------------------------------------------------
+GmatBase* GravityParameterFactory::CreateObject(const std::string& ofType,
+                                                const std::string& withName)
+{
+   return CreateParameter(ofType, withName);
+}
+
+//------------------------------------------------------------------------------
 // Parameter* CreateParameter(const std::string& ofType,
 //       const std::string& withName)
 //------------------------------------------------------------------------------

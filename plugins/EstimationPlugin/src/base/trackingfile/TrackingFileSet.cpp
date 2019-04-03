@@ -25,13 +25,16 @@
 #include "StringUtil.hpp"
 #include <sstream>                  // For magic number mapping code
 /// Temporarily here; needs to move into a factory
-#include "RangeAdapterKm.hpp"
+#include "GNRangeAdapter.hpp"
 #include "DSNRangeAdapter.hpp"
 #include "DopplerAdapter.hpp"
 #include "GNDopplerAdapter.hpp"
+#include "TDRSRangeAdapter.hpp"
 #include "TDRSDopplerAdapter.hpp"
-#include "RangeRateAdapterKps.hpp"
+//#include "RangeRateAdapterKps.hpp"
 #include "PointRangeRateAdapterKps.hpp"
+#include "GPSAdapter.hpp"
+#include "GPSPointMeasureModel.hpp"
 
 //#define DEBUG_CONSTRUCTION
 //#define DEBUG_INITIALIZATION
@@ -171,7 +174,6 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    solarsystem               (tfs.solarsystem),
    thePropagator             (tfs.thePropagator),
    references                (tfs.references),
-   datafiles                 (tfs.datafiles),
    useRelativityCorrection   (tfs.useRelativityCorrection),
    useETminusTAICorrection   (tfs.useETminusTAICorrection),
    rangeModulo               (tfs.rangeModulo),
@@ -243,7 +245,6 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
       solarsystem             = tfs.solarsystem;
       thePropagator           = tfs.thePropagator;
       references              = tfs.references;
-      datafiles               = tfs.datafiles;
       useRelativityCorrection = tfs.useRelativityCorrection;
       useETminusTAICorrection = tfs.useETminusTAICorrection;
       rangeModulo             = tfs.rangeModulo;
@@ -819,13 +820,15 @@ std::string TrackingFileSet::GetStringParameter(const Integer id,
 bool TrackingFileSet::AddToSignalPath(std::string participantName, Integer configIndex, Integer strandIndex)
 {
    // validate participant name
-   if (GmatStringUtil::IsValidIdentity(participantName) == false)
+   if (GmatStringUtil::IsValidExtendedIdentity(participantName) == false)        // It is for GPS Point Solution
       throw MeasurementException("Error: Invalid participant name '" + participantName + "' was set to " + GetName() + ".AddTrackingConfig parameter.\n");
    
    if (strandIndex > 0)
       throw MeasurementException("Error: Syntax error when setting value to " + GetName() + ".AddTrackingConfig parameter. In current version, GMAT does not allow two or more participant lists in tracking configuration.\n");
-
-   trackingConfigs[configIndex].strands[strandIndex].push_back(participantName);
+   
+   StringArray names = GmatStringUtil::ParseName(participantName);
+   trackingConfigs[configIndex].strands[strandIndex].push_back(names[0]);
+   trackingConfigs[configIndex].sensors[strandIndex].push_back(names[1]);
 
    return true;
 }
@@ -845,29 +848,51 @@ bool TrackingFileSet::AddToSignalPath(std::string participantName, Integer confi
 * @return               true if no syntax error, false otherwise
 */
 //------------------------------------------------------------------------------
+std::string TrackingFileSet::CheckTypeDeprecation(const std::string datatype)
+{
+   std::map<std::string, std::string> depTypeMap;
+   TFSMagicNumbers *mn = TFSMagicNumbers::Instance();
+   depTypeMap = mn->GetDeprecatedTypeMap();
+
+   std::string typeName = datatype;
+   for (std::map<std::string, std::string>::iterator i = depTypeMap.begin();
+      i != depTypeMap.end(); ++i)
+   {
+      if ((*i).first == datatype)
+      {
+         std::stringstream ss;
+         ss << "Warning: " << GetName() << ".AddTrackingConfig type name '" 
+            << datatype << "' is deprecated and will be removed in a future release. Use '" 
+            << (*i).second << "' instead.\n";
+
+         if (find(mesg.begin(), mesg.end(), ss.str()) == mesg.end())
+         {
+            MessageInterface::ShowMessage(ss.str());
+            mesg.push_back(ss.str());
+         }
+         typeName = (*i).second;
+         break;
+      }
+   }
+
+   return typeName;
+}
+
+
 bool TrackingFileSet::ParseTrackingConfig(std::string value, Integer& configIndex, bool& start)
 {
    // case 1: parse a strand {part1, ..., partn}
    // case 2: parse a tracking config syntax: {{part1, ..., partn}, ..., {part1, ..., partn}, datatype1, ..., datatypem}
 
-   //MessageInterface::ShowMessage("TrackingFileSet::ParseTrackingConfig('%s', %d)\n", value.c_str(), configIndex);
+   //MessageInterface::ShowMessage("TrackingFileSet::ParseTrackingConfig('%s', %d)     for TrackingFileSet %s\n", value.c_str(), configIndex, GetName().c_str());
 
    bool retval = true;
 
    // Get all known measurement types
-   StringArray knownTypes;                                                                     // GMT-5701
-   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();                                     // GMT-5701
-   //if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))        // GMT-5701
-   if (runmode != GmatGlobal::TESTING)                                                         // GMT-5701
-   {                                                                                           // GMT-5701
-      knownTypes.push_back("DSNRange");                                                        // GMT-5701
-      knownTypes.push_back("Doppler");                                                         // GMT-5701
-   }                                                                                           // GMT-5701
-   else                                                                                        // GMT-5701
-   {                                                                                           // GMT-5701
-      TFSMagicNumbers *mn = TFSMagicNumbers::Instance();                                       // GMT-5701
-      knownTypes = mn->GetKnownTypes();                                                        // GMT-5701
-   }                                                                                           // GMT-5701
+   StringArray knownTypes;                                                                  // GMT-5701
+   TFSMagicNumbers *mn = TFSMagicNumbers::Instance();                                       // GMT-5701
+   //knownTypes = mn->GetKnownTypes();                                                      // GMT-5701
+   knownTypes = mn->GetAvailableTypes();                                                    // GMT-5701
 
    // Remove opened and closed curly brackets at the begin and end of string
    std::string value1 = GmatStringUtil::Trim(value.substr(1, value.size() - 2));
@@ -889,10 +914,10 @@ bool TrackingFileSet::ParseTrackingConfig(std::string value, Integer& configInde
             // Get list of strands
             std::string strand = value1.substr(0, pos + 1);
 
-            //MessageInterface::ShowMessage("case 2: strand = <%s>\n", strand.c_str());
             // Add a slot to strands array in order to store a new strand 
-            StringArray trackList;
+            StringArray trackList, sensorList;
             trackingConfigs[configIndex].strands.push_back(trackList);
+            trackingConfigs[configIndex].sensors.push_back(sensorList);
             Integer strandIndex = trackingConfigs[configIndex].strands.size() - 1;
 
             // Parse the strand
@@ -909,14 +934,15 @@ bool TrackingFileSet::ParseTrackingConfig(std::string value, Integer& configInde
       }
 
       // 2. Parse tracking config and get a list of data types: datatype1, ..., datatypem
-      //MessageInterface::ShowMessage("case 2: data types = <%s>\n", value1.c_str());
-
       std::string datatype;
       pos = value1.find_first_of(',');
       while (pos != value1.npos)
       {
          // Get data type
          datatype = value1.substr(0, pos);
+         
+         // Check deprecated types
+         datatype = CheckTypeDeprecation(datatype);
 
          // Validate and add data type to data type array
          if (find(knownTypes.begin(), knownTypes.end(), datatype) == knownTypes.end())
@@ -950,6 +976,10 @@ bool TrackingFileSet::ParseTrackingConfig(std::string value, Integer& configInde
 
       // Add the last data type to data type array
       datatype = value1;
+
+      // Check deplicated types
+      datatype = CheckTypeDeprecation(datatype);
+
       if (find(knownTypes.begin(), knownTypes.end(), datatype) == knownTypes.end())
       {
          std::stringstream ss;
@@ -981,8 +1011,9 @@ bool TrackingFileSet::ParseTrackingConfig(std::string value, Integer& configInde
    {
       //case 1: parse a strand syntax: part1, ..., partn
       // Add a slot to strands array in order to store a new strand 
-      StringArray trackList;
+      StringArray trackList, sensorList;
       trackingConfigs[configIndex].strands.push_back(trackList);
+      trackingConfigs[configIndex].sensors.push_back(sensorList);
       Integer strandIndex = trackingConfigs[configIndex].strands.size() - 1;
 
       // Parse the strand
@@ -1047,19 +1078,10 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
 
       // Get all known measurement types
-      StringArray knownTypes;                                                                     // GMT-5701
-      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();                                     // GMT-5701
-      //if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))        // GMT-5701
-      if (runmode != GmatGlobal::TESTING)                                                         // GMT-5701
-      {                                                                                           // GMT-5701
-         knownTypes.push_back("DSNRange");                                                        // GMT-5701
-         knownTypes.push_back("Doppler");                                                         // GMT-5701
-      }                                                                                           // GMT-5701
-      else                                                                                        // GMT-5701
-      {                                                                                           // GMT-5701
-         TFSMagicNumbers *mn = TFSMagicNumbers::Instance();                                       // GMT-5701
-         knownTypes = mn->GetKnownTypes();                                                        // GMT-5701
-      }                                                                                           // GMT-5701
+      StringArray knownTypes;                                                                  // GMT-5701
+      TFSMagicNumbers *mn = TFSMagicNumbers::Instance();                                       // GMT-5701
+      //knownTypes = mn->GetKnownTypes();                                                      // GMT-5701
+      knownTypes = mn->GetAvailableTypes();                                                    // GMT-5701
 
 
       // Create a new tracking config
@@ -1110,8 +1132,9 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
             ++openBracketCount;
             rawName = GmatStringUtil::Trim(rawName.substr(1));                          // trim open curly bracket and all white space
             
-            StringArray trackList;
+            StringArray trackList, sensorList;
             trackingConfigs[defIndex].strands.push_back(trackList);
+            trackingConfigs[defIndex].sensors.push_back(trackList);
             Integer strandIndex = trackingConfigs[defIndex].strands.size() - 1;
             AddToSignalPath(rawName, defIndex, strandIndex);
 
@@ -1143,6 +1166,9 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
          }
 
          // case 6:
+         // Check deplicated types
+         rawName = CheckTypeDeprecation(rawName);
+
          if (find(knownTypes.begin(), knownTypes.end(), rawName) == knownTypes.end())
          {
             std::stringstream ss;
@@ -1751,14 +1777,14 @@ const StringArray& TrackingFileSet::GetRefObjectNameArray(
          }
    }
 
-   // @todo This loop statement is temporary code.  Remove when datafile objects
-   // are autogenerated.  The current code sets DataFile object names in the
-   // filenames array
-   if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::DATA_FILE))
-   {
-      for (UnsignedInt i = 0; i <  filenames.size(); ++i)
-         refObjectNames.push_back(filenames[i]);
-   }
+   //// @todo This loop statement is temporary code.  Remove when datafile objects
+   //// are autogenerated.  The current code sets DataFile object names in the
+   //// filenames array
+   //if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::DATA_FILE))
+   //{
+   //   for (UnsignedInt i = 0; i <  filenames.size(); ++i)
+   //      refObjectNames.push_back(filenames[i]);
+   //}
 
    if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::DATA_FILTER))
    {
@@ -1915,6 +1941,13 @@ GmatBase* TrackingFileSet::GetRefObject(const Gmat::ObjectType type,
             return references[index];
    }
 
+   if (type == Gmat::DATA_FILTER)
+   {
+      if ((index < (Integer)dataFilters.size()) && (index >= 0))
+         if (dataFilters[index]->GetName() == name)
+            return dataFilters[index];
+   }
+
    return MeasurementModelBase::GetRefObject(type, name, index);
 }
 
@@ -1943,18 +1976,7 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 
    bool retval = false;
 
-   if (obj->IsOfType(Gmat::DATA_FILE))
-   {
-      if (find(datafiles.begin(), datafiles.end(), obj) == datafiles.end())
-      {
-         #ifdef DEBUG_INITIALIZATION
-            MessageInterface::ShowMessage("Adding datafile %s\n", name.c_str());
-         #endif
-         datafiles.push_back((DataFile*)obj);
-         return true;
-      }
-   }
-   else if (obj->IsOfType(Gmat::DATA_FILTER))
+   if (obj->IsOfType(Gmat::DATA_FILTER))
    {
       bool found = false;
       for(UnsignedInt i = 0; i < dataFilters.size(); ++i)
@@ -2015,13 +2037,24 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 
    bool retval = false;
 
-   if (find(references.begin(), references.end(), obj) == references.end())
+   if (type == Gmat::DATA_FILTER)
    {
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("Adding node %s\n", name.c_str());
-      #endif
-      references.push_back(obj);
-      retval = true;
+      if ((index < (Integer)dataFilters.size()) && (index >= 0))
+      {
+         dataFilters[index] = obj;
+         retval = true;
+      }
+   }
+   else
+   {
+      if (find(references.begin(), references.end(), obj) == references.end())
+      {
+         #ifdef DEBUG_INITIALIZATION
+            MessageInterface::ShowMessage("Adding node %s\n", name.c_str());
+         #endif
+         references.push_back(obj);
+         retval = true;
+      }
    }
 
    return (retval || MeasurementModelBase::SetRefObject(obj,type,name,index));
@@ -2043,14 +2076,21 @@ ObjectArray& TrackingFileSet::GetRefObjectArray(const Gmat::ObjectType type)
    static ObjectArray objectList;
    objectList.clear();
 
-   if ((type == Gmat::DATA_FILTER)||(type == Gmat::UNKNOWN_OBJECT))
+   objectList = MeasurementModelBase::GetRefObjectArray(type);
+   
+   if ((type == Gmat::SPACE_POINT) || (type == Gmat::UNKNOWN_OBJECT))
+   {
+      for (UnsignedInt i = 0; i < references.size(); ++i)
+         objectList.push_back(references[i]);
+   }
+   
+   if ((type == Gmat::DATA_FILTER) || (type == Gmat::UNKNOWN_OBJECT))
    {
       for(UnsignedInt i = 0; i < dataFilters.size(); ++i)
          objectList.push_back(dataFilters[i]);
-      return objectList;
    }
 
-   return MeasurementModelBase::GetRefObjectArray(type);
+   return objectList;
 }
 
 //------------------------------------------------------------------------------
@@ -2127,7 +2167,8 @@ bool TrackingFileSet::Initialize()
    {
       // Count the adapters needed
       TFSMagicNumbers *mn = TFSMagicNumbers::Instance();
-      StringArray knownTypes = mn->GetKnownTypes();
+      //StringArray knownTypes = mn->GetKnownTypes();
+      StringArray knownTypes = mn->GetAvailableTypes();
 
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("Tracking Configuration:\n");
@@ -2143,15 +2184,7 @@ bool TrackingFileSet::Initialize()
       if (filenames.size() == 0)
          throw MeasurementException("No observation data file is set to " + GetName() + " object.\n");
 
-      // Note: No ramp table is accepted when frequency is got from transmiter
-//      // Check for ramp table 
-//      if (rampedTablenames.size() == 0)
-//         throw MeasurementException("No ramp table is set to " + GetName() + " object.\n");
-
       // Build the adapters
-      //if (trackingConfigs.size() == 0)
-      //   throw MeasurementException("No TrackingConfig is defined for " + GetName() + " object.\n");
-
       for (UnsignedInt i = 0; i < trackingConfigs.size(); ++i)
       {
          // Check to make sure only one strand defined in TrackingConfig
@@ -2164,6 +2197,19 @@ bool TrackingFileSet::Initialize()
 
          for (UnsignedInt j = 0; j < trackingConfigs[i].types.size(); ++j)
          {
+            // Processing for all measurement types using Receiver in a strand such as GPS_PosVec
+            if (trackingConfigs[i].types[j] == "GPS_PosVec")
+            {
+               // Verify participant is a reveiver
+               for (UnsignedInt k = 0; k < trackingConfigs[i].sensors.size(); ++k)
+               {
+                  if (trackingConfigs[i].sensors[k].at(0) == "")
+                     throw MeasurementException("Error: No GPS Receiver was set to the strand in "
+                     + GetName() + ".AddTrackingConfig parameter for GPS_PosVec measurement type.\n");
+               }
+            }
+
+            // Build a tracking data adapter for a given tracking configuration
             TrackingDataAdapter *tda =
                   BuildAdapter(trackingConfigs[i].strands[0],
                         trackingConfigs[i].types[j], i);
@@ -2173,18 +2219,6 @@ bool TrackingFileSet::Initialize()
                throw MeasurementException("Unable to build the " +
                      trackingConfigs[i].types[j] + " measurement");
             }
-
-            // This section was done in BuildAdapter
-            //// Pass in the signal paths
-            //std::string theStrand;
-            //for (UnsignedInt k=0; k < trackingConfigs[i].strands[0].size(); ++k)
-            //{
-            //   if (k > 0)
-            //      theStrand += ", ";
-            //   theStrand += trackingConfigs[i].strands[0][k];
-            //}
-
-            //tda->SetStringParameter("SignalPath", theStrand);
 
             // Push tracking data apadter to measurement model list
             measurements.push_back(tda);
@@ -2248,14 +2282,15 @@ bool TrackingFileSet::Initialize()
          }
 
          std::string measType = measurements[i]->GetStringParameter("MeasurementType");
-         // Set range modulo constant for DSNRange
-         if (measType == "DSNRange")
+         // Set range modulo constant for DSN_SeqRange
+         if (measType == "DSN_SeqRange")
          {
             measurements[i]->SetRealParameter("RangeModuloConstant", rangeModulo);
          }
 
          // Set service access, node 4 frequency and band, SMAR id for TDRSDoppler
-         if (measType == "TDRSDoppler_HZ")
+         //if (measType == "TDRSDoppler_HZ")
+         if (measType == "SN_Doppler")
          {
             // set the list of service access to TDRSDopplerAdapter object
             for (UnsignedInt accIndex = 0; accIndex < tdrsServiceAccessList.size(); ++accIndex) 
@@ -2271,15 +2306,24 @@ bool TrackingFileSet::Initialize()
          }
 
          // Set doppler count interval for Doppler
-         if ((measType == "Doppler")||(measType == "Doppler_RangeRate")||(measType == "TDRSDoppler_HZ"))
+         //if ((measType == "DSN_TCP") || (measType == "RangeRate") || (measType == "TDRSDoppler_HZ"))
+         if ((measType == "DSN_TCP")||(measType == "RangeRate")||(measType == "SN_Doppler"))
          {
             measurements[i]->SetRealParameter("DopplerCountInterval", dopplerCountInterval);
          }
-         // Set DopplerInterval for RangeRate
-         if (measType == "RangeRate")
+
+         /// This code for RnageRateAdapterKps is no longer in use. It was done in GNDopplerAdapter class (the lines right above)
+         //// Set DopplerInterval for RangeRate
+         //if (measType == "RangeRate")
+         //{
+         //   measurements[i]->SetRealParameter("DopplerInterval", dopplerCountInterval);      // unit: second
+         //}
+
+         //if (measType == "ECFVec")
+         if (measType == "GPS_PosVec")
          {
-            //measurements[i]->SetRealParameter("DopplerInterval", dopplerInterval);
-            measurements[i]->SetRealParameter("DopplerInterval", dopplerCountInterval);      // unit: second
+            // set value to parameters for GPS position vector measurement
+            // Currently nothing needs to set
          }
 
          // Initialize TrackingDataAdapter
@@ -2289,6 +2333,24 @@ bool TrackingFileSet::Initialize()
       // Initialize data filters
       for (UnsignedInt i = 0; i < dataFilters.size(); ++i)
          dataFilters[i]->Initialize();
+
+      // Verify referent objects setting
+      StringArray nameList = GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
+      ObjectArray objList = GetRefObjectArray(Gmat::UNKNOWN_OBJECT);
+      for (UnsignedInt i = 0; i < nameList.size(); ++i)
+      {
+         std::string objName = nameList[i];
+         bool found = false;
+         for (UnsignedInt j = 0; j < objList.size(); ++j)
+         {
+            if (objName == objList[j]->GetName())
+               found = true;
+         }
+         if (!found)
+         {
+            throw MeasurementException("Error: GMAT object with name '" + objName + "' was not defined in script.\n");
+         }
+      }
 
       isInitialized = true;
    }
@@ -2460,16 +2522,28 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    std::string adapterName = ss.str();          // tracking adapter name contains TrackingFileSet name following tracking configuration index and type 
    //MessageInterface::ShowMessage("Adapter name: <%s>\n", adapterName.c_str());
    
-   if (type == "Range_KM")                                    // It is GN (or USN) Range
+   //if (type == "Range_KM")                                    // It is GN (or USN) Range
+   if (type == "Range")                                    // It is GN (or USN) Range
    {
-      retval = new RangeAdapterKm(adapterName);
+      //retval = new RangeAdapterKm(adapterName);
+      retval = new GNRangeAdapter(adapterName);
       if (retval)
       {
          retval->UsesLightTime(useLighttime);
          retval->SetStringParameter("MeasurementType", type);
       }
    }
-   else if (type == "DSNRange")                               // It is DSN Range
+   else if (type == "SN_Range")                                    // It is SN Range     (TDRS Range measurement)
+   {
+      //retval = new RangeAdapterKm(adapterName);
+      retval = new TDRSRangeAdapter(adapterName);
+      if (retval)
+      {
+         retval->UsesLightTime(useLighttime);
+         retval->SetStringParameter("MeasurementType", type);
+      }
+   }
+   else if (type == "DSN_SeqRange")                               // It is DSN Range
    {
       retval = new DSNRangeAdapter(adapterName);
       if (retval)
@@ -2478,27 +2552,29 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
          retval->SetStringParameter("MeasurementType", type);
       }
    }
-   else if (type == "Doppler")                               // It is DSN Doppler
+   else if (type == "DSN_TCP")                               // It is DSN Doppler
    {
       retval = new DopplerAdapter(adapterName);
       if (retval)
       {
-         ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);
+         //((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);
+         ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range", configIndex);
          retval->UsesLightTime(useLighttime);
          retval->SetStringParameter("MeasurementType", type);
       }
    }                                                                  
-   else if (type == "Doppler_RangeRate")
+   else if (type == "RangeRate")
    {
       retval = new GNDopplerAdapter(adapterName);
       if (retval)
       {
-         ((GNDopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);
+         //((GNDopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);
+         ((GNDopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range", configIndex);
          retval->UsesLightTime(useLighttime);
          retval->SetStringParameter("MeasurementType", type);
       }
    }
-   else if (type == "TDRSDoppler_HZ")                    // It is 2-ways TDRS Doppler
+   else if (type == "SN_Doppler")           //else if (type == "TDRSDoppler_HZ")                    // It is 2-ways TDRS Doppler
    {
       retval = new TDRSDopplerAdapter(adapterName);
       if (retval)
@@ -2514,26 +2590,39 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
          shortStrand.push_back(strand[3]);
          shortStrand.push_back(strand[4]);
 
-         ((TDRSDopplerAdapter*)retval)->adapterES = (RangeAdapterKm*)BuildAdapter(shortStrand, "Range_KM", configIndex);
-         ((TDRSDopplerAdapter*)retval)->adapterSL = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);
-         ((TDRSDopplerAdapter*)retval)->adapterSS = (RangeAdapterKm*)BuildAdapter(shortStrand, "Range_KM", configIndex);
+         //((TDRSDopplerAdapter*)retval)->adapterES = (RangeAdapterKm*)BuildAdapter(shortStrand, "Range_KM", configIndex);
+         //((TDRSDopplerAdapter*)retval)->adapterSL = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);
+         //((TDRSDopplerAdapter*)retval)->adapterSS = (RangeAdapterKm*)BuildAdapter(shortStrand, "Range_KM", configIndex);
+         ((TDRSDopplerAdapter*)retval)->adapterES = (RangeAdapterKm*)BuildAdapter(shortStrand, "Range", configIndex);
+         ((TDRSDopplerAdapter*)retval)->adapterSL = (RangeAdapterKm*)BuildAdapter(strand, "Range", configIndex);
+         ((TDRSDopplerAdapter*)retval)->adapterSS = (RangeAdapterKm*)BuildAdapter(shortStrand, "Range", configIndex);
       }
    }
-   else if (type == "RangeRate")
-   {                                                                  
-      retval = new RangeRateAdapterKps(instanceName + type);              
-      if (retval)                                                     
-      {
-         retval->UsesLightTime(useLighttime);                         
-         retval->SetStringParameter("MeasurementType", type);       
-      }
-   }
+   /// Calcalation of GN Doppler (km/s) is in GNRangeAdapter class. RangeRateAdapterKps is no longer in use
+   //else if (type == "RangeRate")
+   //{                                                                  
+   //   retval = new RangeRateAdapterKps(instanceName + type);              
+   //   if (retval)                                                     
+   //   {
+   //      retval->UsesLightTime(useLighttime);                         
+   //      retval->SetStringParameter("MeasurementType", type);       
+   //   }
+   //}
    else if (type == "PointRangeRate")
    {
       retval = new PointRangeRateAdapterKps(instanceName + type);
       if (retval)
       {
          retval->UsesLightTime(useLighttime);
+         retval->SetStringParameter("MeasurementType", type);
+      }
+   }
+   else if (type == "GPS_PosVec")
+   {
+      retval = new GPSAdapter(instanceName + type);
+      if (retval)
+      {
+         retval->UsesLightTime(false);                        // GPS position vector measurement does not apply light time solution
          retval->SetStringParameter("MeasurementType", type);
       }
    }
@@ -2545,7 +2634,13 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    {
       TFSMagicNumbers *mn = TFSMagicNumbers::Instance();
       //MeasureModel *mm = new MeasureModel(instanceName + type + "Measurement");
-      MeasureModel *mm = new MeasureModel(adapterName + "Measurement");
+
+      MeasureModel *mm;
+      if (type == "GPS_PosVec")
+         mm = (MeasureModel*)(new GPSPointMeasureModel(adapterName + "Measurement"));
+      else
+         mm = new MeasureModel(adapterName + "Measurement");
+
       retval->SetMeasurement(mm);
       Integer magicNumber = mn->GetMagicNumber(nodelist, type);
       Real multiplier = mn->GetMNMultiplier(magicNumber);
@@ -2571,30 +2666,18 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
 }
 
 
-bool TrackingFileSet::GenerateTrackingConfigs(std::vector<StringArray> strandsList, StringArray typesList)
+bool TrackingFileSet::GenerateTrackingConfigs(std::vector<StringArray> strandsList, std::vector<StringArray> sensorsList, StringArray typesList)
 {
    if (strandsList.empty())
       return true;
 
-   // Validate measurement type in typesList                                                                      // GMT-5701
-   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();                                                        // GMT-5701
-   //if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))                           // GMT-5701
-   if (runmode != GmatGlobal::TESTING)                                                                            // GMT-5701
-   {                                                                                                              // GMT-5701
-      for (Integer i = 0; i < typesList.size(); ++i)                                                              // GMT-5701
-      {                                                                                                           // GMT-5701
-         if ((typesList[i] != "DSNRange") && (typesList[i] != "Doppler"))                                         // GMT-5701
-            throw MeasurementException("Error: Observation's data type '" + typesList[i] +                        // GMT-5701
-            "' is not allowed in the current GMAT version. It only allows 'DSNRange' and 'Doppler' observation.\n");         // GMT-5701
-      }                                                                                                           // GMT-5701
-   }                                                                                                              // GMT-5701
 
    // Generate a list of tracking configs
    MessageInterface::ShowMessage("Total of %d tracking configurations are generated for tracking file set %s:\n", strandsList.size(), GetName().c_str());
    for(UnsignedInt i = 0; i < strandsList.size(); ++i)
    {
       MeasurementDefinition md;
-      md.SetDefinitionString(strandsList[i], typesList[i]);
+      md.SetDefinitionString(strandsList[i], sensorsList[i], typesList[i]);
       trackingConfigs.push_back(md);
       trackingConfigs[i].GetDefinitionString();
       MessageInterface::ShowMessage("   Tracking config %d: %s\n", i, md.GetDefinitionString().c_str());
@@ -2632,6 +2715,11 @@ TrackingFileSet::MeasurementDefinition::~MeasurementDefinition()
    for (UnsignedInt i = 0; i < strands.size(); ++i)
       strands[i].clear();
    strands.clear();
+
+   for (UnsignedInt i = 0; i < sensors.size(); ++i)
+      sensors[i].clear();
+   sensors.clear();
+   
    types.clear();
 }
 
@@ -2652,6 +2740,12 @@ TrackingFileSet::MeasurementDefinition::MeasurementDefinition(
    {
       StringArray strand = md.strands[i];
       strands.push_back(strand);
+   }
+
+   for (UnsignedInt i = 0; i < md.sensors.size(); ++i)
+   {
+      StringArray sensor = md.sensors[i];
+      sensors.push_back(sensor);
    }
 }
 
@@ -2682,15 +2776,23 @@ TrackingFileSet::MeasurementDefinition&
          StringArray strand = md.strands[i];
          strands.push_back(strand);
       }
+
+      sensors.clear();
+      for (UnsignedInt i = 0; i < md.sensors.size(); ++i)
+      {
+         StringArray sensor = md.sensors[i];
+         strands.push_back(sensor);
+      }
    }
 
    return *this;
 }
 
 
-bool TrackingFileSet::MeasurementDefinition::SetDefinitionString(StringArray strand, std::string measType)
+bool TrackingFileSet::MeasurementDefinition::SetDefinitionString(StringArray strand, StringArray sens, std::string measType)
 {
    strands.push_back(strand);
+   sensors.push_back(sens);
    types.push_back(measType);
 
    return true;
@@ -2719,14 +2821,19 @@ std::string TrackingFileSet::MeasurementDefinition::GetDefinitionString() const
          if (j > 0)
             configstring += ",";
          configstring += strands[i][j];
+
+         if (sensors[i][j] != "")
+            configstring += ("." + sensors[i][j]);
       }
       configstring += "}";
    }
+   
    for (UnsignedInt i = 0; i < types.size(); ++i)
    {
       configstring += ",";
       configstring += types[i];
    }
    configstring += "}";
+   
    return configstring;
 }

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -42,6 +42,26 @@
 //---------------------------------
 //  public methods
 //---------------------------------
+
+//------------------------------------------------------------------------------
+//  CreateObject(std::string ofType, std::string withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates and returns an object of the requested CelestialBody 
+ * class.
+ *
+ * @param <ofType> the CelestialBody object to create and return.
+ * @param <withName> the name to give the newly-created CelestialBody object.
+ *
+ * @return a new 
+ *
+ */
+//------------------------------------------------------------------------------
+CelestialBody* CelestialBodyFactory::CreateObject(const std::string &ofType,
+                                                  const std::string &withName)
+{
+   return CreateCelestialBody(ofType, withName);
+}
 
 //------------------------------------------------------------------------------
 //  CreateCelestialBody(std::string ofType, std::string withName)

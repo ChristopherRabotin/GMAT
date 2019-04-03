@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -447,21 +447,45 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
       s = GetName().c_str();
 
     wxHelpController *theHelpController = GmatAppData::Instance()->GetMainFrame()->GetHelpController();
-	if (theHelpController != NULL)
-	{
-		#ifdef DEBUG_GMATPANEL
-		MessageInterface::ShowMessage
-			("GmatPanel::OnHelp() theHelpController=<%p>\n   "
-			"File to display=%s\n", theHelpController,
-			s.c_str());
-		#endif
-		// displays chm, not html
-		// see if there is an override for panel (e.g., PropSetupKeyword=Propagator)
-		sHTML = s+".html";
-		s = pConfig->Read(s+"Keyword", sHTML);
 
-		if (!theHelpController->DisplaySection(s)) 
-			theHelpController->DisplayContents();
+    if (theHelpController != NULL)
+    {
+        #ifdef DEBUG_GMATPANEL
+        MessageInterface::ShowMessage
+            ("GmatPanel::OnHelp() theHelpController=<%p>\n   "
+            "File to display=%s\n", theHelpController,
+            s.c_str());
+        #endif
+        // displays chm, not html
+
+        // work around for wxWidgets bug: http://trac.wxwidgets.org/ticket/14888
+        // chm help fails for Windows 8,10.
+        // solution taken from: https://stackoverflow.com/questions/29944745/
+
+        bool useHelpController = true;
+
+        #ifdef _WIN32  // All Win platforms define this, even when 64-bit       
+        //For Windows 8 is dwMajorVersion = 6, dwMinorVersion = 2.
+        OSVERSIONINFOEX info;
+        ZeroMemory(&info, sizeof(OSVERSIONINFOEX));
+        info.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+        GetVersionEx((LPOSVERSIONINFO)&info);//info requires typecasting
+
+        Real winVersion = (Real)info.dwMajorVersion + (Real)info.dwMinorVersion / 10.0;
+        if (winVersion > 6.1)
+            useHelpController = false;
+        #endif
+        if (useHelpController) {
+            sHTML = s + ".html";
+            s = pConfig->Read(s + "Keyword", sHTML);
+            // see if there is an override for panel (e.g., PropSetupKeyword=Propagator)
+            if (!theHelpController->DisplaySection(s))
+                theHelpController->DisplayContents();
+        }
+        else {
+            theHelpController->DisplayContents();
+        }
+
 	}
 	else
 	{

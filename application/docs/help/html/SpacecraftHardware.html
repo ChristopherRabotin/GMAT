@@ -1,0 +1,67 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Spacecraft Hardware</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="SpacecraftEpoch.html" title="Spacecraft Epoch"><link rel="next" href="SpacecraftNavigation.html" title="Spacecraft Navigation"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Spacecraft Hardware</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="SpacecraftEpoch.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="SpacecraftNavigation.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="SpacecraftHardware"></a><div class="titlepage"></div><a name="N1F2A5" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Spacecraft Hardware</span></h2><p>Spacecraft Hardware &mdash; Add hardware to a spacecraft</p></div><div class="refsection"><a name="N1F2B6"></a><h2>Description</h2><p>The hardware fields allow you to attach pre-configured hardware
+    models to a spacecraft. Current models include
+    <span class="guilabel">ChemicalTank</span>, <span class="guilabel">ChemicalThruster</span>
+    ,<span class="guilabel">ElectricTank</span>, and
+    <span class="guilabel">ElectricThruster</span>. Before you attach a hardware model
+    to a <span class="guilabel">Spacecraf</span>t, you must first create the
+    model.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="FuelTank.html" title="ChemicalTank"><span class="refentrytitle">ChemicalTank</span></a>, <a class="xref" href="Thruster.html" title="ChemicalThruster"><span class="refentrytitle">ChemicalThruster</span></a>,<a class="xref" href="ElectricTank.html" title="ElectricTank"><span class="refentrytitle">ElectricTank</span></a>, <a class="xref" href="ElectricThruster.html" title="ElectricThruster"><span class="refentrytitle">ElectricThruster</span></a></p></div><div class="refsection"><a name="N1F2DA"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Tanks</span></td><td><p>This field is used to attach
+            <span class="guilabel">FuelTank(s)</span> to a
+            <span class="guilabel">Spacecraft</span>. In a script command, an empty
+            list, e.g., <code class="literal">DefaultSC.Tanks={}</code>, is allowed and
+            is used to indicate that no <span class="guilabel">FuelTank(s)</span> is
+            attached to the spacecraft. </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>A list of <span class="guilabel">ChemicalTanks</span> and
+                    <span class="guilabel">Chemical Thrusters</span>.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script.</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Thrusters</span></td><td><p>This field is used to attach
+            <span class="guilabel">Thruster(s)</span> to a
+            <span class="guilabel">Spacecraft</span>. In a script command, an empty
+            list, e.g., <code class="literal">DefaultSC.Thrusters={}</code>, is allowed
+            and is used to indicate that no <span class="guilabel">Thrusters</span> are
+            attached to the spacecraft. </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>A list of <span class="guilabel">ChemicalThruster</span>s and
+                    <span class="guilabel">ElectricThrusters</span>.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1F36B"></a><h2>GUI</h2><p>There are two spacecraft hardware items, the<span class="guilabel">
+    FuelTank</span> and the <span class="guilabel">Thruster</span>, that can be
+    attached to a Spacecraft. Here, we describe the method used to create and
+    then attach these items to a <span class="guilabel">Spacecraft</span>. For details
+    on how to configure the <span class="guilabel">FuelTank </span>and
+    <span class="guilabel">Thruster</span> resources, see the help for the individual
+    hardware item. Note the discussion below uses a chemical system as an
+    example but applies equally to electric systems.</p><p>As shown below, to add a <span class="guilabel">ChemicalTank</span> to your
+    script, highlight the <span class="guilabel">Hardware</span> resource and then
+    right click to add a <span class="guilabel">ChemicalTank</span>.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftHardware_GUI_1_better.png" align="middle" height="195"></td></tr></table></div></div><p>To add a <span class="guilabel">Thruster</span> to your script, highlight the
+    <span class="guilabel">Hardware</span> resource and then right click to add a
+    <span class="guilabel">Thruster</span>.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftHardware_GUI_2_better.png" align="middle" height="171"></td></tr></table></div></div><p>Thus far, we have created both a <span class="guilabel">ChemicalTank</span>
+    and a <span class="guilabel">ChemicalThruster</span>. Next, we attach both the
+    <span class="guilabel">ChemicalTank</span> and the
+    <span class="guilabel">ChemicalThruster</span> to a particular<span class="guilabel">
+    Spacecraft</span>. To do this, double click on the desired
+    <span class="guilabel">Spacecraft</span> under the <span class="guilabel">Spacecraft</span>
+    resource to bring up the associated GUI panel. Then click on the
+    <span class="guilabel">Tanks</span> tab to bring up the following GUI
+    display.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftHardware_GUI_3.png" align="middle" height="405"></td></tr></table></div></div><p>Next, select the desired <span class="guilabel">ChemicalTank</span> and use
+    the right arrow button to attach the<span class="guilabel"> ChemicalTank</span> to
+    the <span class="guilabel">Spacecraft</span> as shown below. Then click the
+    <span class="guibutton">Apply</span> button.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftHardware_GUI_4.png" align="middle" height="422"></td></tr></table></div></div><p>Similarly, to attach a <span class="guilabel">ChemicalThruster</span> to a
+    <span class="guilabel">Spacecraft</span>, double click on the desired
+    <span class="guilabel">Spacecraft</span> under the <span class="guilabel">Spacecraft</span>
+    resource and then select the <span class="guilabel">Actuators</span> tab. Then
+    select the desired <span class="guilabel">ChemicalThruster</span> and use the right
+    arrow to attach the <span class="guilabel">ChemicalThruster</span> to the
+    <span class="guilabel">Spacecraft</span> as shown below. Finally, click the
+    <span class="guibutton">Apply</span> button.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftHardware_GUI_5.png" align="middle" height="419"></td></tr></table></div></div></div><div class="refsection"><a name="N1F407"></a><h2>Remarks</h2><p>To use a <span class="guilabel">Thruster</span> to apply a finite burn to a
+    <span class="guilabel">Spacecraft</span>, additional steps are required. For
+    example, when you create the <span class="guilabel">ChemicalThruster</span>
+    resource, you have to associate a <span class="guilabel">ChemicalTank</span> with
+    the <span class="guilabel">ChemicalThruster</span>. For details on this and related
+    matters, see the help for the <span class="guilabel">ChemicalTank</span>,
+    <span class="guilabel">ChemicalThruster</span>, and <span class="guilabel">FiniteBurn</span>
+    resources.</p></div><div class="refsection"><a name="N1F424"></a><h2>Examples</h2><div class="informalexample"><p>Create a default <span class="guilabel">Spacecraft</span>. Create
+      <span class="guilabel">ChemicalTank</span> and
+      <span class="guilabel">ChemicalThruster</span> resources and attach them to the
+      <span class="guilabel">Spacecraft</span>.</p><pre class="programlisting"><code class="code">% Create default Spacecraft, ChemicalTank, and Thruster Resources
+Create Spacecraft DefaultSC
+Create ChemicalTank FuelTank1
+Create ChemicalThruster Thruster1
+
+%  Attach ChemicalTank and Thruster to the spacecraft
+DefaultSC.Thrusters = {Thruster1}
+DefaultSC.Tanks = {FuelTank1}
+
+BeginMissionSequence</code>      </pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="SpacecraftEpoch.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="SpacecraftNavigation.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Spacecraft Epoch&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Spacecraft Navigation</td></tr></table></div></body></html>

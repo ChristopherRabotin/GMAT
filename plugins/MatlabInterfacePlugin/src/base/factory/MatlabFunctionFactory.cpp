@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,10 +39,25 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
+//  GmatBase* CreateFunction(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates and returns an object of the requested MatlabFunction class
+ *
+ * @param <ofType> the Function object to create and return.
+ */
+//------------------------------------------------------------------------------
+GmatBase* MatlabFunctionFactory::CreateObject(const std::string &ofType,
+         const std::string &withName)
+{
+   return CreateFunction(ofType, withName);
+}
+
+//------------------------------------------------------------------------------
 //  CreateFunction(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
- * This method creates and returns an object of the requested Function class
+ * This method creates and returns an object of the requested MatlabFunction class
  *
  * @param <ofType> the Function object to create and return.
  */

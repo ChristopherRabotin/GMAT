@@ -1,0 +1,62 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>ClearPlot</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="CallPythonFunction.html" title="CallPythonFunction"><link rel="next" href="EndFiniteBurn.html" title="EndFiniteBurn"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">ClearPlot</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="CallPythonFunction.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="EndFiniteBurn.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="ClearPlot"></a><div class="titlepage"></div><a name="N233EC" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ClearPlot</span></h2><p>ClearPlot &mdash; Allows you to clear all data from an XYPlot</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><code class="literal">ClearPlot</code>  <em class="replaceable"><code>OutputNames</code></em>
+<em class="replaceable"><code>
+OutputNames</code></em>
+  <em class="replaceable"><code>OutputNames</code></em> is the list of subscribers whose data is to be 
+  cleared. When data of multiple subscribers is to be cleared, 
+  then they need to be separated by a space.</pre></div><div class="refsection"><a name="N2340D"></a><h2>Description</h2><p>The <span class="guilabel">ClearPlot</span> command allows you to clear all
+    data from an <span class="guilabel">XYPlot</span> after it has been plotted. The
+    <span class="guilabel">ClearPlot</span> command works only for the
+    <span class="guilabel">XYPlot</span> resource and data from multiple
+    <span class="guilabel">XYPlot</span> resources can be cleared.
+    <span class="guilabel">ClearPlot</span> command can be used through GMAT&rsquo;s GUI or
+    the script interface.</p></div><div class="refsection"><a name="N23424"></a><h2>Options</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">OutputNames</span></td><td><p> The <span class="guilabel">ClearPlot</span> command allows
+            the user to clear data from an <span class="guilabel">XYPlot</span>
+            subscriber. When more than one subscriber is being used, the
+            subscribers need to be separated by a space. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Resource reference</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">XYPlot</span> resource</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DefaultXYPlot</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N2346B"></a><h2>GUI</h2><p>Figure below shows default settings for
+    <span class="guilabel">ClearPlot</span> command.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_ClearPlot_GUI_2.png" align="middle" height="191"></td></tr></table></div></div></div><div class="refsection"><a name="N2347C"></a><h2>Remarks</h2><p>GMAT allows you to insert <span class="guilabel">ClearPlot</span> command
+    into the <span class="guilabel">Mission</span> tree at any location. This allows
+    you to clear data output from an <span class="guilabel">XYPlot</span> at any point
+    in your mission. The <span class="guilabel">XYPlot</span> subscriber plots data at
+    each propagation step of the entire mission duration. If you want to
+    report data to an <span class="guilabel">XYPlot</span> at specific points in your
+    mission, then a <span class="guilabel">ClearPlot</span> command can be inserted
+    into the mission sequence to control when a subscriber plots data. Refer
+    to the <a class="xref" href="ClearPlot.html#ClearPlot_Examples" title="Examples">Examples</a> section below to see how <span class="guilabel">ClearPlot</span>
+    command can be used in the <span class="guilabel">Mission</span> tree.</p></div><div class="refsection"><a name="ClearPlot_Examples"></a><h2>Examples</h2><div class="informalexample"><p>This example shows how to use <span class="guilabel">ClearPlot</span>
+      command on multiple subscribers. Data from <span class="guilabel">XYPlot</span>
+      subscribers is cleared after 2 days of the propagation:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create XYPlot aPlot1 aPlot2 aPlot3
+
+aPlot1.XVariable = aSat.ElapsedSecs
+aPlot1.YVariables = {aSat.EarthMJ2000Eq.X}
+
+aPlot2.XVariable = aSat.ElapsedSecs
+aPlot2.YVariables = {aSat.EarthMJ2000Eq.Y}
+
+aPlot3.XVariable = aSat.ElapsedSecs
+aPlot3.YVariables = {aSat.EarthMJ2000Eq.VX, aSat.EarthMJ2000Eq.VY, ...
+aSat.EarthMJ2000Eq.VZ}
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+ClearPlot aPlot1 aPlot2 aPlot3</code></pre></div><div class="informalexample"><p>This example shows how to use <span class="guilabel">ClearPlot</span>
+      command on a single subscriber. Data from <span class="guilabel">XYPlot</span> is
+      cleared for the first 3 days of the propagation and only the data
+      retrieved from last day of propagation is plotted:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create XYPlot aPlot1
+
+aPlot1.XVariable = aSat.ElapsedDays
+aPlot1.YVariables = {aSat.EarthMJ2000Eq.X, aSat.EarthMJ2000Eq.Y}
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 3}
+ClearPlot aPlot1
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="CallPythonFunction.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="EndFiniteBurn.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">CallPythonFunction&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;EndFiniteBurn</td></tr></table></div></body></html>

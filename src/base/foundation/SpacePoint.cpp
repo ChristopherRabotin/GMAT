@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -198,7 +198,12 @@ targetColorStr     ("")
    //theSpkPath = FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
    // Use VEHICLE_EPHEM_SPK_PATH. SPK_PATH was renamed to PLANETARY_EPHEM_SPK_PATH (LOJ: 2014.06.18)
    theSpkPath = FileManager::Instance()->GetFullPathname(FileManager::VEHICLE_EPHEM_SPK_PATH);
-
+   
+   #ifdef DEBUG_SPK_PATH
+   MessageInterface::ShowMessage
+      ("In SpacePoint() constructor, theSpkPath = '%s'\n", theSpkPath.c_str());
+   #endif
+   
    SaveAllAsDefault();
 }
 
@@ -2111,6 +2116,13 @@ void SpacePoint::ValidateKernel(const std::string &kName, const std::string labe
    static bool writeWarning = true;
    std::string tempSpkName =
       FileManager::Instance()->FindPath(kName, FileManager::PLANETARY_EPHEM_SPK_PATH, true, writeWarning);
+   
+   // If file not found, try with VEHICLE_EPHEM_SPK_PATH (LOJ: 2016.10.04)
+   if (tempSpkName == "")
+   {
+      tempSpkName =
+      FileManager::Instance()->FindPath(kName, FileManager::VEHICLE_EPHEM_SPK_PATH, true, writeWarning);
+   }
    writeWarning = false;
    
    #ifdef DEBUG_KERNEL_VALIDATE

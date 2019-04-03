@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -49,13 +49,31 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  Solver* CreateSolver(const std::string &ofType, const std::string &withName)
+//  GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested Solver class. 
  *
  * @param <ofType> type of Solver object to create and return.
  * @param <withName> the name for the newly-created Solver object.
+ * 
+ * @return A pointer to the created object.
+ */
+//------------------------------------------------------------------------------
+GmatBase* NewParameterFactory::CreateObject(const std::string &ofType,
+                                            const std::string &withName)
+{
+   return CreateParameter(ofType, withName);
+}
+
+//------------------------------------------------------------------------------
+//  Parameter* CreateParameter(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates and returns an object of the requested Parameter class. 
+ *
+ * @param <ofType> type of Parameter object to create and return.
+ * @param <withName> the name for the newly-created Parameter object.
  * 
  * @return A pointer to the created object.
  */

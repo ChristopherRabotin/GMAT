@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -26,11 +26,11 @@
 //
 /**
  * Implements GetLastState class.
- * [state] = GetLastState(sat)
+ * [state] = GetLastState(spacecraft)
  *   Input:
- *    - sat is a spacecraft
+ *    - spacecraft is a spacecraft object name
  *   Output:
- *    - state is 6x1 arrays of current Cartesian state of sat
+ *    - state is 6x1 arrays of current Cartesian state of spacecraft object
  */
 //------------------------------------------------------------------------------
 
@@ -41,7 +41,6 @@
 //#define DEBUG_FUNCTION_INIT
 //#define DEBUG_FUNCTION_EXEC
 
-
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
 //#endif
@@ -51,10 +50,8 @@
 #endif
 
 //---------------------------------
-// static data
+// public
 //---------------------------------
-
-
 //------------------------------------------------------------------------------
 //  GetLastState(std::string typeStr, std::string name)
 //------------------------------------------------------------------------------
@@ -69,18 +66,19 @@ GetLastState::GetLastState(const std::string &typeStr, const std::string &name) 
    BuiltinGmatFunction(typeStr, name)
 {
    objectTypeNames.push_back(typeStr);
-   objectTypeNames.push_back("GetLastState");
+   if (typeStr != "GetLastState")
+      objectTypeNames.push_back("GetLastState");
    
    // Build input and output arrays. Function interface is:
-   // [state] = GetLastState(sat)
+   // [state] = GetLastState(spacecraft)
    
    // Add dummy input names
-   inputNames.push_back("__input__1__");
-   inputArgMap.insert(std::make_pair("__input__1__", (ElementWrapper*) NULL));
+   inputNames.push_back("__BuiltinFunction_GetLastState_input_1_spacecraft__");
+   inputArgMap.insert(std::make_pair("__BuiltinFunction_GetLastState_input_1_spacecraft__", (ElementWrapper*) NULL));
    
    // Add dummy output names
-   outputNames.push_back("__output__1__");
-   outputArgMap.insert(std::make_pair("__output__1__", (ElementWrapper*) NULL));
+   outputNames.push_back("__BuiltinFunction_GetLastState_output_1_state__");
+   outputArgMap.insert(std::make_pair("__BuiltinFunction_GetLastState_output_1_state__", (ElementWrapper*) NULL));
    
    // Add output types
    outputWrapperTypes.push_back(Gmat::ARRAY_WT);
@@ -204,7 +202,7 @@ bool GetLastState::Execute(ObjectInitializer *objInit, bool reinitialize)
    #ifdef DEBUG_FUNCTION_EXEC
    MessageInterface::ShowMessage
       ("GetLastState::Execute() <%p>'%s' entered\n", this, GetName().c_str());
-   ShowObjects("");
+   ShowObjectMap(objectStore, "", "objectStore");
    MessageInterface::ShowMessage
       ("   outputArgMap.size() = %d\n   outputWrapperTypes.size() = %d\n",
        outputArgMap.size(), outputWrapperTypes.size());
@@ -213,7 +211,8 @@ bool GetLastState::Execute(ObjectInitializer *objInit, bool reinitialize)
        outputRowCounts.size(), outputColCounts.size());
    #endif
    
-   // Check for output info
+   // Check for output info, there should be 1 output
+   // It is an internal coding error if not 1
    if ((outputArgMap.size() != outputWrapperTypes.size()) &&
        outputWrapperTypes.size() != 1)
    {
@@ -262,8 +261,8 @@ bool GetLastState::Execute(ObjectInitializer *objInit, bool reinitialize)
          }
          else
          {
-            // Check for spacepoint type
-            if (!obj->IsOfType(Gmat::SPACE_POINT))
+            // Check for spacecraft type
+            if (!obj->IsOfType(Gmat::SPACECRAFT))
             {
                msg = msg + "The object '" + objName + "' is not valid type to retrieve GetLastState()\n";
             }

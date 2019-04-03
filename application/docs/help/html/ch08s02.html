@@ -1,0 +1,191 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Configure Fuel Tank, Spacecraft properties, Maneuvers, Propagators, Differential Corrector, Coordinate Systems and Graphics</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Mars_B_Plane_Targeting.html" title="Chapter&nbsp;8.&nbsp;Mars B-Plane Targeting"><link rel="prev" href="Mars_B_Plane_Targeting.html" title="Chapter&nbsp;8.&nbsp;Mars B-Plane Targeting"><link rel="next" href="ch08s03.html" title="Configure the Mission Sequence"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Configure Fuel Tank, Spacecraft properties, Maneuvers, Propagators,
+    Differential Corrector, Coordinate Systems and Graphics</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Mars_B_Plane_Targeting.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;8.&nbsp;Mars B-Plane Targeting</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ch08s03.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N11A9D"></a>Configure Fuel Tank, Spacecraft properties, Maneuvers, Propagators,
+    Differential Corrector, Coordinate Systems and Graphics</h2></div></div></div><p>For this tutorial, you&rsquo;ll need GMAT open, with the default mission
+    loaded. To load the default mission, click <span class="guiicon">New Mission</span>
+    (<span class="inlinemediaobject"><img src="../files/images/icons/NewMission.png" align="middle" height="10"></span>) or start a new GMAT session.
+    <span class="guilabel">DefaultSC</span> will be modified to set spacecraft&rsquo;s
+    initial state as an out-going hyperbolic trajectory.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N11AB0"></a>Create Fuel Tank</h3></div></div></div><p>We need to create a fuel tank in order to see how much fuel is
+      expended after each impulsive burn. We will modify
+      <span class="guilabel">DefaultSC</span> resource later and attach the fuel tank
+      to the spacecraft.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>In the <span class="guilabel">Resources</span> tree, right-click the
+          <span class="guilabel">Hardware</span> folder, point to
+          <span class="guilabel">Add</span> and click <span class="guilabel">ChemicalTank</span>. A
+          new resource called <span class="guilabel">ChemicalTank1</span> will be
+          created.</p></li><li class="step"><p>Right-click<span class="guilabel">ChemicalTank1</span> and click
+          <span class="guilabel">Rename</span>.</p></li><li class="step"><p>In the<span class="guilabel">Rename</span> box, type
+          <span class="guilabel">MainTank</span> and click
+          <span class="guilabel">OK</span>.</p></li><li class="step"><p>Double click on<span class="guilabel">MainTank</span> to edit its
+          properties.</p></li><li class="step"><p>Set the values shown in the table below.</p><div class="table"><a name="N11AEA"></a><p class="title"><b>Table&nbsp;8.1.&nbsp;<span class="guilabel">MainTank</span> settings</b></p><div class="table-contents"><table summary="MainTank settings" border="1"><colgroup><col width="50%"><col width="50%"></colgroup><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td><span class="guilabel">Fuel Mass</span></td><td><strong class="userinput"><code>1718</code></strong></td></tr><tr><td><span class="guilabel">Fuel Density</span></td><td><strong class="userinput"><code>1000</code></strong></td></tr><tr><td><span class="guilabel">Pressure</span></td><td><strong class="userinput"><code>5000</code></strong></td></tr><tr><td><span class="guilabel">Volume</span></td><td><strong class="userinput"><code>2</code></strong></td></tr></tbody></table></div></div><p><br class="table-break"></p><p></p></li><li class="step"><p>Click <span class="guilabel">OK</span> to save these changes.</p></li></ol></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N11B22"></a>Modify the DefaultSC Resource</h3></div></div></div><p>We need to make minor modifications to
+      <span class="guilabel">DefaultSC</span> in order to define spacecraft&rsquo;s initial
+      state and attach the fuel tank to the spacecraft.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>In the <span class="guilabel">Resources</span> tree, under
+          <span class="guilabel">Spacecraft</span> folder, right-click
+          <span class="guilabel">DefaultSC</span> and click
+          <span class="guilabel">Rename</span>.</p></li><li class="step"><p>In the <span class="guilabel">Rename</span> box, type
+          <span class="guilabel">MAVEN</span> and click <span class="guilabel">OK</span>.</p></li><li class="step"><p>Double-click on <span class="guilabel">MAVEN</span> to edit its
+          properties. Make sure <span class="guilabel">Orbit</span> tab is
+          selected.</p></li><li class="step"><p>Set the values shown in the table below.</p><div class="table"><a name="N11B53"></a><p class="title"><b>Table&nbsp;8.2.&nbsp;<span class="guilabel">MAVEN</span> settings</b></p><div class="table-contents"><table summary="MAVEN settings" border="1"><colgroup><col width="50%"><col width="50%"></colgroup><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td><span class="guilabel">Epoch Format</span></td><td><span class="guilabel">UTCGregorian</span></td></tr><tr><td><span class="guilabel">Epoch</span></td><td><strong class="userinput"><code>18 Nov 2013
+                    20:26:24.315</code></strong></td></tr><tr><td><span class="guilabel">Coordinate System</span></td><td><span class="guilabel">EarthMJ2000Eq</span></td></tr><tr><td><span class="guilabel">State Type</span></td><td><span class="guilabel">Keplerian</span></td></tr><tr><td><span class="guilabel">SMA</span> under
+                    <span class="guilabel">Elements</span></td><td><strong class="userinput"><code>-32593.21599272796</code></strong></td></tr><tr><td><span class="guilabel">ECC</span> under
+                    <span class="guilabel">Elements</span></td><td><strong class="userinput"><code>1.202872548116185</code></strong></td></tr><tr><td><span class="guilabel">INC</span> under
+                    <span class="guilabel">Elements</span></td><td><strong class="userinput"><code>28.80241266404142</code></strong></td></tr><tr><td><span class="guilabel">RAAN</span> under
+                    <span class="guilabel">Elements</span></td><td><strong class="userinput"><code>173.9693759331483</code></strong></td></tr><tr><td><span class="guilabel">AOP</span> under
+                    <span class="guilabel">Elements</span></td><td><strong class="userinput"><code>240.9696529532764</code></strong></td></tr><tr><td><span class="guilabel">TA</span> under
+                    <span class="guilabel">Elements</span></td><td><strong class="userinput"><code>359.9465533778069</code></strong></td></tr></tbody></table></div></div><p><br class="table-break"></p><p></p></li><li class="step"><p>Click on <span class="guilabel">Tanks</span> tab now.</p></li><li class="step"><p>Under <span class="guilabel">Available Tanks</span>, you'll see
+          <span class="guilabel">MainTank</span>. This is the fuel tank that we created
+          earlier.</p></li><li class="step"><p>We attach <span class="guilabel">MainTank</span> to the spacecraft
+          <span class="guilabel">MAVEN</span> by bringing it under <span class="guilabel">Selected
+          Tanks</span> box. Select <span class="guilabel">MainTank</span> under
+          <span class="guilabel">Available Tanks</span> and bring it over to the
+          right-hand side under the <span class="guilabel">Selected
+          Tanks</span>.</p></li><li class="step"><p>Click <span class="guilabel">OK</span> to save these changes.</p></li></ol></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N11BEB"></a>Create the Maneuvers</h3></div></div></div><p>We&rsquo;ll need two <span class="guilabel">ImpulsiveBurn</span> resources for
+      this tutorial. Below, we&rsquo;ll rename the default ImpulsiveBurn and create
+      a new one. We&rsquo;ll also select the fuel tank that was created earlier in
+      order to access fuel for the burns.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>In the <span class="guilabel">Resources</span> tree, under the
+          <span class="guilabel">Burns</span> folder, right-click
+          <span class="guilabel">DefaultIB</span> and click
+          <span class="guilabel">Rename</span>.</p></li><li class="step"><p>In the <span class="guilabel">Rename</span> box, type
+          <span class="guilabel">TCM</span>, an acronym for Trajectory Correction
+          Maneuver and click <span class="guilabel">OK</span> to edit its
+          properties.</p></li><li class="step"><p>Double-Click <span class="guilabel">TCM</span> to edit its properties
+          to edit its properties.</p></li><li class="step"><p>Check <span class="guilabel">Decrement Mass</span> under <span class="guilabel">Mass
+          Change</span>.</p></li><li class="step"><p>For <span class="guilabel">Tank</span> field under <span class="guilabel">Mass
+          Change</span>, select <span class="guilabel">MainTank</span> from drop
+          down menu.</p></li><li class="step"><p>Click <span class="guilabel">OK</span> to save these changes.</p></li><li class="step"><p>Right-click the<span class="guilabel">Burns</span> folder, point to
+          <span class="guilabel">Add</span>, and click
+          <span class="guilabel">ImpulsiveBurn</span>. A new resource called
+          <span class="guilabel">ImpulsiveBurn1</span> will be created.</p></li><li class="step"><p><span class="guilabel">Rename</span> the new
+          <span class="guilabel">ImpulsiveBurn1</span> resource to
+          <span class="guilabel">MOI</span>, an acronym for Mars Orbit Insertion and
+          click <span class="guilabel">OK</span>.</p></li><li class="step"><p>Double-click <span class="guilabel">MOI</span> to edit its
+          properties.</p></li><li class="step"><p>For <span class="guilabel">Origin</span> field under
+          <span class="guilabel">Coordinate System</span>, select
+          <span class="guilabel">Mars</span>.</p></li><li class="step"><p>Check <span class="guilabel">Decrement Mass</span> under <span class="guilabel">Mass
+          Change</span>.</p></li><li class="step"><p>For <span class="guilabel">Tank</span> field under <span class="guilabel">Mass
+          Change</span>, select <span class="guilabel">MainTank</span> from the
+          drop down menu.</p></li><li class="step"><p>Click <span class="guilabel">OK</span> to save these changes.</p></li></ol></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N11C7A"></a>Create the Propagators</h3></div></div></div><p>We&rsquo;ll need to add three propagators for this tutorial. Below,
+      we&rsquo;ll rename the default <span class="guilabel">DefaultProp</span> and create two
+      more propagators.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>In the <span class="guilabel">Resources</span> tree, under the
+          <span class="guilabel">Propagators</span> folder, right-click
+          <span class="guilabel">DefaultProp</span> and click Rename.</p></li><li class="step"><p>In the <span class="guilabel">Rename</span> box, type
+          <span class="guilabel">NearEarth</span> and click
+          <span class="guilabel">OK</span>.</p></li><li class="step"><p>Double-click on <span class="guilabel">NearEarth</span> to edit its
+          properties.</p></li><li class="step"><p>Set the values shown in the table below.</p><div class="table"><a name="N11CA5"></a><p class="title"><b>Table&nbsp;8.3.&nbsp;<span class="guilabel">NearEarth</span> settings</b></p><div class="table-contents"><table summary="NearEarth settings" border="1"><colgroup><col width="66%"><col width="34%"></colgroup><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td><span class="guilabel">Initial Step Size</span> under
+                    <span class="guilabel">Integrator </span></td><td><strong class="userinput"><code>600</code></strong></td></tr><tr><td><span class="guilabel">Accuracy</span> under <span class="guilabel">
+                    Integrator</span></td><td><strong class="userinput"><code>1e-013</code></strong></td></tr><tr><td><span class="guilabel">Min Step Size</span> under
+                    <span class="guilabel">Integrator</span></td><td><strong class="userinput"><code>0</code></strong></td></tr><tr><td><span class="guilabel">Max Step Size</span> under
+                    <span class="guilabel">Integrator</span></td><td><strong class="userinput"><code>600</code></strong></td></tr><tr><td><span class="guilabel">Model</span> under <span class="guilabel">Gravity
+                    </span></td><td><span class="guilabel">JGM-2</span></td></tr><tr><td><span class="guilabel">Degree</span> under
+                    <span class="guilabel">Gravity</span></td><td><strong class="userinput"><code>8</code></strong></td></tr><tr><td><span class="guilabel">Order</span> under
+                    <span class="guilabel">Gravity</span></td><td><strong class="userinput"><code>8</code></strong></td></tr><tr><td><span class="guilabel">Atmosphere Model</span> under
+                    <span class="guilabel">Drag</span></td><td><span class="guilabel">None</span></td></tr><tr><td><span class="guilabel">Point Masses</span> under
+                    <span class="guilabel">Force Model</span></td><td>Add <span class="guilabel">Luna</span> and
+                    <span class="guilabel">Sun</span></td></tr><tr><td><span class="guilabel">Use Solar Radiation Pressure</span>
+                    under <span class="guilabel">Force Model</span></td><td><span class="guilabel">Check this field</span></td></tr></tbody></table></div></div><p><br class="table-break"></p><p></p></li><li class="step"><p>Click on <span class="guilabel">OK</span> to save these changes.</p></li><li class="step"><p>Right-click the <span class="guilabel">Propagators</span> folder and
+          click <span class="guilabel">Add Propagator</span>. A new resource called
+          <span class="guilabel">Propagator1</span> will be created.</p></li><li class="step"><p><span class="guilabel">Rename</span> the new
+          <span class="guilabel">Propagator1</span> resource to
+          <span class="guilabel">DeepSpace</span> and click
+          <span class="guilabel">OK</span>.<span class="guilabel"></span></p></li><li class="step"><p>Double-click <span class="guilabel">DeepSpace</span> to edit its
+          properties<span class="guilabel">.</span></p></li><li class="step"><p>Set the values shown in the table below.</p><div class="table"><a name="N11D50"></a><p class="title"><b>Table&nbsp;8.4.&nbsp;<span class="guilabel">DeepSpace</span> settings</b></p><div class="table-contents"><table summary="DeepSpace settings" border="1"><colgroup><col width="66%"><col width="34%"></colgroup><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td><span class="guilabel">Type</span> under
+                    <span class="guilabel">Integrator </span></td><td><span class="guilabel">PrinceDormand78</span></td></tr><tr><td><span class="guilabel">Initial Step Size</span> under
+                    <span class="guilabel">Integrator </span></td><td><strong class="userinput"><code>600</code></strong></td></tr><tr><td><span class="guilabel">Accuracy</span> under <span class="guilabel">
+                    Integrator</span></td><td><strong class="userinput"><code>1e-012</code></strong></td></tr><tr><td><span class="guilabel">Min Step Size</span> under
+                    <span class="guilabel">Integrator</span></td><td><strong class="userinput"><code>0</code></strong></td></tr><tr><td><span class="guilabel">Max Step Size</span> under
+                    <span class="guilabel">Integrator</span></td><td><strong class="userinput"><code>864000</code></strong></td></tr><tr><td><span class="guilabel">Central Body</span> under
+                    <span class="guilabel">Force Model </span></td><td><span class="guilabel">Sun</span></td></tr><tr><td><span class="guilabel">Primary Body</span> under
+                    <span class="guilabel">Force Model</span></td><td><span class="guilabel">None</span></td></tr><tr><td><span class="guilabel">Point Masses</span> under
+                    <span class="guilabel">Force Model</span></td><td>Add <span class="guilabel">Earth, Luna, Sun, Mars, Jupiter,
+                    Neptune, Saturn, Uranus, Venus</span></td></tr><tr><td><span class="guilabel">Use Solar Radiation Pressure</span>
+                    under <span class="guilabel">Force Model</span></td><td><span class="guilabel">Check this field</span></td></tr></tbody></table></div></div><p><br class="table-break"></p><p></p></li><li class="step"><p>Click <span class="guilabel">OK</span> to save these changes.</p></li><li class="step"><p>Right-click the <span class="guilabel">Propagators</span> folder and
+          click <span class="guilabel">Add Propagator</span>. A new resource called
+          <span class="guilabel">Propagator1</span> will be created.</p></li><li class="step"><p>Rename the new <span class="guilabel">Propagator1</span> resource to
+          <span class="guilabel">NearMars</span> and click
+          <span class="guilabel">OK</span>.</p></li><li class="step"><p>Double-click on <span class="guilabel">NearMars</span> to edit its
+          properties.</p></li><li class="step"><p>Set the values shown in the table below.</p><div class="table"><a name="N11DE9"></a><p class="title"><b>Table&nbsp;8.5.&nbsp;<span class="guilabel">NearMars</span> settings</b></p><div class="table-contents"><table summary="NearMars settings" border="1"><colgroup><col width="66%"><col width="34%"></colgroup><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td><span class="guilabel">Type</span> under
+                    <span class="guilabel">Integrator </span></td><td><span class="guilabel">PrinceDormand78</span></td></tr><tr><td><span class="guilabel">Initial Step Size</span> under
+                    <span class="guilabel">Integrator </span></td><td><strong class="userinput"><code>600</code></strong></td></tr><tr><td><span class="guilabel">Accuracy</span> under <span class="guilabel">
+                    Integrator</span></td><td><strong class="userinput"><code>1e-012</code></strong></td></tr><tr><td><span class="guilabel">Min Step Size</span> under
+                    <span class="guilabel">Integrator</span></td><td><strong class="userinput"><code>0</code></strong></td></tr><tr><td><span class="guilabel">Max Step Size</span> under
+                    <span class="guilabel">Integrator</span></td><td><strong class="userinput"><code>86400</code></strong></td></tr><tr><td><span class="guilabel">Central Body</span> under
+                    <span class="guilabel">Force Model </span></td><td><span class="guilabel">Mars</span></td></tr><tr><td><span class="guilabel">Primary Body</span> under
+                    <span class="guilabel">Force Model</span></td><td><span class="guilabel">Mars</span></td></tr><tr><td><span class="guilabel">Model</span> under
+                    <span class="guilabel">Gravity</span></td><td><span class="guilabel">Mars-50C</span></td></tr><tr><td><span class="guilabel">Degree</span> under
+                    <span class="guilabel">Gravity</span></td><td><strong class="userinput"><code>8</code></strong></td></tr><tr><td><span class="guilabel">Order</span> under
+                    <span class="guilabel">Gravity</span></td><td><strong class="userinput"><code>8</code></strong></td></tr><tr><td><span class="guilabel">Atmosphere Model</span> under
+                    <span class="guilabel">Drag</span></td><td><span class="guilabel">None</span></td></tr><tr><td><span class="guilabel">Point Masses</span> under
+                    <span class="guilabel">Force Model</span></td><td>Add <span class="guilabel">Sun</span></td></tr><tr><td><span class="guilabel">Use Solar Radiation Pressure</span>
+                    under <span class="guilabel">Force Model</span></td><td><span class="guilabel">Check this field</span></td></tr></tbody></table></div></div><p><br class="table-break"></p><p></p></li><li class="step"><p>Click <span class="guilabel">OK</span> to save the changes.</p></li></ol></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N11E88"></a>Create the Differential Corrector</h3></div></div></div><p>Two <code class="function">Target</code> sequences that we will create
+      later need a <code class="classname">DifferentialCorrector</code> resource to
+      operate, so let&rsquo;s create one now. We'll leave the settings at their
+      defaults.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>In the <span class="guilabel">Resources</span> tree, expand the
+          <span class="guilabel">Solvers</span> folder if it isn&rsquo;t already.</p></li><li class="step"><p>Right-click the<span class="guilabel"> Boundary Value Solvers</span>
+          folder, point to <span class="guilabel">Add</span>, and click
+          <span class="guilabel">DifferentialCorrector</span>. A new resource called
+          <span class="guilabel">DC1</span> will be created.</p></li><li class="step"><p><span class="guilabel">Rename</span> the new <span class="guilabel">DC1</span>
+          resource to <span class="guilabel">DefaultDC</span> and click
+          <span class="guilabel">OK</span>.</p></li></ol></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N11EBA"></a>Create the Coordinate Systems</h3></div></div></div><p>The BdotT and BdotR constraints that we will define later under
+      the first <span class="guilabel">Target</span> sequence require us to create a
+      coordinate system. Orbit View resources that we will create later also
+      need coordinate system resources to operate. We will create Sun and Mars
+      centered coordinate systems. So let&rsquo;s create them now.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>In the <span class="guilabel">Resources</span> tree, right-click the
+          <span class="guilabel">Coordinate Systems</span> folder and click
+          <span class="guilabel">Add Coordinate System</span>. A new Dialog box is
+          created with a title <span class="guilabel">New Coordinate
+          System.</span></p></li><li class="step"><p>Type <span class="guilabel">SunEcliptic</span> under
+          <span class="guilabel">Coordinate System </span><span class="guilabel">Name</span>
+          box.</p></li><li class="step"><p>Under <span class="guilabel">Origin</span> field, select
+          <span class="guilabel">Sun</span>.</p></li><li class="step"><p>For <span class="guilabel">Type</span> under <span class="guilabel">Axes</span>,
+          select <span class="guilabel">MJ2000Ec.</span></p></li><li class="step"><p>Click <span class="guilabel">OK</span> to save these changes. You&rsquo;ll
+          see that a new coordinate system <span class="guilabel">SunEcliptic</span> is
+          created under <span class="guilabel">Coordinate Systems</span> folder.</p></li><li class="step"><p>Right-click the <span class="guilabel">Coordinate Systems</span> folder
+          and click <span class="guilabel">Add Coordinate System</span>. A new Dialog
+          Box is created with a title <span class="guilabel">New Coordinate
+          System</span>.</p></li><li class="step"><p>Type <span class="guilabel">MarsInertial</span> under
+          <span class="guilabel">Coordinate System Name</span> box.</p></li><li class="step"><p>Under <span class="guilabel">Origin</span> field, select
+          <span class="guilabel">Mars</span>.</p></li><li class="step"><p>For <span class="guilabel">Type</span> under <span class="guilabel">Axes</span>,
+          select <span class="guilabel">BodyInertial</span>.</p></li><li class="step"><p>Click <span class="guilabel">OK</span> to save these changes. You&rsquo;ll
+          see that a new coordinate system <span class="guilabel">MarsInertial
+          </span>is created under <span class="guilabel">Coordinate Systems</span>
+          folder.</p></li></ol></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N11F32"></a>Create the Orbit Views</h3></div></div></div><p>We&rsquo;ll need three <span class="guilabel">DefaultOrbitView</span> resources
+      for this tutorial. Below, we&rsquo;ll rename the default
+      <span class="guilabel">DefaultOrbitView</span> and create two new ones. We need
+      three graphics windows in order to visualize spacecraft&rsquo;s trajectory
+      centered around Earth, Sun and then Mars</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>In the <span class="guilabel">Resources</span> tree, under
+          <span class="guilabel">Output</span> folder, right-click
+          <span class="guilabel">DefaultOrbitView</span> and click
+          <span class="guilabel">Rename</span>.</p></li><li class="step"><p>In the <span class="guilabel">Rename</span> box, type
+          <span class="guilabel">EarthView</span> and click
+          <span class="guilabel">OK</span>.</p></li><li class="step"><p>In the <span class="guilabel">Output</span> folder, delete
+          <span class="guilabel">DefaultGroundTrackPlot</span>.</p></li><li class="step"><p>Double-click <span class="guilabel">EarthView</span> to edit its
+          properties.</p></li><li class="step"><p>Set the values shown in the table below.</p><div class="table"><a name="N11F6C"></a><p class="title"><b>Table&nbsp;8.6.&nbsp;<span class="guilabel">EarthView</span> settings</b></p><div class="table-contents"><table summary="EarthView settings" border="1"><colgroup><col width="66%"><col width="34%"></colgroup><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td><span class="guilabel">View Scale Factor</span> under
+                    <span class="guilabel">View Definition</span></td><td><strong class="userinput"><code>4</code></strong></td></tr><tr><td><span class="guilabel">View Point Vector</span> boxes, under
+                    <span class="guilabel">View Definition</span></td><td><strong class="userinput"><code>0, 0, 30000</code></strong></td></tr></tbody></table></div></div><p><br class="table-break"></p><p></p></li><li class="step"><p>Click <span class="guilabel">OK</span> to save these changes.</p></li><li class="step"><p>Right-click the <span class="guilabel">Output</span> folder, point to
+          <span class="guilabel">Add</span>, and click <span class="guilabel">OrbitView</span>.
+          A new resource called <span class="guilabel">OrbitView1</span> will be
+          created.</p></li><li class="step"><p><span class="guilabel">Rename</span> the new <span class="guilabel">OrbitView1
+          </span>resource to <span class="guilabel">SolarSystemView </span>and
+          click <span class="guilabel">OK</span>.</p></li><li class="step"><p>Double-click <span class="guilabel">SolarSystemView</span> to edit its
+          properties.</p></li><li class="step"><p>Set the values shown in the table below.</p><div class="table"><a name="N11FC3"></a><p class="title"><b>Table&nbsp;8.7.&nbsp;<span class="guilabel">SolarSystemView</span> settings</b></p><div class="table-contents"><table summary="SolarSystemView settings" border="1"><colgroup><col width="66%"><col width="34%"></colgroup><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td>From <span class="guilabel">Celestial Object</span> under
+                    <span class="guilabel">View Object</span>, add following objects to
+                    <span class="guilabel">Selected Celestial Object </span>box</td><td><span class="guilabel">Mars, Sun</span> (Do not remove
+                    <span class="guilabel">Earth</span>)</td></tr><tr><td><span class="guilabel">Coordinate System</span> under
+                    <span class="guilabel">View Definition</span></td><td><span class="guilabel">SunEcliptic</span></td></tr><tr><td><span class="guilabel">View Point Reference</span> under
+                    <span class="guilabel">View Definition</span></td><td><span class="guilabel">Sun</span></td></tr><tr><td><span class="guilabel">View Point Vector</span> boxes, under
+                    <span class="guilabel">View Definition</span></td><td><strong class="userinput"><code>0, 0, 5e8</code></strong></td></tr><tr><td><span class="guilabel">View Direction</span> under
+                    <span class="guilabel">View Definition</span></td><td><span class="guilabel">Sun</span></td></tr><tr><td><span class="guilabel">Coordinate System</span> under
+                    <span class="guilabel">View Up Definition</span></td><td><span class="guilabel">SunEcliptic</span></td></tr></tbody></table></div></div><p><br class="table-break"></p><p></p></li><li class="step"><p>Click <span class="guilabel">OK</span> to save these changes.</p></li><li class="step"><p>Right-click the <span class="guilabel">Output </span>folder, point to
+          <span class="guilabel">Add</span>, and click <span class="guilabel">OrbitView</span>.
+          A new resource called <span class="guilabel">OrbitView1</span> will be
+          created.</p></li><li class="step"><p><span class="guilabel">Rename</span> the new
+          <span class="guilabel">OrbitView1</span> resource to
+          <span class="guilabel">MarsView</span> and click
+          <span class="guilabel">OK</span>.</p></li><li class="step"><p>Double-click <span class="guilabel">MarsView</span> to edit its
+          properties.</p></li><li class="step"><p>Set the values shown in the table below.</p><div class="table"><a name="N1204B"></a><p class="title"><b>Table&nbsp;8.8.&nbsp;<span class="guilabel">MarsView</span> settings</b></p><div class="table-contents"><table summary="MarsView settings" border="1"><colgroup><col width="66%"><col width="34%"></colgroup><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td>From <span class="guilabel">Celestial Object</span> under
+                    <span class="guilabel">View Object</span>, add following object to
+                    <span class="guilabel">Selected Celestial Object</span> box</td><td><span class="guilabel">Mars</span> (You don&rsquo;t have to remove
+                    <span class="guilabel">Earth</span>)</td></tr><tr><td><span class="guilabel">Coordinate System</span> under
+                    <span class="guilabel">View Definition</span></td><td><span class="guilabel">MarsInertial</span></td></tr><tr><td><span class="guilabel">View Point Reference</span> under
+                    <span class="guilabel">View Definition</span></td><td><span class="guilabel">Mars</span></td></tr><tr><td><span class="guilabel">View Point Vector</span> boxes, under
+                    <span class="guilabel">View Definition</span></td><td><strong class="userinput"><code>22000, 22000, 0</code></strong></td></tr><tr><td><span class="guilabel">View Direction</span> under
+                    <span class="guilabel">View Definition</span></td><td><strong class="userinput"><code>Mars</code></strong></td></tr><tr><td><span class="guilabel">Coordinate System </span>under
+                    <span class="guilabel">View Up Definition</span></td><td><span class="guilabel">MarsInertial</span></td></tr></tbody></table></div></div><p><br class="table-break"></p><p></p></li><li class="step"><p>Click <span class="guilabel">OK</span> to save the changes.</p></li></ol></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Mars_B_Plane_Targeting.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Mars_B_Plane_Targeting.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ch08s03.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;8.&nbsp;Mars B-Plane Targeting&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Configure the Mission Sequence</td></tr></table></div></body></html>

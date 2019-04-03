@@ -39,18 +39,22 @@
 #include "ConsoleMessageReceiver.hpp"
 #include "Moderator.hpp"
 #include "StringUtil.hpp"
+#include "GmatGlobal.hpp"
 
 #include "CommandFactory.hpp"
 #include "PointMassForce.hpp"
 #include "PrintUtility.hpp"
 
 //#define DEBUG_CONSOLE
+//#define DEBUG_CONSOLE_STARTUP
 
 #ifdef DEBUG_CONSOLE
 #include <unistd.h>
 #endif
 
-static Moderator *mod = NULL;
+static Moderator   *mod          = NULL;
+static GmatGlobal  *gmatGlobal   = NULL;
+static std::string lastRunScript = "";
 
 //------------------------------------------------------------------------------
 //  void ShowHelp()
@@ -69,16 +73,18 @@ void ShowHelp()
              << "The second runs the input script once and then exits.\n"
              << "The third selection executes specific testing scenarios.\n\n" 
              << "Valid options are:\n"
-             << "   --help, -h              Shows available options\n"
-             << "   --version, -v           Show version and build information\n"
-             << "   --batch, -b <filename>  Runs multiple scripts listed in specified file\n"
-             << "   --run, -r <filename>    Runs the input script once, then exits\n"
-             << "   --minimize, -m          Opens with GUI minimized (ignored for Console)\n"
-             << "   --start-server          Starts GMAT Server on start-up (ignored for Console)\n"
-             << "   --save                  Saves current script (interactive mode only)\n"
-             << "   --summary               Writes command summary (interactive mode only)\n"
-             << "   --verbose <on/off>      Dump info messages to screen during run (default is on)\n"
-             << "   --exit, -x              Exit after run (default)\n"
+             << "   --help, -h                    Shows available options\n"
+             << "   --version, -v                 Show version and build information\n"
+             << "   --batch, -b <filename>        Runs multiple scripts listed in specified file\n"
+             << "   --run, -r <filename>          Runs the input script once, then exits\n"
+             << "   --logfile, -l <filename>      Specify the log file (ignored in Console interactive mode)\n"
+             << "   --startup_file, -s <filename> Specify the startup file (ignored in Console interactive mode)\n"
+             << "   --minimize, -m                Opens with GUI minimized (ignored for Console)\n"
+             << "   --start-server                Starts GMAT Server on start-up (ignored for Console)\n"
+             << "   --save                        Saves current script (interactive mode only)\n"
+             << "   --summary                     Writes command summary (interactive mode only)\n"
+             << "   --verbose <on/off>            Dump info messages to screen during run (default is on)\n"
+             << "   --exit, -x                    Exit after run (default)\n"
              << std::endl << std::endl;
 }
 
@@ -433,15 +439,101 @@ void DumpDEData(double secsToStep, double spanInSecs)
    data << std::endl;
 }
 
+
+//------------------------------------------------------------------------------
+// StringArray CheckForStartupAndLogFile(int argc, char *argv[])
+//------------------------------------------------------------------------------
+/**
+ * Check the input arguments specifically and only for the startup file
+ * and log file.
+ *
+ * @param <argc> The count of the input arguments.
+ * @param <argv> The input arguments.
+ *
+ * @return array of startup and log file names
+ */
+//------------------------------------------------------------------------------
+StringArray CheckForStartupAndLogFile(int argc, char *argv[])
+{
+   StringArray result;
+   std::string theStartup = "gmat_startup_file.txt";
+   std::string theLog     = ""; 
+   
+   // if we're in interactive mode, these options are ignored
+   // if there are only two arguments, the second should be a script
+   if (argc > 2)
+   {
+      std::string arg("");
+      for (int i = 1; i < argc; ++i)
+      {
+         arg = argv[i];
+         if ((arg == "--logfile") || (arg == "-l"))
+         {
+            if (argc < i + 2)
+            {
+               MessageInterface::ShowMessage("*** Missing log file name\n");
+            }
+            else
+            {
+               std::string lFile = argv[i+1];
+               if (lFile[0] != '-')
+               {
+                  // Replace single quotes
+                  GmatStringUtil::Replace(lFile, "'", "");
+                  theLog = lFile;
+                  ++i;
+               }
+               else
+               {
+                  MessageInterface::ShowMessage("*** Missing log file name\n");
+               }
+            }
+         }
+         else if ((arg == "--startup_file") || (arg == "-s"))
+         {
+            if (argc < i + 2)
+            {
+               MessageInterface::ShowMessage("*** Missing startup file name\n");
+            }
+            else
+            {
+               std::string sFile = argv[i+1];
+               if (sFile[0] != '-')
+               {
+                  // Replace single quotes
+                  GmatStringUtil::Replace(sFile, "'", "");
+                  theStartup = sFile;
+                  ++i;
+               }
+               else
+               {
+                  MessageInterface::ShowMessage("*** Missing startup file name\n");
+               }
+            }
+         }
+         else
+         {
+            ; // ignore anything else for now
+         }
+      }
+   }
+   
+   result.push_back(theStartup);
+   result.push_back(theLog);
+   
+   return result;
+}
+
+
 //------------------------------------------------------------------------------
 // int main(int argc, char *argv[])
 //------------------------------------------------------------------------------
 /**
  * The program entry point.
- * 
+ *
  * @param <argc> The count of the input arguments.
  * @param <argv> The input arguments.
- * 
+ *
  * @return 0 on success.
  */
 //------------------------------------------------------------------------------
@@ -471,6 +563,7 @@ int main(int argc, char *argv[])
       bool        batchRun = false;
       bool        settingVerbose = false;
       
+      
       // Set the message receiver and moderator pointers here
       ConsoleMessageReceiver *theMessageReceiver = ConsoleMessageReceiver::Instance();
       MessageInterface::SetMessageReceiver(theMessageReceiver);
@@ -483,8 +576,25 @@ int main(int argc, char *argv[])
          MessageInterface::ShowMessage(" --------> and the application path is %s\n", argv[0]);
       #endif
 
+      StringArray filesSpecified = CheckForStartupAndLogFile(argc, argv);
+      std::string startUpFile    = filesSpecified.at(0);
+      std::string logFile        = filesSpecified.at(1);
+      
+      if (logFile != "")
+      {
+         gmatGlobal = GmatGlobal::Instance();
+         gmatGlobal->SetLogfileSource(GmatGlobal::CMD_LINE, logFile);
+      }
+      
+      // Can't set the log file yet because we don't have the OUTPUT_PATH until
+      // we've read the startup file
+      
+      #ifdef DEBUG_CONSOLE_STARTUP
+         MessageInterface::ShowMessage(" --------> startup set in args to %s\n", startUpFile.c_str());
+      #endif
       mod = Moderator::Instance();
-      if (mod == NULL || !(mod->Initialize("gmat_startup_file.txt")))
+
+      if (mod == NULL || !(mod->Initialize(startUpFile)))
       {
          std::cout << "Moderator failed to initialize!  Unable to run GmatConsole." << std::endl;
          return 1;
@@ -492,6 +602,7 @@ int main(int argc, char *argv[])
 
       if (argc < 2)    // interactive mode
       {
+         bool ignoreNext = false;
          do
          {
             std::cout << "Enter a script file, "
@@ -517,7 +628,7 @@ int main(int argc, char *argv[])
                }
                else if (!strcmp(scriptfile, "--args"))
                {
-                  ; // ignore this - it's used by the open statement hen opening the GUI version
+                  ; // ignore this - it's used by the open statement when opening the GUI version
                }
                else if ((!strcmp(scriptfile, "--run")) || (!strcmp(scriptfile, "-r")))
                {
@@ -527,13 +638,23 @@ int main(int argc, char *argv[])
                {
                   batchRun = true; // will grab batch file name as next arg
                }
+               else if ((!strcmp(scriptfile, "--logfile")) || (!strcmp(scriptfile, "-l")))
+               {
+                  std::cout << "\n--logfile option ignored in interactive mode\n ";
+                  ignoreNext = true; // skip log file name
+               }
+               else if ((!strcmp(scriptfile, "--startup_file")) || (!strcmp(scriptfile, "-s")))
+               {
+                  std::cout << "\n--startup_file option ignored in interactive mode\n ";
+                  ignoreNext = true; // skip startup file name
+               }
                else if ((!strcmp(scriptfile, "--minimize")) || (!strcmp(scriptfile, "-m")))
                {
                   std::cout << "\n--minimize option ignored\n ";
                }
                else if (!strcmp(scriptfile, "--save"))
                {
-                  SaveScript();
+                  SaveScript(lastRunScript); // need a filename here!
                }
                else if ((!strcmp(scriptfile, "--version")) || (!strcmp(scriptfile, "-v")))
                {
@@ -565,6 +686,11 @@ int main(int argc, char *argv[])
             }
             else if (!runcomplete)
             {
+               if (ignoreNext)
+               {
+                  ignoreNext = false;
+                  continue;
+               }
                if (settingVerbose)
                {
                   if (!strcmp(scriptfile, "off"))
@@ -588,6 +714,7 @@ int main(int argc, char *argv[])
                   else  // --run or -r
                   {
                      RunScriptInterpreter(scriptfile, verbosity);
+                     lastRunScript = scriptfile;
                   }
                   batchRun = false;
                }
@@ -615,16 +742,40 @@ int main(int argc, char *argv[])
          }
          if (!runcomplete)
          {
+            bool skipNext = false;
             for (int i = 1; i < argc; ++i)
             {
                arg = argv[i];
+               if (skipNext)
+               {
+                  skipNext = false;
+                  continue;
+               }
                if (arg == "--start-server")
                {
                   std::cout << "\nGMAT server currently unavailable to GmatConsole\n ";
                }
-               else if (arg =="--args")
+               else if (arg == "--args")
                {
-                  ; // ignore this - it's used by the open statement hen opening the GUI version
+                  ; // ignore this - it's used by the open statement when opening the GUI version
+               }
+               else if ((arg == "--logfile") || (arg == "-l"))
+               {
+                  if (argc >= i + 2) // there could be a log file name next
+                  {
+                     std::string nextArg = argv[i+1];
+                     if (nextArg[0] != '-')
+                        skipNext = true; // skip log file name - handled previously
+                  }
+               }
+               else if ((arg == "--startup_file") || (arg == "-s"))
+               {
+                  if (argc >= i + 2) // there could be a startup file name next
+                  {
+                     std::string nextArg = argv[i+1];
+                     if (nextArg[0] != '-')
+                        skipNext = true; // skip startup file name - handled previously
+                  }
                }
                else if ((arg == "--minimize") || (arg == "-m"))
                {
@@ -636,7 +787,7 @@ int main(int argc, char *argv[])
                }
                else if (arg == "--save")
                {
-                  SaveScript();
+                  ; // SaveScript(); // should this be ignored here? yes
                }
                else if (arg == "--summary")
                {

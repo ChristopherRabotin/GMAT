@@ -1,0 +1,85 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>CallMatlabFunction</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="CallGmatFunction.html" title="CallGmatFunction"><link rel="next" href="CallPythonFunction.html" title="CallPythonFunction"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">CallMatlabFunction</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="CallGmatFunction.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="CallPythonFunction.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="CallMatlabFunction"></a><div class="titlepage"></div><a name="N23117" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">CallMatlabFunction</span></h2><p>CallMatlabFunction &mdash; Call a MATLAB function</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><em class="replaceable"><code>MatlabFunction</code></em><code class="literal">()</code>
+<em class="replaceable"><code>MatlabFunction</code></em><code class="literal">(</code><em class="replaceable"><code>input_argument</code></em>[<code class="literal">,</code> <em class="replaceable"><code>input_argument</code></em>]...<code class="literal">)</code>
+<code class="literal">[</code><em class="replaceable"><code>output_argument</code></em>[<code class="literal">,</code> <em class="replaceable"><code>output_argument</code></em>]...<code class="literal">]</code> <code class="literal">=</code> <em class="replaceable"><code>MatlabFunction</code></em>
+<code class="literal">[</code><em class="replaceable"><code>output_argument</code></em>[<code class="literal">,</code> <em class="replaceable"><code>output_argument</code></em>]...<code class="literal">]</code> <code class="literal">=</code> <em class="replaceable"><code>...
+    MatlabFunction</code></em><code class="literal">(</code><em class="replaceable"><code>input_argument</code></em>[<code class="literal">,</code> <em class="replaceable"><code>input_argument</code></em>]...<code class="literal">)</code></pre></div><div class="refsection"><a name="N23175"></a><h2>Description</h2><p>GMAT provides a special command that allows you to call a function
+    written in the MATLAB language or provided with the MATLAB software. In
+    the GUI, this is the <span class="guilabel">CallMatlabFunction</span>
+    command.</p><p>In the syntax description, <span class="guilabel">MatlabFunction</span> is a
+    <span class="guilabel">MatlabFunction</span> resource that must be declared during
+    initialization. Arguments can be passed into and returned from the
+    function, though some data-type limitations apply. See <a class="xref" href="CallMatlabFunction.html#CallMatlabFunction_Remarks" title="Remarks">Remarks</a> for
+    details.</p><p>When a MATLAB function is called, GMAT opens a MATLAB command-line
+    window in the background. This functionality requires that MATLAB be
+    properly installed and configured on your system.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="MatlabFunction.html" title="MatlabFunction"><span class="refentrytitle">MatlabFunction</span></a>, <a class="xref" href="MatlabInterface.html" title="MATLAB Interface"><span class="refentrytitle">MATLAB Interface</span></a></p></div><div class="refsection"><a name="N23195"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_CallMatlabFunction_GUI.png" align="middle" height="219"></td></tr></table></div></div><p>The <span class="guilabel">CallMatlabFunction</span> GUI provides two input
+    boxes for input and output arguments and a list to select a function to
+    call.</p><p>The <span class="guilabel">Output</span> box lists all configured output
+    argument parameters. These must be selected by clicking
+    <span class="guilabel">Edit</span>, which displays a parameter selection window.
+    See the <a class="xref" href="CalculationParameters.html" title="Calculation Parameters"><span class="refentrytitle">Calculation Parameters</span></a> reference for details on
+    how to select a parameter.</p><p>The <span class="guilabel">Input</span> box is identical in behavior to
+    <span class="guilabel">Output</span>, but lists all configured input arguments to
+    the function. Arguments must be selected by clicking
+    <span class="guilabel">Edit</span>. The <span class="guilabel">Function</span> list displays
+    all functions that have been declared as
+    <span class="guilabel">MatlabFunction</span> resources in the Resources tree.
+    Select a function from the list to call it.</p><p>When the changes are accepted, GMAT does not perform any validation
+    of input or output arguments. This validation is performed when the
+    mission is run, when MATLAB has been started.</p></div><div class="refsection"><a name="CallMatlabFunction_Remarks"></a><h2>Remarks</h2><p>The input arguments (<em class="replaceable"><code>input_argument</code></em>
+    values in the syntax description) can be any of the following types:
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>resource parameter of real number type (e.g.
+          <span class="guilabel"><em class="replaceable"><code>Spacecraft</code></em>.X</span>)</p></li><li class="listitem"><p>resource parameter of string type (e.g.
+          <span class="guilabel"><em class="replaceable"><code>Spacecraft</code></em>.UTCGregorian</span>)</p></li><li class="listitem"><p><span class="guilabel">Array</span>, <span class="guilabel">String</span>, or
+          <span class="guilabel">Variable</span> resource</p></li><li class="listitem"><p><span class="guilabel">Array</span> resource element</p></li></ul></div><p>The output arguments (<em class="replaceable"><code>output_argument</code></em>
+    values in the syntax description) can be any of the following types:
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>resource parameter of real number type (e.g.
+          <span class="guilabel"><em class="replaceable"><code>Spacecraft</code></em>.X</span>)</p></li><li class="listitem"><p>resource parameter of string type (e.g.
+          <span class="guilabel"><em class="replaceable"><code>Spacecraft</code></em>.UTCGregorian</span>)</p></li><li class="listitem"><p><span class="guilabel">Array</span>, <span class="guilabel">String</span>, or
+          <span class="guilabel">Variable</span> resource</p></li><li class="listitem"><p><span class="guilabel">Array</span> resource element</p></li></ul></div><p>Data type conversion is performed for the following data types when
+    values are passed between MATLAB and GMAT. When data is passed from GMAT
+    to MATLAB as input arguments, the following conversions occur.</p><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>GMAT</th><th>MATLAB</th></tr></thead><tbody><tr><td><p>real number (e.g. <span class="guilabel">Spacecraft.X</span>,
+            <span class="guilabel">Variable</span>, <span class="guilabel">Array</span> element)
+            </p></td><td><p> double</p></td></tr><tr><td><p>string (e.g.
+            <span class="guilabel"><em class="replaceable"><code>Spacecraft</code></em>.UTCGregorian</span>,
+            <span class="guilabel">String</span> resource) </p></td><td><p> char array</p></td></tr><tr><td><p><span class="guilabel">Array</span> resource </p></td><td><p> double array</p></td></tr></tbody></table></div><p>When data is passed from MATLAB to GMAT as output arguments, the
+    following conversions occur.</p><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>MATLAB</th><th>GMAT</th></tr></thead><tbody><tr><td><p>char array </p></td><td><p> string</p></td></tr><tr><td><p>double </p></td><td><p> real number</p></td></tr><tr><td><p>double array </p></td><td><p> Array resource</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N23279"></a><h2>Examples</h2><div class="informalexample"><p>Call a simple built-in MATLAB function:</p><pre class="programlisting"><code class="code">Create MatlabFunction sinh
+Create Variable x y
+
+BeginMissionSequence
+
+x = 1
+[y] = sinh(x)</code></pre></div><div class="informalexample"><p>Call an external custom MATLAB function:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create ImpulsiveBurn aBurn
+Create Propagator aProp
+
+Create MatlabFunction CalcHohmann
+CalcHohmann.FunctionPath = 'C:\path\to\functions'
+
+Create Variable a_target mu dv1 dv2
+mu = 398600.4415
+
+BeginMissionSequence
+
+% calculate burns for circular Hohmann transfer (example)
+[dv1, dv2] = CalcHohmann(aSat.SMA, a_target, mu)
+
+% perform first maneuver
+aBurn.Element1 = dv1
+Maneuver aBurn(aSat)
+
+% propagate to apoapsis
+Propagate aProp(aSat) {aSat.Apoapsis}
+
+% perform second burn
+aBurn.Element1 = dv2
+Maneuver aBurn(aSat)</code></pre></div><div class="informalexample"><p>Return the MATLAB search path and working directory:</p><pre class="programlisting"><code class="code">Create MatlabFunction path pwd
+Create String pathStr pwdStr
+Create ReportFile aReport
+
+BeginMissionSequence
+
+[pathStr] = path
+[pwdStr] = pwd
+
+Report aReport pathStr
+Report aReport pwdStr</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="CallGmatFunction.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="CallPythonFunction.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">CallGmatFunction&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;CallPythonFunction</td></tr></table></div></body></html>

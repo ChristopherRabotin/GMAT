@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -398,7 +398,8 @@ Real Propagator::SetRealParameter(const Integer id, const Real value)
       if (GmatMathUtil::IsEqual(value, 0.0, STEP_SIZE_TOLERANCE))
       {
          std::stringstream ss;
-         ss << "Initial Step Size must not be zero (tolerance = " << STEP_SIZE_TOLERANCE << " seconds).";
+         ss << "Initial Step Size must not be zero (tolerance = "
+            << STEP_SIZE_TOLERANCE << " seconds).";
          throw PropagatorException(ss.str());
       }
       stepSizeBuffer = value;

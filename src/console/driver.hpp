@@ -55,6 +55,9 @@ void SaveScript(std::string filename = "");
 void ShowVersionInfo();
 void ShowCommandSummary(std::string filename = "");
 void DumpDEData(double secsToStep, double spanInSecs = 86400.0);
+
+StringArray CheckForStartupAndLogFile(int argc, char *argv[]);
+
 int main(int argc, char *argv[]);
 
 #endif /* driver_hpp */

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -86,6 +86,7 @@ protected:
    wxComboBox*     epochFormatComboBox;
    wxComboBox*     initialEpochComboBox;
    wxComboBox*     finalEpochComboBox;
+   wxCheckBox*     eventBoundariesCheckBox;
    
    wxComboBox*     allCoordSystemComboBox;
    wxStaticText*   allCoordSystemStaticText;
@@ -99,6 +100,11 @@ protected:
    wxTextCtrl*     numericStepSizeTextCtrl;
    wxStaticText*   numericStepSizeUnit;
    
+   // STK .e specific widgets
+   wxStaticText*   distanceUnitStaticText;
+   wxComboBox*     distanceUnitComboBox;
+
+   wxStaticBoxSizer *fileSettingsStaticBoxSizer;
    wxFlexGridSizer *grid1; //LOJ: Made this member data so that CS with only MJ2000Eq axis can be shown or hidden
    wxFlexGridSizer *grid2; //LOJ: Made this member data so that OutputFormat can be shown or hidden
    
@@ -106,6 +112,7 @@ protected:
    wxString        fileFormat;
    wxString        outputFormat;
    wxString        previousEpochFormat;
+   wxString        distanceUnit;
    
    wxFileDialog *fileDialog;
    

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -44,11 +44,16 @@ public:
    virtual EphemerisWriter* Clone(void) const;
    virtual void             Copy(const EphemerisWriter* orig);
    
+   void         SetDistanceUnit(const std::string &dU);
+   void         SetIncludeEventBoundaries(bool iEB);
+
 protected:
    
    STKEphemerisFile *stkEphemFile; // owned object
    std::string      stkVersion;
    bool             stkWriteFailed;
+   std::string      distanceUnit;
+   bool             includeEventBoundaries;
    
    // Abstract methods required by all subclasses
    virtual void BufferOrbitData(Real epochInDays, const Real state[6]);
@@ -68,16 +73,14 @@ protected:
                                 bool writeAfterData,
                                 bool ignoreBlankComments);
    virtual void FinishUpWriting();
+   virtual void CloseEphemerisFile(bool done = true, bool writeMetaData = true);
    
-   
-   void         HandleWriteOrbit();
    void         HandleSTKOrbitData(bool writeDatda, bool timeToWrite);
    void         FinishUpWritingSTK();
    
    // STK file writing
    void         WriteSTKOrbitDataSegment(bool canFinish);
    void         FinalizeSTKEphemeris();
-   
 };
 
 #endif // EphemWriterSTK_hpp

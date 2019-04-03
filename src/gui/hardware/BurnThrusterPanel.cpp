@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -784,7 +784,7 @@ void BurnThrusterPanel::SaveData()
       #endif
       std::string tankName = tankComboBox->GetValue().mb_str().data();
       if ((tankName != "No Fuel Tank Selected") &&
-          (tankName != "No Fuel Tank Available"))
+          (tankName != "No Fuel Tanks Available"))
          localObject->SetStringParameter("Tank", tankName);
    }
 
@@ -921,7 +921,7 @@ void BurnThrusterPanel::SaveData(GmatBase *theObject)
                #endif
                std::string tankName = tankComboBox->GetValue().mb_str().data();
                if ((tankName != "No Fuel Tank Selected") &&
-                   (tankName != "No Fuel Tank Available"))
+                   (tankName != "No Fuel Tanks Available"))
                   localObject->SetStringParameter("Tank", tankName);
             }
          }

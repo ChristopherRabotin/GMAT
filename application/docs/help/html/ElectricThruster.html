@@ -1,0 +1,254 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>ElectricThruster</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="ElectricTank.html" title="ElectricTank"><link rel="next" href="EclipseLocator.html" title="EclipseLocator"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">ElectricThruster</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ElectricTank.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="EclipseLocator.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="ElectricThruster"></a><div class="titlepage"></div><a name="N178A5" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ElectricThruster</span></h2><p>ElectricThruster &mdash; An electric thruster model</p></div><div class="refsection"><a name="N178B6"></a><h2>Description</h2><p>The <span class="guilabel">ElectricThruster</span> resource is a model of an
+    electric thruster which supports several models for thrust and mass flow
+    computation. The <span class="guilabel">ElecticThruster</span> model also allows
+    you to specify properties such as a duty cycle and scale factor and to
+    connect an <span class="guilabel">ElectricThruster</span> with an
+    <span class="guilabel">ElectricTank</span>. You can flexibly define the direction
+    of the thrust by specifying the thrust components in coordinate systems
+    such as (locally defined) <span class="guilabel">SpacecraftBody</span> or
+    <span class="guilabel">LVLH</span>, or by choosing any configured
+    <span class="guilabel">CoordinateSystem</span> resource.</p><p>For a complete descripton of how to configure all Resources required
+    for electric propulsion modelling, see the Tutorial named <a class="xref" href="Tut_ElectricPropulsion.html" title="Chapter&nbsp;12.&nbsp;Electric Propulsion">Chapter&nbsp;12, <i>Electric Propulsion</i></a></p><p>See Also <a class="xref" href="ElectricTank.html" title="ElectricTank"><span class="refentrytitle">ElectricTank</span></a>, <a class="xref" href="NuclearPowerSystem.html" title="NuclearPowerSystem"><span class="refentrytitle">NuclearPowerSystem</span></a>, <a class="xref" href="SolarPowerSystem.html" title="SolarPowerSystem"><span class="refentrytitle">SolarPowerSystem</span></a></p></div><div class="refsection"><a name="N178DE"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Axes</span></td><td><p>Allows the user to define a spacecraft centered set
+            of axes for the <span class="guilabel">ElectricThruster</span>. This field
+            cannot be modified in the Mission Sequence</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">VNB</span>, <span class="guilabel">LVLH</span>,
+                    <span class="guilabel">MJ2000Eq</span>,
+                    <span class="guilabel">SpacecraftBody</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">VNB</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ConstantThrust</span></td><td><p>Thrust value used<span class="guilabel"> ThrustModel</span> is
+            set to <span class="guilabel">ConstantThrustAndIsp</span>. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.237</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">CoordinateSystem</span></td><td><p>Determines what coordinate system the orientation
+            parameters, <span class="guilabel">ThrustDirection1</span>,
+            <span class="guilabel">ThrustDirection2</span>, and
+            <span class="guilabel">ThrustDirection3</span> refer to. This field cannot
+            be modified in the Mission Sequence. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Local</span>,
+                    <span class="guilabel">EarthMJ2000Eq</span>,
+                    <span class="guilabel">EarthMJ2000Ec</span>,
+                    <span class="guilabel">EarthFixed</span>, or any user defined
+                    system</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Local</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DecrementMass</span></td><td><p>Flag which determines if the
+            <span class="guilabel">FuelMass</span> is to be decremented as it used.
+            This field cannot be modified in the Mission Sequence. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true, false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>false</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DutyCycle</span></td><td><p>Fraction of time that the thrusters are on during a
+            maneuver. The thrust applied to the spacecraft is scaled by this
+            amount. Note that this scale factor also affects mass flow rate.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0 &lt;= Real &lt;= 1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FixedEfficiency</span></td><td><p>Thruster efficiency. Only used when
+            <span class="guilabel">ThrustModel</span> is
+            <span class="guilabel">FixedEfficiency</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.7</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Decimal Percent</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">GravitationalAccel </span></td><td><p>Value of the gravitational acceleration used for the
+            FuelTank/Thruster calculations. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>9.81</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>m/s<sup>2</sup></p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Isp</span></td><td><p>Thruster specific impulse. Only used when
+            <span class="guilabel">ThrustModel</span> is set to
+            <span class="guilabel">FixedEfficiency</span> or
+            <span class="guilabel">ConstantThrustAndIsp</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>4200</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>seconds</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MassFlowCoeff1</span></td><td><p>Mass flow coefficient. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>-0.004776</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>See <a class="xref" href="ElectricThruster.html#ElectricThruster_Models" title="Mathematical Models">Mathematical Models</a></p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MassFlowCoeff2</span></td><td><p>Mass flow coefficient. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.05717</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>See <a class="xref" href="ElectricThruster.html#ElectricThruster_Models" title="Mathematical Models">Mathematical Models</a></p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MassFlowCoeff3</span></td><td><p>Mass flow coefficient. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>-0.09956</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>See <a class="xref" href="ElectricThruster.html#ElectricThruster_Models" title="Mathematical Models">Mathematical Models</a></p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MassFlowCoeff4</span></td><td><p>Mass flow coefficient. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.03211</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>See <a class="xref" href="ElectricThruster.html#ElectricThruster_Models" title="Mathematical Models">Mathematical Models</a></p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MassFlowCoeff5</span></td><td><p>Mass flow coefficient. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>2.13781</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>See <a class="xref" href="ElectricThruster.html#ElectricThruster_Models" title="Mathematical Models">Mathematical Models</a></p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MaximumUsablePower</span></td><td><p>The maximum power the thruster can use to generate
+            thrust. Power provided above MaximumUsablePower is not used in the
+            thrust model.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0, Real &lt; MinimumUsablePower</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>7.266</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>kW</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MinimumUsablePower</span></td><td><p>The minimum power the thruster can use to generate
+            thrust. If power provided to thruster is below MinimumUsablePower,
+            no thrust is generated. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0, Real &gt; MinimumUsablePower</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.638</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>kW</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MixRatio</span></td><td><p>The mixture ratio employed to draw fuel from multiple
+            tanks. For example, if there are two tanks and
+            <span class="guilabel">MixRatio</span> is set to [2 1], then twice as much
+            fuel will be drawn from tank one as from tank 2 in the
+            <span class="guilabel">Tank</span> list. Note, if a MixRatio is not
+            supplied, fuel is drawn from tanks in equal amounts, (the
+            <span class="guilabel">MixRatio</span> is set to a vector of ones the same
+            length as the <span class="guilabel">Tank</span> list). </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Array of real numbers with same length as number of
+                    tanks in the <span class="guilabel">Tank</span> array</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>[1]</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Origin</span></td><td><p>This field, used in conjunction with the
+            <span class="guilabel">Axes</span> field, allows the user to define a
+            spacecraft centered set of axes for the
+            <span class="guilabel">ElectricThruster</span>. <span class="guilabel">Origin</span>
+            has no affect when a <span class="guilabel">Local</span> coordinate system
+            is used and the <span class="guilabel">Axes</span> are set to
+            <span class="guilabel">MJ2000Eq</span> or
+            <span class="guilabel">SpacecraftBody</span>. This field cannot be modified
+            in the Mission Sequence. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Sun</span>,
+                    <span class="guilabel">Mercury</span>, <span class="guilabel">Venus</span>,
+                    <span class="guilabel">Earth</span>, <span class="guilabel">Luna</span>,
+                    <span class="guilabel">Mars</span>,<span class="guilabel">Jupiter</span>,
+                    <span class="guilabel">Saturn</span>, <span class="guilabel">Uranus</span>,
+                    <span class="guilabel">Neptune</span>,
+                    <span class="guilabel">Pluto</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Earth</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Tanks</span></td><td><p><span class="guilabel">ElectricTank</span> from which the
+            <span class="guilabel">ElectricThruster</span> draws propellant from. In a
+            script command, an empty list, e.g., <code class="literal">Thruster1.Tank =
+            {}</code>, is NOT allowed. Via the script, if you wish to
+            indicate that no <span class="guilabel">ElectricTank</span> is associated
+            with an <span class="guilabel">ElectricThruster</span>, do not include
+            commands such as <code class="literal">Thruster1.Tank = ...</code> in your
+            script. This field cannot be modified in the Mission Sequence.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>User defined list of<span class="guilabel">
+                    FuelTank(s)</span>.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ThrustCoeff1</span></td><td><p>Thrust coefficient. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>-5.19082</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>See <a class="xref" href="ElectricThruster.html#ElectricThruster_Models" title="Mathematical Models">Mathematical Models</a></p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ThrustCoeff2</span></td><td><p>Thrust coefficient. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>2.96519</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>See <a class="xref" href="ElectricThruster.html#ElectricThruster_Models" title="Mathematical Models">Mathematical Models</a></p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ThrustCoeff3</span></td><td><p>Thrust coefficient. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>-14.41789</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>See <a class="xref" href="ElectricThruster.html#ElectricThruster_Models" title="Mathematical Models">Mathematical Models</a></p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ThrustCoeff4</span></td><td><p>Thrust coefficient. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>54.05382</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>See <a class="xref" href="ElectricThruster.html#ElectricThruster_Models" title="Mathematical Models">Mathematical Models</a></p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ThrustCoeff5</span></td><td><p>Thrust coefficient. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>-0.00100092</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>See <a class="xref" href="ElectricThruster.html#ElectricThruster_Models" title="Mathematical Models">Mathematical Models</a></p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ThrustDirection1</span></td><td><p>X component of the spacecraft thrust vector
+            direction. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">1</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ThrustDirection2</span></td><td><p>Y component of the spacecraft thrust vector
+            direction. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">1</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ThrustDirection3</span></td><td><p>Z component of the spacecraft thrust vector
+            direction. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ThrustModel</span></td><td><p>The type of thruster model. See <a class="xref" href="ElectricThruster.html#ElectricThruster_Models" title="Mathematical Models">Mathematical Models</a> for a
+            detailed description of the options.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">ThrustMassPolynomial</span>,
+                    <span class="guilabel">ConstantThrustAndIsp</span>,<span class="guilabel">FixedEfficiency</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">ThrustMassPolynomial</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ThrustScaleFactor</span></td><td><p><span class="guilabel">ThrustScaleFactor</span> is a scale
+            factor that is multiplied by the thrust vector, for a given
+            thruster, before the thrust vector is added into the total
+            acceleration. Note that the value of this scale factor does not
+            affect the mass flow rate. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt;= 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N17EAE"></a><h2>Interactions</h2><div class="informaltable"><table border="1"><colgroup><col width="23%"><col width="77%"></colgroup><thead><tr><th align="left">Command or Resource</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">BeginFiniteBurn/EndFiniteBurn
+            command</span></td><td><p>Use these commands, which require a
+            <span class="guilabel">Spacecraft</span> and a
+            <span class="guilabel">FiniteBurn</span> name as input, to implement a
+            finite burn. </p></td></tr><tr><td><span class="guilabel">ElectricTank resource</span></td><td><p>This resource contains the fuel used to power the
+            <span class="guilabel">ElectricThruster</span> specified by the<span class="guilabel">
+            FiniteBurn</span> resource.</p></td></tr><tr><td><span class="guilabel">FiniteBurn resource</span></td><td><p>When using the
+            <span class="guilabel">BeginFiniteBurn/EndFiniteBurn</span> commands, you
+            must specify which <span class="guilabel">FiniteBurn</span> resource to
+            implement. The <span class="guilabel">FiniteBurn</span> resource specifies
+            which <span class="guilabel">ElectricThruster(s)</span> to use for the
+            finite burn. </p></td></tr><tr><td><span class="guilabel">Spacecraft resource</span></td><td><p>When using the
+            <span class="guilabel">BeginFiniteBurn/EndFiniteBurn</span> commands, you
+            must specify which <span class="guilabel">Spacecraft</span> to apply the
+            finite burn to. </p></td></tr><tr><td><span class="guilabel">Propagate command</span></td><td><p>In order to implement a non-zero finite burn, a
+            <span class="guilabel">Propagate</span> statement must occurr within the
+            <span class="guilabel">BeginFiniteBurn</span> and
+            <span class="guilabel">EndFiniteBurn</span> statements. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N17F0E"></a><h2>GUI</h2><p>The <span class="guilabel">ElectricThruster</span> dialog box allows you to
+    specify properties of an <span class="guilabel">ElectricThruster</span> including
+    the <span class="guilabel">Coordinate System</span> of the thrust acceleration
+    direction vector, the thrust magnitude and Isp coefficients, and choice of
+    <span class="guilabel">ElectricTank</span>. The layout of the
+    <span class="guilabel">ElectricThruster</span> dialog box is shown below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ElectricThruster_GUI_3.png" align="middle" height="777"></td></tr></table></div></div><p>When configuring the <span class="guilabel">Coordinate System</span> field,
+    you can choose between existing coordinate systems or use locally defined
+    coordinate systems. The <span class="guilabel">Axes</span> field is only active if
+    <span class="guilabel">Coordinate System</span> is set to
+    <span class="guimenuitem">Local</span>. The <span class="guilabel">Origin</span> field is
+    only active if <span class="guilabel">Coordinate System</span> is set to
+    <span class="guimenuitem">Local</span> and <span class="guilabel">Axes</span> is set to
+    either <span class="guimenuitem">VNB</span> or
+    <span class="guimenuitem">LVLH</span>.</p><p>Selecting the <span class="guimenu">Configure Polynomials</span> button brings
+    up the following dialog box where you may input the coefficients for the
+    <span class="guilabel">ElectricThruster</span> polynomial.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ElectricThruster_GUI_5.png" align="middle" height="319"></td></tr></table></div></div><p>Similarly, clicking the <span class="guilabel">Configure Polynomials</span>
+    also allows you to edit mass flow coefficients as shown below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ElectricThruster_GUI_7.png" align="middle" height="319"></td></tr></table></div></div></div><div class="refsection"><a name="N17F6A"></a><h2>Remarks</h2><div class="refsection"><a name="ElectricThruster_Models"></a><h3>Mathematical Models</h3><p>The <span class="guilabel">ElectricThruster</span> model supports several
+      models for computation of thrust and and mass flow rate and the model
+      used is set by the <span class="guilabel">ThrustModel</span> field. When
+      <span class="guilabel">ThrustModel</span> is set to
+      <span class="guilabel">ThrustMassPolynomial</span>, the following polynomials are
+      used to compute thrust and mass flow rate</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ElectricThruster_ThustMassPolynomial.png" align="middle" height="96"></td></tr></table></div></div><p>where P is the power provided to the thruster which is computed
+      using the power logic defined on the FiniteBurn resource, f_d is duty
+      cycle, f_s is thrust scale factor, R_iT is the rotation matrix from the
+      thrust coordinate system to the inertial system, and T_hat is the thrust
+      unit vector. By industry convention, the mass flow rate and thrust
+      polynomial equations are in mg/s and milli-Newtons respectively. GMAT
+      internally converts the units to be consistent with the equations of
+      motion.</p><p>When <span class="guilabel">ThrustModel</span> is set to
+      <span class="guilabel">ConstantThrustAndIsp</span>, the following polynomials are
+      used to compute thrust and mass flow rate</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ElectricThruster_ConstThrustAndIspEq.png" align="middle" height="107"></td></tr></table></div></div><p>where C_t1 is set using the <span class="guilabel">ConstantThrust</span>
+      field, Isp is set using the <span class="guilabel">Isp</span> field, f_d is duty
+      cycle, f_s is thrust scale factor, R_iT is the rotation matrix from the
+      thrust coordinate system to the inertial system, and T_hat is the thrust
+      unit vector. Note, by industry convention, the mass flow rate and thrust
+      polynomial equations are in mg/s and milli-Newtons respectively. GMAT
+      internally converts the units to be consistent with the equations of
+      motion.</p><p>When <span class="guilabel">ThrustModel</span> is set to
+      <span class="guilabel">FixedEfficiency</span>, the following polynomials are used
+      to compute thrust and mass flow rate</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ElectricThruster_FixedEfficiencyEq.png" align="middle" height="128"></td></tr></table></div></div><p>where P is the power provided to the thruster which is computed
+      from the power logic defined on the <span class="guilabel">FiniteBurn</span>
+      Resource. "Eta" is the <span class="guilabel">FixedEfficiency</span> setting, f_d
+      is duty cycle, f_s is thrust scale factor, R_iT is the rotation matrix
+      from the thrust coordinate system to the inertial system, and T_hat is
+      the thrust unit vector.</p></div><div class="refsection"><a name="N17FBC"></a><h3>Use of Thruster Resource in Conjunction With Maneuvers</h3><p>An <span class="guilabel">ElectricThruster</span> resource is used only in
+      association with finite maneuvers. To implement a finite maneuver, you
+      must first create both an <span class="guilabel">ElectricTank</span> and a
+      <span class="guilabel">FiniteBurn</span> resource. You must also associate an
+      <span class="guilabel">ElectricTank</span> with the
+      <span class="guilabel">ElectricThruster</span> resource and you must associate an
+      <span class="guilabel">ElectricThruster</span> with the
+      <span class="guilabel">FiniteBurn</span> resource. The actual finite maneuver is
+      implemented using the
+      <span class="guilabel">BeginFiniteBurn</span>/<span class="guilabel">EndFiniteBurn</span>
+      commands.</p><p>For a complete descripton of how to configure all Resources
+      required for electric propulsion modelling, see the Tutorial named <a class="xref" href="Tut_ElectricPropulsion.html" title="Chapter&nbsp;12.&nbsp;Electric Propulsion">Chapter&nbsp;12, <i>Electric Propulsion</i></a></p></div><div class="refsection"><a name="N17FE0"></a><h3>Local Coordinate Systems</h3><p>Here, a Local coordinate system is defined as one that we
+      configure "locally" using the <span class="guilabel">ElectricThruster</span>
+      resource interface as opposed to defining a coordinate system using the
+      <span class="guilabel">Coordinate Systems</span> folder in the
+      <span class="guilabel">Resources</span> Tree.</p><p>To configure a local coordinate system, you must specify the
+      coordinate system of the input thrust acceleration direction vector,
+      <span class="guimenu">ThrustDirection1-3</span>. If you choose a local coordinate
+      system, the four choices available, as given by the
+      <span class="guimenu">Axes</span> sub-field, are <span class="guimenuitem">VNB</span>,
+      <span class="guimenuitem">LVLH</span>, <span class="guimenuitem">MJ2000Eq</span>,
+      and <span class="guimenuitem">SpacecraftBody</span>.
+      <span class="guimenuitem">VNB</span> or Velocity-Normal-Binormal is a
+      non-inertial coordinate system based upon the motion of the spacecraft
+      with respect to the <span class="guimenu">Origin</span> sub-field. For example, if
+      the <span class="guimenu">Origin</span> is chosen as Earth, then the X-axis of
+      this coordinate system is the along the velocity of the spacecraft with
+      respect to the Earth, the Y-axis is along the instantaneous orbit normal
+      (with respect to the Earth) of the spacecraft, and the Z-axis completes
+      the right-handed set.</p><p>Similarly, Local Vertical Local Horizontal or
+      <span class="guimenuitem">LVLH</span> is also a non-inertial coordinate system
+      based upon the motion of the spacecraft with respect to the
+      <span class="guimenu">Origin</span> sub-field. Again, if we choose Earth as the
+      origin, then the X-axis of this coordinate system is the position of the
+      spacecraft with respect to the Earth, the Z-axis is the instantaneous
+      orbit normal (with respect to the Earth) of the spacecraft, and the
+      Y-axis completes the right-handed set.</p><p><span class="guimenuitem">MJ2000Eq</span> is the J2000-based
+      Earth-centered Earth mean equator inertial coordinate system. Note that
+      the <span class="guimenu">Origin</span> sub-field is not needed to define this
+      coordinate system.</p><p><span class="guimenuitem">SpacecraftBody</span> is the attitude system
+      of the spacecraft. Since the thrust is applied in this system, GMAT uses
+      the attitude of the spacecraft, a spacecraft attribute, to determine the
+      inertial thrust direction. Note that the <span class="guilabel">Origin</span>
+      sub-field is not needed to define this coordinate system.</p></div><div class="refsection"><a name="N18021"></a><h3>Caution Regarding Force Model Discontinuties</h3><p>Note that when modellign shadows on a
+      <span class="guilabel">SolarPowerSystem</span> Resource, it is possible that
+      there is not enough power available to power an
+      <span class="guilabel">ElectricThruster</span>. This occurs when the power
+      available from the <span class="guilabel">SolarPowerSystem</span>, or the power
+      distributed to the thruster, is less than
+      <span class="guilabel">MinimumUsablePower</span>. When this occurs, the thruster
+      model turns off thrust and this can cause a discontinuity in the force
+      model. To avoid this, you must propagate to the boundary and switch
+      propagators, or configure the <span class="guilabel">Propagator</span> to
+      continue propagating if a poor step occurs.</p></div></div><div class="refsection"><a name="N18035"></a><h2>Examples</h2><div class="informalexample"><p>Create a default <span class="guilabel">ElectricTank</span> and an
+      <span class="guilabel">ElectricThruster</span> that allows for fuel depletion,
+      assign the <span class="guilabel">ElectricThruster</span> the default
+      <span class="guilabel">ElectricTank</span>, and attach both to a
+      <span class="guilabel">Spacecraft</span>.</p><pre class="programlisting">%  Create an ElectricTank Resource
+Create ElectricTank anElectricTank
+
+%  Create an Electric Thruster Resource
+Create ElectricThruster anElectricThruster
+anElectricThruster.CoordinateSystem = Local
+anElectricThruster.Origin = Earth
+anElectricThruster.Axes = VNB
+anElectricThruster.ThrustDirection1 = 1
+anElectricThruster.ThrustDirection2 = 0
+anElectricThruster.ThrustDirection3 = 0
+anElectricThruster.DutyCycle = 1
+anElectricThruster.ThrustScaleFactor = 1
+anElectricThruster.DecrementMass = true
+anElectricThruster.Tank = {anElectricTank}
+anElectricThruster.GravitationalAccel = 9.810000000000001
+anElectricThruster.ThrustModel = ThrustMassPolynomial
+anElectricThruster.MaximumUsablePower = 7.266
+anElectricThruster.MinimumUsablePower = 0.638
+anElectricThruster.ThrustCoeff1 = -5.19082
+anElectricThruster.ThrustCoeff2 = 2.96519
+anElectricThruster.ThrustCoeff3 = -14.4789
+anElectricThruster.ThrustCoeff4 = 54.05382
+anElectricThruster.ThrustCoeff5 = -0.00100092
+anElectricThruster.MassFlowCoeff1 = -0.004776
+anElectricThruster.MassFlowCoeff2 = 0.05717
+anElectricThruster.MassFlowCoeff3 = -0.09956
+anElectricThruster.MassFlowCoeff4 = 0.03211
+anElectricThruster.MassFlowCoeff5 = 2.13781
+anElectricThruster.FixedEfficiency = 0.7
+anElectricThruster.Isp = 4200
+anElectricThruster.ConstantThrust = 0.237
+
+%  Create a SolarPowerSystem Resource
+Create SolarPowerSystem aSolarPowerSystem
+
+%  Create a Spacecraft Resource and attach hardware
+Create Spacecraft DefaultSC
+DefaultSC.Tanks = {anElectricTank}
+DefaultSC.Thrusters = {anElectricThruster}
+DefaultSC.PowerSystem = aSolarPowerSystem
+
+BeginMissionSequence</pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ElectricTank.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="EclipseLocator.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">ElectricTank&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;EclipseLocator</td></tr></table></div></body></html>

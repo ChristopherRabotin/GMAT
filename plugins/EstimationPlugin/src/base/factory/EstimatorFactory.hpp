@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -57,8 +57,10 @@ public:
 //   virtual Estimator* CreateEstimator(const std::string &ofType,
 //                                const std::string &withName /* = "" */);
 
-   virtual Solver* CreateSolver(const std::string &ofType,
-                                const std::string &withName /* = "" */);
+   virtual GmatBase* CreateObject(const std::string &ofType,
+                                  const std::string &withName /* = "" */);
+   virtual Solver*   CreateSolver(const std::string &ofType,
+                                  const std::string &withName /* = "" */);
 
    // default constructor
    EstimatorFactory();

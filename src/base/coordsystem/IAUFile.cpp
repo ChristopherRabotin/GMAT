@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -31,6 +31,7 @@
 
 #include <stdio.h>
 #include "IAUFile.hpp"
+#include "RealUtilities.hpp"
 #include "FileManager.hpp"
 #include "LagrangeInterpolator.hpp"
 #include "MessageInterface.hpp"
@@ -193,7 +194,7 @@ bool IAUFile::GetIAUData(Real ind, Real* iau_data, Integer dim, Integer order)
 
 	// Specify beginning index and ending index in order to run interpolation:
 	Real stepsize = 1.0;
-	Integer midpoint = (ind-independence[0])/stepsize;
+    Integer midpoint = (ind-independence[0])/(Integer)GmatMathUtil::NearestInt(stepsize);
 	Integer beginIndex = (0 > (midpoint-order/2))? 0:(midpoint-order/2);
 	Integer endIndex = ((pointsCount-1) < (beginIndex+order))? (pointsCount-1):(beginIndex+order);
 	beginIndex = (0 > (endIndex-order))? 0:(endIndex-order);

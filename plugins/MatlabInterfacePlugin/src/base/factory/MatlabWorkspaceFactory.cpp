@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,8 +39,20 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CreateSubscriber(const std::string &ofType, const std::string &withName,
-//                   const std::string &fileName)
+//  GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * @see CreateSubscriber()
+ */
+//------------------------------------------------------------------------------
+GmatBase* MatlabWorkspaceFactory::CreateObject(const std::string &ofType,
+                                               const std::string &withName)
+{
+   return CreateSubscriber(ofType, withName);
+}
+
+//------------------------------------------------------------------------------
+//  Subscriber* CreateSubscriber(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested Subscriber class
@@ -53,8 +65,7 @@
  */
 //------------------------------------------------------------------------------
 Subscriber* MatlabWorkspaceFactory::CreateSubscriber(const std::string &ofType,
-                                                     const std::string &withName,
-                                                     const std::string &filename)
+                                                     const std::string &withName)
 {
    if (ofType == "MatlabWorkspace")
       return new MatlabWorkspace(withName);

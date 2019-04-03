@@ -1,0 +1,30 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Create and configure Force model and propagator</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data"><link rel="prev" href="DSN_Estimation_Define_the_types_of_measurements_that_will_be_processed.html" title="Define the types of measurements that will be processed"><link rel="next" href="DSN_Estimation_Create_and_configure_BatchEstimatorInv_object.html" title="Create and configure BatchEstimatorInv object"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Create and configure Force model and propagator</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="DSN_Estimation_Define_the_types_of_measurements_that_will_be_processed.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="DSN_Estimation_Create_and_configure_BatchEstimatorInv_object.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="DSN_Estimation_Create_and_configure_Force_model_and_propagator"></a>Create and configure Force model and propagator</h2></div></div></div><p>We now create and configure the force model and propagator that will
+    be used for the simulation. For this deep space drift away orbit, we
+    naturally choose the Sun as our central body. Since we are far away from
+    all the planets, we use point mass gravity models and we include the
+    effects of the Sun, Earth, Moon, and most of the other planets. In
+    addition, we model Solar Radiation Pressure (SRP) affects and we include
+    the effect of general relativity on the dynamics. The script segment
+    accomplishing this is shown below.</p><pre class="programlisting">Create ForceModel Fm;
+Create Propagator Prop;
+Fm.CentralBody             = Sun;
+Fm.PointMasses             = {Sun, Earth, Luna, Mars, Saturn, ...
+                             Uranus, Mercury, Venus, Jupiter};
+Fm.SRP                     = On;
+Fm.RelativisticCorrection  = On;
+Prop.FM                    = Fm;
+Prop.MinStep               = 0;
+Prop.MaxStep               = 86400  </pre><p>We say a few words about our choice of minimum and maximum step
+    sizes for our propagator. As mentioned in the
+    <span class="guilabel">BatchEstimatorInv</span> Help, it is recommended that if the
+    <span class="guilabel">ForceModel</span> resource associated with your propagator
+    is using relative step control, i.e., <code class="code">ErrorControl = RSSStep</code>,
+    then the minimum step size, <span class="guilabel">MinStep</span>, of your
+    propagator should be set to 0. We have not directly set the value of
+    <span class="guilabel">Fm.ErrorControl</span> but since we know that, by default,
+    its value is RSSStep, we set <span class="guilabel">Prop.MinStep</span> equal to 0.
+    For our deep space orbit, the dynamics are slowly changing and we want our
+    integrator to take large steps as long as the default accuracy error
+    tolerance of approximately 1e-11 is maintained. Thus, we set our max step
+    to 1 day. Finally, we note that for actual operational missions, the user
+    may want to use a more stringent accuracy error tolerance.</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="DSN_Estimation_Define_the_types_of_measurements_that_will_be_processed.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="DSN_Estimation_Create_and_configure_BatchEstimatorInv_object.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Define the types of measurements that will be processed&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Create and configure BatchEstimatorInv object</td></tr></table></div></body></html>

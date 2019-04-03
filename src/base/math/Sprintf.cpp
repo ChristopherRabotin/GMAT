@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -50,7 +50,7 @@
  */
 //------------------------------------------------------------------------------
 Sprintf::Sprintf(const std::string &name)
-   : StringFunction("Sprintf", name)
+   : StringFunctionNode("Sprintf", name)
 {
 }
 
@@ -77,7 +77,7 @@ Sprintf::~Sprintf()
  */
 //------------------------------------------------------------------------------
 Sprintf::Sprintf(const Sprintf &copy) :
-   StringFunction      (copy)
+   StringFunctionNode      (copy)
 {
 }
 
@@ -113,7 +113,7 @@ bool Sprintf::ValidateInputs()
        GetTypeName().c_str(), desc.c_str());
    #endif
    
-   if (!StringFunction::ValidateInputs())
+   if (!StringFunctionNode::ValidateInputs())
       return false;
    
    // Add any other validation here

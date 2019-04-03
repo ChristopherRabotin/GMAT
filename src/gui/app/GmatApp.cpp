@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -141,36 +141,51 @@ bool GmatApp::OnInit()
       // Continue work on this (loj: 2008.12.04)
       //@todo: Add all files contains gmat_startup_file in
       // startup up directory, and show user to select one
-      //---------------------------------------------------------
-      #ifdef __GET_STARTUP_FILE_FROM_USER__
-      //---------------------------------------------------------
-      bool readOtherStartupFile = false;
-      
-      wxArrayString choices;
-      choices.Add(startupFile);
-      choices.Add("Read other startup file");
-      wxString msg = "Please select GMAT startup file to read";
-      int result =
-         wxGetSingleChoiceIndex(msg, "GMAT Startup File", 
-                                choices, NULL, -1, -1, true, 150, 200);
-      if (result == 1)
-         readOtherStartupFile = true;
-      
-      // reading other startup file, save current directory and set it back
-      if (readOtherStartupFile)
-      {
-         wxString filename = 
-            ::wxFileSelector("Choose GMAT startup file", "",
-                             "gmat_startup_file.txt", "txt", "*.*");
-         if (filename != "")
-            startupFile = filename;
-      }
-      //---------------------------------------------------------      
-      #endif
-      //---------------------------------------------------------
+//      //---------------------------------------------------------
+//      #ifdef __GET_STARTUP_FILE_FROM_USER__
+//      //---------------------------------------------------------
+//      bool readOtherStartupFile = false;
+//      
+//      wxArrayString choices;
+//      choices.Add(startupFile);
+//      choices.Add("Read other startup file");
+//      wxString msg = "Please select GMAT startup file to read";
+//      int result =
+//         wxGetSingleChoiceIndex(msg, "GMAT Startup File", 
+//                                choices, NULL, -1, -1, true, 150, 200);
+//      if (result == 1)
+//         readOtherStartupFile = true;
+//      
+//      // reading other startup file, save current directory and set it back
+//      if (readOtherStartupFile)
+//      {
+//         wxString filename = 
+//            ::wxFileSelector("Choose GMAT startup file", "",
+//                             "gmat_startup_file.txt", "txt", "*.*");
+//         if (filename != "")
+//            startupFile = filename;
+//      }
+//      //---------------------------------------------------------      
+//      #endif
+//      //---------------------------------------------------------
       
       // Create the Moderator - GMAT executive
       theModerator = Moderator::Instance();
+      
+      // Check the argument list for the startup and/or log file names
+      // here
+      StringArray theFiles   = CheckForStartupAndLogFile();
+      std::string theStartup = theFiles.at(0);
+      std::string theLogfile = theFiles.at(1);
+      
+      if (theLogfile != "")
+      {
+         GmatGlobal::Instance()->SetLogfileSource(GmatGlobal::CMD_LINE, theLogfile);
+      }
+      
+      std::string startupFileToRead = startupFile;
+      if (theStartup != "")
+         startupFileToRead = theStartup;
       
       // Initialize the Moderator.
       // The Moderator passes startup file to FileManger to read.
@@ -182,7 +197,8 @@ bool GmatApp::OnInit()
          ("   curr dir before Moderator init = '%s'\n", currDirBeforeInit.c_str());
       #endif
       
-      if (theModerator->Initialize(startupFile, true))
+//      if (theModerator->Initialize(startupFile, true))
+      if (theModerator->Initialize(startupFileToRead, true))
       {
          GuiInterpreter *guiInterp = GuiInterpreter::Instance();
          theModerator->SetUiInterpreter(guiInterp);
@@ -571,6 +587,97 @@ void GmatApp::OnAssertFailure(const wxChar *file, int line, const wxChar *func,
 }
 #endif
 
+//------------------------------------------------------------------------------
+// StringArray CheckForStartupAndLogFile()
+//------------------------------------------------------------------------------
+/**
+ * Check the input arguments specifically and only for the startup file
+ * and log file.
+ *
+ * NOTE; this method will access the argc and argv inputs
+ *
+ * @return array of startup and log file names
+ */
+//------------------------------------------------------------------------------
+StringArray GmatApp::CheckForStartupAndLogFile()
+{
+   StringArray result;
+   std::string theStartup = ""; // "gmat_startup_file.txt";
+   std::string theLog     = ""; // "GmatLog.txt";
+   
+   // if there is only one arguments, that is only the application name
+   // NOTE: on Mac, we expect --args before any other arguments.
+   if (argc > 1)
+   {
+      for (int i = 1; i < argc; ++i)
+      {
+         #if wxCHECK_VERSION(3, 0, 0)
+            std::string arg = argv[i].WX_TO_STD_STRING;
+            std::string argNext = "";
+            if (argc >= i + 2)
+               argNext = argv[i+1].WX_TO_STD_STRING;
+         #else
+            std::string arg = argv[i];
+            std::string argNext = "";
+            if (argc >= i + 2)
+               argNext = argv[i+1];
+         #endif
+         if ((arg == "--logfile") || (arg == "-l"))
+         {
+            if (argc < i + 2)
+            {
+//               MessageInterface::PutMessage("*** Missing log file name\n");
+            }
+            else
+            {
+               std::string lFile = argNext;
+               if (lFile[0] != '-')
+               {
+                  // Replace single quotes
+                  GmatStringUtil::Replace(lFile, "'", "");
+                  theLog = lFile;
+                  ++i;
+               }
+               else
+               {
+//                  MessageInterface::PutMessage("*** Missing log file name\n");
+               }
+            }
+         }
+         else if ((arg == "--startup_file") || (arg == "-s"))
+         {
+            if (argc < i + 2)
+            {
+//               MessageInterface::PutMessage("*** Missing startup file name\n");
+            }
+            else
+            {
+               std::string sFile = argNext;
+               if (sFile[0] != '-')
+               {
+                  // Replace single quotes
+                  GmatStringUtil::Replace(sFile, "'", "");
+                  theStartup = sFile;
+                  ++i;
+               }
+               else
+               {
+//                  MessageInterface::PutMessage("*** Missing startup file name\n");
+               }
+            }
+         }
+         else
+         {
+            ; // ignore anything else for now
+         }
+      }
+   }
+   
+   result.push_back(theStartup);
+   result.push_back(theLog);
+   
+   return result;
+}
 
 //------------------------------------------------------------------------------
 // bool ProcessCommandLineOptions()
@@ -602,13 +709,16 @@ bool GmatApp::ProcessCommandLineOptions()
    #endif
    std::string gmatHelp = gmatUsage + gmatText + "\n";
    gmatHelp +=
-         "-h, \t--help        \t\tDisplay command line usage information in the Message Window\n"
-         "-m, \t--minimize    \t\tOpen GMAT with a minimized interface\n"
-         "-r, \t--run         \t\tAutomatically run the specified script after loading\n"
-         "    \t              \t\t[has no effect if no script is specified]\n"
-         "-v, \t--version     \t\tDisplay version information in the Message Window\n"
-         "-x, \t--exit        \t\tExit GMAT after running the specified script\n"
-         "    \t              \t\t[has no effect if no script is specified]\n";
+         "-h, \t--help                   \t\t\tDisplay command line usage information in the Message Window\n"
+         "-l, \t--logfile <filename>     \t\tSpecify log file name\n"
+         "-s, \t--startup_file <filename>\tSpecify the startup file to read\n"
+         "-m, \t--minimize               \t\tOpen GMAT with a minimized interface\n"
+         "-r, \t--run <filename>         \t\tAutomatically run the specified script after loading\n"
+         "    \t                         \t\t\t[has no effect if no script is specified]\n"
+         "-v, \t--version                \t\tDisplay version information in the Message Window\n"
+         "-x, \t--exit                   \t\t\tExit GMAT after running the specified script\n"
+         "    \t                         \t\t\t[if specified with only a script name (i.e. NO --run option), GMAT simply opens and closes]\n";
+   
    
    //wxString commandLineOptions = wxT(gmatHelp.c_str());
    wxString commandLineOptions = wxString(gmatHelp.c_str());
@@ -620,13 +730,27 @@ bool GmatApp::ProcessCommandLineOptions()
    // Handle any command line arguments
    if (argc > 1)
    {
+      bool skipNext = false;
       for (int i = 1; i < argc; ++i)
       {
          #if wxCHECK_VERSION(3, 0, 0)
          std::string arg = argv[i].WX_TO_STD_STRING;
+         std::string argNext = "";
+         if (argc >= i + 2)
+            argNext = argv[i+1].WX_TO_STD_STRING;
          #else
          std::string arg = argv[i];
+         std::string argNext = "";
+         if (argc >= i + 2)
+            argNext = argv[i+1];
          #endif
+         // If we are skipping the next one (for startup_file or logfile, e.g.),
+         // continue to the enxt argument
+         if (skipNext)
+         {
+            skipNext = false;
+            continue;
+         }
          
          #ifdef DEBUG_CMD_LINE
          MessageInterface::PutMessage("arg = %s\n", arg.c_str());
@@ -667,6 +791,42 @@ bool GmatApp::ProcessCommandLineOptions()
          else if ((arg == "--exit") || (arg == "-x"))
          {
             GmatGlobal::Instance()->SetRunMode(GmatGlobal::EXIT_AFTER_RUN);
+         }
+         else if ((arg == "--logfile") || (arg == "-l"))
+         {
+            bool missingLogfile = true;
+            if (argc >= i + 2) // there could be a log file name next
+            {
+               std::string nextArg = argNext;
+               if (nextArg[0] != '-')
+               {
+                  skipNext = true; // skip log file name - handled previously
+                  missingLogfile = false;
+               }
+            }
+            if (missingLogfile)
+            {
+               MessageInterface::ShowMessage(
+                    "*** Missing log file name: ignoring --logfile argument\n");
+            }
+         }
+         else if ((arg == "--startup_file") || (arg == "-s"))
+         {
+            bool missingStartup = true;
+            if (argc >= i + 2) // there could be a startup file name next
+            {
+               std::string nextArg = argNext;
+               if (nextArg[0] != '-')
+               {
+                  skipNext = true; // skip startup file name - handled previously
+                  missingStartup = false;
+               }
+            }
+            if (missingStartup)
+            {
+               MessageInterface::ShowMessage(
+                  "*** Missing startup file name: ignoring --startup_file argument\n");
+            }
          }
          else if ((arg == "--minimize") || (arg == "-m"))
          {
@@ -709,6 +869,10 @@ bool GmatApp::ProcessCommandLineOptions()
                   MessageInterface::PutMessage("%s\n", scriptToRun.c_str());
                #endif
             }
+         }
+         else if (arg == "--save")
+         {
+            ; // ignore this argument for the GUI GMAT
          }
          else
          {

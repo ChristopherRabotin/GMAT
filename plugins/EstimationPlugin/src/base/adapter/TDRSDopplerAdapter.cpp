@@ -90,7 +90,8 @@ TDRSDopplerAdapter::TDRSDopplerAdapter(const std::string& name) :
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("TDRSDopplerAdapter default constructor <%p>\n", this);
 #endif
-   typeName = "TDRSDoppler_HZ";              // change type name from "RangeKm" to "TDRSDoppler_HZ"
+   //typeName = "TDRSDoppler_HZ";              // change type name from "RangeKm" to "TDRSDoppler_HZ"
+   typeName = "SN_Doppler";              // change type name from "Range" to "SN_Doppler"
 }
 
 
@@ -336,7 +337,7 @@ std::string TDRSDopplerAdapter::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool TDRSDopplerAdapter::SetStringParameter(const Integer id, const std::string& value)
 {
-   // Note that: measurement type of adapter is always "Range_KM", so it does not need to change
+   // Note that: measurement type of adapter is always ("TDRSDoppler_HZ") "SN_Doppler", so it does not need to change
    bool retval = true;
    if ((id != MEASUREMENT_TYPE)&&(id != SIGNAL_PATH))
    {
@@ -1016,7 +1017,7 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
    adapterES->AddMediaCorrection(false);
    adapterES->CalculateMeasurement(withEvents, obData, rampTB);
    measDataES = adapterES->GetMeasurement();
-   measDataES.value[0] = measDataES.value[0] / adapterES->GetMultiplierFactor();      // convert to full range in km  // Does it need to convert to full range ?????? Answer: Yes, when Range_KM measurement takes half range to be its value, in this case, we need to convert to full range 
+   measDataES.value[0] = measDataES.value[0] / adapterES->GetMultiplierFactor();      // convert to full range in km  // Does it need to convert to full range ?????? Answer: Yes, when (Range_KM) Range measurement takes half range to be its value, in this case, we need to convert to full range 
 
 
    // 3. Compute for Start-Long and Start-Short paths w/o any noise and bias
@@ -1262,12 +1263,15 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
       // 4.12. Add noise and bias
       Real C_idealVal = cMeasurement.value[i];
       
-      if (measurementType == "TDRSDoppler_HZ")
+      //if (measurementType == "TDRSDoppler_HZ")
+      if (measurementType == "SN_Doppler")
       {         
          // Compute bias
-         ComputeMeasurementBias("Bias", "TDRSDoppler_HZ", 2);
+         //ComputeMeasurementBias("Bias", "TDRSDoppler_HZ", 2);
+         ComputeMeasurementBias("Bias", "SN_Doppler", 2);
          // Compute noise sigma
-         ComputeMeasurementNoiseSigma("NoiseSigma", "TDRSDoppler_HZ", 2);
+         //ComputeMeasurementNoiseSigma("NoiseSigma", "TDRSDoppler_HZ", 2);
+         ComputeMeasurementNoiseSigma("NoiseSigma", "SN_Doppler", 2);
          // Compute measurement error covariance matrix
          ComputeMeasurementErrorCovarianceMatrix();
 
@@ -1323,7 +1327,8 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("      . Multiplier factor for EL-path: %.12lf Hz/Km\n", multiplierEL);
          MessageInterface::ShowMessage("      . Multiplier factor for ES-path: %.12lf Hz/Km\n", multiplierES);
          MessageInterface::ShowMessage("      . C-value w/o noise and bias  : %.12lf Hz\n", C_idealVal);
-         if (measurementType == "TDRSDoppler_HZ")
+         //if (measurementType == "TDRSDoppler_HZ")
+         if (measurementType == "SN_Doppler")
          {
             MessageInterface::ShowMessage("      . TDRSDoppler noise sigma  : %.12lf Hz \n", noiseSigma[i]);
             MessageInterface::ShowMessage("      . TDRSDoppler bias         : %.12lf Hz \n", measurementBias[i]);
@@ -1407,7 +1412,8 @@ const std::vector<RealArray>& TDRSDopplerAdapter::CalculateMeasurementDerivative
 
    if (paramName == "Bias")
    {
-      if (((ErrorModel*)obj)->GetStringParameter("Type") == "TDRSDoppler_HZ")
+      //if (((ErrorModel*)obj)->GetStringParameter("Type") == "TDRSDoppler_HZ")
+      if (((ErrorModel*)obj)->GetStringParameter("Type") == "SN_Doppler")
          theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, id);
       else
       {

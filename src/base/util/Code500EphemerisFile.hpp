@@ -98,7 +98,7 @@ protected:
       char   tapeId[8];                             // 81-88
       char   sourceId[8];                           // 89-96
       char   headerTitle[56];                       // 97-152
-      double centralBodyIndicator;                  // 153-156
+      double centralBodyIndicator;                  // 153-160 Central body of integration
       double brouwerLyddame[6];                     // 161-208
       double refTimeForDUT_YYMMDD;                  // 209-216
       char   coordSystemIndicator1[4];              // 217-220
@@ -152,7 +152,7 @@ protected:
       double timeIntervalBetweenPoints_DUT;         // 1553-1560
       double precessionNutationIndicator;           // 1561-1568
       double ghaAtEpoch;                            // 1569-1576
-      double coordinateCenterIndicator;             // 1577-1584
+      double coordinateCenterIndicator;             // 1577-1584 Central body of output ephem
       double dateOfInitiationOfEphemComp_YYYMMDD;   // 1585-1592
       double timeOfInitiationOfEphemComp_HHMMSS;    // 1593-1600
       double ghaAtEphemStart_RAD;                   // 1601-1608
@@ -231,12 +231,13 @@ protected:
    double         mSatId;
    double         mInputTimeSystem;  // 1 = A1, 2 = UTC
    double         mOutputTimeSystem; // 1 = A1, 2 = UTC
-   double         mCentralBodyIndicator; 
+   double         mCentralBodyOfIntegration; // Earth = 1, etc.
+   double         mCentralBodyOfOutputEphem; // Earth = 0, etc.
    double         mPrecNutIndicator; // hardcoded to 1
    std::string    mProductId;
    std::string    mTapeId;
    std::string    mSourceId;
-   std::string    mCentralBody;      // Earth, Luna, Sun, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Mercury, Venus
+   std::string    mOutputCentralBody; // Earth, Luna, Sun, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Mercury, Venus
    std::string    mTimeSystem;
    std::string    mCoordSystem;      // "2000" for J2000
    
@@ -281,7 +282,7 @@ protected:
    std::vector<EphemData> ephemRecords;
 
    // For cartesian to keplerian state conversion
-   double mCentralBodyMu;
+   double mOutputCentralBodyMu;
    
    // File mode, format, and name (read or write)
    int  mFileMode;  // 1 = input, 2 = output
@@ -355,6 +356,10 @@ protected:
    std::string ToUtcGregorian(double dutTime, bool forOutput = true);
    std::string ToUtcGregorian(const A1Mjd &a1Mjd, bool forOutput = true);
    std::string ToYearMonthDayHourMinSec(double yyymmdd, double secsOfDay);
+   
+   // Body indicator
+   double GetBodyIndicator(const std::string &bodyName, int forWhich);
+   std::string GetBodyName(double bodyInd, int forWhich);
    
    // String functions
    void CopyString(char *to, const std::string &from, int numChars);

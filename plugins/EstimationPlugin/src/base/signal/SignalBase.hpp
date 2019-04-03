@@ -99,7 +99,6 @@ public:
 
    virtual std::string  GetPathDescription(bool fullList = true);
 
-   SignalData&          GetSignalData();
    SignalData*          GetSignalDataObject();
    void                 SetSignalData(const SignalData& newData);
    bool                 IsSignalFeasible();

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1238,13 +1238,12 @@ bool AtmosphereModel::SetStringParameter(const Integer id,
    {
       if (value != "")
       {
-         bool headerFound = false;
          bool startFound = false;
          bool fileIsValid = false;
 
          // If the file is a SCHATTEN file, we require 3 tags:
          // "PREDICTED SOLAR DATA", "BEGIN_DATA", and "END_DATA"
-         std::string searchFor = "PREDICTED SOLAR DATA";
+         std::string searchFor = "BEGIN_DATA";
          std::string line;
 
          // Does it exist?
@@ -1271,20 +1270,14 @@ bool AtmosphereModel::SetStringParameter(const Integer id,
             line = GmatStringUtil::ToUpper(line);
             if (std::string(line).find(searchFor) != std::string::npos)
             {
-               if (!headerFound)
-               {
-                  headerFound = true;
-                  searchFor = "BEGIN_DATA";
-               }
-               if (headerFound && !startFound)
-               {
-                  startFound = true;
-                  searchFor = "END_DATA";
-               }
-               if (headerFound && startFound)
-               {
-                  fileIsValid = true;
-               }
+                if (!startFound){
+                    startFound = true;
+                    searchFor = "END_DATA";
+                    continue;
+                }
+                if (startFound){
+                    fileIsValid = true;
+                }
             }
          }
          inStream.close();

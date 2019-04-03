@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -85,6 +85,27 @@
 //---------------------------------
 //  public methods
 //---------------------------------
+
+//------------------------------------------------------------------------------
+//  GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates and returns an object of the requested command class 
+ *
+ * @param <ofType>   type of command object to create and return.
+ * @param <withName> name of the command (currently not used).
+ *
+ * @return command object
+ *
+ * @note As of 2003/10/14, we are ignoring the withname parameter.  Use of this
+ *       parameter may be added later.
+ */
+//------------------------------------------------------------------------------
+GmatBase* CommandFactory::CreateObject(const std::string &ofType,
+                                       const std::string &withName)
+{
+   return CreateCommand(ofType, withName);
+}
 
 //------------------------------------------------------------------------------
 //  GmatCommand* CreateCommand(const std::string &ofType, 

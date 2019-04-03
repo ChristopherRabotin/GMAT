@@ -1,0 +1,227 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>FindEvents</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="EndFiniteBurn.html" title="EndFiniteBurn"><link rel="next" href="For.html" title="For"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">FindEvents</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="EndFiniteBurn.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="For.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="FindEvents"></a><div class="titlepage"></div><a name="N234E0" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">FindEvents</span></h2><p>FindEvents &mdash; Execute an event location search</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><code class="literal">FindEvents </code><em class="replaceable"><code>Locator</code></em> [<code class="literal">{Append = </code><code class="literal">true</code>|<code class="literal">false}</code>]</pre></div><div class="refsection"><a name="N23502"></a><h2>Description</h2><p>The <span class="guilabel">FindEvents</span> command executes an event
+    location search defined by either of the event location resources,
+    <span class="guilabel">ContactLocator</span> or
+    <span class="guilabel">EclipseLocator</span>. If configured, the search will result
+    in a text-based event report.</p><p>An explicit <span class="guilabel">FindEvents</span> command is not necessary
+    for most simple event location searches. If the locator resource is
+    configured with <span class="guilabel">RunMode</span> =
+    <code class="literal">'Automatic'</code>, <span class="guilabel">FindEvents</span> is
+    executed automatically at the end of the mission sequence. Manual
+    execution of the command is most useful to generate custom searches for
+    part of a mission, or to change search intervals based on mission
+    data.</p><p>The <span class="guilabel">Append</span> option is used to configure how the
+    report file is written. If <span class="guilabel">Append</span> is true, the new
+    report will be appended to the end of the existing file. If
+    <span class="guilabel">Append</span> is false, it will replace the old file. Note
+    that if <span class="guilabel">Append</span> is true, the report may be appended to
+    a file that existed prior to the current GMAT session.</p><p><span class="ref_seealso">See Also</span>:<a class="xref" href="ContactLocator.html" title="ContactLocator"><span class="refentrytitle">ContactLocator</span></a>, <a class="xref" href="EclipseLocator.html" title="EclipseLocator"><span class="refentrytitle">EclipseLocator</span></a></p></div><div class="refsection"><a name="N23536"></a><h2>Options</h2><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel"><em class="replaceable"><code>Locator</code></em></span></td><td><p>The event locator to execute.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p><span class="guilabel">ContactLocator</span>,
+                    <span class="guilabel">EclipseLocator</span></p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>any valid <span class="guilabel">ContactLocator</span> or
+                    <span class="guilabel">EclipseLocator</span> resource</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>none</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Append</span></td><td><p>Append to an existing event report (if true) or
+            replace it (if false).</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">true</code>,
+                    <code class="literal">false</code></p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>false</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N235A6"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_FindEvents_1.png" align="middle" height="178"></td></tr></table></div></div><p>The <span class="guilabel">FindEvents</span> GUI panel is very simple. Choose
+    the event locator to execute from the <span class="guilabel">Event Locator</span>
+    list, which is populated by all existing
+    <span class="guilabel">EclipseLocator</span> and
+    <span class="guilabel">ContactLocator</span> resources. To append the report (if
+    one is generated), enable the <span class="guilabel">Append</span> box.</p></div><div class="refsection"><a name="N235C3"></a><h2>Remarks</h2><div class="refsection"><a name="N235C6"></a><h3>Using FindEvents in loops</h3><p>The <span class="guilabel">FindEvents</span> command can be used inside
+      loops like <span class="guilabel">For</span> and <span class="guilabel">While</span>, but
+      not inside solver sequences, like <span class="guilabel">Target</span> and
+      <span class="guilabel">Optimize</span>. To perform event location based on the
+      result of a solver sequence, put the <span class="guilabel">FindEvents</span>
+      command after the sequence.</p><p>When <span class="guilabel">FindEvents</span> is used inside a loop, but
+      there are several potential issues to be aware of. The following snippet
+      illustrates several.</p><pre class="programlisting">Create EclipseLocator ec
+ec.Spacecraft = sat
+ec.OccultingBodies = {Mercury, Venus, Earth, Luna, Mars, Phobos, Deimos}
+ec.Filename = 'ForLoop.report'
+ec.InputEpochFormat = TAIGregorian
+
+% Prevents automatic execution at end of mission
+ec.RunMode = 'Manual'
+
+% Lets us manually control search intervals
+ec.UseEntireInterval = false
+
+BeginMissionSequence
+
+% Execute FindEvents once before loop, to clear
+% out any existing file.
+ec.InitialEpoch = sat.TAIGregorian
+Propagate prop(sat) {sat.ElapsedSecs = 2400}
+ec.FinalEpoch = sat.TAIGregorian
+FindEvents ec {Append = false}
+
+% Main loop
+For I = 1:1:71
+    % Set initial epoch of search to current epoch
+    ec.InitialEpoch = sat.TAIGregorian
+    % Propagate
+    Propagate prop(sat) {sat.ElapsedSecs = 2400}
+    % Set final epoch of search to new epoch
+    ec.FinalEpoch = sat.TAIGregorian
+    % Execute search, appending to file
+    FindEvents ec {Append = true}
+EndFor</pre></div></div><div class="refsection"><a name="N235E4"></a><h2>Examples</h2><div class="informalexample"><p>Perform a basic eclipse search in LEO:</p><pre class="programlisting">SolarSystem.EphemerisSource = 'DE421'
+
+Create Spacecraft sat
+sat.DateFormat = UTCGregorian
+sat.Epoch = '15 Sep 2010 16:00:00.000'
+sat.CoordinateSystem = EarthMJ2000Eq
+sat.DisplayStateType = Keplerian
+sat.SMA = 6678.14
+sat.ECC = 0.001
+sat.INC = 0
+sat.RAAN = 0
+sat.AOP = 0
+sat.TA = 180
+
+Create ForceModel fm
+fm.CentralBody = Earth
+fm.PrimaryBodies = {Earth}
+fm.GravityField.Earth.PotentialFile = 'JGM2.cof'
+fm.GravityField.Earth.Degree = 0
+fm.GravityField.Earth.Order = 0
+fm.GravityField.Earth.EarthTideModel = 'None'
+fm.Drag.AtmosphereModel = None
+fm.PointMasses = {}
+fm.RelativisticCorrection = Off
+fm.SRP = Off
+
+Create Propagator prop
+prop.FM = fm
+prop.Type = RungeKutta89
+
+Create EclipseLocator el
+el.Spacecraft = sat
+el.Filename = 'Simple.report'
+el.OccultingBodies = {Earth}
+el.EclipseTypes = {'Umbra', 'Penumbra', 'Antumbra'}
+el.RunMode = 'Manual'
+
+BeginMissionSequence
+
+Propagate prop(sat) {sat.ElapsedSecs = 10800}
+
+FindEvents el
+</pre></div><div class="informalexample"><p>Execute FindEvents in a loop, appending each time:</p><pre class="programlisting">SolarSystem.EphemerisSource = 'SPICE'
+SolarSystem.SPKFilename = 'de421.bsp'
+
+Create Spacecraft sat
+sat.DateFormat = UTCGregorian
+sat.Epoch = '10 May 1984 00:00:00.000'
+sat.CoordinateSystem = MarsMJ2000Eq
+sat.DisplayStateType = Keplerian
+sat.SMA = 6792.38
+sat.ECC = 0
+sat.INC = 45
+sat.RAAN = 0
+sat.AOP = 0
+sat.TA = 0
+
+Create ForceModel fm
+fm.CentralBody = Mars
+fm.PrimaryBodies = {Mars}
+fm.GravityField.Mars.PotentialFile = 'Mars50c.cof'
+fm.GravityField.Mars.Degree = 0
+fm.GravityField.Mars.Order = 0
+fm.Drag.AtmosphereModel = None
+fm.PointMasses = {}
+fm.RelativisticCorrection = Off
+fm.SRP = Off
+
+Create Propagator prop
+prop.FM = fm
+prop.Type = RungeKutta89
+
+Create CoordinateSystem MarsMJ2000Eq
+MarsMJ2000Eq.Origin = Mars
+MarsMJ2000Eq.Axes = MJ2000Eq
+
+Create Moon Phobos
+Phobos.CentralBody = 'Mars'
+Phobos.PosVelSource = 'SPICE'
+Phobos.NAIFId = 401
+Phobos.OrbitSpiceKernelName = {'mar063.bsp'}
+Phobos.SpiceFrameId = 'IAU_PHOBOS'
+Phobos.EquatorialRadius = 13.5
+Phobos.Flattening = 0.3185185185185186
+Phobos.Mu = 7.093399e-004
+
+Create Moon Deimos
+Deimos.CentralBody = 'Mars'
+Deimos.PosVelSource = 'SPICE'
+Deimos.NAIFId = 402
+Deimos.OrbitSpiceKernelName = {'mar063.bsp'}
+Deimos.SpiceFrameId = 'IAU_DEIMOS'
+Deimos.EquatorialRadius = 7.5
+Deimos.Flattening = 0.30666666666666664
+Deimos.Mu = 1.588174e-004
+
+Create EclipseLocator ec
+ec.Spacecraft = sat
+ec.OccultingBodies = {Mercury, Venus, Earth, Luna, Mars, Phobos, Deimos}
+ec.Filename = 'ForLoop.report'
+ec.RunMode = 'Manual'
+ec.UseEntireInterval = false
+ec.InputEpochFormat = TAIGregorian
+
+Create Variable I
+
+BeginMissionSequence
+
+ec.InitialEpoch = sat.TAIGregorian
+Propagate prop(sat) {sat.ElapsedSecs = 2400}
+ec.FinalEpoch = sat.TAIGregorian
+FindEvents ec {Append = false}
+
+For I = 1:1:71
+    ec.InitialEpoch = sat.TAIGregorian
+    Propagate prop(sat) {sat.ElapsedSecs = 2400}
+    ec.FinalEpoch = sat.TAIGregorian
+    FindEvents ec {Append = true}
+EndFor
+</pre></div><div class="informalexample"><p>Execute FindEvents in a loop, executing search in stages but not
+      appending:</p><pre class="programlisting">Create Spacecraft sat
+sat.DateFormat = UTCGregorian
+sat.Epoch = '1 Mar 2016 12:00:00.000'
+sat.CoordinateSystem = EarthMJ2000Eq
+sat.DisplayStateType = Keplerian
+sat.SMA = 42164
+sat.ECC = 0
+sat.INC = 0
+sat.RAAN = 0
+sat.AOP = 0
+sat.TA = 0
+
+Create ForceModel fm
+fm.CentralBody = Earth
+fm.PrimaryBodies = {Earth}
+fm.GravityField.Earth.PotentialFile = 'JGM2.cof'
+fm.GravityField.Earth.Degree = 0
+fm.GravityField.Earth.Order = 0
+fm.GravityField.Earth.EarthTideModel = 'None'
+fm.Drag.AtmosphereModel = None
+fm.PointMasses = {}
+fm.RelativisticCorrection = Off
+fm.SRP = Off
+
+Create Propagator prop
+prop.FM = fm
+prop.Type = RungeKutta89
+prop.MaxStep = 2700
+
+Create EclipseLocator ec
+ec.Spacecraft = sat
+ec.OccultingBodies = {Mercury, Venus, Earth, Luna}
+ec.Filename = 'WhileLoop.report'
+ec.RunMode = 'Manual'
+
+SolarSystem.EphemerisSource = 'DE421'
+
+BeginMissionSequence
+
+While sat.UTCModJulian &lt;= 27480
+    Propagate prop(sat) {sat.ElapsedSecs = 28800}
+    FindEvents ec {Append = false}
+EndWhile
+</pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="EndFiniteBurn.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="For.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">EndFiniteBurn&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;For</td></tr></table></div></body></html>

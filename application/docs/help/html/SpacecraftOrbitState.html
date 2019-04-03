@@ -1,0 +1,799 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Spacecraft Orbit State</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="SpacecraftNavigation.html" title="Spacecraft Navigation"><link rel="next" href="SpacecraftVisualizationProperties.html" title="Spacecraft Visualization Properties"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Spacecraft Orbit State</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="SpacecraftNavigation.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="SpacecraftVisualizationProperties.html">Next</a></td></tr></table><hr></div><div lang="en_US" class="refentry"><a name="SpacecraftOrbitState"></a><div class="titlepage"></div><a name="N1F61F" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Spacecraft Orbit State</span></h2><p>Spacecraft Orbit State &mdash; The orbital initial conditions</p></div><div class="refsection"><a name="N1F630"></a><h2>Description</h2><p>GMAT supports a suite of state types for defining the orbital state,
+    including <span class="guilabel">Cartesian</span> and
+    <span class="guilabel">Keplerian</span>, among others. In addtion, you can define
+    the orbital state in different coordinate systems, for example
+    <span class="guilabel">EarthMJ2000Eq</span> and <span class="guilabel">EarthFixed</span>.
+    GMAT provides three general state types that can be used with any
+    coordinate system: <span class="guibutton">Cartesian</span>,
+    <span class="guilabel">SphericalAZFPA</span>, and
+    <span class="guilabel">SphericalRADEC</span>. There are three additional state
+    types that can be used with coordinate systems centered at a celestial
+    body: <span class="guilabel">Keplerian</span>,
+    <span class="guilabel">ModifiedKeplerian</span>, and
+    <span class="guilabel">Equinoctial</span>.</p><p>In <a class="xref" href="SpacecraftOrbitState.html#Resources_SpacecraftOrbitState_Remarks" title="Remarks">the section called &ldquo;Remarks&rdquo;</a> below,
+    we describe each state type in detail including state-type definitions,
+    singularities, and how the state fields interact with the
+    <span class="guilabel">CoordinateSystem</span> and <span class="guilabel">Epoch</span>
+    fields. There are some limitations when setting the orbital state during
+    initialization, which are discussed in <a class="xref" href="SpacecraftOrbitState.html#Resources_SpacecraftOrbitState_Remarks" title="Remarks">the section called &ldquo;Remarks&rdquo;</a>. We also include
+    examples for setting each state type in commonly used coordinate
+    systems.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a>, <a class="xref" href="Propagator.html" title="Propagator"><span class="refentrytitle">Propagator</span></a>, and <a class="xref" href="SpacecraftEpoch.html" title="Spacecraft Epoch"><span class="refentrytitle">Spacecraft Epoch</span></a></p></div><div class="refsection"><a name="N1F66E"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AltEquinoctialP</span></td><td><p> A measure of the orientation of the orbit.
+            AltEquinoctialP and AltEquinoctialQ together govern how an orbit
+            is oriented. <span class="guilabel">AltEquinotialP</span> =
+            sin(<span class="guilabel">INC</span>/2)*sin(<span class="guilabel">RAAN</span>).</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-1 &le; <span class="guilabel">AltEquinoctialP</span> &le; 1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.08982062789020774</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>(None)</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AltEquinoctialQ</span></td><td><p> A measure of the orientation of the orbit.
+            AltEquinoctialP and AltEquinoctialQ together govern how an orbit
+            is oriented. <span class="guilabel">AltEquinotialP</span> =
+            sin(<span class="guilabel">INC</span>/2)*cos(<span class="guilabel">RAAN</span>).</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-1 &le; <span class="guilabel">AltEquinoctialQ</span> &le; 1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.06674269576352432</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>(None)</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AOP</span></td><td><p> The orbital argument of periapsis expressed in the
+            coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">AOP</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>314.1905515359921</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AZI</span></td><td><p> The orbital velocity azimuth expressed in the
+            coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">AZI</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>82.37742168155043</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="guilabel">BrouwerLongAOP</span></p><p><span class="guilabel">BrouwerShortAOP</span></p></td><td><p>Brouwer-Lyddane long-term averaged (short-term
+            averaged) mean argument of periapsis.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt;
+                    <span class="guilabel">BrouwerLongAOP/BrouwerShortAOP</span> &lt;
+                    &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Conversion from default Cartesian state</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="guilabel">BrouwerLongECC</span></p><p><span class="guilabel">BrouwerShortECC</span></p></td><td><p>Brouwer-Lyddane long-term averaged (short-term
+            averaged) mean eccentricity.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0 &le;
+                    <span class="guilabel">BrouwerLongECC/BrouwerShortECC</span> &le;
+                    0.99</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Conversion from default Cartesian state</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="guilabel">BrouwerLongINC</span></p><p><span class="guilabel">BrouwerShortINC</span></p></td><td><p>Brouwer-Lyddane long-term averaged (short-term
+            averaged) mean inclination.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0 &le;
+                    <span class="guilabel">BrouwerLongINC/BrouwerShortINC</span> &le;
+                    180</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Conversion from default Cartesian state</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="guilabel">BrouwerLongMA</span></p><p><span class="guilabel">BrouwerShortMA</span></p></td><td><p>Brouwer-Lyddane long-term averaged (short-term
+            averaged) mean MA (mean anomaly).</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt;
+                    <span class="guilabel">BrouwerLongMA/BrouwerShortMA</span> &lt;
+                    &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Conversion from default Cartesian state</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="guilabel">BrouwerLongRAAN</span></p><p><span class="guilabel">BrouwerShortRAAN</span></p></td><td><p>Brouwer-Lyddane long-term averaged (short-term
+            averaged) mean RAAN (right ascension of the ascending
+            node).</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt;
+                    <span class="guilabel">BrouwerLongRAAN/BrouwerShortRAAN</span> &lt;
+                    &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Conversion from default Cartesian state</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="guilabel">BrouwerLongSMA</span></p><p><span class="guilabel">BrouwerShortSMA</span></p></td><td><p>Long-term averaged (short-term averaged) mean
+            semi-major axis.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Brouwer*SMA</span> &gt;
+                    3000/(1-<span class="guilabel">Brouwer*ECC</span>)</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Conversion from default Cartesian state</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">CoordinateSystem</span></td><td><p>The coordinate system with respect to which the
+            orbital state is defined. The
+            <span class="guilabel">CoordinateSystem</span> field is dependent upon the
+            <span class="guilabel">DisplayStateType</span> field. If the coordinate
+            system chosen by the user does not have a gravitational body at
+            the origin, then the state types <span class="guilabel">Keplerian</span>,
+            <span class="guilabel">ModifiedKeplerian</span>, and
+            <span class="guilabel">Equinoctial</span> are not permitted. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">CoordinateSystem</span>
+                    resource</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">EarthMJ2000Eq</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DEC</span></td><td><p>The declination of the orbital position expressed in
+            the coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-90 &le; <span class="guilabel">DEC</span> &le; 90</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>10.37584492005105</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DECV</span></td><td><p> The declination of orbital velocity expressed in the
+            coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-90 &le; <span class="guilabel">DECV</span> &le; 90</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>7.747772036108118</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Delaunayg</span></td><td><p>Delaunay "g" element, identical to
+            <span class="guilabel">AOP</span>, expressed in the coordinate system
+            chosen in the <span class="guilabel">CoordinateSystem</span> field.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">Delaunayg</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>314.1905515359921</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DelaunayG</span></td><td><p>Delaunay "G" element, the magnitude of the orbital
+            angular momentum, expressed in the coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0 &le; <span class="guilabel">DelaunayG</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>53525.52895581695</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km<sup>2</sup>/s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Delaunayh</span></td><td><p>Delaunay "h" element, identical to
+            <span class="guilabel">RAAN</span>, expressed in the coordinate system
+            chosen in the <span class="guilabel">CoordinateSystem</span> field.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">Delaunayh</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>306.6148021947984</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DelaunayH</span></td><td><p>Delaunay "H" element, the z-component of the orbital
+            angular momentum vector, expressed in the coordinate system chosen
+            in the <span class="guilabel">CoordinateSystem</span> field.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">Delaunayl</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>52184.99999999999</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km<sup>2</sup>/s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Delaunayl</span></td><td><p>Delaunay "&#8467;" element, identical to the mean anomaly,
+            expressed in the coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">Delaunayl</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>97.10782663991999</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DelaunayL</span></td><td><p>Delaunay "L" element, related to the two-body orbital
+            energy, expressed in the coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0 &le; <span class="guilabel">DelaunayL</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>53541.66590560955</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km<sup>2</sup>/s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DisplayStateType</span></td><td><p>The orbital state type displayed in the GUI. Allowed
+            state types are dependent upon the selection of
+            <span class="guilabel">CoordinateSystem</span>. For example, if the
+            coordinate system does not have a celestial body at the origin,
+            <span class="guilabel">Keplerian</span>,
+            <span class="guilabel">ModifiedKeplerian</span>, and
+            <span class="guilabel">Equinoctial</span> are not allowed options for
+            <span class="guilabel">DisplayStateType</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Cartesian</span>,
+                    <span class="guilabel">Keplerian</span>,
+                    <span class="guilabel">ModifiedKeplerian</span>,
+                    <span class="guilabel">SphericalAZFPA</span>,
+                    <span class="guilabel">SphericalRADEC</span>, or
+                    <span class="guilabel">Equinoctial</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Cartesian</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ECC</span></td><td><p> The orbital eccentricity expressed in the coordinate
+            system chosen in the <span class="guilabel">CoordinateSystem</span> field.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">ECC</span> &lt; 0.9999999 or
+                    <span class="guilabel">ECC</span> &gt; 1.0000001. If
+                    <span class="guilabel">ECC</span> &gt; 1, <span class="guilabel">SMA</span>
+                    must be &lt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.02454974900598137</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EquinoctialH</span></td><td><p> A measure of the orbital eccentricity and argument
+            of periapsis. <span class="guilabel">EquinoctialH</span> and
+            <span class="guilabel">EquinoctialK</span> together govern how elliptic an
+            orbit is and where the periapsis is located.
+            <span class="guilabel">EquinotialH</span> = <span class="guilabel">ECC</span> *
+            sin(<span class="guilabel">AOP</span> + <span class="guilabel">RAAN</span>) .</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-0.99999 &lt; <span class="guilabel">EquinoctialH</span> &lt;
+                    0.99999, AND sqrt(<span class="guilabel">EquinoctialH</span>^2 +
+                    <span class="guilabel">EquinoctialK</span>^2) &lt; 0.99999</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>-0.02423431419337062</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EquinoctialK</span></td><td><p> A measure of the orbital eccentricity and argument
+            of periapsis. <span class="guilabel">EquinoctialH</span> and
+            <span class="guilabel">EquinoctialK</span> together govern how elliptic an
+            orbit is and where the periapsis is located.
+            <span class="guilabel">EquinotialK</span> = <span class="guilabel">ECC</span> *
+            cos(<span class="guilabel">AOP</span> + <span class="guilabel">RAAN</span>) .</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-0.99999 &lt; <span class="guilabel">EquinoctialK</span> &lt;
+                    0.99999, AND sqrt(<span class="guilabel">EquinoctialH</span>^2 +
+                    <span class="guilabel">EquinoctialK</span>^2) &lt; 0.99999</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>-0.003922778585859663</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EquinoctialP</span></td><td><p> A measure of the orientation of the orbit.
+            <span class="guilabel">EquinoctialP</span> and
+            <span class="guilabel">EquinoctialQ</span> together govern how an orbit is
+            oriented. <span class="guilabel">EquinotialP</span> =
+            <span class="guilabel">tan</span>(<span class="guilabel">INC</span>/2)*sin(<span class="guilabel">RAAN</span>).
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">EquinoctialP</span> &lt;
+                    &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>-0.09038834725719359</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EquinoctialQ</span></td><td><p> A measure of the orientation of the orbit.
+            <span class="guilabel">EquinoctialP</span> and
+            <span class="guilabel">EquinoctialQ</span> together govern how an orbit is
+            oriented. <span class="guilabel">EquinotialQ</span> =
+            tan(<span class="guilabel">INC</span>/2)*cos(<span class="guilabel">RAAN</span>).
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">EquinoctialQ</span> &lt;
+                    &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.06716454898232072</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FPA</span></td><td><p> The orbital flight path angle expressed in the
+            coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0 &le; <span class="guilabel">FPA</span> &le; 180</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>88.60870365370448</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Deg.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Id</span></td><td><p> The spacecraft Id used in tracking data files. This
+            field is only used for EstimationPlugin protype functionality.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>SatId</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">INC</span></td><td><p> The orbital inclination expressed in the coordinate
+            system chosen in the <span class="guilabel">CoordinateSystem</span> field.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0 &le; <span class="guilabel">INC</span> &le; 180</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>12.85008005658097</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="guilabel">IncomingBVAZI</span></p><p><span class="guilabel">OutgoingBVAZI</span></p></td><td><p><span class="guilabel">IncomingBVAZI</span>/<span class="guilabel">OutgoingBVAZI</span>
+            is the B-vector azimuth at infinity of the incoming/outgoing
+            asymptote measured counter-clockwise from south. If
+            <span class="guilabel">C3Energy</span> &lt; 0 the apsides vector is
+            substituted for the outgoing/incoming asymptote.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt;
+                    <span class="guilabel">IncomingBVAZI/OutgoingBVAZI</span> &lt;
+                    &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Conversion from default Cartesian state</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="guilabel">IncomingC3Energy</span></p><p><span class="guilabel">OutgoingC3Energy</span></p></td><td><p>C3 energy. <span class="guilabel">C3Energy</span> =
+            -mu/<span class="guilabel">SMA</span>.
+            <span class="guilabel">IncomingC3Energy</span>/<span class="guilabel">OutgoingC3Energy</span>
+            differ only in that they are associated with the
+            <span class="guilabel">IncomingAsymptote</span> and
+            <span class="guilabel">OutgoingAsymptote</span> state representations,
+            respectively.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">IncomingC3Energy</span> &le; -1e-7 or
+                    <span class="guilabel">IncomingC3Energy</span> &ge; 1e-7</p><p><span class="guilabel">OutgoingC3Energy</span> &le; -1e-7 or
+                    <span class="guilabel">OutgoingC3Energy</span> &ge; 1e-7</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Conversion from default Cartesian state</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km<sup>2</sup>/s<sup>2</sup></p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="guilabel">IncomingDHA</span></p><p><span class="guilabel">OutgoingDHA</span></p></td><td><p><span class="guilabel">IncomingDHA</span>/<span class="guilabel">OutgoingDHA</span>
+            is the declination of the incoming/outgoing asymptote. If
+            <span class="guilabel">C3Energy</span> &lt; 0 the apsides vector is
+            substituted for the incoming/outgoing asymptote..</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-90&deg; &le;
+                    <span class="guilabel">IncomingDHA</span>/<span class="guilabel">OutgoingDHA</span>
+                    &lt; 90&deg;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Conversion from default Cartesian state</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="guilabel">IncomingRadPer</span></p><p><span class="guilabel">OutgoingRadPer</span></p></td><td><p>The orbital radius of periapsis. The radius of
+            periapsis is the minimum distance (osculating) between the
+            spacecraft and celestial body at the origin of coordinate system.
+            <span class="guilabel">IncomingRadPer</span>/<span class="guilabel">OutgoingRadPer</span>
+            differ from <span class="guilabel">RadPer</span> only in that they are
+            associated with the <span class="guilabel">IncomingAsymptote</span> and
+            <span class="guilabel">OutgoingAsymptote</span> state representations,
+            respectively.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>abs(<span class="guilabel">IncomingRadPer</span>) &ge; 1
+                    meter.</p><p>abs(<span class="guilabel">OutgoingRadPer</span>) &ge; 1
+                    meter.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Conversion from default Cartesian state</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="guilabel">IncomingRHA</span></p><p><span class="guilabel">OutgoingRHA</span></p></td><td><p><span class="guilabel">IncomingRHA</span>/<span class="guilabel">OutgoingRHA</span>
+            is the right ascension of the incoming/outgoing asymptote. If
+            <span class="guilabel">C3Energy</span> &lt; 0 the apsides vector is
+            substituted for the incoming/outgoing asymptote. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">IncomingRHA/OutgoingRHA</span>
+                    &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Conversion from default Cartesian state</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MLONG</span></td><td><p> A measure of the location of the spacecraft in it's
+            orbit.<span class="guilabel"> MLONG</span> = <span class="guilabel">AOP</span> +
+            <span class="guilabel">RAAN</span> + <span class="guilabel">MA</span>. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-360 &le; <span class="guilabel">MLONG</span> &le; 360</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>357.9131803707105</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ModEquinoctialF</span></td><td><p>Components of the eccentricity vector (with
+            <span class="guilabel">ModEquinoctialG</span>). The eccentricity vector has
+            a magnitude equal to the eccentricity and it points from the
+            central body to perigee. <span class="guilabel">ModEquinoctialF</span> =
+            <span class="guilabel">ECC</span> *
+            cos(<span class="guilabel">AOP</span>+<span class="guilabel">RAAN</span>)</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">ModEquinoctialF</span> &lt;
+                    &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>-0.003922778585859663</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>(None)</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ModEquinoctialG</span></td><td><p>Components of eccentricity vector (with
+            <span class="guilabel">ModEquinoctialF</span>).
+            <span class="guilabel">ModEquinoctialG</span> = <span class="guilabel">ECC</span> *
+            sin(<span class="guilabel">AOP</span>+<span class="guilabel">RAAN</span>)</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">ModEquinoctialG</span> &lt;
+                    &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>-0.02423431419337062</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>(None)</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ModEquinoctialH</span></td><td><p>Identical to
+            <span class="guilabel">EquinoctialQ</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">ModEquinoctialH</span> &lt;
+                    &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.06716454898232072</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>(None)</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ModEquinoctialK</span></td><td><p>Idential to <span class="guilabel">EquinoctialP</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">ModEquinoctialK</span> &lt;
+                    &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>-0.09038834725719359</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>(None)</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">NAIFId</span></td><td><p> The spacecraft Id used in SPICE kernels. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>-123456789</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">OrbitSpiceKernelName</span></td><td><p> SPK Kernels for spacecraft orbit. SPK orbit kernels
+            have extension ".BSP". This field cannot be set in the Mission
+            Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>List of path and filenames.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>No Default. The field is empty.</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">PlanetodeticAZI</span></td><td><p>The orbital velocity azimuth expressed in the
+            coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. Unlike the
+            <span class="guilabel">AZI</span> field,
+            <span class="guilabel">PlanetodeticAZI</span> is associated with the
+            <span class="guilabel">Planetodetic</span> state representation, which is
+            only valid for coordinate systems with
+            <span class="guilabel">BodyFixed</span> axes.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">PlanetodeticAZI</span> &lt;
+                    &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>81.80908019114962</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">PlanetodeticHFPA</span></td><td><p>The orbital horizontal flight path angle expressed in
+            the coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field.
+            <span class="guilabel">PlanetodeticHFPA</span> is only valid for coordinate
+            systems with <span class="guilabel">BodyFixed</span> axes.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-90 &le; <span class="guilabel">PlanetodeticHFPA</span> &le;
+                    90</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1.494615814842774</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">PlanetodeticLAT</span></td><td><p>The planetodetic latitude expressed in the coordinate
+            system chosen in the <span class="guilabel">CoordinateSystem</span> field.
+            This field is only valid for coordinate systems with
+            <span class="guilabel">BodyFixed</span> axes.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-90 &le; <span class="guilabel">PlanetodeticLAT</span> &le;
+                    90</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>10.43478253114861</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">PlanetodeticLON</span></td><td><p>The planetodetic longitude expressed in the
+            coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. This field is only
+            valid for coordinate systems with <span class="guilabel">BodyFixed</span>
+            axes.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">PlanetodeticLON</span> &lt;
+                    &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>79.67188405807977</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">PlanetodeticRMAG</span></td><td><p>The magnitude of the orbital position vector
+            expressed in the coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. Unlike the
+            <span class="guilabel">RMAG</span> field,
+            <span class="guilabel">PlanetodeticRMAG</span> is associated with the
+            <span class="guilabel">Planetodetic</span> state representation, which is
+            only valid for coordinate systems with
+            <span class="guilabel">BodyFixed</span> axes.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">PlanetodeticRMAG</span> &ge; 1e-10</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>7218.032973047435</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">PlanetodeticVMAG</span></td><td><p>The magnitude of the orbital velocity vector
+            expressed in the coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. Unlike the
+            <span class="guilabel">VMAG</span> field,
+            <span class="guilabel">PlanetodeticVMAG</span> is associated with the
+            <span class="guilabel">Planetodetic</span> state representation, which is
+            only valid for coordinate systems with
+            <span class="guilabel">BodyFixed</span> axes.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">PlanetodeticVMAG</span> &ge; 1e-10</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>6.905049647173787</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km/s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RA</span></td><td><p> The right ascension of the orbital position
+            expressed in the coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">RA</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RAAN</span></td><td><p> The orbital right ascension of the ascending node
+            expressed in the coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">RAAN</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>306.6148021947984</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RadApo</span></td><td><p>The orbital radius of apoapsis expressed in the
+            coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. The radius of
+            apoapsis is the maximum distance (osculating) between the
+            <span class="guilabel">Spacecraft</span> and celestial body at the origin
+            of <span class="guilabel">CoordinateSystem</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>abs(<span class="guilabel">RadApo</span>) &ge; 1 meter.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>7368.49911046818</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RadPer</span></td><td><p>The orbital radius of periapsis expressed in the
+            coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. The radius of
+            periapsis is the minimum distance (osculating) between the
+            <span class="guilabel">Spacecraft</span> and celestial body at the origin
+            of <span class="guilabel">CoordinateSystem</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>abs(<span class="guilabel">RadPer</span>) &ge; 1 meter.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>7015.378524789846</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RAV</span></td><td><p> The right ascension of orbital velocity expressed in
+            the coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">RAV</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>90</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RMAG</span></td><td><p> The magnitude of the orbital position vector
+            expressed in the coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">RMAG</span> &ge; 1e-10</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>7218.032973047435</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SemilatusRectum</span></td><td><p>Magnitude of the position vector when at true anomaly
+            of 90 deg.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">SemilatusRectum</span> &gt;
+                    1e-7</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>7187.60430675539</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SMA</span></td><td><p> The orbital semi-major axis expressed in the
+            coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">SMA</span> &lt; -0.001 m or
+                    <span class="guilabel">SMA</span> &gt; 0.001 meter. If
+                    <span class="guilabel">SMA</span> &lt; 0, then
+                    <span class="guilabel">ECC</span> must be &gt; 1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>7191.938817629013</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">TA</span></td><td><p> The orbital true anomaly expressed in the coordinate
+            system chosen in the <span class="guilabel">CoordinateSystem</span> field.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">TA</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>99.8877493320488</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">TLONG</span></td><td><p>True longitude of the osculating orbit.
+            <span class="guilabel">TLONG</span> = <span class="guilabel">RAAN</span> +
+            <span class="guilabel">AOP</span> + <span class="guilabel">TA</span></p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">TLONG</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.6931030628392251</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">VMAG</span></td><td><p> The magnitude of the orbital velocity vector
+            expressed in the coordinate system chosen in the
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">VMAG</span> &ge; 1e-10</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>7.417715281675348</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km/s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">VX</span></td><td><p>The x-component of the
+            <span class="guilabel">Spacecraft</span> velocity with respect to the
+            coordinate system chosen in the spacecraft's
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">VX</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km/s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">VY</span></td><td><p> The y-component of the
+            <span class="guilabel">Spacecraft</span> velocity with respect to the
+            coordinate system chosen in the spacecraft's
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">VY</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>7.35</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km/s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">VZ</span></td><td><p> The z-component of the
+            <span class="guilabel">Spacecraft</span> velocity with respect to the
+            coordinate system chosen in the spacecraft's
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">VZ</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km/s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">X</span></td><td><p> The x-component of the
+            <span class="guilabel">Spacecraft</span> position with respect to the
+            coordinate system chosen in the spacecraft's
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">X</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>7100</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Y</span></td><td><p>The y-component of the
+            <span class="guilabel">Spacecraft</span> position with respect to the
+            coordinate system chosen in the spacecraft's
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">Y</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Z</span></td><td><p> The z-component of the
+            <span class="guilabel">Spacecraft</span> position with respect to the
+            coordinate system chosen in the spacecraft's
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">Z</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1300</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N2045D"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftOrbitEpoch_GUI.png" align="middle" height="531"></td></tr></table></div></div><p>The <span class="guilabel">Spacecraft</span> orbit state dialog box allows
+    you to set the epoch, coordinate system, and state type values for the
+    <span class="guilabel">Spacecraft</span> orbital state. When you specify an orbital
+    state, you define the state in the representation selected in the
+    <span class="guilabel">StateType</span> menu, with respect to the coordinate system
+    specified in the <span class="guilabel">CoordinateSystem</span> menu, at the epoch
+    defined in the <span class="guilabel">Epoch</span> menu. If the selected
+    <span class="guilabel">CoordinateSystem</span> is time varying, the epoch of the
+    coordinate system is defined by the <span class="guilabel">Epoch</span> field, and
+    changing the epoch changes the inertial representation of the orbital
+    state.</p><p>A change in <span class="guilabel">Epoch Format</span> causes an immediate
+    update to <span class="guilabel">Epoch</span> to reflect the chosen time system and
+    format.</p><p>The <span class="guilabel">Keplerian</span>,
+    <span class="guilabel">ModifiedKeplerian</span>, and
+    <span class="guilabel">Equinoctial</span> state types cannot be computed if the
+    <span class="guilabel">CoordinateSystem</span> does not have a central body at the
+    origin, or if the <span class="guilabel">CoordinateSystem</span> references the
+    current spacecraft (resulting in a circular reference). For example, if
+    you have selected the <span class="guilabel">Keplerian</span> state type,
+    coordinate systems for which the Keplerian elements cannot be computed do
+    not appear in the <span class="guilabel">CoordinateSystem</span> menu. Similarly,
+    if you have selected a <span class="guilabel">CoordinateSystem</span> that does not
+    have a celestial body at the origin, Keplerian-based state types will not
+    appear as options in the <span class="guibutton">StateType</span> menu. The
+    <span class="guilabel">Planetodetic</span> state type cannot be selected untill the
+    <span class="guilabel">CoordinateSystem</span> has <span class="guilabel">BodyFixed</span>
+    axes.</p></div><div class="refsection"><a name="Resources_SpacecraftOrbitState_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N204B2"></a><h3>Cartesian State</h3><p>The<span class="guilabel"> Cartesian</span> state is composed of the
+      position and velocity components expressed with respect to the selected
+      <span class="guilabel">CoordinateSystem</span>.</p></div><div class="refsection"><a name="N204BD"></a><h3>Keplerian and Modified Keplerian State Types</h3><p>The <span class="guilabel">Keplerian</span> and
+      <span class="guilabel">ModifiedKeplerian</span> state types use the osculating
+      Keplerian orbital elements with respect to the selected
+      <span class="guilabel">CoordinateSystem</span>. To use either the
+      <span class="guilabel">Keplerian</span> or <span class="guilabel">ModifiedKeplerian</span>
+      state type, the <span class="guilabel">Spacecraft</span>&rsquo;s coordinate system must
+      have a central body at the origin. The two representations differ in how
+      the orbit size and shape are defined. The <span class="guilabel">Keplerian</span>
+      state type is composed of the following elements:<span class="guilabel">
+      SMA</span>, <span class="guilabel">ECC</span>, <span class="guilabel">INC</span>,
+      <span class="guilabel">RAAN</span>, <span class="guilabel">AOP</span>, and
+      <span class="guilabel">TA</span>. The <span class="guilabel">ModifiedKeplerian</span>
+      state type is composed of the following elements:
+      <span class="guilabel">RadApo</span>, <span class="guilabel">RadPer</span>,
+      <span class="guilabel">INC</span>, <span class="guilabel">RAAN</span>,
+      <span class="guilabel">AOP</span>, and <span class="guilabel">TA</span>. The tables and
+      figures below describe each <span class="guilabel">Keplerian</span> state element
+      in detail including singularities.</p></div><div class="refsection"><a name="N20501"></a><h3>Geometry of the Keplerian Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">SMA</span></td><td><p><span class="guilabel">SMA</span> contains information on
+              the type and size of an orbit. If <span class="guilabel">SMA</span> &gt;
+              0 the orbit is elliptic. If <span class="guilabel">SMA</span> &lt;0 the
+              orbit is hyperbolic. <span class="guilabel">SMA</span> is infinite for
+              parabolic orbits. </p></td></tr><tr><td><span class="guilabel">ECC</span></td><td><p><span class="guilabel">ECC</span> contains information on
+              the shape of an orbit. If <span class="guilabel">ECC</span> = 0, then the
+              orbit is circular. If 0 &lt; <span class="guilabel">ECC</span> &lt; 1,
+              the orbit is elliptical. If , <span class="guilabel">ECC</span> = 1 the
+              orbit is parabolic. If <span class="guilabel">ECC</span> &gt; 1 then the
+              orbit is hyperbolic. </p></td></tr><tr><td><span class="guilabel">INC</span></td><td><p><span class="guilabel">INC</span> is the angle between the
+              orbit angular momentum vector and the z-axis. If
+              <span class="guilabel">INC</span> &lt; 90 deg., then the orbit is
+              prograde. If <span class="guilabel">INC</span> &gt; 90 deg, then the
+              orbit is retrograde </p></td></tr><tr><td><span class="guilabel">RAAN</span></td><td><p><span class="guilabel">RAAN</span> is defined as the angle
+              between x-axis and the node vector measured counterclockwise.
+              The node vector is defined as the cross product of the z-axis
+              and orbit angular momentum vector. <span class="guilabel">RAAN</span> is
+              undefined for equatorial orbits. </p></td></tr><tr><td><span class="guilabel">AOP</span></td><td><p><span class="guilabel">AOP</span> is the angle between a
+              vector pointing at periapsis and a vector pointing in the
+              direction of the line of nodes. <span class="guilabel">AOP</span> is
+              undefined for circular orbits.</p></td></tr><tr><td><span class="guilabel">TA</span></td><td><p><span class="guilabel">TA</span> is defined as the angle
+              between a vector pointing at periapsis and a vector pointing at
+              the spacecraft. <span class="guilabel">TA</span> is undefined for
+              circular orbits. </p></td></tr></tbody></table></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftOrbitState_Remark_2.png" align="middle" height="611"></td></tr></table></div></div><p>The <span class="guilabel">Keplerian</span> and
+      <span class="guilabel">ModifiedKeplerian</span> state types have several
+      singularities. The table below describes the different singularities and
+      how each is handled in the state conversion algorithms.</p><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Singularity</th><th>Comments and Behavior</th></tr></thead><tbody><tr><td><span class="guilabel">ECC = 1</span></td><td><p><span class="guilabel">SMA</span> is infinite and cannot be
+              used to define the size of the orbit. GMAT requires
+              <span class="guilabel">ECC</span> &lt; 0.9999999 or
+              <span class="guilabel">ECC</span> &gt; 1.0000001 when setting
+              <span class="guilabel">ECC</span> or when performing conversions. For
+              transformations performed near these limits, loss of precision
+              may occur. </p></td></tr><tr><td><span class="guilabel">ECC = 0</span></td><td><p><span class="guilabel">AOP</span> is undefined. If
+              <span class="guilabel">ECC</span> &lt;= 1e-11, GMAT sets<span class="guilabel">
+              AOP</span> to zero in the conversion from
+              <span class="guilabel">Cartesian</span> to
+              <span class="guilabel">Keplerian/ModKeplerian</span> and includes all
+              orbital-plane angular displacement in the true anomaly.
+              </p></td></tr><tr><td><span class="guilabel">SMA = 0</span></td><td><p>Results in a singular conic section. GMAT requires
+              |<span class="guilabel">SMA</span>| &gt; 1 meter when inputting
+              <span class="guilabel">SMA</span>. </p></td></tr><tr><td><span class="guilabel">SMA = INF</span></td><td><p><span class="guilabel">SMA</span> is infinite and another
+              parameter is required to capture the size of the orbit.
+              <span class="guilabel">Keplerian</span> elements are not supported.
+              </p></td></tr><tr><td><span class="guilabel">INC = 0</span></td><td><p><span class="guilabel">RAAN</span> is undefined. If
+              <span class="guilabel">INC</span> &lt; 6e-10, GMAT sets
+              <span class="guilabel">RAAN</span> to 0 in the conversion from
+              <span class="guilabel">Cartesian</span> to
+              <span class="guilabel">Keplerian</span>/<span class="guilabel">ModKeplerian</span>.
+              Then, if <span class="guilabel">ECC</span> &lt; 1e-11,
+              <span class="guilabel">AOP</span> is set to 0 and GMAT includes all
+              angular displacement between the x-axis and the spacecraft in
+              the true anomaly. If <span class="guilabel">ECC</span> &ge; 1e-11, then
+              <span class="guilabel">AOP</span> is computed as the angle between the
+              eccentricity vector and the x-axis.</p></td></tr><tr><td><span class="guilabel">INC = 180</span></td><td><p><span class="guilabel">RAAN</span> is undefined. If
+              <span class="guilabel">INC</span> &gt; (180 - 6e-10), GMAT sets
+              <span class="guilabel">RAAN</span> to 0 in the conversion from
+              <span class="guilabel">Cartesian</span> to
+              <span class="guilabel">Keplerian</span>/<span class="guilabel">ModKeplerian</span>.
+              Then, if <span class="guilabel">ECC</span> &lt; 1e-11,
+              <span class="guilabel">AOP</span> is set to 0 and GMAT includes all
+              angular displacement between the x-axis and the spacecraft in
+              the true anomaly. If <span class="guilabel">ECC</span> &ge; 1e-11, then
+              <span class="guilabel">AOP</span> is computed as the angle between the
+              eccentricity vector and the x-axis.</p></td></tr><tr><td><span class="guilabel">RadPer = 0</span></td><td><p>Singular conic section. GMAT requires
+              <span class="guilabel">RadPer</span> &gt; 1 meter in state conversions.
+              </p></td></tr><tr><td><span class="guilabel">RadApo = 0</span></td><td><p>Singular conic section. GMAT requires
+              abs(<span class="guilabel">RadApo</span>) &gt; 1 meter in state
+              conversions. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N2062F"></a><h3>Delaunay State Type</h3><p>The conversion between <span class="guilabel">Delaunay</span> and
+      <span class="guilabel">Cartesian</span> is performed passing through classical
+      <span class="guilabel">Keplerian</span> state. Therefore,
+      <span class="guilabel">Delaunay</span> state cannot represent parabolic orbits.
+      Also, the <span class="guilabel">Delaunay</span> state cannot represent
+      hyperbolic orbits because of the definition of
+      <span class="guilabel">DelaunayL</span>, which is not a real value when
+      <span class="guilabel">SMA</span> is negative. The table below describes the
+      elements of the <span class="guilabel">Delaunay</span> state.</p><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Delaunayl</span></td><td><p>The mean anomaly. It is related to uniform angular
+              motion on a circle of radius
+              <span class="guilabel">SMA</span>.</p></td></tr><tr><td><span class="guilabel">Delaunayg</span></td><td><p> See &ldquo;Keplerian State&rdquo; section,
+              <span class="guilabel">AOP</span></p></td></tr><tr><td><span class="guilabel">Delaunayh</span></td><td><p> See &ldquo;Keplerian State&rdquo; section,
+              <span class="guilabel">RAAN</span> </p></td></tr><tr><td><span class="guilabel">DelaunayL</span></td><td><p>Related to the two-body orbital energy.
+              <span class="guilabel">DelaunayL</span> =
+              sqrt(mu*<span class="guilabel">SMA</span>)</p></td></tr><tr><td><span class="guilabel">DelaunayG</span></td><td><p> Magnitude of the orbital angular momentum vector.
+              <span class="guilabel">DelaunayG</span> =
+              <span class="guilabel">DelaunayL</span>*sqrt(1-<span class="guilabel">ECC</span>^2)
+              </p></td></tr><tr><td><span class="guilabel">DelaunayH</span></td><td><p> The K component of the orbital angular momentum.
+              <span class="guilabel">DelaunayH</span> = <span class="guilabel">DelaunayG</span>
+              * cos(<span class="guilabel">INC</span>)</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N206A8"></a><h3>Singularities in the Delaunay Elements</h3><p>Singularities in the <span class="guilabel">Delaunay</span> elements is the
+      same as the <span class="guilabel">Keplerian</span> elements, because it uses the
+      <span class="guilabel">Keplerian</span> elements during conversion. See
+      &ldquo;Keplerian State&rdquo; section. The table below shows the additional
+      singularities regarding the <span class="guilabel">Delaunay</span> state
+      type.</p><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">ECC &gt; 1</span></td><td><p><span class="guilabel">DelaunayL</span> is not real for
+              hyperbolic orbits by its definition.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N206D4"></a><h3>Brouwer-Lyddane Mean State Type</h3><p>The <span class="guilabel">BrouwerMeanShort</span> state represents
+      short-term averaged mean motion under low-order zonal harmonics (i.e.
+      J2-J5). Likewise, <span class="guilabel">BrouwerMeanLong</span> state represents
+      long-term averaged mean motion under low-order zonal harmonics (i.e.
+      J2-J5). GMAT uses JGM-2 zonal coefficients in Brouwer Mean states
+      algorithms. Both are singular for near parabolic or hyperbolic orbits.
+      To use
+      <span class="guilabel">BrouwerMeanShort</span>/<span class="guilabel">BrouwerMeanLong</span>
+      state type in GMAT, the central body must be the Earth. If the central
+      body is the Earth, GMAT can calculate
+      <span class="guilabel">BrouwerMeanShort</span>/<span class="guilabel">BrouwerMeanLong</span>
+      state from the osculating state (<span class="guilabel">Cartesian</span>,
+      <span class="guilabel">Keplerian</span>, etc.) and vice-versa.</p><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><p><span class="guilabel">BrouwerLongAOP</span></p><p><span class="guilabel">BrouwerShortAOP</span></p></td><td><p>Brouwer-Lyddane long-term averaged (short-term
+              averaged) mean argument of periapsis.</p></td></tr><tr><td><p><span class="guilabel">BrouwerLongMA</span></p><p><span class="guilabel">BrouwerShortMA</span></p></td><td><p>Brouwer-Lyddane long-term averaged (short-term
+              averaged) mean MA (mean anomaly).</p></td></tr><tr><td><p><span class="guilabel">BrouwerLongECC</span></p><p><span class="guilabel">BrouwerShortECC</span></p></td><td><p>Brouwer-Lyddane long-term averaged (short-term
+              averaged) mean eccentricity.</p></td></tr><tr><td><p><span class="guilabel">BrouwerLongINC</span></p><p><span class="guilabel">BrouwerShortINC</span></p></td><td><p>Brouwer-Lyddane long-term averaged (short-term
+              averaged) mean inclination.</p></td></tr><tr><td><p><span class="guilabel">BrouwerLongRAAN</span></p><p><span class="guilabel">BrouwerShortRAAN</span></p></td><td><p>Brouwer-Lyddane long-term averaged (short-term
+              averaged) mean RAAN (right ascension of the ascending
+              node).</p></td></tr><tr><td><p><span class="guilabel">BrouwerLongSMA</span></p><p><span class="guilabel">BrouwerShortSMA</span></p></td><td><p>Long-term averaged (short-term averaged) mean
+              semi-major axis.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20745"></a><h3>Singularities in the Brouwer-Lyddane Mean Elements</h3><p>The table below shows the characteristics of singularities
+      regarding
+      <span class="guilabel">BrouwerMeanShort</span>/<span class="guilabel">BrouwerMeanLong</span>
+      state and the implemented method to handle the singularities in GMAT
+      state conversion algorithms. Note that because Brouwer-Lyddane mean
+      elements involve an iterative solution, loss of precision may occur near
+      singularities.</p><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">BrouwerSMA &lt;
+              3000/(1-BrouwerECC)</span></td><td><p>Because Brouwer&rsquo;s formulation based on Earth&rsquo;s
+              zonal harmonics, <span class="guilabel">BrouwerMeanShort</span> and
+              <span class="guilabel">BrouwerMeanLong</span> cannot address orbits with
+              mean perigee distance is smaller than Earth&rsquo;s radius, 3000 km
+              because of numerical instability. </p></td></tr><tr><td><span class="guilabel">BrouwerLongINC= 63, BrouwerLongINC =
+              117</span></td><td><p>If given <span class="guilabel">BrouwerLongINC</span>
+              (long-term averaged INC only) is close to
+              i<sub>c</sub>= 63 deg. or 117 deg., the algorithm is
+              unstable because of singular terms (non-zero imaginary
+              components). Thus, GMAT cannot calculate osculating
+              elements.</p></td></tr><tr><td><span class="guilabel">BrouwerLongECC = 0, BrouwerLongECC &ge;
+              1</span></td><td><p>If <span class="guilabel">BrouwerECC</span> is larger than
+              0.9, or <span class="guilabel">BrouwerECC</span> is smaller than 1E-7, it
+              has been reported that Cartesian to
+              <span class="guilabel">BrouwerMeanLong</span> state does not converge
+              statistically. For these cases, GMAT gives a warning message
+              with the current conversion error.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N2078C"></a><h3>Spherical State Types</h3><p>The <span class="guilabel">SphericalAZFPA </span>and
+      <span class="guilabel">SphericalRADEC</span> state types are composed of the
+      polar coordinates of the spacecraft state expressed with respect to the
+      selected <span class="guilabel">CoordinateSystem</span>. The two spherical
+      representations differ in how the velocity is defined. The
+      <span class="guilabel">SphericalRADEC</span> state type is composed of the
+      following elements: <span class="guilabel">RMAG</span>, <span class="guilabel">RA</span>,
+      <span class="guilabel">DEC</span>, <span class="guilabel">VMAG</span>,
+      <span class="guilabel">RAV</span>, and <span class="guilabel">DECV</span>. The
+      <span class="guilabel">SphericalAZFPA</span> state type is composed of the
+      following elements: <span class="guilabel">RMAG</span>, <span class="guilabel">RA</span>,
+      <span class="guilabel">DEC</span>, <span class="guilabel">VMAG</span>,
+      <span class="guilabel">AZ</span>I and <span class="guilabel">FPA</span>. The tables and
+      figures below describe each spherical state element in detail including
+      singularities.</p></div><div class="refsection"><a name="N207C4"></a><h3>Geometry of the Spherical Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">RMAG</span></td><td><p>The magnitude of the position
+              vector.</p></td></tr><tr><td><span class="guilabel">RA</span></td><td><p>The right ascension which is the angle between the
+              projection of the position vector into the xy-plane and the
+              x-axis measured counterclockwise. </p></td></tr><tr><td><span class="guilabel">DEC</span></td><td><p>The declination which is the angle between tjhe
+              position vector and the xy-plane. </p></td></tr><tr><td><span class="guilabel">VMAG</span></td><td><p>The magnitude of the velocity vector.
+              </p></td></tr><tr><td><span class="guilabel">FPA</span></td><td><p>The vertical flight path angle. The angle measured
+              from a plane normal to the postion vector to the velocity vector
+              , measured in the plane formed by position vector and velocity
+              vector. </p></td></tr><tr><td><span class="guilabel">AZI</span></td><td><p>The flight path azimuth. The angle measured from
+              the vector perpendicular to the position vector and pointing
+              north, to the projection of the velocity vector, into a plane
+              normal to the position vector.</p></td></tr><tr><td><span class="guilabel">RAV</span></td><td><p>The right ascension of velocity. The angle between
+              the projection of the velocity vector into the xy-plane and the
+              x-axis measured counterclockwise.</p></td></tr><tr><td><span class="guilabel">DECV</span></td><td><p>The flight path azimuth. The angle between the
+              velocity vector and the xy-plane.</p></td></tr></tbody></table></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftOrbitState_Remark_4.png" align="middle" height="476"></td></tr></table></div></div></div><div class="refsection"><a name="N2081A"></a><h3>Singularities in the Spherical Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Singularity</th><th>Comments and Behavior</th></tr></thead><tbody><tr><td><span class="guilabel">RMAG = 0</span></td><td><p>Results in a singular conic section: declination
+              and flight path angle are undefined. GMAT will not allow
+              transformations if <span class="guilabel">RMAG</span> &lt; 1e-10. For
+              <span class="guilabel">RMAG</span> values greater than, but near 1e-10,
+              loss of precision may occur in transformations. </p></td></tr><tr><td><span class="guilabel">VMAG = 0</span></td><td><p>Results in a singular conic section: velocity
+              declination and flight path angle are undefined. GMAT will not
+              allow transformations if <span class="guilabel">VMAG</span> &lt;
+              1e-10.For <span class="guilabel">VMAG</span> values greater than, but
+              near 1e-10, loss of precision may occur in transformations.
+              </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20849"></a><h3>Planetodetic State Type</h3><p>The <span class="guilabel">Planetodetic</span> state type is useful for
+      specifying states relative to the surface of a central body. It is very
+      similar to the spherical state types, but uses the central body's
+      flattening in its definition. To use the
+      <span class="guilabel">Planetodetic</span> state type, the spacecraft&rsquo;s
+      coordinate system must have a celestial body at the origin, and must
+      have <span class="guilabel">BodyFixed</span> axes.</p><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">PlanetodeticRMAG</span></td><td><p>Magnitude of the orbital radius
+              vector.</p></td></tr><tr><td><span class="guilabel">PlanetodeticLON</span></td><td><p>Planetodetic longitude.</p></td></tr><tr><td><span class="guilabel">PlanetodeticLAT</span></td><td><p>Planetodetic latitude, using the
+              <span class="guilabel">Flattening</span> of the central
+              body.</p></td></tr><tr><td><span class="guilabel">PlanetodeticVMAG</span></td><td><p>Magnitude of the orbital velocity vector in the
+              fixed frame.</p></td></tr><tr><td><span class="guilabel">PlanetodeticAZI</span></td><td><p>Orbital velocity azimuth in the fixed
+              frame.</p></td></tr><tr><td><span class="guilabel">PlanetodeticHFPA</span></td><td><p>Horizontal flight path angle.
+              <span class="guilabel">HFPA</span> = 90 -
+              <span class="guilabel">VFPA</span></p></td></tr></tbody></table></div></div><div class="refsection"><a name="N2089B"></a><h3>Singularities in the Planetodetic Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Singularity</th><th>Comments and Behavior</th></tr></thead><tbody><tr><td><span class="guilabel">PlanetodeticRMAG = 0</span></td><td><p>Results in a singular conic section: declination
+              and flight path angle are undefined. GMAT will not allow
+              transformations if <span class="guilabel">PlanetodeticRMAG</span> &lt;
+              1e-10. For <span class="guilabel">PlanetodeticRMAG</span> values greater
+              than, but near 1e-10, loss of precision may occur in
+              transformations. </p></td></tr><tr><td><span class="guilabel">PlanetodeticVMAG = 0</span></td><td><p>Results in a singular conic section: velocity
+              declination and flight path angle are undefined. GMAT will not
+              allow transformations if <span class="guilabel">PlanetodeticVMAG</span>
+              &lt; 1e-10. For <span class="guilabel">PlanetodeticVMAG</span> values
+              greater than, but near 1e-10, loss of precision may occur in
+              transformations. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N208CA"></a><h3>Equinoctial State Type</h3><p>GMAT supports the <span class="guilabel">Equinoctial</span> state
+      representation which is non-singular for elliptic orbits with
+      inclinations less than 180 degrees. To use the
+      <span class="guilabel">Equinoctial</span> state type, the spacecraft&rsquo;s coordinate
+      system must have a central body at the origin.</p><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">SMA</span></td><td><p>See Keplerian section. </p></td></tr><tr><td><span class="guilabel">EquinoctialH</span></td><td><p>A measure of the orbital eccentricity and argument
+              of periapsis. <span class="guilabel">EquinoctialH</span> and
+              <span class="guilabel">EquinoctialK</span> together govern how elliptical
+              an orbit is and where the periapsis is located.<span class="guilabel">
+              EquinotialH </span>= <span class="guilabel">ECC</span> *
+              sin(<span class="guilabel">AOP</span>). </p></td></tr><tr><td><span class="guilabel">EquinoctialK</span></td><td><p>A measure of the orbital eccentricity and argument
+              of periapsis. <span class="guilabel">EquinoctialH</span> and<span class="guilabel">
+              EquinoctialK</span> together govern how eliptical an orbit
+              is and where the periapsis is located.
+              <span class="guilabel">EquinotialK</span> = <span class="guilabel">ECC</span> *
+              cos(<span class="guilabel">AOP</span>) </p></td></tr><tr><td><span class="guilabel">EquinoctialP</span></td><td><p>A measure of the orientation of the orbit.
+              <span class="guilabel">EquinoctialP</span> and
+              <span class="guilabel">EquinoctialQ</span> together govern how an orbit
+              is oriented. <span class="guilabel">EquinotialP</span> =
+              tan(<span class="guilabel">INC</span>/2)*sin(<span class="guilabel">RAAN</span>).
+              </p></td></tr><tr><td><span class="guilabel">EquinoctialQ</span></td><td><p> A measure of the orientation of the orbit.
+              <span class="guilabel">EquinoctialP</span> and
+              <span class="guilabel">EquinoctialQ</span> together govern how an orbit
+              is oriented. <span class="guilabel">EquinotialQ</span> =
+              tan(<span class="guilabel">INC</span>/2)*cos(<span class="guilabel">RAAN</span>).
+              </p></td></tr><tr><td><span class="guilabel">MLONG</span></td><td><p> A measure of the mean location of the spacecraft
+              in its orbit. <span class="guilabel">MLONG</span> =
+              <span class="guilabel">AOP</span> +<span class="guilabel"> RAAN</span> +
+              <span class="guilabel">MA</span>. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20959"></a><h3>Singularities in the Equinoctial Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">INC = 180</span></td><td><p><span class="guilabel">RAAN</span> is undefined. If
+              <span class="guilabel">INC</span> &gt; 180 - 1.0e-11, GMAT sets
+              <span class="guilabel">RAAN</span> to 0 degrees. GMAT does not support
+              <span class="guilabel">Equinoctial</span> elements for true retrograde
+              orbits. </p></td></tr><tr><td><span class="guilabel">ECC &gt; 0.9999999</span></td><td><p><span class="guilabel">Equinoctial</span> elements are not
+              defined for parabolic or hyperbolic orbits. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20989"></a><h3>Alternate Equinoctial State Type</h3><p>The <span class="guilabel">AlternateEquinoctial</span> state type is a
+      slight variation on the <span class="guilabel">Equinoctial</span> elements that
+      uses sin(<span class="guilabel">INC</span>/2) instead of
+      tan(<span class="guilabel">INC</span>/2) in the "P" and "Q" elements. Both
+      representations have the same singularties.</p><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">SMA</span></td><td><p>See Keplerian section. </p></td></tr><tr><td><span class="guilabel">EquinoctialH</span></td><td><p>See Equinoctial section.</p></td></tr><tr><td><span class="guilabel">EquinoctialK</span></td><td><p>See Equinoctial section.</p></td></tr><tr><td><span class="guilabel">AltEquinoctialP</span></td><td><p>A measure of the orientation of the orbit.
+              <span class="guilabel">AltEquinoctialP</span> and
+              <span class="guilabel">AltEquinoctialQ</span> together govern how an
+              orbit is oriented. <span class="guilabel">AltEquinotialP</span> =
+              sin(<span class="guilabel">INC</span>/2)*sin(<span class="guilabel">RAAN</span>).</p></td></tr><tr><td><span class="guilabel">AltEquinoctialQ</span></td><td><p>A measure of the orientation of the orbit.
+              <span class="guilabel">AltEquinoctialP</span> and
+              <span class="guilabel">AltEquinoctialQ</span> together govern how an
+              orbit is oriented. <span class="guilabel">AltEquinotialP</span> =
+              sin(<span class="guilabel">INC</span>/2)*cos(<span class="guilabel">RAAN</span>).
+              </p></td></tr><tr><td><span class="guilabel">MLONG</span></td><td><p> See Equinoctial section.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N209F4"></a><h3>Modified Equinoctial State Type</h3><p>The <span class="guilabel">ModifiedEquinoctial</span> state representation
+      is non-singular for circular, elliptic, parabolic, and hyperbolic
+      orbits. The only singularity is for retrograde equatorial orbits,
+      because, like <span class="guilabel">Equinoctial</span> and
+      <span class="guilabel">ModifiedEquinoctial</span>, GMAT does not support the
+      retrograde factor.</p><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">SemilatusRectum</span></td><td><p>Magnitude of the position vector when at true
+              anomaly of 90 deg <span class="guilabel">SemilatusRectum</span> =
+              <span class="guilabel">SMA</span>*(1-<span class="guilabel">ECC</span>^2)</p></td></tr><tr><td><span class="guilabel">ModEquinoctialF</span></td><td><p> Components of eccentricity vector (with
+              <span class="guilabel">ModEquinoctialG</span>). Projection of
+              eccentricity vector onto x. <span class="guilabel">ModEquinoctialF</span>
+              = <span class="guilabel">ECC</span> * cos
+              (<span class="guilabel">AOP</span>+<span class="guilabel">RAAN</span>)
+              </p></td></tr><tr><td><span class="guilabel">ModEquinoctialG</span></td><td><p> Components of eccentricity vector (with
+              <span class="guilabel">ModEquinoctialF</span>). Projection of
+              eccentricity vector onto y. <span class="guilabel">ModEquinoctialG</span>
+              = <span class="guilabel">ECC</span> * sin
+              (<span class="guilabel">AOP</span>+<span class="guilabel">RAAN</span>)
+              </p></td></tr><tr><td><span class="guilabel">ModEquinoctialH</span></td><td><p>Identical to
+              <span class="guilabel">EquinoctialQ</span>.</p></td></tr><tr><td><span class="guilabel">ModEquinoctialK</span></td><td><p> Idential to
+              <span class="guilabel">EquinoctialP</span>.</p></td></tr><tr><td><span class="guilabel">TLONG</span></td><td><p> A measure of the true location of the spacecraft
+              in its orbit. <span class="guilabel">TLONG</span> =
+              <span class="guilabel">AOP</span> + <span class="guilabel">RAAN</span> +
+              <span class="guilabel">TA</span>. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20A77"></a><h3>Singularities in the Modified Equinoctial Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">INC = 180</span></td><td><p>Similar to <span class="guilabel">Equinoctial</span>
+              elements, there is singularity at <span class="guilabel">INC</span> = 180
+              deg. GMAT does not support
+              <span class="guilabel">ModifiedEquinoctial</span> elements for retrograde
+              equatorial orbits. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20A9C"></a><h3>Hyperbolic Asymptote State Type</h3><p>GMAT supports two related hyperbolic asymptote state types:
+      <span class="guilabel">IncomingAsymptote</span> for defining the incoming
+      hyperbolic asymptote, and <span class="guilabel">OutgoingAsymptote</span>, for
+      defining the outgoing hyperbolic asymptote. Both representations are
+      useful for defining flybys.</p><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><p><span class="guilabel">IncomingRadPer</span></p><p><span class="guilabel">OutgoingRadPer</span></p></td><td><p>The orbital radius of periapsis. The radius of
+              periapsis is the minimum distance (osculating) between the
+              spacecraft and celestial body at the origin of coordinate
+              system.
+              <span class="guilabel">IncomingRadPer</span>/<span class="guilabel">OutgoingRadPer</span>
+              differ from <span class="guilabel">RadPer</span> only in that they are
+              associated with the <span class="guilabel">IncomingAsymptote</span> and
+              <span class="guilabel">OutgoingAsymptote</span> state representations,
+              respectively. </p></td></tr><tr><td><p><span class="guilabel">IncomingC3Energy</span></p><p><span class="guilabel">OutgoingC3Energy</span></p></td><td><p> C3 energy. <span class="guilabel">C3Energy</span> =
+              -mu/<span class="guilabel">SMA</span>.
+              <span class="guilabel">IncomingC3Energy</span>/<span class="guilabel">OutgoingC3Energy</span>
+              differ only in that they are associated with the
+              <span class="guilabel">IncomingAsymptote</span> and
+              <span class="guilabel">OutgoingAsymptote</span> state representations,
+              respectively.</p></td></tr><tr><td><p><span class="guilabel">IncomingRHA</span></p><p><span class="guilabel">OutgoingRHA</span></p></td><td><p><span class="guilabel">IncomingRHA</span>/<span class="guilabel">OutgoingRHA</span>
+              is the right ascension of the incoming/outgoing asymptote. If
+              <span class="guilabel">C3Energy</span> &lt; 0 the apsides vector is
+              substituted for the incoming/outgoing asymptote. </p></td></tr><tr><td><p><span class="guilabel">IncomingDHA</span></p><p><span class="guilabel">OutgoingDHA</span></p></td><td><p><span class="guilabel">IncomingDHA</span>/<span class="guilabel">OutgoingDHA</span>
+              is the declination of the incoming/outgoing asymptote. If
+              <span class="guilabel">C3Energy</span> &lt; 0 the apsides vector is
+              substituted for the incoming/outgoing asymptote..</p></td></tr><tr><td><p><span class="guilabel">IncomingBVAZI</span></p><p><span class="guilabel">OutgoingBVAZI</span></p></td><td><p>
+              <span class="guilabel">IncomingBVAZI</span>/<span class="guilabel">OutgoingBVAZI</span>
+              is the B-vector azimuth at infinity of the incoming/outgoing
+              asymptote measured counter-clockwise from south. If
+              <span class="guilabel">C3Energy</span> &lt; 0 the apsides vector is
+              substituted for the outgoing/incoming asymptote.</p></td></tr><tr><td><span class="guilabel">TA</span></td><td><p> See <span class="guilabel">Keplerian</span>.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20B34"></a><h3>Singularities in the Hyperbolic Asymptote Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">IncomingC3Energy/OutgoingC3Energy =
+              0</span></td><td><p>If
+              <span class="guilabel">IncomingC3Energy</span>/<span class="guilabel">OutgoingC3Energy</span>
+              = 0 the spacecraft has a parabolic orbit. Hyperbolic asymptote
+              states do not support parabolic orbits. It must be avoided that
+              -1E-7 &le; <span class="guilabel">IncomingC3Energy/OutgoingC3Energy</span> &le;
+              1E-7 by choosing a proper set of elements. </p></td></tr><tr><td><span class="guilabel">ECC = 0</span></td><td><p>For the case of circular orbits,
+              <span class="guilabel">TA</span> is undefined. It must be avoided that
+              <span class="guilabel">ECC</span> &le; 1E-7 by choosing a proper set of
+              elements. GMAT does not support hyperbolic asymptote
+              representation for true circular orbits.</p></td></tr><tr><td><span class="guilabel">Asymptote vector parallel to
+              z-axis</span></td><td><p> If the asymptote vector is parallel or
+              antiparallel to coordinate system&rsquo;s z-direction, then the
+              B-plane is undefined. It must be avoided by choosing either a
+              proper coordinate system or set of elements.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20B6D"></a><h3>State Component Interactions with the Spacecraft Coordinate
+      System Field</h3><p>When you define <span class="guilabel">Spacecraf</span>t state elements
+      such as <span class="guilabel">SMA</span>, <span class="guilabel">X</span>, or
+      <span class="guilabel">DEC</span> for example, these values are set in
+      coordinates defined by the <span class="guilabel">Spacecraft</span>&rsquo;s
+      <span class="guilabel">CoordinateSystem</span> field. For example, the following
+      lines result in the X-component of the <span class="guilabel">Cartesian</span>
+      state of <span class="guilabel">MySat</span> to be <code class="literal">1000</code>, in
+      the <span class="guilabel">EarthFixed</span> system.</p><pre class="programlisting"><code class="code">aSpacecraft.CoordinateSystem = EarthFixed
+aSpacecraft.X = 1000  </code>      </pre><p>When the script lines above are executed in a script, GMAT
+      converts the state to the specified coordinate system, in this case
+      <span class="guilabel">EarthFixed</span>, sets the <span class="guilabel">X</span>
+      component to <code class="literal">1000</code>, and then converts the state back
+      to the internal inertial representation.</p><p>The following example sets <span class="guilabel">SMA</span> to
+      <code class="literal">8000</code> in the <span class="guilabel">EarthMJ2000Eq</span>
+      system, then sets <span class="guilabel">X</span> to <code class="literal">6000</code> in
+      the Earth fixed system. (Note this is NOT allowed in initialization
+      mode; see later remarks for more information).</p><pre class="programlisting"><code class="code">aSpacecraft.CoordinateSystem = EarthMJ2000Eq
+aSpacecraft.SMA = 8000
+aSpacecraft.CoordinateSystem = EarthFixed
+aSpacecraft.X = 6000</code></pre></div><div class="refsection"><a name="N20BB3"></a><h3>State Component Interactions with the Spacecraft Epoch
+      Field</h3><p>When you specify the <span class="guilabel">Spacecraft</span>&rsquo;s epoch, you
+      define the initial epoch of the spacecraft in the specified coordinate
+      system. If your choice for the <span class="guilabel">Spacecraft</span>'s
+      coordinate system is a time varying system such as the
+      <span class="guilabel">EarthFixed</span> system, then you define the state in the
+      <span class="guilabel">EarthFixed</span> system at that epoch. For example, the
+      following lines would result in the cartesian state of
+      <span class="guilabel">MySat</span> to be set to <code class="literal">[7000 0 1300 0 7.35
+      1]</code> in the <span class="guilabel">EarthFixed</span> system at
+      <code class="literal">01 Dec 2000 12:00:00.000</code> UTC.</p><pre class="programlisting"><code class="code">Create Spacecraft MySat
+MySat.Epoch.UTCGregorian = '01 Dec 2000 12:00:00.000'
+MySat.CoordinateSystem = EarthFixed
+MySat.X = 7000
+MySat.Y = 0
+MySat.Z = 1300
+MySat.VX = 0
+MySat.VY = 7.35
+MySat.VZ = 1</code>      </pre><p>The corresponding <span class="guilabel">EarthMJ2000Eq</span>
+      representation is</p><pre class="programlisting"><code class="code">X  = -2320.30266
+Y  = -6604.25075
+Z  =  1300.02599
+VX =  7.41609
+VY = -2.60562
+VZ =  0.99953</code></pre><p>You can change the epoch of a <span class="guilabel">Spacecraft</span> in
+      the mission sequence using a script line like this:</p><pre class="programlisting"><code class="code">MySat.Epoch.TAIGregorian = '02 Dec 2000 12:00:00.000'</code></pre><p>When the above line is executed in the mission sequence, GMAT
+      converts the state to the specified coordinate system and then to the
+      specified state type &mdash; in this case <span class="guilabel">EarthFixed</span> and
+      <span class="guilabel">Cartesian</span> respectively &mdash; sets the epoch to the
+      value of <code class="literal">02 Dec 2000 12:00:00.000</code>, and then converts
+      the state back to the internal representation. This behavior is
+      identical to that of the spacecraft orbit dialog box in the GUI. Because
+      the coordinate system in this case is time varying, changing the
+      spacecraft epoch has resulted in a change in the spacecraft's inertial
+      state representation. After the epoch is changed to <code class="literal">02 Dec 2000
+      12:00:00.000</code>, the <span class="guilabel">EarthMJ2000Eq</span> state
+      representation is now:</p><pre class="programlisting"><code class="code">X  = -2206.35771
+Y  = -6643.18687
+Z  =  1300.02073
+VX =  7.45981
+VY = -2.47767
+VZ =  0.99953       </code>      </pre></div><div class="refsection"><a name="N20BF9"></a><h3>Scripting Limitations during Initialization</h3><p>When setting the <span class="guilabel">Spacecraft</span> orbit state in a
+      script, there are a few limitations to be aware of. In the
+      initialization portion of the script (before the
+      <span class="guilabel">BeginMissionSequence</span> command), you should set the
+      epoch and coordinate system only once; multiple definitions of these
+      parameters will result in either errors or warning messages and may lead
+      to unexpected results.</p><p>Also when setting a state during initialization, you must set the
+      orbit state in a set of fields corresponding to a single state type. For
+      example, set the orbit state using the <span class="guilabel">X</span>,
+      <span class="guilabel">Y</span>, <span class="guilabel">Z</span>, <span class="guilabel">VX</span>,
+      <span class="guilabel">VY</span>, <span class="guilabel">VZ</span> fields (for the
+      <span class="guilabel">Cartesian</span> state type) or the <span class="guilabel">SMA, ECC,
+      INC, RAAN, AOP</span>, <span class="guilabel">TA</span> fields (for the
+      <span class="guilabel">Keplerian</span> state type), but not a mixture of the
+      two. If you need to mix state types, coordinate systems, or epochs to
+      define the state of a spacecraft, you must set the state using scripting
+      in the mission sequence (after the
+      <span class="guilabel">BeginMissionSequence</span> command).</p></div><div class="refsection"><a name="N20C27"></a><h3>Shared State Components</h3><p>Some state components, such as <span class="guilabel">SMA</span>, are
+      shared among multiple state representations. In the mission sequence,
+      GMAT does not require you to specify the state representation that you
+      are setting; rather, you may specify a combination of elements from
+      different representations.</p><p>For these shared components, GMAT defines a default representation
+      for each, and uses that representation when setting or retrieving the
+      value for the shared component. This is normally transparent, though it
+      can have side effects if the default representation has singularities or
+      numerical precision losses caused by the value being set or retrieved.
+      The following table lists each shared state component and its default
+      representation.</p><div class="informaltable"><table border="1"><colgroup><col width="20%"><col width="40%"><col width="40%"></colgroup><thead><tr><th>Field</th><th>Shared Between</th><th>Default Representation</th></tr></thead><tbody><tr><td>AOP</td><td>Keplerian, ModifiedKeplerian</td><td>Keplerian</td></tr><tr><td>DEC</td><td>SphericalAZFPA, SphericalRADEC</td><td>SphericalAZFPA</td></tr><tr><td>EquinoctialH</td><td>AlternateEquinoctial, Equinoctial</td><td>Equinoctial</td></tr><tr><td>EquinoctialK</td><td>AlternateEquinoctial, Equinoctial</td><td>Equinoctial</td></tr><tr><td>INC</td><td>Keplerian, ModifiedKeplerian</td><td>Keplerian</td></tr><tr><td>RA</td><td>SphericalAZFPA, SphericalRADEC</td><td>SphericalAZFPA</td></tr><tr><td>RAAN</td><td>Keplerian, ModifiedKeplerian</td><td>Keplerian</td></tr><tr><td>RMAG</td><td>SphericalAZFPA, SphericalRADEC</td><td>SphericalAZFPA</td></tr><tr><td>SMA</td><td>AlternateEquinoctial, Equinoctial, Keplerian</td><td>Keplerian</td></tr><tr><td>TA</td><td>IncomingAsymptote, OutgoingAsymptote, Keplerian,
+              ModifiedKeplerian</td><td>Keplerian</td></tr><tr><td>VMAG</td><td>SphericalAZFPA, SphericalRADEC</td><td>SphericalAZFPA</td></tr></tbody></table></div><p>As an example, consider the following mission sequence. Because
+      GMAT executes each command sequentially, it uses the assigned state
+      representation to calculation each component. For shared components, it
+      uses the default representation for reach.</p><pre class="programlisting">BeginMissionSequence
+aSpacecraft.SMA = 20000      % conversion goes through Keplerian
+aSpacecraft.RA = 30          % conversion goes through SphericalAZFPA
+aSpacecraft.OutgoingDHA = 90 % conversion goes through OutgoingAsymptote
+aSpacecraft.TA = 45          % conversion goes through Keplerian</pre><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>When setting state parameters (especially in Keplerian-based
+        representations) using non-default dependencies, be careful of the
+        loss of precision caused by large translations in the intermediate
+        orbit.</p></div></div></div><div class="refsection"><a name="N20C96"></a><h2>Examples</h2><div class="informalexample"><p>Define a <span class="guilabel">Spacecraft</span>&rsquo;s Earth MJ2000Eq
+      coordinates in the <span class="guilabel">Keplerian</span> representation:</p><pre class="programlisting"><code class="code">Create Spacecraft aSpacecraft
+aSpacecraft.CoordinateSystem = EarthMJ2000Eq
+aSpacecraft.SMA  = 7100
+aSpacecraft.ECC  = 0.01
+aSpacecraft.INC  = 30
+aSpacecraft.RAAN = 45
+aSpacecraft.AOP  = 90
+aSpacecraft.TA   = 270     </code></pre></div><div class="informalexample"><p>Define a <span class="guilabel">Spacecraft</span>&rsquo;s Earth fixed coordinates
+      in the <span class="guilabel">Cartesian</span> representation:</p><pre class="programlisting"><code class="code">Create Spacecraft aSpacecraft
+aSpacecraft.CoordinateSystem = EarthFixed
+aSpacecraft.X = 7100
+aSpacecraft.Y = 0
+aSpacecraft.Z = 1300
+aSpacecraft.VX = 0
+aSpacecraft.VY = 7.35
+aSpacecraft.VZ = 1</code></pre></div><div class="informalexample"><p>Define a <span class="guilabel">Spacecraft</span>&rsquo;s Moon centered
+      coordinates in <span class="guilabel">ModifiedKeplerian</span>
+      representation.</p><pre class="programlisting"><code class="code">Create CoordinateSystem MoonInertial
+MoonInertial.Origin = Luna
+MoonInertial.Axes = BodyInertial
+
+Create Spacecraft aSpacecraft
+aSpacecraft.CoordinateSystem = MoonInertial
+aSpacecraft.RadPer = 2100
+aSpacecraft.RadApo = 2200
+aSpacecraft.INC = 90
+aSpacecraft.RAAN = 45
+aSpacecraft.AOP = 45
+aSpacecraft.TA = 180</code></pre></div><div class="informalexample"><p>Define a <span class="guilabel">Spacecraft</span>&rsquo;s Rotating Libration
+      Point coordinates in the <span class="guilabel">SphericalAZFPA</span>
+      representation:</p><pre class="programlisting"><code class="code">Create LibrationPoint ESL1
+ESL1.Primary = Sun
+ESL1.Secondary = Earth
+ESL1.Point = L1
+
+Create CoordinateSystem EarthSunL1CS
+EarthSunL1CS.Origin = ESL1 
+EarthSunL1CS.Axes = ObjectReferenced
+EarthSunL1CS.XAxis = R
+EarthSunL1CS.ZAxis = N
+EarthSunL1CS.Primary = Sun
+EarthSunL1CS.Secondary = Earth
+
+Create Spacecraft aSpacecraft
+aSpacecraft.CoordinateSystem = EarthSunL1CS
+aSpacecraft.DateFormat = UTCGregorian
+aSpacecraft.Epoch = '09 Dec 2005 13:00:00.000'
+aSpacecraft.RMAG = 1520834.130720907
+aSpacecraft.RA = -111.7450242065574
+aSpacecraft.DEC = -20.23326432189756
+aSpacecraft.VMAG = 0.2519453702907011
+aSpacecraft.AZI = 85.22478175803107
+aSpacecraft.FPA = 97.97050698644287        </code></pre></div><div class="informalexample"><p>Define a <span class="guilabel">Spacecraft</span>&rsquo;s Earth-fixed coordinates
+      in the <span class="guilabel">Planetodetic</span> representation:</p><pre class="programlisting"><code class="code">Create Spacecraft aSpacecraft
+aSpacecraft.CoordinateSystem = EarthFixed
+aSpacecraft.PlanetodeticRMAG = 7218.032973047435
+aSpacecraft.PlanetodeticLON = 79.67188405817301
+aSpacecraft.PlanetodeticLAT = 10.43478253417053
+aSpacecraft.PlanetodeticVMAG = 6.905049647178043
+aSpacecraft.PlanetodeticAZI = 81.80908019170981
+aSpacecraft.PlanetodeticHFPA = 1.494615714741736</code></pre></div><div class="informalexample"><p>Set a <span class="guilabel">Spacecraft</span>&rsquo;s Earth MJ2000 ecliptic
+      coordinates in the <span class="guilabel">Equinoctial</span>
+      representation:</p><pre class="programlisting"><code class="code">Create Spacecraft aSpacecraft
+aSpacecraft.CoordinateSystem = EarthMJ2000Ec
+aSpacecraft.SMA = 9100
+aSpacecraft.EquinoctialH = 0.00905
+aSpacecraft.EquinoctialK = 0.00424
+aSpacecraft.EquinoctialP = -0.1059
+aSpacecraft.EquinoctialQ = 0.14949
+aSpacecraft.MLONG = 247.4528</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="SpacecraftNavigation.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="SpacecraftVisualizationProperties.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Spacecraft Navigation&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Spacecraft Visualization Properties</td></tr></table></div></body></html>

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -109,6 +109,11 @@ public:
       PLANETARY_COEFF_FILE,
       NUTATION_COEFF_FILE,
       PLANETARY_PCK_FILE,
+      EARTH_LATEST_PCK_FILE,
+      EARTH_PCK_PREDICTED_FILE,
+      EARTH_PCK_CURRENT_FILE,
+      LUNA_PCK_CURRENT_FILE,
+      LUNA_FRAME_KERNEL_FILE,
       LEAP_SECS_FILE,
       LSK_FILE,
       PERSONALIZATION_FILE,
@@ -161,9 +166,9 @@ public:
    std::string GetStartupFileDir();
    std::string GetStartupFileName();
    std::string GetFullStartupFilePath();
-   void ReadStartupFile(const char *fileName = "");
+//   void ReadStartupFile(const char *fileName = ""); // remove redundant method
    void ReadStartupFile(const std::string &fileName = "");
-   void WriteStartupFile(const char *fileName = "");
+//   void WriteStartupFile(const char *fileName = "");// remove redundant method
    void WriteStartupFile(const std::string &fileName = "");
    
    std::string GetRootPath();

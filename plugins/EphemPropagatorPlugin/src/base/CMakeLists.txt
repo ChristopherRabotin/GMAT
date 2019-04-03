@@ -31,6 +31,7 @@ SET(PLUGIN_SRCS
     propagator/EphemerisPropagator.cpp
     propagator/Code500Propagator.cpp
     propagator/SPKPropagator.cpp
+    propagator/StkEPropagator.cpp
 )
 
 # ====================================================================

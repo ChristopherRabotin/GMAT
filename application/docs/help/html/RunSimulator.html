@@ -1,0 +1,556 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>RunSimulator</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="RunEstimator.html" title="RunEstimator"><link rel="next" href="Set.html" title="Set"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">RunSimulator</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="RunEstimator.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Set.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="RunSimulator"></a><div class="titlepage"></div><a name="N24ECE" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">RunSimulator</span></h2><p>RunSimulator &mdash; Generates simulated navigation measurements</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis">RunSimulator Simulator_InstanceName </pre></div><div class="refsection"><a name="N24EE4"></a><h2>Description</h2><p>The <span class="guilabel">RunSimulator</span> command generates the
+    simulated measurements specified in the user-provided
+    <span class="guilabel">Simulator</span> resource. An output file, with name
+    specified in the <span class="guilabel">Simulator</span> resource is
+    created.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Simulator.html" title="Simulator"><span class="refentrytitle">Simulator</span></a></p></div><div class="refsection"><a name="N24EF9"></a><h2>Remarks</h2><div class="refsection"><a name="N24EFC"></a><h3>Content of the Output File for DSN data</h3><p>After the <span class="guilabel">RunSimulator</span> command has finished
+      execution, one or more output files, as defined in the specified
+      <span class="guilabel">Simulator</span> object, will be created. Each row of data
+      in an output file contains information about one specific measurement at
+      a given time. The format for a given row of data is described fully in
+      the <a class="xref" href="TrackingFileSet.html" title="TrackingFileSet"><span class="refentrytitle">TrackingFileSet</span></a> resource help.</p><p>Currently, GMAT supports two DSN data types, DSN TRK-2-34 type 7
+      (sequential range) and DSN TRK-2-34 type 17 (Total count phase). As
+      shown in the <a class="xref" href="TrackingFileSet.html" title="TrackingFileSet"><span class="refentrytitle">TrackingFileSet</span></a> resource help, for a type
+      7 measurement, a row of data has the following GMAT internal file
+      format.</p><pre class="programlisting">TAIMJD  DSN_SeqRange 9004 [Downlink Station ID] [S/C ID] [Range Observable (RU)] [Uplink Band] [Uplink Freq (Hz)] [Range Modulo (RU)]</pre><p>where [Uplink Band] species the frequency band of the transmitting
+      station as shown in the table below.</p><div class="informaltable"><table border="1"><colgroup><col width="22%"><col width="78%"></colgroup><thead><tr><th align="center">Uplink Band Value</th><th align="center">Description</th></tr></thead><tbody><tr><td>0</td><td>Unknown or not applicable</td></tr><tr><td>1</td><td>S-band</td></tr><tr><td>2</td><td>X-band</td></tr><tr><td>3</td><td>Ka-band</td></tr><tr><td>4</td><td>Ku-band</td></tr><tr><td>5</td><td>L-band</td></tr></tbody></table></div><p>and where the [Range Observable (RU)], is calculated according
+      to</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+          <m:mrow>
+            <m:mi>C</m:mi>
+
+            <m:mstyle displaystyle="true">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>&int;</m:mo>
+
+                  <m:mrow>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:mrow>
+
+                  <m:mrow>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>3</m:mn>
+                  </m:mrow>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>f</m:mi>
+
+                    <m:mi>T</m:mi>
+                  </m:msub>
+
+                  <m:mo stretchy="false">(</m:mo>
+
+                  <m:mi>t</m:mi>
+
+                  <m:mo stretchy="false">)</m:mo>
+
+                  <m:mi>d</m:mi>
+
+                  <m:mi>t</m:mi>
+                </m:mrow>
+              </m:mrow>
+            </m:mstyle>
+
+            <m:mo>,</m:mo>
+
+            <m:mtext>&nbsp;mod&nbsp;M&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(RU)</m:mtext>
+          </m:mrow>
+        </m:math></div><p>where</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mn>1</m:mn>
+          </m:msub>
+
+          <m:mo>,</m:mo>
+
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mn>3</m:mn>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>Transmission&nbsp;and&nbsp;Reception&nbsp;epoch,&nbsp;respectively</m:mtext>
+        </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+          <m:msub>
+            <m:mi>f</m:mi>
+
+            <m:mi>T</m:mi>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>Ground&nbsp;Station&nbsp;transmit&nbsp;frequency</m:mtext>
+        </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+          <m:mi>C</m:mi>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>transmitter&nbsp;dependent&nbsp;constant&nbsp;(221/1498&nbsp;for&nbsp;X-band&nbsp;and&nbsp;1/2&nbsp;for&nbsp;S-Band)</m:mtext>
+        </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+          <m:mtext>M&nbsp;</m:mtext>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>&nbsp;length&nbsp;of&nbsp;the&nbsp;ranging&nbsp;code&nbsp;in&nbsp;RU</m:mtext>
+        </m:math></div><p>As shown in the <a class="xref" href="TrackingFileSet.html" title="TrackingFileSet"><span class="refentrytitle">TrackingFileSet</span></a> resource help,
+      for a DSN TRK-2-34 type 17 measurement, a row of data has the following
+      GMAT internal file format.</p><pre class="programlisting"># TAIMJD_t3e DSN_TCP 9006 [Downlink Station ID] [S/C ID] [Uplink Band] [DopplerCountInterval_seconds] [DopplerMeas_Hz]</pre><p>where [Uplink Band] has been previously described and where
+      DopplerMeas_Hz, the Doppler measurement, is calculated according
+      to</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+          <m:mrow>
+            <m:mi>C</m:mi>
+
+            <m:mo>=</m:mo>
+
+            <m:mo>&minus;</m:mo>
+
+            <m:mfrac>
+              <m:mrow>
+                <m:msub>
+                  <m:mi>M</m:mi>
+
+                  <m:mn>2</m:mn>
+                </m:msub>
+              </m:mrow>
+
+              <m:mrow>
+                <m:mrow>
+                  <m:mo>(</m:mo>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>3</m:mn>
+
+                        <m:mi>e</m:mi>
+                      </m:mrow>
+                    </m:msub>
+
+                    <m:mo>&minus;</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>3</m:mn>
+
+                        <m:mi>s</m:mi>
+                      </m:mrow>
+                    </m:msub>
+                  </m:mrow>
+
+                  <m:mo>)</m:mo>
+                </m:mrow>
+              </m:mrow>
+            </m:mfrac>
+
+            <m:mstyle displaystyle="true">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>&int;</m:mo>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mrow/>
+
+                      <m:mi>s</m:mi>
+                    </m:msub>
+                  </m:mrow>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mrow/>
+
+                      <m:mi>e</m:mi>
+                    </m:msub>
+                  </m:mrow>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>f</m:mi>
+
+                    <m:mi>T</m:mi>
+                  </m:msub>
+
+                  <m:mo stretchy="false">(</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+
+                  <m:mo stretchy="false">)</m:mo>
+
+                  <m:mi>d</m:mi>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:mrow>
+              </m:mrow>
+            </m:mstyle>
+
+            <m:mtext>&nbsp;&nbsp;=</m:mtext>
+
+            <m:mo>&minus;</m:mo>
+
+            <m:mfrac>
+              <m:mrow>
+                <m:msub>
+                  <m:mi>M</m:mi>
+
+                  <m:mn>2</m:mn>
+                </m:msub>
+
+                <m:mrow>
+                  <m:mo>(</m:mo>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>1</m:mn>
+
+                        <m:mi>e</m:mi>
+                      </m:mrow>
+                    </m:msub>
+
+                    <m:mo>&minus;</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>1</m:mn>
+
+                        <m:mi>s</m:mi>
+                      </m:mrow>
+                    </m:msub>
+                  </m:mrow>
+
+                  <m:mo>)</m:mo>
+                </m:mrow>
+              </m:mrow>
+
+              <m:mrow>
+                <m:mi>D</m:mi>
+
+                <m:mi>C</m:mi>
+
+                <m:mi>I</m:mi>
+              </m:mrow>
+            </m:mfrac>
+
+            <m:msub>
+              <m:mover accent="true">
+                <m:mi>f</m:mi>
+
+                <m:mo>&macr;</m:mo>
+              </m:mover>
+
+              <m:mi>T</m:mi>
+            </m:msub>
+
+            <m:mtext>&nbsp;&nbsp;&nbsp;&nbsp;(Hz)</m:mtext>
+          </m:mrow>
+        </m:math></div><p>where</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mrow>
+              <m:mn>1</m:mn>
+
+              <m:mi>s</m:mi>
+            </m:mrow>
+          </m:msub>
+
+          <m:mo>,</m:mo>
+
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mrow>
+              <m:mn>1</m:mn>
+
+              <m:mi>e</m:mi>
+            </m:mrow>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>start&nbsp;and&nbsp;end&nbsp;of&nbsp;transmission&nbsp;interval</m:mtext>
+        </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+          <m:msub>
+            <m:mi>f</m:mi>
+
+            <m:mi>T</m:mi>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>transmit&nbsp;frequency</m:mtext>
+        </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+          <m:msub>
+            <m:mi>M</m:mi>
+
+            <m:mn>2</m:mn>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>Transponder&nbsp;turn&nbsp;around&nbsp;ratio&nbsp;(typically,&nbsp;240/221&nbsp;for&nbsp;S-band&nbsp;and&nbsp;880/749&nbsp;for&nbsp;X-band)</m:mtext>
+        </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+          <m:mtext>DCI&nbsp;=&nbsp;</m:mtext>
+
+          <m:mrow>
+            <m:mo>(</m:mo>
+
+            <m:mrow>
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mrow>
+                  <m:mn>3</m:mn>
+
+                  <m:mi>e</m:mi>
+                </m:mrow>
+              </m:msub>
+
+              <m:mo>&minus;</m:mo>
+
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mrow>
+                  <m:mn>3</m:mn>
+
+                  <m:mi>s</m:mi>
+                </m:mrow>
+              </m:msub>
+            </m:mrow>
+
+            <m:mo>)</m:mo>
+          </m:mrow>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>&nbsp;Doppler&nbsp;Count&nbsp;Interval</m:mtext>
+        </m:math></div><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+          <m:msub>
+            <m:mover accent="true">
+              <m:mi>f</m:mi>
+
+              <m:mo>&macr;</m:mo>
+            </m:mover>
+
+            <m:mi>T</m:mi>
+          </m:msub>
+
+          <m:mo>&equiv;</m:mo>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:mstyle displaystyle="true">
+                <m:mrow>
+                  <m:munderover>
+                    <m:mo>&int;</m:mo>
+
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>t</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:msub>
+                        <m:mrow/>
+
+                        <m:mi>s</m:mi>
+                      </m:msub>
+                    </m:mrow>
+
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>t</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:msub>
+                        <m:mrow/>
+
+                        <m:mi>e</m:mi>
+                      </m:msub>
+                    </m:mrow>
+                  </m:munderover>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>f</m:mi>
+
+                      <m:mi>T</m:mi>
+                    </m:msub>
+
+                    <m:mo stretchy="false">(</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+
+                    <m:mo stretchy="false">)</m:mo>
+
+                    <m:mi>d</m:mi>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                  </m:mrow>
+                </m:mrow>
+              </m:mstyle>
+            </m:mrow>
+
+            <m:mrow>
+              <m:mrow>
+                <m:mo>(</m:mo>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mrow>
+                      <m:mn>1</m:mn>
+
+                      <m:mi>e</m:mi>
+                    </m:mrow>
+                  </m:msub>
+
+                  <m:mo>&minus;</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mrow>
+                      <m:mn>1</m:mn>
+
+                      <m:mi>s</m:mi>
+                    </m:mrow>
+                  </m:msub>
+                </m:mrow>
+
+                <m:mo>)</m:mo>
+              </m:mrow>
+            </m:mrow>
+          </m:mfrac>
+
+          <m:mtext>&nbsp;</m:mtext>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>average&nbsp;transmit&nbsp;frequency&nbsp;</m:mtext>
+        </m:math></div><p>Note that (t3e - t3s) is known as the Doppler Count Interval and
+      is an input field, <span class="guilabel">SimDopplerCountInterval</span>, for the
+      <span class="guilabel">TrackingFileSet</span> resource.</p><p>When you simulate DSN range or Doppler, you can choose whether or
+      not the frequency from the transmitting <span class="guilabel">Ground
+      Station</span> is Non-ramped or Ramped. If you wish to model ramped
+      data, you must supply an input ramp table. The format of the input ramp
+      table is discussed in the <span class="guilabel"><a class="xref" href="TrackingFileSet.html" title="TrackingFileSet"><span class="refentrytitle">TrackingFileSet</span></a></span> resource help.</p><p>The table below shows how the values of Uplink Band, C, M2, and
+      transmit frequency are calculated. The second column shows how the
+      Uplink Band, which is included in the output file for both range and
+      Doppler measurements, is calculated. For S-band, a &ldquo;1&rdquo; is output and for
+      X-band, a &ldquo;2&rdquo; is output.</p><p>The output GMAT Measurement Data (GMD) file contains the
+      observable value which is calculated using the equations shown above.
+      The third column shows how the value of C or M2, which is used to
+      calculate the observation value shown in the GMD file, is
+      calculated.</p><p>Finally, the fourth column shows how the transmit frequency, which
+      shows up directly in the GMD file (for DSN range but not DSN Doppler)
+      and is also used to calculate the observation value given in the GMD
+      file, is calculated.</p><div class="informaltable"><table width="100%" border="1"><colgroup><col align="center" width="10%"><col width="27%"><col width="34%"><col width="29%"></colgroup><thead><tr><th align="center">Measurement Type</th><th align="center">Uplink Band</th><th align="center">Value of C (Range) or M2 (Doppler) used to
+              calculate Observation</th><th align="center">Transmit freq used to calculate
+              Observation</th></tr></thead><tbody><tr><td align="center"><span class="bold"><strong>Simulate Range without ramp
+              table</strong></span></td><td><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Set based upon transmitter frequency set by user on
+                    the Transmitter.Frequency field. If freq is in [2000-4000]
+                    MHz, then Uplink Band is S-band. If freq is in [7000-8000]
+                    MHz, then Uplink Band is X-band.</p></li></ul></div></td><td><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Set based upon Uplink Band result shown in previous
+                    column. C=&frac12; for S-band and 221/1498 for X-band.</p></li><li class="listitem"><p>Value of Transponder.TurnAroundRatio has no effect
+                    on C</p></li></ul></div></td><td><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+                          <m:msub>
+                            <m:mi>f</m:mi>
+
+                            <m:mi>T</m:mi>
+                          </m:msub>
+                        </m:math>=Transmitter.frequency (This frequency
+                    will be written to the GMD range file)</p></li></ul></div></td></tr><tr><td align="center"><span class="bold"><strong>Simulate Range with ramp
+              table</strong></span></td><td><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Uplink Band in ramp table takes precedence over both
+                    transmitter frequency set by user and transmit frequency
+                    in ramp table.</p></li></ul></div></td><td><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Set based upon Uplink Band result shown in previous
+                    column. C=&frac12; for S-band and 221/1498 for X-band.</p></li><li class="listitem"><p>Value of Transponder.TurnAroundRatio has no effect
+                    on C</p></li></ul></div></td><td><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+                          <m:msub>
+                            <m:mi>f</m:mi>
+
+                            <m:mi>T</m:mi>
+                          </m:msub>
+                        </m:math>=Ramp Table frequency (This frequency
+                    will be written to the GMD range file)</p></li></ul></div></td></tr><tr><td align="center"><span class="bold"><strong>Simulate Doppler without ramp
+              table</strong></span></td><td><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Set based upon transmitter frequency set by user on
+                    the Transmitter.Frequency field. If freq is in [2000-4000]
+                    MHz, then Uplink Band is S-band. If freq is in [7000-8000]
+                    MHz, then Uplink Band is X-band.</p></li></ul></div></td><td><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>M2=Transponder.TurnAroundRatio</p></li></ul></div></td><td><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+                          <m:msub>
+                            <m:mi>f</m:mi>
+
+                            <m:mi>T</m:mi>
+                          </m:msub>
+                        </m:math>=Transmitter.frequency</p></li></ul></div></td></tr><tr><td align="center"><span class="bold"><strong>Simulate Doppler with ramp
+              table</strong></span></td><td><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Uplink Band in ramp table takes precedence over both
+                    transmitter frequency set by user and transmit frequency
+                    in ramp table.</p></li></ul></div></td><td><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Set based upon Uplink Band result shown in previous
+                    column. M2=240/221 for S-band and 880/749 for X
+                    band.</p></li><li class="listitem"><p>Value of Transponder.TurnAroundRatio has no effect
+                    on M2</p></li></ul></div></td><td><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+                          <m:msub>
+                            <m:mi>f</m:mi>
+
+                            <m:mi>T</m:mi>
+                          </m:msub>
+                        </m:math>=Ramp Table frequency</p></li></ul></div></td></tr></tbody></table></div><p>As discussed in the <a class="xref" href="Transponder.html" title="Transponder"><span class="refentrytitle">Transponder</span></a> Help, for both
+      ramped and non-ramped data, the turn around ratio set on the
+      <span class="guilabel">Transponder</span> object,
+      <span class="guilabel">Transponder.TurnAroundRatio</span>, will be used to
+      calculate the media corrections needed to determine the value of the
+      simulated range and Doppler measurements.</p></div></div><div class="refsection"><a name="N25302"></a><h2>Examples</h2><div class="informalexample"><p>Run simulation.</p><pre class="programlisting"><code class="code">%Perform a simulation
+
+Create Simulator mySim
+
+BeginMissionSequence 
+RunSimulator mySim</code></pre></div><div class="informalexample"><p>For a comprehensive example of running a simulation, see the <a class="xref" href="Tut_Simulate_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;13.&nbsp;Simulate DSN Range and Doppler Data">Chapter&nbsp;13, <i>Simulate DSN Range and Doppler Data</i></a> tutorial.</p></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="RunEstimator.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Set.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">RunEstimator&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Set</td></tr></table></div></body></html>

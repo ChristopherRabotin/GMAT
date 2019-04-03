@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -128,6 +128,8 @@ public:
    SolarSystem* GetSolarSystemInUse();
    void SetObjectMap(ObjectMap *objMap, bool forFunction = false);
    ObjectMap* GetObjectMap();
+   ////void SetFunction(Function *func);
+   ////Function* GetFunction();
    void SetFunction(Function *func);
    Function* GetFunction();
    
@@ -170,7 +172,7 @@ public:
    bool FindPropertyID(GmatBase *obj, const std::string &chunk, GmatBase **owner,
                        Integer &id, Gmat::ParameterType &type);
    
-   void BuildCreatableObjectMaps();
+   void BuildCreatableObjectMaps(bool finalBuild = false);
    StringArray GetCreatableList(Gmat::ObjectType type,
                                 const std::string subType = "");
    
@@ -222,6 +224,7 @@ protected:
    bool         inFunctionMode;
    bool         hasFunctionDefinition;
    Function     *currentFunction;
+   ////UserDefinedFunction *currentFunction;
    
    /// Flag used to handle Python function call detection
    bool isPythonFunction;
@@ -361,6 +364,8 @@ protected:
    // for GamtFunction handling
    bool CheckFunctionDefinition(const std::string &funcPathAndName,
                                 GmatBase *function, bool fullCheck = true);
+   // bool CheckFunctionDefinition(const std::string &funcPathAndName,
+   //                              Function *function, bool fullCheck = true);
    bool BuildFunctionDefinition(const std::string &str);
    void ClearTempObjectNames();
    
@@ -377,40 +382,17 @@ protected:
    void ShowObjectMap(const std::string &title, ObjectMap *objMap = NULL);
    
 private:
-      
-   StringArray   commandList;
-   StringArray   atmosphereList;
-   StringArray   attitudeList;
-   StringArray   axisSystemList;
-   StringArray   burnList;
-   StringArray   calculatedPointList;
-   StringArray   dataFileList;
-   StringArray   ephemFileList;
-   StringArray   functionList;
-   StringArray   hardwareList;
-   StringArray   measurementList;
-   StringArray   measurementModelList;
-   StringArray   trackingSystemList;
-   StringArray   obtypeList;
-   StringArray   odeModelList;
-   StringArray   parameterList;
-   StringArray   physicalModelList;
-   StringArray   propagatorList;
-   StringArray   solverList;
-   StringArray   stopcondList;
-   StringArray   subscriberList;
-   StringArray   spacePointList;
-   StringArray   celestialBodyList;
-   StringArray   eventLocatorList;
-   StringArray   interfaceList;
-   StringArray   errorModelList;
-   StringArray   dataFilterList;
 
+   StringArray   commandList;
+   StringArray   celestialBodyList;
+   StringArray   functionList;   
    StringArray   matlabFunctionNames;
    
    static StringArray   allObjectTypeList;
    static StringArray   viewableCommandList;
-   static std::map<std::string, Gmat::ObjectType> objectTypeMap;
+   static ObjectTypeMap objectTypeMap;
+   static ObjectTypeArrayMap objectTypeArrayMap;
+   
    bool IsParameterType(const std::string &desc);
    bool CheckForSpecialCase(GmatBase *obj, Integer id, std::string &value);
    bool CheckUndefinedReference(GmatBase *obj, bool writeLine = true);

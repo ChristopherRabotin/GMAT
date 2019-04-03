@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -45,6 +45,14 @@
 //#define DEBUG_SCHUR
 //#define DEBUG_INVERSION
 //#define DEBUG_STM
+
+#define  NORMAL_FLAG      0      // Normal
+#define  BLOCKED_FLAG     1      // Signal blocked
+#define  U_FLAG           2      // Unmatched
+#define  RAMP_FLAG        4      // Out of ramped table
+#define  IRMS_FLAG        8      // Initial RMS Sigma Editing
+#define  OLSE_FLAG       16      // Outer-Loop Sigma Editing
+#define  USER_FLAG       32      // Second level data edit
 
 
 //------------------------------------------------------------------------------
@@ -159,7 +167,6 @@ void BatchEstimatorInv::Accumulate()
 #ifdef DEBUG_ACCUMULATION
    MessageInterface::ShowMessage("Entered BatchEstimatorInv::Accumulate()\n");
 #endif
-
    // Measurements are possible!
    const MeasurementData *calculatedMeas = NULL;
    std::vector<RealArray> stateDeriv;
@@ -175,69 +182,91 @@ void BatchEstimatorInv::Accumulate()
    const std::vector<ListItem*> *stateMap = esm.GetStateMap();
    modelsToAccess = measManager.GetValidMeasurementList();            // Get valid measurement models
    const ObservationData *currentObs = measManager.GetObsData();      // Get current observation data
-
+   
+   // Perform second level data editing on observation data
+   Integer recNum = measManager.GetCurrentRecordNumber();
+   if (recNum == editedRecords.size())
+   {
+      Integer dataFilterIndex = -1;
+      ObservationData* obData = FilteringData(measManager.GetObsDataObject(), recNum, dataFilterIndex);
+      if (obData)
+         editedRecords.push_back(NORMAL_FLAG);
+      else
+      {
+         editedRecords.push_back(USER_FLAG);
+         ++numRemovedRecords["USER"];
+      }
+   }
+   else
+   {
+      editedRecords[recNum] = editedRecords[recNum] & USER_FLAG;      // keep USER flag and clear all other flags
+      if (editedRecords[recNum] == USER_FLAG)
+         ++numRemovedRecords["USER"];                                 // recount due to this variable was reset to 0
+   }
 
    // Get ground station and measurement type from current observation data
    std::string gsName = currentObs->participantIDs[0];
    std::string typeName = currentObs->typeName;
    std::string keyword = gsName + " " + typeName;
-
-   bool found = false;
    UnsignedInt indexKey = 0;
-   for (; indexKey < stationAndType.size(); ++indexKey)
+
+   if (editedRecords[recNum] == NORMAL_FLAG)
    {
-      if (stationAndType[indexKey] == keyword)
+      bool found = false;
+      for (; indexKey < stationAndType.size(); ++indexKey)
       {
-         sumAllRecords[indexKey] += 1;            // count for the total records
-         found = true;
-         break;
+         if (stationAndType[indexKey] == keyword)
+         {
+            sumAllRecords[indexKey] += 1;            // count for the total records
+            found = true;
+            break;
+         }
       }
+      if (!found)
+      {
+         // create a statistics record for a new combination of station and measuement type 
+         stationAndType.push_back(keyword);
+         stationsList.push_back(gsName);
+         measTypesList.push_back(typeName);
+         sumAllRecords.push_back(1);                // set total records to 1 at the first time
+         sumAcceptRecords.push_back(0);
+         sumResidual.push_back(0.0);
+         sumResidualSquare.push_back(0.0);
+         sumWeightResidualSquare.push_back(0.0);
+
+         sumSERecords.push_back(0);
+         sumSEResidual.push_back(0.0);
+         sumSEResidualSquare.push_back(0.0);
+         sumSEWeightResidualSquare.push_back(0.0);
+      }
+
+      // Set initial value for 2 statistics tables
+      if (statisticsTable["TOTAL NUM RECORDS"].find(keyword) == statisticsTable["TOTAL NUM RECORDS"].end())
+         statisticsTable["TOTAL NUM RECORDS"][keyword] = 0.0;
+      if (statisticsTable["ACCEPTED RECORDS"].find(keyword) == statisticsTable["ACCEPTED RECORDS"].end())
+         statisticsTable["ACCEPTED RECORDS"][keyword] = 0.0;
+      if (statisticsTable["WEIGHTED RMS"].find(keyword) == statisticsTable["WEIGHTED RMS"].end())
+         statisticsTable["WEIGHTED RMS"][keyword] = 0.0;
+      if (statisticsTable["MEAN RESIDUAL"].find(keyword) == statisticsTable["MEAN RESIDUAL"].end())
+         statisticsTable["MEAN RESIDUAL"][keyword] = 0.0;
+      if (statisticsTable["STANDARD DEVIATION"].find(keyword) == statisticsTable["STANDARD DEVIATION"].end())
+         statisticsTable["STANDARD DEVIATION"][keyword] = 0.0;
+
+      if (statisticsTable1["TOTAL NUM RECORDS"].find(typeName) == statisticsTable1["TOTAL NUM RECORDS"].end())
+         statisticsTable1["TOTAL NUM RECORDS"][typeName] = 0.0;
+      if (statisticsTable1["ACCEPTED RECORDS"].find(typeName) == statisticsTable1["ACCEPTED RECORDS"].end())
+         statisticsTable1["ACCEPTED RECORDS"][typeName] = 0.0;
+      if (statisticsTable1["WEIGHTED RMS"].find(typeName) == statisticsTable1["WEIGHTED RMS"].end())
+         statisticsTable1["WEIGHTED RMS"][typeName] = 0.0;
+      if (statisticsTable1["MEAN RESIDUAL"].find(typeName) == statisticsTable1["MEAN RESIDUAL"].end())
+         statisticsTable1["MEAN RESIDUAL"][typeName] = 0.0;
+      if (statisticsTable1["STANDARD DEVIATION"].find(typeName) == statisticsTable1["STANDARD DEVIATION"].end())
+         statisticsTable1["STANDARD DEVIATION"][typeName] = 0.0;
+
+      // count total number of observation data for a pair of groundstation and measurement type
+      statisticsTable["TOTAL NUM RECORDS"][keyword] += 1;
+      statisticsTable1["TOTAL NUM RECORDS"][typeName] += 1;
    }
-   if (!found)
-   {
-      // create a statistics record for a new combination of station and measuement type 
-      stationAndType.push_back(keyword);
-      stationsList.push_back(gsName);
-      measTypesList.push_back(typeName);
-      sumAllRecords.push_back(1);                // set total records to 1 at the first time
-      sumAcceptRecords.push_back(0);
-      sumResidual.push_back(0.0);
-      sumResidualSquare.push_back(0.0);
-      sumWeightResidualSquare.push_back(0.0);
-
-      sumSERecords.push_back(0);
-      sumSEResidual.push_back(0.0);
-      sumSEResidualSquare.push_back(0.0);
-      sumSEWeightResidualSquare.push_back(0.0);
-   }
-
-
-   // Set initial value for 2 statistics tables
-   if (statisticsTable["TOTAL NUM RECORDS"].find(keyword) == statisticsTable["TOTAL NUM RECORDS"].end())
-      statisticsTable["TOTAL NUM RECORDS"][keyword] = 0.0;
-   if (statisticsTable["ACCEPTED RECORDS"].find(keyword) == statisticsTable["ACCEPTED RECORDS"].end())
-      statisticsTable["ACCEPTED RECORDS"][keyword] = 0.0;
-   if (statisticsTable["WEIGHTED RMS"].find(keyword) == statisticsTable["WEIGHTED RMS"].end())
-      statisticsTable["WEIGHTED RMS"][keyword] = 0.0;
-   if (statisticsTable["MEAN RESIDUAL"].find(keyword) == statisticsTable["MEAN RESIDUAL"].end())
-      statisticsTable["MEAN RESIDUAL"][keyword] = 0.0;
-   if (statisticsTable["STANDARD DEVIATION"].find(keyword) == statisticsTable["STANDARD DEVIATION"].end())
-      statisticsTable["STANDARD DEVIATION"][keyword] = 0.0;
-
-   if (statisticsTable1["TOTAL NUM RECORDS"].find(typeName) == statisticsTable1["TOTAL NUM RECORDS"].end())
-      statisticsTable1["TOTAL NUM RECORDS"][typeName] = 0.0;
-   if (statisticsTable1["ACCEPTED RECORDS"].find(typeName) == statisticsTable1["ACCEPTED RECORDS"].end())
-      statisticsTable1["ACCEPTED RECORDS"][typeName] = 0.0;
-   if (statisticsTable1["WEIGHTED RMS"].find(typeName) == statisticsTable1["WEIGHTED RMS"].end())
-      statisticsTable1["WEIGHTED RMS"][typeName] = 0.0;
-   if (statisticsTable1["MEAN RESIDUAL"].find(typeName) == statisticsTable1["MEAN RESIDUAL"].end())
-      statisticsTable1["MEAN RESIDUAL"][typeName] = 0.0;
-   if (statisticsTable1["STANDARD DEVIATION"].find(typeName) == statisticsTable1["STANDARD DEVIATION"].end())
-      statisticsTable1["STANDARD DEVIATION"][typeName] = 0.0;
-
-   // count total number of observation data for a pair of groundstation and measurement type
-   statisticsTable["TOTAL NUM RECORDS"][keyword] += 1;
-   statisticsTable1["TOTAL NUM RECORDS"][typeName] += 1;
 
 #ifdef DEBUG_ACCUMULATION
    MessageInterface::ShowMessage("StateMap size is %d\n", stateMap->size());
@@ -247,9 +276,12 @@ void BatchEstimatorInv::Accumulate()
    for(UnsignedInt i=0; i < currentObs->participantIDs.size(); ++i)
       MessageInterface::ShowMessage("   %s", currentObs->participantIDs[i].c_str());
 
-   MessageInterface::ShowMessage("   O = %.12lf", currentObs->value[0]);
+   MessageInterface::ShowMessage("   O = [");
+   for (UnsignedInt i = 0; i < currentObs->value.size(); ++i)
+      MessageInterface::ShowMessage("%.12lf   ", currentObs->value[i]);
+   MessageInterface::ShowMessage("]\n");
 
-   if ((currentObs->typeName == "DSNRange")||(currentObs->typeName == "DSNTwoWayRange"))
+   if ((currentObs->typeName == "DSN_SeqRange")||(currentObs->typeName == "DSNTwoWayRange"))
       MessageInterface::ShowMessage("   range modulo = %lf\n", currentObs->rangeModulo);
    MessageInterface::ShowMessage("\n");
 #endif
@@ -354,47 +386,63 @@ void BatchEstimatorInv::Accumulate()
       numRemovedRecords["U"]++;
       measManager.GetObsDataObject()->inUsed = false;
       measManager.GetObsDataObject()->removedReason = "U";
+      editedRecords[recNum] = editedRecords[recNum] | U_FLAG;          // adding Unmatched flag
 
-      if (textFileMode == "Normal")
+      for (Integer k = 0; k < currentObs->value.size(); ++k)
       {
-         // Write to report file edit status:
-         sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 4) + " ";
-
-         // Write to report file O-value, C-value, O-C, and elevation angle 
-         sprintf(&s[0], "%21.6lf", currentObs->value[0]);
-         sLine << s << " ";
-         sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";
-         sLine << GmatStringUtil::GetAlignmentString("N/A", 20, GmatStringUtil::RIGHT) << " ";
-         sLine << GmatStringUtil::GetAlignmentString("N/A", 6, GmatStringUtil::RIGHT);
-         sLine << "\n";
-      }
-      else
-      {
-         // Write to report file edit status:
-         sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 4, GmatStringUtil::LEFT) + " ";  // Edit status
-
-         // Write to report file O-value, C-value, O-C, unit, and elevation angle
-         sprintf(&s[0], "%21.6lf %21.6lf", currentObs->value_orig[0], currentObs->value[0]);
-         sLine << s << " ";
-         sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // C-value
-         sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";      // O-C
-         sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // W
-         sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // W*(O-C)^2
-         sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // sqrt(W)*|O-C|
-         sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";      // elevation angle
-
-         // fill out N/A for partial derivative
-         for (int i = 0; i < stateMap->size(); ++i)
-            sLine << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT) << " ";   // derivative
-
-         if ((currentObs->typeName == "DSNTwoWayRange") || (currentObs->typeName == "DSNRange"))
-            sprintf(&s[0], "            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreqAtRecei, currentObs->rangeModulo);
-         else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler")||(currentObs->typeName == "Doppler_RangeRate"))
-            sprintf(&s[0],"            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
+         // write a line in report file information about currentObs->value[k]
+         if (k == 0)
+            linePrefix = sLine.str();            // store information of the first element and use it to write out for the second and third elements. It is used in GPS Point Solution measurement.
          else
-            sprintf(&s[0],"          N/A                      N/A                      N/A                     N/A");
-         sLine << s;
-         sLine << "\n";
+            sLine << linePrefix;                 // write information of the first element for the second and third elements
+
+         if (textFileMode == "Normal")
+         {
+            // Write to report file edit status:
+            if (editedRecords[recNum] & USER_FLAG)
+               sLine << "USER" << " ";
+            else
+               sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 4) + " ";
+
+            // Write to report file O-value, C-value, O-C, and elevation angle 
+            sprintf(&s[0], "%21.6lf", currentObs->value[k]);
+            sLine << s << " ";
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 20, GmatStringUtil::RIGHT) << " ";
+            sLine << GmatStringUtil::GetAlignmentString(" ", 6, GmatStringUtil::RIGHT);
+            sLine << "\n";
+         }
+         else
+         {
+            // Write to report file edit status:
+            if (editedRecords[recNum] & USER_FLAG)
+               sLine << "USER" << " ";
+            else
+               sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 4, GmatStringUtil::LEFT) + " ";  // Edit status
+
+            // Write to report file O-value, C-value, O-C, unit, and elevation angle
+            sprintf(&s[0], "%21.6lf %21.6lf", currentObs->value_orig[k], currentObs->value[k]);
+            sLine << s << " ";
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // C-value
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";      // O-C
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // W
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // W*(O-C)^2
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // sqrt(W)*|O-C|
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";      // elevation angle
+
+            // fill out N/A for partial derivative
+            for (int i = 0; i < stateMap->size(); ++i)
+               sLine << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT) << " ";   // derivative
+
+            if ((currentObs->typeName == "DSNTwoWayRange") || (currentObs->typeName == "DSN_SeqRange"))
+               sprintf(&s[0], "            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreqAtRecei, currentObs->rangeModulo);
+            else if ((currentObs->typeName == "DSNTwoWayDoppler") || (currentObs->typeName == "DSN_TCP") || (currentObs->typeName == "RangeRate"))
+               sprintf(&s[0], "            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
+            else
+               sprintf(&s[0], "          N/A                      N/A                      N/A                     N/A");
+            sLine << s;
+            sLine << "\n";
+         }
       }
    }
    else
@@ -405,59 +453,95 @@ void BatchEstimatorInv::Accumulate()
       // verify media correction to be in acceptable range. It is [0m, 60m] for troposphere correction and [0m, 20m] for ionosphere correction
       ValidateMediaCorrection(calculatedMeas);
 
+      measManager.GetObsDataObject()->removedReason = calculatedMeas->unfeasibleReason;
+      //std::string ss = measManager.GetObsDataObject()->removedReason = calculatedMeas->unfeasibleReason;
       if (count == 0)
       {
-         std::string ss = measManager.GetObsDataObject()->removedReason = calculatedMeas->unfeasibleReason;
-         if (ss.substr(0,1) == "B")
-            numRemovedRecords["B"]++;
-         else
-            numRemovedRecords[ss]++;
-
-         if (textFileMode == "Normal")
+         std::string ss = measManager.GetObsDataObject()->removedReason;
+         if (ss.substr(0, 1) == "B")
          {
-            // Write to report file edit status:
-            sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
-
-            // Write to report file O-value, C-value, O-C, unit, and elevation angle
-            sprintf(&s[0], "%21.6lf", currentObs->value[0]);
-            sLine << s << " ";
-            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";
-            sLine << GmatStringUtil::GetAlignmentString("N/A", 20, GmatStringUtil::RIGHT) << " ";
-            
-            // write elevation angle
-            sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
-            sLine << s;
-            sLine << "\n";
+            numRemovedRecords["B"]++;
+            editedRecords[recNum] = editedRecords[recNum] | BLOCKED_FLAG;
          }
          else
          {
-            // Write to report file edit status:
-            sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
+            numRemovedRecords[ss]++;
+            if (ss == "R")
+               editedRecords[recNum] = editedRecords[recNum] | RAMP_FLAG;
+            else if (ss == "IRMS")
+               editedRecords[recNum] = editedRecords[recNum] | IRMS_FLAG;
+            else if (ss == "OLSE")
+               editedRecords[recNum] = editedRecords[recNum] | OLSE_FLAG;
+         }
 
-            // Write C, O-C, W, W*(O-C)^2, sqrt(W)*(O-C), and elevation angle
-            sprintf(&s[0], "%21.6lf %21.6lf", currentObs->value_orig[0], currentObs->value[0]);
-            sLine << s << " ";
-            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // C-value
-            sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";      // O-C
-            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // W
-            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // W*(O-C)^2
-            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // sqrt(W)*|O-C|
-            sprintf(&s[0], "%18.12lf", calculatedMeas->feasibilityValue);
-            sLine << s << " ";                                                                         // elevation angle
-
-            // fill out N/A for partial derivative
-            for (int i = 0; i < stateMap->size(); ++i)
-               sLine << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT) << " ";   // derivative
-            
-
-            if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
-               sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreqAtRecei, currentObs->rangeModulo);
-            else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler")||(currentObs->typeName == "Doppler_RangeRate"))
-               sprintf(&s[0],"            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
+         for (Integer k = 0; k < currentObs->value.size(); ++k)
+         {
+            // write a line in report file information about currentObs->value[k]
+            if (k == 0)
+               linePrefix = sLine.str();            // store information of the first element and use it to write out for the second and third elements. It is used in GPS Point Solution measurement.
             else
-               sprintf(&s[0],"          N/A                      N/A                      N/A                     N/A");
-            sLine << s;
-            sLine << "\n";
+               sLine << linePrefix;                 // write information of the first element for the second and third elements
+
+            if (textFileMode == "Normal")
+            {
+               // Write to report file edit status:
+               if (editedRecords[recNum] & USER_FLAG)
+                  sLine << "USER" << " ";
+               else
+                  sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
+
+               // Write to report file O-value, C-value, O-C, unit, and elevation angle
+               sprintf(&s[0], "%21.6lf", currentObs->value[k]);
+               sLine << s << " ";
+               sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";
+               sLine << GmatStringUtil::GetAlignmentString("N/A", 20, GmatStringUtil::RIGHT) << " ";
+
+               // Write to report file elevation angle:
+               if (currentObs->typeName == "GPS_PosVec")
+                  sprintf(&s[0], "%s", "      ");
+               else
+                  sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
+               sLine << s;
+               sLine << "\n";
+            }
+            else
+            {
+               // Write to report file edit status:
+               if (editedRecords[recNum] & USER_FLAG)
+                  sLine << "USER" << " ";
+               else
+                  sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
+
+               // Write C, O-C, W, W*(O-C)^2, sqrt(W)*(O-C), and elevation angle
+               sprintf(&s[0], "%21.6lf %21.6lf", currentObs->value_orig[k], currentObs->value[k]);
+               sLine << s << " ";
+               sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // C-value
+               sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";      // O-C
+               sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // W
+               sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // W*(O-C)^2
+               sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // sqrt(W)*|O-C|
+               
+               // Write to report file elevation angle:
+               if (currentObs->typeName == "GPS_PosVec")
+                  sprintf(&s[0], "%s", "                  ");
+               else
+                  sprintf(&s[0], "%18.12lf", calculatedMeas->feasibilityValue);
+               sLine << s << " ";                                                                         // elevation angle
+
+               // fill out N/A for partial derivative
+               for (int i = 0; i < stateMap->size(); ++i)
+                  sLine << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT) << " ";   // derivative
+
+
+               if ((currentObs->typeName == "DSNTwoWayRange") || (currentObs->typeName == "DSN_SeqRange"))
+                  sprintf(&s[0], "            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreqAtRecei, currentObs->rangeModulo);
+               else if ((currentObs->typeName == "DSNTwoWayDoppler") || (currentObs->typeName == "DSN_TCP") || (currentObs->typeName == "RangeRate"))
+                  sprintf(&s[0], "            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
+               else
+                  sprintf(&s[0], "          N/A                      N/A                      N/A                     N/A");
+               sLine << s;
+               sLine << "\n";
+            }
          }
       }
       else // (count >= 1)
@@ -466,13 +550,14 @@ void BatchEstimatorInv::Accumulate()
          // Case: ((modelsToAccess.size() > 0) && (measManager.Calculate(modelsToAccess[0], true) >= 1))
          
          // It has to make correction for observation value before running data filter
-         if ((iterationsTaken == 0)&&((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange")))
+         if ((iterationsTaken == 0)&&((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSN_SeqRange")))
          {
             // value correction is only applied for DSNTwoWayRange and it is only performed at the first time
             for (Integer index = 0; index < currentObs->value.size(); ++index)
                measManager.GetObsDataObject()->value[index] = ObservationDataCorrection(calculatedMeas->value[index], currentObs->value[index], currentObs->rangeModulo);
          }
          
+         // Peform Outloop Sigma Editing
          bool isReUsed = DataFilter();
          
          #ifdef DEBUG_ACCUMULATION
@@ -483,55 +568,93 @@ void BatchEstimatorInv::Accumulate()
          {
             // Specify removed reason and count number of removed records
             std::string ss = measManager.GetObsDataObject()->removedReason;         //currentObs->removedReason;
-            if (ss.substr(0,1) == "B")
-               numRemovedRecords["B"]++;
-            else
-               numRemovedRecords[ss]++;
-
-            Real ocDiff = currentObs->value[0]-calculatedMeas->value[0];
-            Real weight;
-            if ((*(calculatedMeas->covariance))(0,0) != 0.0)
-               weight = 1.0 / (*(calculatedMeas->covariance))(0,0);
-            else
-               weight = 1.0;
-
-            if (textFileMode == "Normal")
+            if (ss.substr(0, 1) == "B")
             {
-               // Write to report file edit status:
-               sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
-
-               // Write O-value, C-value, and O-C
-               sprintf(&s[0], "%21.6lf %21.6lf %20.6lf ", currentObs->value[0], calculatedMeas->value[0], ocDiff);
-               sLine << s << " ";
-
-               // write elevation angle
-               sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
-               sLine << s;
-               sLine << "\n";
+               numRemovedRecords["B"]++;
+               editedRecords[recNum] = editedRecords[recNum] | BLOCKED_FLAG;
             }
             else
             {
-               // Write to report file edit status:
-               sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
-
-               // Write C, O-C, W, W*(O-C)^2, sqrt(W)*(O-C), and elevation angle
-               sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
-               sLine << s << " ";
-
-               // fill out N/A for partial derivative
-               for (int i = 0; i < stateMap->size(); ++i)
-                  sLine << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT) << " ";   // derivative
-
-               if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
-                  sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreqAtRecei, currentObs->rangeModulo);
-               else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler")||(currentObs->typeName == "Doppler_RangeRate"))
-                  sprintf(&s[0],"            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
-               else
-                  sprintf(&s[0],"          N/A                      N/A                      N/A                     N/A");
-               sLine << s;
-               sLine << "\n";
+               numRemovedRecords[ss]++;
+               if (ss == "R")
+                  editedRecords[recNum] = editedRecords[recNum] | RAMP_FLAG;
+               else if (ss == "IRMS")
+                  editedRecords[recNum] = editedRecords[recNum] | IRMS_FLAG;
+               else if (ss == "OLSE")
+                  editedRecords[recNum] = editedRecords[recNum] | OLSE_FLAG;
             }
             
+            Real ocDiff;
+            for (Integer k = 0; k < currentObs->value.size(); ++k)
+            {
+               if (k == 0)
+                  linePrefix = sLine.str();            // store information of the first element and use it to write out for the second and third elements. It is used in GPS Point Solution measurement.
+               else
+                  sLine << linePrefix;                 // write information of the first element for the second and third elements
+
+               // Calculate residual O-C
+               ocDiff = currentObs->value[k] - calculatedMeas->value[k];
+
+               Real weight;
+               if ((*(calculatedMeas->covariance))(k, k) != 0.0)
+                  weight = 1.0 / (*(calculatedMeas->covariance))(k, k);
+               else
+                  weight = 1.0;
+
+               if (textFileMode == "Normal")
+               {
+                  // Write to report file edit status:
+                  if (editedRecords[recNum] & USER_FLAG)
+                     sLine << "USER" << " ";
+                  else
+                     sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
+
+                  // Write O-value, C-value, and O-C
+                  sprintf(&s[0], "%21.6lf %21.6lf %20.6lf", currentObs->value[k], calculatedMeas->value[k], ocDiff);
+                  sLine << s << " ";
+
+                  // Write to report file elevation angle:
+                  if (currentObs->typeName == "GPS_PosVec")
+                     sprintf(&s[0], "%s", "      ");
+                  else
+                     sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
+                  sLine << s;
+                  sLine << "\n";
+               }
+               else
+               {
+                  // Write to report file edit status:
+                  if (editedRecords[recNum] & USER_FLAG)
+                     sLine << "USER" << " ";
+                  else
+                     sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
+
+                  // Write C, O-C, W, W*(O-C)^2, sqrt(W)*(O-C), and elevation angle
+                  if (currentObs->typeName == "GPS_PosVec")
+                     sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), "                  ");
+                  else
+                     sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+
+                  sLine << s << " ";
+
+                  // fill out N/A for partial derivative
+                  for (int i = 0; i < stateMap->size(); ++i)
+                     sLine << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT) << " ";   // derivative
+
+                  if ((currentObs->typeName == "DSNTwoWayRange") || (currentObs->typeName == "DSN_SeqRange"))
+                  {
+                     //sprintf(&s[0], "            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreqAtRecei, currentObs->rangeModulo);
+                     sprintf(&s[0], "            %d   %.15le   %.15le                     N/A", calculatedMeas->uplinkBand, calculatedMeas->uplinkFreqAtRecei, calculatedMeas->rangeModulo);     // this case we use frequency in calculatedMeas
+                  }
+                  else if ((currentObs->typeName == "DSNTwoWayDoppler") || (currentObs->typeName == "DSN_TCP") || (currentObs->typeName == "RangeRate"))
+                     sprintf(&s[0], "            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
+                  else
+                     sprintf(&s[0], "          N/A                      N/A                      N/A                     N/A");
+                  sLine << s;
+                  sLine << "\n";
+               }
+            }
+
             // Write the .mat data
             if (writeMatFile && (matWriter != NULL))
             {
@@ -549,6 +672,10 @@ void BatchEstimatorInv::Accumulate()
          }
          else
          {
+            std::string ss = measManager.GetObsDataObject()->removedReason;
+            if (!(editedRecords[recNum] & USER_FLAG))
+               numRemovedRecords[ss]++;                    // Count number of records with Normal flag
+
             RealArray hTrow;
             hTrow.assign(stateSize, 0.0);
             UnsignedInt rowCount = calculatedMeas->value.size();
@@ -581,13 +708,24 @@ void BatchEstimatorInv::Accumulate()
                         hTilde[j][i+k] = stateDeriv[j][k];                                          // hTilde is partial derivates at measurement time tm (not at aprioi time t0)
 
                   #ifdef DEBUG_ACCUMULATION
-                     MessageInterface::ShowMessage("      Result:\n         ");
+                     MessageInterface::ShowMessage("      Result:\n");
                      for (UnsignedInt l = 0; l < stateDeriv.size(); ++l)
                      {
                         for (UnsignedInt m = 0; m < (*stateMap)[i]->length; ++m)
                            MessageInterface::ShowMessage("%.12lf   ",
                               stateDeriv[l][m]);
-                        MessageInterface::ShowMessage("\n         ");
+                        MessageInterface::ShowMessage("\n");
+                     }
+                     MessageInterface::ShowMessage("\n");
+
+                     MessageInterface::ShowMessage("      hTilde:\n");
+                     for (UnsignedInt row = 0; row < hTilde.size(); ++row)
+                     {
+                        for (UnsignedInt col = 0; col < hTilde[row].size(); ++col)
+                        {
+                           MessageInterface::ShowMessage("%.12lf   ", hTilde[row][col]);
+                        }
+                        MessageInterface::ShowMessage("\n");
                      }
                      MessageInterface::ShowMessage("\n");
                   #endif
@@ -634,7 +772,9 @@ void BatchEstimatorInv::Accumulate()
                   hRow[j] = entry;
                }
 
-               hAccum.push_back(hRow);                   // each element of hAccum is a vector partial derivative
+               if (editedRecords[recNum] == NORMAL_FLAG)
+                  hAccum.push_back(hRow);                   // each element of hAccum is a vector partial derivative
+
                hMeas.push_back(hRow);
 
                #ifdef DEBUG_ACCUMULATION_RESULTS
@@ -653,15 +793,22 @@ void BatchEstimatorInv::Accumulate()
                #endif
             }
 
-            Real ocDiff;
+            Real ocDiff;          // It is residual value = O - C
+            RealArray ocDiffVec;  // It is residual vector = O_vector - C_vector
             Real weight;
             #ifdef DEBUG_ACCUMULATION
                MessageInterface::ShowMessage("Accumulating the O-C differences\n");
                MessageInterface::ShowMessage("   Obs size = %d, calc size = %d\n",
                   currentObs->value.size(), calculatedMeas->value.size());
             #endif
+
             for (UnsignedInt k = 0; k < currentObs->value.size(); ++k)
             {
+               if (k == 0)
+                  linePrefix = sLine.str();
+               else
+                  sLine << linePrefix;
+
                // Calculate residual O-C
                ocDiff = currentObs->value[k] - calculatedMeas->value[k];
                #ifdef DEBUG_O_MINUS_C
@@ -676,13 +823,19 @@ void BatchEstimatorInv::Accumulate()
                      calculatedMeas->participantIDs[0].c_str(), calculatedMeas->participantIDs[1].c_str(), C_Epoch, calculatedMeas->value[k], 
                      ocDiff, calculatedMeas->uplinkFreq);
                #endif
+               
+               // if the record has normal flag, store all results needed for calculate statistics
+               if (editedRecords[recNum] == NORMAL_FLAG)
+               {
+                  measurementEpochs.push_back(currentEpoch);
+                  OData.push_back(currentObs->value[k]);
+                  CData.push_back(calculatedMeas->value[k]);
+                  measurementResiduals.push_back(ocDiff);
+                  measurementResidualID.push_back(calculatedMeas->uniqueID);
+                  ocDiffVec.push_back(ocDiff);
+               }
 
-               measurementEpochs.push_back(currentEpoch);
-               OData.push_back(currentObs->value[k]);
-               CData.push_back(calculatedMeas->value[k]);
-               measurementResiduals.push_back(ocDiff);
-               measurementResidualID.push_back(calculatedMeas->uniqueID);
-            
+               
                // Calculate weight
                weight = 1.0;
                if (currentObs->noiseCovariance == NULL)
@@ -710,53 +863,83 @@ void BatchEstimatorInv::Accumulate()
                      "is %le\n", k, k, (*(currentObs->noiseCovariance))(k,k));
                    #endif
                }
-               Weight.push_back(weight);
-            
-               for (UnsignedInt i = 0; i < stateSize; ++i)
+
+               // if the record has normal flag, store all results needed for calculate statistics
+               if (editedRecords[recNum] == NORMAL_FLAG)
                {
-                  for (UnsignedInt j = 0; j < stateSize; ++j)
-                     //information(i,j) += hRow[i] * weight * hRow[j];
-                     information(i,j) += hMeas[k][i] * weight * hMeas[k][j];   // the first term in open-close square bracket of equation 8-57 in GTDS MathSpec
-
-                  //residuals[i] += hRow[i] * weight * ocDiff;
-                  residuals[i] += hMeas[k][i] * weight * ocDiff;               // the first term in open-close parenthesis of equation 8-57 in GTDS MathSpec
+                  Weight.push_back(weight);
                }
+               
+               // Accummulate information matrix and residuals based on observation 
+               // data which is selected for estimation calculation
+               if (editedRecords[recNum] == NORMAL_FLAG)
+               {
+                  for (UnsignedInt i = 0; i < stateSize; ++i)
+                  {
+                     for (UnsignedInt j = 0; j < stateSize; ++j)
+                        //information(i,j) += hRow[i] * weight * hRow[j];
+                        information(i, j) += hMeas[k][i] * weight * hMeas[k][j];   // the first term in open-close square bracket of equation 8-57 in GTDS MathSpec
 
-            
+                     //residuals[i] += hRow[i] * weight * ocDiff;
+                     residuals[i] += hMeas[k][i] * weight * ocDiff;               // the first term in open-close parenthesis of equation 8-57 in GTDS MathSpec
+                  }
+               }
+               
                // Write report for this observation data for case data record is removed
-               std::string ss = currentObs->removedReason;
+               //std::string ss = currentObs->removedReason;
+               std::string ss = measManager.GetObsDataObject()->removedReason;
                if (textFileMode == "Normal")
                {
                   // Write to report file edit status:
-                  if (ss == "N")
-                     sLine << GmatStringUtil::GetAlignmentString("-", 4, GmatStringUtil::LEFT) + " ";
+                  if (editedRecords[recNum] & USER_FLAG)
+                     sLine << "USER" << " ";
                   else
-                     sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
+                  {
+                     if (ss == "N")
+                        sLine << GmatStringUtil::GetAlignmentString("-", 4, GmatStringUtil::LEFT) + " ";
+                     else
+                        sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
+                  }
 
                   // Write to report file O-value, C-value, O-C, 
                   sprintf(&s[0], "%21.6lf %21.6lf %20.6lf", currentObs->value[k], calculatedMeas->value[k], ocDiff);
                   sLine << s << " ";
 
                   // Write to report file elevation angle:
-                  sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
+                  if (currentObs->typeName == "GPS_PosVec")
+                     sprintf(&s[0], "%s", "      ");
+                  else
+                     sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
                   sLine << s;
                   sLine << "\n";
                }
                else
                {
                   // Write to report file edit status:
-                  if (ss == "N")
-                     sLine << GmatStringUtil::GetAlignmentString("-", 4, GmatStringUtil::LEFT) + " ";
+                  if (editedRecords[recNum] & USER_FLAG)
+                     sLine << "USER" << " ";
                   else
-                     sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
+                  {
+                     if (ss == "N")
+                        sLine << GmatStringUtil::GetAlignmentString("-", 4, GmatStringUtil::LEFT) + " ";
+                     else
+                        sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
+                  }
 
-                  sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+                  if (currentObs->typeName == "GPS_PosVec")
+                     sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le %s", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), "                  ");
+                  else
+                     sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
                   sLine << s << " ";
 
                   // fill out N/A for partial derivative
-                  for (UnsignedInt p = 0; p < hAccum[hAccum.size()-1].size(); ++p)
+                  //for (UnsignedInt p = 0; p < hAccum[hAccum.size()-1].size(); ++p)
+                  for (UnsignedInt p = 0; p < hMeas[hMeas.size() - currentObs->value.size() + k].size(); ++p)
                   {
-                     Real derivative = hAccum[hAccum.size()-1][p];
+                     //Real derivative = hAccum[hAccum.size()-1][p];
+                     Real derivative = hMeas[hMeas.size() - currentObs->value.size() + k][p];
+
+                     // Convert derivative w.r.t. Cr_Epsilon and Cd_Epsilon to derivative w.r.t. Cr and Cd before display them out
                      if ((*stateMap)[p]->elementName == "Cr_Epsilon")
                      {
                         Real Cr = (*stateMap)[p]->object->GetRealParameter("Cr") / (1 + (*stateMap)[p]->object->GetRealParameter("Cr_Epsilon"));
@@ -771,9 +954,12 @@ void BatchEstimatorInv::Accumulate()
                      sLine << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(derivative, false, true, true, 10, 19), 19, GmatStringUtil::RIGHT) << " ";
                   }
 
-                  if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
-                     sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreqAtRecei, currentObs->rangeModulo);
-                  else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler")||(currentObs->typeName == "Doppler_RangeRate"))
+                  if ((currentObs->typeName == "DSNTwoWayRange") || (currentObs->typeName == "DSN_SeqRange"))
+                  {
+                     //sprintf(&s[0], "            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreqAtRecei, currentObs->rangeModulo);
+                     sprintf(&s[0], "            %d   %.15le   %.15le                     N/A", calculatedMeas->uplinkBand, calculatedMeas->uplinkFreqAtRecei, calculatedMeas->rangeModulo);   // use frequency in calculatedMeas
+                  }
+                  else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "DSN_TCP")||(currentObs->typeName == "RangeRate"))
                      sprintf(&s[0],"            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
                   else
                      sprintf(&s[0],"          N/A                      N/A                      N/A                     N/A");
@@ -782,26 +968,31 @@ void BatchEstimatorInv::Accumulate()
                }
 
             }
-
-            // Count number of observation data accepted for estimation calculation
-            statisticsTable["ACCEPTED RECORDS"][keyword] += 1;
-            statisticsTable["WEIGHTED RMS"][keyword] += weight*ocDiff*ocDiff;                    // sum of weighted residual square
-            statisticsTable["MEAN RESIDUAL"][keyword] += ocDiff;                                 // sum of residual
-            statisticsTable["STANDARD DEVIATION"][keyword] += ocDiff*ocDiff;                     // sum of residual square
             
-            statisticsTable1["ACCEPTED RECORDS"][typeName] += 1;
-            statisticsTable1["WEIGHTED RMS"][typeName] += weight*ocDiff*ocDiff;                    // sum of weighted residual square
-            statisticsTable1["MEAN RESIDUAL"][typeName] += ocDiff;                                 // sum of residual
-            statisticsTable1["STANDARD DEVIATION"][typeName] += ocDiff*ocDiff;                     // sum of residual square
+            if (editedRecords[recNum] == NORMAL_FLAG)
+            {
+               measurementTimes.push_back(currentEpoch);
+               measurementResVectors.push_back(ocDiffVec);
+               observationID.push_back(calculatedMeas->uniqueID);
+               
+               // Count number of observation data accepted for estimation calculation
+               statisticsTable["ACCEPTED RECORDS"][keyword] += 1;
+               statisticsTable["WEIGHTED RMS"][keyword] += weight*ocDiff*ocDiff;                    // sum of weighted residual square
+               statisticsTable["MEAN RESIDUAL"][keyword] += ocDiff;                                 // sum of residual
+               statisticsTable["STANDARD DEVIATION"][keyword] += ocDiff*ocDiff;                     // sum of residual square
+               
+               statisticsTable1["ACCEPTED RECORDS"][typeName] += 1;
+               statisticsTable1["WEIGHTED RMS"][typeName] += weight*ocDiff*ocDiff;                    // sum of weighted residual square
+               statisticsTable1["MEAN RESIDUAL"][typeName] += ocDiff;                                 // sum of residual
+               statisticsTable1["STANDARD DEVIATION"][typeName] += ocDiff*ocDiff;                     // sum of residual square
 
+               sumAcceptRecords[indexKey] += 1;                             // sum of all accepted records
+               sumResidual[indexKey] += ocDiff;                             // sum of residual
+               Real ocDiff2 = ocDiff*ocDiff;
+               sumResidualSquare[indexKey] += ocDiff2;                      // sum of residual square
+               sumWeightResidualSquare[indexKey] += weight*ocDiff2;         // sum of weigth residual square
+            }
             
-            sumAcceptRecords[indexKey] += 1;                             // sum of all accepted records
-            sumResidual[indexKey] += ocDiff;                             // sum of residual
-            Real ocDiff2 = ocDiff*ocDiff;
-            sumResidualSquare[indexKey] += ocDiff2;                      // sum of residual square
-            sumWeightResidualSquare[indexKey] += weight*ocDiff2;         // sum of weigth residual square
-
-
             #ifdef DEBUG_ACCUMULATION_RESULTS
                MessageInterface::ShowMessage("Observed measurement value:\n");
                for (UnsignedInt k = 0; k < currentObs->value.size(); ++k)
@@ -854,7 +1045,7 @@ void BatchEstimatorInv::Accumulate()
       } // end of if (count >= 1)
 
    }  // end of if (modelsToAccess.size() == 0)
-
+   
    if (writeMatFile && (matWriter != NULL))
    {
       if (matData.stringValues[matObsEditFlagIndex][matIndex] == "N/A")
@@ -863,17 +1054,35 @@ void BatchEstimatorInv::Accumulate()
       if (calculatedMeas)
          matData.realValues[matElevationIndex][matIndex] = calculatedMeas->feasibilityValue;
 
-      if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
+      if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSN_SeqRange"))
       {
-         matData.realValues[matFreqBandIndex][matIndex] = currentObs->uplinkBand;
-         matData.realValues[matFrequencyIndex][matIndex] = currentObs->uplinkFreqAtRecei;
+         if (calculatedMeas == NULL)
+         {
+            matData.realValues[matFreqBandIndex][matIndex] = currentObs->uplinkBand;
+            matData.realValues[matFrequencyIndex][matIndex] = currentObs->uplinkFreqAtRecei;
+         }
+         else
+         {
+            matData.realValues[matFreqBandIndex][matIndex] = calculatedMeas->uplinkBand;
+            matData.realValues[matFrequencyIndex][matIndex] = calculatedMeas->uplinkFreqAtRecei;
+         }
       }
       else if ((currentObs->typeName == "DSNTwoWayDoppler") ||
-               (currentObs->typeName == "Doppler") ||
-               (currentObs->typeName == "Doppler_RangeRate"))
+               (currentObs->typeName == "DSN_TCP") ||
+               (currentObs->typeName == "RangeRate"))
       {
-         matData.realValues[matFreqBandIndex][matIndex] = currentObs->uplinkBand;
-         matData.realValues[matDoppCountIndex][matIndex] = currentObs->dopplerCountInterval;
+         if (calculatedMeas == NULL)
+         {
+            matData.realValues[matFreqBandIndex][matIndex] = currentObs->uplinkBand;
+            matData.realValues[matDoppCountIndex][matIndex] = currentObs->dopplerCountInterval;
+            matData.realValues[matFrequencyIndex][matIndex] = currentObs->uplinkFreqAtRecei;
+         }
+         else
+         {
+            matData.realValues[matFreqBandIndex][matIndex] = calculatedMeas->uplinkBand;
+            matData.realValues[matDoppCountIndex][matIndex] = calculatedMeas->dopplerCountInterval;
+            matData.realValues[matFrequencyIndex][matIndex] = calculatedMeas->uplinkFreqAtRecei;
+         }
       }
    }
    
@@ -936,6 +1145,9 @@ void BatchEstimatorInv::Estimate()
    // Display number of removed records for each type of filters
    if (!numRemovedRecords.empty())
    {
+      if (!dataFilterStrings.empty())
+         MessageInterface::ShowMessage("Number records edited by Second Level Data Editor : %d\n", numRemovedRecords["USER"]);
+
       MessageInterface::ShowMessage("Number of Records Removed Due To:\n");
       MessageInterface::ShowMessage("   . No Computed Value Configuration Available : %d\n", numRemovedRecords["U"]);
       MessageInterface::ShowMessage("   . Out of Ramp Table Range   : %d\n", numRemovedRecords["R"]);
@@ -943,14 +1155,17 @@ void BatchEstimatorInv::Estimate()
       MessageInterface::ShowMessage("   . Initial RMS Sigma Filter  : %d\n", numRemovedRecords["IRMS"]);
       MessageInterface::ShowMessage("   . Outer-Loop Sigma Editor : %d\n", numRemovedRecords["OLSE"]);
    }
-   MessageInterface::ShowMessage("Number of records used for estimation: %d\n", measurementResiduals.size());
-   
+   //MessageInterface::ShowMessage("Number of records used for estimation: %d\n", measurementResiduals.size());
+   MessageInterface::ShowMessage("Number of records used for estimation: %d\n", numRemovedRecords["N"]);
+
    if (measurementResiduals.size() < esm.GetStateMap()->size())
+   //if (numRemovedRecords["N"] < esm.GetStateMap()->size())
    {
       std::stringstream ss;
       ss << "Error: For Batch estimator " << GetName() 
          << ", there are " << esm.GetStateMap()->size() 
          << " solve-for parameters, and only " << measurementResiduals.size() 
+         //<< " solve-for parameters, and only " << numRemovedRecords["N"]
          << " valid observable records remaining after editing. Please modify data editing criteria or provide a better a-priori estimate.\n";
       throw EstimatorException(ss.str());
    }
@@ -979,17 +1194,6 @@ void BatchEstimatorInv::Estimate()
       try
       {
          Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
-
-         //MessageInterface::ShowMessage("Apriori covariance matrix:\n[");
-         //for (Integer row = 0; row < Pdx0_inv.GetNumRows(); ++row)
-         //{
-         //   for (Integer col = 0; col < Pdx0_inv.GetNumColumns(); ++col)
-         //      MessageInterface::ShowMessage("%le   ", Pdx0_inv.GetElement(row, col));
-         //   if (row < Pdx0_inv.GetNumRows() - 1)
-         //      MessageInterface::ShowMessage("\n");
-         //}
-         //MessageInterface::ShowMessage("]\n");
-
       }
       catch (...)
       {
@@ -1013,14 +1217,18 @@ void BatchEstimatorInv::Estimate()
       }
    }
 
-   for (int i = 0; i < measurementResiduals.size(); ++i)
-      newResidualRMS += measurementResiduals[i] * measurementResiduals[i]*Weight[i];
-
+   // Calculate new residual RMS
+   for (Integer i = 0; i < measurementResiduals.size(); ++i)
+   {
+      newResidualRMS += measurementResiduals[i] * measurementResiduals[i] * Weight[i];
+   }
+   
    if (useApriori)
-      newResidualRMS = GmatMathUtil::Sqrt(newResidualRMS / (measurementResiduals.size()+1));
+      newResidualRMS = GmatMathUtil::Sqrt(newResidualRMS / (measurementResiduals.size() + 1));
    else
       newResidualRMS = GmatMathUtil::Sqrt(newResidualRMS / measurementResiduals.size());
-
+   
+   
    // Calculate RMSB:
    if (iterationsTaken == 0)
       bestResidualRMS = newResidualRMS;
@@ -1273,18 +1481,17 @@ void BatchEstimatorInv::Estimate()
    for (UnsignedInt j = 0; j < hAccum.size(); ++j)      // j presents for the index of the measurement jth
    {
       Real temp = 0;
-      for(UnsignedInt i = 0; i < hAccum[j].size(); ++i)
-      {
-         temp += hAccum[j][i]*dx[i];
-      }
+      for (UnsignedInt i = 0; i < hAccum[j].size(); ++i)
+         temp += hAccum[j][i] * dx[i];
+         
       predictedRMS += (measurementResiduals[j] - temp)*(measurementResiduals[j] - temp)*Weight[j];          // The first term in equation 8-185 in GTDS MathSpec
    }
 
    if (useApriori)
-      predictedRMS = sqrt(predictedRMS / (measurementResiduals.size()+1));
+      predictedRMS = sqrt(predictedRMS / (measurementResiduals.size() + 1));
    else
-      predictedRMS = sqrt(predictedRMS/measurementResiduals.size());
-
+      predictedRMS = sqrt(predictedRMS / measurementResiduals.size());
+   
 
    // Write to report initial state for current iteration
    WriteToTextFile(currentState);

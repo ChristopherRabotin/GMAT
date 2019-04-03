@@ -1,10 +1,10 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                          AvroInterfaceFactory
+//                              StationFactory
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -32,8 +32,8 @@
 //------------------------------------------------------------------------------
 
 
-#ifndef SampleFactory_hpp
-#define SampleFactory_hpp
+#ifndef StationFactory_hpp
+#define StationFactory_hpp
 
 #include "StationDefs.hpp"
 #include "Factory.hpp"
@@ -50,8 +50,10 @@ public:
    StationFactory(const StationFactory& elf);
    StationFactory& operator=(const StationFactory& elf);
 
+   virtual GmatBase*        CreateObject(const std::string &ofType,
+                                         const std::string &withName = "");        
    virtual SpacePoint*      CreateSpacePoint(const std::string &ofType,
                                              const std::string &withName = "");        
 };
 
-#endif /* SampleFactory_hpp */
+#endif /* StationFactory_hpp */

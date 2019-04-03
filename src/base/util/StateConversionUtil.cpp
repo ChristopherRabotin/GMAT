@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1305,11 +1305,11 @@ Rvector6 StateConversionUtil::CartesianToKeplerian(Real mu, const Rvector3 &pos,
    Real anomaly = kepOut[5];
    Real sma = kepOut[0];
    Real ecc = kepOut[1];
-   Real ta  = kepOut[5];
+   Real ta  = kepOut[5];                // unit: degree
 
    if (anomalyType != TA)
    {
-      anomaly = ConvertFromTrueAnomaly(anomalyType, ta, ecc);
+      anomaly = ConvertFromTrueAnomaly(anomalyType, ta*GmatMathConstants::RAD_PER_DEG, ecc)*GmatMathConstants::DEG_PER_RAD;   // unit: degree
    }
    Rvector6 kep(sma, ecc, kepOut[2], kepOut[3], kepOut[4], anomaly);
 
@@ -5782,7 +5782,7 @@ Rvector6 StateConversionUtil::CartesianToAngularMomentum(Real mu, const Rvector3
 //--------------------------------------------------------------------------------------
 /**
 * This function is used to calculate Cartesian to Keplerian derivative state conversion matrix.
-* Only apply for Keplerian state presented in mean anomaly only.
+* Only apply for Keplerian state presented in mean anomaly only. (GTDS MathSpec Equation 3-229)
 *
 * @param mu                 mu value of primary body
 * @param cartesianState     state presented in Cartesian coordiante system
@@ -5797,8 +5797,8 @@ Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversion(
    
    // 1. Convert Cartesian state to Keplerian state (angles in degree)
    Rvector6 keplerState = StateConversionUtil::CartesianToKeplerian(mu, cartesianState, StateConversionUtil::MA);
-
-   if ((keplerState[1] > 0.0)&&(keplerState[1] < 1.0))
+   
+   if ((keplerState[1] >= 0.0)&&(keplerState[1] < 1.0))
    {
       // 2. Convert INC, RAAN, AOP, MA from degree to radian
       for (UnsignedInt i = 2; i < 6; ++i)
@@ -5806,10 +5806,10 @@ Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversion(
 
       // 3. Calculate derivative conversion matrix
       Rmatrix66 m = KeplerianToCartesianDerivativeConversion(mu, keplerState);
-      result = m.Inverse();
+      result = m.Inverse();                                                        // GTDS MathSpec Equation 3-229
    }
    else
-      throw UtilityException("Error: Eccentricity (" + GmatStringUtil::ToString(keplerState[1]) + ") is out of range (0,1)\n");
+      throw UtilityException("Error: Eccentricity (" + GmatStringUtil::ToString(keplerState[1]) + ") is out of range [0,1)\n");
 
    return result;
 }
@@ -5869,30 +5869,31 @@ Rmatrix66 StateConversionUtil::KeplerianToCartesianDerivativeConversion(
    Real a, e, M, Ohm, omega, iAngle;
    a      = keplerState(0);                  // SMA
    e      = keplerState(1);                  // ECC
-   iAngle = keplerState(2);                  // INC
-   Ohm    = keplerState(3);                  // RAAN
-   omega  = keplerState(4);                  // AOP
-   M      = keplerState(5);                  // MA
+   iAngle = keplerState(2);                  // INC            // unit: radian
+   Ohm    = keplerState(3);                  // RAAN           // unit: radian
+   omega  = keplerState(4);                  // AOP            // unit: radian
+   M      = keplerState(5);                  // MA             // unit: radian
 
-   if ((e <= 0.0)||(e >= 1.0))
-      throw UtilityException("Error: Eccentricity (" + GmatStringUtil::ToString(e) + ") is out of range (0,1)\n");
+   if ((e < 0.0)||(e >= 1.0))
+      throw UtilityException("Error: Eccentricity (" + GmatStringUtil::ToString(e) + ") is out of range [0,1)\n");
 
    // Specify E from e and M
    Real E;         // eccentric anomaly
-   E = CalculateEccentricAnomaly(e,M);                                     // Equation 3-178 GTDS MathSpec
+   E = CalculateEccentricAnomaly(e,M);                                     // Equation 3-178 GTDS MathSpec   
 
    // Specify rp:                                                          // Equation 3-176 GTDS MathSpec
    Rvector3 rpVec;
    rpVec[0] = a*(Cos(E) - e);
    rpVec[1] = a*Sin(E)*Sqrt(1 - e*e);
    rpVec[2] = 0;
-
+   
    // Specify rpdot:                                                       // Equation 3-177 GTDS MathSpec 
    Rvector3 rpdotVec;
    rpdotVec[0] = -Sin(E);
    rpdotVec[1] = Cos(E)*Sqrt(1 - e*e);
    rpdotVec[2] = 0;
    rpdotVec = (Sqrt(mu/a)/(1 - e*Cos(E))) * rpdotVec;
+
    // Specify P
    Rmatrix33 P;
    P(0,0) = Cos(Ohm)*Cos(omega) - Sin(Ohm)*Cos(iAngle)*Sin(omega);         // Equation 3-192a GTDS MathSpec
@@ -5904,25 +5905,25 @@ Rmatrix66 StateConversionUtil::KeplerianToCartesianDerivativeConversion(
    P(2,0) = Sin(iAngle)*Sin(omega);                                        // Equation 3-192g GTDS MathSpec
    P(2,1) = Sin(iAngle)*Cos(omega);                                        // Equation 3-192h GTDS MathSpec
    P(2,2) = Cos(iAngle);                                                   // Equation 3-192i GTDS MathSpec
-
+   
    // Specify rVec and rdotVec
    Rvector3 rVec = P * rpVec;                                              // Equation 3-193 GTDS MathSpec
    Rvector3 rdotVec = P * rpdotVec;                                        // Equation 3-194 GTDS MathSpec
 
    // Mean motion n:
    Real n = (1/a)*Sqrt(mu/a);                                              // Equation 3-201 GTDS MathSpec
-
+   
    // Conversion matrix
    Rmatrix33 c1, c2, A, B;
    // Partial derivative of rp w.r.t. semi-major axis a, eccentricity e, and mean anomaly M (Equation 3-199 GTDS MathSpec)
    c1(0,0) = rpVec[0]/a;
    c1(1,0) = rpVec[1]/a;
    c1(2,0) = 0.0;
-   c1(0,1) = -a - rpVec[1]*rpVec[1]/(rpVec.Norm()*(1-e*e));
-   c1(1,1) = rpVec[0]*rpVec[1]/(rpVec.Norm()*(1-e*e));
+   c1(0,1) = -a - rpVec[1] * rpVec[1] / (rVec.Norm()*(1 - e*e));        
+   c1(1,1) = rpVec[0] * rpVec[1] / (rVec.Norm()*(1 - e*e));
    c1(2,1) = 0.0;
-   c1(0,2) = -a*rpVec[1]/(rpVec.Norm()*Sqrt(1-e*e));
-   c1(1,2) = a*Sqrt(1-e*e)*(rpVec[0] + a*e)/rpVec.Norm();
+   c1(0,2) = -a*rpVec[1] / (rVec.Norm()*Sqrt(1 - e*e));
+   c1(1,2) = a*Sqrt(1 - e*e)*(rpVec[0] + a*e) / rVec.Norm();
    c1(2,2) = 0.0;
    A = P*c1;                                                               // Equation 3-195 GTDS MatSpec
 
@@ -5930,11 +5931,11 @@ Rmatrix66 StateConversionUtil::KeplerianToCartesianDerivativeConversion(
    c2(0,0) = -rpdotVec[0]/(2*a);
    c2(1,0) = -rpdotVec[1]/(2*a);
    c2(2,0) = 0.0;
-   c2(0,1) = rpdotVec[0]*Pow(a/rpVec.Norm(),2)*(2*rpVec[0]/a + e*Pow(rpVec[0]/a,2)/(1-e*e));
-   c2(1,1) = n*Pow(a/rpVec.Norm(),2)*(rpVec[0]*rpVec[0]/rpVec.Norm() - rpVec[1]*rpVec[1]/a/(1-e*e)) / Sqrt(1-e*e);
+   c2(0,1) = rpdotVec[0] * Pow(a / rVec.Norm(), 2)*(2 * rpVec[0] / a + e*Pow(rpVec[1] / a, 2) / (1 - e*e));
+   c2(1,1) = n*Pow(a / rVec.Norm(), 2)*(rpVec[0] * rpVec[0] / rVec.Norm() - rpVec[1] * rpVec[1] / a / (1 - e*e)) / Sqrt(1 - e*e);
    c2(2,1) = 0.0;
-   c2(0,2) = -n*Pow(a/rpVec.Norm(), 3)*rpVec[0];
-   c2(1,2) = -n*Pow(a/rpVec.Norm(), 3)*rpVec[1];
+   c2(0,2) = -n*Pow(a / rVec.Norm(), 3)*rpVec[0];
+   c2(1,2) = -n*Pow(a / rVec.Norm(), 3)*rpVec[1];
    c2(2,2) = 0.0;
    B = P*c2;                                                               // Equation 3-196 GTDS MatSpec
 
@@ -5943,10 +5944,10 @@ Rmatrix66 StateConversionUtil::KeplerianToCartesianDerivativeConversion(
    Rmatrix33 dPdOhm;
    dPdOhm(0,0) = -P(1,0);
    dPdOhm(0,1) = -P(1,1);
-   dPdOhm(0,2) = 0.0;
+   dPdOhm(0,2) = -P(1,2);         // 0.0;  // Equation 3-202 GTDS MatSpec is incorrect at here
    dPdOhm(1,0) = P(0,0);
    dPdOhm(1,1) = P(0,1);
-   dPdOhm(1,2) = 0.0;
+   dPdOhm(1,2) = P(0,2);          // 0.0;  // Equation 3-202 GTDS MatSpec is incorrect at here
    dPdOhm(2,0) = 0.0;
    dPdOhm(2,1) = 0.0;
    dPdOhm(2,2) = 0.0;
@@ -5971,22 +5972,22 @@ Rmatrix66 StateConversionUtil::KeplerianToCartesianDerivativeConversion(
    Rmatrix33 dPdi;
    dPdi(0,0) = Sin(Ohm)*Sin(iAngle)*Sin(omega);
    dPdi(0,1) = Sin(Ohm)*Sin(iAngle)*Cos(omega);
-   dPdi(0,2) = 0.0;
+   dPdi(0,2) = Sin(Ohm)*Cos(iAngle);                   // 0.0;    // Equation 3-204 GTDS MathSpec is incorrect here
    dPdi(1,0) = -Cos(Ohm)*Sin(iAngle)*Sin(omega);
    dPdi(1,1) = -Cos(Ohm)*Sin(iAngle)*Cos(omega);
-   dPdi(1,2) = 0.0;
+   dPdi(1,2) = -Cos(Ohm)*Cos(iAngle);                  // 0.0;    // Equation 3-204 GTDS MathSpec is incorrect here
    dPdi(2,0) = Cos(iAngle)*Sin(omega);
    dPdi(2,1) = Cos(iAngle)*Cos(omega);
-   dPdi(2,2) = 0.0;
+   dPdi(2,2) = -Sin(iAngle);                           // 0.0;    // Equation 3-204 GTDS MathSpec is incorrect here
    Rvector3 drdi = dPdi * rpVec;                                           // Equation 3-197 GTDS MathSpec
    Rvector3 drdotdi = dPdi * rpdotVec;                                     // Equation 3-198 GTDS MathSpec
 
    result(0,0) = A(0,0); result(0,1) = A(0,1); result(0,5) = A(0,2);
    result(1,0) = A(1,0); result(1,1) = A(1,1); result(1,5) = A(1,2);
-   result(2,0) = A(2,0); result(2,1) = A(2,1); result(2,5) = A(0,2);
+   result(2,0) = A(2,0); result(2,1) = A(2,1); result(2,5) = A(2,2); //A(0,2);
    result(3,0) = B(0,0); result(3,1) = B(0,1); result(3,5) = B(0,2);
    result(4,0) = B(1,0); result(4,1) = B(1,1); result(4,5) = B(1,2);
-   result(5,0) = B(2,0); result(5,1) = B(2,1); result(5,5) = B(0,2);
+   result(5,0) = B(2,0); result(5,1) = B(2,1); result(5,5) = B(2,2); //B(0,2);
    
    result(0,2) = drdi[0];    result(0,3) = drdOhm[0];    result(0,4) = drdomega[0];
    result(1,2) = drdi[1];    result(1,3) = drdOhm[1];    result(1,4) = drdomega[1];
@@ -5995,10 +5996,11 @@ Rmatrix66 StateConversionUtil::KeplerianToCartesianDerivativeConversion(
    result(4,2) = drdotdi[1]; result(4,3) = drdotdOhm[1]; result(4,4) = drdotdomega[1];
    result(5,2) = drdotdi[2]; result(5,3) = drdotdOhm[2]; result(5,4) = drdotdomega[2];
 
+
    // convert radian to degree INC, RAAN, AOP, and MA from radian to degree
    for(UnsignedInt row = 0; row < 6; ++row)
-      for(UnsignedInt col = 2; col < 6; ++col)
-         result(row,col) = result(row,col)*GmatMathConstants::DEG_PER_RAD;
+      for (UnsignedInt col = 2; col < 6; ++col)
+         result(row,col) = result(row,col)*GmatMathConstants::RAD_PER_DEG;      // Note that: di, dOhm, domega, and dM are in denominator 
 
    return result;
 }

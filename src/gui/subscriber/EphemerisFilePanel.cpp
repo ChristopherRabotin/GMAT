@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -173,6 +173,7 @@ void EphemerisFilePanel::Create()
    grid1->Add(onlyMj2000EqComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    grid1->Hide(onlyMJ2000EqStaticText);
    grid1->Hide(onlyMj2000EqComboBox);
+
    id = mObject->GetParameterID("WriteEphemeris");
    writeEphemerisCheckBox = (wxCheckBox*) BuildControl(this, id);
    writeEphemerisCheckBox->SetToolTip(pConfig->Read(_T("WriteEphemerisHint")));
@@ -183,7 +184,7 @@ void EphemerisFilePanel::Create()
    
    
    // 2. Create File Settings box:
-   wxStaticBoxSizer *fileSettingsStaticBoxSizer =
+   fileSettingsStaticBoxSizer =
       new wxStaticBoxSizer(wxHORIZONTAL, this, "File Settings");
    grid2 = new wxFlexGridSizer( 3, 0, 0 );
    
@@ -274,7 +275,25 @@ void EphemerisFilePanel::Create()
    grid2->Add(outputFormatStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
    grid2->Add(outputFormatComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
    grid2->Add(0, 0, wxALIGN_CENTER|wxALL, bsize );
+
+   //DistanceUnit
+   id = mObject->GetParameterID("DistanceUnit");
+   distanceUnitStaticText =
+      new wxStaticText(this, ID_TEXT, wxString("D" GUI_ACCEL_KEY "istance Unit"),
+            wxDefaultPosition, wxDefaultSize, 0 );
+   distanceUnitComboBox = (wxComboBox*) BuildControl(this, id);
+   distanceUnitComboBox->SetToolTip(pConfig->Read(_T("OutputFormatHint")));
+   grid2->Add(distanceUnitStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   grid2->Add(distanceUnitComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
+   grid2->Add(0, 0, wxALIGN_CENTER|wxALL, bsize );
    
+   //includeEventBoundaries
+   id = mObject->GetParameterID("IncludeEventBoundaries");
+   eventBoundariesCheckBox = (wxCheckBox*) BuildControl(this, id);
+   eventBoundariesCheckBox->SetToolTip(pConfig->Read(_T("EventBoundariesHint")));
+   grid2->Add(eventBoundariesCheckBox, 0, wxALIGN_LEFT|wxALL, bsize );
+   grid2->Add(0, 0, wxALIGN_LEFT|wxALL, bsize );
+
    fileSettingsStaticBoxSizer->Add( grid2, 0, wxALIGN_LEFT|wxALL, bsize );
    
    // 3. Create Epoch box:
@@ -348,6 +367,8 @@ void EphemerisFilePanel::LoadData()
       LoadControl("EpochFormat");
       LoadControl("InitialEpoch");
       LoadControl("FinalEpoch");
+      LoadControl("DistanceUnit");
+      LoadControl("IncludeEventBoundaries");
       
       // Show all or only MJ2000Eq coordinate system
       ShowCoordSystems(fileFormat);
@@ -408,6 +429,8 @@ void EphemerisFilePanel::SaveData()
       SaveControl("InterpolationOrder");
       SaveControl("StepSize");
       SaveControl("OutputFormat");
+      SaveControl("DistanceUnit");
+      SaveControl("IncludeEventBoundaries");
       SaveControl("EpochFormat");
       try
       {
@@ -476,6 +499,9 @@ wxControl *EphemerisFilePanel::BuildControl(wxWindow *parent, Integer index)
          if (mObject->GetParameterText(index) == "WriteEphemeris")
             cbControl = new wxCheckBox(parent, ID_CHECKBOX,
                   GUI_ACCEL_KEY"Write Ephemeris");
+         else if (mObject->GetParameterText(index) == "IncludeEventBoundaries")
+            cbControl = new wxCheckBox(parent, ID_CHECKBOX,
+                  GUI_ACCEL_KEY"Include Event Boundaries");
          else
             cbControl = new wxCheckBox(parent, ID_CHECKBOX,
                   (mObject->GetParameterText(index)).c_str());
@@ -663,6 +689,19 @@ void EphemerisFilePanel::LoadControl(const std::string &label)
       // Use the order from the object as well
       valueInteger = mObject->GetIntegerParameter("InterpolationOrder");
       interpolationOrderTextCtrl->SetValue(wxString::Format("%d",valueInteger));
+
+      if (fileFormat == "STK-TimePosVel")
+      {
+         distanceUnitStaticText->Enable();
+         distanceUnitComboBox->Enable();
+         eventBoundariesCheckBox->Enable();
+      }
+      else
+      {
+         distanceUnitStaticText->Disable();
+         distanceUnitComboBox->Disable();
+         eventBoundariesCheckBox->Disable();
+      }
    }
    else if (label == "Filename")
    {
@@ -704,6 +743,16 @@ void EphemerisFilePanel::LoadControl(const std::string &label)
    {
       valueString = wxString(mObject->GetStringParameter(label).c_str());
       finalEpochComboBox->SetValue(valueString);
+   }
+   else if (label == "DistanceUnit")
+   {
+      valueString = wxString(mObject->GetStringParameter(label).c_str());
+      distanceUnitComboBox->SetValue(valueString);
+   }
+   else if (label == "IncludeEventBoundaries")
+   {
+      valueBool = mObject->GetBooleanParameter(mObject->GetParameterID(label));
+      eventBoundariesCheckBox->SetValue(valueBool);
    }
    
    #ifdef DEBUG_LOAD_DATA
@@ -820,6 +869,16 @@ void EphemerisFilePanel::SaveControl(const std::string &label)
       valueString = finalEpochComboBox->GetValue();
       clonedObj->SetStringParameter(paramId, valueString);
    }
+   else if (label == "DistanceUnit")
+   {
+      valueString = distanceUnitComboBox->GetValue();
+      clonedObj->SetStringParameter(paramId, valueString);
+   }
+   else if (label == "IncludeEventBoundaries")
+   {
+      valueBool =  eventBoundariesCheckBox->GetValue();
+      clonedObj->SetBooleanParameter(paramId, valueBool);
+   }
    
    #ifdef DEBUG_SAVE_DATA
    MessageInterface::ShowMessage
@@ -875,6 +934,19 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
          // Show default interpolator; show or hide step size
          ShowInterpolatorAndStepSize(fileFormat);
          
+         if (newFileFormat == "STK-TimePosVel")
+         {
+            distanceUnitStaticText->Enable();
+            distanceUnitComboBox->Enable();
+            eventBoundariesCheckBox->Enable();
+         }
+         else
+         {
+            distanceUnitStaticText->Disable();
+            distanceUnitComboBox->Disable();
+            eventBoundariesCheckBox->Disable();
+         }
+
          EnableUpdate(true);
       }
    }
@@ -888,6 +960,19 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
       if (outputFormat != newOutputFormat)
       {
          outputFormat = newOutputFormat;
+         EnableUpdate(true);
+      }
+   }
+   else if (event.GetEventObject() == distanceUnitComboBox)
+   {
+      wxString newDistanceUnit = distanceUnitComboBox->GetValue();
+      #ifdef DEBUG_COMBOBOX
+      MessageInterface::ShowMessage
+         ("distanceUnit=%s, newDistanceUnit=%s\n", distanceUnit.c_str(), newDistanceUnit.c_str())
+      #endif
+      if (distanceUnit != newDistanceUnit)
+      {
+         distanceUnit = newDistanceUnit;
          EnableUpdate(true);
       }
    }

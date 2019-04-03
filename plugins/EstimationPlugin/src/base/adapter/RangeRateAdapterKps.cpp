@@ -63,7 +63,7 @@ RangeRateAdapterKps::RangeRateAdapterKps(const std::string& name) :
    RangeAdapterKm       (name),
    dopplerInterval      (1.0)
 {
-   typeName="RangeRate";
+   typeName="RangeRateKps";             //typeName="RangeRate";
 }
 
 

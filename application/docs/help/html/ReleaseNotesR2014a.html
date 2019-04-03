@@ -1,0 +1,156 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>GMAT R2014a Release Notes</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ReleaseNotes.html" title="Release Notes"><link rel="prev" href="ReleaseNotesR2015a.html" title="GMAT R2015a Release Notes"><link rel="next" href="ReleaseNotesR2013b.html" title="GMAT R2013b Release Notes"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">GMAT R2014a Release Notes</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ReleaseNotesR2015a.html">Prev</a>&nbsp;</td><th align="center" width="60%">Release Notes</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ReleaseNotesR2013b.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="ReleaseNotesR2014a"></a>GMAT R2014a Release Notes</h2></div></div></div><p>The General Mission Analysis Tool (GMAT) version R2014a was released
+  May 2014. This is the first public release since April 2013, and is the 8th
+  release for the project.</p><p>Below is a summary of key changes in this release. Please see the full
+  <a class="link" href="http://bugs.gmatcentral.org/secure/ReleaseNote.jspa?projectId=10000&amp;version=10500" target="_top">R2014a
+  Release Notes</a> on JIRA for a complete list.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N29F2E"></a>New Features</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N29F31"></a>Trajectory Colors and Labels</h4></div></div></div><p>In GMAT R2014a, you can now specify colors for each segment of
+      your trajectory independently, so you can clearly see where a segment
+      begins and ends. This can help define portions of a trajectory, such as
+      before or after maneuvers. All color handling has also been moved from
+      the graphics resources (<span class="guilabel">OrbitView</span> and
+      <span class="guilabel">GroundTrackPlot</span>) to the resources and commands
+      controlling the trajectory (e.g. <span class="guilabel">Spacecraft</span>,
+      <span class="guilabel">Planet</span>, <span class="guilabel">Propagate</span>).</p><p>On Spacecraft, the color specification has moved to the
+      Visualization tab. See the circled area in the screenshot below. Colors
+      for celestial bodies (<span class="guilabel">Planet</span>,
+      <span class="guilabel">Moon</span>, <span class="guilabel">Asteroid</span>, etc.) are
+      specified similarly.</p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="../files/images/relnotes/r2014a/SpacecraftVisualization.png" width="417"></div></div></div><p>The trajectory color associated with a particular trajectory
+      segment can be changed by changing the color for that particular
+      <span class="guilabel">Propagate</span> command. It will override the color for
+      the Spacecraft being propagated for that segment only, and it will
+      return to the default color afterwards.</p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="../files/images/relnotes/r2014a/Propagate.png" width="418"></div></div></div><p>Additionally, colors can now be specified either by name
+      (<code class="literal">'Blue'</code>) or by RGB value (<code class="literal">[0 0
+      255]</code>).</p><p>This release also adds participant labels in the graphics as well.
+      As long as
+      <span class="guilabel">OrbitView</span>.<span class="guilabel">ShowLabels</span> is
+      enabled, each celestial body or <span class="guilabel">Spacecraft</span> in the
+      plot will show its name next to it.</p><p>See the following example:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+aSat.OrbitColor = 'Blue'
+
+Create Propagator aProp
+
+Create OrbitView aView
+aView.Add = {aSat, Earth}
+aView.XYPlane = off
+aView.Axes = off
+aView.EnableConstellations = off
+aView.ShowLabels = on
+
+BeginMissionSequence
+% plots in blue
+Propagate aProp(aSat) {aSat.ElapsedSecs = 900}                     
+aSat.OrbitColor = 'Green'
+% plots in green
+Propagate aProp(aSat) {aSat.ElapsedSecs = 900}             
+ % plots in red        
+Propagate aProp(aSat) {aSat.ElapsedSecs = 900, OrbitColor = Red}  </code></pre><p>This example results in the following image:</p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="../files/images/relnotes/r2014a/OrbitViewExample.png" width="341"></div></div></div><p>See the <a class="link" href="Color.html" title="Color">Color</a> reference, as well as
+      the individual <a class="link" href="Spacecraft.html" title="Spacecraft">Spacecraft</a>, <a class="link" href="CelestialBody.html" title="CelestialBody">CelestialBody</a>, <a class="link" href="Propagate.html" title="Propagate">Propagate</a>, and <a class="link" href="OrbitView.html" title="OrbitView">OrbitView</a> references, for more
+      information.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N29F9A"></a>New Orbit State Representations</h4></div></div></div><p>GMAT now supports six new common orbit state representations,
+      developed with support by the Korea Aerospace Research Institute
+      (KARI). The new representations are:</p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p>Long- and short-period Brouwer-Lyddane mean elements
+            (<span class="guilabel">BrouwerMeanLong</span> and
+            <span class="guilabel">BrouwerMeanShort</span>)</p></li><li class="listitem"><p>Incoming and outgoing hyperbolic asymptote elements
+            (<span class="guilabel">IncomingAsymptote</span> and
+            <span class="guilabel">OutgoingAsymptote</span>)</p></li><li class="listitem"><p>Modified equinoctial elements
+            (<span class="guilabel">ModifiedEquinoctial</span>)</p></li><li class="listitem"><p>Alternate equinoctial elements
+            (<span class="guilabel">AlternateEquinoctial</span>)</p></li><li class="listitem"><p>Delaunay elements (<span class="guilabel">Delaunay</span>)</p></li><li class="listitem"><p>Planetodetic elements, when using a body-fixed coordinate
+            system (<span class="guilabel">Planetodetic</span>)</p></li></ul></div><p>The new representations are available as options in the
+      <span class="guilabel">Spacecraft</span> "<span class="guilabel">State Type</span>" list,
+      and as options to the
+      <span class="guilabel">Spacecraft</span>.<span class="guilabel">DisplayStateType</span>
+      field.</p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="../files/images/relnotes/r2014a/SpacecraftStateTypes.png" width="158"></div></div></div><p>See the <a class="link" href="SpacecraftOrbitState.html" title="Spacecraft Orbit State">Spacecraft Orbit
+      State</a> reference for more information.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N29FE6"></a>New Attitude Models</h4></div></div></div><p>GMAT now supports three new kinematic attitude models, developed
+      with support by the Korea Aerospace Research Institute (KARI). The new
+      representations are:</p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p>Precessing spinner</p></li><li class="listitem"><p>Nadir pointing</p></li><li class="listitem"><p>CCSDS Attitude Ephemeris Message (AEM)</p></li></ul></div><p>The new representations are available as options in the
+      <span class="guilabel">Spacecraft</span> "<span class="guilabel">Attitude</span>" list,
+      and as options to the
+      <span class="guilabel">Spacecraft</span>.<span class="guilabel">DisplayStateType</span>
+      field.</p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="../files/images/relnotes/r2014a/AttitudeTypes.png" width="270"></div></div></div><p>See the <a class="link" href="SpacecraftAttitude.html" title="Spacecraft Attitude">Spacecraft
+      Attitude</a> reference for more information.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A011"></a>Dynamics and Model Improvements</h4></div></div></div><p>GMAT now supports several new dynamics models and a new numerical
+      integrator.</p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p>Prince Dormand 853 integrator. See the <a class="link" href="Propagator.html" title="Propagator">Propagator</a> reference for more
+            information.</p></li><li class="listitem"><p>Mars-GRAM density model. See the <a class="link" href="Propagator.html" title="Propagator">Propagator</a> reference for more
+            information.</p></li><li class="listitem"><p>High-fidelity, attitude dependent SRP dynamics model. See
+            the <a class="link" href="Propagator.html" title="Propagator">Propagator</a> reference, and
+            the <a class="link" href="SpacecraftBallisticMass.html" title="Spacecraft Ballistic/Mass Properties">Spacecraft Ballistic
+            and Mass Properties</a> reference for more information.</p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A031"></a>Targeting and Optimization Improvements</h4></div></div></div><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p>There are new boundary value solver options on
+            <span class="guilabel">DifferentialCorrector</span>
+            (<span class="guilabel">Broyden</span>, and
+            <span class="guilabel">ModifiedBroyden</span>). Brodyen&rsquo;s method and
+            modified Broyden's method usually take more iterations but fewer
+            function evaluations than <span class="guilabel">NewtonRaphson</span> and
+            so are often faster. See the <a class="link" href="DifferentialCorrector.html" title="DifferentialCorrector">Differential Corrector</a>
+            reference for more information.</p></li><li class="listitem"><p>There are new parameters that check for convergence of
+            solvers. See the <a class="link" href="CalculationParameters.html" title="Calculation Parameters">Calculation
+            Parameters</a> reference for more information.</p></li></ul></div><p> Below is a script example that illustrates the new
+      algorithm and parameter options.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aPropagator
+
+Create ImpulsiveBurn aBurn
+Create DifferentialCorrector aDC
+%  This algorithm is often faster, as is ModifiedBroyden
+aDC.Algorithm = Broyden  
+
+Create OrbitView EarthView
+EarthView.Add = {Earth,aSat}
+EarthView.ViewScaleFactor = 5
+
+Create ReportFile aReport 
+
+BeginMissionSequence
+
+%  Report targeter status here
+Report aReport aDC.SolverStatus aDC.SolverState
+Target aDC
+    Vary aDC(aBurn.Element1 = 1.0, {Upper = 3, MaxStep = 0.4})
+    Maneuver aBurn(aSat)
+    Propagate aPropagator(aSat,{aSat.Apoapsis})
+    Achieve aDC(aSat.RMAG = 42164)
+EndTarget
+%  Report targeter status here
+Report aReport aDC.SolverStatus aDC.SolverState
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2A055"></a>Improvements</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A058"></a>Dependencies in Assignment Command</h4></div></div></div><p>You can now define settable parameters by using a dependency on
+      the LHS of an assignment command:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+
+BeginMissionSequence
+
+aSat.EarthFixed.X = 7000
+aSat.EarthMJ2000Eq.VZ = 1</code></pre></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A060"></a>Other Improvements</h4></div></div></div><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p>You can now set true retrograde orbits when using the
+          Keplerian representation.</p></li><li class="listitem"><p>You can now use the quaternion Rvector parameter on the right
+          hand side of an assignment command.</p></li><li class="listitem"><p>You can now use a <span class="guilabel">Spacecraft</span> body fixed
+          coordinate system as the coordinate system for an
+          <span class="guilabel">OrbitView</span>.</p></li><li class="listitem"><p>The number of <span class="guilabel">Spacecraft</span> that that can be
+          displayed in <span class="guilabel">OrbitView </span>is no longer limited to
+          30.</p></li><li class="listitem"><p>The documentation for <span class="guilabel">OrbitView</span> has been
+          significantly expanded. See the <a class="link" href="OrbitView.html" title="OrbitView">Orbit
+          View</a> reference for details.</p></li><li class="listitem"><p>You can now save an XY plot graphics window to an image
+          file.</p></li><li class="listitem"><p>The supported set of keyboard shortcuts has been greatly
+          expanded. See the <a class="link" href="KeyboardShortcuts.html" title="Keyboard Shortcuts">Keyboard
+          Shortcuts</a> reference for more information.</p></li><li class="listitem"><p>You can now use many more common ASCII characters in GMAT
+          strings.</p></li><li class="listitem"><p>You can now generate orbit state command summary reports using
+          coordinate systems that have any point type as the origin of the
+          selected coordinate system. Previously the origin had to be a
+          <span class="guilabel">Celestial Body</span>.</p></li></ul></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2A09A"></a>Compatibility Changes</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Color settings for <span class="guilabel">Resources</span> displayed in
+        graphics are now configured on the <span class="guilabel">Resource</span> and
+        via the <span class="guilabel">Propagate</span> command.
+        <span class="guilabel">OrbitColor</span> and <span class="guilabel">TargetColor</span>
+        fields on graphics resources are no longer used.. See the <a class="link" href="SpacecraftVisualizationProperties.html" title="Spacecraft Visualization Properties">Spacecraft
+        Visualization</a> reference, and <a class="link" href="Propagate.html" title="Propagate">Propagate</a> command reference for
+        details.</p></li><li class="listitem"><p>AtmosDensity is now reported in units of kg/km^3. See the <a class="link" href="CalculationParameters.html" title="Calculation Parameters">Calculation Parameter</a> reference
+        for details.</p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2A0BF"></a>Known &amp; Fixed Issues</h3></div></div></div><p>Over 123 bugs were closed in this release. See the <a class="link" href="http://li64-187.members.linode.com:8080/issues/?filter=12406" target="_top">"Critical
+    Issues Fixed in R2014a" report</a> for a list of critical bugs and
+    resolutions in R2014a. See the <a class="link" href="http://li64-187.members.linode.com:8080/issues/?filter=12408" target="_top">"Minor
+    Issues Fixed for R2014a" report</a> for minor issues addressed in
+    R2014a.</p><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A0CC"></a>Known Issues</h4></div></div></div><p>All known issues that affect this version of GMAT can be seen in
+      the <a class="link" href="http://li64-187.members.linode.com:8080/issues/?filter=12407" target="_top">"Known
+      Issues in R2014a" report</a> in JIRA.</p><p>There are several known issues in this release that we consider to
+      be significant:</p><div class="informaltable"><table border="1"><colgroup><col width="16%"><col width="84%"></colgroup><thead><tr><th align="left">ID</th><th align="left">Description</th></tr></thead><tbody><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-2561" target="_top">GMT-2561</a></td><td>UTC Epoch Entry and Reporting During Leap Second is
+                incorrect.</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3043" target="_top">GMT-3043</a></td><td>Inconsistent validation when creating variables that
+                shadow built-in math functions</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3108" target="_top">GMT-3108</a></td><td>OrbitView with STM and Propagate Synchronized does not
+                show spacecraft in correct locations</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3289" target="_top">GMT-3289</a></td><td>First step algorithm fails for backwards propagation
+                using SPK propagator</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3350" target="_top">GMT-3350</a></td><td>Single-quote requirements are not consistent across
+                objects and modes</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3556" target="_top">GMT-3556</a></td><td>Unable to associate tank with thruster in command
+                mode</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3629" target="_top">GMT-3629</a></td><td>GUI starts in bad state when started with
+                --minimize</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3669" target="_top">GMT-3669</a></td><td>Planets not drawn during optimization in
+                OrbitView</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3738" target="_top">GMT-3738</a></td><td>Cannot set standalone FuelTank, Thruster fields in
+                CallMatlabFunction</td></tr><tr><td><a class="link" href="http://bugs.gmatcentral.org/browse/GMT-4520" target="_top">GMT-4520</a></td><td>Unrelated script line in Optimize changes results
+                (causes crash)</td></tr><tr><td><a class="link" href="http://bugs.gmatcentral.org/browse/GMT-4408" target="_top">GMT-4408</a></td><td>Failed to load icon file and to open DE file</td></tr><tr><td><a class="link" href="http://bugs.gmatcentral.org/browse/GMT-4398" target="_top">GMT-4520</a></td><td>Coordinate System Fixed attitudes are held constant in
+                SPAD SRP model during a propagation step</td></tr></tbody></table></div></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ReleaseNotesR2015a.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ReleaseNotes.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ReleaseNotesR2013b.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">GMAT R2015a Release Notes&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;GMAT R2013b Release Notes</td></tr></table></div></body></html>

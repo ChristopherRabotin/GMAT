@@ -1,0 +1,115 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>GMAT R2012a Release Notes</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ReleaseNotes.html" title="Release Notes"><link rel="prev" href="ReleaseNotesR2013a.html" title="GMAT R2013a Release Notes"><link rel="next" href="ReleaseNotesR2011a.html" title="GMAT R2011a Release Notes"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">GMAT R2012a Release Notes</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ReleaseNotesR2013a.html">Prev</a>&nbsp;</td><th align="center" width="60%">Release Notes</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ReleaseNotesR2011a.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="ReleaseNotesR2012a"></a>GMAT R2012a Release Notes</h2></div></div></div><p>The General Mission Analysis Tool (GMAT) version R2012a was released
+  May 23, 2012. This is the first public release in over a year, and is the
+  5th public release for the project. In this release:</p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p>52,000 lines of code were added</p></li><li class="listitem"><p>Code and documentation was contributed by 9 developers from 2
+      organizations</p></li><li class="listitem"><p>6847 system tests were run every weeknight</p></li></ul></div><p>This is a beta release. It has undergone extensive testing in many
+  areas, but is not considered ready for production use.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2A480"></a>New Features</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A483"></a>Ground Track Plot</h4></div></div></div><p>GMAT can now show the ground track of a spacecraft using the new
+      <span class="guilabel">GroundTrackPlot</span> resource. This view shows the
+      orbital path of one or more spacecraft projected onto a two-dimensional
+      map of a celestial body, and can use any celestial body that you have
+      configured. Here's an example of the plot created as part of the default
+      mission:</p><div class="screenshot"><div class="mediaobject"><img src="../files/images/relnotes/r2012a/groundtrackplot.png" width="295"></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A494"></a>Orbit Designer</h4></div></div></div><p>Sometimes you need to create a spacecraft in a particular orbit
+      but don't exactly know the proper orbital element values. Before, you
+      had to make a rough estimate, or go back to the math to figure it out.
+      Now, GMAT R2012a comes with a new <span class="guilabel">Orbit Designer</span>
+      that does this math for you.</p><p>The <span class="guilabel">Orbit Designer</span> helps you create one of
+      six different Earth-centered orbit types, each with a flexible array of
+      input options:</p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p>sun-synchronous</p></li><li class="listitem"><p>repeat sun-synchronous</p></li><li class="listitem"><p>repeat ground track</p></li><li class="listitem"><p>geostationary</p></li><li class="listitem"><p>molniya</p></li><li class="listitem"><p>frozen</p></li></ul></div><p>Once you've created your desired orbit, it is automatically
+      imported into the Spacecraft resource for later use. Here's an example
+      of a sun-synchronous orbit using the Designer. To open the
+      <span class="guilabel">Orbit Designer</span>, click the button on the
+      <span class="guilabel">Spacecraft</span> properties window.</p><div class="screenshot"><div class="mediaobject"><img src="../files/images/relnotes/r2012a/orbitdesigner.png" width="548"></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A4C6"></a>Eclipse Locator [alpha]</h4></div></div></div><p>We've done significant work toward having a robust eclipse
+      location tool in GMAT, but this work is not complete. This release comes
+      with an alpha-stage plugin (disabled by default) called
+      <code class="filename">libEventLocator</code>. When enabled, this plugin adds a
+      new <span class="guilabel">EclipseLocator</span> resource that can be configured
+      to calculate eclipse entry and exit times and durations with respect to
+      any configured Spacecraft and celestial bodies. The eclipse data can be
+      reported to a text file or plotted graphically. Some known limitations
+      include an assumption of spherical celestial bodies and a lack of
+      light-time correction. This feature has not been rigorously tested, and
+      may be brittle. We've included it here as a preview of what's coming in
+      future releases.</p><div class="screenshot"><div class="mediaobject"><img src="../files/images/relnotes/r2012a/eclipselocator.png" width="321"></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A4DA"></a>C Interface [alpha]</h4></div></div></div><p>Likewise, we've included an experimental library and plugin that
+      exposes a plain-C interface to GMAT's internal dynamics model
+      functionality. This interface is intended to fill a very specific need:
+      to expose force model derivates from GMAT to external software,
+      especially MATLAB, for use with an external integrator (though GMAT can
+      do the propagation also, if desired). The interface is documented by an
+      <a class="link" href="http://gmat.sourceforge.net/docs/R2012a/capi/index.html" target="_top">API
+      reference</a> for now.</p></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2A4E3"></a>Improvements</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A4E6"></a>Dynamics Models</h4></div></div></div><p>We've made lots of improvements to GMAT's already capable force
+      model suite. Here's some highlights:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>GMAT now models Earth ocean and pole tides. This is a
+          script-only option that can be turned on alongside an Earth harmonic
+          gravity model; turn it on with a line like this:</p><pre class="programlisting"><em class="replaceable"><code>ForceModel</code></em>.GravityField.Earth.EarthTideModel = 'SolidAndPole'</pre></li><li class="listitem"><p>You can now apply relativistic corrections using the checkbox
+          on the properties for <span class="guilabel">Propagator</span>.</p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A4F9"></a>Solar System</h4></div></div></div><p>GMAT can now use the DE421 and DE424 ephemerides for the solar
+      system. These files are included in the installer, but are not activated
+      by default. To use either of these ephemerides, double-click the
+      <span class="guilabel">SolarSystem</span> folder and select it from the
+      <span class="guilabel">Ephemeris Source</span> list. Or include the following
+      script line:</p><pre class="programlisting">SolarSystem.EphemerisSource = 'DE421'</pre><p>There's also a new <span class="guilabel">SolarSystem</span> resource
+      called <span class="guilabel">SolarSystemBarycenter</span> that represents the
+      barycenter as given by the chosen ephemeris source (DE405, DE421, SPICE,
+      etc.). This resource can be used directly in reports or as the origin of
+      a user-defined coordinate system.</p><div class="screenshot"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td><img src="../files/images/relnotes/r2012a/ssb.png" height="49"></td></tr></table></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A519"></a>TDB Input</h4></div></div></div><p>You can now input the epoch of a <span class="guilabel">Spacecraft</span>
+      orbit in the TDB time system (in both Modified Julian and Gregorian
+      formats).</p><div class="screenshot"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td><img src="../files/images/relnotes/r2012a/tdb.png" height="102"></td></tr></table></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A52C"></a>Mission Tree</h4></div></div></div><p>We've made significant improvements to the mission tree to make it
+      more user-friendly to heavy users. The biggest improvement is that you
+      can now filter the mission sequence in different ways to make complex
+      missions easier to understand, for example by hiding non-physical events
+      or collapsing the tree to only its top-level elements.</p><div class="screenshot"><div class="mediaobject"><img src="../files/images/relnotes/r2012a/mtfilters.png" width="150"></div></div><p>GMAT also now lets you name your mission sequence commands. Thus,
+      instead of a sequence made up of commands like "Optimize1" and
+      "Propagate3", you can label them "Optimize LOI" and "Prop to Periapsis".
+      This example shows the <code class="filename">Ex_HohmannTransfer.script</code>
+      sample with labeled commands.</p><div class="screenshot"><div class="mediaobject"><img src="../files/images/relnotes/r2012a/mtlabels.png" width="153"></div></div><p>Finally, we added the ability to undock the mission tree so you
+      can place it and the resources tree side by side and see both at the
+      same time. To undock the tree, right-click the
+      <span class="guilabel">Mission</span> tab and drag it from its docked position.
+      To dock it again, just close the new <span class="guilabel">Mission</span>
+      window.</p><div class="screenshot"><div class="mediaobject"><img src="../files/images/relnotes/r2012a/mtundock.png" width="400"></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A559"></a>Mission Summary</h4></div></div></div><p>You can now change the coordinate system shown in the
+      <span class="guilabel">Mission Summary</span> on the fly: just change the
+      <span class="guilabel">Coordinate System</span> list at the top of the window and
+      the numbers will update. This feature can use any coordinate system
+      currently defined in GMAT, including user-defined ones.</p><p>There's also a new <span class="guilabel">Mission Summary - Physics-Based
+      Commands</span> that shows only physical events
+      (<span class="guilabel">Propagate</span> commands, burns, etc.), and further data
+      was added to both <span class="guilabel">Mission Summary</span> types.</p><div class="screenshot"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td><img src="../files/images/relnotes/r2012a/missionsummary.png" height="293"></td></tr></table></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A57A"></a>Window Persistency</h4></div></div></div><p>The locations of output windows are now saved with the mission in
+      the script file. This means that when running a mission, all the output
+      windows that were open when the mission was last saved will reappear in
+      their old positions.</p><p>In addition, the locations of certain GMAT windows, like the
+      mission tree, the script editor, and the application window itself are
+      saved to the user preferences file
+      (<code class="filename">MyGMAT.ini</code>).</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A584"></a>Switch to Visual Studio on Windows</h4></div></div></div><p>With this release, the official GMAT binaries for Windows are now
+      compiled with Microsoft Visual Studio 2010 instead of GCC. The biggest
+      benefit of this is in performance; we've seen up to a 50% performance
+      improvement in certain cases in unofficial testing. It also leads to
+      more a industry-standard development process on Windows, as the MinGW
+      suite is no longer needed.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A589"></a>New Icons</h4></div></div></div><p>The last release saw a major overhaul of GMAT's GUI icons. This
+      time we've revised some and added more, especially in the mission
+      tree.</p><p><span class="inlinemediaobject"><img src="../files/images/relnotes/r2012a/iconsold.png" width="116"></span><span class="inlinemediaobject"><img src="../files/images/relnotes/r2012a/iconsnew.png" width="147"></span></p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A599"></a>Training Manual</h4></div></div></div><p>The non-reference material in the GMAT User Guide has been
+      overhauled, partially rewritten, and reformatted to form a new GMAT
+      Training Manual. This includes the "Getting Started" material, some
+      short how-to articles, and some longer tutorials. All of this
+      information is included in the GMAT User Guide as well, in addition to
+      reference material that is undergoing a similar rewrite later this
+      year.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A59E"></a>Infrastructure</h4></div></div></div><p>The GMAT project has implemented several infrastructure
+      improvements in the last year. The biggest of these was switching from
+      our old Bugzilla system to <a class="link" href="http://li64-187.members.linode.com:8080" target="_top">JIRA</a> for
+      issue tracking.</p><p>This year also saw the creation of the <a class="link" href="http://gmat.sourceforge.net/blog/" target="_top">GMAT Blog</a> and the
+      <a class="link" href="http://gmatplugins.sourceforge.net/blog/" target="_top">GMAT Plugins
+      and Extensions Blog</a> with a fair number of posts each, plus
+      reorganizations for the <a class="link" href="http://gmat.ed-pages.com/wiki/tiki-index.php" target="_top">wiki</a>
+      and the <a class="link" href="http://gmat.ed-pages.com/forum/" target="_top">forums</a>. We
+      reactivated our two mailing lists, <a class="link" href="http://lists.sourceforge.net/mailman/listinfo/gmat-developers" target="_top">gmat-developers</a>
+      and <a class="link" href="http://lists.sourceforge.net/mailman/listinfo/gmat-users" target="_top">gmat-users</a>,
+      but haven't seen much usage of each yet. And finally, we created a new
+      mailing list, <a class="link" href="http://lists.sourceforge.net/mailman/listinfo/gmat-buildtest" target="_top">gmat-buildtest</a>,
+      for automated daily build and test updates.</p></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2A5C5"></a>Compatibility Changes</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A5C8"></a>Application Control Changes</h4></div></div></div><p>The command-line arguments for the GMAT executable have changed.
+      See the following table for replacements.</p><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="33%"><col width="34%"></colgroup><thead><tr><th align="center">Old</th><th align="center">New</th><th align="center">Description</th></tr></thead><tbody><tr><td><code class="literal">-help</code></td><td><code class="literal">--help</code>, <code class="literal">-h</code></td><td>Shows available options</td></tr><tr><td><code class="literal">-date</code></td><td><code class="literal">--version</code>,
+              <code class="literal">-v</code></td><td>Shows GMAT build date</td></tr><tr><td><code class="literal">-ms</code></td><td><code class="literal">--start-server</code></td><td>Starts GMAT server on startup</td></tr><tr><td><code class="literal">-br
+              <em class="replaceable"><code>filename</code></em></code></td><td><code class="literal">--run</code>, <code class="literal">-r
+              <em class="replaceable"><code>scriptname</code></em></code></td><td>Builds and runs the script</td></tr><tr><td><code class="literal">-minimize</code></td><td><code class="literal">--minimize</code>,
+              <code class="literal">-m</code></td><td>Minimizes GMAT window</td></tr><tr><td><code class="literal">-exit</code></td><td><code class="literal">--exit</code>, <code class="literal">-x</code></td><td>Exits GMAT after a script is run</td></tr></tbody></table></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A625"></a>Script Syntax Changes</h4></div></div></div><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="33%"><col width="34%"></colgroup><thead><tr><th align="center">Resource</th><th align="center">Field</th><th align="center">Replacement</th></tr></thead><tbody><tr><td><code class="literal">ForceModel</code></td><td><code class="literal">Drag</code></td><td><code class="literal">Drag.AtmosphereModel</code></td></tr><tr><td><code class="literal">Propagator</code></td><td><code class="literal">MinimumTolerance
+              (BulirschStoer)</code></td><td>(none)</td></tr></tbody></table></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2A64A"></a>Known &amp; Fixed Issues</h3></div></div></div><p>Many bugs were closed in this release, but a comprehensive list is
+    difficult to create because of the move from Bugzilla to JIRA. See the
+    <a class="link" href="http://li64-187.members.linode.com:8080/issues/?filter=11103" target="_top">"Bugs
+    closed in R2012a" report</a> in for a partial list.</p><p>All known issues that affect this version of GMAT can be seen in
+    <a class="link" href="http://li64-187.members.linode.com:8080/secure/IssueNavigator.jspa?mode=hide&amp;requestId=11104" target="_top">the
+    "Known issues in R2012a" report</a> in JIRA.</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ReleaseNotesR2013a.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ReleaseNotes.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ReleaseNotesR2011a.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">GMAT R2013a Release Notes&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;GMAT R2011a Release Notes</td></tr></table></div></body></html>

@@ -1,0 +1,136 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>DifferentialCorrector</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="ContactLocator.html" title="ContactLocator"><link rel="next" href="ElectricTank.html" title="ElectricTank"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">DifferentialCorrector</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ContactLocator.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ElectricTank.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="DifferentialCorrector"></a><div class="titlepage"></div><a name="N174D8" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">DifferentialCorrector</span></h2><p>DifferentialCorrector &mdash; A numerical solver</p></div><div class="refsection"><a name="N174E9"></a><h2>Description</h2><p>A <span class="guilabel">DifferentialCorrector</span> (DC) is a numerical
+    solver for solving boundary value problems. It is used to refine a set of
+    variable parameters in order to meet a set of goals defined for the
+    modeled mission. The DC in GMAT supports several numerical techniques. In
+    the mission sequence, you use the
+    <span class="guilabel">DifferentialCorrector</span> resource in a
+    <span class="guilabel">Target</span> control sequence to solve the boundary value
+    problem. In GMAT, differential correctors are often used to determine the
+    maneuver components required to achieve desired orbital conditions, say,
+    B-plane conditions at a planetary flyby.</p><p>You must create and configure a
+    <span class="guilabel">DifferentialCorrector</span> resource for your application
+    by setting numerical properties of the solver such as the algorithm type,
+    the maximum number of allowed iterations and choice of derivative method
+    used to calculate the finite differences. You can also select among
+    different output options that show increasing levels of information for
+    each differential corrector iteration.</p><p>This resource cannot be modified in the Mission Sequence.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Target.html" title="Target"><span class="refentrytitle">Target</span></a>, <a class="xref" href="Vary.html" title="Vary"><span class="refentrytitle">Vary</span></a>, <a class="xref" href="Achieve.html" title="Achieve"><span class="refentrytitle">Achieve</span></a></p></div><div class="refsection"><a name="N1750B"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Algorithm</span></td><td><p>The numerical method used to solve the boundary value
+            problem. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>
+                      <span class="guilabel">NewtonRaphson, Broyden,
+                      ModifiedBroyden</span>
+                    </p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">NewtonRaphson</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DerivativeMethod</span></td><td><p> Chooses between one-sided and central differencing
+            for numerically determining the derivative. Only used when
+            <span class="guilabel">Algorithm</span> is set to
+            <span class="guilabel">NewtonRaphson</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">ForwardDifference</span>,
+                    <span class="guilabel">BackwardDifference</span>,
+                    <span class="guilabel">CentralDifference</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">ForwardDifference</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MaximumIterations</span></td><td><p>Sets the maximum number of nominal passes the
+            <span class="guilabel">DifferentialCorrector</span> is allowed to take
+            during the attempt to find a solution. If the maximum iterations
+            is reached, GMAT exits the target loop and continues to the next
+            command in the mission sequence. In this case, the objects retain
+            their states as of the last nominal pass through the targeting
+            loop. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Integer &gt;= <code class="literal">1</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>25</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ReportFile</span></td><td><p>Specifies the path and file name for the
+            <span class="guilabel">DifferentialCorrector</span> report.&nbsp; The report is
+            only generated if <span class="guilabel">ShowProgress</span> is set to
+            true.&nbsp; </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Filename consistent with OS</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><code class="literal">DifferentialCorrectorDCName.data</code>,
+                    where <code class="literal">DCname</code> is the name of the
+                    <span class="guilabel">DifferentialCorrector</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ReportStyle</span></td><td><p>Controls the amount and type of information written
+            to the file defined in the <span class="guilabel">ReportFile</span> field.
+            Currently, the <span class="guilabel">Normal</span> and
+            <span class="guilabel">Concise</span> options contain the same information:
+            the Jacobian, the inverse of the Jacobian, the current values of
+            the control variables, and achieved and desired values of the
+            constraints. <span class="guilabel">Verbose</span> contains values of the
+            perturbation variables in addition to the data for
+            <span class="guilabel">Normal</span> and <span class="guilabel">Concise</span>.
+            <span class="guilabel">Debug</span> contains detailed script snippets at
+            each iteration for objects that have control variables. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Normal</span>,
+                    <span class="guilabel">Concise</span>,
+                    <span class="guilabel">Verbose</span>,
+                    <span class="guilabel">Debug</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Normal</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ShowProgress</span></td><td><p>When the <span class="guilabel">ShowProgress</span> field is
+            set to true, then data illustrating the progress of the
+            differential correction process are written to the message window
+            and the <span class="guilabel">ReportFile</span>. The message window is
+            updated with information on the current control variable values
+            and the contraint variances.&nbsp;&nbsp;When the
+            <span class="guilabel">ShowProgress</span> field is set to false, no
+            information on the progress of the differential correction process
+            is displayed to the message window or written to the
+            <span class="guilabel">ReportFile</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">true</code>,
+                    <code class="literal">false</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">true</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1768B"></a><h2>GUI</h2><p>The <span class="guilabel">DifferentialCorrector</span> dialog box allows you
+    to specify properties of a <span class="guilabel">DifferentialCorrector</span> such
+    as the numerical algorithm, maximum iterations, choice of derivative
+    method used to calculate the finite differences, and choice of reporting
+    options.</p><p>To create a <span class="guilabel">DifferentialCorrector</span> resource,
+    navigate to the <span class="guilabel">Resources</span> tree, expand the
+    <span class="guilabel">Solvers</span> folder, right-click on the <span class="guilabel">Boundary
+    Value Solvers</span> folder, point to <span class="guilabel">Add</span>, and
+    click <span class="guilabel">DifferentialCorrector</span>. A resource named
+    <span class="guilabel">DC1</span> will be created. Double-click on the
+    <span class="guilabel">DC1</span> resource to bring up the following
+    <span class="guilabel">Differential Corrector</span> dialog box.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_DifferentialCorrector_GUI.png" align="middle" height="339"></td></tr></table></div></div></div><div class="refsection"><a name="N176BC"></a><h2>Remarks</h2><div class="refsection"><a name="N176BF"></a><h3>Supported Algorithm Details</h3><p>GMAT supports several algorithms for solving boundary value
+      problems including <span class="guilabel">Newton Raphson</span>,
+      <span class="guilabel">Broyden</span>, and <span class="guilabel">Modified Broyden</span>.
+      These algorithms use finite differencing or other numerical
+      approximations to compute the Jacobian of the constraints and
+      independent variables. The default algorithm is currently
+      <span class="guilabel">NewtonRaphson</span>. <span class="guilabel">Brodyen</span>&rsquo;s
+      method and <span class="guilabel">ModifiedBroyden</span> usually take more
+      iterations but fewer function evaluations than
+      <span class="guilabel">NewtonRaphson</span> and so are often faster. A
+      description of each algorithm is provided below. We recommend trying
+      different algorithm options for your application to determine which
+      algorithm provides the best balance of performance and
+      robustness.</p><div class="refsection"><a name="N176D9"></a><h4>Newton-Raphson</h4><p>The <span class="guilabel">NewtonRaphson</span> algorithm is a
+        quasi-Newton method that computes the Jacobian using finite
+        differencing. GMAT supports forward, central, and backward
+        differencing to compute the Jacobian.</p></div><div class="refsection"><a name="N176E1"></a><h4>Broyden</h4><p><span class="guilabel">Broyden</span>&rsquo;s method uses the slope between
+        state iterations as an approximation of the first derivative instead
+        of numerically calculating the first derivative using finite
+        differencing. This results in substantially fewer function
+        evaluations. The Broyden iterate is updated using the following
+        equation.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_DifferentialCorrector_BroydenUpdate.png" align="middle" height="92"></td></tr></table></div></div></div><div class="refsection"><a name="N176F1"></a><h4>ModifiedBroyden</h4><p>The modified <span class="guilabel">Broyden</span>&rsquo;s method updates the
+        inverse of the Jacobian matrix to avoid numerical issues in matrix
+        inversion when solving near singular problems. Like
+        <span class="guilabel">Broyden</span>&rsquo;s method, it requires fewer function
+        evaluations than the <span class="guilabel">NewtonRaphson</span> algorithm. The
+        inverse of the Jacobian, H, is updated using the following
+        equation,</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_DifferentialCorrector_ModBroydenUpdate_1.png" align="middle" height="67"></td></tr></table></div></div><p>where</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_DifferentialCorrector_ModBroydenUpdate_2.png" align="middle" height="182"></td></tr></table></div></div></div></div><div class="refsection"><a name="N17713"></a><h3>Resource and Command Interactions</h3><p>The <span class="guilabel">DifferentialCorrector</span> object can only be
+      used in the context of targeting-type commands. Please see the
+      documentation for <span class="guilabel">Target</span>,
+      <span class="guilabel">Vary</span>, and <span class="guilabel">Achieve</span> for more
+      information and worked examples.</p></div></div><div class="refsection"><a name="N17724"></a><h2>Examples</h2><div class="informalexample"><p>Create a <span class="guilabel">DifferentialCorrector</span> configured to
+      use <span class="guilabel">Broyden</span>'s method and use it to solve for an
+      apogee raising maneuver.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+Create ImpulsiveBurn aDeltaV
+Create OrbitView a3DPlot
+a3DPlot.Add = {aSat,Earth};
+
+Create DifferentialCorrector aDC
+aDC.Algorithm = 'Broyden'
+
+BeginMissionSequence
+
+Propagate aProp(aSat){aSat.Periapsis}
+
+Target aDC
+
+    Vary aDC(aDeltaV.Element1 = 0.01)
+    Maneuver aDeltaV(aSat)
+    Propagate aProp(aSat){aSat.Apoapsis}
+    Achieve aDC(aSat.RMAG = 12000)
+
+EndTarget</code>    </pre></div><p>To see further examples for how the
+    <span class="guilabel">DifferentialCorrector</span> object is used in conjunction
+    with <span class="guilabel">Target</span>, <span class="guilabel">Vary</span>, and
+    <span class="guilabel">Achieve</span> commands to solve orbit problems, see the
+    <span class="guilabel">Target</span> command examples.</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ContactLocator.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ElectricTank.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">ContactLocator&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;ElectricTank</td></tr></table></div></body></html>

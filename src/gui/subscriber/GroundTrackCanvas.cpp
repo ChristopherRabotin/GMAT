@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -288,6 +288,8 @@ void GroundTrackCanvas::SetGl2dDrawingOption(const std::string &centralBodyName,
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::ClearPlot()
 {
+   SetGLContext(); // Ensure context is valid; placate some GL drivers
+
    //loj: black for now.. eventually it will use background color
    glClearColor(0.0, 0.0, 0.0, 1);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

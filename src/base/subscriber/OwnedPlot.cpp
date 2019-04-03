@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -34,6 +34,7 @@
 #include "PlotInterface.hpp"     // for XY plot
 #include "SubscriberException.hpp"
 #include "MessageInterface.hpp"  // for ShowMessage()
+#include "ColorTypes.hpp"
 
 //#define DEBUG_OwnedPlot_INIT 1
 //#define DEBUG_OwnedPlot_PARAM 1
@@ -119,7 +120,6 @@ OwnedPlot::OwnedPlot(const std::string &name, const std::string &plotTitle,
    mIsOwnedPlotWindowSet   (false),
    mDataCollectFrequency   (1),
    mUpdatePlotFrequency    (1),
-   defaultColor            (0xFF0000),
    markerSize              (3),
    markerStyle             (-1),
    lineWidth               (1),
@@ -140,6 +140,35 @@ OwnedPlot::OwnedPlot(const std::string &name, const std::string &plotTitle,
    objectTypeNames.push_back("XYPlot");
    objectTypeNames.push_back("OwnedPlot");
    parameterCount = OwnedPlotParamCount;
+
+   // Buffer 16 default colors
+   defaultColor.push_back(GmatColor::BLUE);
+   defaultColor.push_back(GmatColor::GREEN);
+   defaultColor.push_back(GmatColor::RED);
+   defaultColor.push_back(GmatColor::PURPLE);
+   defaultColor.push_back(GmatColor::ORANGE);
+   defaultColor.push_back(GmatColor::GOLDEN_ROD);
+   defaultColor.push_back(GmatColor::MAROON);
+   defaultColor.push_back(GmatColor::BROWN);
+   defaultColor.push_back(GmatColor::BLUE_VIOLET);
+   defaultColor.push_back(GmatColor::DARK_OLIVE_GREEN);
+   defaultColor.push_back(GmatColor::MAGENTA);
+   defaultColor.push_back(GmatColor::DARK_GRAY);
+   defaultColor.push_back(GmatColor::PLUM);
+   defaultColor.push_back(GmatColor::MIDNIGHT_BLUE);
+   defaultColor.push_back(GmatColor::SIENNA);
+   defaultColor.push_back(GmatColor::MEDIUM_SPRING_GREEN);
+
+   // Swap R and B values: ColorTypes follows a different order from TSPlot
+   for (UnsignedInt i = 0; i < defaultColor.size(); ++i)
+   {
+      Integer red   = defaultColor[i] & 0xff;
+      Integer green = defaultColor[i] & 0x00ff00;
+      Integer blue  = defaultColor[i] & 0xff0000;
+      red = red << 16;
+      blue = blue >> 16;
+      defaultColor[i] = red + green + blue;
+   }
 }
 
 
@@ -627,8 +656,9 @@ Integer OwnedPlot::GetIntegerParameter(const Integer id) const
    case UPDATE_PLOT_FREQUENCY:
       return mUpdatePlotFrequency;
 
+   /// @todo: add code to index into the array
    case DEFAULT_COLOR:
-      return defaultColor;
+      return defaultColor[0];
 
    case LINE_WIDTH:
       return lineWidth;
@@ -690,8 +720,9 @@ Integer OwnedPlot::SetIntegerParameter(const Integer id, const Integer value)
          return value;
 
       case DEFAULT_COLOR:
-         defaultColor = value;
-         return defaultColor;
+         /// @todo: add code to index into the array
+         defaultColor[0] = value;
+         return defaultColor[0];
 
       case LINE_WIDTH:
          lineWidth = value;
@@ -899,7 +930,7 @@ bool OwnedPlot::SetStringParameter(const Integer id, const std::string &value)
                curveNames.end())
          {
             curveNames.push_back(value);
-            curveColor.push_back(defaultColor);
+            curveColor.push_back(defaultColor[curveColor.size() % defaultColor.size()]);
             curveLineWidth.push_back(lineWidth);
             curveLineStyle.push_back(lineStyle);
             if (markerStyle == -1)
@@ -984,7 +1015,7 @@ bool OwnedPlot::SetStringParameter(const Integer id, const std::string &value,
          else
          {
             curveNames.push_back(value);
-            curveColor.push_back(defaultColor);
+            curveColor.push_back(defaultColor[curveColor.size() % defaultColor.size()]);
             curveLineWidth.push_back(lineWidth);
             curveLineStyle.push_back(lineStyle);
             if (markerStyle == -1)

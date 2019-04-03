@@ -1,0 +1,105 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Design the Trajectory</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="OptimalLunarFlyby.html" title="Chapter&nbsp;9.&nbsp;Optimal Lunar Flyby using Multiple Shooting"><link rel="prev" href="ch09s03.html" title="Configure the Mission Sequence"><link rel="next" href="Tut_UsingGMATFunctions.html" title="Chapter&nbsp;10.&nbsp;Mars B-Plane Targeting Using GMAT Functions"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Design the Trajectory</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ch09s03.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;9.&nbsp;Optimal Lunar Flyby using Multiple Shooting</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Tut_UsingGMATFunctions.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N12C37"></a>Design the Trajectory</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12C3A"></a>Overview</h3></div></div></div><p>We are now ready to design the trajectory. We&rsquo;ll do this in a
+      couple of steps:</p><div class="orderedlist"><ol class="orderedlist compact" type="1"><li class="listitem"><p>Run the script configuration and verify your
+          configuration.</p></li><li class="listitem"><p>Run the mission applying only the patch point constraints to
+          provide a smooth trajectory.</p></li><li class="listitem"><p>Run the mission with all constraints applied generating an
+          optimal solution.</p></li><li class="listitem"><p>Run the mission with an alternative initial guess.</p></li><li class="listitem"><p>Add a new constraint and rerun the mission.</p></li></ol></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12C50"></a>Step 1: Verify Your Configuration</h3></div></div></div><p>If your script is configured correctly, when you click
+      <span class="guilabel">Save-Sync-Run</span> in the bottom of the script editor,
+      you should see an <span class="guilabel">OrbitView</span> graphics window display
+      the initial guess for the trajectory as shown below. In the graphics,
+      <span class="guilabel">satTOI</span> is displayed in green,
+      <span class="guilabel">satFlyBy_Backward</span> is displayed in orange,
+      <span class="guilabel">satFlyBy_Forward</span> is displayed in dark red, and
+      <span class="guilabel">satMOI_Backward</span> is displayed in bright red, and
+      <span class="guilabel">satMOI_Forward</span> is displayed in blue.</p><div class="figure"><a name="Tut_OptimalFlyby_VerfiyConfig"></a><p class="title"><b>Figure&nbsp;9.4.&nbsp;View of Discontinuous Trajectory</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_OptimalFlyby_VerifyConfig.png" align="middle" height="608" alt="View of Discontinuous Trajectory"></td></tr></table></div></div></div></div><br class="figure-break"><p>You can use the mouse to manipulate the
+      <span class="guilabel">OrbitView</span> to see that the patch points are indeed
+      discontinuous for the initial guess as shown below in the two screen
+      captures. If your configuration does not provide you with similar
+      graphics, compare your script to the one provided for this tutorial and
+      address any differences.</p><div class="figure"><a name="Tut_OptimalFlyby_VerifyConfig2"></a><p class="title"><b>Figure&nbsp;9.5.&nbsp;Alternate View (1) of Discontinuous Trajectory</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_OptimalFlyby_VerifyConfig2.png" align="middle" height="490" alt="Alternate View (1) of Discontinuous Trajectory"></td></tr></table></div></div></div></div><br class="figure-break"><div class="figure"><a name="Tut_OptimalFlyby_VerifyConfig3"></a><p class="title"><b>Figure&nbsp;9.6.&nbsp;Alternate View (2) of Discontinuous Trajectory</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_OptimalFlyby_VerifyConfig3.png" align="middle" height="501" alt="Alternate View (2) of Discontinuous Trajectory"></td></tr></table></div></div></div></div><br class="figure-break"></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12C96"></a>Step 2: Find a Smooth Trajectory</h3></div></div></div><p>At this point in the tutorial, your script is configured to
+      eliminate the patch point discontinuities but does not apply mission
+      constraints. We need to make a few small modifications before
+      proceeding. We will turn off the <span class="guilabel">OrbitView</span> to
+      improve the run time, and we will remove the <span class="guilabel">Stop</span>
+      command so that the optimizer will attempt to find a solution.</p><div class="orderedlist"><ol class="orderedlist compact" type="1"><li class="listitem"><p>Near the bottom of the script, comment out the
+          <span class="guilabel">Stop</span> command.</p></li><li class="listitem"><p>In the configuration of <span class="guilabel">EarthView</span>, change
+          <span class="guilabel">ShowPlot</span> to <span class="guilabel">false.</span></p></li><li class="listitem"><p>Click <span class="guilabel">Save Sync Run</span>.</p></li></ol></div><p>After a few optimizer iterations you should see &ldquo;NLPOpt converged
+      to within target accuracy" displayed in the GMAT message window and your
+      XY plot graphics should appear as shown below. Let&rsquo;s discuss the content
+      of these windows. The upper left window shows the RSS history of
+      velocity error at the two patch points during the optimization process.
+      The lower left window shows the RSS history of the position error. The
+      upper right window shows error in mission orbit inclination, and the
+      lower right window shows error mission orbit apogee and perigee radii.
+      You can see that in all cases the patch point discontinuities were
+      driven to zero, but since other constraints were not applied there are
+      still errors in some mission constraints.</p><div class="figure"><a name="Tut_OptimalFlyby_SmoothTrajectory"></a><p class="title"><b>Figure&nbsp;9.7.&nbsp;Smooth Trajectory Solution</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_OptimalFlyby_SmoothTrajectory.png" align="middle" height="361" alt="Smooth Trajectory Solution"></td></tr></table></div></div></div></div><br class="figure-break"><p>Before proceeding to the next step, go to the message window and
+      copy and paste the final values of the optimization variables to a text
+      editor for later use:</p><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N12CCB"></a>Step 3: Find an Optimal Trajectory</h4></div></div></div><p>At this point in the tutorial, your script is configured to
+        eliminate the patch point discontinuities but does not apply
+        constraints. We need to make a few small modifications to the script
+        to find an solution that meets the constraints.</p><div class="orderedlist"><ol class="orderedlist compact" type="1"><li class="listitem"><p>Remove the &ldquo;%&rdquo; sign from the all
+            N<span class="guilabel">onlinearConstraint</span> commands and the
+            <span class="guilabel">Minimize</span> command:</p><div class="informalexample"><pre class="programlisting"><code class="code">NonlinearConstraint NLPOpt(satTOI.INC=conTOIInclination)
+NonlinearConstraint NLPOpt(satTOI.RadPer=conTOIPeriapsis)
+NonlinearConstraint NLPOpt(satMOI_Backward.RadPer = conMOIPeriapsis)
+NonlinearConstraint NLPOpt(launchRdotV=0)
+NonlinearConstraint NLPOpt(satMOI_Forward.EarthMJ2000Eq.INC =. . .
+NonlinearConstraint NLPOpt(satMOI_Forward.RadApo=conMOIApoapsis)
+Minimize NLPOpt(Cost)
+</code></pre></div></li><li class="listitem"><p>Click <span class="guilabel">Save Sync Run</span>.</p></li></ol></div><p>The screen capture below shows the plots after optimization has
+        been completed. Notice that the constraint errors have been driven to
+        zero in the plots</p><div class="figure"><a name="Tut_OptimalFlyby_OptimalTrajectory"></a><p class="title"><b>Figure&nbsp;9.8.&nbsp;Optimal Trajectory Solution</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_OptimalFlyby_OptimalTrajectory.png" align="middle" height="361" alt="Optimal Trajectory Solution"></td></tr></table></div></div></div></div><br class="figure-break"><p>Another way to verify that the constraints have been satisfied
+        is to look in the message window where the final constraint variances
+        are displayed as shown below. We could further reduce the variances by
+        lowering the tolerance setting on the optimizer.</p><div class="informalexample"><pre class="programlisting"><code class="code">Equality Constraint Variances:
+      Delta satTOI.INC = 1.44773082411e-011
+      Delta satTOI.RadPer = 7.08496372681e-010
+      Delta satMOI_Backward.RadPer = -3.79732227884e-007
+      Delta launchRdotV = -1.87725390788e-014
+      Delta satTOI.EarthMJ2000Eq.X = 0.00037122167123
+      Delta satTOI.EarthMJ2000Eq.Y = 2.79954474536e-005
+      Delta satTOI.EarthMJ2000Eq.Z = 2.78138068097e-005
+      Delta satTOI.EarthMJ2000Eq.VX = -3.87579257577e-009
+      Delta satTOI.EarthMJ2000Eq.VY = 1.5329883335e-009
+      Delta satTOI.EarthMJ2000Eq.VZ = -6.84140494256e-010
+      Delta satMOI_Backward.EarthMJ2000Eq.X = 0.0327844279818
+      Delta satMOI_Backward.EarthMJ2000Eq.Y = 0.0501471919124
+      Delta satMOI_Backward.EarthMJ2000Eq.Z = 0.0063349630509
+      Delta satMOI_Backward.EarthMJ2000Eq.VX = -7.5196416871e-008
+      Delta satMOI_Backward.EarthMJ2000Eq.VY = -7.48570442854e-008
+      Delta satMOI_Backward.EarthMJ2000Eq.VZ = -6.01668809219e-009
+      Delta satMOI_Forward.EarthMJ2000Eq.INC = -1.25488952563e-010
+      Delta satMOI_Forward.RadApo = -0.000445483252406
+</code></pre></div><p>Finally, let&rsquo;s look at the delta-V of the solution. In this case
+        the delta-V is simply the value of <span class="guilabel">MOI.Element1</span>
+        which is displayed in the message window with a value of -0.09171
+        km/s.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N12CFF"></a>Step 4: Use a New Initial Guess</h4></div></div></div><p>In Step 2 above, you saved the final solution for the smooth
+        trajectory run. Let&rsquo;s use those values as the initial guess and see if
+        we find a similar solution as found in the previous step. In the
+        <span class="guilabel">ScriptEvent</span> that defines the initial guess, paste
+        the values below, below the values already there. (don&rsquo;t overwrite the
+        old values!). Once you have changed the guess, run the mission
+        again.</p><div class="informalexample"><pre class="programlisting"><code class="code">launchEpoch = 27698.2503232
+flybyEpoch = 27703.7774182
+moiEpoch = 27723.6487435
+satTOI.X = -6651.63393843
+satTOI.Y = -229.372171037
+satTOI.Z = -168.481408909
+satTOI.VX = 0.244028352166
+satTOI.VY = -9.56544906767
+satTOI.VZ = 5.11103080924
+satFlyBy_Forward.X = 869.368923086
+satFlyBy_Forward.Y = -6284.53685414
+satFlyBy_Forward.Z = -3598.94426638
+satFlyBy_Forward.VX = 1.14614444527
+satFlyBy_Forward.VY = -0.726070354598
+satFlyBy_Forward.VZ = -0.617780594192
+satMOI_Backward.X = -53541.9714485
+satMOI_Backward.Y = -68231.6304631
+satMOI_Backward.Z = -1272.77554803
+satMOI_Backward.VX = 2.0799329871
+satMOI_Backward.VY = -1.89082570193
+satMOI_Backward.VZ = -0.284385092038
+</code></pre></div><p>We see in this case the optimization converged and found
+        essentially the same solution of -0.0907079 km/s</p><div class="figure"><a name="Tut_OptimalFlyby_NewGuess"></a><p class="title"><b>Figure&nbsp;9.9.&nbsp;Solution Using New Guess</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_OptimalFlyby_NewGuess.png" align="middle" height="361" alt="Solution Using New Guess"></td></tr></table></div></div></div></div><br class="figure-break"></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12D1A"></a>Step 5: Apply a New Constraint</h3></div></div></div><p>We leave it as an exercise, to apply a constraint that the lunar
+      flyby periapsis radius must be greater than or equal to 5000 km.</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ch09s03.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="OptimalLunarFlyby.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Tut_UsingGMATFunctions.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Configure the Mission Sequence&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;10.&nbsp;Mars B-Plane Targeting Using GMAT Functions</td></tr></table></div></body></html>

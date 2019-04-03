@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -45,7 +45,25 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  Estimator* CreateEstimator(const std::string &ofType, const std::string &withName)
+//  GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates and returns an object of the requested Estimator class.
+ *
+ * @param ofType type of Estimator object to create and return.
+ * @param withName the name for the newly-created Estimator object.
+ *
+ * @return A pointer to the created object.
+ */
+//------------------------------------------------------------------------------
+GmatBase* EstimatorFactory::CreateObject(const std::string &ofType,
+                                         const std::string &withName)
+{
+   return CreateSolver(ofType, withName);
+}
+
+//------------------------------------------------------------------------------
+//  Solver* CreateSolver(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested Estimator class.
@@ -57,7 +75,7 @@
  */
 //------------------------------------------------------------------------------
 Solver* EstimatorFactory::CreateSolver(const std::string &ofType,
-                                    const std::string &withName)
+                                       const std::string &withName)
 {
    // Not sure that we want to break these guys out like this; left in in case
    //it's desired

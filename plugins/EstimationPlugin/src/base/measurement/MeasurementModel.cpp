@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -2020,7 +2020,8 @@ const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents,
    {
       if (forObservation->dataFormat == "GMAT_OD")
       {
-         ((PhysicalMeasurement*)measurement)->SetConstantFrequency(forObservation->uplinkFreq);
+         //((PhysicalMeasurement*)measurement)->SetConstantFrequency(forObservation->uplinkFreq);       // ObservationData.uplinkFreq is no longer in use
+         ((PhysicalMeasurement*)measurement)->SetConstantFrequency(forObservation->uplinkFreqAtRecei);  // use ObservationData.uplinkFreqAtRecei instead
          ((PhysicalMeasurement*)measurement)->SetFrequencyBand(forObservation->uplinkBand);
 //       ((PhysicalMeasurement*)measurement)->SetRangeModulo(forObservation->rangeModulo);
       }

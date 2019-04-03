@@ -63,8 +63,6 @@ public:
    DEFAULT_TO_NO_CLONES
 
 protected:
-   /// The FileThrust that is available for the force models
-   FileThrust *burnForce;
    /// The vector of forces managed by the Sandbox
    std::vector<PhysicalModel*>   *transientForces;
    /// Name of the thrust history file object

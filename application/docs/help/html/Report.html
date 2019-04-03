@@ -1,0 +1,81 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Report</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="Propagate.html" title="Propagate"><link rel="next" href="RunEstimator.html" title="RunEstimator"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Report</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Propagate.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="RunEstimator.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Report"></a><div class="titlepage"></div><a name="N24A1D" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Report</span></h2><p>Report &mdash; Allows you to write data to a text file</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><code class="literal">Report</code>  <em class="replaceable"><code>ReportName</code></em>  <em class="replaceable"><code>DataList</code></em>
+
+<em class="replaceable"><code>ReportName</code></em>
+  <em class="replaceable"><code>ReportName</code></em> option allows you to specify the 
+  ReportFile for data output.
+<em class="replaceable"><code>DataList</code></em>
+  <em class="replaceable"><code>DataList</code></em> option allows you to output data to the Filename 
+  specified by the <em class="replaceable"><code>ReportName</code></em>. Multiple objects can be written 
+  in the <em class="replaceable"><code>DataList</code></em> when they are separated by spaces.</pre></div><div class="refsection"><a name="N24A4D"></a><h2>Description</h2><p>The <span class="guilabel">Report</span> command allows you to report data
+    at specific points in your mission sequence. GMAT allows you to insert
+    <span class="guilabel">Report</span> command into the <span class="guilabel">Mission</span>
+    tree at any location. <span class="guilabel">Report</span> command can be used
+    through GMAT&rsquo;s GUI or via the script interface. The parameters reported by
+    <span class="guilabel">Report</span> command are placed into a report file that can
+    be accessed at the end of the mission run.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="ReportFile.html" title="ReportFile"><span class="refentrytitle">ReportFile</span></a></p></div><div class="refsection"><a name="N24A68"></a><h2>Options</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">ReportName</span></td><td><p> The <span class="guilabel">ReportName</span> option allows
+            the user to specify the <span class="guilabel">ReportFile</span> for data
+            output. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Resource reference</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">ReportFile</span> resource</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DefaultReportFile</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DataList</span></td><td><p> The <span class="guilabel">DataList </span>option allows the
+            user to output data to the file name that is specified by the
+            <span class="guilabel">ReportName</span>. Multiple objects can be in the
+            <span class="guilabel">DataList </span>when they are separated by
+            spaces.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Reference array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Spacecraft</span>,
+                    <span class="guilabel">ImpulsiveBurn</span> reportable parameters,
+                    <span class="guilabel">Array</span>, Array Element,
+                    <span class="guilabel">Variable</span>, or a
+                    <span class="guilabel">String</span>.</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DefaultSC.A1ModJulian</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N24AF0"></a><h2>GUI</h2><p>Figure below shows default settings for <span class="guilabel">Report</span>
+    command:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Report_GUI_2.png" align="middle" height="362"></td></tr></table></div></div></div><div class="refsection"><a name="N24B01"></a><h2>Remarks</h2><p><span class="guilabel">Report</span> command can be used to report data to a
+    report file at specific points in your mission. If you want data to be
+    reported at each propagation step of the entire mission duration, then you
+    should not use <span class="guilabel">Report</span> command. Instead you should use
+    <span class="guilabel">ReportFile</span> resource. See
+    <span class="guilabel">ReportFile</span> resource section of the User's Guide to
+    learn about the syntax that allows you to report data at each raw
+    integrator steps.</p></div><div class="refsection"><a name="N24B11"></a><h2>Examples</h2><div class="informalexample"><p>Propagate an orbit for two days and report epoch and selected
+      orbital elements to a report file using the <span class="guilabel">Report</span>
+      command.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create ReportFile aReport
+
+Create Propagator aProp
+
+BeginMissionSequence
+
+Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
+aSat.EarthMJ2000Eq.RAAN
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
+aSat.EarthMJ2000Eq.RAAN</code></pre></div><div class="informalexample"><p>Report user-defined parameters such as variables, array elements
+      and a string to a report file using the <span class="guilabel">Report</span>
+      command.</p><pre class="programlisting"><code class="code">Create ReportFile aReport
+
+Create Variable aVar aVar2
+aVar = 100
+aVar2 = 2000
+
+Create Array aArray[2,2]
+aArray(1, 1) = 2
+aArray(1, 2) = 3
+aArray(2, 1) = 4
+aArray(2, 2) = 5
+
+Create String aString
+aString = 'GMAT is awesome'
+
+BeginMissionSequence
+
+Report aReport aVar aVar2 aArray(1,1) aArray(1,2) aArray(2,1) ...
+aArray(2,2) aString</code></pre></div><div class="informalexample"><p>While spacecraft propagates for less than a day, report
+      spacecraft's true anomaly, eccentricity and altitude after every 3600
+      seconds using the <span class="guilabel">Report</span> command:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create ReportFile aReport
+Create Propagator aProp 
+
+BeginMissionSequence
+
+While aSat.ElapsedDays &lt; 1
+ Propagate aProp(aSat) {aSat.ElapsedSecs = 3600 }
+ Report aReport aSat.Earth.TA aSat.Earth.ECC aSat.Earth.Altitude
+EndWhile</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Propagate.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="RunEstimator.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Propagate&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;RunEstimator</td></tr></table></div></body></html>

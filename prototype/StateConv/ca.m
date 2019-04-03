@@ -1,2 +1,0 @@
-clear all
-clc

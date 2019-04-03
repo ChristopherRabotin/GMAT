@@ -1,0 +1,57 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>If</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="Global.html" title="Global"><link rel="next" href="Maneuver.html" title="Maneuver"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">If</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Global.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Maneuver.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="If"></a><div class="titlepage"></div><a name="N23989" class="indexterm"></a><a name="N2398C" class="indexterm"></a><a name="N2398F" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">If</span></h2><p>If &mdash; Conditionally execute a series of commands</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><code class="literal">If</code> <em class="replaceable"><code>logical expression</code></em>
+    [<em class="replaceable"><code>script statement</code></em>]
+    &hellip;
+<code class="literal">EndIf</code></pre><pre class="synopsis"><code class="literal">If</code> <em class="replaceable"><code>logical expression</code></em>
+    [<em class="replaceable"><code>script statement</code></em>]
+    &hellip;
+<code class="literal">Else</code>
+    [<em class="replaceable"><code>script statement</code></em>]
+    &hellip;
+<code class="literal">EndIf</code></pre></div><div class="refsection"><a name="N239C1"></a><h2>Description</h2><p>The <span class="guilabel">If</span> command is a control logic statement
+    that executes a series of commands if the value of the provided logical
+    expression is true. The syntax of the logical expression is described in
+    the <a class="link" href="ScriptLanguage.html" title="Script Language">script language
+    reference</a>.</p><p>The <span class="guilabel">If</span> command can optionally contain an
+    <span class="guilabel">Else</span> clause that defines a series of commands to
+    execute if the associated logical expression is false.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="ScriptLanguage.html" title="Script Language"><span class="refentrytitle">Script Language</span></a>, <a class="xref" href="For.html" title="For"><span class="refentrytitle">For</span></a>, <a class="xref" href="While.html" title="While"><span class="refentrytitle">While</span></a></p></div><div class="refsection"><a name="N239E2"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Else_GUI.png" align="middle" height="318"></td></tr></table></div></div><p>The <span class="guilabel">If</span> command GUI panel features a table in
+    which you can build a complex logical expression. The rows of the table
+    correspond to individual relational expressions in a compound logical
+    expression (up to 10), and the columns correspond to individual elements
+    of those expressions. The first line automatically contains a default
+    statement:</p><pre class="programlisting"><code class="code">If DefaultSC.ElapsedDays &lt; 1.0</code></pre><p>The first column of the first row contains a placeholder for the
+    <span class="guilabel">If</span> command name. This cannot be changed. The first
+    column of each additional row contains the logical operator
+    (<span class="guilabel">&amp;</span>, <span class="guilabel">|</span>) that joins the
+    expression in that row with the one above it. To select a logical
+    operator, double-click or right-click in the appropriate box in the table
+    to display a selection window. Click the correct operator and click
+    <span class="guilabel">OK</span> to select it.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_IfWhile_LogicalOperators.png" align="middle" height="336"></td></tr></table></div></div><p>The <span class="guilabel">Left Hand Side</span> column contains the
+    left-hand side of each individual expression. Double-click the cell to
+    type a parameter name. To set this value from a parameter selection list
+    instead, either click &ldquo;&hellip;&rdquo; to the left of the cell you want to set, or
+    right-click the cell itself. A <span class="guilabel">ParameterSelectDialog</span>
+    window will appear that allows you to choose a parameter.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Else_GUI_3.png" align="middle" height="416"></td></tr></table></div></div><p>The <span class="guilabel">Condition</span> column contains the conditional
+    operator (<span class="guilabel">==</span>, <span class="guilabel">~=</span>,
+    <span class="guilabel">&lt;</span>, etc.) that joins the left-hand and right-hand
+    sides of the expression. To select a relational operator, double-click or
+    right-click in the appropriate box in the table, and a selection window
+    will appear. Click the correct operator and click <span class="guilabel">OK</span>
+    to select it.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_IfWhile_RelationalOperators.png" align="middle" height="336"></td></tr></table></div></div><p>Finally, the <span class="guilabel">Right Hand Side</span> column contains
+    the right-hand side of the expression. This value can be modified the same
+    way as the <span class="guilabel">Left Hand Side</span> column.</p><p>When you are finished, click <span class="guilabel">Apply</span> to save your
+    changes, or click <span class="guilabel">OK</span> to save your changes and close
+    the window. The command will be validated when either button is
+    clicked.</p></div><div class="refsection"><a name="N23A48"></a><h2>Examples</h2><div class="informalexample"><p>A simple <span class="guilabel">If</span> statement:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create ForceModel aForceModel
+
+Create Propagator aProp
+aProp.FM = aForceModel
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 1, aSat.Altitude = 300}
+If aSat.Altitude &lt; 301 &amp; aSat.Altitude &gt; 299
+    % propagation stopped on altitude constraint
+Else
+    % propagation continued for 1 day
+EndIf</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Global.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Maneuver.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Global&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Maneuver</td></tr></table></div></body></html>

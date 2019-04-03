@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -29,6 +29,9 @@
  */
 //------------------------------------------------------------------------------
 
+//#include "windows.h"                    // It needs for memory leak test
+//#include "psapi.h"                      // It needs for memory leak test
+
 #include "GmatGlobal.hpp"
 #include "MessageInterface.hpp"
 #include <algorithm>                    // Required for GCC 4.3
@@ -48,6 +51,31 @@ const Integer GmatGlobal::INTEGER_WIDTH = 4;
 //---------------------------------
 // public methods
 //---------------------------------
+
+// // It needs for memory leak test      
+//unsigned long GmatGlobal::GetUsedMemorySize(bool isAtStart)
+//{
+//   static unsigned long startLen, endLen;
+//
+//   // Get memory size used for this process
+//   PROCESS_MEMORY_COUNTERS_EX pmc;
+//   GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PPROCESS_MEMORY_COUNTERS>(&pmc), sizeof(pmc));
+//   SIZE_T memSize = pmc.PrivateUsage;
+//   
+//   if (isAtStart)
+//   {
+//      startLen = memSize;
+//      fprintf(repPtr, "Hi there 1: memory size = %d\n", startLen);
+//   }
+//   else
+//   {
+//      endLen = memSize;
+//      fprintf(repPtr, "Hi there 2: memory size = %d    difference = %d\n", endLen, endLen - startLen);
+//   }
+//
+//   return memSize;
+//}
+
 
 //------------------------------------------------------------------------------
 // GmatGlobal* Instance()
@@ -346,6 +374,34 @@ void GmatGlobal::SetGuiMode(Integer mode)
 Integer GmatGlobal::GetPlotMode()
 {
    return plotMode;
+}
+
+//------------------------------------------------------------------------------
+// void SetCommandEchoMode(bool tf)
+//------------------------------------------------------------------------------
+/**
+ * Sets the command echo mode
+ *
+ * @param tf true to turn on command echo mde, false to turn it off
+ */
+//------------------------------------------------------------------------------
+void GmatGlobal::SetCommandEchoMode(bool tf)
+{
+   commandEchoMode = tf;
+}
+
+//------------------------------------------------------------------------------
+// bool EchoCommands()
+//------------------------------------------------------------------------------
+/**
+ * Returns the current command echo mode
+ *
+ * @return true if the mode is set to echo commands to the message window
+ */
+//------------------------------------------------------------------------------
+bool GmatGlobal::EchoCommands()
+{
+   return commandEchoMode;
 }
 
 //------------------------------------------------------------------------------
@@ -806,6 +862,63 @@ void GmatGlobal::SetItrfCoefficientsFile(ItrfCoefficientsFile *itrf)
    theItrfFile = itrf;
 }
 
+//------------------------------------------------------------------------------
+// void SetLogfileSource(Integer src, const std::string logfileName)
+//------------------------------------------------------------------------------
+void GmatGlobal::SetLogfileSource(Integer src, const std::string logfileName)
+{
+   logfileSrc = src;
+   if (logfileName != "")
+   {
+      if (src == GmatGlobal::CMD_LINE)
+         cmdLineLog = logfileName;
+      else if (src == GmatGlobal::SCRIPT)
+         scriptLog  = logfileName;
+      else if (src == GmatGlobal::STARTUP)
+         startupLog = logfileName;
+   }
+}
+
+//------------------------------------------------------------------------------
+// void SetLogfileName(Integer forSrc, const std::string logfileName)
+//------------------------------------------------------------------------------
+void GmatGlobal::SetLogfileName(Integer forSrc, const std::string logfileName)
+{
+   if (forSrc == GmatGlobal::CMD_LINE)
+      cmdLineLog = logfileName;
+   else if (forSrc == GmatGlobal::SCRIPT)
+      scriptLog  = logfileName;
+   else if (forSrc == GmatGlobal::STARTUP)
+      startupLog = logfileName;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetLogfileSource()
+//------------------------------------------------------------------------------
+Integer GmatGlobal::GetLogfileSource()
+{
+   return logfileSrc;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetLogfileName(Integer forSrc)
+//------------------------------------------------------------------------------
+std::string GmatGlobal::GetLogfileName(Integer forSrc)
+{
+   Integer srcId = forSrc;
+   if (forSrc == 0) // get current log file name
+      srcId = GetLogfileSource();
+   
+   if (srcId == GmatGlobal::CMD_LINE)
+      return cmdLineLog;
+   else if (srcId == GmatGlobal::SCRIPT)
+      return scriptLog;
+   else if (srcId == GmatGlobal::STARTUP)
+      return startupLog;
+   else
+      return "";
+}
+
 
 //------------------------------------------------------------------------------
 // void  AddHiddenCommand(const std::string &cmd)
@@ -820,7 +933,7 @@ void GmatGlobal::AddHiddenCommand(const std::string &cmd)
 {
    #ifdef DEBUG_HIDDEN_COMMAND
    MessageInterface::ShowMessage
-      ("FileManager::AddHiddenCommand() Adding %s to HiddenCommands\n",
+      ("GmatGlobal::AddHiddenCommand() Adding %s to HiddenCommands\n",
        cmd.c_str());
    #endif
 
@@ -910,7 +1023,7 @@ void GmatGlobal::RemoveHiddenCommand(const std::string &cmd)
 {
    #ifdef DEBUG_HIDDEN_COMMAND
    MessageInterface::ShowMessage
-      ("FileManager::RemoveHiddenCommand() Removing %s to HiddenCommands\n",
+      ("GmatGlobal::RemoveHiddenCommand() Removing %s to HiddenCommands\n",
        cmd.c_str());
    #endif
 
@@ -946,7 +1059,7 @@ GmatGlobal::GmatGlobal()
 {
    // Current GMAT version.
    // @note: Make sure to switch it to the official release number for RC1
-   gmatVersion = "R2016a";
+   gmatVersion = "R2017a";
    
    isTesting = false;                      // It is a temporary fix in order to run gression test with runmode = TESTING. 
                                            // It needs to improve in the next GMAT release
@@ -962,6 +1075,7 @@ GmatGlobal::GmatGlobal()
    isWritingParameterInfo = false;
    isWritingFilePathInfo = false;
    isWritingGmatKeyword = true;
+   commandEchoMode = false;
    runMode = NORMAL;
    runState = Gmat::IDLE;
    guiMode = NORMAL_GUI;
@@ -971,6 +1085,15 @@ GmatGlobal::GmatGlobal()
    
    SetDefaultFormat();
    SetToDefaultFormat();
+   
+   // Logfile
+   logfileSrc = GmatGlobal::STARTUP;
+   cmdLineLog = "";
+   scriptLog  = "";
+   startupLog = "";
+
+
+//   repPtr = fopen("rep.txt", "w");          // It needs for memory leak test
 }
 
 

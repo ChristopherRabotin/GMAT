@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -30,6 +30,7 @@
 //------------------------------------------------------------------------------
 
 #include "GmatFunction.hpp"
+#include "FunctionException.hpp"
 #include "Assignment.hpp"        // for Assignment::GetMathTree()
 #include "FileManager.hpp"       // for GetGmatFunctionPath()
 #include "FileUtil.hpp"          // for ParseFileName(), GetCurrentWorkingDirectory()
@@ -74,9 +75,9 @@
 //{
 //};
 
-
-
-
+//---------------------------------
+// public
+//---------------------------------
 //------------------------------------------------------------------------------
 // GmatFunction(std::string &name)
 //------------------------------------------------------------------------------
@@ -87,7 +88,7 @@
  */
 //------------------------------------------------------------------------------
 GmatFunction::GmatFunction(const std::string &name) :
-   Function("GmatFunction", name)
+   UserDefinedFunction("GmatFunction", name)
 {
    #ifdef DEBUG_FUNCTION_CONSTRUCT
    MessageInterface::ShowMessage
@@ -211,7 +212,7 @@ GmatFunction::~GmatFunction()
  */
 //------------------------------------------------------------------------------
 GmatFunction::GmatFunction(const GmatFunction &copy) :
-   Function(copy)
+   UserDefinedFunction(copy)
 {
    mIsNewFunction = false;
    unusedGlobalObjectList = NULL;
@@ -290,7 +291,7 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
    #endif
    if (!fcs) return false;
    
-   Function::Initialize(objInit);
+   UserDefinedFunction::Initialize(objInit);
    
    // Initialize the Validator - I think I need to do this each time - or do I?
    validator->SetFunction(this);
@@ -509,7 +510,7 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       }
    }
    // Now remove the ones that were moved to the global object store
-   for (Integer ii = 0; ii < removeFromObjectStore.size(); ii++)
+   for (UnsignedInt ii = 0; ii < removeFromObjectStore.size(); ii++)
       objectStore->erase(removeFromObjectStore.at(ii));
    
    GmatCommand *current = fcs;
@@ -695,9 +696,7 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
    MessageInterface::ShowMessage("   objectsInitialized = %d\n", objectsInitialized);
    #endif
    
-   #if 1
-   // For two modes function parsing, some ref objects are not set without
-   // reinitialization
+   // For two modes function parsing, some ref objects are not set without reinitialization
    // Reinitialize Spacecrafts (LOJ: 2015.01.21) - /MonteCarlo/TestCalcOfGSEtime.script
    // Reinitialize Burns (LOJ:2015.01.09) - Function_TargetCheck.script
    // Reinitialize CalculatedPoints (LOJ:2015.01.08)
@@ -737,7 +736,6 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
       ShowTrace(callCount, t1, "GmatFunction::Execute() END   object re-initialization");
       #endif
    }
-   #endif
    
    #ifdef DEBUG_OBJECT_MAP
    ShowObjects("In GmatFunction::Execute()");
@@ -997,7 +995,7 @@ void GmatFunction::Finalize(bool cleanUp)
    MessageInterface::ShowMessage("   Calling Function::Finalize()\n");
    #endif
    
-   Function::Finalize(cleanUp);
+   UserDefinedFunction::Finalize(cleanUp);
    
    #ifdef DEBUG_FUNCTION_FINALIZE
    MessageInterface::ShowMessage("GmatFunction::Finalize() leaving\n");
@@ -1081,7 +1079,7 @@ bool GmatFunction::SetStringParameter(const Integer id, const std::string &value
          break;
       }
    default:
-      retval = Function::SetStringParameter(id, value);
+      retval = UserDefinedFunction::SetStringParameter(id, value);
       break;
    }
    

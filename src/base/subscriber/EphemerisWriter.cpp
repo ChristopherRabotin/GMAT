@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -420,10 +420,14 @@ void EphemerisWriter::SetInitialData(const std::string &iniEpoch,
    
    #ifdef DEBUG_EPHEMFILE_SET
    MessageInterface::ShowMessage
-      ("EphemerisWriter::SetInitialData() <%p>'%s' leaving, ephemType='%s'\n   "
-       "initialEpochStr='%s', finalEpochStr='%s', stepSizeInSecs=%f, stepSizeInA1Mjd=%.9f, "
-       "useFixedStepSize=%d\n", this, ephemName.c_str(), ephemType.c_str(),
-       initialEpochStr.c_str(), finalEpochStr.c_str(), stepSizeInSecs, useFixedStepSize);
+      ("   initialEpochStr='%s', finalEpochStr='%s',\n   stepSizeInSecs=%.9f, "
+       "stepSizeInA1Mjd=%.9f, useFixedStepSize=%d\n   interpolatorName='%s', "
+       "interpolationOrder=%d\n", initialEpochStr.c_str(), finalEpochStr.c_str(),
+       stepSizeInSecs, stepSizeInA1Mjd, useFixedStepSize,
+       interpolatorName.c_str(), interpolationOrder);
+   MessageInterface::ShowMessage
+      ("EphemerisWriter::SetInitialData() <%p>'%s' leaving, ephemType='%s'\n",
+       this, ephemName.c_str(), ephemType.c_str());
    #endif
 }
 
@@ -487,6 +491,12 @@ void EphemerisWriter::SetRunFlags(bool finalize, bool endOfRun, bool finalized)
 //------------------------------------------------------------------------------
 void EphemerisWriter::SetOrbitData(Real epochInDays, Real state[6])
 {
+   #ifdef DEBUG_EPHEMFILE_DATA
+      MessageInterface::ShowMessage("   %.12lf [%lf %lf %lf %lf %lf %lf]\n",
+            epochInDays, state[0], state[1], state[2], state[3], state[4],
+            state[5]);
+   #endif
+
    currEpochInDays = epochInDays;
    for (int i = 0; i < 6; i++)
       currState[i] = state[i];
@@ -572,6 +582,9 @@ bool EphemerisWriter::Initialize()
        "outputFormat='%s'\n", this, ephemName.c_str(), spacecraftName.c_str(), 
        isInitialized, ephemType.c_str(), stateType.c_str(),
        outputFormat.c_str());
+   MessageInterface::ShowMessage
+      ("   interpolateInitialState=%d, interpolateFinalState=%d\n", interpolateInitialState,
+       interpolateFinalState);
    #endif
    
    if (isInitialized)
@@ -609,14 +622,17 @@ bool EphemerisWriter::Initialize()
       writeDataInDataCS = false;
    
    // Set initial interpolation flag for first and final state
-   if (stepSize == "IntegratorSteps")
-   {
-      if (initialEpochStr != "InitialSpacecraftEpoch")
-         interpolateInitialState = true;
-      
-      if (finalEpochStr != "FinalSpacecraftEpoch")
-         interpolateFinalState = true;
-   }
+   if (initialEpochStr != "InitialSpacecraftEpoch")
+      interpolateInitialState = true;
+   
+   if (finalEpochStr != "FinalSpacecraftEpoch")
+      interpolateFinalState = true;
+   
+   #ifdef DEBUG_EPHEMFILE_INIT
+   MessageInterface::ShowMessage
+      ("   After checking, interpolateInitialState=%d, interpolateFinalState=%d\n",
+       interpolateInitialState, interpolateFinalState);
+   #endif
    
    // Set spacecraft ID
    spacecraftId = spacecraft->GetStringParameter("Id");
@@ -654,7 +670,7 @@ bool EphemerisWriter::Initialize()
          #endif
       }
    }
-     
+   
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
       ("   useFixedStepSize=%d, interpolateInitialState=%d, interpolateFinalState=%d\n",
@@ -898,6 +914,13 @@ bool EphemerisWriter::CheckInitialAndFinalEpoch()
    // From user specified initial epoch to user specified final epoch
    else
    {
+      #ifdef DEBUG_EPHEMFILE_WRITE
+      MessageInterface::ShowMessage
+         ("   ===> Using user specified initial and final epoch, so checking...\n");
+      #endif
+      if (currEpochInDays < initialEpochA1Mjd)
+         initialEpochReached = false;
+      
       // Use tolerance of -1.0e-11 when checking for time to write (GMT-4079 fix)
       //if ((currEpochInDays >= initialEpochA1Mjd) && (currEpochInDays <= finalEpochA1Mjd))
       if (((currEpochInDays - initialEpochA1Mjd) >= -1.0e-11) &&
@@ -911,7 +934,7 @@ bool EphemerisWriter::CheckInitialAndFinalEpoch()
    #ifdef DEBUG_EPHEMFILE_WRITE
    MessageInterface::ShowMessage
       ("EphemerisWriter::CheckInitialAndFinalEpoch() returning writeData=%d, "
-       "finalEpochReached=%d, initial epoch %s\n", writeData,
+       "finalEpochReached=%d, initial epoch %s\n\n", writeData,
        finalEpochReached, initialEpochReached ? "reached" : "not reached");
    #endif
    
@@ -932,14 +955,16 @@ void EphemerisWriter::HandleWriteOrbit()
    DebugWriteTime("   nextReqEpochInSecs = ", nextReqEpochInSecs);
    #endif
    
-   if (useFixedStepSize)
+   // Check interpolateInitialState first
+   if (interpolateInitialState)
    {
+      #ifdef DEBUG_EPHEMFILE_WRITE
+      MessageInterface::ShowMessage
+         ("===> Need to interpolateInitialState, so calling WriteOrbitAt()\n");
+      #endif
       WriteOrbitAt(nextReqEpochInSecs, currState);
-   }
-   else if (interpolateInitialState)
-   {
-      WriteOrbitAt(nextReqEpochInSecs, currState);
-      if (nextReqEpochInSecs == (initialEpochA1Mjd * GmatTimeConstants::SECS_PER_DAY))
+      Real tdiff = nextReqEpochInSecs - (initialEpochA1Mjd * GmatTimeConstants::SECS_PER_DAY);
+      if (GmatMathUtil::Abs(tdiff) <= 1.0-6)
       {
          #ifdef DEBUG_EPHEMFILE_WRITE
          MessageInterface::ShowMessage
@@ -951,6 +976,11 @@ void EphemerisWriter::HandleWriteOrbit()
          initialEpochA1Mjd = -999.999;
          nextOutEpochInSecs = -999.999;
       }
+   }
+   
+   if (useFixedStepSize)
+   {
+      WriteOrbitAt(nextReqEpochInSecs, currState);
    }
    else if (interpolateFinalState)
    {
@@ -1000,7 +1030,10 @@ void EphemerisWriter::HandleEndOfRun()
    #endif
    
    // If not first time and there is data to process, finish up writing
-   if (!firstTimeWriting && !a1MjdArray.empty())
+   //if (!firstTimeWriting && !a1MjdArray.empty())
+   // If not first time writing, finish up writing. For STK array can be empty at the end of
+   // event so do not check for empty array here. (Fix for GMT-5929 LOJ: 2016.12.29)
+   if (!firstTimeWriting)
    {
       #ifdef DEBUG_EPHEMFILE_FINISH
       MessageInterface::ShowMessage("EphemerisWriter::HandleEndOfRun() Calling FinishUpWriting()\n");

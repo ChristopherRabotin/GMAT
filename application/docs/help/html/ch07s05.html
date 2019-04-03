@@ -1,0 +1,51 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Run the Mission</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Tut_TargetFiniteBurn.html" title="Chapter&nbsp;7.&nbsp;Target Finite Burn to Raise Apogee"><link rel="prev" href="ch07s04.html" title="Configure the Mission Sequence"><link rel="next" href="Mars_B_Plane_Targeting.html" title="Chapter&nbsp;8.&nbsp;Mars B-Plane Targeting"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Run the Mission</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ch07s04.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;7.&nbsp;Target Finite Burn to Raise Apogee</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Mars_B_Plane_Targeting.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N11975"></a>Run the Mission</h2></div></div></div><p>Before running the mission, click <span class="guilabel">Save</span> to save
+    the mission to a file of your choice. Now click <span class="guilabel">Run</span>.
+    As the mission runs, you will see GMAT solve the targeting problem. Each
+    iteration and perturbation is shown in
+    <span class="guilabel">DefaultOrbitView</span> window in light blue, and the final
+    solution is shown in red. After the mission completes, the 3D view should
+    appear as shown in the image shown below. You may want to run the mission
+    several times to see the targeting in progress.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N11983"></a>Inspect Orbit View and Message Window</h3></div></div></div><p>Inspect the 3D DefaultOrbitView window. Manipulate the window as
+      needed to view the orbit "face-on." Visually verify that apogee has
+      indeed been raised.</p><div class="figure"><a name="Tut_TargetFiniteBurn_Fig17_3D_View_of_Finite_Burn_to_Raise_Apogee"></a><p class="title"><b>Figure&nbsp;7.17.&nbsp;3D View of <span class="guilabel">Finite Burn to Raise
+        Apogee</span></b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_TargetFiniteBurn_Fig17_3D_View_of_Finite_Burn_to_Raise_Apogee.png" align="middle" height="589" alt="3D View of Finite Burn to Raise Apogee"></td></tr></table></div></div></div></div><br class="figure-break"><p>As shown below, we inspect the output message window to determine
+      the number of iterations it took the
+      <span class="guilabel">DifferentialCorrector</span> to converge and the final
+      value of the control variable, <span class="guilabel">BurnDuration</span>. Verify
+      that you obtained a similar value for
+      <span class="guilabel">BurnDuration</span>.</p><pre class="screen">*** Targeting Completed in 13 iterations
+
+      Final Variable values:
+
+      BurnDuration = 1213.19316329</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N119A4"></a>Explore the Command Summary Reports</h3></div></div></div><p>All of the commands in the <span class="guilabel">Mission</span> tree have
+      associated <span class="guilabel">Command Summary</span> reports. As shown below,
+      we review these reports to help verify that our script performed as
+      expected.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>In the <span class="guilabel">Mission</span> tree, select
+          <span class="guilabel">Prop To Perigee</span>, then right-click to open the
+          associated <span class="guilabel">Command Summary</span> which describes the
+          state of <span class="guilabel">DefaultSC</span> after the <span class="guilabel">Prop To
+          Perigee</span> command has been performed. We verify perigee has
+          indeed been achieved by finding the mean anomaly value of
+          <span class="guilabel">DefaultSC</span>. To do this, we look at the value of
+          <span class="guilabel">MA</span> under the Keplerian State. As expected, the
+          mean anomaly is zero.</p></li><li class="step"><p>View the <span class="guilabel">Turn Thruster On</span> command
+          summary. Note that, as expected, prior to the start of the maneuver,
+          the fuel mass is <code class="literal">756</code> kg.</p></li><li class="step"><p>View the <span class="guilabel">Turn Thruster Off</span> command
+          summary.</p><ol type="a" class="substeps"><li class="step"><p>Note that the mean anomaly at the end of the maneuver is
+              <code class="literal">25.13</code> degrees. Thus, as the burn occurred,
+              the mean anomaly increased from <code class="literal">0</code> to
+              <code class="literal">25.13</code> degrees. By orbital theory, we know
+              that an apogee raising burn is best performed at perigee. Thus,
+              we may be able to achieve our orbital goal using less fuel if we
+              &ldquo;center&rdquo; the burn. For example, we could try starting our burn
+              at a mean anomaly of <code class="literal">&ndash;(25.13/2)</code> instead of
+              <code class="literal">0</code> degrees.</p></li><li class="step"><p>Note that, at the end of the maneuver, the fuel mass is
+              <code class="literal">343.76990815648</code> kg. Thus, this finite burn
+              used approximately <code class="literal">756 &ndash; 343.8</code> =
+              <code class="literal">412.2</code> kg of fuel.</p></li></ol></li><li class="step"><p>View the <span class="guilabel">Prop To Apogee</span> command
+          summary.</p><ol type="a" class="substeps"><li class="step"><p>We note that the mean anomaly is <code class="literal">180</code>
+              degrees which proves that we are indeed at apogee.</p></li><li class="step"><p>We note that the orbital radius (RMAG) is
+              <code class="literal">11999.999998192</code> km which proves that we have
+              achieved our desired <code class="literal">12000</code> km apogee radius
+              to within our desired tolerance of <code class="literal">0.1</code>
+              km.</p></li></ol></li></ol></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ch07s04.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Tut_TargetFiniteBurn.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Mars_B_Plane_Targeting.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Configure the Mission Sequence&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;8.&nbsp;Mars B-Plane Targeting</td></tr></table></div></body></html>

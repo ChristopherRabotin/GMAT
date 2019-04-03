@@ -77,7 +77,7 @@ GNDopplerAdapter::GNDopplerAdapter(const std::string& name) :
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("GNDopplerAdapter default constructor <%p>\n", this);
 #endif
-   typeName = "Doppler_RangeRate";              // change type name from "RangeKm" to "Doppler_RangeRate"
+   typeName = "RangeRate";  //"Doppler_RangeRate";              // change type name from "RangeKm" to ("Doppler_RangeRate") "RangeRate"
 }
 
 
@@ -297,7 +297,7 @@ std::string GNDopplerAdapter::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool GNDopplerAdapter::SetStringParameter(const Integer id, const std::string& value)
 {
-   // Note that: measurement type of adapter is always "Range_KM", so it does not need to change
+   // Note that: measurement type of adapter is always ("Doppler_RangeRate") "RangeRate", so it does not need to change
    bool retval = true;
    if ((id != MEASUREMENT_TYPE)&&(id != SIGNAL_PATH))
       retval = adapterS->SetStringParameter(id, value);
@@ -834,12 +834,15 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
       // 4.2. Add noise and bias if possible
       Real C_idealVal = cMeasurement.value[i];
       
-      if (measurementType == "Doppler_RangeRate")
+      //if (measurementType == "Doppler_RangeRate")
+      if (measurementType == "RangeRate")
       {         
          // Compute bias
-         ComputeMeasurementBias("Bias", "Doppler_RangeRate", 2);
+         //ComputeMeasurementBias("Bias", "Doppler_RangeRate", 2);
+         ComputeMeasurementBias("Bias", "RangeRate", 2);
          // Compute noise sigma
-         ComputeMeasurementNoiseSigma("NoiseSigma", "Doppler_RangeRate", 2);
+         //ComputeMeasurementNoiseSigma("NoiseSigma", "Doppler_RangeRate", 2);
+         ComputeMeasurementNoiseSigma("NoiseSigma", "RangeRate", 2);
          // Compute measurement error covariance matrix
          ComputeMeasurementErrorCovarianceMatrix();
 
@@ -885,7 +888,8 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("      . Multiplier factor for S-path  : %.12lf\n", multiplierS);
          MessageInterface::ShowMessage("      . Multiplier factor for E-path  : %.12lf\n", multiplierE);
          MessageInterface::ShowMessage("      . C-value w/o noise and bias    : %.12lf Km/s\n", C_idealVal);
-         if (measurementType == "Doppler_RangeRate")
+         //if (measurementType == "Doppler_RangeRate")
+         if (measurementType == "RangeRate")
          {
             MessageInterface::ShowMessage("      . GNDoppler noise sigma      : %.12lf Km/s \n", noiseSigma[i]);
             MessageInterface::ShowMessage("      . GNDoppler bias             : %.12lf Km/s \n", measurementBias[i]);
@@ -969,7 +973,8 @@ const std::vector<RealArray>& GNDopplerAdapter::CalculateMeasurementDerivatives(
 
    if (paramName == "Bias")
    {
-      if (((ErrorModel*)obj)->GetStringParameter("Type") == "Doppler_RangeRate")
+      //if (((ErrorModel*)obj)->GetStringParameter("Type") == "Doppler_RangeRate")
+      if (((ErrorModel*)obj)->GetStringParameter("Type") == "RangeRate")
          theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, id);
       else
       {

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -77,7 +77,7 @@ public:
    // interpolate x, y, and lod to input time
    virtual bool    GetPolarMotionAndLod(Real forUtcMjd, Real &xval, Real  &yval,
                                         Real &lodval);
-   void            GetTimeRage(Real& timeMin, Real &timeMax);
+   void            GetTimeRange(Real& timeMin, Real &timeMax);
 
 protected:
 

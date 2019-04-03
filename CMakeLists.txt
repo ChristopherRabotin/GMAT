@@ -19,7 +19,7 @@
 #
 
 # Require CMake minimum version
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.7.0)
 CMAKE_POLICY(VERSION 3.5)
 
 # Support OSX 10.8+ -> go to 10.10 as minimum
@@ -30,7 +30,7 @@ ENDIF()
 
 # Set Cmake project
 PROJECT(GMAT C CXX)
-SET(GMAT_RELEASE_NAME "R2016a" CACHE STRING "GMAT version name")
+SET(GMAT_RELEASE_NAME "R2017a" CACHE STRING "GMAT version name")
 SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
 
 # Enforce C++11
@@ -41,11 +41,13 @@ SET(CMAKE_CXX_EXTENSIONS OFF)
 # Path to custom Find****.cmake files
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/build/cmake_modules")
 
-# Detect 32/64 bit
+# Detect 32/64 bit compiler
 if(CMAKE_CL_64 OR (CMAKE_SIZEOF_VOID_P EQUAL 8))
   SET(GMAT_64_BIT ON)
+  MESSAGE(STATUS "*** Creating 64-bit GMAT Build System. Please ensure that 64-bit versions of all dependencies are available. ***")
 else()
   SET(GMAT_64_BIT OFF)
+  MESSAGE(STATUS "*** Creating 32-bit GMAT Build System. Please ensure that 32-bit versions of all dependencies are available. ***")
 endif()
 
 # Default to Release configuration on single-config generators
@@ -197,9 +199,7 @@ SET(MATLAB_ADDITIONAL_VERSIONS
   "R2016b=9.1"
   CACHE STRING "Additional searched MATLAB versions. Format as semicolon-separated Release=Version pairs, e.g. R20YYx=V.v"
   )
-SET(Matlab_MAT_LIBRARY "Matlab_MAT_LIBRARY-NOTFOUND" CACHE FILEPATH "Path to libmat" FORCE)
-MARK_AS_ADVANCED(CLEAR Matlab_MAT_LIBRARY)
-FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
+FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY MAT_LIBRARY)
 
 if(NOT Matlab_FOUND)
   IF(GMAT_64_BIT)
@@ -208,26 +208,6 @@ if(NOT Matlab_FOUND)
     SET(MATLAB_BIT 32-bit)
   ENDIF()
   MESSAGE(WARNING "${MATLAB_BIT} Matlab NOT FOUND. Set Matlab_ROOT_DIR to the path to Matlab and ensure you have a working license.")
-else()
-  # Find libmat, which is not currently found by CMake's FindMatlab module
-  GET_FILENAME_COMPONENT(Matlab_LIB_DIR ${Matlab_MEX_LIBRARY} DIRECTORY)
-  IF(WIN32)
-    # Needed since Matlab prepends "lib" to library names on Windows
-    SET(Matlab_MAT_NAME libmat) 
-  ELSE()
-    SET(Matlab_MAT_NAME mat)
-  ENDIF()
-  FIND_LIBRARY(Matlab_MAT_LIBRARY
-    ${Matlab_MAT_NAME}
-    PATHS ${Matlab_LIB_DIR}
-    NO_DEFAULT_PATH
-    )
-  if(Matlab_MAT_LIBRARY)
-    SET(Matlab_LIBRARIES ${Matlab_LIBRARIES} ${Matlab_MAT_LIBRARY})
-    MARK_AS_ADVANCED(FORCE Matlab_MAT_LIBRARY)
-  else()
-    MESSAGE(WARNING "libmat NOT FOUND. Please contact GMAT support with this error.")
-  endif()
 endif()
 
 # ====================================================================
@@ -342,12 +322,10 @@ if(WIN32)
   ADD_DEFINITIONS("/wd4430 /wd4251 /wd4231 /wd4996 /nologo")
 endif()
 
-# Set 64 bit Definitions and directories
+# Set 32/64-bit specific definitions and directories
 if(GMAT_64_BIT)
-  MESSAGE(STATUS "Will compile 64-bit GMAT")
   ADD_DEFINITIONS("-DUSE_64_BIT_LONGS")
 else()
-  MESSAGE(STATUS "Will compile 32-bit GMAT")
 endif()
 
 # Additional *NIX-specific definitions

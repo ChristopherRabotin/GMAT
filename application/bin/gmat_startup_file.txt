@@ -62,6 +62,7 @@ PLUGIN                  = ../plugins/libExtraPropagators
 PLUGIN                  = ../plugins/libPolyhedronGravity
 PLUGIN                  = ../plugins/libSaveCommand
 PLUGIN                  = ../plugins/libThrustFile
+PLUGIN                  = ../plugins/libEKF
 
 # Internal-only plugins
 PLUGIN                  = ../plugins/proprietary/libMarsGRAM
@@ -117,10 +118,15 @@ PLANETARY_COEFF_PATH   = DATA_PATH/planetary_coeff/
 EOP_FILE               = PLANETARY_COEFF_PATH/eopc04_08.62-now
 NUTATION_COEFF_FILE    = PLANETARY_COEFF_PATH/NUTATION.DAT
 PLANETARY_PCK_FILE     = PLANETARY_COEFF_PATH/SPICEPlanetaryConstantsKernel.tpc
+EARTH_LATEST_PCK_FILE  = PLANETARY_COEFF_PATH/earth_latest_high_prec.bpc
+EARTH_PCK_PREDICTED_FILE = PLANETARY_COEFF_PATH/SPICEEarthPredictedKernel.bpc
+EARTH_PCK_CURRENT_FILE   = PLANETARY_COEFF_PATH/SPICEEarthCurrentKernel.bpc
+LUNA_PCK_CURRENT_FILE    = PLANETARY_COEFF_PATH/SPICELunaCurrentKernel.bpc
+LUNA_FRAME_KERNEL_FILE   = PLANETARY_COEFF_PATH/SPICELunaFrameKernel.tf
 #-----------------------------------------------------------
 TIME_PATH              = DATA_PATH/time/
 LEAP_SECS_FILE         = TIME_PATH/tai-utc.dat
-LSK_FILE                 = TIME_PATH/SPICELeapSecondKernel.tls
+LSK_FILE               = TIME_PATH/SPICELeapSecondKernel.tls
 #-----------------------------------------------------------
 EARTH_POT_PATH         = DATA_PATH/gravity/earth/
 LUNA_POT_PATH          = DATA_PATH/gravity/luna/
@@ -180,16 +186,12 @@ ICRF_FILE              = DATA_PATH/icrf/ICRF_Table.txt
 #-----------------------------------------------------------
 
 #-----------------------------------------------------------
-# Base location of MATLAB libraries (required only for OS X)
-#-----------------------------------------------------------
-MATLAB_APP_PATH        = /Applications/MATLAB_R2016a.app
-
-#-----------------------------------------------------------
 # Debug options
 #-----------------------------------------------------------
 #RUN_MODE              = TESTING
 #RUN_MODE              = TESTING_NO_PLOTS
 #RUN_MODE              = EXIT_AFTER_RUN
+#ECHO_COMMANDS         = TRUE
 #DEBUG_MATLAB          = ON
 #DEBUG_PARAMETERS      = ON
 #DEBUG_FILE_PATH       = ON

@@ -1,0 +1,368 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>EphemerisFile</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="EclipseLocator.html" title="EclipseLocator"><link rel="next" href="ErrorModel.html" title="ErrorModel"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">EphemerisFile</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="EclipseLocator.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ErrorModel.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="EphemerisFile"></a><div class="titlepage"></div><a name="N18527" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">EphemerisFile</span></h2><p>EphemerisFile &mdash; Generate spacecraft&rsquo;s ephemeris data</p></div><div class="refsection"><a name="N18538"></a><h2>Description</h2><p><span class="guilabel">EphemerisFile</span> is a user-defined resource that
+    generates spacecraft&rsquo;s ephemeris in a report format. You can generate
+    spacecraft&rsquo;s ephemeris data in any of the user-defined coordinate frames.
+    GMAT allows you to output ephemeris data in CCSDS-OEM, SPK, Code-500 and
+    STK .e (STK -TimePosVel) formats. See the <a class="xref" href="EphemerisFile.html#EphemerisFile_Remarks" title="Remarks">Remarks</a> section for
+    more details. <span class="guilabel">EphemerisFile</span> resource can be
+    configured to generate ephemeris data at default integration steps or by
+    entering user-selected step sizes.</p><p>GMAT allows you to generate any number of ephemeris data files by
+    creating multiple <span class="guilabel">EphermisFile</span> resources. An
+    <span class="guilabel">EphemerisFile</span> resource can be created using either
+    the GUI or script interface. GMAT also provides the option of when to
+    write and stop writing ephemeris data to a text file through the
+    <span class="guilabel">Toggle</span>
+    <span class="guilabel">On</span>/<span class="guilabel">Off</span> commands. See the <a class="xref" href="EphemerisFile.html#EphemerisFile_Remarks" title="Remarks">Remarks</a> section below
+    for detailed discussion of the interaction between
+    <span class="guilabel">EphemerisFile</span> resource and
+    <span class="guilabel">Toggle</span> command.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="CoordinateSystem.html" title="CoordinateSystem"><span class="refentrytitle">CoordinateSystem</span></a>, <a class="xref" href="Toggle.html" title="Toggle"><span class="refentrytitle">Toggle</span></a></p></div><div class="refsection"><a name="N1856B"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">CoordinateSystem</span></td><td><p>Allows you to generate spacecraft ephemeris w.r.t the
+            coordinate system that you select for this field. Ephemeris can
+            also be generated w.r.t a user-specified coordinate system. This
+            field cannot be modified in the Mission Sequence. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any default coordinate system or a user-defined
+                    coordinate system</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">EarthMJ2000Eq</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DistanceUnit</span></td><td><p>The unit for distance quantities written to STK
+            ephemeris files. Only active when <span class="guilabel">FileFormat</span>
+            is set to <span class="guilabel">STK-TimePosVel</span>.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Kilometers or Meters</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Values</span></p></td><td><p>Kilometers</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EpochFormat</span></td><td><p>The field allows you to set the type of the epoch
+            that you choose to enter for <span class="guilabel">InitialEpoch</span> and
+            <span class="guilabel">FinalEpoch</span> fields. This field cannot be
+            modified in the Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any of the following epoch formats:<span class="guilabel">
+                    UTCGregorian</span><span class="guilabel">
+                    UTCModJulian</span>,<span class="guilabel">
+                    TAIGregorian</span>,<span class="guilabel">
+                    TAIModJulian</span>,<span class="guilabel">
+                    TTGregorian</span>,<span class="guilabel">
+                    TTModJulian</span>,<span class="guilabel"> A1Gregorian</span>,
+                    <span class="guilabel">A1ModJulian</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">UTCGregorian</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FileFormat</span></td><td><p>Allows the user to generate ephemeris file in four
+            available ephemeris formats: CCSDS-OEM, SPK, Code-500 or
+            STK-TimePosVel (i.e. STK .e format). This field cannot be modified
+            in the Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">CCSDS-OEM</span>,
+                    <span class="guilabel">SPK</span>, <span class="guilabel">Code-500</span>,
+                    <span class="guilabel">STK-TimePosVel</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">CCSDS-OEM</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FileName</span></td><td><p>Allows the user to name the ephemeris file that is
+            generated. File extensions for CCSDS-OEM, SPK, Code-500 and
+            STK-TimePosVel ephemeris types are *.oem, *.bsp, *.eph and *.e
+            respectively. This field cannot be modified in the Mission
+            Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Valid File Path and Name</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">EphemerisFile1.eph</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FinalEpoch</span></td><td><p>Allows the user to specify the time span of an
+            ephemeris file. Ephemeris file is generated up to final epoch that
+            is specified in <span class="guilabel">FinalEpoch</span> field. This field
+            cannot be modified in the Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>user-defined final epoch or Default Value</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">FinalSpacecraftEpoch</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">IncludeEventBoundaries</span></td><td><p>Flag to optionally write event data and boundaries to
+            an STK ephem file. Only active when
+            <span class="guilabel">FileFormat</span> is set to
+            <span class="guilabel">STK-TimePosVel</span>. When set to true, if there
+            are discontinuities in the ephemeris data, the times of the
+            discontinuities are written to the file along with blank lines at
+            the discontinuity. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true, false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Values</span></p></td><td><p>true</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">InitialEpoch</span></td><td><p>Allows the user to specify the starting epoch of the
+            ephemeris file. Ephemeris file is generated starting from the
+            epoch that is defined in <span class="guilabel">InitialEpoch</span> field.
+            This field cannot be modified in the Mission Sequence.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>user-defined initial epoch or Default Value</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">InitialSpacecraftEpoch</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">InterpolationOrder</span></td><td><p>Allows you to set the interpolation order for the
+            available interpolator methods (<span class="guilabel">Lagrange</span> or
+            <span class="guilabel">Hermite</span>) for any of the ephemeris types. This
+            field cannot be modified in the Mission Sequence.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>1 &lt;= Integer Number &lt;= 10</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>7</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Interpolator</span></td><td><p>This field defines the available interpolator method
+            that was used to generate ephemeris file. Available
+            <span class="guilabel">Interpolators</span> are
+            <span class="guilabel">Lagrange</span> or <span class="guilabel">Hermite</span>.
+            This field cannot be modified in the Mission Sequence.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Lagrange</span> for CCSDS-OEM,
+                    Code-500 and STK-TimePosVel ephemeris
+                    types,<span class="guilabel">Hermite</span> for SPK file</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Lagrange</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Maximized</span></td><td><p>Allows the user to maximize the generated ephemeris
+            file window. This field cannot be modified in the Mission
+            Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true,false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>false</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">OutputFormat</span></td><td><p>Allows the user to specify what type of format they
+            want GSFC Code-500 ephmeris to be generated in. GSFC Code-500
+            ephemeris can be generated in the PC or UNIX version. This field
+            cannot be modified in the Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">PC</span>,
+                    <span class="guilabel">UNIX</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">PC</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RelativeZOrder</span></td><td><p>Allows the user to select which generated ephemeris
+            file display window is to displayed first on the screen. The
+            <span class="guilabel">EphemerisFile</span> resource with lowest
+            <span class="guilabel">RelativeZOrder</span> value will be displayed last
+            while <span class="guilabel">EphemerisFile</span> resource with highest
+            <span class="guilabel">RelativeZOrder</span> value will be displayed first.
+            This field cannot be modified in the Mission Sequence.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Integer &ge; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Size</span></td><td><p>Allows the user to control the display size of
+            generated ephemeris file panel. First value in [0 0] matrix
+            controls horizonal size and second value controls vertical size of
+            ephemeris file display window. This field cannot be modified in
+            the Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any Real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>[ 0 0 ]</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Spacecraft</span></td><td><p>Allows the user to generate ephemeris data of
+            spacecraft(s) that are defined in <span class="guilabel">Spacecraft</span>
+            field. This field cannot be modified in the Mission
+            Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Default spacecraft or any number of user-defined
+                    spacecrafts or formations</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DefaultSC</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">StepSize</span></td><td><p>The ephemeris file is generated at the step size that
+            is specified for <span class="guilabel">StepSize</span> field. The user can
+            generate ephemeris file at default Integration step size (using
+            raw integrator steps) or by defining a fixed step size. For
+            <code class="literal">CCSDS-OEM</code> and <code class="literal">STK-TimePosVel</code>
+            file formats, you can generate ephemeris at either Integrator
+            steps or fixed step size. For <code class="literal">SPK</code> file format,
+            GMAT lets you generate ephemeris at only raw integrator step
+            sizes. For <code class="literal">Code-500</code> ephemeris file type, you
+            can generate ephemeris at only fixed step sizes. This field cannot
+            be modified in the Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number &gt; 0.0 or equals Default Value</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><code class="literal">IntegratorSteps </code> for
+                    <code class="literal">CCSDS-OEM</code>, <code class="literal">SPK</code> and
+                    <code class="literal">STK-TimePosVel</code> file formats and
+                    <code class="literal">60</code> seconds for
+                    <code class="literal">Code-500</code> file format</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">UpperLeft</span></td><td><p>Allows the user to pan the generated ephemeris file
+            display window in any direction. First value in [0 0] matrix helps
+            to pan the window horizontally and second value helps to pan the
+            window vertically. This field cannot be modified in the Mission
+            Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any Real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>[ 0 0 ]</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">WriteEphemeris</span></td><td><p>Allows the user to optionally calculate/write or not
+            calculate/write an ephemeris that has been created and configured.
+            This field cannot be modified in the Mission Sequence.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true,false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>true</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Unit</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N18944"></a><h2>GUI</h2><p>The figure below shows the default settings for the
+    <span class="guilabel">EphemerisFile</span> resource:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_EphemeriesFile_GUI_3.png" align="middle" height="564"></td></tr></table></div></div><p>GMAT allows you to modify <span class="guilabel">InitialEpoch</span>,
+    <span class="guilabel">FinalEpoch</span> and <span class="guilabel">StepSize</span> fields
+    of <span class="guilabel">EphemerisFile</span> resource. Instead of always
+    generating the ephemeris file at default time span settings of
+    <span class="guilabel">InitialSpacecraftEpoch</span> and
+    <span class="guilabel">FinalSpacecraftEpoch</span>, you can define your own initial
+    and final epochs. Similarly, instead of using the default
+    <span class="guilabel">IntegratorSteps</span> setting for
+    <span class="guilabel">StepSize</span> field, you can generate the ephemeris file
+    at the step size of your choice.</p><p>The GUI figure below shows ephemeris file which will be generated
+    from initial epoch of 01 Jan 2000 14:00:00.000 to final epoch of 01 Jan
+    2000 20:00:00.000 while using non-default step size of 300 seconds:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_EphemeriesFile_GUI_4.png" align="middle" height="563"></td></tr></table></div></div></div><div class="refsection"><a name="EphemerisFile_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N1897E"></a><h3>Behavior of Coordinate System Field for CCSDS, Code 500 and SPK
+      File Formats</h3><p>If the selected <span class="guilabel">CoordinateSystem</span> uses
+      MJ2000Eq axes, the CCSDS ephemeris file contains &ldquo;EME2000&rdquo; for the
+      REF_FRAME according to CCSDS convention. By CCSDS requirements,
+      non-standard axes names are allowed when documented in an ICD. The
+      <span class="guilabel">CoordinateSystems</span> specifications document in the
+      user's guide is the ICD for all axes supported by GMAT. Also if you
+      create a new coordinate system whose origin is Luna, then the CCSDS
+      ephemeris file contains &ldquo;Moon&rdquo; for the CENTER_NAME.</p><p>For code 500 file format, J2000 epoch can be with reference to any
+      central body that you select. For code 500 and SPK file formats, GMAT
+      can only write ephemeris for a coordinate system under
+      <span class="guilabel">CoordinateSystem</span> field that references MJ2000Eq
+      axis type for any central body.</p><p>There is one important difference between GMAT and IAU
+      conventions. By IAU convention, there is no name for the IAU2000 axes
+      that is independent of the origin. GCRF is coordinate system centered at
+      earth with IAU2000 axes, and ICRF is a coordinate system centered at the
+      solar system barycenter with IAU2000 axes. We have chosen to name the
+      IAU2000 axes ICRF regardless of the origin. Please refer to
+      <span class="guilabel">CoordinateSystems</span> specifications document to read
+      more about built-in coordinate systems and description of Axes types
+      that GMAT supports.</p></div><div class="refsection"><a name="N18993"></a><h3>Behavior of Ephemeris File during Discontinuous &amp; Iterative
+      Processes</h3><p>When generating an ephemeris file for a mission sequence, GMAT
+      separately interpolates ephemeris segments that are bounded by
+      discontinuous or discrete mission events. Discontinuous or discrete
+      mission sequence events can range from impulsive or finite-burn
+      maneuvers, changes in dynamics models or when using assignment commands.
+      Furthermore, when a mission sequence employs iterative processes such as
+      differential correction or optimization, GMAT only writes the ephemeris
+      for the final solution from the iterative processes. See the <a class="xref" href="EphemerisFile.html#EphemerisFile_Examples" title="Examples">Examples</a> section
+      below to see how an ephemeris file is generated during a discontinuous
+      event such as an impulsive burn and iterative process like differential
+      correction.</p><p>Version 1 of CCSDS Orbit Data Messages (ODMs) document used to
+      require that the ephemeris be generated in increasing time order and
+      only going forward. However version 2 of CCSDS ODM document now allows
+      for ephemeris file to be generated backwards as well. Currently in GMAT,
+      when you propagate a spacecraft backwards in time, then the CCSDS
+      ephemeris is also generated backwards.</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>The Code500 ephemeris file requires fixed time steps and has a
+        pre-defined format for handling chunks of ephemeris data. The format
+        does not allow chunking to stop and start at state discontinuities
+        that occur at impulsive maneuvers. GMAT's current behavior is to
+        interpolate across those discontinuities as the code 500 format does
+        not elegantly support ephemerides with discontinuities. This is
+        acceptable for small maneuvers but becomes less accurate as the
+        maneuvers grow in magnitude. We recommend using more modern ephemeris
+        file formats for this reason. In the event you must use a Code500
+        ephemeris file with a discontinuous trajectory, we recommend using a
+        propagator with small, fixed times steps, and a small
+        <code class="literal">StepSize</code> setting on the ephemeris file to reduce
+        interpolation error near the discontinuity.</p></div><p>Similar to CCSDS ephemeris format, the STK-TimePosVel ephemeris is
+      also generated in separate chunks of ephemeris data whenever an event
+      such as an impulsive or a finite maneuver takes place or a change in
+      dynamic models occurs. However, unlike the CCSDS ephemeris,
+      STK-TimePosVel ephemeris is not generated during backward propagations
+      and only forward propagation ephemeris is reported.</p></div><div class="refsection"><a name="N189A6"></a><h3>Behavior of Ephemeris File When It Does Not Meet CCSDS File
+      Format Requirements</h3><p>When an ephemeris file is generated, it needs to follow the
+      Recommended Standard for ODMs that has been prepared by the CCSDS. The
+      set of orbit data messages described in the Recommended Standard is the
+      baseline concept of trajectory representation in data interchange
+      applications that are cross-supported between Agencies of the CCSDS.
+      CCSDS-ODM Recommended Standard documents establishes a common framework
+      and provides a common basis for the interchange of orbit data.</p><p>Currently, the ephemeris file that is generated by GMAT meets most
+      of the recommended standards that are prescribed by the CCSDS. However
+      whenever there is a case when GMAT&rsquo;s ephemeris violates CCSDS file
+      format requirements, then the generated ephemeris file will display a
+      warning in ephemeris file&rsquo;s Header section. More specifically, this
+      warning will be given under COMMENT and it will let you know that this
+      ephemeris file does not fully satisfy CCSDS file formatting
+      requirements.</p></div><div class="refsection"><a name="N189AD"></a><h3>Behavior of Interpolation Order Field for the Ephemeris File
+      Formats:</h3><p>For CCSDS file formats, whenever there is not enough raw data
+      available to support the requested interpolation type and order, GMAT
+      throws an error message and stops interpolation. GMAT still generates
+      the ephemeris file but no spacecraft ephemeris data is written to the
+      file and only the file&rsquo;s Header section will be there. Within the Header
+      section and under COMMENT, a message will be thrown saying that not
+      enough raw data is available to generate spacecraft ephemeris data at
+      the requested interpolation order.</p><p>For SPK file formats, raw data is always collected at every
+      integrator step for each segment and then sent to SPK kernel writer.
+      GMAT does not perform any interpolation for SPK files as SPK contains
+      its own interpolation. As a result, <span class="guilabel">InitialEpoch</span>
+      and <span class="guilabel">FinalEpoch</span> fields behave differently for SPK
+      ephemerides. The first epoch on the file is the first step after
+      <span class="guilabel">InitialEpoch</span>. The last epoch on the file is the
+      last step before <span class="guilabel">FinalEpoch.</span></p><p>For code 500 file formats, you can set the interpolation order and
+      currently GMAT supports Lagrange as the available interpolator method.
+      For code 500 file formats, if there is not enough raw data available to
+      support interpolation type and order, GMAT will throw an error message
+      and stop interpolation.</p><p>For the STK-TimePosVel ephemeris format, whenever there is not
+      enough raw data available to support the generation of ephemeris at the
+      requested interpolation order and fixed step size, GMAT will internally
+      adjust the interpolation order such that at least the beginning and the
+      last ephemeris points are reported in the STK .e ephemeris file. This
+      new interpolation order will be reported at STK . e ephemeris's header
+      data.</p></div><div class="refsection"><a name="N189C3"></a><h3>Behavior When Using EphemerisFile Resource &amp; Toggle
+      Command</h3><p><span class="guilabel">EphemerisFile</span> resource generates ephemeris
+      file at each propagation step of the entire mission duration. If you
+      want to generate ephemeris data during specific points in your mission,
+      then a <span class="guilabel">Toggle</span> <span class="guilabel">On/Off</span> command
+      can be inserted into the <span class="guilabel">Mission</span> tree to control
+      when the <span class="guilabel">EphemerisFile </span>resource writes data. When
+      <span class="guilabel">Toggle</span> <span class="guilabel">Off</span> command is issued
+      for an <span class="guilabel">EphemerisFile</span> subscriber, no data is sent to
+      a file until a <span class="guilabel">Toggle</span> <span class="guilabel">On</span>
+      command is issued. Similarly, when a <span class="guilabel">Toggle</span>
+      <span class="guilabel">On</span> command is used, ephemeris data is sent to a
+      file at each integration step until a <span class="guilabel">Toggle</span> Off
+      command is used. The Toggle command can be used on all four ephemeris
+      types that GMAT supports.</p><p>Below is an example script snippet that shows how to use
+      <span class="guilabel">Toggle Off/On</span> commands while using the
+      <span class="guilabel">EphemerisFile</span> resource. No ephemeris data is sent
+      for first two days of propagation and only the data that is collected
+      during last four days of propagation is sent to text file called
+      &lsquo;<code class="literal">EphemerisFile1.eph</code>&rsquo;:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create EphemerisFile anEphmerisFile
+
+anEphmerisFile.Spacecraft = aSat
+anEphmerisFile.Filename = 'EphemerisFile1.eph'
+
+BeginMissionSequence
+
+Toggle anEphmerisFile Off
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+Toggle anEphmerisFile On
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></pre></div><div class="refsection"><a name="N189FC"></a><h3>Behavior of Code 500 Ephemeris File During Discontinuous &amp;
+      Iterative Processes</h3><p>Code 500 ephemeris file follows the ephemeris format and
+      definitions that have been defined in <span class="emphasis"><em>Flight Dynamics Division
+      (FDD) Generic Data Product Formats Interface Control
+      Document</em></span>.</p><p>Unlike CCSDS ephemeris file, code 500 ephemeris does not support
+      separate chunks in the data blocks whenever discontinuous or discrete
+      mission events such as impulsive/finite maneuvers, change in dynamics or
+      assignment command takes place. Rather, code 500 ephemeris is generated
+      all in one continuous data block regardless of any number of mission
+      events that may occur between initial and final epochs of ephemeris
+      file. Furthermore, when a mission sequence employs iterative processes
+      such as differential correction or optimization, GMAT will only write
+      the ephemeris for the final solution from the iterative processes. Code
+      500 ephemeris does not allow non-monotonic ephemeris generation and an
+      exception will be thrown if propagation direction changes. Furthermore,
+      any discontinuities created by assignments may result in invalid code
+      500 files.</p></div><div class="refsection"><a name="N18A06"></a><h3>Code 500 Ephemeris Header Records</h3><p>The standard format for Code 500 ephemeris files has a logical
+      record length of 2800 bytes. Code 500 files have two header records,
+      ephemeris header record 1 and ephemeris record 2, followed by as many
+      ephemeris data records as required for the file timespan. Many
+      parameters in ephemeris file's header records are mandatory while some
+      fields are optional. GMAT's Code 500 ephemeris header records only
+      specifies fields that are mandatory and optional fields have not been
+      included. Code 500's ephemeris header record 1 is mandatory while
+      ephemeris record 2 is optional. Complete description of ephemeris format
+      and list of mandatory and optional ephemeris header record parameters is
+      defined in <span class="emphasis"><em>Flight Dynamics Division (FDD) Generic Data Product
+      Formats Interface Control Document</em></span>. In GMAT, only required
+      fields have been written in header record 1 while header record 2 is
+      left blank. Table below lists header record 1's required fields and any
+      additional comments pertaining to that field.</p><div class="informaltable"><table border="1"><colgroup><col width="53%"><col width="47%"></colgroup><thead><tr><th>Required Fields</th><th>Comments</th></tr></thead><tbody><tr><td><span class="guilabel">productId</span></td><td><p>'EPHEM '</p></td></tr><tr><td><span class="guilabel">satId</span></td><td><p>123.000000</p></td></tr><tr><td><span class="guilabel">timeSystemIndicator</span></td><td><p>2.000000</p></td></tr><tr><td><span class="guilabel">StartDateOfEphem_YYYMMDD</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">startDayCountOfYear</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">startSecondsOfDay</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">endDateOfEphem_YYYMMDD</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">endDayCountOfYear</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">endSecondsOfDay</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">stepSize_SEC</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">startYYYYMMDDHHMMSSsss.</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">endYYYYMMDDHHMMSSsss.</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">tapeId</span></td><td><p>'STANDARD'</p></td></tr><tr><td><span class="guilabel">sourceId</span></td><td><p>'GTDS '</p></td></tr><tr><td><span class="guilabel">headerTitle</span></td><td><p>'</p></td></tr><tr><td><span class="guilabel">centralBodyIndicator</span></td><td><p>Set to central body of corrdinate system. Note GMAT
+              allows users to change central body of
+              integration.</p></td></tr><tr><td><span class="guilabel">refTimeForDUT_YYMMDD</span></td><td><p>570918.000000</p></td></tr><tr><td><span class="guilabel">coordSystemIndicator1</span></td><td><p>'2000'</p></td></tr><tr><td><span class="guilabel">coordSystemIndicator2</span></td><td><p>4</p></td></tr><tr><td><span class="guilabel">orbitTheory</span></td><td><p>'COWELL '</p></td></tr><tr><td><span class="guilabel">timeIntervalBetweenPoints_DUT</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">timeIntervalBetweenPoints_SEC</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">outputIntervalIndicator</span></td><td><p>1</p></td></tr><tr><td><span class="guilabel">epochTimeOfElements_DUT</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">epochTimeOfElements_DAY.</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">epochA1Greg.</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">epochUtcGreg.</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">yearOfEpoch_YYY</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">monthOfEpoch_MM</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">dayOfEpoch_DD</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">hourOfEpoch_HH</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">minuteOfEpoch_MM</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">secondsOfEpoch_MILSEC</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">keplerianElementsAtEpoch_RAD[0]</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">keplerianElementsAtEpoch_RAD[1]</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">keplerianElementsAtEpoch_RAD[2]</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">keplerianElementsAtEpoch_RAD[3]</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">keplerianElementsAtEpoch_RAD[4]</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">keplerianElementsAtEpoch_RAD[5]</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">cartesianElementsAtEpoch_DULT[0]</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">cartesianElementsAtEpoch_DULT[1]</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">cartesianElementsAtEpoch_DULT[2]</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">cartesianElementsAtEpoch_DULT[3]</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">cartesianElementsAtEpoch_DULT[4]</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">cartesianElementsAtEpoch_DULT[5]</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">startTimeOfEphemeris_DUT</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">endTimeOfEphemeris_DUT</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">timeIntervalBetweenPoints_DUT</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">dateOfInitiationOfEphemComp_YYYMMDD</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">timeOfInitiationOfEphemComp_HHMMSS</span></td><td><p>value depends on run time</p></td></tr><tr><td><span class="guilabel">utcTimeAdjustment_SEC</span></td><td><p>0.000000</p></td></tr><tr><td><span class="guilabel">Pecession/Nutation indicator</span></td><td><p>1</p></td></tr></tbody></table></div><p>For ephemeris header record 1, there are some required fields that
+      have not been tabulated in GMAT's Code 500 ephemeris header record 1.
+      These fields that have not been tabulated in header record 1 are listed
+      in the table below. 0.0 indicates "used" and 1.0 means "not
+      used".</p><div class="informaltable"><table border="1"><colgroup><col width="53%"><col width="47%"></colgroup><thead><tr><th>Required Fields</th><th>Comments</th></tr></thead><tbody><tr><td><span class="guilabel">Zonal and tesseral harmonics
+              indicator</span></td><td><p>1.0</p></td></tr><tr><td><span class="guilabel">Lunar gravitation perturbation
+              indicator</span></td><td><p>1.0</p></td></tr><tr><td><span class="guilabel">Solar radiation perturbation
+              indicator</span></td><td><p>1.0</p></td></tr><tr><td><span class="guilabel">Solar gravitation perturbation
+              indicator</span></td><td><p>1.0</p></td></tr><tr><td><span class="guilabel">Atmospheric drag perturbation
+              indicator</span></td><td><p>1.0</p></td></tr><tr><td><span class="guilabel">Greenwich hour angle at
+              epoch</span></td><td><p>1.0</p></td></tr></tbody></table></div></div></div><div class="refsection"><a name="EphemerisFile_Examples"></a><h2>Examples</h2><div class="informalexample"><p>This example shows how to generate a simple ephemeris file.
+      Ephemeris file is generated for two days of propagation. At default
+      settings, ephemeris file is generated at each integrator step and in
+      CCSDS file format. Ephemeris data is sent to text file called
+      &lsquo;<code class="literal">EphemerisFile2.eph</code>&rsquo;:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create EphemerisFile anEphmerisFile
+
+anEphmerisFile.Spacecraft = aSat
+anEphmerisFile.Filename = 'EphemerisFile2.eph'
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}</code></pre></div><div class="informalexample"><p>This example shows how an ephemeris file is generated during an
+      iterative process like differential correction that includes a
+      discontinuous event like an impulsive burn. Ephemeris data is sent to
+      text file called &lsquo;<code class="literal">EphemerisFile3.eph</code>&rsquo;:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create ImpulsiveBurn TOI
+Create DifferentialCorrector aDC
+
+Create EphemerisFile anEphmerisFile
+
+anEphmerisFile.Spacecraft = aSat
+anEphmerisFile.Filename = 'EphemerisFile3.eph'
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.Earth.Periapsis}
+
+Target aDC
+ Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, ...
+ Upper = 3.14159, MaxStep = 0.5})
+ Maneuver TOI(aSat)
+ Propagate aProp(aSat) {aSat.Earth.Apoapsis}
+ Achieve aDC(aSat.Earth.RMAG = 42165)
+EndTarget
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></pre></div><div class="informalexample"><p>This example shows how to generate a simple STK-TimePosVel (i.e.
+      STK .e) ephemeris file. Ephemeris file is generated for 1 day of
+      propagation, then a simple impulsive maneuver takes place and spacecraft
+      propagates for another day. This ephemeris is generated at raw
+      integrator steps.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create ImpulsiveBurn IB
+IB.Element1 = 0.5
+
+Create EphemerisFile anEphmerisFile
+
+anEphmerisFile.Spacecraft = aSat
+anEphmerisFile.Filename = 'EphemerisFile.e'
+anEphmerisFile.FileFormat = STK-TimePosVel
+
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+Maneuver IB(aSat)
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="EclipseLocator.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ErrorModel.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">EclipseLocator&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;ErrorModel</td></tr></table></div></body></html>

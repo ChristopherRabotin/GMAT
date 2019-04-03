@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -66,6 +66,11 @@ public:
    Rmatrix(const Rmatrix &m);
    virtual ~Rmatrix();
    
+// ekf mod 12/16
+   static Rmatrix Identity(unsigned int size);
+   static Rmatrix Diagonal(unsigned int size, Rvector data);
+// end ekf mod
+
    virtual bool 
    IsOrthogonal(Real accuracyRequired = GmatRealConstants::REAL_EPSILON) const;
    virtual bool 
@@ -88,6 +93,9 @@ public:
    Rmatrix operator/(const Rmatrix &RHSRmatrix) const;
    const Rmatrix& operator/=(const Rmatrix &RHSRmatrix);
    
+   Rmatrix ElementWiseMultiply(const Rmatrix &m);
+   Rmatrix ElementWiseDivide(const Rmatrix &m);
+
    // operations with scalars
    Rmatrix operator+(Real scalar) const;
    const Rmatrix& operator+=(Real scalar);
@@ -100,6 +108,7 @@ public:
    
    Rmatrix operator/(Real scalar) const;
    const Rmatrix& operator/=(Real scalar);
+   
    
    // negate
    Rmatrix operator-() const;
@@ -117,7 +126,8 @@ public:
    virtual Real   Determinant() const;            
    virtual Real   Cofactor(int r, int c) const;            
    Rmatrix Transpose() const;                        
-   Rmatrix Inverse() const;                    
+   Rmatrix Inverse() const;
+   Rmatrix Inverse(Real zeroValue) const;    // ekf mod 12/16
    virtual Rmatrix Pseudoinverse() const;            
    Rmatrix Symmetric() const;            
    Rmatrix AntiSymmetric() const;    
@@ -144,7 +154,7 @@ public:
    virtual std::string ToString(Integer precision, Integer width = 1,
                                 bool horizontal = false,
                                 const std::string &prefix = "",
-                                bool appendEol = false) const;
+                                bool appendEol = true) const;
    
    virtual std::string ToString(bool useCurrentFormat = true,
                                 bool scientific = false, bool showPoint = false,
@@ -152,7 +162,7 @@ public:
                                 Integer width = GmatGlobal::DATA_WIDTH,
                                 bool horizontal = true, Integer spacing = 1,
                                 const std::string &prefix = "",
-                                bool appendEol = false) const;
+                                bool appendEol = true) const;
    
    virtual std::string ToRowString(Integer row, Integer precision,
                                    Integer width = 1, bool zeroFill = false) const;

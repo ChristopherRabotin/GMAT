@@ -1,0 +1,393 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Run the mission and analyze the results</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data"><link rel="prev" href="DSN_Estimation_Create_and_configure_BatchEstimatorInv_object.html" title="Create and configure BatchEstimatorInv object"><link rel="next" href="ch14s08.html" title="References"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Run the mission and analyze the results</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="DSN_Estimation_Create_and_configure_BatchEstimatorInv_object.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ch14s08.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="DSN_Estimation_Run_the_mission_and_analyze_the_results"></a>Run the mission and analyze the results</h2></div></div></div><p>The script segment used to run the mission is shown below.</p><pre class="programlisting">BeginMissionSequence
+ 
+RunEstimator bat</pre><p>The first script line, <span class="guilabel">BeginMissionSequence</span>, is
+    a required command which indicates that the &ldquo;Command&rdquo; section of the GMAT
+    script has begun. The second line of the script issues the
+    <span class="guilabel">RunEstimator</span> command with the bat
+    <span class="guilabel">BatchEstimatorInv</span> resource, defined in the <a class="xref" href="DSN_Estimation_Create_and_configure_BatchEstimatorInv_object.html" title="Create and configure BatchEstimatorInv object">Create and configure BatchEstimatorInv object</a> section, as an argument. This tells GMAT to
+    perform the estimation using parameters specified by the bat
+    resource.</p><p>We have now completed all of our script segments. See the file,
+    <code class="filename">Orbit Estimation using DSN Range and Doppler
+    Data.script</code>, for a listing of the entire script. We are now
+    ready to run the script. Hit the Save,Sync,Run button, (<span class="inlinemediaobject"><img src="../files/images/icons/Save_Sync_Run.png" height="10"></span>). Given the amount of data we are processing, our
+    mission orbit, and our choice of force model, the script should finish
+    execution in about 1-2 minutes.</p><p>We analyze the results of this script in many ways. In the first
+    subsection, we analyze the Message window output. In the second
+    subsection, we look at the plots of the observation residuals, and in the
+    third subsection, we analyze the batch estimation report. Finally, in the
+    fourth subsection, we discuss how the contents of the MATLAB output file
+    can be used to analyze the results of our estimation process.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="DSN_Estimation_Message_Window_Output"></a>Message Window Output</h3></div></div></div><p>We first analyze the message window output focusing on the
+      messages that may require some explanation. Follow along using <a class="xref" href="DSN_Estimation_Appendix_A.html" title="Appendix A &ndash; GMAT Message Window Output">Appendix A &ndash; GMAT Message Window Output</a> where we
+      have put a full listing of the output. Soon into the message flow, we
+      get a message telling us how many measurement records were read
+      in.</p><pre class="programlisting">Data file 'Simulate DSN Range and Doppler Data 3 weeks.gmd' has 1348 
+	  of 1348 records used for estimation.</pre><p>The value of 1348 is the number of lines of measurement data in
+      the GMD file listed above.</p><p>Next, the window output contains a description of the tracking
+      configuration. The output below confirms that we are processing range
+      and Doppler data from the <span class="guilabel">CAN</span>,
+      <span class="guilabel">GDS</span>, and <span class="guilabel">MAD</span> ground
+      stations.</p><pre class="programlisting">List of tracking configurations (present in participant ID) for load 
+	  records from data file 
+	  'Simulate DSN Range and Doppler Data 3 weeks.gmd':
+   Config 0: {{22222,11111,22222},DSN_SeqRange}
+   Config 1: {{22222,11111,22222},DSN_TCP}
+   Config 2: {{33333,11111,33333},DSN_SeqRange}
+   Config 3: {{33333,11111,33333},DSN_TCP}
+   Config 4: {{44444,11111,44444},DSN_SeqRange}
+   Config 5: {{44444,11111,44444},DSN_TCP}</pre><p>Later on in the output, GMAT echoes out the a priori estimate that
+      we input into the script.</p><pre class="programlisting">a priori state:
+   Estimation Epoch:
+       27253.500417064603 A.1 modified Julian
+       27253.500416666666 TAI modified Julian
+   19 Aug 2015 00:00:00.000 UTCG
+   Sat.SunMJ2000Eq.X = -126544963
+   Sat.SunMJ2000Eq.Y = 61978518
+   Sat.SunMJ2000Eq.Z = 24133225
+   Sat.SunMJ2000Eq.VX = -13.789
+   Sat.SunMJ2000Eq.VY = -24.673
+   Sat.SunMJ2000Eq.VZ = -10.662</pre><p>Next, GMAT outputs some data associated with the initial iteration
+      of the Outer Loop Sigma Editing (OLSE) process as shown below.</p><pre class="programlisting">Number of Records Removed Due To:
+   . No Computed Value Configuration Available : 0
+   . Out of Ramp Table Range   : 0
+   . Signal Blocked            : 0
+   . Initial RMS Sigma Filter  : 0
+   . Outer-Loop Sigma Editor   : 0
+Number of records used for estimation: 1348</pre><p>As previously
+      mentioned, the OLSE process can edit (i.e., remove) certain data from
+      use as part of the estimation algorithm. There are five conditions which
+      could cause a data point to be edited. For each condition, the output
+      above specifies how many data points were edited. We now discuss the
+      meaning of the five conditions.</p><p>The first condition, &ldquo;No Computed Value Configuration Available&rdquo;
+      means that GMAT has read in some measurement data but no corresponding
+      tracking configuration has been defined in the GMAT script. Thus, GMAT
+      has no way to form the computed, C, value of the measurement. For
+      example, this might happen if our script did not define a
+      <span class="guilabel">GroundStation</span> object corresponding to some data in
+      the GMD file. Since we have defined everything we need to, no data
+      points are edited for this condition.</p><p>The second condition, &ldquo;Out of Ramp Table Range,&rdquo; means that while
+      solving the light time equations, GMAT needs to know the transmit
+      frequency, for some ground station, at a time that is not covered by the
+      ramp table specified in our <span class="guilabel">TrackingFileSet</span>
+      resource, <span class="guilabel">DSNsimData</span>. Looking at our input GMD
+      file, we see that our measurement times range from 27253.500416666669 to
+      27274.500416666662 TAIMJD. Since our ramp table has a ramp record for
+      all three ground stations at 27252 TAIMJD which is about 1 &frac12; days before
+      the first measurement and since our <span class="emphasis"><em>a priori</em></span>
+      Cartesian state estimate is fairly good, it makes sense that no
+      measurements were edited for this condition.</p><p>The third condition, &ldquo;Signal Blocked,&rdquo; indicates that while taking
+      into account its current estimate of the state, GMAT calculates that a
+      measurement for a certain measurement strand is not possible because the
+      signal is &ldquo;blocked.&rdquo; Actually, the signal does not have to blocked, it
+      just has to violate the minimum elevation angle constraint associated
+      with a given ground station. Consider a <span class="guilabel">GDS</span> to
+      <span class="guilabel">Sat</span> to <span class="guilabel">GDS</span> range two way range
+      measurement at given time. If the <span class="guilabel">GDS</span> to
+      <span class="guilabel">Sat</span> elevation angle was 6 degrees, the measurement
+      would be edited out since the minimum elevation angle, as specified by
+      the <span class="guilabel">GDS.MinimumElevationAngle</span> field, is set at 7
+      degrees. Since, in our simulation, we specified that only data meeting
+      this 7 degree constraint should be written out, it is plausible that no
+      data were edited because of this condition.</p><p>The fourth condition, &ldquo;Initial RMS Sigma Filter,&rdquo; corresponds to
+      GMAT&rsquo;s OLSE processing for the initial iteration. As mentioned before,
+      you can find a complete description of the OLSE in the &ldquo;Behavior of
+      Outer Loop Sigma Editing (OLSE)&rdquo; discussion in the
+      <span class="guilabel">BatchEstimatorInv</span> Help. As described in the Help,
+      for the initial iteration, data is edited if</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|Weighted Measurement Residual| &gt;
+      <span class="guilabel">OLSEInitialRMSSigma</span></p><p>where the Weighted Measurement Residual for a given measurement is
+      given by</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(O-C)/<span class="guilabel">NoiseSigma</span></p><p>and where <span class="guilabel">NoiseSigma</span> are inputs that we set
+      when we created the various <span class="guilabel">ErrorModel</span>
+      resources.</p><p>We note that for a good orbit solution, the Weighted Measurement
+      Residual has a value of approximately one. Since our <span class="emphasis"><em>a
+      priori</em></span> state estimate is not that far off from the truth and
+      since we have set <span class="guilabel">OLSEInitialRMSSigma</span> to a very
+      large value of 10,000, we do not expect any data to be edited for this
+      condition.</p><p>The fifth condition, &ldquo;Outer-Loop Sigma Editor,&rdquo; corresponds to
+      GMAT&rsquo;s OLSE processing for the second or later iteration. Since the
+      output we are analyzing is for the initial iteration of the batch
+      estimator, the number of data points edited because of this condition is
+      0. We will discuss the OLSE processing for the second or later
+      iterations when we analyze the output for a later iteration.</p><pre class="programlisting">WeightedRMS residuals for this iteration : 1459.94235975
+   BestRMS residuals for this iteration     : 1459.94235975
+   PredictedRMS residuals for next iteration: 1.01539521333</pre><p>The first output line above gives the weighted RMS calculated when
+      the estimate of the state is the input a priori state (i.e., the 0th
+      iteration state). The weighted RMS value of approximately 1460 is
+      significantly far away from the value of 1 associated with a good orbit
+      solution. The second output line gives the best (smallest) weighted RMS
+      value for all of the iterations. Since this is our initial iteration,
+      the value of the BestRMS is the same as the WeightedRMS. The third
+      output line is the predicted weighted RMS value for the next iteration.
+      Because of the random noise involved in generating the simulated input
+      data, the numbers you see may differ from that above.</p><p>Next, GMAT outputs the state associated with the first iteration
+      of the batch estimator. Let&rsquo;s define what we mean by iteration. The
+      state at iteration &lsquo;n&rsquo; is the state after GMAT has solved the so-called
+      normal equations (e.g., Eq. 4.3.22 or 4.3.25 in Tapley [2004]) &lsquo;n&rsquo;
+      successive times. By convention, the state at iteration 0 is the input
+      <span class="emphasis"><em>a priori</em></span> state.</p><pre class="programlisting">------------------------------------------------------
+Iteration 1
+
+Current estimated state:
+   Estimation Epoch:
+       27253.500417064603 A.1 modified Julian
+       27253.500416666666 TAI modified Julian
+   19 Aug 2015 00:00:00.000 UTCG
+   Sat.SunMJ2000Eq.X = -126544968.377
+   Sat.SunMJ2000Eq.Y = 61978514.8777
+   Sat.SunMJ2000Eq.Z = 24133217.2547
+   Sat.SunMJ2000Eq.VX = -13.7889998632
+   Sat.SunMJ2000Eq.VY = -24.6730006664
+   Sat.SunMJ2000Eq.VZ = -10.6619986007</pre><p>Next, GMAT outputs statistics on how many data points were edited
+      for this iteration.</p><pre class="programlisting">Number of Records Removed Due To:
+   . No Computed Value Configuration Available : 0   
+   . Out of Ramp Table Range   : 0
+   . Signal Blocked : 0
+   . Initial RMS Sigma Filter  : 0
+   . Outer-Loop Sigma Editor : 2
+Number of records used for estimation: 1346</pre><p>For the same reasons we discussed for the initial 0th iteration,
+      as expected, no data points were edited because &ldquo;No Computed Value
+      Configuration Available&rdquo; or because a requested frequency was &ldquo;Out of
+      Ramp Table Range.&rdquo; Also, for the same reasons discussed for the 0th
+      iteration, it is plausible that no data points were edited for this
+      iteration because of signal blockage. Note that there are no data points
+      edited because of the &ldquo;Initial RMS Sigma Filter&rdquo; condition. This is as
+      expected because this condition only edits data on the initial 0th
+      iteration. Finally, we note that 2 data points out of 1348 data points
+      are edited because of the OLSE condition. As discussed in the &ldquo;Behavior
+      of Outer Loop Sigma Editing (OLSE)&rdquo; section in the
+      <span class="guilabel">BatchEstimatorInv</span> Help,&rdquo; data is edited if</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|Weighted Measurement Residual| &gt;
+      OLSEMultiplicativeConstant * WRMSP + OLSEAdditiveConstant</p><p>where</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WRMSP is the predicted weighted RMS calculated at the end
+      of the previous iteration.</p><p>In the <a class="xref" href="DSN_Estimation_Create_and_configure_BatchEstimatorInv_object.html" title="Create and configure BatchEstimatorInv object">Create and configure BatchEstimatorInv object</a> section, we chose
+      <span class="guilabel">OLSEMultiplicativeConstant</span> = 3 and
+      <span class="guilabel">OLSEAdditiveConstant</span> = 0 and thus the equation
+      above becomes</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|Weighted Measurement Residual| &gt; 3 * WRMSP</p><p>It is a good sign that only 2 of 1348, or 0.15 % of the data is
+      edited out. If too much data is edited out, even if you have a good
+      weighted RMS value, it indicates that you may have a problem with your
+      state estimate. Next, GMAT outputs some root mean square, (RMS),
+      statistical data associated with iteration 1.</p><pre class="programlisting">   WeightedRMS residuals for this iteration : 1.00807187051
+   BestRMS residuals for this iteration     : 1.00807187051
+   PredictedRMS residuals for next iteration: 1.00804237273</pre><p>The first output line above gives the weighted RMS calculated when
+      the estimate of the state is the iteration 1 state. The weighted RMS
+      value of 1.00807187051 is very close to the value of 1 associated with a
+      good orbit solution. The second output line gives the best (smallest)
+      weighted RMS value for all of the iterations. Since this iteration 1
+      WeightedRMS value is the best so far, BestRMS is set to the current
+      WeightedRMS value. The third output line is the predicted weighted RMS
+      value for the next iteration. Note that the RMS values calculated above
+      only use data points that are used to form the state estimate. Thus, the
+      edited points are not used to calculate the RMS.</p><p>Because the predicted WeightedRMS value is very close to the
+      BestRMS value, GMAT, as shown in the output below, concludes that the
+      estimation process has converged. As previously mentioned, see the
+      &ldquo;Behavior of Convergence Criteria&rdquo; discussion in the
+      <span class="guilabel">BatchEstimatorInv</span> Help for complete details.</p><pre class="programlisting">This iteration is converged due to relative convergence criteria.
+
+
+********************************************************
+*** Estimating Completed in 2 iterations
+********************************************************
+
+Estimation converged!
+      |1 - RMSP/RMSB| = | 1- 1.00804 / 1.00807| = 2.92616e-005 is 
+	  less than RelativeTol, 0.0001</pre><p>GMAT then outputs the final, iteration 2, state. Note that GMAT
+      does not actually calculate the weighted RMS associated with this state
+      but we assume that it is close to the predicted value of 1.00804237273
+      that was previously output.</p><pre class="programlisting">Final Estimated State:
+
+   Estimation Epoch:
+       27253.500417064603 A.1 modified Julian
+       27253.500416666666 TAI modified Julian
+   19 Aug 2015 00:00:00.000 UTCG
+   Sat.SunMJ2000Eq.X = -126544968.759
+   Sat.SunMJ2000Eq.Y = 61978514.3889
+   Sat.SunMJ2000Eq.Z = 24133216.7847
+   Sat.SunMJ2000Eq.VX = -13.7889997238
+   Sat.SunMJ2000Eq.VY = -24.673000621
+   Sat.SunMJ2000Eq.VZ = -10.6619988668</pre><p>Finally, GMAT outputs the final Cartesian state error covariance
+      matrix and correlation matrix, as well as the time required to complete
+      this script.</p><pre class="programlisting" width="100">Final Covariance Matrix:
+
+        6.566855211518e+000        1.044634165793e+001        3.112863356104e+000       -2.345908150453e-006        5.035500518048e-007        1.602400702334e-006
+        1.044634082751e+001        2.043155461343e+001       -4.258301029878e+000       -3.704075903144e-006        2.022938490903e-007        3.971535902921e-006
+        3.112865361595e+000       -4.258297445960e+000        2.371732979013e+001       -1.178974996784e-006        1.683977194948e-006       -2.674173473312e-006
+       -2.345908159193e-006       -3.704076213842e-006       -1.178974284159e-006        8.386165742100e-013       -1.658563839962e-013       -6.047842793431e-013
+        5.035500497713e-007        2.022939026968e-007        1.683977056710e-006       -1.658563826712e-013        1.032575255469e-012       -2.190676053421e-012
+        1.602400700119e-006        3.971536117909e-006       -2.674174002075e-006       -6.047842762516e-013       -2.190676053038e-012        5.776276322091e-012
+
+Final Correlation Matrix:
+
+             1.000000000000             0.901851016006             0.249429858518            -0.999655967713             0.193376220513             0.260176714954
+             0.901850944314             1.000000000000            -0.193442883328            -0.894844247176             0.044042413976             0.365581159741
+             0.249430019216            -0.193442720520             1.000000000000            -0.264356490609             0.340284723675            -0.228471850851
+            -0.999655971438            -0.894844322236            -0.264356330820             1.000000000000            -0.178233614796            -0.274786120507
+             0.193376219732             0.044042425647             0.340284695741            -0.178233613372             1.000000000000            -0.897001819395
+             0.260176714594             0.365581179531            -0.228471896026            -0.274786119102            -0.897001819239             1.000000000000
+
+********************************************************
+</pre><pre class="programlisting">
+Mission run completed.
+===&gt; Total Run Time: 85.739000 seconds
+
+========================================</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="DSN_Estimation_Plots_of_Observation_Residuals"></a>Plots of Observation Residuals</h3></div></div></div><p>GMAT creates plots on a per iteration, per ground station, and per
+      measurement type basis. We elaborate on what this means. When the script
+      first runs, the first plots that show up are the 0th iteration
+      residuals. This means that when calculating the &lsquo;O-C&rsquo; observation
+      residual, GMAT calculates the Computed, C, value of the residual using
+      the a priori state. As shown in <a class="xref" href="DSN_Estimation_Appendix_B.html" title="Appendix B &ndash; Zeroth Iteration Plots of Observation Residuals">Appendix B &ndash; Zeroth Iteration Plots of Observation
+    Residuals</a>, there
+      are 6 of these 0th iteration residual plots. For each of the 3 stations,
+      there is one plot of the range residuals and one plot of the Doppler
+      residuals. After iteration 1 processing is complete, GMAT outputs the
+      iteration 1 residuals as shown in <a class="xref" href="DSN_Estimation_Appendix_C.html" title="Appendix C &ndash; First Iteration Plots of Observation Residuals">Appendix C &ndash; First Iteration Plots of Observation Residuals</a>. As
+      previously mentioned, although for this script, GMAT takes two
+      iterations to converge, the actual iteration 2 residuals are neither
+      calculated nor plotted.
+      DSN_Estimation_Create_and_configure_the_Ground_Station_and_related_parameters</p><p>We now analyze the CAN range and Doppler residuals. For the 0th
+      iteration, the range residuals vary from approximately 11,000 to 31,000
+      RU. These residuals are this large because our a priori estimate of the
+      state was deliberately perturbed from the truth. There are multiple
+      indicators on this graph that indicate that GMAT has not yet converged.
+      First, the residuals have an approximate linear structure. If you have
+      modeled the dynamics and measurements correctly, the plots should have a
+      random appearance with no structure. Additionally, the residuals are
+      biased, i.e., they do not have zero mean. For a well modeled system, the
+      mean value of the residuals should be near zero. Finally, the magnitude
+      of the range residuals is significantly too large. Recall that in the
+      <a class="xref" href="DSN_Estimation_Create_and_configure_the_Ground_Station_and_related_parameters.html" title="Create and configure the Ground Station and related parameters">Create and configure the Ground Station and related
+    parameters</a> section, we set the 1 sigma measurement noise
+      for the CAN range measurements to 10.63 RU. Thus, for a large sample of
+      measurements, we expect, roughly, that the vast majority of measurements
+      will lie between the values of approximately -32 and +32 RU. Taking a
+      look at the 1st iteration CAN range residuals, this is, approximately,
+      what we get.</p><p>The 0th iteration <span class="guilabel">CAN</span> Doppler residuals range
+      from approximately 0.0050 to 0.01535 Hz. As was the case for the range
+      0th iteration residuals, the fact that the Doppler residuals are biased
+      indicates that GMAT has not yet converged. Recall that in the <a class="xref" href="DSN_Estimation_Create_and_configure_the_Ground_Station_and_related_parameters.html" title="Create and configure the Ground Station and related parameters">Create and configure the Ground Station and related
+    parameters</a> section, we set the 1 sigma measurement noise
+      for the <span class="guilabel">CAN</span> Doppler measurements to 0.0282 Hz.
+      Thus, for a large sample of measurements, we expect, roughly, that the
+      vast majority of measurements will lie between the values of
+      approximately -0.0846 and +0.0846 RU. Taking a look at the 1st iteration
+      <span class="guilabel">CAN</span> Doppler residuals, this is, approximately, what
+      we get.</p><p>There is one important detail on these graphs that you should be
+      aware of. GMAT only plots the residuals for data points that are
+      actually used to calculate the solution. Recall that for iteration 0,
+      all 1348 of 1348 total measurements were used to calculate the orbit
+      state, i.e., no data points were edited. Thus, if you counted up all the
+      data points on the 6 iteration 0 plots, you would find 1348 points. The
+      situation is different for the 1st iteration. Recall that for iteration
+      1, 1346 of 1348 total measurements were used to calculate the orbit
+      state, i.e., 2 data points were edited. Thus, if you counted up all the
+      data points on the 6 iteration 1 plots, you would find 1346 points. If
+      you wish to generate plots that contain both non-edited and edited
+      measurements, you will need to generate them yourself using the MATLAB
+      output file as discussed in the <a class="xref" href="DSN_Estimation_Run_the_mission_and_analyze_the_results.html#DSN_Estimation_Matlab_Output_File" title="Matlab Output File">Matlab Output File</a>
+      section.</p><p>We note that the graphs have some interactive features. Hover your
+      mouse over the graph of interest and then right click. You will see that
+      you have four options. You can toggle both the grid lines and the Legend
+      on and off. You can also export the graph data to a text file, and
+      finally, you can export the graph image to a bmp file.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="DSN_Estimation_Batch_Estimator_Output_Report"></a>Batch Estimator Output Report</h3></div></div></div><p>When we created our BatchEstimatorInv resource, bat, in the <a class="xref" href="DSN_Estimation_Create_and_configure_BatchEstimatorInv_object.html" title="Create and configure BatchEstimatorInv object">Create and configure BatchEstimatorInv object</a> section, we specified that the output file
+      name would be 'Orbit Estimation using DSN Range and Doppler Data.report.
+      Go to GMAT&rsquo;s &lsquo;output&rsquo; directory and open this file, preferably using an
+      editor such as Notepad++ where you can easily scroll across the rows of
+      data.</p><p>The first approximately 150 lines of the report are mainly an echo
+      of the parameters we input into the script such as initial spacecraft
+      state, force model, propagator settings, measurement types to be
+      processed, etc.</p><p>After this echo of the input data, the output report contains
+      measurement residuals associated with the initial 0th iteration. Search
+      the file for the words, &lsquo;ITERATION 0: MEASUREMENT RESIDUALS&rsquo; to find the
+      location of where the relevant output begins. This output sections
+      contains information on all of the measurements, both non-edited and
+      edited, that can possibly be used in the estimation process. Each row of
+      data corresponds to one measurement. For each measurement, the output
+      tells you the following</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Iteration Number</p></li><li class="listitem"><p>Record Number</p></li><li class="listitem"><p>Epoch in UTC Gregorian format</p></li><li class="listitem"><p>Observation type. &lsquo;DSN_SeqRange&rsquo; corresponds to DSN sequential
+          range and &lsquo;DSN_TCP&rsquo; corresponds to DSN total count phase-derived
+          Doppler.</p></li><li class="listitem"><p>Participants. For example, &lsquo;22222,11111,22222&rsquo; tells you that
+          your measurement comes from a <span class="guilabel">CAN</span> to
+          <span class="guilabel">Sat</span> to <span class="guilabel">CAN</span> link.</p></li><li class="listitem"><p>Edit Criteria.</p></li><li class="listitem"><p>Observed Value (O)</p></li><li class="listitem"><p>Computed Value (C)</p></li><li class="listitem"><p>Observation Residual (O-C)</p></li><li class="listitem"><p>Elevation Angle</p></li></ul></div><p>We have previously discussed the edit criteria. In particular, we
+      discussed the various reasons why data might be edited. If the edit
+      criteria shown in the output is &lsquo;-,&rsquo; this means that the data was not
+      edited and the data was used, for this iteration, to calculate a state
+      estimate.</p><p>Note that if the elevation angle of any of the measurements is
+      below our input criteria of 7 degrees, then the measurement would be
+      edited because the signal would be considered to be &ldquo;blocked.&rdquo; For range
+      data, we would see Bn where n is an integer specifying the leg number.
+      For our two way range data type, we have two legs, the uplink leg
+      represented by the integer, 1, and the downlink leg, represented by the
+      integer 2. Thus, if we saw &ldquo;B1&rdquo; in this field, this would mean that the
+      signal was blocked for the uplink leg. Correspondingly, for Doppler
+      data, we would also see Bn, but the integer n would be 1 or 2 depending
+      upon whether the blockage occurred in the start path (n=1) or the end
+      path (n=2).</p><p>After all of the individual iteration 0 residuals are printed out,
+      four different iteration 0 observation summary reports, as shown below,
+      are printed out.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Observation Summary by Station and Data Type</p></li><li class="listitem"><p>Observation Summary by Data Type and Station</p></li><li class="listitem"><p>Observation Summary by Station</p></li><li class="listitem"><p>Observation Summary by Data Type</p></li></ul></div><p>After all of the observation summaries are printed out, the
+      updated state and covariance information, obtained by processing the
+      previous residual information, are printed out. The output also contains
+      statistical information about how much the individual components of the
+      state estimate have changed for this iteration.</p><p>At this point, the output content repeats itself for the next
+      iteration. The new state estimate is used to calculate new residuals and
+      the process starts all over again. The process stops when the estimator
+      has either converged or diverged.</p><p>We now give an example of how this report can be used. In the
+      <a class="xref" href="DSN_Estimation_Run_the_mission_and_analyze_the_results.html#DSN_Estimation_Message_Window_Output" title="Message Window Output">Message Window Output</a> section, we noted that, for iteration 1, two
+      measurements were edited because of the OLSE criteria. Let&rsquo;s investigate
+      this in more detail. What type of data was edited? From what station?
+      Could there be a problem with this data type at this station? We look at
+      the &lsquo;Observation Summary by Station and Data Type&rsquo; for iteration 1. We
+      see that one range measurement from the <span class="guilabel">GDS</span> station
+      and one range measurement from the <span class="guilabel">MAD</span> station was
+      edited. The mean residual and 1 sigma standard deviation for
+      <span class="guilabel">GDS</span> range measurements was -0.828187 and 10.595392
+      RU, respectively. The mean residual and 1 sigma standard deviation for
+      <span class="guilabel">MAD</span> range measurements was 0.976758 and 11.047855
+      RU, respectively.</p><p>Now that we know that the issue was with <span class="guilabel">GDS</span>
+      and <span class="guilabel">MAD</span> range measurements, we look at the detailed
+      residual output, for iteration 1, to determine the time these
+      measurements occurred. We can search for the OLSE keyword to help do
+      this. We determine that a <span class="guilabel">GDS</span> range measurement was
+      edited at 07 Sep 2015 19:00:00.000 UTCG and that it had an observation
+      residual of -32.432373 RU. This is just a bit beyond the 3 sigma value
+      and we conclude that there is no real problem with the
+      <span class="guilabel">GDS</span> range measurements. This is just normal
+      statistical variation.</p><p>We also determine that a <span class="guilabel">MAD</span> range
+      measurement was edited at 31 Aug 2015 11:00:00.000 UTCG and that it had
+      an observation residual of -33.497559 RU. Again, this is just a bit
+      beyond the 3 sigma value and we conclude that there is no real problem
+      with the <span class="guilabel">MAD</span> range measurements. We remind you,
+      that when you do your run, you may have a different number of data
+      points edited. This is because, when you do your simulation, GMAT uses a
+      random number generator and you will be using a different data
+      set.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="DSN_Estimation_Matlab_Output_File"></a>Matlab Output File</h3></div></div></div><p>In the <a class="xref" href="DSN_Estimation_Create_and_configure_BatchEstimatorInv_object.html" title="Create and configure BatchEstimatorInv object">Create and configure BatchEstimatorInv object</a> section, when we created our
+      <span class="guilabel">BatchEstimatorInv</span> resource, bat, we chose our
+      MATLAB output file name, '<code class="filename">Orbit Estimation using DSN Range and
+      Doppler Data.mat</code>.' By default, this file is created in GMAT&rsquo;s
+      &lsquo;output&rsquo; directory. This file will only be created if you have MATLAB
+      installed and properly configured for use with GMAT.</p><p>Start up a MATLAB session. Change the directory to your GMAT
+      &lsquo;output&rsquo; directory and then type the following at the MATLAB command
+      prompt.</p><pre class="programlisting">&gt;&gt; load 'Orbit Estimation using DSN Range and Doppler Data.mat'</pre><p>After the file has loaded, type the following command to obtain a
+      list of available variable names inside this file.</p><pre class="programlisting">&gt;&gt; whos</pre><p>You should see something similar to the following:</p><pre class="programlisting">&gt;&gt; whos
+  Name            Size             Bytes  Class     Attributes
+
+  Iteration0      1x1             847660  struct              
+  Iteration1      1x1             847690  struct              
+  Iteration2      1x1             847696  struct             </pre><p>You may see more or fewer iterations depending on your run. Each
+      iteration variable is a structure containing the following
+      arrays:</p><div class="informaltable"><table border="0"><colgroup><col width="50%"><col width="50%"></colgroup><tbody><tr><td>Status</td><td>Observation status flag, 1 = observation is
+              good/useable</td></tr><tr><td>IterationNumber</td><td>The iteration number. This matches the iteration number
+              in the structure name.</td></tr><tr><td>Epoch</td><td>The TAIModJulian time tag of each observation, computed
+              value, and residual</td></tr><tr><td>Observed</td><td>The observed value (from the GMD file) in Range Units or
+              Hertz</td></tr><tr><td>Calculated</td><td>The predicted observation, in Range Units or Hertz,
+              computed by GMAT using the force modeling specified in the batch
+              estimator propagator</td></tr><tr><td>ObsMinusCalculated</td><td>The observation residual, in Range Units or Hertz</td></tr><tr><td>Elevation</td><td>The computed elevation of the observation, in
+              degrees</td></tr><tr><td>Frequency</td><td>The transmit frequency at the time of the observation, in
+              Hertz</td></tr><tr><td>FrequencyBand</td><td>The frequency band of the observation. See the
+              <span class="guilabel">TrackingFileSet</span> help for a list of
+              frequency band indicators.</td></tr><tr><td>DopplerCountInterval</td><td>The Doppler count interval in seconds, for Doppler
+              observations. Set to -1 for range observations.</td></tr><tr><td>Participants</td><td>For each observation, a comma-separated string
+              identifying the transmit station, tracked object, and receive
+              station in order</td></tr><tr><td>Type</td><td>A string identifying the observation type, DSN_SeqRange
+              or DSN_TCP</td></tr><tr><td>UTCGregorian</td><td>The UTCGregorian epoch string of each observation</td></tr><tr><td>ObsEditFlag</td><td>The editing status flag for each observation. N = not
+              edited, U = no computed value configuration available, R = out
+              of ramp table range, B = blocked by elevation edit criteria,
+              IRMS = initial RMS sigma edit, OLSE = outer-loop sigma
+              edit</td></tr></tbody></table></div><p>Any unset or uncomputed values are set to -1. You can use these
+      arrays to perform custom plots and statistical analysis using MATLAB.
+      For example, to produce a plot of all range residuals from the final
+      iteration, you can do the following:</p><pre class="programlisting">&gt;&gt; I = find(strcmp(Iteration2.Type, 'DSN_SeqRange'));
+&gt;&gt; plot(Iteration2.Epoch(I), Iteration2.ObsMinusCalc(I), 'go');</pre></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="DSN_Estimation_Create_and_configure_BatchEstimatorInv_object.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ch14s08.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Create and configure BatchEstimatorInv object&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;References</td></tr></table></div></body></html>

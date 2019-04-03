@@ -1,0 +1,35 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>String</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="SpacecraftVisualizationProperties.html" title="Spacecraft Visualization Properties"><link rel="next" href="TrackingFileSet.html" title="TrackingFileSet"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">String</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="SpacecraftVisualizationProperties.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="TrackingFileSet.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="String"></a><div class="titlepage"></div><a name="N20F66" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">String</span></h2><p>String &mdash; A user-defined string variable</p></div><div class="refsection"><a name="N20F77"></a><h2>Description</h2><p>The <span class="guilabel">String</span> resource is used to store a string
+    value for use by commands in the Mission Sequence.</p><p>In the script environment, <span class="guilabel">String</span> resources are
+    initialized to the string <code class="literal">'STRING_PARAMETER_UNDEFINED'</code>
+    on creation. In the GUI environment, they&rsquo;re initialized to the empty
+    string (<code class="literal">''</code>). String resources can be assigned using
+    string literals or (in the Mission Sequence) other
+    <span class="guilabel">String</span> resources, numeric
+    <span class="guilabel">Variable</span> resources, or resource parameters that have
+    string types.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Array.html" title="Array"><span class="refentrytitle">Array</span></a>, <a class="xref" href="Variable.html" title="Variable"><span class="refentrytitle">Variable</span></a></p></div><div class="refsection"><a name="N20F9A"></a><h2>Fields</h2><p>The <span class="guilabel">String</span> resource has no fields; instead, the
+    resource itself is set to the desired value.</p><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><em class="replaceable"><code>value</code></em></td><td><p>The value of the string variable.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><code class="literal">''</code> (empty) (GUI)</p><p><code class="literal">'STRING_PARAMETER_UNDEFINED'</code>
+                    (script)</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N20FE6"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_String_Create.png" align="middle" height="291"></td></tr></table></div></div><p>The GMAT GUI lets you create multiple <span class="guilabel">String</span>
+    resources at once without leaving the window. To create a
+    <span class="guilabel">String</span>:</p><div class="orderedlist"><ol class="orderedlist compact" type="1"><li class="listitem"><p>In the <span class="guilabel">String Name</span> box, type the desired
+        name of the string.</p></li><li class="listitem"><p>In the <span class="guilabel">String Value</span> box, type the initial
+        value of the string. This is required and must be a literal string
+        value. Quotes are not necessary when setting the value.</p></li><li class="listitem"><p>Click the <span class="guilabel">=&gt;</span> button to create the string
+        and add it to the list on the right.</p></li></ol></div><p>You can create multiple <span class="guilabel">String</span> resources this
+    way. To edit an existing string in this window, click it in the list on
+    the right and edit the value. You must click the
+    <span class="guilabel">=&gt;</span> button again to save your changes.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_String_Edit.png" align="middle" height="185"></td></tr></table></div></div><p>You can also double-click an existing <span class="guilabel">String</span> in
+    the resources tree in the main GMAT window. This opens the string
+    properties box above that allows you to edit the value of that individual
+    string.</p></div><div class="refsection"><a name="N21024"></a><h2>Remarks</h2><p><span class="guilabel">String</span> resources can (in the Mission Sequence)
+    be set using numeric <span class="guilabel">Variable</span> resources. The numeric
+    value of the <span class="guilabel">Variable</span> is converted to a string during
+    the assignment. The numeric value is converted to a string representation
+    in either floating-point or scientific notation (whichever is more
+    appropriate) with a maximum of 16 significant figures.</p></div><div class="refsection"><a name="N21031"></a><h2>Examples</h2><div class="informalexample"><p>Creating a string and assigning it a literal value:</p><pre class="programlisting"><code class="code">Create ReportFile aReport
+
+Create String aStr
+aStr = 'MyString'
+
+BeginMissionSequence
+
+Report aReport aStr</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="SpacecraftVisualizationProperties.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="TrackingFileSet.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Spacecraft Visualization Properties&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;TrackingFileSet</td></tr></table></div></body></html>

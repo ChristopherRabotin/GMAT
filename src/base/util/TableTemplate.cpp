@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -350,7 +350,7 @@ TableTemplate<T>::SetSize(int r, int c, bool zeroElements)
                elementD[(ii * colsD) + jj] = saved[(ii * oldCols) + jj];
             }
          }
-         delete saved;
+         delete[] saved;
       }
    }
 }
@@ -417,8 +417,12 @@ TableTemplate<T>::ChangeSize(int r, int c, bool zeroElements)
             elementD[(ii * colsD) + jj] = saved[(ii * oldCols) + jj];
          }
       }
-      delete saved;
+      //delete saved;
    }
+
+   //Step 6: Delete temporary buffer
+   if (saved != NULL)
+      delete [] saved;
 }
 
 //------------------------------------------------------------------------------

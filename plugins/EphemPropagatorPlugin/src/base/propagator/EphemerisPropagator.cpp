@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1227,6 +1227,14 @@ bool EphemerisPropagator::Initialize()
                   MessageInterface::ShowMessage("From spacecraft epoch = %lf, "
                         "elapsed time = %lf\n", initialEpoch, timeFromEpoch);
                #endif
+
+               #ifdef DEBUG_INITIAL_EPHEM_STATE
+                  MessageInterface::ShowMessage("From spacecraft\n");
+               #endif
+
+               Rvector6 state = ((SpaceObject*)(propObjects[0]))->GetMJ2000State(initialEpoch);
+               for (UnsignedInt q = 0; q < 6; ++q)
+                  j2kState[q] = state[q];
             }
             break;
 
@@ -1240,6 +1248,10 @@ bool EphemerisPropagator::Initialize()
                if (ephemStart > 0)
                {
                   initialEpoch = ephemStart;
+
+                  #ifdef DEBUG_INITIAL_EPHEM_STATE
+                     MessageInterface::ShowMessage("From Ephem\n");
+                  #endif
                }
             break;
 
@@ -1251,7 +1263,13 @@ bool EphemerisPropagator::Initialize()
                timeFromEpoch = 0.0;
             }
             else
+            {
                initialEpoch = ConvertToRealEpoch(startEpoch, epochFormat);
+
+               #ifdef DEBUG_INITIAL_EPHEM_STATE
+                  MessageInterface::ShowMessage("From Script\n");
+               #endif
+            }
             break;
       }
 

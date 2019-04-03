@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -335,17 +335,19 @@ bool RunEstimator::Initialize()
       throw CommandException("Cannot initialize RunEstimator command -- the "
             "object named " + solverName + " is not a Estimator.");
 
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1\n"); 
-      #endif
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1: create an Estimator and set value to the Estimator\n"); 
+   #endif
    theEstimator = (Estimator*)(estObj->Clone());
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1.1\n"); 
-      #endif
+
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1.1: reset delay flag\n"); 
+   #endif
    theEstimator->SetDelayInitialization(false);
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1.2\n"); 
-      #endif
+
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1.2: initialize the Estimator\n"); 
+   #endif
    theEstimator->Initialize();
 
    theEstimator->TakeAction("ResetInstanceCount");
@@ -353,6 +355,9 @@ bool RunEstimator::Initialize()
    estObj->TakeAction("ResetInstanceCount");                // does it need to do it???
    estObj->TakeAction("IncrementInstanceCount");            // does it need to do it???
 
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("RunEstimator::Initialize():   step 2: set DATASTREAM objects to measurement manager\n");
+#endif
    // Set the observation data streams for the measurement manager
    MeasurementManager *measman = theEstimator->GetMeasurementManager();
    StringArray streamList = measman->GetStreamList();
@@ -372,6 +377,9 @@ bool RunEstimator::Initialize()
                streamList[ms]);
    }
 
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("RunEstimator::Initialize():   step 3: set ramped table to measurement manager\n");
+   #endif
 ///// Check for generic approach here
    // Set the ramp table data streams for the measurement manager
    streamList = measman->GetRampTableDataStreamList();
@@ -489,19 +497,36 @@ bool RunEstimator::PreExecution()
 #endif
 
    bool retval = false;
+
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("PreExecution(): Step 1: initialize RunEstimator\n");
+#endif
    if (Initialize())
    {
+#ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("PreExecution(): Step 2: re-initialize the Estimator\n");
+#endif
       retval = theEstimator->Reinitialize();
 
-      // Load participant names to estimation state manager 
       MeasurementManager *measman = theEstimator->GetMeasurementManager();
       EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
       StringArray participants = measman->GetParticipantList();
+
+#ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("PreExecution(): Step 3: load participant names to EstimationStateManager\n");
+#endif
+      // Load participant names to estimation state manager 
       esm->SetParticipantList(participants);
       
+#ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("PreExecution(): Step 4: load solve-fors to EstimationStateManager\n");
+#endif
       // Load solve for objects to esm
       LoadSolveForsToESM();
 
+#ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("PreExecution(): Step 5: set solver-for objects to EstimationStateManager\n");
+#endif
       // Pass in the objects
       StringArray objList = esm->GetObjectList("");
       for (UnsignedInt i = 0; i < objList.size(); ++i)
@@ -526,11 +551,23 @@ bool RunEstimator::PreExecution()
          }
 
          if (obj != NULL)
+         {
+#ifdef DEBUG_INITIALIZATION
+            MessageInterface::ShowMessage("PreExecution(): object <%s,%p> set to EstimationStateManager\n", obj->GetName().c_str(), obj);
+#endif
             esm->SetObject(obj);
+         }
       }
 
+#ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("PreExecution(): Step 6: build state in EstimationStateManager\n");
+#endif
       esm->BuildState();
 
+
+#ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("PreExecution(): Step 7: set up event manager\n");
+#endif
       // Find the event manager and store its pointer
       if (triggerManagers == NULL)
           throw CommandException("The Event Manager pointer was not set on the "
@@ -557,6 +594,10 @@ bool RunEstimator::PreExecution()
          throw CommandException("The EventManager pointer was not set on the "
             "RunEstimator command");
 
+
+#ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("PreExecution(): Step 8: set up Propagator\n");
+#endif
       // Next comes the propagator
       PropSetup *obj = theEstimator->GetPropagator();
 
@@ -611,6 +652,9 @@ bool RunEstimator::PreExecution()
       propObjectNames.push_back(participants);
       propPrepared = false;
 
+#ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("PreExecution(): Step 9: initialize RunSolver\n");
+#endif
       // Now we can initialize the propagation subsystem by calling up the
       // inheritance tree.
       try
@@ -791,11 +835,11 @@ bool RunEstimator::Execute()
       #endif
 
       if (state != Solver::FINISHED)
-         theEstimator->AdvanceState();
+         state = theEstimator->AdvanceState(); // ekf mod 12/16
       else
       {
          // It has to run all work in AdvanceState() before Finalize()
-         theEstimator->AdvanceState();
+         state = theEstimator->AdvanceState();  // ekf mod 12/16
          Finalize();
       }
    } catch (...)//(EstimatorException ex1)
@@ -823,9 +867,16 @@ void RunEstimator::RunComplete()
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("Entered RunEstimator::RunComplete()\n");
    #endif
-   commandRunning = false;
+   //commandRunning = false;                        // Fix bug GMT-5818 Batch estimation stop and start error
 
    RunSolver::RunComplete();
+   commandComplete = true;                          // Fix bug GMT-5818 Batch estimation stop and start error
+   commandRunning = false;                          // Fix bug GMT-5818 Batch estimation stop and start error
+   propPrepared = false;                            // Fix bug GMT-5818 Batch estimation stop and start error
+
+   overridePropInit = true;                         // Fix bug GMT-5818 Batch estimation stop and start error
+   delayInitialization = true;                      // Fix bug GMT-5818 Batch estimation stop and start error
+
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("Exit RunEstimator::RunComplete()\n");
    #endif

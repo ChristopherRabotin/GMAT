@@ -1,0 +1,279 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>ReportFile</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="RejectFilter.html" title="RejectFilter"><link rel="next" href="Simulator.html" title="Simulator"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">ReportFile</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="RejectFilter.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Simulator.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="ReportFile"></a><div class="titlepage"></div><a name="N1CAE3" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ReportFile</span></h2><p>ReportFile &mdash; Report data to a text file</p></div><div class="refsection"><a name="N1CAF4"></a><h2>Description</h2><p>The <span class="guilabel">ReportFile</span> resource allows you to write
+    data to a text file that can be viewed after a mission run has been
+    completed. GMAT allows you to report user-defined <span class="guilabel">Variables,
+    Arrays</span>, <span class="guilabel">Strings</span> and <span class="guilabel">Object
+    Parameters</span>. GMAT gives you control over setting formatting
+    properties of the output report file that is generated at the end of a
+    mission run. You can create <span class="guilabel">ReportFile</span> resource in
+    either the GUI or script interface. GMAT also provides the option of when
+    to write and stop writing data to a text file through the
+    <span class="guilabel">Toggle</span>
+    <span class="guilabel">On</span>/<span class="guilabel">Off</span> command. See the <a class="xref" href="ReportFile.html#ReportFile_Remarks" title="Remarks">Remarks</a> section below for
+    detailed discussion of the interaction between
+    <span class="guilabel">ReportFile</span> resource and <span class="guilabel">Toggle</span>
+    command.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Report.html" title="Report"><span class="refentrytitle">Report</span></a>, <a class="xref" href="Toggle.html" title="Toggle"><span class="refentrytitle">Toggle</span></a></p></div><div class="refsection"><a name="N1CB25"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Add</span></td><td><p>Allows a user to add any number of user-defined
+            <span class="guilabel">Variables</span>, <span class="guilabel">Arrays</span>,
+            <span class="guilabel">Strings</span> or <span class="guilabel">Object
+            Parameters</span> to a report file. To add multiple
+            user-defined variables or parameters, enclose the reported values
+            with curly brackets. Ex. <code class="literal">MyReportName.Add ={Sat.X, Sat.Y,
+            Var1, Array(1,1)}</code>; The GUI's
+            <span class="guilabel">Selected</span> <span class="guilabel">Value(s</span>) field
+            is the equivalent of the script's <span class="guilabel">Add</span> field.
+            This field cannot be modified in the Mission Sequence.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Reference array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any user-defined parameter. Ex. Variables, Arrays,
+                    Strings, or Object parameters</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">{DefaultSC.A1ModJulian,
+                      DefaultSC.EarthMJ2000Eq.X}</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ColumnWidth</span></td><td><p>This field defines the width of the data columns in a
+            report file. The value for <span class="guilabel">ColumnWidth</span> is
+            applied to all columns of data. For example, if
+            <span class="guilabel">ColumnWidth</span> is set to 20, then each data
+            column will be 20 white-spaces wide. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Integer &gt; 1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>23</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Characters</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Delimiter</span></td><td><p>When <span class="guilabel">FixedWidth</span> field is turned
+            off, this field become active. The <span class="guilabel">Delimiter</span>
+            field allows you to report data to a report file in
+            <code class="literal">Comma</code>, <code class="literal">Semicolon</code>,
+            <code class="literal">Space</code> and <code class="literal">Tab</code> delimited
+            format.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">Comma</code>, <code class="literal">SemiColon</code>, <code class="literal">Space</code>, <code class="literal">Tab</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>When this field is active, then default is
+                    <code class="literal">Space</code></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Filename</span></td><td><p>Allows the user to define the file path and file name
+            for a report file.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Valid File Path and Name</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">ReportFile1.txt</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FixedWidth</span></td><td><p>Allows you to enable or disable
+            <span class="guilabel">Delimiter</span> and
+            <span class="guilabel">ColumnWidth</span> fields. When this field is turned
+            on, the <span class="guilabel">Delimiter</span> field is inactive and
+            <span class="guilabel">ColumnWidth</span> field is active and can be used
+            to vary the width of the data columns. When
+            <span class="guilabel">FixedWidth</span> field is turned off, the
+            <span class="guilabel">ColumnWidth</span> field becomes inactive and
+            <span class="guilabel">Delimiter</span> field is active for use.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>On, Off</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">On</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">LeftJustify</span></td><td><p> When the <span class="guilabel">LeftJustify</span> field is
+            set to <span class="guilabel">On</span>, then the data is left justified
+            and appears at the left most side of the column. If the
+            <span class="guilabel">LeftJustify</span> field is set to
+            <span class="guilabel">Off</span>, then the data is centered in the column.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>On, Off</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>On</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Maximized</span></td><td><p>Allows the user to maximize the
+            <span class="guilabel">ReportFile</span> window. This field cannot be
+            modified in the Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true,false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>false</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Precision</span></td><td><p>Allows the user to set the number of significant
+            digits of the data written to a report.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Integer &gt; 1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>16</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Same as variable being reported</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RelativeZOrder</span></td><td><p>Allows the user to select which
+            <span class="guilabel">ReportFile</span> to display first on the screen.
+            The <span class="guilabel">ReportFile</span> with lowest
+            <span class="guilabel">RelativeZOrder</span> value will be displayed last
+            while <span class="guilabel">ReportFile</span> with highest
+            <span class="guilabel">RelativeZOrder</span> value will be displayed first.
+            This field cannot be modified in the Mission Sequence.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Integer &ge; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Size</span></td><td><p>Allows the user to control the display size of
+            generated report file. First value in [0 0] matrix controls
+            horizonal size and second value controls vertical size of report
+            file window. This field cannot be modified in the Mission
+            Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any Real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>[ 0 0 ]</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SolverIterations</span></td><td><p> This field determines whether or not data associated
+            with perturbed trajectories during a solver
+            (<span class="guilabel">Targeter</span>, <span class="guilabel">Optimize</span>)
+            sequence is written to a report file. When
+            <span class="guilabel">SolverIterations</span> is set to
+            <span class="guilabel">All</span>, all perturbations/iterations are written
+            to a report file. When <span class="guilabel">SolverIterations</span> is
+            set to <span class="guilabel">Current</span>, only current solution is
+            written to a report file. When
+            <span class="guilabel">SolverIterations</span> is set to
+            <span class="guilabel">None</span>, this shows only final solution after
+            the end of an iterative process and reports only final solution to
+            a report file. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">All</code>,
+                    <code class="literal">Current</code>,
+                    <code class="literal">None</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Current</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Upperleft</span></td><td><p>Allows the user to pan the generated report file
+            display window in any direction. First value in [0 0] matrix helps
+            to pan the report file window horizontally and second value helps
+            to pan the window vertically. This field cannot be modified in the
+            Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any Real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>[ 0 0 ]</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">WriteHeaders</span></td><td><p> This field specifies whether to include headers that
+            describe the variables in a report file.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>True, False</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>True</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">WriteReport</span></td><td><p> This field specifies whether to write data to the
+            report <span class="guilabel">FileName</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>True, False</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>True</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ZeroFill</span></td><td><p>Allows zeros to be placed in data written to a report
+            to match set precision. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>On, Off</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Off</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1CE7A"></a><h2>GUI</h2><p>Figure below shows default name and settings for the
+    <span class="guilabel">ReportFile</span> resource:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ReportFile_GUI_3.png" align="middle" height="413"></td></tr></table></div></div></div><div class="refsection"><a name="ReportFile_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N1CE8F"></a><h3>Behavior When using Filename field</h3><p>GMAT allows you to specify the name of the report file in two
+      ways. The default naming convention for a report file when using
+      <span class="guilabel">FileName</span> field is shown below:</p><pre class="programlisting"><code class="code">Create ReportFile aReport
+aReport.Filename = 'ReportFile1.txt'
+aReport.WriteReport = true</code></pre><p>An alternate method for naming a report file is to name the file
+      without using any single quotes around the report file&rsquo;s name.</p><pre class="programlisting"><code class="code">Create ReportFile aReport
+aReport.Filename = ReportFile1.txt
+aReport.WriteReport = true</code></pre></div><div class="refsection"><a name="N1CE9F"></a><h3>How data is reported to a report file</h3><p>GMAT allows you to report data to a report file in two ways: You
+      can use <span class="guilabel">ReportFile.Add</span> field or a
+      <span class="guilabel">Report</span> command.</p><p>You can add data using the <span class="guilabel">.Add</span> field of
+      <span class="guilabel">ReportFile</span> resource and this method reports data to
+      the report file at each propagation step. Below is an example script
+      snippet that shows how to report epoch and selected orbital elements
+      using the <span class="guilabel">.Add</span> field:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create ReportFile aReport
+
+aReport.Add = {aSat.UTCGregorian aSat.Earth.SMA, aSat.Earth.ECC, ...
+aSat.Earth.TA, aSat.EarthMJ2000Eq.RAAN}
+
+Create Propagator aProp
+
+BeginMissionSequence
+Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}</code></pre><p>GMAT&rsquo;s <span class="guilabel">ReportFile.Add</span> field will not report
+      selected data to the report file at each propagation step if
+      <span class="guilabel">Propagate</span> command is not included under the
+      <span class="guilabel">BeginMissionSequence</span>.</p><p>An alternative method of reporting data to the report file is via
+      the <span class="guilabel">Report</span> command. Using the
+      <span class="guilabel">Report</span> command allows you to report data to the
+      report file at specific points in your mission. Below is an example
+      script snippet that shows how to report epoch and selected orbital
+      elements using the <span class="guilabel">Report </span>command:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create ReportFile aReport
+
+Create Propagator aProp
+
+BeginMissionSequence
+
+Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
+aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}
+
+Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
+aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN</code></pre></div><div class="refsection"><a name="N1CED1"></a><h3>Behavior and Interactions when using ReportFile Resource &amp;
+      Report Command</h3><p>Suppose you utilize a <span class="guilabel">ReportFile</span> resource and
+      opt not to write a report and select <span class="guilabel">false</span> for the
+      field name <span class="guilabel">WriteReport</span>, as shown in the example
+      below:</p><pre class="programlisting"><code class="code">Create ReportFile aReport
+aReport.Filename = ReportFile1.txt
+aReport.Add = {aSat.A1ModJulian, aSat.Earth.SMA}
+aReport.WriteReport = false</code></pre><p>Now assume that at the same time, you decide to utilize
+      <span class="guilabel">Report</span> command in the <span class="guilabel">Mission</span>
+      tree, as shown in the example script snippet below:</p><pre class="programlisting"><code class="code">BeginMissionSequence;
+Report aReport aSat.A1ModJulian aSat.Earth.SMA aSat.Earth.ECC
+Propagate aProp(aSat) {aSat.Earth.Periapsis}
+Report aReport aSat.A1ModJulian aSat.Earth.SMA aSat.Earth.ECC</code></pre><p>At this point, you may think that since false option is selected
+      under the field name <span class="guilabel">WriteReport</span> in
+      <span class="guilabel">ReportFile</span> resource, hence GMAT will not generate
+      the report file called <code class="literal">ReportFile1.txt</code>. On the
+      Contrary, GMAT will generate a report called
+      <code class="literal">ReportFile1.txt</code>, but this report will only contain
+      data that was requested using the <span class="guilabel">Report</span> command.
+      <code class="literal">ReportFile1.txt</code> text file will contain epoch,
+      semi-major-axis and eccentricity only at specific points of the
+      mission.</p></div><div class="refsection"><a name="N1CF01"></a><h3>Behavior when reporting data in Iterative Processes</h3><p>GMAT allows you to specify how data is written to reports during
+      iterative processes such as differential correction or optimization.
+      <span class="guilabel">SolverIterations</span> field of
+      <span class="guilabel">ReportFile</span> resource supports 3 options which are
+      described in the table below:</p><div class="informaltable"><table border="1"><colgroup><col width="20%"><col width="80%"></colgroup><thead><tr><th>SolverIterations options</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">All</span></td><td><p> Shows only current iteration/perturbation after
+              the end of an iterative process and reports current solution to
+              a report file. </p></td></tr><tr><td><span class="guilabel">Current</span></td><td><p> Shows all iterations/perturbations in an iterative
+              process and reports all iterations/perturbations to a report
+              file. </p></td></tr><tr><td><span class="guilabel">None</span></td><td><p> Shows only final solution after the end of an
+              iterative process and reports only final solution to a report
+              file. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1CF33"></a><h3>Where Reports are written</h3><p>GMAT allows you to write reports to any desired path or location.
+      You can do this by going to GMAT&rsquo;s startup file called
+      <code class="literal">gmat_startup_file.txt </code>and define an absolute path
+      under <code class="literal">OUTPUT_PATH</code>. This allows you to save report
+      files in the directory of your choice as oppose to saving report files
+      in GMAT's default Output folder. In
+      <span class="guilabel">ReportFile.FileName</span> field, If no path is provided
+      and only name of the report file is defined, then report files are
+      written to GMAT's default Output folder. The default path where reports
+      are written to is the Output folder located in the main directory where
+      GMAT is installed.</p><p>Below is an example script snippet that shows where generated
+      reports are written when only report file&rsquo;s name is provided under the
+      <span class="guilabel">FileName</span> field. In this example,
+      <code class="literal">'ReportFile1.txt'</code>report is written to the Output
+      folder located in the main directory where GMAT is installed:</p><pre class="programlisting"><code class="code">Create ReportFile aReport
+
+aReport.Filename = 'ReportFile1.txt'
+aReport.Add = {aSat.A1ModJulian, aSat.Earth.ECC}</code></pre><p>An alternate method where report files can be written is by
+      defining a relative path. You can define the relative path in GMAT&rsquo;s
+      startup file <code class="literal">gmat_startup_file.txt</code> under
+      <code class="literal">OUTPUT_PATH</code>. For example, you can set a relative path
+      by setting <code class="literal">OUTPUT_PATH =
+      C:/Users/rqureshi/Desktop/GMAT/mytestfolder/../output2/</code>. In
+      this path, the syntax ".." means to &ldquo;go up one level&rdquo;. After saving the
+      startup file, when the script is executed, the generated report file
+      named under <span class="guilabel">FileName</span> field will be written to a
+      path <code class="literal">C:\Users\rqureshi\Desktop\GMAT\output2</code>.</p><p>Another method where report files can be written to is by defining
+      an absolute path in GMAT&rsquo;s startup file
+      <code class="literal">gmat_startup_file.txt</code> under
+      <code class="literal">OUTPUT_PATH</code>. For example, you can set an absolute
+      path by setting <code class="literal">OUTPUT_PATH =
+      C:/Users/rqureshi/Desktop/GMAT/mytestfolder/</code>. When the script
+      is executed, report file named under <span class="guilabel">FileName</span> field
+      will be written to an absolute path
+      <code class="literal">C:\Users\rqureshi\Desktop\GMAT\mytestfolder</code>.</p><p>Instead of defining a relative or an absolute path in GMAT's
+      startup file, you can choose to define an absolute path under
+      <span class="guilabel">FileName</span> field too. For example, if you set
+      <code class="literal">ReportFile.FileName =
+      C:\Users\rqureshi\Desktop\GMAT\mytestfolder\ReportFile.txt</code>,
+      then report file will be saved in
+      <code class="literal">mytestfolder</code>.</p></div><div class="refsection"><a name="N1CF79"></a><h3>Behavior when using ReportFile Resource &amp; Toggle
+      Command</h3><p>GMAT allows you to use <span class="guilabel">Toggle</span> command while
+      using the <span class="guilabel">Add</span> field of
+      <span class="guilabel">ReportFile</span> resource. When <span class="guilabel">Toggle
+      Off</span> command is issued for a <span class="guilabel">ReportFile</span>,
+      not data is sent to a report file until a <span class="guilabel">Toggle On</span>
+      command is issued. Similarly, when a <span class="guilabel">Toggle On</span>
+      command is used, data is sent to a report file at each integration step
+      until a <span class="guilabel">Toggle Off</span> command is used.</p><p>Below is an example script snippet that shows how to use
+      <span class="guilabel">Toggle Off</span> and <span class="guilabel">Toggle On</span>
+      command while using the <span class="guilabel">ReportFile</span> resource.
+      Spacecraft&rsquo;s cartesian position vector is reported to the report
+      file.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create ReportFile aReport
+aReport.Filename = 'ReportFile1.txt'
+aReport.Add = {aSat.UTCGregorian, aSat.EarthMJ2000Eq.X ...
+aSat.EarthMJ2000Eq.Y aSat.EarthMJ2000Eq.Z}
+
+BeginMissionSequence
+
+Toggle aReport Off
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+Toggle aReport On
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></pre></div><div class="refsection"><a name="N1CFA4"></a><h3>Behavior When Specifying Empty Brackets in ReportFile's Add
+      Field</h3><p>When using <span class="guilabel">ReportFile.Add</span> field, GMAT does
+      not allow brackets to be left empty. The brackets must always be
+      populated with values that you wish to report. If brackets are left
+      empty, then GMAT throws in an exception. Below is a sample script
+      snippet that shows an example of empty brackets. If you were to run this
+      script, then GMAT throws in an execption reminding you that brackets
+      cannot be left empty.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+Create ReportFile aReport
+
+aReport.Add = {}
+
+BeginMissionSequence
+Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}</code></pre></div></div><div class="refsection"><a name="N1CFAF"></a><h2>Examples</h2><div class="informalexample"><p>Propagate an orbit and write cartesian state to a report file at
+      every integrator step</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create ReportFile aReport
+GMAT aReport.Filename = 'ReportFile1.txt'
+aReport.Add = {aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
+aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX ...
+aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ}
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}
+</code></pre></div><div class="informalexample"><p>Propagate an orbit for 1 day and write cartesian state to a report
+      file at specific points in your mission</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create ReportFile aReport
+GMAT aReport.Filename = 'ReportFile1.txt'
+
+BeginMissionSequence
+
+Report aReport aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
+aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX ...
+aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+
+Report aReport aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
+aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX ...
+aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ
+</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="RejectFilter.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Simulator.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">RejectFilter&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Simulator</td></tr></table></div></body></html>

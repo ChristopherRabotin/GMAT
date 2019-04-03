@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -203,6 +203,7 @@ Real PlanetData::GetPlanetReal(Integer item)
    MessageInterface::ShowMessage("   mha = %f\n", mha);
    #endif
    
+   // Why not use a1mjd obtained previously?
    Real epoch = mSpacecraft->GetRealParameter("A1Epoch");
    Rvector6 instate = mSpacecraft->GetState().GetState();
    Rvector6 state;

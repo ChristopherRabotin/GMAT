@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1163,7 +1163,8 @@ bool GroundStation::VerifyAddHardware()
       obj = (*i);
       if (obj == NULL)
       {
-         MessageInterface::ShowMessage("***Error***:One element of hardwareList = NULL\n");
+         //MessageInterface::ShowMessage("***Error***:One element in hardwareList is NULL\n");
+         throw GmatBaseException("Error: One element in " + GetName() + ".AddHardware is NULL.\n");
          return false;
       }
    }
@@ -1203,13 +1204,19 @@ bool GroundStation::VerifyAddHardware()
             bool check;
             if (primaryAntenna == NULL)
             {
-               MessageInterface::ShowMessage
-                ("***Error***:primary antenna of %s in %s's AddHardware list is not set \n",
-                 obj->GetName().c_str(), this->GetName().c_str());
+               //MessageInterface::ShowMessage
+               // ("***Error***:primary antenna of %s in %s's AddHardware list is not set \n",
+               //  obj->GetName().c_str(), this->GetName().c_str());
+               throw GmatBaseException("Error: Primary antenna of " + obj->GetName() + " in " 
+                  + GetName() + ".AddHardware list is not set.\n");
                check = false;
             }
             else
             {
+               if (antennaList.empty())
+                  throw GmatBaseException("Error: primary antenna of " + obj->GetName()
+                                          + "is not set into " + GetName() + ".AddHardware\n");
+
                // Check primary antenna of transmitter, receiver, or transponder is in antenna list:
                check = false;
                for(ObjectArray::iterator j= antennaList.begin(); j != antennaList.end(); ++j)
@@ -1225,14 +1232,18 @@ bool GroundStation::VerifyAddHardware()
                      MessageInterface::ShowMessage
                        ("Primary antenna %s of %s is a clone of an antenna in %s's AddHardware\n",
                        primaryAntenna->GetName().c_str(), obj->GetName().c_str(), this->GetName().c_str());
+                     check = true;
+                     break;
                   }
                }
                if (check == false)
                {
                   // Display error message:
-                  MessageInterface::ShowMessage
-                      ("***Error***:primary antenna of %s is not in %s's AddHardware\n",
-                       obj->GetName().c_str(), this->GetName().c_str());
+                  //MessageInterface::ShowMessage
+                  //    ("***Error***:primary antenna of %s is not in %s's AddHardware\n",
+                  //     obj->GetName().c_str(), this->GetName().c_str());
+                  throw GmatBaseException("Error: Primary antenna of " + obj->GetName() + " in " 
+                     + GetName() + ".AddHardware list is not set.\n");
                }
 
             }

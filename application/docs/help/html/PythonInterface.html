@@ -1,0 +1,41 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Python Interface</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="System.html" title="System"><link rel="prev" href="MatlabInterface.html" title="MATLAB Interface"><link rel="next" href="ScriptLanguage.html" title="Script Language"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Python Interface</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="MatlabInterface.html">Prev</a>&nbsp;</td><th align="center" width="60%">System</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ScriptLanguage.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="PythonInterface"></a><div class="titlepage"></div><a name="N28FF3" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Python Interface</span></h2><p>Python Interface &mdash; Interface to the Python programming language</p></div><div class="refsection"><a name="N29004"></a><h2>Description</h2><p>The Python interface provides a link to the Python programming 
+    language, allowing GMAT to run Python functions as if they were native
+    functions in the GMAT script language.</p><p>The interface cannot be controlled directly through the script
+    language. Instead, GMAT starts the Python interface automatically when it 
+    calls a Python function.</p><p>The Python interface is accessed using GMAT's CallPythonFunction 
+    command. For details on calling a function and passing data, see the 
+    <span class="guilabel"><a class="xref" href="CallPythonFunction.html" title="CallPythonFunction"><span class="refentrytitle">CallPythonFunction</span></a></span> reference.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="CallPythonFunction.html" title="CallPythonFunction"><span class="refentrytitle">CallPythonFunction</span></a></p></div><div class="refsection"><a name="N29018"></a><h2>GUI</h2><p>The Python interface in GMAT is launched and driven internally.  Users 
+    do not have direct access to the interface from the GMAT graphical user 
+    interface.</p></div><div class="refsection"><a name="N2901D"></a><h2>Remarks</h2><div class="refsection"><a name="N29020"></a><h3>Interface
+      Setup</h3><p>The following conditions must be true for GMAT to successfully
+      initiate communication with Python. All conditions must be true for the
+      same instance of Python.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>A compatible version of Python must be installed on
+          the same machine on which GMAT is running.  GMAT is built and tested 
+          with Python 3.4.3.  The interface is linked with the Python binary 
+          libraries, so the installed version of Python on the user's machine 
+          must match the architecture and release used to build GMAT.</p></li><li class="listitem"><p>The architecture (32-bit or 64-bit) of GMAT and the installed
+          version of Python must match. For example, the 32-bit version of
+          GMAT is compatible only with the 32-bit version of Python.</p></li><li class="listitem"><p>The Python system accesses Python modules on the user's machine.  
+          This functionality is configured, including path information used by 
+          Python, by installing Python as a resource for all users of the 
+         machine.</p></li><li class="listitem"><p>On Windows: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>The following path entries (where
+                <code class="filename"><em class="replaceable"><code>Python</code></em></code> is the
+                path to the installed version of Python) must be present in
+                the <code class="envar">Path</code> environment variable.</p><p><code class="filename"><em class="replaceable"><code>Python</code></em></code></p><p><code class="filename"><em class="replaceable"><code>Python</code></em>/Scripts</code></p><p></p></li><li class="listitem"><p>The following path (where
+                <code class="filename"><em class="replaceable"><code>Python</code></em></code> is the
+                path to the installed version of Python) must be present in
+                the <code class="envar">PYTHONPATH</code> environment variable.</p><p><code class="filename"><em class="replaceable"><code>Python</code></em>/Lib/site-packages</code></p><p></p></li></ul></div></li><li class="listitem"><p>On Linux: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>The Python release used in the GMAT build must be the default
+                	Python package (that is, Python 3.4) accessed from the terminal.</p></li></ul></div></li></ul></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Common troubleshooting tips on Windows:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>If you are using the officially-released 32-bit version of
+            GMAT, make sure you have the 32-bit version of Python
+            installed.</p></li><li class="listitem"><p>If the path above exists in your system <code class="envar">Path</code>
+            variable, try placing it at the front of the path specification.</p></li></ul></div></div></div><div class="refsection"><a name="N2906D"></a><h3>Python Engine Connection</h3><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>GMAT does not close the Python interface after a run has 
+        completed. This feature prevents anomalous behavior that can occur when 
+        loading some Python modules repeatedly during a run, but it can lead to
+        confusing behavior if Python files are changed and rerun in the same 
+        GMAT session.</p><p>We recommend restarting GMAT after editing Python functions in 
+        order to guarantee that your edits take effect when you rerun your 
+        script.</p></div><p>When GMAT runs a mission that contains a Python function call, it
+      loads Python into memory as an embedded system in GMAT before it makes the
+      function call. It then reuses this system for the rest of the GMAT
+      session.</p></div></div><div class="refsection"><a name="N29077"></a><h2>Examples</h2><p>See the <a class="xref" href="CallPythonFunction.html" title="CallPythonFunction"><span class="refentrytitle">CallPythonFunction</span></a> reference for common
+    examples.</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="MatlabInterface.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="System.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ScriptLanguage.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">MATLAB Interface&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Script Language</td></tr></table></div></body></html>

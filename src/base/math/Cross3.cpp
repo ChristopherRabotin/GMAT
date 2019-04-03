@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -47,7 +47,7 @@
  */
 //------------------------------------------------------------------------------
 Cross3::Cross3(const std::string &name)
-   : NumericFunction("Cross3", name)
+   : NumericFunctionNode("Cross3", name)
 {
 }
 
@@ -73,7 +73,7 @@ Cross3::~Cross3()
  */
 //------------------------------------------------------------------------------
 Cross3::Cross3(const Cross3 &func) :
-   NumericFunction   (func)
+   NumericFunctionNode   (func)
 {
 }
 
@@ -93,7 +93,7 @@ Cross3& Cross3::operator=(const Cross3 &func)
    if (this == &func)
       return *this;
    
-   NumericFunction::operator=(func);
+   NumericFunctionNode::operator=(func);
    return *this;
 }
 

@@ -1,0 +1,266 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Mission Tree</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="TourOfGmat.html" title="Chapter&nbsp;3.&nbsp;Tour of GMAT"><link rel="prev" href="ResourceTree.html" title="Resources Tree"><link rel="next" href="CommandSummary.html" title="Command Summary"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Mission Tree</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ResourceTree.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;3.&nbsp;Tour of GMAT</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="CommandSummary.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="MissionTree"></a>Mission Tree</h2></div></div></div><a name="N106BE" class="indexterm"></a><p>The Mission Tree is an ordered, hierarchical, display of your GMAT
+  script command mission sequence (everything after the
+  <span class="guilabel">BeginMissionSequence</span> in your script). It represents the
+  ordered list of commands to be executed to model your mission. The
+  hierarchical grouping in the mission tree represent commands that are
+  executed inside a control logic command, e.g., <span class="guilabel">If</span>,
+  <span class="guilabel">For</span>, <span class="guilabel">While</span>, etc. The mission tree
+  allows you to add, edit, delete and rename commands. It allows you to
+  configure or filter the display of the commands in the Mission Tree to make
+  the command execution easier to understand or modify. An example Mission
+  Tree screenshot is below. The Mission Tree window is made up of 2 elements:
+  the Mission Sequence on the left and the view filters toolbar on the
+  right.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Using_MissionTree_GUI_1.png" align="middle" height="375"></td></tr></table></div></div><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>Edits to the Mission Tree will be reflected in your script after it
+    is synchronized and vice-versa. If you edit the Mission Tree, you need to
+    synchronize with the script to see it in the script editor. If you edit
+    the script, you need to synchronize with the GUI to see your changes
+    reflected in the Mission Tree.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N106DB"></a>Mission Tree Display</h3></div></div></div><p>The Mission Tree Display shows your hierarchical, ordered list of
+    commands. Normally, the Mission Tree displays only the command name in the
+    tree for each command node (more information such as command type,
+    construction information, etc can be displayed using the <span class="guilabel">Show
+    Detail</span> menu option). Commands are executed in the order they
+    appear, e.g., GMAT executes commands from the top of the Mission Tree to
+    the bottom. For control logic (<span class="guilabel">If</span>,
+    <span class="guilabel">For</span>, and <span class="guilabel">While</span>) and the
+    <span class="guilabel">Optimize</span> and <span class="guilabel">Target</span> commands,
+    you can define a block of commands that execute as children of the parent
+    command. These child commands of the control logic or the
+    <span class="guilabel">Optimize</span> and <span class="guilabel">Target</span> commands
+    appear indented. Use the plus (<span class="guilabel">+</span>) symbol to the left
+    of the control logic command to show all the grouped commands and the
+    minus (<span class="guilabel">-</span>) symbol to hide all the grouped commands.
+    Commands that are grouped under control logic commands (e.g.
+    <span class="guilabel">If</span>, <span class="guilabel">For</span>, and
+    <span class="guilabel">While</span>) only execute if that control logic command is
+    successfully executed (e.g., if the local expression evaluates to true for
+    <span class="guilabel">If</span> command, or the loop condition evaluates to true
+    for <span class="guilabel">For</span> and <span class="guilabel">While</span>
+    commands).</p><p>In general, commands are executed only once. However, child commands
+    grouped under the loop commands (e.g. <span class="guilabel">For</span> and
+    <span class="guilabel">While</span>) may execute multiple times. These commands
+    will execute for each time the loop command evaluates to true. Commands
+    under the <span class="guilabel">If</span> commands are only executed if the
+    <span class="guilabel">If</span> condition evaluates to true; otherwise, they are
+    skipped. For the <span class="guilabel">If-Else</span> command, child commands
+    grouped under the <span class="guilabel">If</span> portion of the command execute
+    if the conditional statement evaluates to true; otherwise, the child
+    commands grouped under the <span class="guilabel">Else</span> portion of the
+    command execute.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Note that all commands in the Mission Tree are grouped under a
+      special <span class="guilabel">Mission Sequence</span> home item. This home item
+      is always present as the first item in the Mission Tree and cannot be
+      deleted.</p></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N1072D"></a>View Filters Toolbar</h3></div></div></div><p>The Mission Tree may display a subset of the commands of the full
+    mission sequence based on your view filter options. There are 3 basic
+    filtering options available within GMAT:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Filter by branch level</p></li><li class="listitem"><p>Filter by command types (inclusive)</p></li><li class="listitem"><p>Filter by command types (exclusive)</p></li></ul></div><p>The view filters activate by clicking one of the view filter buttons
+    to the right of the Mission Tree. The pressed (pushed in) button indicates
+    which filter is currently enabled. The four buttons on the top are the
+    Filter by branch level buttons. The next four buttons in the middle are
+    the inclusive filter-by-command-types buttons, and the four buttons on the
+    bottom are the exclusive filter-by-command-types buttons. The button at
+    the very bottom of the view filters toolbar allows you to define a custom
+    filter. You cannot combine filter-by-branch-level filters with the
+    filter-by-command-type filters nor combine inclusive and exclusive command
+    type filters. However, multiple inclusive command type filters can be
+    combined (e.g., filter both physics related and solver related commands)
+    or multiple exclusive command type filters can be combined.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Note that all parents of a viewable command are displayed, even if
+      the parent command is not part of the viewable command set.</p><p>Also note that the Mission Tree automatically reconfigures to show
+      all commands when the user Appends or Inserts a new command.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N10743"></a>Filter by Branch Level</h4></div></div></div><p>Filtering by branch level causes GMAT to not display commands in
+      the mission tree that are below a certain level. To select the number of
+      levels you wish to display, click the buttons on the top. The four
+      buttons correspond to (from top to bottom):</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Show all branches</p></li><li class="listitem"><p>Show one level of branching</p></li><li class="listitem"><p>Show two levels of branching</p></li><li class="listitem"><p>Show three levels of branching</p></li></ul></div><p>Only one filter-by-branch-level button may be active at a time.
+      The default GMAT behavior is to display all branches of a mission
+      tree.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N10757"></a>Filter by Command Types</h4></div></div></div><p>GMAT allows you to filter what commands are displayed by their
+      command type. You may select to only display commands that are in a
+      filter command type set (inclusive) or only display commands that are
+      not in a filter command type set (exclusive). GMAT provides both
+      pre-configured command type sets (e.g., physics related or output
+      related) and custom command type sets that you define</p><p>The four middle buttons in the View Options toolbar are
+      pre-configured inclusive command filters, e.g., only display commands
+      that are in the desired command set. The four inclusive filter buttons
+      correspond to (from top to bottom):</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Physics Related (<span class="guilabel">Propagate</span>,
+          <span class="guilabel">Maneuver</span>, <span class="guilabel">BeginFiniteBurn</span>,
+          and <span class="guilabel">EndFiniteBurn</span>)</p></li><li class="listitem"><p>Solver Related (<span class="guilabel">Target</span>,
+          <span class="guilabel">Optimize</span>, <span class="guilabel">Vary</span>,
+          <span class="guilabel">Achieve</span>,
+          <span class="guilabel">NonlinearConstraint</span>,
+          <span class="guilabel">Minimize</span>, <span class="guilabel">EndTarget</span>,
+          <span class="guilabel">EndOptimize</span>)</p></li><li class="listitem"><p><span class="guilabel">ScriptEvent</span> commands</p></li><li class="listitem"><p>Control Flow (<span class="guilabel">If</span>,
+          <span class="guilabel">If-Else</span>, <span class="guilabel">For</span>, and
+          <span class="guilabel">While</span>)</p></li></ul></div><p>Multiple inclusive command type filters can be active at once. For
+      example, to filter both physics related and solver related commands,
+      click both the physics-related and solver-related filter buttons so that
+      they appear pressed down. This option will show all physics related and
+      solver related commands and hide all other commands (except Parents of
+      the viewable commands)).</p><p>The four buttons at the bottom in the View Options toolbar are
+      pre-configured exclusive command filters, e.g., only display commands
+      that are not in the command set. The four exclusive filter buttons
+      correspond to (from top to bottom):</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="guilabel">Report</span></p></li><li class="listitem"><p><span class="guilabel">Equation</span></p></li><li class="listitem"><p>Output-related (<span class="guilabel">Report</span>,
+          <span class="guilabel">Toggle</span>, <span class="guilabel">PenUp</span>,
+          <span class="guilabel">PenDown</span>, <span class="guilabel">MarkPoint</span>, and
+          <span class="guilabel">ClearPlot</span>)</p></li><li class="listitem"><p>Function calls
+          (<span class="guilabel">CallMatlabFunction</span>)</p></li></ul></div><p>Multiple exclusive command type filters can be active at once. For
+      example, to show everything but <span class="guilabel">Report</span> and
+      output-related commands, click both the <span class="guilabel">Report</span> and
+      output-related filter buttons so that they appear pressed down.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Note that the Mission Tree shows an ellipsis (&hellip;) after a command
+        name if the command is followed by items not graphically displayed in
+        the tree because of filter options.</p></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N107D0"></a>Mission Sequence Menu</h3></div></div></div><p>The Mission Tree has two context-sensitive popup menus, depending on
+    whether you right-click the <span class="guilabel">Mission Sequence</span> home
+    item or a command in the Mission Tree. The <span class="guilabel">Mission
+    Sequence</span> popup menu primarily allows you to manipulate the
+    Mission Tree window and the entire command sequence. It also enables
+    appending (adding to the end) commands to the mission tree.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Using_MissionTree_MissionSequenceMenu.png" align="middle" height="337"></td></tr></table></div></div><p><span class="guilabel">Mission Sequence</span> menu options are always
+    available and active in the menu list.</p><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N107E8"></a>Mission Sequence Menu Options:</h4></div></div></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N107EB"></a><span class="guimenuitem">Collapse All</span></h5></div></div></div><p>This menu option collapses all the branches in the Mission Tree
+        so that you only see the top-level commands. To show branches, click
+        the plus (<span class="guilabel">+</span>) button next to a command or select
+        <span class="guimenuitem">Expand All</span> from the <span class="guilabel">Mission
+        Sequence</span> popup menu.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N107FA"></a><span class="guimenuitem">Expand All</span></h5></div></div></div><p>This menu option expands all the branches and sub-branches in
+        the Mission Tree so that you see every command in the mission
+        sequence. To hide branches, click the minus (<span class="guilabel">-</span>)
+        button next to a command or select <span class="guimenuitem">Collapse
+        All</span> from the <span class="guilabel">Mission Sequence</span> popup
+        menu.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N10809"></a><span class="guimenuitem">Append</span></h5></div></div></div><p>The <span class="guimenuitem">Append</span> menu option displays the
+        submenu of commands that can be appended to the mission sequence. This
+        menu is not available when the Mission Tree view is filtered.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N10812"></a><span class="guimenuitem">Run</span></h5></div></div></div><p>The <span class="guimenuitem">Run</span> menu option executes the
+        mission command sequence. This menu option is always available.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N1081B"></a><span class="guimenuitem">Show Detail</span></h5></div></div></div><p>The <span class="guimenuitem">Show Detail</span> menu option toggles
+        an option to display the mission tree with short or verbose text. When
+        the show detail menu option is checked, each command is displayed with
+        the script line for the command (e.g. what appears in &ldquo;<span class="guilabel">Show
+        Script</span>&rdquo; for the command). When the show detail menu option
+        is unchecked, the mission tree shows only the label for the command
+        which will be your custom label if you have provided one and a system
+        provided label if you have not labelled the command. This menu option
+        is always available.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N10827"></a><span class="guimenuitem">Show Mission Sequence</span></h5></div></div></div><p>The <span class="guimenuitem">Show Mission Sequence</span> menu option
+        displays a streamlined text view of the mission sequence in text
+        window. This view shows a hierarchical view of every command (similar
+        to a script view) in the mission sequence. Unlike the script editor,
+        this view only includes the command names and labels. This menu option
+        is always available.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N10830"></a><span class="guimenuitem">Show Script</span></h5></div></div></div><p>The <span class="guimenuitem">Show Script</span> menu option displays
+        the script associated with the GUI version of the current mission
+        script. This is the complete script that would be saved to a file if
+        you clicked the GUI save button. Note that when the GUI is
+        unsynchronized with the script editor (please see <a class="xref" href="ScriptEditor.html" title="Script Editor">Script Editor</a> for more details),
+        this mission script is different than the script displayed in the
+        script editor. This menu option is always available</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N1083D"></a><span class="guimenuitem">Mission Summary - All</span></h5></div></div></div><p>The <span class="guimenuitem">Mission Summary - All</span> menu option
+        displays a mission simulation summary for the all commands in the
+        mission sequence. This summary information includes spacecraft state
+        information, spacecraft physical properties, time information,
+        planetodetic properties, and other orbit data for each command. This
+        information is only available after a mission simulation is run and
+        the data shows state information after the execution of the command.
+        Showing Mission Summary data for a <span class="guilabel">ScriptEvent</span>
+        command is equivalent to showing summary data for the last command in
+        that <span class="guilabel">ScriptEvent</span>. If commands are nested in
+        control flow or solver branches, the summary data that is displayed is
+        for the last pass through the sequence. This menu option is always
+        available.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N1084C"></a><span class="guimenuitem">Mission Summary - Physics</span></h5></div></div></div><p>The <span class="guimenuitem">Mission Summary - Physics</span> menu
+        option displays a mission simulation summary for physics related
+        commands in the mission sequence. This summary information includes
+        spacecraft state information, spacecraft physical properties, time
+        information, planetodetic properties, and other orbit data for each
+        command. This information is only available after a mission simulation
+        is run and the data shows state information after the execution of the
+        command. Note that if you have physics-based commands such as
+        <span class="guilabel">Propagate</span> or <span class="guilabel">Maneuver</span> inside
+        a <span class="guilabel">ScriptEvent</span> command, then summary information
+        for those commands, are not displayed. Showing Mission Summary data
+        for a <span class="guilabel">ScriptEvent</span> is equivalent to showing
+        summary data for the last command in that
+        <span class="guilabel">ScriptEvent</span>. If commands are nested in control
+        flow or solver branches, the summary data that is displayed is for the
+        last pass through the sequence. This menu option is always
+        available.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N10864"></a><span class="guimenuitem">Dock Mission Tree</span></h5></div></div></div><p>The <span class="guimenuitem">Dock Mission Tree</span> menu option
+        docks the Mission Tree window in the notebook containing the Resources
+        tree and Output tree. This option is only selectable if the Mission
+        Tree is currently floating or undocked. Please see the
+        Docking/Undocking/Placement section for more information.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N1086D"></a><span class="guimenuitem">Undock Mission Tree</span></h5></div></div></div><p>The <span class="guimenuitem">Undock Mission Tree</span> menu option
+        undocks, or makes floating, the Mission Tree window from the Resources
+        tree and Output tree. The undocked Mission Tree window may be resized,
+        moved, maximized, minimized, and restored. This option is only
+        selectable if the Mission Tree is currently docked. Please see the
+        <a class="xref" href="MissionTree.html#MissionTree_Docking" title="Docking/Undocking/Placement">the section called &ldquo;Docking/Undocking/Placement&rdquo;</a> section for more
+        information.</p></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10879"></a>Command Menu</h3></div></div></div><p>The Command popup menu allows you to add, edit, or delete the
+    commands in the Mission Tree by using the right mouse button. This
+    displays a context sensitive menu for adding and modifying commands as
+    well as viewing your command sequence and command summary. To add commands
+    to the Mission Tree, right click a command and select
+    <span class="guimenuitem">Append</span>, <span class="guimenuitem">Insert
+    Before</span>, or <span class="guimenuitem">Insert After</span>. To edit
+    commands, double click the command name or right click and select
+    <span class="guimenuitem">Open</span>.</p><p>Most commands in GMAT can appear anywhere in the mission sequence.
+    However, there are some exceptions and the Command popup menu is context
+    sensitive, meaning the options available under the menu change based on
+    what command is selected and where in the tree the command occurs. Here is
+    a complete list of context sensitivities:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="guimenuitem">Insert</span> and
+        <span class="guimenuitem">Append</span> are not available unless the mission
+        tree filter is set to show all levels.</p></li><li class="listitem"><p><span class="guilabel">Achieve</span> commands can only appear inside of
+        a <span class="guilabel">Target</span> sequence.</p></li><li class="listitem"><p><span class="guilabel">Vary</span> commands can only appear in a
+        <span class="guilabel">Target</span> or <span class="guilabel">Optimize</span>
+        sequence,</p></li><li class="listitem"><p><span class="guilabel">NonlinearConstraint</span> and
+        <span class="guilabel">Minimize</span> commands can only appear in an
+        <span class="guilabel">Optimize</span> sequence.</p></li></ul></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Using_MissionTree_GUI_4.png" align="middle" height="553"></td></tr></table></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N108BC"></a>Command Menu Options</h4></div></div></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N108BF"></a><span class="guimenuitem">Open</span></h5></div></div></div><p>This menu option opens the command editor window for the
+        selected command. The <span class="guimenuitem">Open</span> menu option is
+        always active in the menu list. If the window is already open, the
+        <span class="guimenuitem">Open</span> option brings the window to the front
+        and makes it the active window.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N108CB"></a><span class="guimenuitem">Close</span></h5></div></div></div><p>This menu options closes the command editor window for the
+        selected command. The <span class="guimenuitem">Close</span> menu option is
+        always active in the menu list.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N108D4"></a><span class="guimenuitem">Append</span></h5></div></div></div><p>The <span class="guimenuitem">Append</span> menu option displays the
+        submenu of commands that can be appended as the last sub-item of the
+        selected command in the Mission Tree. As such, the
+        <span class="guimenuitem">Append</span> menu option only appears when the
+        selected tree item can contain sub-items, e.g., the <span class="guilabel">Mission
+        Sequence</span> home item, control logic commands, and
+        <span class="guilabel">Optimize</span> and <span class="guilabel">Target</span>
+        commands. Note that the <span class="guimenuitem">Append</span> submenu is
+        context-sensitive and will only show commands that may be appended to
+        the selected command. Finally, this menu is not available when the
+        Mission Tree view is filtered.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N108EC"></a><span class="guimenuitem">Insert After</span></h5></div></div></div><p>The <span class="guimenuitem">Insert After</span> menu option displays
+        the submenu of commands that can be inserted after the selected
+        command (and any child commands, if any) in the Mission Tree.
+        Nominally, the new command is inserted at the same level as the
+        selected command. However, if the selected command is the &ldquo;End&rdquo;
+        command of a control logic or <span class="guilabel">Optimize</span> or
+        <span class="guilabel">Target</span> command (e.g., <span class="guilabel">End
+        For</span>, <span class="guilabel">End If</span>, <span class="guilabel">End
+        Optimize</span>, etc), the new command is inserted after the
+        <span class="guilabel">End</span> command and on the same level (e.g., the next
+        level up) as the parent command. The <span class="guimenuitem">Insert
+        After</span> menu option is always active in the menu list
+        except when the <span class="guilabel">Mission Sequence</span> home item is
+        selected. Note that the <span class="guimenuitem">Insert After</span>
+        submenu is context-sensitive and will only show commands that may be
+        added after the selected command. Finally, this menu is not available
+        when the Mission Tree view is filtered.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N10910"></a><span class="guimenuitem">Insert Before</span></h5></div></div></div><p>The <span class="guimenuitem">Insert Before</span> menu option
+        displays the submenu of commands that can be inserted before the
+        selected command (and any child commands, if any) in the Mission Tree.
+        The new command is always inserted at the same level as the selected
+        command. The Insert Before menu option is always active in the menu
+        list except when the Mission Sequence Home item is selected. Note that
+        the <span class="guimenuitem">Insert Before</span> submenu is
+        context-sensitive and will only show commands that may be added before
+        the selected command. Finally, this menu is not available when the
+        Mission Tree view is filtered.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N1091C"></a><span class="guimenuitem">Rename</span></h5></div></div></div><p>The <span class="guimenuitem">Rename</span> menu option displays a
+        dialog box where you can rename the selected command. A command name
+        may contain any characters except the single quote. Note that, unlike
+        resources, command names do not have to be unique. The
+        <span class="guimenuitem">Rename</span> menu option is always active in the
+        menu list except when the <span class="guilabel">Mission Sequence</span> home
+        item is selected.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N1092B"></a><span class="guimenuitem">Delete</span></h5></div></div></div><p>The <span class="guimenuitem">Delete</span> menu option deletes the
+        selected command. GMAT does not confirm the option before deletion
+        occurs. The <span class="guimenuitem">Delete</span> menu option is always
+        active in the menu list except when the <span class="guilabel">Mission
+        Sequence</span> home item is selected.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a name="N1093A"></a><span class="guimenuitem">Command Summary</span></h5></div></div></div><p>The <span class="guimenuitem">Command Summary</span> menu option
+        displays a mission simulation summary for the selected command,
+        including spacecraft state information, time information, planetodetic
+        properties, and other orbit data. This information is only available
+        after a mission simulation run. This menu option is always available.
+        However, command summary data is not available for
+        <span class="guilabel">Propagate</span> command in single step mode. The button
+        is available but no data is displayed.</p></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="MissionTree_Docking"></a>Docking/Undocking/Placement</h3></div></div></div><p>The Mission Tree window may be used as a floating window or docked
+    with the Resource tree. GMAT remembers the placement and docking status of
+    the Mission Tree even after you quit. The undocked Mission Tree window may
+    be resized, moved, or minimized. When the Mission Tree is undocked, and
+    the user opens a dialog box for a GUI component, the dialog box does not
+    cover the Mission Tree.</p><p>To undock the Mission Tree Display, either:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Right click and drag the <span class="guilabel">Mission</span> tab out of
+        the Resource Tree window.</p></li><li class="listitem"><p>Right click the <span class="guilabel">Mission Sequence</span> home item
+        and select <span class="guimenuitem">Undock Mission Tree</span>.</p></li></ul></div><p>To dock the Mission Tree display, either:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Left click the close button (<span class="guibutton">x</span>) of the
+        undocked Mission Tree window.</p></li><li class="listitem"><p>RIght click the <span class="guilabel">Mission Sequence</span> home item
+        and select <span class="guimenuitem">Dock Mission Tree</span>.</p></li></ul></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ResourceTree.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="TourOfGmat.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="CommandSummary.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Resources Tree&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Command Summary</td></tr></table></div></body></html>

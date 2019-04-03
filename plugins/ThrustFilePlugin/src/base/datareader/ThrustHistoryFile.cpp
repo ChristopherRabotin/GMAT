@@ -66,6 +66,7 @@ ThrustHistoryFile::ThrustHistoryFile(const std::string& theName) :
    thrustFileName    ("")
 {
    objectTypes.push_back(Gmat::INTERFACE);
+   objectTypeNames.push_back("Interface");
    objectTypeNames.push_back("ThrustHistoryFile");
    parameterCount = ThrustHistoryFileParamCount;
 

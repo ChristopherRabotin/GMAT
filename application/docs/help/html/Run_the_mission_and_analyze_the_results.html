@@ -1,0 +1,89 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Run the mission and analyze the results</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Tut_Simulate_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;13.&nbsp;Simulate DSN Range and Doppler Data"><link rel="prev" href="Create_and_configure_Simulator_object.html" title="Create and configure Simulator object"><link rel="next" href="Create_Realistic_GMD.html" title="Create a more realistic GMAT Measurement Data (GMD)"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Run the mission and analyze the results</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Create_and_configure_Simulator_object.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;13.&nbsp;Simulate DSN Range and Doppler Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Create_Realistic_GMD.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="Run_the_mission_and_analyze_the_results"></a>Run the mission and analyze the results</h2></div></div></div><p>The script segment used to run the mission is shown below.</p><pre class="programlisting">BeginMissionSequence
+ 
+RunSimulator Sim</pre><p>The first script line, <span class="guilabel">BeginMissionSequence</span>, is
+    a required command which indicates that the &ldquo;Command&rdquo; section of the GMAT
+    script has begun. The second line of the script issues the
+    <span class="guilabel">RunSimulator</span> command with the
+    <span class="guilabel">Sim</span> Simulator resource, defined in the <a class="xref" href="Create_and_configure_Simulator_object.html" title="Create and configure Simulator object">Create and configure Simulator object</a>
+    section, as an argument. This tells GMAT to perform the simulation
+    specified by the <span class="guilabel">Sim</span> resource.</p><p>We have now completed all of our script segments. See the file,
+    <code class="filename">Simulate DSN Range and Doppler Data.script</code>, for a
+    listing of the entire script. We are now ready to run the script. Hit the
+    Save,Sync,Run button, (<span class="inlinemediaobject"><img src="../files/images/icons/Save_Sync_Run.png" height="10"></span>). Because we are only simulating a small amount of
+    data, the script should finish execution in about one second.</p><p>Let&rsquo;s take a look at the output created. The file created,
+    <code class="filename">Sat_dsn_range_and_doppler_measurements.gmd</code>, was
+    specified in the <span class="guilabel">TrackingFileSet</span> resource,
+    <span class="guilabel">DSNsimData</span>, that we created in the <a class="xref" href="Define_the_types_of_measurements_to_be_simulated.html" title="Define the types of measurements to be simulated">Define the types of measurements to be simulated</a> section. The default directory, if none is
+    specified, is the GMAT &lsquo;output&rsquo; directory. Let&rsquo;s analyze the contents of
+    this &ldquo;GMAT Measurement Data&rdquo; or GMD file as shown below.</p><pre class="programlisting" width="100">% GMAT Internal Measurement Data File
+27253.500405092593 DSN_SeqRange 9004 22222 11111 26016945.24902344 2 7.2e+009 3.3554432e+007
+27253.500405092593 DSN_TCP  9006 22222 11111 2 10 -8459336323.89349840 
+27253.507349537038 DSN_SeqRange 9004 22222 11111 21728172.10375977 2 7.2e+009 3.3554432e+007 
+27253.507349537038 DSN_TCP  9006 22222 11111 2 10 -8459335611.28409770</pre><p>The first line of the file is a comment line indicating that this is
+    a file containing measurement data stored in GMAT&rsquo;s internal format. There
+    are 4 lines of data representing range data at two successive times and
+    Doppler data at two successive times. As we expected, we have no more than
+    4 total measurements. Refer to the <span class="guilabel">TrackingFileSet</span>
+    Help for a description of the range and Doppler GMD file format.</p><p>We now analyze the first line of data which represents a DSN two way
+    range measurement at the start of the simulation at '19 Aug 2015
+    00:00:00.000 UTCG&rsquo; which corresponds to the output TAI modified Julian Day
+    of 27253.500405092593 TAIMJD.</p><p>The second and third fields, DSN_SeqRange and 9004, are just
+    internal GMAT codes indicating the use of DSN range (Trk 2-34 type 7)
+    data.</p><p>The 4th field, 22222, is the Downlink station ID. This is the ID we
+    gave the <span class="guilabel">CAN</span> <span class="guilabel">GroundStation</span>
+    object that we created in the <a class="xref" href="Create_and_configure_the_Ground_Station_and_related_parameters.html" title="Create and configure the Ground Station and related parameters">Create and configure the Ground Station and related
+    parameters</a> section. The 5th field, 11111, is the
+    spacecraft ID. This is the ID we gave the <span class="guilabel">Sat</span>
+    <span class="guilabel">Spacecraft</span> object that we created in the <a class="xref" href="Create_and_configure_the_spacecraft_spacecraft_transponder_and_related_parameters.html" title="Create and configure the spacecraft, spacecraft transponder, and related parameters">Create and configure the spacecraft, spacecraft transponder, and
+    related parameters</a> section.</p><p>The 6th field, 26016945.24902344, is the actual DSN range
+    observation value in RU.</p><p>The 7th field, 2, is an integer which represents the Uplink Band of
+    the uplink <span class="guilabel">GroundStation</span>, <span class="guilabel">CAN</span>.
+    The designation, 2, represents X-band. See the
+    <span class="guilabel">RunSimulator</span> Help for a detailed discussion of how
+    GMAT determines what value should be written here. As described in the
+    Help, since we are not using a ramp table, GMAT determines the Uplink Band
+    by looking at the transmit frequency of the
+    <span class="guilabel">Transmitter</span> object attached to the
+    <span class="guilabel">CAN</span> ground station. GMAT knows that the 7200 MHz
+    value that we assigned to <span class="guilabel">CAN&rsquo;s</span>
+    <span class="guilabel">Transmitter</span> resource,
+    <span class="guilabel">DSNTransmitter</span>, corresponds to an X-band
+    frequency.</p><p>The 8th field, 7.2e+009, is the transmit frequency of
+    <span class="guilabel">CAN</span> at the time of the measurement. Since we are not
+    using a ramp table, this value will be constant for all measurements and
+    it is given by the value of the frequency of the
+    <span class="guilabel">Transmitter</span> object,
+    <span class="guilabel">DSNTransmitter</span>, that we attached to the
+    <span class="guilabel">CAN</span> ground station. Recall the following script
+    segment, <code class="code">DSNTransmitter.Frequency = 7200; %MHz</code>, from the
+    <a class="xref" href="Create_and_configure_the_Ground_Station_and_related_parameters.html" title="Create and configure the Ground Station and related parameters">Create and configure the Ground Station and related
+    parameters</a> section.</p><p>The 9th field, 3.3554432e+007, represents the integer range modulo
+    number that helps define the DSN range measurement. This is the value that
+    we set when we created and configured the
+    <span class="guilabel">TrackingFileSet</span> <span class="guilabel">DSNsimData</span>
+    object in the <a class="xref" href="Define_the_types_of_measurements_to_be_simulated.html" title="Define the types of measurements to be simulated">Define the types of measurements to be simulated</a> section. Recall the following script
+    command,</p><div class="literallayout"><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DSNsimData.SimRangeModuloConstant&nbsp;=&nbsp;3.3554432e+07;</p></div><p>This range modulo number is discussed in <span class="emphasis"><em><a class="xref" href="Appendix_A_Determination_of_Measurement_Noise_Values.html" title="Appendix A &ndash; Determination of Measurement Noise Values">Appendix A &ndash; Determination of Measurement Noise Values</a></em></span> and is defined as M, the length of
+    the ranging code in RU.</p><p>We now analyze the second line of data which represents a DSN two
+    way Doppler measurement at the start of the simulation at '19 Aug 2015
+    00:00:00.000 UTCG&rsquo; which corresponds to the output TAI modified Julian Day
+    of 27253.500405092593 TAIMJD.</p><p>The second and third fields, Doppler and 9006, are just internal
+    GMAT codes indicating the use of DSN Doppler (derived from two successive
+    Trk 2-34 type 17 Total Count Phase measurements) data.</p><p>The 4th field, 22222, is the Downlink station ID. This is the ID we
+    gave the <span class="guilabel">CAN</span> GroundStation object that we created in
+    the <a class="xref" href="Create_and_configure_the_Ground_Station_and_related_parameters.html" title="Create and configure the Ground Station and related parameters">Create and configure the Ground Station and related
+    parameters</a> section. The 5th field, 11111, is the
+    spacecraft ID. This is the ID we gave the <span class="guilabel">Sat</span>
+    <span class="guilabel">Spacecraft</span> object that we created in the <a class="xref" href="Create_and_configure_the_spacecraft_spacecraft_transponder_and_related_parameters.html" title="Create and configure the spacecraft, spacecraft transponder, and related parameters">Create and configure the spacecraft, spacecraft transponder, and
+    related parameters</a> section.</p><p>The 6th field, 2, is an integer which represents the Uplink Band of
+    the uplink <span class="guilabel">GroundStation</span>, <span class="guilabel">CAN</span>.
+    As we mentioned when discussing the range measurement, the designation, 2,
+    represents X-band.</p><p>The 7th field, 10, is the Doppler Count Interval (DCI) used to help
+    define the Doppler measurement. This is the value that we set when we
+    created and configured the <span class="guilabel">TrackingFileSet</span>
+    <span class="guilabel">DSNsimData</span> object in the <a class="xref" href="Define_the_types_of_measurements_to_be_simulated.html" title="Define the types of measurements to be simulated">Define the types of measurements to be simulated</a> section. Recall the following script
+    command,</p><div class="literallayout"><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DSNsimData.SimDopplerCountInterval&nbsp;=&nbsp;10.0;</p></div><p>The DCI is also discussed in <span class="emphasis"><em><a class="xref" href="Appendix_A_Determination_of_Measurement_Noise_Values.html" title="Appendix A &ndash; Determination of Measurement Noise Values">Appendix A &ndash; Determination of Measurement Noise Values</a></em></span>.</p><p>The 8th field, -7819057474.22393610, is the actual DSN Doppler
+    observation value in Hz.</p><p>The third line of data represents the second DSN two way range
+    measurement at '19 Aug 2015 00:10:00.000 UTCG&rsquo; which corresponds to the
+    output TAI modified Julian Day time of 27253.507349537038 TAIMJD. The
+    fourth line of data represents the second DSN two way Doppler measurement
+    at '19 Aug 2015 00:10:00.000 UTCG.&rsquo;</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Create_and_configure_Simulator_object.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Tut_Simulate_DSN_Range_and_Doppler_Data.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Create_Realistic_GMD.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Create and configure Simulator object&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Create a more realistic GMAT Measurement Data (GMD)</td></tr></table></div></body></html>

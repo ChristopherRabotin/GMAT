@@ -1,0 +1,124 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Appendix A &ndash; GMAT Message Window Output</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data"><link rel="prev" href="ch14s08.html" title="References"><link rel="next" href="DSN_Estimation_Appendix_B.html" title="Appendix B &ndash; Zeroth Iteration Plots of Observation Residuals"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Appendix A &ndash; GMAT Message Window Output</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ch14s08.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="DSN_Estimation_Appendix_B.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="DSN_Estimation_Appendix_A"></a>Appendix A &ndash; GMAT Message Window Output</h2></div></div></div><pre class="programlisting">Running mission...
+
+Data file 'Simulate DSN Range and Doppler Data 3 weeks.gmd' has 1348 
+of 1348 records used for estimation.
+Total number of load records : 1348  
+
+List of tracking configurations (present in participant ID) for load 
+records from data file 
+'Simulate DSN Range and Doppler Data 3 weeks.gmd':
+
+   Config 0: {{22222,11111,22222},DSN_SeqRange}
+   Config 1: {{22222,11111,22222},DSN_TCP}
+   Config 2: {{33333,11111,33333},DSN_SeqRange}
+   Config 3: {{33333,11111,33333},DSN_TCP}
+   Config 4: {{44444,11111,44444},DSN_SeqRange}
+   Config 5: {{44444,11111,44444},DSN_TCP}
+
+
+****   No tracking configuration was generated because the tracking 
+configuration is defined in the script.
+********************************************************
+*** Performing Estimation (using "bat")
+*** 
+********************************************************
+
+a priori state:
+   Estimation Epoch:
+       27253.500417064603 A.1 modified Julian
+       27253.500416666666 TAI modified Julian
+   19 Aug 2015 00:00:00.000 UTCG
+   Sat.SunMJ2000Eq.X = -126544963
+   Sat.SunMJ2000Eq.Y = 61978518
+   Sat.SunMJ2000Eq.Z = 24133225
+   Sat.SunMJ2000Eq.VX = -13.789
+   Sat.SunMJ2000Eq.VY = -24.673
+   Sat.SunMJ2000Eq.VZ = -10.662
+
+Number of Records Removed Due To:
+   . No Computed Value Configuration Available : 0
+   . Out of Ramp Table Range   : 0
+   . Signal Blocked : 0
+   . Initial RMS Sigma Filter  : 0
+   . Outer-Loop Sigma Editor : 0
+Number of records used for estimation: 1348
+
+   WeightedRMS residuals for this iteration : 1459.94235975
+   BestRMS residuals for this iteration     : 1459.94235975
+   PredictedRMS residuals for next iteration: 1.01539521333
+
+------------------------------------------------------
+Iteration 1
+
+Current estimated state:
+   Estimation Epoch:
+       27253.500417064603 A.1 modified Julian
+       27253.500416666666 TAI modified Julian
+   19 Aug 2015 00:00:00.000 UTCG
+   Sat.SunMJ2000Eq.X = -126544968.377
+   Sat.SunMJ2000Eq.Y = 61978514.8777
+   Sat.SunMJ2000Eq.Z = 24133217.2547
+   Sat.SunMJ2000Eq.VX = -13.7889998632
+   Sat.SunMJ2000Eq.VY = -24.6730006664
+   Sat.SunMJ2000Eq.VZ = -10.6619986007
+
+Number of Records Removed Due To:
+   . No Computed Value Configuration Available : 0   
+   . Out of Ramp Table Range                   : 0
+   . Signal Blocked                            : 0
+   . Initial RMS Sigma Filter                  : 0
+   . Outer-Loop Sigma Editor                   : 2
+Number of records used for estimation          :1346
+
+   WeightedRMS residuals for this iteration : 1.00807187051
+   BestRMS residuals for this iteration     : 1.00807187051
+   PredictedRMS residuals for next iteration: 1.00804237273
+This iteration is converged due to relative convergence criteria.
+
+
+********************************************************
+*** Estimating Completed in 2 iterations
+********************************************************
+
+Estimation converged!
+      |1 - RMSP/RMSB| = | 1- 1.00804 / 1.00807| = 2.92616e-005 is 
+	  less than RelativeTol, 0.0001
+
+Final Estimated State:
+
+   Estimation Epoch:
+       27253.500417064603 A.1 modified Julian
+       27253.500416666666 TAI modified Julian
+   19 Aug 2015 00:00:00.000 UTCG
+   Sat.SunMJ2000Eq.X = -126544968.759
+   Sat.SunMJ2000Eq.Y = 61978514.3889
+   Sat.SunMJ2000Eq.Z = 24133216.7847
+   Sat.SunMJ2000Eq.VX = -13.7889997238
+   Sat.SunMJ2000Eq.VY = -24.673000621
+   Sat.SunMJ2000Eq.VZ = -10.6619988668
+</pre><pre class="programlisting" width="80">Final Covariance Matrix:
+
+        6.566855211518e+000        1.044634165793e+001        3.112863356104e+000       -2.345908150453e-006        5.035500518048e-007        1.602400702334e-006
+        1.044634082751e+001        2.043155461343e+001       -4.258301029878e+000       -3.704075903144e-006        2.022938490903e-007        3.971535902921e-006
+        3.112865361595e+000       -4.258297445960e+000        2.371732979013e+001       -1.178974996784e-006        1.683977194948e-006       -2.674173473312e-006
+       -2.345908159193e-006       -3.704076213842e-006       -1.178974284159e-006        8.386165742100e-013       -1.658563839962e-013       -6.047842793431e-013
+        5.035500497713e-007        2.022939026968e-007        1.683977056710e-006       -1.658563826712e-013        1.032575255469e-012       -2.190676053421e-012
+        1.602400700119e-006        3.971536117909e-006       -2.674174002075e-006       -6.047842762516e-013       -2.190676053038e-012        5.776276322091e-012
+
+Final Correlation Matrix:
+
+             1.000000000000             0.901851016006             0.249429858518            -0.999655967713             0.193376220513             0.260176714954
+             0.901850944314             1.000000000000            -0.193442883328            -0.894844247176             0.044042413976             0.365581159741
+             0.249430019216            -0.193442720520             1.000000000000            -0.264356490609             0.340284723675            -0.228471850851
+            -0.999655971438            -0.894844322236            -0.264356330820             1.000000000000            -0.178233614796            -0.274786120507
+             0.193376219732             0.044042425647             0.340284695741            -0.178233613372             1.000000000000            -0.897001819395
+             0.260176714594             0.365581179531            -0.228471896026            -0.274786119102            -0.897001819239             1.000000000000
+
+********************************************************
+
+
+Mission run completed.
+===&gt; Total Run Time: 85.739000 seconds
+
+========================================</pre></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ch14s08.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="DSN_Estimation_Appendix_B.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">References&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Appendix B &ndash; Zeroth Iteration Plots of Observation
+    Residuals</td></tr></table></div></body></html>

@@ -37,6 +37,8 @@ public:
    AdapterFactory(const AdapterFactory& fact);
    AdapterFactory& operator= (const AdapterFactory& fact);
 
+   GmatBase *CreateObject(const std::string &ofType,
+         const std::string &withName = "");
    MeasurementModel *CreateMeasurementModel(const std::string &ofType,
          const std::string &withName = "");
 };

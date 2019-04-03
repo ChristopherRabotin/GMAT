@@ -20,7 +20,7 @@
 % @param  cmd  input command name (such as Create, Propagate, GMAT)
 % @param  varargin  command arguments (such as DefaultProp(DefaultSC))
 %-------------------------------------------------------------------------------
-% Copyright (c) 2002 - 2015 United States Government as represented by the
+% Copyright (c) 2002 - 2017 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
 % All Other Rights Reserved.
 %
@@ -35,7 +35,6 @@
 % governing permissions and limitations under the License.
 
 function CallGMAT(cmd, varargin)
-
 %%disp('==============================');
 %%disp([cmd varargin{1}]);
 
@@ -77,5 +76,6 @@ end
 % call dde function to send string
 %-------------------------------------------------
 global gmatChannel;
-
 Poke(gmatChannel, 'script', str);
+
+

@@ -10,3 +10,6 @@
 *R2015a
 /GMATd
 /GmatConsoled
+*.so*
+/GMATd-R2016a
+/GmatConsoled-R2016a

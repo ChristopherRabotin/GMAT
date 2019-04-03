@@ -31,12 +31,10 @@
  */
 //------------------------------------------------------------------------------
 FormationFactory::FormationFactory() :
-   Factory           (Gmat::SPACECRAFT)
+   Factory           (Gmat::FORMATION)
 {
    if (creatables.empty())
    {
-      // Replace the FormationClass string here with your class name.  For multiple 
-      // classes of the same core type, push back multiple names here
       creatables.push_back("Formation");
    }
 }
@@ -68,8 +66,6 @@ FormationFactory::FormationFactory(const FormationFactory& elf) :
 {
    if (creatables.empty())
    {
-      // Replace the FormationClass string here with your class name.  For multiple 
-      // classes of the same type, push back multiple names here
       creatables.push_back("Formation");
    }
 }
@@ -95,8 +91,6 @@ FormationFactory& FormationFactory::operator=(
 
       if (creatables.empty())
       {
-         // Replace the FormationClass string here with your class name.  For multiple 
-         // classes of the same type, push back multiple names here
          creatables.push_back("Formation");
       }
    }
@@ -106,26 +100,42 @@ FormationFactory& FormationFactory::operator=(
 
 
 //------------------------------------------------------------------------------
-// GmatCommand* CreateCommand(const std::string &ofType,
-//       const std::string &withName)
+// GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Creation method for GMAT SpaceObjects
  *
- * @param ofType The subtype of the command
+ * @param ofType The subtype of the space object
  * @param withName The new command's name
  *
  * @return A newly created GmatCommand (or NULL if this factory doesn't create
  *         the requested type)
  */
 //------------------------------------------------------------------------------
-SpaceObject* FormationFactory::CreateSpacecraft(const std::string &ofType,
-                                             const std::string &withName)
+GmatBase* FormationFactory::CreateObject(const std::string &ofType,
+                                         const std::string &withName)
 {
-   // This is how you'd implement creation of a ConsolePrint command 
+   return CreateFormation(ofType, withName);
+}
+
+//------------------------------------------------------------------------------
+// SpaceObject* CreateFormation(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Creation method for GMAT Formation
+ *
+ * @param ofType The type name of the Formation
+ * @param withName The new Formation name
+ *
+ * @return A newly created Formation (or NULL if this factory doesn't create
+ *         the requested type)
+ */
+//------------------------------------------------------------------------------
+SpaceObject* FormationFactory::CreateFormation(const std::string &ofType,
+                                               const std::string &withName)
+{
    if (ofType == "Formation")
       return new Formation(Gmat::FORMATION, ofType, withName);
-   // add more here .......
-
+   
    return NULL;   // doesn't match any type of Command known by this factory
 }

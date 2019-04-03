@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -80,9 +80,25 @@ void ScriptReadWriter::SetInStream(std::istream *is)
    inStream = is; 
    reachedEndOfFile = false;
    readFirstBlock = false;
-   currentLineNumber = 0;
+   if (!isParsingIncludeFile)
+       currentLineNumber = 0;
 }
 
+//------------------------------------------------------------------------------
+// void SetIsParsingIncludeFile(bool flag);
+//------------------------------------------------------------------------------
+void ScriptReadWriter::SetIsParsingIncludeFile(bool flag)
+{
+    isParsingIncludeFile = flag;
+}
+
+//------------------------------------------------------------------------------
+// bool GetIsParsingIncludeFile(bool flag);
+//------------------------------------------------------------------------------
+bool ScriptReadWriter::GetIsParsingIncludeFile()
+{
+    return isParsingIncludeFile;
+}
 
 //------------------------------------------------------------------------------
 // Integer GetLineWidth()
@@ -91,7 +107,6 @@ Integer ScriptReadWriter::GetLineWidth()
 {
    return lineWidth;
 }
-
 
 //------------------------------------------------------------------------------
 // void SetLineWidth(Integer lineWidth)
@@ -398,6 +413,7 @@ bool ScriptReadWriter::Initialize()
    writeGmatKeyword = true;
    reachedEndOfFile = false;
    readFirstBlock = false;
+   isParsingIncludeFile = false;
    
    return true;  // need to change so if something wasn't set to return false
 }
@@ -428,12 +444,18 @@ std::string ScriptReadWriter::CrossPlatformGetLine()
       result += ch;
    }
    
+   if ((ch == '\r') && (inStream->peek() == '\n'))
+      inStream->get(ch);
+
    if ((ch == '\0') || (inStream->eof()))
    {
       reachedEndOfFile = true;
    }
    
-   ++currentLineNumber;
+   // Increment line counter for main body of script
+   if (!isParsingIncludeFile)
+       ++currentLineNumber;
+
    currentLine = result;
    
    return result;

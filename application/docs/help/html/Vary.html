@@ -1,0 +1,159 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Vary</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="Toggle.html" title="Toggle"><link rel="next" href="While.html" title="While"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Vary</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Toggle.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="While.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Vary"></a><div class="titlepage"></div><a name="N258C8" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Vary</span></h2><p>Vary &mdash; Specifies variables used by a solver</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><code class="literal">Vary</code> SolverName(&lt;UserSelectedControl&gt;=<em class="replaceable"><code>InitialGuess</code></em>,
+[{[<code class="literal">Perturbation</code>=<em class="replaceable"><code>Arg1</code></em>], [<code class="literal">MaxStep</code>=<em class="replaceable"><code>Arg2</code></em>],
+[<code class="literal">Lower</code>=<em class="replaceable"><code>Arg3</code></em>], [<code class="literal">Upper</code>=<em class="replaceable"><code>Arg4</code></em>], 
+[<code class="literal">AdditiveScalefactor</code>=<em class="replaceable"><code>Arg5</code></em>], [<code class="literal">MultiplicativeScalefactor</code>=<em class="replaceable"><code>Arg6</code></em>]}])  </pre></div><div class="refsection"><a name="N25907"></a><h2>Description</h2><p>The <span class="guilabel">Vary</span> command is used in conjunction with
+    either the <span class="guilabel">Target</span> or the
+    <span class="guilabel">Optimize</span> command. The <span class="guilabel">Vary</span>
+    command defines the control variable used by the targeter or optimizer.
+    The <span class="guilabel">Target</span> or <span class="guilabel">Optimize</span> sequence
+    then varies these control variables until certain desired conditions are
+    met. Every <span class="guilabel">Target</span> or <span class="guilabel">Optimize</span>
+    sequence must contain at least one <span class="guilabel">Vary</span>
+    command.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="DifferentialCorrector.html" title="DifferentialCorrector"><span class="refentrytitle">DifferentialCorrector</span></a>, <a class="xref" href="FminconOptimizer.html" title="FminconOptimizer"><span class="refentrytitle">FminconOptimizer</span></a>,
+    <a class="xref" href="VF13ad.html" title="VF13ad"><span class="refentrytitle">VF13ad</span></a>, <a class="xref" href="Target.html" title="Target"><span class="refentrytitle">Target</span></a>, <a class="xref" href="Optimize.html" title="Optimize"><span class="refentrytitle">Optimize</span></a></p></div><div class="refsection"><a name="N2593A"></a><h2>Options</h2><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AdditiveScaleFactor</span></td><td><p>Number used to nondimensionalize the independent
+            variable. The solver sees only the nondimensional form of the
+            variable. The nondimensionalization is performed using the
+            following equation: xn = m (xd + a). (xn is the non-dimensional
+            parameter. xd is the dimensional parameter. a= additive scale
+            factor. m= multiplicative scale factor.)&nbsp; Note the
+            nondimensionalization process occurs after the perturbation to the
+            control variable has been applied.&nbsp; Thus, xd represents a
+            perturbed control variable. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Real Number, Array element, Variable, or any user
+                    defined parameter</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number, Array element, Variable, or any user
+                    defined parameter</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">InitialGuess</span></td><td><p> Specifies the initial guess for the selected
+            <span class="guilabel">Variable</span> </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Real Number, Array element, Variable, or any
+                    user-defined parameter that obeys the conditions for the
+                    selected Variable object</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number, Array element, Variable, or any
+                    user-defined parameter that obeys the conditions for the
+                    selected Variable object</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.5</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Lower</span></td><td><p>The&nbsp;<span class="guilabel">Lower</span> option (only used for
+            the Differential Corrector and fmincon solvers) is used to set
+            the&nbsp;lower&nbsp;bound of the control <span class="guilabel">Variable</span>.
+            <span class="guilabel">Lower</span> must be less than
+            <span class="guilabel">Uppe</span>r.&nbsp; </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Real Number, Array element, Variable, or any user
+                    defined parameter</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number, Array element, Variable, or any user
+                    defined para- meter (Upper &gt; Lower )</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MaxStep</span></td><td><p>The <span class="guilabel">MaxStep</span> option (only used
+            for the <span class="guilabel">DifferentialCorrector</span> and
+            <span class="guilabel">VF13ad</span> solvers) is the maximum allowed change
+            in the control variable during a single iteration of the solver.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Real Number, Array element, Variable, or any user
+                    defined parameter &gt; 0</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number, Array element, Variable, or any user
+                    defined parameter &gt; 0</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.2</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MultiplicativeScaleFactor</span></td><td><p>Number used to nondimensionalize the independent
+            variable. The solver sees only the nondimensional form of the
+            variable. The nondimensionalization is performed using the
+            following equation: xn = m (xd + a). (xn is the non-dimensional
+            parameter. xd is the dimensional parameter. a= additive scale
+            factor. m= multiplicative scale factor.)&nbsp; Note the
+            nondimensionalization process occurs after the perturbation to the
+            control variable has been applied.&nbsp; Thus, xd represents a
+            perturbed control variable. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Real Number, Array element, Variable, or any user
+                    defined parameter</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number, Array element, Variable, or any user
+                    defined parameter &gt; 0</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Perturbation</span></td><td><p>The <span class="guilabel">Perturbation</span> option (only
+            used for the <span class="guilabel">DifferentialCorrector</span> and
+            <span class="guilabel">VF13ad</span> solvers) is the perturbation step
+            sized used to calculate the finite difference derivative </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Real Number, Array element, Variable, or any user
+                    defined parameter</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number, Array element, Variable, or any user
+                    defined parameter != 0</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.0001</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SolverName</span></td><td><p>Allows you to choose which solver to assign to the
+            <span class="guilabel">Vary</span> command. In the context of a
+            <span class="guilabel">Target</span> sequence, you will choose a
+            <span class="guilabel">DifferentialCorrector</span> object. In the context
+            of an <span class="guilabel">Optimize</span> sequence, you will choose
+            either a <span class="guilabel">FminconOptimizer</span> or
+            <span class="guilabel">VF13ad</span> object. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Solver (either an Optimizer or a Targeter)</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any user defined Optimizer or Targeter</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><code class="literal">DefaultDC</code> in a
+                    <span class="guilabel">Target</span> sequence and
+                    <code class="literal">DefaultSQP</code> in an
+                    <span class="guilabel">Optimize</span> sequence</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Upper</span></td><td><p>The <span class="guilabel">Upper</span> option (only used for
+            the <span class="guilabel">DifferentialCorrector</span> and
+            <span class="guilabel">FminconOptimizer</span> solvers) is used to set the
+            upper bound of the control <span class="guilabel">Variable</span>.
+            <span class="guilabel">Lower</span> must be less than
+            <span class="guilabel">Upper</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Real Number, Array element, Variable, or any user
+                    defined parameter</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number, Array element, Variable, or any user
+                    defined para- meter (Upper &gt; Lower )</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>3.14159</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">UserSelectedControl</span></td><td><p>Allows you to select any single element user-defined
+            parameter, except a number, to vary. For example,
+            <code class="literal">DefaultIB.V</code>,<code class="literal"> DefaultIB.N</code>,
+            <code class="literal">DefaultIB.Element1</code>,
+            <code class="literal">DefaultSC.TA</code>, <code class="literal">Array(1,1)</code>,
+            and <span class="guilabel">Variable</span> are all valid values. The three
+            element burn vector or multidimensional Arrays are not valid
+            values. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Parameter, Array element,
+                    <span class="guilabel">Variable</span>, or any other single element
+                    user-defined parameter, excluding numbers.&nbsp; Note that the
+                    variable chosen must be settable in the
+                    <span class="guilabel">Mission</span> tree.&nbsp;</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Spacecraft parameter, Array element,
+                    <span class="guilabel">Variable</span>, or any other single element
+                    user-defined parameter, excluding numbers</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">DefaultIB.Element1</code>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N25B1C"></a><h2>GUI</h2><p>The <span class="guilabel">Vary</span> command, only valid within either a
+    <span class="guilabel">Target</span> or an <span class="guilabel">Optimize</span> sequence,
+    is used to define the control variables which will be used to solve a
+    problem. The <span class="guilabel">Vary</span> command dialog box is shown
+    below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Vary_GUI_1.png" align="middle" height="302"></td></tr></table></div></div><p>The <span class="guilabel">Vary</span> command dialog box allows you to
+    specify </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Choice of <span class="guilabel">Solver</span> (a differential
+          corrector if using a <span class="guilabel">Target</span> sequence or an
+          optimizer if using an <span class="guilabel">Optimize</span>
+          sequence).</p></li><li class="listitem"><p>Control <span class="guilabel">Variable</span> object. To define the
+          control <span class="guilabel">Variable</span> used in the
+          <span class="guilabel">Vary</span> command, click the
+          <span class="guilabel">Edit</span> button to bring up the
+          <span class="guilabel">ParameterSelectDialog</span> as shown below. Use the
+          arrow to select the desired object and then click
+          <span class="guilabel">OK</span>.</p></li><li class="listitem"><p><span class="guilabel">Initial Value</span> for the control variable
+          object.</p></li><li class="listitem"><p><span class="guilabel">Perturbation</span> Step size used as part of
+          the finite differencing algorithm. As noted in the Remarks section,
+          this field is only used if the solver chosen is a differential
+          corrector or a VF13AD optimizer.</p></li><li class="listitem"><p><span class="guilabel">Lower</span> allowed limit for the converged
+          control variable object. As noted in the Remarks section, this field
+          is only used if the solver chosen is a differential corrector or a
+          fmincon optimizer.</p></li><li class="listitem"><p><span class="guilabel">Upper</span> allowed limit for the converged
+          control variable object. As noted in the Remarks section, this field
+          is only used if the solver chosen is a differential corrector or a
+          fmincon optimizer.</p></li><li class="listitem"><p>Maximum step size (<span class="guilabel">Max Step</span>), per
+          iteration, for the control variable object. As noted in the Remarks
+          section, this field is only used if the solver chosen is a
+          differential corrector or a VF13AD optimizer.</p></li><li class="listitem"><p><span class="guilabel">Additive Scale Factor</span> used to scale the
+          control variable object.</p></li><li class="listitem"><p><span class="guilabel">Multiplicative Scale Factor</span> used to scale
+          the control variable object.</p></li></ul></div></div><div class="refsection"><a name="N25B81"></a><h2>Remarks</h2><div class="refsection"><a name="N25B84"></a><h3>Vary Command Options</h3><p>The <span class="guilabel">Vary</span> command is designed to work with all
+      three of the GMAT targeters and optimizers (Differential Corrector,
+      fmincon, and VF13AD). The solvers, which are developed by different
+      parties, all work slightly differently and thus have different needs.
+      The table below shows which command options are available for a given
+      solver.</p><div class="informaltable"><table border="1"><colgroup><col width="38%"><col width="15%"><col width="16%"><col width="15%"><col width="16%"></colgroup><thead><tr><th>&nbsp;</th><th>Differential Corrector</th><th>fmincon</th><th>VF13AD</th><th>SNOPT</th></tr></thead><tbody><tr><td><span class="guilabel">SolverName</span></td><td><p> X </p></td><td><p> X </p></td><td><p> X </p></td><td><p> X </p></td></tr><tr><td><span class="guilabel">Variable</span></td><td><p> X </p></td><td><p> X </p></td><td><p> X </p></td><td><p> X </p></td></tr><tr><td><span class="guilabel">InitialGuess</span></td><td><p> X </p></td><td><p> X </p></td><td><p> X </p></td><td><p> X </p></td></tr><tr><td><span class="guilabel">AdditiveScaleFactor</span></td><td><p> X </p></td><td><p> X </p></td><td><p> X </p></td><td><p> X </p></td></tr><tr><td><span class="guilabel">MultiplicativeScaleFactor</span></td><td><p> X </p></td><td><p> X </p></td><td><p> X </p></td><td><p> X </p></td></tr><tr><td><span class="guilabel">Lower</span></td><td><p> X </p></td><td><p> X </p></td><td><p> </p></td><td><p> X </p></td></tr><tr><td><span class="guilabel">Upper</span></td><td><p> X </p></td><td><p> X </p></td><td><p> </p></td><td><p> X </p></td></tr><tr><td><span class="guilabel">Perturbation</span></td><td><p> X </p></td><td><p> </p></td><td><p> X </p></td><td><p> </p></td></tr><tr><td><span class="guilabel">MaxStep</span></td><td><p> X </p></td><td><p> </p></td><td><p> X </p></td><td><p> </p></td></tr></tbody></table></div><p>The <span class="guilabel">Vary</span> syntax allows you to specify the
+      value of an option even if a particular solver would not use the
+      information.</p><div class="refsection"><a name="N25C41"></a><h4>Vary Command Accepts Repeated Parameters</h4><p>As shown in the example below, the <span class="guilabel">Vary</span>
+        command accepts repeated parameters.</p><pre class="programlisting"><code class="code">Vary DefaultDC(ImpulsiveBurn1.Element1 = 2, ...
+{Perturbation = 1e99, Perturbation = .001})</code>        </pre><p>The accepted best practice is not to repeat parameters in any
+        given command. However, for the <span class="guilabel">Vary</span> command, if
+        you accidentally sets the same parameter multiple times, the last
+        setting takes precedence. Thus, in the example above, the perturbation
+        step size is set to 0.001.</p></div><div class="refsection"><a name="N25C52"></a><h4>Use of Thruster Parameters in a Vary Command</h4><p>If you wish to use thruster parameters, such as thrust
+        direction, in a <span class="guilabel">Vary</span> command, then you must
+        reference the cloned (child) object directly. In the example below, we
+        first show syntax, using the parent object that does not work. We then
+        show the correct syntax using the cloned (child) object.</p><pre class="programlisting"><code class="code">%Referencing the parent object, thruster1, does not work.
+Vary DC1(thruster1.ThrustDirection1 = 0.4)
+Vary DC1(thruster1.ThrustDirection2 = 0.5)
+
+%Referencing the cloned (child) object, Sc.thruster1, does work.
+Vary DC1(Sc.thruster1.ThrustDirection1 = 0.4)
+Vary DC1(Sc.thruster1.ThrustDirection2 = 0.5)</code>        </pre></div><div class="refsection"><a name="N25C5E"></a><h4>Command Interactions</h4><div class="informaltable"><table border="1"><colgroup><col width="45%"><col width="55%"></colgroup><tbody><tr><td><span class="guilabel">Target command</span></td><td><p> A <span class="guilabel">Vary</span> command only occurs
+                within a <span class="guilabel">Target</span> or
+                <span class="guilabel">Optimize</span> sequence. </p></td></tr><tr><td><span class="guilabel">Optimize command</span></td><td><p> A <span class="guilabel">Vary</span> command only occurs
+                within a <span class="guilabel">Target</span> or
+                <span class="guilabel">Optimize</span> sequence. </p></td></tr><tr><td><span class="guilabel">Achieve command</span></td><td><p> The <span class="guilabel">Achieve</span> command, used
+                as part of a <span class="guilabel">Target</span> sequence, specifies
+                the desired result or goal (obtained by using the
+                <span class="guilabel">Vary</span> command to vary the control
+                variables). </p></td></tr><tr><td><span class="guilabel">NonlinearConstraint
+                command</span></td><td><p> The <span class="guilabel">NonlinearConstraint</span>
+                command, used as part of an <span class="guilabel">Optimize</span>
+                sequence, specifies the desired result or goal (obtained by
+                using the <span class="guilabel">Vary</span> command to vary the
+                control variables). </p></td></tr><tr><td><span class="guilabel">Minimize command</span></td><td><p> The <span class="guilabel">Minimize </span>command, used
+                as part of an <span class="guilabel">Optimize</span> sequence,
+                specifies the desired quantity to be minimized (obtained by
+                using the <span class="guilabel">Vary</span> command to vary the
+                control variables). </p></td></tr></tbody></table></div></div></div></div><div class="refsection"><a name="N25CBD"></a><h2>Examples</h2><p>As mentioned above, the <span class="guilabel">Vary</span> command only
+    occurs within either a <span class="guilabel">Target</span> or an
+    <span class="guilabel">Optimize</span> sequence. See the <span class="guilabel"><a class="xref" href="Target.html" title="Target"><span class="refentrytitle">Target</span></a></span> and <span class="guilabel"><a class="xref" href="Optimize.html" title="Optimize"><span class="refentrytitle">Optimize</span></a></span> command help for examples showing the use
+    of the <span class="guilabel">Vary</span> command.</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Toggle.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="While.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Toggle&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;While</td></tr></table></div></body></html>

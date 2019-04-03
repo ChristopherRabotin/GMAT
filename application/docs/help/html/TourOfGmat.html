@@ -1,0 +1,159 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter&nbsp;3.&nbsp;Tour of GMAT</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="UsingGmat.html" title="Using GMAT"><link rel="prev" href="GettingHelp.html" title="Getting Help"><link rel="next" href="ResourceTree.html" title="Resources Tree"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Chapter&nbsp;3.&nbsp;Tour of GMAT</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="GettingHelp.html">Prev</a>&nbsp;</td><th align="center" width="60%">Using GMAT</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ResourceTree.html">Next</a></td></tr></table><hr></div><div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a name="TourOfGmat"></a>Chapter&nbsp;3.&nbsp;Tour of GMAT</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="section"><a href="TourOfGmat.html#UserInterfaces">User Interfaces Overview</a></span></dt><dd><dl><dt><span class="section"><a href="TourOfGmat.html#N10382">GUI Overview</a></span></dt><dt><span class="section"><a href="TourOfGmat.html#N10476">Script Interface Overview</a></span></dt><dt><span class="section"><a href="TourOfGmat.html#N104D2">GUI/Script Interface Interactions and Rules</a></span></dt></dl></dd><dt><span class="section"><a href="ResourceTree.html">Resources Tree</a></span></dt><dd><dl><dt><span class="section"><a href="ResourceTree.html#N1058A">Organization</a></span></dt><dt><span class="section"><a href="ResourceTree.html#N1059B">Folder Menus</a></span></dt><dt><span class="section"><a href="ResourceTree.html#N105F6">Resource Menus</a></span></dt></dl></dd><dt><span class="section"><a href="MissionTree.html">Mission Tree</a></span></dt><dd><dl><dt><span class="section"><a href="MissionTree.html#N106DB">Mission Tree Display</a></span></dt><dt><span class="section"><a href="MissionTree.html#N1072D">View Filters Toolbar</a></span></dt><dt><span class="section"><a href="MissionTree.html#N107D0">Mission Sequence Menu</a></span></dt><dt><span class="section"><a href="MissionTree.html#N10879">Command Menu</a></span></dt><dt><span class="section"><a href="MissionTree.html#MissionTree_Docking">Docking/Undocking/Placement</a></span></dt></dl></dd><dt><span class="section"><a href="CommandSummary.html">Command Summary</a></span></dt><dd><dl><dt><span class="section"><a href="CommandSummary.html#N109A1">Data Availability</a></span></dt><dt><span class="section"><a href="CommandSummary.html#N109AF">Data Contents</a></span></dt><dt><span class="section"><a href="CommandSummary.html#N109C5">Supported Commands</a></span></dt><dt><span class="section"><a href="CommandSummary.html#N109CA">Coordinate Systems</a></span></dt></dl></dd><dt><span class="section"><a href="Output.html">Output Tree</a></span></dt><dt><span class="section"><a href="ScriptEditor.html">Script Editor</a></span></dt><dd><dl><dt><span class="section"><a href="ScriptEditor.html#N10A44">Active Script</a></span></dt><dt><span class="section"><a href="ScriptEditor.html#N10A5A">GUI/Script Synchronization</a></span></dt><dt><span class="section"><a href="ScriptEditor.html#N10AD8">Scripts List</a></span></dt><dt><span class="section"><a href="ScriptEditor.html#N10B0A">Edit Window</a></span></dt><dt><span class="section"><a href="ScriptEditor.html#N10B88">Find and Replace</a></span></dt><dt><span class="section"><a href="ScriptEditor.html#N10BE1">File Controls</a></span></dt><dt><span class="section"><a href="ScriptEditor.html#N10BF1">Save Status Indicator</a></span></dt></dl></dd></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="UserInterfaces"></a>User Interfaces Overview</h2></div></div></div><p>GMAT offers multiple ways to design and execute your mission. The two
+  primary interfaces are the graphical user interface (GUI) and the script
+  interface. These interfaces are interchangeable and each supports most of
+  the functionality available in GMAT. When you work in the script interface,
+  you are working in GMAT&rsquo;s custom script language. To avoid issues such as
+  circular dependencies, there are some basic rules you must follow. Below, we
+  discuss these interfaces and then discuss the basic rules and best practices
+  for working in each interface.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10382"></a>GUI Overview</h3></div></div></div><p>When you start a session, the GMAT desktop is displayed with a
+    default mission already loaded. The GMAT desktop has a native look and
+    feel on each platform and most desktop components are supported on all
+    platforms.</p><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N10387"></a>Windows GUI</h4></div></div></div><p>When you open GMAT on Windows and click <span class="guiicon">Run</span> in
+      the Toolbar, GMAT executes the default mission as shown in the figure
+      below. The tools listed below the figure are available in the GMAT
+      desktop.</p><div class="figure"><a name="N1038F"></a><p class="title"><b>Figure&nbsp;3.1.&nbsp;GMAT Desktop (Windows)</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td><img src="../files/images/Intro_GettingStarted_WindowsGUI.png" height="1114" alt="GMAT Desktop (Windows)"></td></tr></table></div></div></div></div><br class="figure-break"><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Menu Bar</span></p></td><td><p>The menu bar contains <span class="guimenu">File</span>,
+            <span class="guimenu">Edit</span>, <span class="guimenu">Window</span> and
+            <span class="guimenu">Help</span> functionality.</p><p>On Windows, the <span class="guilabel">File</span> menu contains
+            standard <span class="guilabel">Open</span>, <span class="guilabel">Save</span>,
+            <span class="guilabel">Save As</span>, and <span class="guilabel">Exit</span>
+            functionality as well as <span class="guilabel">Open Recent</span>. The
+            <span class="guilabel">Edit</span> menu contains functionality for script
+            editing when the script editor is active. The
+            <span class="guilabel">Window</span> menu contains tools for organizing
+            graphics windows and the script editor within the GMAT desktop.
+            Examples include the ability to <span class="guilabel">Tile</span> windows,
+            <span class="guilabel">Cascade</span> windows and
+            <span class="guilabel">Close</span> windows. The Help menu contains links
+            to <span class="guilabel">Online Help</span>,
+            <span class="guilabel">Tutorials</span>, <span class="guilabel">Forums</span>, and
+            the <span class="guilabel">Report An Issue</span> option links to GMAT&rsquo;s
+            defect reporting system, the <span class="guilabel">Welcome Page</span>,
+            and a <span class="guilabel">Provide Feedback</span> link.</p></td></tr><tr><td><p><span class="term">Toolbar</span></p></td><td><p>The toolbar provides easy access to frequently used controls
+            such as file controls, <span class="guilabel">Run</span>,
+            <span class="guilabel">Pause</span>, and <span class="guilabel">Stop</span> for
+            mission execution, and controls for graphics animation. On Windows
+            and Linux, the toolbar is located at the top of the GMAT window;
+            on the Mac, it is located on the left of the GMAT frame. Because
+            the toolbar is vertical on the Mac, some toolbar options are
+            abbreviated.</p><p>GMAT allows you to simultaneously edit the raw script file
+            representation of your mission and the GUI representation of your
+            mission. It is possible to make inconsistent changes in these
+            mission representations. The <span class="guilabel">GUI/Script Sync
+            Status</span> indicator located in the toolbar shows you the
+            state of the two mission representations. See the <a class="xref" href="TourOfGmat.html#GuiScriptInteractionsAndSynchronization" title="GUI/Script Interactions and Synchronization">the section called &ldquo;GUI/Script Interactions and Synchronization&rdquo;</a> section for
+            further discussion.</p></td></tr><tr><td><p><span class="term">Resources Tab</span></p></td><td><p>The <span class="guilabel">Resources</span> tab brings the
+            <span class="guilabel">Resources</span> tree to the foreground of the
+            desktop.</p></td></tr><tr><td><p><span class="term">Resources Tree</span></p></td><td><p>The <span class="guilabel">Resources</span> tree displays all
+            configured GMAT resources and organizes them into logical groups.
+            All objects created in a GMAT script using a <span class="guilabel">Create
+            </span>command are found in the <span class="guilabel">Resources</span>
+            tree in the GMAT desktop.</p></td></tr><tr><td><p><span class="term">Mission Tab</span></p></td><td><p>The <span class="guilabel">Mission</span> tab brings the Mission Tree
+            to the foreground of the desktop.</p></td></tr><tr><td><p><span class="term">Mission Tree</span></p></td><td><p>The <span class="guilabel">Mission</span> tree displays GMAT commands
+            that control the time-ordered sequence of events in a mission. The
+            <span class="guilabel">Mission</span> tree contains all script lines that
+            occur after the <code class="function">BeginMissionSequence</code> command
+            in a GMAT script. You can undock the <span class="guilabel">Mission</span>
+            tree as shown in the figure below by right-clicking on the
+            <span class="guilabel">Mission</span> tab and dragging it into the graphics
+            window. You can also follow these steps:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Click on the <span class="guilabel">Mission</span> tab to bring
+                the <span class="guilabel">Mission</span> Tree to the
+                foreground.</p></li><li class="listitem"><p>Right-click on the <span class="guilabel">Mission Sequence</span>
+                folder in the <span class="guilabel">Mission</span> tree and select
+                <span class="guilabel">Undock Mission Tree</span> in the menu.</p></li></ol></div><div class="figure"><a name="N1044A"></a><p class="title"><b>Figure&nbsp;3.2.&nbsp;Undocked Mission Tree</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td><img src="../files/images/Intro_GettingStarted_UndockedMissionTree.png" height="758" alt="Undocked Mission Tree"></td></tr></table></div></div></div></div><br class="figure-break"></td></tr><tr><td><p><span class="term">Output Tab</span></p></td><td><p>The <span class="guilabel">Output</span> tab brings the Output Tree
+            to the foreground of the desktop.</p></td></tr><tr><td><p><span class="term">Output Tree</span></p></td><td><p>The <span class="guilabel">Output</span> tree contains GMAT output
+            such as report files and graphical displays.</p></td></tr><tr><td><p><span class="term">Message Window</span></p></td><td><p>When you run a mission in GMAT, information including
+            warnings, errors, and progress are written to the message window.
+            For example, if there is a syntax error in a script file, a
+            detailed error message is written to the message window.</p></td></tr><tr><td><p><span class="term">Status Bar</span></p></td><td><p>The status bar contains various informational messages about
+            the state of the GUI. When a mission is running, a
+            <span class="guilabel">Busy</span> indicator will appear in the left pane.
+            The center pane displays the latitude and logitude of the mouse
+            cursor as it moves over a ground track window.</p></td></tr></tbody></table></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10476"></a>Script Interface Overview</h3></div></div></div><p>The GMAT script editor is a textual interface that lets you directly
+    edit your mission in GMAT's built-in scripting language. In <a class="xref" href="TourOfGmat.html#Fig_ScriptEditor" title="Figure&nbsp;3.3.&nbsp;GMAT Script Editor">Figure&nbsp;3.3, &ldquo;GMAT Script Editor&rdquo;</a> below, the script editor is shown maximized
+    in the GMAT desktop and the items relevant to script editing are
+    labeled.</p><div class="figure"><a name="Fig_ScriptEditor"></a><p class="title"><b>Figure&nbsp;3.3.&nbsp;GMAT Script Editor</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td><img src="../files/images/Intro_GettingStarted_ScriptEditor.png" height="1051" alt="GMAT Script Editor"></td></tr></table></div></div></div></div><br class="figure-break"><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Scripts Folder</span></p></td><td><p>The GMAT desktop allows you to have multiple script files open
+          simultaneously. Open script files are displayed in the
+          <span class="guilabel">Scripts</span> folder in the
+          <span class="guilabel">Resources</span> tree. Double click on a script in the
+          <span class="guilabel">Scripts</span> folder to open it in the script editor.
+          The GMAT desktop displays each script in a separate script editor.
+          GMAT indicates the script currently represented in the GUI with a
+          boldface name. Only one script can be loaded into the GUI at a
+          time.</p></td></tr><tr><td><p><span class="term">Script Status Box</span></p></td><td><p>The <span class="guilabel">Script Status</span> box indicates whether
+          or not the script being edited is loaded in the GUI. The box says
+          <span class="guilabel">Active Script</span> for the script currently
+          represented in the GUI and <span class="guilabel">Inactive Script</span> for
+          all others.</p></td></tr><tr><td><p><span class="term">Save,Sync Button</span></p></td><td><p>The <span class="guilabel">Save,Sync</span> button saves any script
+          file changes to disk, makes the script active, and synchronizes the
+          GUI with the script.</p></td></tr><tr><td><p><span class="term">Save,Sync,Run Button</span></p></td><td><p>The <span class="guilabel">Save,Sync,Run</span> button saves any script
+          file changes to disk, makes the script active, synchronizes the GUI
+          with the script, and executes the script.</p></td></tr><tr><td><p><span class="term">Save As Button</span></p></td><td><p>When you click <span class="guilabel">Save As</span>, GMAT displays the
+          <span class="guilabel">Choose A File</span> dialog box and allows you to save
+          the script using a new file name. After saving, GMAT loads the
+          script into the GUI, making the new file the active script.</p></td></tr><tr><td><p><span class="term">Close</span></p></td><td><p>The <span class="guilabel">Close</span> button closes the script
+          editor.</p></td></tr></tbody></table></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N104D2"></a>GUI/Script Interface Interactions and Rules</h3></div></div></div><p>The GMAT desktop supports both a script interface and a GUI
+    interface and these interfaces are designed to be consistent with each
+    other. You can think of the script and GUI as different "views" of the
+    same data: the resources and the mission command sequence. GMAT allows you
+    to switch between views (script and GUI) and have the same view open in an
+    editable state simultaneously. Below we describe the behavior,
+    interactions, and rules of the script and GUI interfaces so you can avoid
+    confusion and potential loss of data.</p><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="GuiScriptInteractionsAndSynchronization"></a>GUI/Script Interactions and Synchronization</h4></div></div></div><p>GMAT allows you to simultaneously edit both the script file
+      representation and the GUI representation of your mission. It is
+      possible to make inconsistent changes in these representations. The
+      <span class="guilabel">GUI/Script Sync Status</span> window located in the
+      toolbar indicates the state of the two representations. On the Mac, the
+      status is indicated in abbreviated form in the left-hand toolbar.
+      <span class="guilabel">Synchronized</span> (green) indicates that the script and
+      GUI contain the same information. <span class="guilabel">GUI Modified</span>
+      (yellow) indicates that there are changes in the GUI that have not been
+      saved to the script. <span class="guilabel">Script Modified</span> (yellow)
+      indicates that there are changes in the script that have not been loaded
+      into the GUI. <span class="guilabel">Unsynchronized</span> (red) indicates that
+      there are changes in both the script and the GUI.</p><div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Caution</h3><p>GMAT will not attempt to merge or resolve simultaneous changes
+        in the Script and GUI and you must choose which representation to save
+        if you have made changes in both interfaces.</p></div><p>The <span class="guiicon">Save</span> button in the toolbar saves the GUI
+      representation over the script. The <span class="guibutton">Save,Sync</span>
+      button on the script editor saves the script representation and loads it
+      into the GUI.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N104F7"></a>How the GUI Maps to a Script</h4></div></div></div><p>Clicking the <span class="guilabel">Save</span> button in the toolbar saves
+      the GUI representation to the script file; this is the same file you
+      edit when working in the script editor. GUI items that appear in the
+      <span class="guilabel">Resources</span> tree appear before the
+      <code class="function">BeginMissionSequence</code> command in a script file and
+      are written in a predefined order. GUI items that appear in the Mission
+      Tree appear after the <code class="function">BeginMissionSequence</code> command
+      in a script file in the same order as they appear in the GUI.</p><div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Caution</h3><p>If you have a script file that has custom formatting such as
+        spacing and data organization, you should work exclusively in the
+        script. If you load your script into the GUI, then click
+        <span class="guilabel">Save</span> in the toolbar, you will lose the formatting
+        of your script. (You will not, however, lose the data.)</p></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N1050E"></a>How the Script Maps to the GUI</h4></div></div></div><p>Clicking the <span class="guilabel">Save,Sync</span> button on the script
+      editor saves the script representation and loads it into the GUI. When
+      you work in a GMAT script, you work in the raw file that GMAT reads and
+      writes. Each script file must contain a command called
+      <code class="function">BeginMissionSequence</code>. Script lines that appear
+      before the <code class="function">BeginMissionSequence</code> command create and
+      configure models and this data will appear in the
+      <span class="guilabel">Resources</span> tree in the GUI. Script lines that appear
+      after the <code class="function">BeginMissionSequence</code> command define your
+      mission sequence and appear in the <span class="guilabel">Mission</span> tree in
+      the GUI. Here is a brief script example to illustrate:</p><pre class="programlisting">Create Spacecraft Sat
+Sat.X = 3000
+BeginMissionSequence
+Sat.X = 1000</pre><p>The line <code class="code">Sat.X = 3000</code> sets the x-component of the
+      Cartesian state to 3000; this value will appear on the
+      <span class="guilabel">Orbit</span> tab of the <span class="guilabel">Spacecraft</span>
+      dialog box. However, because the line <code class="code">Sat.X = 1000</code> appears
+      after the <code class="function">BeginMissionSequence</code> command, the line
+      <code class="code">Sat.X = 1000</code> will appear as an assignment command in the
+      <span class="guilabel">Mission</span> tree in the GUI.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N1053E"></a>Basic Script Syntax Rules</h4></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Each script file must contain one and only one
+          <code class="function">BeginMissionSequence</code> command.</p></li><li class="listitem"><p>GMAT commands are not allowed before the
+          <code class="function">BeginMissionSequence</code> command.</p></li><li class="listitem"><p>You cannot use inline math statements (equations) before the
+          <code class="function">BeginMissionSequence</code> command in a script file.
+          (GMAT considers in-line math statements to be an assignment command.
+          You cannot use equations in the <span class="guilabel">Resources</span> tree,
+          so you also cannot use equations before the
+          <code class="function">BeginMissionSequence</code> command.)</p></li><li class="listitem"><p>In the GUI, you can only use in-line math statements in an
+          assignment command. So, you cannot type <strong class="userinput"><code>3000 +
+          4000</code></strong> or <strong class="userinput"><code>Sat.Y - 8</code></strong> in the text box
+          for setting a spacecraft&rsquo;s dry mass.</p></li><li class="listitem"><p>GMAT&rsquo;s script language is case-sensitive.</p><p>For a more complete discussion of GMAT's script language, see
+          the <a class="xref" href="ScriptLanguage.html" title="Script Language"><span class="refentrytitle">Script Language</span></a> documentation.</p></li></ul></div></div></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="GettingHelp.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="UsingGmat.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ResourceTree.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Getting Help&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Resources Tree</td></tr></table></div></body></html>

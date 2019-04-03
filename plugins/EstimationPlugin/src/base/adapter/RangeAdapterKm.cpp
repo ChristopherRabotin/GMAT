@@ -45,7 +45,7 @@
  */
 //------------------------------------------------------------------------------
 RangeAdapterKm::RangeAdapterKm(const std::string& name) :
-   TrackingDataAdapter      ("RangeKm", name)
+   TrackingDataAdapter("Range", name)                        //TrackingDataAdapter("RangeKm", name)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("RangeAdapterKm default constructor <%p>\n", this);
@@ -353,7 +353,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
       cMeasurement.tropoCorrectWarningValue = 0.0;
 
       if (withMediaCorrection)
-      {  
+      {
          Real correction = GetIonoCorrection();                                  // unit: km
          if ((correction < 0.0) || (correction > 0.04))
          {
@@ -370,7 +370,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             cMeasurement.tropoCorrectWarningValue = correction;                  // unit: km
          }
       }
-
+      
       std::vector<SignalBase*> paths = calcData->GetSignalPaths();
       std::string unfeasibilityReason;
       Real        unfeasibilityValue;
@@ -379,7 +379,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
       cMeasurement.isFeasible = false;
       cMeasurement.unfeasibleReason = "";
       cMeasurement.feasibilityValue = 90.0;
-      
+
       GmatEpoch transmitEpoch, receiveEpoch;
       RealArray values;
       for (UnsignedInt i = 0; i < paths.size(); ++i)           // In the current version of GmatEstimation plugin, it has only 1 signal path. The code has to be modified for multiple signal paths 
@@ -456,19 +456,20 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          }// while loop
          
       }// for i loop
-      
 
       // Caluclate uplink frequency at received time and transmit time
       cMeasurement.uplinkFreq = calcData->GetUplinkFrequency(0, rampTB) * 1.0e6;                        // unit: Hz
       cMeasurement.uplinkFreqAtRecei = calcData->GetUplinkFrequencyAtReceivedEpoch(0,rampTB) * 1.0e6;   // unit: Hz
       cMeasurement.uplinkBand = calcData->GetUplinkFrequencyBand(0, rampTB);
       
-
-      if (measurementType == "Range_KM")
+      //if (measurementType == "Range_KM")
+      if (measurementType == "Range")
       {
          // @todo: it needs to specify number of trips instead of using 2
-         ComputeMeasurementBias("Bias", "Range_KM", 2);
-         ComputeMeasurementNoiseSigma("NoiseSigma", "Range_KM", 2);
+         //ComputeMeasurementBias("Bias", "Range_KM", 2);
+         //ComputeMeasurementNoiseSigma("NoiseSigma", "Range_KM", 2);
+         ComputeMeasurementBias("Bias", measurementType, 2);
+         ComputeMeasurementNoiseSigma("NoiseSigma", measurementType, 2);
          ComputeMeasurementErrorCovarianceMatrix();
       }
 
@@ -494,7 +495,8 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             MessageInterface::ShowMessage("      . C-value w/o noise and bias : %.12lf km \n", values[i]);
             MessageInterface::ShowMessage("      . Noise adding option        : %s\n", (addNoise?"true":"false"));
             MessageInterface::ShowMessage("      . Bias adding option        : %s\n", (addBias?"true":"false"));
-            if (measurementType == "Range_KM")
+            //if (measurementType == "Range_KM")
+            if (measurementType == "Range")
             {
                MessageInterface::ShowMessage("      . Range noise sigma          : %.12lf km \n", noiseSigma[i]);
                MessageInterface::ShowMessage("      . Range bias                 : %.12lf km \n", measurementBias[i]);
@@ -502,10 +504,11 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             }
          #endif
 
-         // This section is only done when measurement type is "Range_KM". For other types such as DSNRange or Doppler, it will be done in their adapters  
-         if (measurementType == "Range_KM")
+         // This section is only done when measurement type is ("Range_KM") "Range". For other types such as DSN_SeqRange or DSN_TCP, it will be done in their adapters  
+         //if (measurementType == "Range_KM")
+         if (measurementType == "Range")
          {
-            // Apply multiplier for "Range_KM" measurement model. This step has to
+            // Apply multiplier for ("Range_KM") "Range" measurement model. This step has to
             // be done before adding bias and noise
             measVal = measVal*multiplier;
 
@@ -883,7 +886,8 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
 
    if (paramName == "Bias")
    {
-      if (((ErrorModel*)obj)->GetStringParameter("Type") == "Range_KM")
+      //if (((ErrorModel*)obj)->GetStringParameter("Type") == "Range_KM")
+      if (((ErrorModel*)obj)->GetStringParameter("Type") == "Range")
          theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, id);
       else
       {
@@ -919,7 +923,8 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
       // Now assemble the derivative data into the requested derivative
       // Note that: multiplier is only applied for elements of spacecraft's state, position, and velocity
       Real factor = 1.0;
-      if (measurementType == "Range_KM")
+      //if (measurementType == "Range_KM")
+      if (measurementType == "Range")
       {
          if (obj->IsOfType(Gmat::SPACECRAFT))
          {

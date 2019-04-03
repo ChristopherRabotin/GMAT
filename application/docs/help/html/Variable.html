@@ -1,0 +1,52 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Variable</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="Thruster.html" title="ChemicalThruster"><link rel="next" href="VF13ad.html" title="VF13ad"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Variable</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Thruster.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="VF13ad.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Variable"></a><div class="titlepage"></div><a name="N21F2A" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Variable</span></h2><p>Variable &mdash; A user-defined numeric variable</p></div><div class="refsection"><a name="N21F3B"></a><h2>Description</h2><p>The <span class="guilabel">Variable</span> resource is used to store a single
+    numeric value for use by commands in the Mission Sequence. It can be used
+    in place of a literal numeric value in most commands.
+    <span class="guilabel">Variable</span> resources are initialized to zero on
+    creation, and can be assigned using literal numeric values or (in the
+    Mission Sequence) <span class="guilabel">Variable</span> resources,
+    <span class="guilabel">Array</span> resource elements, resource parameters of
+    numeric type, or <span class="guilabel">Equation</span> commands that evaluate to
+    scalar numeric values.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Array.html" title="Array"><span class="refentrytitle">Array</span></a>, <a class="xref" href="String.html" title="String"><span class="refentrytitle">String</span></a></p></div><div class="refsection"><a name="N21F59"></a><h2>Fields</h2><p>The <span class="guilabel">Variable</span> resource has no fields; instead,
+    the resource itself is set to the desired value.</p><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><em class="replaceable"><code>value</code></em></td><td><p>The value of the variable.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real number</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <em class="replaceable"><code>value</code></em> &lt;
+                    &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N21FA2"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Variable_Create.png" align="middle" height="291"></td></tr></table></div></div><p>The GMAT GUI lets you create multiple <span class="guilabel">Variable</span>
+    resources at once without leaving the window. To create a
+    <span class="guilabel">Variable</span>:</p><div class="orderedlist"><ol class="orderedlist compact" type="1"><li class="listitem"><p>In the <span class="guilabel">Variable Name</span> box, type the desired
+        name of the variable.</p></li><li class="listitem"><p>In the <span class="guilabel">Variable Value</span> box, type the initial
+        value of the variable. This is required and must be a literal numeric
+        value.</p></li><li class="listitem"><p>Click the <span class="guilabel">=&gt;</span> button to create the
+        variable and add it to the list on the right.</p></li></ol></div><p>You can create multiple <span class="guilabel">Variable</span> resources this
+    way. To edit an existing variable in this window, click it in the list on
+    the right and edit the value. You must click the
+    <span class="guilabel">=&gt;</span> button again to save your changes.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Variable_Edit.png" align="middle" height="185"></td></tr></table></div></div><p>You can also double-click an existing variable in the resources tree
+    in the main GMAT window. This opens the <span class="guilabel">Variable</span>
+    properties box above that allows you to edit the value of that individual
+    variable.</p></div><div class="refsection"><a name="N21FE0"></a><h2>Remarks</h2><p>GMAT <span class="guilabel">Variable</span> resources store a single numeric
+    value. Internally, the value is stored as a double-precision real number,
+    regardless of whether or not a fractional portion is present.</p></div><div class="refsection"><a name="N21FE8"></a><h2>Examples</h2><div class="informalexample"><p>Creating a variable and assigning it a literal value:</p><pre class="programlisting"><code class="code">Create ReportFile aReport
+
+Create Variable aVar
+aVar = 12
+
+BeginMissionSequence
+
+Report aReport aVar</code></pre></div><div class="informalexample"><p>Using variables in Mission Sequence commands:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create ForceModel anFM
+Create ReportFile aReport
+
+Create Propagator aProp
+aProp.FM = anFM
+
+Create Variable i step totalDuration nSteps
+
+BeginMissionSequence
+
+step = 60
+totalDuration = 24*60^2     % one day
+nSteps = totalDuration / step
+
+% Report Keplerian elements every 60 seconds for one day
+For i=1:nSteps
+   Propagate aProp(aSat) {aSat.ElapsedSecs = step}
+   Report aReport aSat.TAIModJulian aSat.SMA aSat.ECC aSat.INC ...
+      aSat.RAAN aSat.AOP aSat.TA
+EndFor</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Thruster.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="VF13ad.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">ChemicalThruster&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;VF13ad</td></tr></table></div></body></html>

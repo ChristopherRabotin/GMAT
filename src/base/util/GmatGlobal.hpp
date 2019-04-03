@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -70,6 +70,13 @@ public:
       NO_MATLAB,  // MATLAB is not installed
    };
    
+   enum LogfileSource
+   {
+      CMD_LINE = 35,
+      SCRIPT,
+      STARTUP,
+   };
+   
    static GmatGlobal* Instance();
    
    // GMAT version
@@ -122,6 +129,9 @@ public:
    void SetGuiMode(Integer mode);
    Integer GetPlotMode();
    void SetPlotMode(Integer mode);
+
+   void SetCommandEchoMode(bool tf);
+   bool EchoCommands();
 
    // MATLAB
    Integer GetMatlabMode();
@@ -206,6 +216,15 @@ public:
    void SetEopFile(EopFile *eop);
    void SetItrfCoefficientsFile(ItrfCoefficientsFile *itrf);
    
+   // Log file set-up
+   void        SetLogfileSource(Integer src, const std::string logfileName = "");
+   void        SetLogfileName(Integer forSrc, const std::string logfileName);
+   Integer     GetLogfileSource();
+   std::string GetLogfileName(Integer forSrc = 0);
+
+//   unsigned long GetUsedMemorySize(bool isAtStart);
+
+
 private:
 
    // Global setting
@@ -281,6 +300,7 @@ private:
    bool isWritingParameterInfo;
    bool isWritingFilePathInfo;
    bool isWritingGmatKeyword;
+   bool commandEchoMode;
    
    bool isEventLocationAvailable;
    bool includeFoundInScriptResource;
@@ -304,11 +324,19 @@ private:
    EopFile *theEopFile;
    ItrfCoefficientsFile *theItrfFile;
    
+   // Logfile
+   Integer logfileSrc;
+   std::string cmdLineLog;
+   std::string scriptLog;
+   std::string startupLog;
+   
    /// The singleton instance
    static GmatGlobal *theGmatGlobal;
    
    GmatGlobal();
    ~GmatGlobal();
+
+//   FILE* repPtr;         // It needs for memory leak test
 };
 
 #endif // GmatGlobal_hpp

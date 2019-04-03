@@ -1,0 +1,124 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Simulator</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="ReportFile.html" title="ReportFile"><link rel="next" href="SNOPTOptimizer.html" title="SNOPT"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Simulator</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ReportFile.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="SNOPTOptimizer.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Simulator"></a><div class="titlepage"></div><a name="N1CFC2" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Simulator</span></h2><p>Simulator &mdash; Configures the generation of simulated tracking data
+    measurements.</p></div><div class="refsection"><a name="N1CFD3"></a><h2>Description</h2><p>A <span class="guilabel">Simulator</span> configures the generation of
+    simulated tracking data measurements. These measurements can then be used
+    by a <span class="guilabel">BatchEstimatorInv</span> resource as part of an
+    estimation run.</p><p>The <span class="guilabel">Simulator</span> object requires specification of
+    one or more instances of a <span class="guilabel">TrackingFileSet</span> resource
+    which identify the specific tracking data observation strands, data types,
+    desired measurement corrections, and the output tracking data file name.
+    Simulated data will be written in the GMAT Measurement Data (GMD) ASCII
+    tracking data format. You must additionally specify a time span for the
+    simulation run and a time interval between simulated observations.
+    Simulated observations are only generated when a tracking strand meets the
+    visibility constraints of all objects in the strand (for example, the
+    observation must be above the ground station minimum elevation mask).
+    Additionally, you must configure and specify an instance of a
+    <span class="guilabel">Propagator</span> for the simulator. Finally, you can choose
+    to add random Gaussian white noise to the generated measurements or to
+    generate measurements without noise. If the
+    <span class="guilabel">Simulator.AddNoise</span> option is set to On, noise with
+    the standard deviation specified on each measurement strand&rsquo;s
+    <span class="guilabel">GroundStation.ErrorModel</span>, is added to the
+    measurements.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="TrackingFileSet.html" title="TrackingFileSet"><span class="refentrytitle">TrackingFileSet</span></a>, <a class="xref" href="RunEstimator.html" title="RunEstimator"><span class="refentrytitle">RunEstimator</span></a></p></div><div class="refsection"><a name="N1CFF9"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AddData</span></td><td><p>A list of one or more
+            <span class="guilabel">TrackingFileSets</span></p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p><span class="guilabel">TrackingFileSet</span> object</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any valid <span class="guilabel">TrackingFileSet</span>
+                    object</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">None</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AddNoise</span></td><td><p>If true, adds noise to simulated observations</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true, false, on, off</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">false</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EpochFormat</span></td><td><p>Epoch format of both the initial and final
+            epoch</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>STRING_TYPE</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>A1ModJulian, TAIModJulian, UTCModJulian,
+                    TTModJulian, TDBModJulian, A1Gregorian, TAIGregorian,
+                    TTGregorian, UTCGregorian, TDBGregorian</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">TAIModJulian</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">InitialEpoch</span></td><td><p>The initial (start) epoch of the data simulation
+            span. In the GMAT script, the <span class="guilabel">EpochFormat</span>
+            field needs to be set before this field is set. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>STRING_TYPE</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Gregorian: 04 Oct 1957 12:00:00.000 &lt;= Epoch
+                    &lt;= 28 Feb 2100 00:00:00.000</p><p>Modified Julian: 6116.0 &lt;= Epoch &lt;=
+                    58127.5</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">'21545'</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FinalEpoch</span></td><td><p>The final (ending) epoch of the data simulation span.
+            In the GMAT script, the <span class="guilabel">EpochFormat</span> field
+            needs to be set before this field is set. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>STRING_TYPE</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Gregorian: 04 Oct 1957 12:00:00.000 &lt;= Epoch
+                    &lt;= 28 Feb 2100 00:00:00.000</p><p>Modified Julian: 6116.0 &lt;= Epoch &lt;=
+                    58127.5</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">'21545'</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MeasurementTimeStep</span></td><td><p>Specifies time step in seconds between two
+            consecutive simulated observations</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">60</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>seconds</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Propagator</span></td><td><p>Name of <span class="guilabel">Propagator</span> object used
+            for calculation</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p><span class="guilabel">Propagator</span> Object</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any valid <span class="guilabel">Propagator</span>
+                    object</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">None</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1D177"></a><h2>Remarks</h2><div class="refsection"><a name="N1D17A"></a><h3>Interactions</h3><div class="informaltable"><table border="1"><colgroup><col width="16%"><col width="84%"></colgroup><thead><tr><th>Resource</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">TrackingFileSet resource</span></td><td><p> Must be created in order to tell the
+              <span class="guilabel">Simulator</span> resource, via the
+              <span class="guilabel">AddData</span> field, which data types will be
+              simulated and to specify the name of the output tracking data
+              file (via <span class="guilabel">FileName</span>)</p></td></tr><tr><td><span class="guilabel">Propagator</span>
+              <span class="guilabel">resource</span></td><td>Used by GMAT to generate the simulated orbit</td></tr><tr><td><span class="guilabel">RunSimulator command</span></td><td><p> Must use the <span class="guilabel">RunSimulator</span>
+              command to actually create the data defined by the
+              <span class="guilabel">Simulator</span> resource</p></td></tr></tbody></table></div></div></div><div class="refsection"><a name="N1D1B3"></a><h2>Examples</h2><div class="informalexample"><p>The example below illustrates using the simulator to generate DSN
+      range measurements. This example is more detailed than usual as it can
+      actually be run to produce a file, <code class="filename">simData.gmd</code>,
+      that contains a single range measurement for a fictional DSN ground
+      station. For a more comprehensive example of simulating measurements,
+      see the <a class="xref" href="Tut_Simulate_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;13.&nbsp;Simulate DSN Range and Doppler Data">Chapter&nbsp;13, <i>Simulate DSN Range and Doppler Data</i></a>
+      tutorial.</p><pre class="programlisting">%Create and Configure Spacecraft
+Create Spacecraft SimSat;
+
+GMAT SimSat.DateFormat  = UTCGregorian;
+GMAT SimSat.Epoch       = '19 Aug 2015 00:00:00.000';
+GMAT SimSat.X           = -126544963;      
+GMAT SimSat.Y           = 61978518;       
+GMAT SimSat.Z           = 24133225;     
+GMAT SimSat.VX          = -13.789;
+GMAT SimSat.VY          = -24.673;
+GMAT SimSat.VZ          = -10.662;
+GMAT SimSat.AddHardware = {SatTransponder, SatTranponderAntenna};
+
+%Create and configure RF hardware
+Create Antenna SatTranponderAntenna DSNReceiverAntenna DSNTransmitterAntenna;
+
+Create Transponder SatTransponder;
+GMAT SatTransponder.PrimaryAntenna = SatTranponderAntenna;
+
+Create Transmitter DSNTransmitter;
+GMAT DSNTransmitter.PrimaryAntenna = DSNTransmitterAntenna;
+GMAT DSNTransmitter.Frequency      = 7200;
+
+Create Receiver DSNReceiver;
+GMAT DSNReceiver.PrimaryAntenna = DSNReceiverAntenna;
+
+%Create and configure ground station and related error model
+Create GroundStation DSN;
+GMAT DSN.AddHardware = ...
+  {DSNTransmitter, DSNReceiver, DSNTransmitterAntenna, DSNReceiverAntenna};
+GMAT DSN.ErrorModels = {DSNrange};
+
+Create ErrorModel DSNrange;
+GMAT DSNrange.Type       = 'DSN_SeqRange';
+GMAT DSNrange.NoiseSigma = 10;
+
+%Define data types
+Create TrackingFileSet simData;
+GMAT simData.AddTrackingConfig = {{DSN,SimSat,DSN}, DSN_SeqRange};
+GMAT simData.FileName          = {'simData.gmd'};
+
+%   Create and configure the Simulator object
+Create Propagator prop;
+
+Create Simulator sim;
+GMAT sim.AddData             = {simData};
+GMAT sim.Propagator          = prop;
+GMAT sim.EpochFormat         = UTCGregorian;
+GMAT sim.InitialEpoch        = '19 Aug 2015 08:00:00.000';
+GMAT sim.FinalEpoch          = '19 Aug 2015 08:00:01.000';
+GMAT sim.MeasurementTimeStep = 60;
+GMAT sim.AddNoise            = On;
+
+%  Mission Sequence - run the simulator.
+
+BeginMissionSequence;
+
+RunSimulator sim;</pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ReportFile.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="SNOPTOptimizer.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">ReportFile&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;SNOPT</td></tr></table></div></body></html>

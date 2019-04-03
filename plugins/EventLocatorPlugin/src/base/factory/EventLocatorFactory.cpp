@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -120,6 +120,24 @@ EventLocatorFactory& EventLocatorFactory::operator=(
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Creation method for EventLocators
+ *
+ * @param ofType The subtype of the event locator
+ * @param withName The new locator's name
+ *
+ * @return A newly created EventLocator (or NULL if this factory doesn't create
+ *         the requested type)
+ */
+//------------------------------------------------------------------------------
+GmatBase* EventLocatorFactory::CreateObject(const std::string &ofType,
+                                            const std::string &withName)
+{
+   return CreateEventLocator(ofType, withName);
+}
 
 //------------------------------------------------------------------------------
 // EventLocator* CreateEventLocator(const std::string &ofType,

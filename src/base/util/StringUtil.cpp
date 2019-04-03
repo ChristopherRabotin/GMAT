@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -6244,6 +6244,44 @@ bool GmatStringUtil::IsValidIdentity(const std::string &str)
 
 
 //------------------------------------------------------------------------------
+// bool IsValidExtendedIdentity(const std::string &str)
+//------------------------------------------------------------------------------
+/*
+* Checks for valid extended identity. An extended identity is an extended name 
+* of a GMAT object. It is has syntax [<Identity>.]*<Identity>. An identity is 
+* started by a alphabet and follow by a series of alphabet, number, and
+* underscore. It has not to be GMAT keyword such as "GMAT", "Create",
+* or "function".
+*
+* @param  str  The input string to check for valid name
+*
+* Returns      true if string is satisfied that condition, false otherwise
+*
+*/
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsValidExtendedIdentity(const std::string &str)
+{
+   std::string str1 = str;
+   std::size_t pos = str1.find_first_of('.');
+
+   while (pos != str1.npos)
+   {
+      std::string name = str1.substr(0, pos);
+      if (!IsValidIdentity(name))
+         return false;
+
+      str1 = str1.substr(pos + 1);
+      pos = str1.find_first_of('.');
+   }   
+
+   if (!IsValidIdentity(str1))
+      return false;
+   else
+      return true;
+}
+
+
+//------------------------------------------------------------------------------
 // bool IsValidFileName(const std::string &str)
 //------------------------------------------------------------------------------
 /*
@@ -6376,4 +6414,27 @@ bool GmatStringUtil::IsValidFullFileName(const std::string &str, Integer &error)
    }
    //MessageInterface::ShowMessage("driver = <%s>   path = <%s>  filename = <%s>\n", driver.c_str(), path.c_str(), filename.c_str());
    return true;
+}
+
+
+StringArray GmatStringUtil::ParseName(const std::string& extendedName)
+{
+   static StringArray names;
+   names.clear();
+
+   std::string name = extendedName;
+   std::string::size_type pos = name.find_last_of('.');
+   if (pos != name.npos)
+   {
+      names.push_back(name.substr(0, pos));
+      name = name.substr(pos+1);
+      names.push_back(name);
+   }
+   else
+   {
+      names.push_back(name);
+      names.push_back("");
+   }
+   
+   return names;
 }

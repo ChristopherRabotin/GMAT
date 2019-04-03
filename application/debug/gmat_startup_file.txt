@@ -57,11 +57,12 @@ PLUGIN                   = ./plugins/libThrustFiled
 
 # Alpha plugins (disabled by default)
 #PLUGIN                  = ./libCInterfaced
-#PLUGIN                  = ./plugins/libGmatEstimationd
-#PLUGIN                  = ./plugins/libExtraPropagatorsd
-#PLUGIN                  = ./plugins/libGeometricMeasurementsd
-#PLUGIN                  = ./plugins/libPolyhedronGravityd
-#PLUGIN                  = ./plugins/libSaveCommandd
+PLUGIN                  = ./plugins/libGmatEstimationd
+PLUGIN                  = ./plugins/libExtraPropagatorsd
+PLUGIN                  = ./plugins/libGeometricMeasurementsd
+PLUGIN                  = ./plugins/libPolyhedronGravityd
+PLUGIN                  = ./plugins/libSaveCommandd
+PLUGIN                  = ./plugins/libEKFd
 
 # Internal-only plugins
 PLUGIN                   = ./plugins/proprietary/libMarsGRAMd
@@ -114,6 +115,11 @@ PLANETARY_COEFF_PATH     = DATA_PATH/planetary_coeff/
 EOP_FILE                 = PLANETARY_COEFF_PATH/eopc04_08.62-now
 NUTATION_COEFF_FILE      = PLANETARY_COEFF_PATH/NUTATION.DAT
 PLANETARY_PCK_FILE       = PLANETARY_COEFF_PATH/SPICEPlanetaryConstantsKernel.tpc
+EARTH_LATEST_PCK_FILE    = PLANETARY_COEFF_PATH/earth_latest_high_prec.bpc
+EARTH_PCK_PREDICTED_FILE = PLANETARY_COEFF_PATH/SPICEEarthPredictedKernel.bpc
+EARTH_PCK_CURRENT_FILE   = PLANETARY_COEFF_PATH/SPICEEarthCurrentKernel.bpc
+LUNA_PCK_CURRENT_FILE    = PLANETARY_COEFF_PATH/SPICELunaCurrentKernel.bpc
+LUNA_FRAME_KERNEL_FILE   = PLANETARY_COEFF_PATH/SPICELunaFrameKernel.tf
 #-----------------------------------------------------------
 TIME_PATH                = DATA_PATH/time/
 LEAP_SECS_FILE           = TIME_PATH/tai-utc.dat

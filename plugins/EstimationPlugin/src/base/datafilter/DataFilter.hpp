@@ -32,7 +32,7 @@
 class ESTIMATION_API DataFilter : public GmatBase
 {
 public:
-   DataFilter(const std::string name);
+   DataFilter(const std::string &ofType, std::string name);
    virtual ~DataFilter();
    DataFilter(const DataFilter& df);
    DataFilter& operator=(const DataFilter& df);
@@ -96,7 +96,7 @@ public:
 
    /// Filter observed data
    virtual ObservationData* 
-                        FilteringData(ObservationData* dataObject, Integer& rejectedReason);
+                        FilteringData(ObservationData* dataObject, Integer& rejectedReason, Integer obDataId = -1);
 //   virtual bool         ValidateInput();
 
    /// @todo: Check this
@@ -106,23 +106,23 @@ public:
 protected:
    /// A list of file names specifies data files on which the filter to be applied 
    StringArray fileNames;
-   bool allDataFile;
+   bool isDataFileDefaultVal;
 
    /// A name list of observed objects
    StringArray observers;
    /// A list of observed objects
    ObjectArray observerObjects;
-   bool allObserver;
+   bool isObserverDefaultVal;
 
    /// A name list of trackers
    StringArray trackers;
    /// A list of trackers
    ObjectArray trackerObjects;
-   bool allTracker;
+   bool isTrackerDefaultVal;
 
    /// A list of all data types
    StringArray dataTypes;
-   bool allDataType;
+   bool isDataTypeDefaultVal;
 
    /// Format of an epoch
    std::string epochFormat;
@@ -137,7 +137,7 @@ protected:
    /// Flag indicate that ValidateInput() function was run
    bool isChecked;
 
-   std::map<std::string, std::string> dataTypesMap;
+   //std::map<std::string, std::string> dataTypesMap;
 
    /// Class parameter ID enumeration
    enum
@@ -184,11 +184,13 @@ protected:
    /// Check observation data containing measurement epoch in time window
    bool     IsInTimeWindow(ObservationData* dataObject);
 
-
 private:
    Real    ConvertToRealEpoch(const std::string &theEpoch,
                                    const std::string &theFormat);
    bool    isEpochFormatSet;
+
+   std::map<std::string, std::string> GetDeprecatedTypeMap() {return depTypeMap;};
+   std::map<std::string, std::string> depTypeMap;
 };
 
 #endif /* DataFilter_hpp */

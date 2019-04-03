@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,8 +39,9 @@
 #include <algorithm>        // for find()
 #include "gmatdefs.hpp"
 
-// Headers used by commands that override InterpretAction
-#include "Function.hpp"
+//#include "Function.hpp"
+#include "ObjectManagedFunction.hpp"
+//#include "UserDefinedFunction.hpp"
 #include "StringUtil.hpp"
 #include "TextParser.hpp"
 #include "SolarSystem.hpp"
@@ -126,7 +127,8 @@ protected:
    /// Name of the function this FunctionManager manages
    std::string          functionName;
    /// the function that this FunctionManager manages
-   Function             *currentFunction;
+   ////old Function             *currentFunction;
+   ObjectManagedFunction    *currentFunction;
    /// the list of passing input strings for this call of the function
    StringArray          passedIns;
    /// the list of passing output strings for this call of the function

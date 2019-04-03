@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -68,7 +68,7 @@ Transponder::PARAMETER_TYPE[TransponderParamCount - RFHardwareParamCount] =
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// Transponder(const std::string &name)
+// Transponder(const std::string &ofType, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Default constructor
@@ -76,8 +76,8 @@ Transponder::PARAMETER_TYPE[TransponderParamCount - RFHardwareParamCount] =
  * @param name The name for the transponder
  */
 //------------------------------------------------------------------------------
-Transponder::Transponder(const std::string &name):
-   RFHardware             ("Transponder", name),
+Transponder::Transponder(const std::string &ofType, const std::string &name) :
+   RFHardware             (ofType, name),
    inputFrequencyModel    ("CenterAndBandwidth"),
    inputCenterFrequency   (0.0),
    inputBandwidth         (1.0e18),

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -79,7 +79,7 @@
 // static data
 //---------------------------------
 const Real ViewCanvas::RADIUS_ZOOM_RATIO = 2.2;
-int ViewCanvas::GmatGLCanvasAttribs[2] = {WX_GL_DOUBLEBUFFER, 0};
+int ViewCanvas::GmatGLCanvasAttribs[4] = { WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16, 0 };
 // color
 static int *sIntColor = new int;
 static GlColorType *sGlColor = (GlColorType*)sIntColor;

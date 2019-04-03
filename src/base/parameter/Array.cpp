@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -543,8 +543,23 @@ Integer Array::SetIntegerParameter(const std::string &label, const Integer value
 //------------------------------------------------------------------------------
 // Rvector GetRvectorParameter(const Integer id, const Integer index) const
 //------------------------------------------------------------------------------
+/**
+ * Retrieves column or row vector from current matrix. Note that index starts
+ * from 0.
+ */
+//------------------------------------------------------------------------------
 Rvector Array::GetRvectorParameter(const Integer id, const Integer index) const
 {
+   #ifdef DEBUG_ARRAY_GET
+   MessageInterface::ShowMessage
+      ("Array::GetRvectorParameter() entered, id=%d, index=%d, mNumCols=%d, "
+       "mNumRows=%d\n", id, index, mNumCols, mNumRows);
+   MessageInterface::ShowMessage
+      ("   mRmatValue.GetNumColumns()=%d, mRmatValue.GetNumRows()=%d\n   "
+       "mRmatValue.ToString()=%s", mRmatValue.GetNumColumns(),
+       mRmatValue.GetNumRows(), mRmatValue.ToString().c_str());
+   #endif
+   
    switch (id)
    {
    case ROW_VALUE:
@@ -554,20 +569,28 @@ Rvector Array::GetRvectorParameter(const Integer id, const Integer index) const
          for (int i=0; i<mNumCols; i++)
             rvec.SetElement(i, mRmatValue.GetElement(index, i));
 
+         #ifdef DEBUG_ARRAY_GET
+         MessageInterface::ShowMessage
+            ("Array::GetRvectorParameter() returning %s\n", rvec.ToString().c_str());
+         #endif
          return rvec;
       }
    case COL_VALUE:
       {
          Rvector rvec(mNumRows);
-      
+         
          for (int i=0; i<mNumRows; i++)
             rvec.SetElement(i, mRmatValue.GetElement(i, index));
-
+         
+         #ifdef DEBUG_ARRAY_GET
+         MessageInterface::ShowMessage
+            ("Array::GetRvectorParameter() returning %s\n", rvec.ToString().c_str());
+         #endif
          return rvec;
       }
    default:
       throw ParameterException
-         ("Array::GetRvectorParameter() Unknown Parameter Name" + PARAMETER_TEXT[id]);
+         ("Array::GetRvectorParameter() Unknown Parameter Name " + PARAMETER_TEXT[id] + "\"");
       //return Parameter::GetRvectorParameter(id, index);
    }
 }

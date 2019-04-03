@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -603,9 +603,9 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    wxString osDescription = wxGetOsDescription();
    wxOperatingSystemId osId = wxGetOsVersion(&osMajor, &osMinor);
    
-#ifdef DEBUG_OS_DETECTION
+   #ifdef DEBUG_OS_DETECTION
    MessageInterface::ShowMessage("OS: %s\n", std::string(osDescription));
-#endif
+   #endif
    int osNum = osMajor * 10 + osMinor;
 
    // Flag to use "delete child" rather than child.Destroy()
@@ -620,12 +620,23 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    //   if (osNum > 61)
    //      useChildDelete = false;
    //}
+   
+   // Crashes when running scripts in a folder because child frames are not deleted
+   // between script runs. So added check for Windows 7 and 32 bit for now to be
+   // able to run script folder using 32-bit GMAT on Windows 7. (LOJ: 2016.09.06)
+   // @todo Should be able to delete all child frames on all platforms and OS
+   // between runs.
+   if ((osDescription.Find("Windows 7") != wxNOT_FOUND) && 
+       !GmatGlobal::Instance()->IsGmatCompiledIn64Bit())
+   {
+      useChildDelete = true;
+   }
 
-#ifdef DEBUG_OS_DETECTION
+   #ifdef DEBUG_OS_DETECTION
    MessageInterface::ShowMessage("OS info: %d.%d ==> %d gives id %d; %sWin 8 or higher\n", 
       osMajor, osMinor, osNum, osId, (!useChildDelete ? "Is " : "Is not "));
-#endif
-
+   #endif
+   
    #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() this=<%p> exiting\n", this);
    #endif
@@ -1793,10 +1804,10 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
 {
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage
-      ("\nGmatMainFrame::CloseAllChildren() entered, closeScriptWindow=%d, closePlots=%d, "
-       "closeReports=%d, closeUndockedMissionTree=%d, closingGmat=%d, closeWelcomePanel = %d\n",
-       closeScriptWindow, closePlots,
-       closeReports, closeUndockedMissionTree, closingGmat, closeWelcomePanel);
+      ("GmatMainFrame::CloseAllChildren() entered, closeScriptWindow=%d, closePlots=%d, "
+       "closeReports=%d\n   closeUndockedMissionTree=%d, closingGmat=%d, closeWelcomePanel = %d\n",
+       closeScriptWindow, closePlots, closeReports, closeUndockedMissionTree,
+       closingGmat, closeWelcomePanel);
    MessageInterface::ShowMessage
       ("   Number of children = %d\n", theMdiChildren->GetCount());
    #endif
@@ -2365,9 +2376,9 @@ void GmatMainFrame::OverrideActiveChildDirty(bool override)
 void GmatMainFrame::CloseCurrentProject()
 {
    #ifdef DEBUG_MAINFRAME_CLOSE
-   MessageInterface::ShowMessage("GmatMainFrame::CloseCurrentProject() entered\n");
+   MessageInterface::ShowMessage("\nGmatMainFrame::CloseCurrentProject() entered\n");
    #endif
-      
+   
    // close all windows
    CloseAllChildren(true, true, true, false);
 
@@ -2386,6 +2397,7 @@ void GmatMainFrame::CloseCurrentProject()
    theGuiInterpreter->ClearAllSandboxes();
    theGuiInterpreter->ClearCommandSeq();
    theGuiInterpreter->ClearResource();
+   theGuiInterpreter->ClearScript();
    MessageInterface::ClearMessage();
 
    GmatAppData *gmatAppData = GmatAppData::Instance();
@@ -2396,7 +2408,7 @@ void GmatMainFrame::CloseCurrentProject()
    SetStatusText("", 2);
 
    #ifdef DEBUG_MAINFRAME_CLOSE
-   MessageInterface::ShowMessage("GmatMainFrame::CloseCurrentProject() exiting\n");
+   MessageInterface::ShowMessage("GmatMainFrame::CloseCurrentProject() exiting\n\n");
    #endif
 }
 
@@ -2511,7 +2523,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
       
       // Check if we are showing non-savable mode
       // @note: Cannot use theGuiInterpreter to querry this flag since
-      //        GuiInterpreter and ScriptInpreter are two different instances
+      //        GuiInterpreter and ScriptInterpreter are two different instances
       if (GmatGlobal::Instance()->GetIncludeFoundInScriptResource())
       {
          // Show advanced status in the toolbar
@@ -3536,6 +3548,10 @@ void GmatMainFrame::OnProjectNew(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
 {
+   #ifdef DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage("GmatMainFrame::OnLoadDefaultMission() entered\n");
+   #endif
+   
    // if any changes were made, ask user to continue
    if (theGuiInterpreter->HasConfigurationChanged())
    {
@@ -3572,6 +3588,9 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
    // Update GUI/Script sync status
    UpdateGuiScriptSyncStatus(1, 1);
    
+   #ifdef DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage("GmatMainFrame::OnLoadDefaultMission() leaving\n");
+   #endif
 }
 
 
@@ -6742,17 +6761,20 @@ void GmatMainFrame::GetBaseFilesToCompare(Integer compareOption, const wxString 
       
       if (filename.Contains(".report") || filename.Contains(".txt") ||
           filename.Contains(".data") || filename.Contains(".script") ||
-          filename.Contains(".eph") || filename.Contains(".truth"))
+          filename.Contains(".eph") || filename.Contains(".oem") ||
+          filename.Contains(".e") || filename.Contains(".truth"))
       {
          // if file has prefix
          if (filename.Left(baseStringLen) == baseString)
          {
             filepath = baseDir + "/" + filename;
             
+            // If not backup files
             // Add files ending 't' for report, txt, and script
-            // 'a' for data, 'h' for eph and truth
+            // 'a' for data, 'h' for eph and truth, 'm' for .oem, 'e' for .e
             if (filename.Last() == 't' || filename.Last() == 'a' ||
-                filename.Last() == 'h')
+                filename.Last() == 'h' || filename.Last() == 'm' ||
+                filename.Last() == 'e')
             {
                wxString noPrefixName = filename;
                noPrefixName.Replace(baseString, "", false);

@@ -1,0 +1,102 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>ElectricTank</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="DifferentialCorrector.html" title="DifferentialCorrector"><link rel="next" href="ElectricThruster.html" title="ElectricThruster"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">ElectricTank</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="DifferentialCorrector.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ElectricThruster.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="ElectricTank"></a><div class="titlepage"></div><a name="N17749" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ElectricTank</span></h2><p>ElectricTank &mdash; A model of a tank containing fuel for an electric propulsion
+    system</p></div><div class="refsection"><a name="N1775A"></a><h2>Description</h2><p>An <span class="guilabel">ElectricTank</span> is a model of a tank and is
+    required for finite burns employing an electric propulsion system. To use
+    an <span class="guilabel">ElectricTank</span>, you must first create the tank, and
+    then attach it to the desired <span class="guilabel">Spacecraft</span> and
+    associate it with an <span class="guilabel">ElectricThruster</span> as shown in the
+    example below. Additionally you must create a
+    <span class="guilabel">SolarPowerSystem</span> or
+    <span class="guilabel">NuclearPowerSystem</span> and attach it to the
+    <span class="guilabel">Spacecraft</span>.</p><p>For a complete descripton of how to configure all Resources required
+    for electric propulsion modelling, see the Tutorial named <a class="xref" href="Tut_ElectricPropulsion.html" title="Chapter&nbsp;12.&nbsp;Electric Propulsion">Chapter&nbsp;12, <i>Electric Propulsion</i></a></p><p>See Also <a class="xref" href="ElectricThruster.html" title="ElectricThruster"><span class="refentrytitle">ElectricThruster</span></a>,<a class="xref" href="NuclearPowerSystem.html" title="NuclearPowerSystem"><span class="refentrytitle">NuclearPowerSystem</span></a>,<a class="xref" href="SolarPowerSystem.html" title="SolarPowerSystem"><span class="refentrytitle">SolarPowerSystem</span></a></p></div><div class="refsection"><a name="N17782"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AllowNegativeFuelMass </span></td><td><p>This field allows the
+            <span class="guilabel">ElectricTank</span> to have negative fuel mass which
+            can be useful in optimization and targeting sequences before
+            convergence has occurred. This field cannot be modified in the
+            Mission Sequence. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">true</code>,
+                    <code class="literal">false</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">false</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FuelMass</span></td><td><p> The mass of fuel in the tank. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>756</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>kg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N177FB"></a><h2>GUI</h2><p>The <span class="guilabel">ElectricTank</span> dialog box allows you to
+    specify properties of a fuel tank. The layout of the
+    <span class="guilabel">ElectricTank</span> dialog box is shown below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="75%"><tr><td align="center"><img src="../files/images/Resource_ElectricTank_GUI.png" align="middle" height="236"></td></tr></table></div></div></div><div class="refsection"><a name="N1780F"></a><h2>Remarks</h2><div class="refsection"><a name="N17812"></a><h3>Use of ElectricTank Resource in Conjunction with
+      Maneuvers</h3><p>An <span class="guilabel">ElectricTank</span> is used in conjunction with
+      finite maneuvers. To implement a finite maneuver, you must first create
+      both an <span class="guilabel">ElectricThruster</span> and a
+      <span class="guilabel">FiniteBurn</span> resource. You must also associate the
+      <span class="guilabel">ElectricTank</span> with the
+      <span class="guilabel">ElectricThruster</span> resource and you must associate
+      the <span class="guilabel">ElectricThruste</span><span class="guilabel">r</span> with the
+      <span class="guilabel">FiniteBurn</span> resource. The finite maneuver is
+      implemented using the <span class="guilabel">BeginFiniteBurn/EndFiniteBurn</span>
+      commands. See the <span class="guilabel">BeginFiniteBurn/EndFiniteBurn</span>
+      command documentation for worked examples on how the
+      <span class="guilabel">ElectricTank</span> resource is used in conjunction with
+      finite maneuvers.</p><p>For a complete descripton of how to configure all Resources
+      required for electric propulsion modelling, see the Tutorial named <a class="xref" href="Tut_ElectricPropulsion.html" title="Chapter&nbsp;12.&nbsp;Electric Propulsion">Chapter&nbsp;12, <i>Electric Propulsion</i></a></p></div><div class="refsection"><a name="N1783B"></a><h3>Behavior When Configuring Tank and Attached Tank
+      Properties</h3><p>Create a default <span class="guilabel">ElectricTank</span> and attach it
+      to a <span class="guilabel">Spacecraft</span> and
+      <span class="guilabel">ElectricThruster</span>.</p><pre class="programlisting">%  Create the ElectricTank Resource
+Create ElectricTank aTank
+aTank.AllowNegativeFuelMass = false
+aTank.FuelMass = 756
+
+%  Create an ElectricThruster and assign it a ElectricTank
+Create ElectricThruster aThruster
+aThruster.Tank = {aTank}
+
+%  Add the ElectricTank and Thruster to a Spacecraft
+Create Spacecraft aSpacecraft
+aSpacecraft.Tanks = {aTank}
+aSpacecraft.Thrusters = {aThruster}    </pre><p>As exhibited below, there are some subtleties associated with
+      setting and getting parent vs. cloned resources. In the example above,
+      <code class="literal">aTank </code>is the parent <span class="guilabel">ElectricTank</span>
+      resource and the field <code class="literal">aSpacecraft.Tanks</code> is populated
+      with a cloned copy of <code class="literal">aTank</code>.</p><p>Create a second spacecraft and attach a fuel tank using the same
+      procedure used in the previous example. Set the
+      <span class="guilabel">FuelMass</span> in the parent resource,
+      <code class="literal">aTank</code>, to 900 kg.</p><pre class="programlisting">%  Add the ElectricTank and ElectricThruster to a second Spacecraft
+Create Spacecraft bSpacecraft
+bSpacecraft.Tanks = {aTank}
+bSpacecraft.Thrusters = {aThruster}
+aTank.FuelMass = 900    %Can be performed in both resource and 
+                        %command modes</pre><p>Note that in the example above, setting the value of the parent
+      resource, <code class="literal">aTank</code>, changes the fuel mass value in both
+      cloned fuel tank resources. More specifically, the value of both
+      <code class="literal">aSpacecraft.aTank.FuelMass</code> and
+      <code class="literal">bSpacecraft.aTank.FuelMass</code> are both now equal to the
+      new value of 900 kg. We note that the assignment command for the parent
+      resource, <code class="literal">aTank.FuelMass</code>, can be performed in both
+      resource and command modes.</p><p>To change the value of the fuel mass in only the first created
+      spacecraft, <span class="guilabel">aSpacecraft</span>, we do the
+      following.</p><pre class="programlisting"><code class="code">%  Create the Fuel Tank Resource
+BeginMissionSequence
+aTank.FuelMass = 756   %Fuel tank mass in both s/c set back to default
+aSpacecraft.aTank.FuelMass = 1000 %Can only be performed in command mode.</code>      </pre><p>As a result of the commands in the previous example, the value of
+      <code class="literal">aSpacecraft.aTank.FuelMass</code> is <code class="literal">1000</code>
+      kg and the value of <code class="literal">bSpacecraft.aTank.FuelMass</code> is 756
+      kg. We note that the assignment command for the cloned resource,
+      <code class="literal">aSpacecraft.aTank.FuelMass</code>, can only be performed in
+      command mode.</p><div class="refsection"><a name="N17888"></a><h4>Caution: Value of AllowNegativeFuelMass Flag Can Affect
+        Iterative Processes</h4><p>By default, GMAT will not allow the fuel mass to be negative.
+        However, occasionally in iterative processes such as targeting, a
+        solver will try values of a maneuver parameter that result in total
+        fuel depletion. Using the default tank settings, this will throw an
+        exception stopping the run unless you set the
+        <span class="guilabel">AllowNegativeFuelMass</span> flag to true. GMAT will not
+        allow the the total spacecraft mass to be negative. If DryMass +
+        FuelMass is negative GMAT will throw an exception and stop.</p></div></div></div><div class="refsection"><a name="N17890"></a><h2>Examples</h2><div class="informalexample"><p>Create a default <span class="guilabel">ElectricTank</span> and attach it
+      to a <span class="guilabel">Spacecraft</span> and
+      <span class="guilabel">ElectricThruster</span>.</p><pre class="programlisting">%  Create the ElectricTank Resource
+Create ElectricTank aTank
+aTank.AllowNegativeFuelMass = false
+aTank.FuelMass = 756
+
+%  Create an ElectricThruster and assign it a ElectricTank
+Create ElectricThruster aThruster
+aThruster.Tank = {aTank}
+
+%  Add the ElectricTank and ElectricThruster to a Spacecraft
+Create Spacecraft aSpacecraft
+aSpacecraft.Tanks = {aTank}
+aSpacecraft.Thrusters = {aThruster}   
+
+BeginMissionSequence    </pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="DifferentialCorrector.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ElectricThruster.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">DifferentialCorrector&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;ElectricThruster</td></tr></table></div></body></html>

@@ -1,0 +1,80 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Array</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="Antenna.html" title="Antenna"><link rel="next" href="Barycenter.html" title="Barycenter"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Array</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Antenna.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Barycenter.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Array"></a><div class="titlepage"></div><a name="N154E3" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Array</span></h2><p>Array &mdash; A user-defined one- or two-dimensional array
+    variable</p></div><div class="refsection"><a name="N154F4"></a><h2>Description</h2><p>The <span class="guilabel">Array</span> resource is used to store a one- or
+    two-dimensional set of numeric values, such as a vector or a matrix.
+    Individual elements of an array can be used in place of a literal numeric
+    value in most commands.</p><p>Arrays must be dimensioned at the time of creation, using the
+    following syntax:</p><pre class="programlisting"><code class="code">Create Array anArray[<em class="replaceable"><code>rows</code></em>, <em class="replaceable"><code>columns</code></em>]</code></pre><p>If only one dimension is specified, a row vector is created.</p><p>Array values are initialized to zero at creation. Values can be
+    assigned individually using literal numeric values or (in the Mission
+    Sequence) <span class="guilabel">Variable</span> resources,
+    <span class="guilabel">Array</span> resource elements, resource parameters of
+    numeric type, or <span class="guilabel">Equation</span> commands that evaluate to
+    scalar numeric values.</p><pre class="programlisting"><code class="code">anArray(<em class="replaceable"><code>row</code></em>, <em class="replaceable"><code>column</code></em>) = <em class="replaceable"><code>value</code></em></code></pre><p>If only one dimension is specified during assignment,
+    <code class="code"><em class="replaceable"><code>row</code></em></code> is assumed to be 1.</p><p>An <span class="guilabel">Array</span> can also be assigned as a whole in the
+    Mission Sequence using another <span class="guilabel">Array</span> resource or an
+    <span class="guilabel">Equation</span> that evaluates to an array. Both sides of
+    the assignment must be identically-sized.</p><pre class="programlisting"><code class="code">anArray = <em class="replaceable"><code>array expression</code></em></code></pre><p><span class="ref_seealso">See Also</span>: <a class="xref" href="String.html" title="String"><span class="refentrytitle">String</span></a>, <a class="xref" href="Variable.html" title="Variable"><span class="refentrytitle">Variable</span></a></p></div><div class="refsection"><a name="N1553F"></a><h2>Fields</h2><p>The <span class="guilabel">Array</span> resource has no fields; instead, the
+    resource elements themselves are set to the desired values.</p><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><em class="replaceable"><code>rows</code></em></td><td><p>The number of rows (during creation), or the row
+            being addressed. The total size of the array is
+            <em class="replaceable"><code>rows</code></em> &times;
+            <em class="replaceable"><code>columns</code></em>. This field is
+            required.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>1 &le; <em class="replaceable"><code>rows</code></em> &le; 1000</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><em class="replaceable"><code>columns</code></em></td><td><p>The number of columns (during creation), or the
+            column being addressed. The total size of the array is
+            <em class="replaceable"><code>rows</code></em> &times;
+            <em class="replaceable"><code>columns</code></em>. This field is
+            required.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>1 &le; <em class="replaceable"><code>columns</code></em> &le; 1000</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><em class="replaceable"><code>value</code></em></td><td><p>The value of the array element being
+            addressed.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real number</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <em class="replaceable"><code>value</code></em> &lt;
+                    &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N155F2"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Array_Create.png" align="middle" height="291"></td></tr></table></div></div><p>The GMAT GUI lets you create multiple <span class="guilabel">Array</span>
+    resources at once without leaving the window. To create an
+    <span class="guilabel">Array</span>:</p><div class="orderedlist"><ol class="orderedlist compact" type="1"><li class="listitem"><p>In the <span class="guilabel">Array Name</span> box, type the desired
+        name of the array.</p></li><li class="listitem"><p>In the <span class="guilabel">Row</span> and <span class="guilabel">Column</span>
+        boxes, type the desired number of rows and columns, respectively. To
+        create a one-dimensional array, set <span class="guilabel">Row</span> to
+        1.</p></li><li class="listitem"><p>Click the <span class="guilabel">=&gt;</span> button to create the array
+        and add it to the list on the right.</p></li><li class="listitem"><p>Click the <span class="guilabel">Edit</span> button to edit the array
+        element values.</p></li></ol></div><p>You can create multiple <span class="guilabel">Array</span> resources this
+    way. To edit an existing array in this window, click it in the list on the
+    right. Click <span class="guilabel">Edit</span> to change the element values, or
+    edit the <span class="guilabel">Row</span> and <span class="guilabel">Column</span> values.
+    You must click the <span class="guilabel">=&gt;</span> button again to save changes
+    to the size of the array.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Array_Edit.png" align="middle" height="377"></td></tr></table></div></div><p>You can edit the elements of an <span class="guilabel">Array</span> by either
+    clicking <span class="guilabel">Edit</span> while creating an array, or by
+    double-clicking the array in the resources tree in the main GMAT window.
+    The edit window allows you to change array elements individually using the
+    row and column lists and clicking <span class="guilabel">Update</span>, or by
+    directly entering data in the table in the lower portion of the window.
+    The data table recognizes a few different mouse and keyboard
+    controls:</p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p>Click a cell once to select it</p></li><li class="listitem"><p>Click a selected cell again, double-click an unselected cell, or
+        press F2 to edit the value</p></li><li class="listitem"><p>Use the arrow keys to select adjacent cells</p></li><li class="listitem"><p>Click the corner header cell to select the entire table</p></li><li class="listitem"><p>Drag the column and row separators to adjust the row height or
+        column width</p></li><li class="listitem"><p>Double-click the row or column separators in the heading to
+        auto-size the row height or column width</p></li></ul></div></div><div class="refsection"><a name="N1565F"></a><h2>Remarks</h2><p>GMAT <span class="guilabel">Array</span> resources store an arbitrary number
+    of numeric values organized into one or two dimensions, up to a maximum of
+    1000 elements per dimension. Internally, the elements are stored as
+    double-precision real numbers, regardless of whether or not fractional
+    portions are present. <span class="guilabel">Array</span> resources can be created
+    and assigned using one or two dimension specifiers. This example shows the
+    behavior in each case:</p><pre class="programlisting"><code class="code">% a is a row vector with 3 elements
+Create Array a[3]
+a(1) = 1    % same as a(1, 1) = 1
+a(2) = 2    % same as a(1, 2) = 2
+a(3) = 3    % same as a(1, 3) = 3
+
+% b is a matrix with 5 rows and 3 columns
+Create Array b[5, 3]
+b(1) = 1    % same as b(1, 1) = 1
+b(2) = 2    % same as b(1, 2) = 2
+b(3) = 3    % same as b(1, 3) = 3
+b(4) = 4    % error: b(1, 4) does not exist
+b(4, 3) = 4 % row 4, column 3</code></pre></div><div class="refsection"><a name="N1566D"></a><h2>Examples</h2><div class="informalexample"><p>Creating and reporting an array:</p><pre class="programlisting"><code class="code">Create ReportFile aReport
+Create Variable i idx1 idx2
+Create Array fib[9]
+
+BeginMissionSequence
+
+fib(1) = 0
+fib(2) = 1
+For i=3:9
+   idx1 = i-1
+   idx2 = i-2
+   fib(i) = fib(idx1) + fib(idx2)
+EndFor
+Report aReport fib</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Antenna.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Barycenter.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Antenna&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Barycenter</td></tr></table></div></body></html>

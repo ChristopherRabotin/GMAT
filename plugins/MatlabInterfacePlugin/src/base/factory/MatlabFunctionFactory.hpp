@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -41,6 +41,7 @@
 class MATLAB_API MatlabFunctionFactory : public Factory
 {
 public:
+   GmatBase* CreateObject(const std::string &ofType, const std::string &withName = "");
    Function* CreateFunction(const std::string &ofType, const std::string &withName = "");
 
    MatlabFunctionFactory();

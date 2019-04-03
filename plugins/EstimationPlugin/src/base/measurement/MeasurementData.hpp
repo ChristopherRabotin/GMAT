@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,6 +38,7 @@
 #include "EstimationDefs.hpp"
 #include "Covariance.hpp"
 #include "TimeSystemConverter.hpp"
+#include "GmatTime.hpp"
 
 /**
  *  The measurement data structure
@@ -76,8 +77,15 @@ public:
    GmatEpoch         epoch;
    /// Who is involved in the measurement.  First one is the "anchor" node
    StringArray       participantIDs;
+   /// The id of sensor attached to participant in order to send or receive signal (use for GPS Point Solution)
+   StringArray       sensorIDs;
    /// The measured value.  Array to handle more than one value, like AZ_EL
    RealArray         value;
+   
+   // This is use for DSN_TCP measurement only 
+   /// The measured value present in travel time without noise and bias
+   std::vector<GmatTime>  valueInTime;
+
    /// Flag indicating if the measurement could be made when it was attempted
    bool              isFeasible;
    

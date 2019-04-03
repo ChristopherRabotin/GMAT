@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -144,7 +144,8 @@ bool GregorianDate::SetDate(Date *newDate, Integer format)
    if (!newDate->IsValid())
    { 
       MessageInterface::ShowMessage("Warning:  Can't set date to string\n");
-      return (isValid = false); 
+      isValid = false;
+      return isValid;
    }  
    
    std::string temp;
@@ -174,7 +175,8 @@ bool GregorianDate::SetDate(Date *newDate, Integer format)
    stringYMDHMS = newDate->ToPackedCalendarString();
    type = "Gregorian";
    
-   return (isValid = true);
+   isValid = true;
+   return isValid;
 }
 
 //---------------------------------------------------------------------------
@@ -340,7 +342,8 @@ void GregorianDate::ParseOut(const std::string &str)
                   "\nWarning: invalid Gregorian time for minutes format(MM)\n"); 
                return;
             }
-            if (timeToken.GetToken(2).length() != 6)
+            if ((timeToken.GetToken(2).length() < 2) ||
+               (timeToken.GetToken(2).length() > 6))
             {
                MessageInterface::ShowMessage(
                   "\nWarning: invalid Gregorian time for seconds format(SS.mmm)\n"); 
@@ -359,17 +362,27 @@ void GregorianDate::ParseOut(const std::string &str)
             timeToken.Set(strSeconds,"."); 
 
             // Check time format in second
-            if (timeToken.CountTokens() != 2 || 
-                timeToken.GetToken(0).length() != 2 ||
-                timeToken.GetToken(1).length() != 3)
+            if ((timeToken.CountTokens() > 2) || 
+               ((timeToken.CountTokens() == 1) &&
+                (timeToken.GetToken(0).length() != 2)) ||
+               ((timeToken.CountTokens() == 2) &&
+                 ((timeToken.GetToken(0).length() != 2) ||
+                  (timeToken.GetToken(1).length() > 3))))
             {
                MessageInterface::ShowMessage(
                   "\nWarning: invalid Gregorian format with seconds"); 
                return;
             }
             
-            tempYMD += timeToken.GetToken(0) + timeToken.GetToken(1);
-            
+            if (timeToken.CountTokens() == 1)
+               tempYMD += timeToken.GetToken(0) + "000";
+            else if (timeToken.GetToken(1).length() == 1)
+               tempYMD += timeToken.GetToken(0) + timeToken.GetToken(1) + "00";
+            else if (timeToken.GetToken(1).length() == 2)
+               tempYMD += timeToken.GetToken(0) + timeToken.GetToken(1) + "0";
+            else 
+               tempYMD += timeToken.GetToken(0) + timeToken.GetToken(1);
+
             // Get real number in seconds
             Real second = ToReal(strSeconds); 
             #if DEBUG_GREGORIAN_VALIDATE

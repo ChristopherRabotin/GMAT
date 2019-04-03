@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -43,7 +43,8 @@ class GMAT_API ScriptInterpreter : public Interpreter
 {
 public:        
    static ScriptInterpreter*   Instance();
-   
+
+   virtual void Clear();
    virtual bool Interpret();
    virtual bool Interpret(GmatCommand *cmd, bool skipHeader = false,
                           bool functionMode = false);
@@ -76,6 +77,7 @@ protected:
    /// Flag indicating #Include statement fouond in the resource mode
    bool includeFoundInResource;
    
+   void InitializeScriptData();
    bool InterpretIncludeFile(GmatCommand *inCmd);
    
    bool ReadScript(GmatCommand *cmd = NULL, bool skipHeader = false, bool reinitialize = true);

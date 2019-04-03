@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1472,9 +1472,12 @@ const std::string& PropSetup::GetGeneratingString(Gmat::WriteMode mode,
    }
    
    // Temporarily rename propagator to the type name so the Type field fills
-   std::string pname = mPropagator->GetName();
+   std::string pname = "";
    if (mPropagator != NULL)
+   {
+      pname = mPropagator->GetName();
       mPropagator->SetName(mPropagator->GetTypeName());
+   }
 
    gen += GmatBase::GetGeneratingString(mode, prefix, useName);
    generatingString = gen;
@@ -1544,7 +1547,7 @@ void PropSetup::UpdateClonedObject(GmatBase *obj)
       #endif
 
       ODEModel *odem = ((PropSetup*)obj)->GetODEModel();
-      if (odem != NULL)
+      if ((odem != NULL) && (mODEModel != NULL))
       {
          if (odem->GetName() == mODEModel->GetName())
          {
@@ -1574,8 +1577,8 @@ void PropSetup::UpdateClonedObjectParameter(GmatBase *obj,
             "called\n", obj->GetName().c_str());
    #endif
 
-   if ((obj->IsOfType(Gmat::ODE_MODEL) && (mODEModel != NULL)) ||
-       obj->IsOfType(Gmat::PROP_SETUP))
+   if ((obj->IsOfType(Gmat::ODE_MODEL) ||
+       obj->IsOfType(Gmat::PROP_SETUP)) && (mODEModel != NULL))
    {
       #ifdef DEBUG_CLONES
          MessageInterface::ShowMessage("Setting parameter on %s on Propsetup "

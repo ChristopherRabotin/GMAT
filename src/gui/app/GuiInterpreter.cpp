@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -611,7 +611,6 @@ Parameter* GuiInterpreter::CreateParameter(const std::string &type,
 //------------------------------------------------------------------------------
 // Subscriber* CreateSubscriber(const std::string &type,
 //                              const const std::string &name,
-//                              const std::string &filename = "",
 //                              bool createDefault = true)
 //------------------------------------------------------------------------------
 /**
@@ -619,21 +618,19 @@ Parameter* GuiInterpreter::CreateParameter(const std::string &type,
  *
  * @param <type> object type
  * @param <name> object name
- * @param <filename> file name if used
  *
  * @return a subscriber object pointer
  */
 //------------------------------------------------------------------------------
 Subscriber* GuiInterpreter::CreateSubscriber(const std::string &type,
                                              const std::string &name,
-                                             const std::string &filename,
                                              bool createDefault)
 {
    // Set object manage option to configuration object
    GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
    theModerator->SetObjectManageOption(1);
    Subscriber *obj =
-      theModerator->CreateSubscriber(type, name, filename, createDefault);
+      theModerator->CreateSubscriber(type, name, createDefault);
    
    #ifdef DEBUG_SYNC_STATUS
    MessageInterface::ShowMessage
@@ -1048,6 +1045,22 @@ Integer GuiInterpreter::RunMission(Integer sandboxNum)
 Integer GuiInterpreter::ChangeRunState(const std::string &state, Integer sandboxNum)
 {
    return theModerator->ChangeRunState(state, sandboxNum);
+}
+
+
+//------------------------------------------------------------------------------
+// void ClearScript()
+//------------------------------------------------------------------------------
+/**
+ * Clears scirpt related data
+ */
+//------------------------------------------------------------------------------
+void GuiInterpreter::ClearScript()
+{
+   // Reset script data for ScriptInterpreter instance
+   theModerator->ClearScript();
+   // Reset script data for GuiInterpreter instance
+   ScriptInterpreter::Clear();
 }
 
 

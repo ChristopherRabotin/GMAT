@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -467,8 +467,15 @@ bool Create::InsertIntoLOS(GmatBase *obj, const std::string &withName)
       MessageInterface::ShowMessage("   InsertIntoLOS: entered with obj = <%p> "
          "and name = %s\n", obj, withName.c_str());
    #endif
-   GmatBase *mapObj;
+
    std::string ex;
+   if (!obj)
+   {
+      ex = "Create::InsertIntoLOS() '" + withName +
+            "' has NULL pointer as input";
+      throw CommandException(ex);
+   }
+   GmatBase *mapObj;
    // if it is already in the LOS, make sure the types match
    if (objectMap->find(withName) != objectMap->end())
    {

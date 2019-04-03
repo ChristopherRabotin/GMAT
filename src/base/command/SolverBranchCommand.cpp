@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -381,7 +381,9 @@ void SolverBranchCommand::ResetLoopData()
       name = (*i)->GetName();
       //GmatBase *gb = (*objectMap)[name];
       GmatBase *gb = FindObject(name);
-      if (gb != NULL) {
+
+      if (gb != NULL)
+      {
          if (gb->GetType() == Gmat::SPACECRAFT)
          {
             sc = (Spacecraft*)gb;
@@ -394,18 +396,8 @@ void SolverBranchCommand::ResetLoopData()
          }
       }
    }
-   // Reset the propagators so that propagations run identically loop to loop
+   // Trigger reset for the propagators so they run identically loop to loop
    BranchCommand::TakeAction("ResetLoopData");
-//   GmatCommand *cmd = branch[0];
-//   while (cmd != this)
-//   {
-//      if (cmd->GetTypeName() == "Propagate")
-//         cmd->TakeAction("ResetLoopData");
-//      cmd = cmd->GetNext();
-//   }
-
-   // Now push the current data point to the subscribers to avoid a data gap
-
 }
 
 
@@ -770,13 +762,13 @@ bool SolverBranchCommand::TakeAction(const std::string &action,
       // Set the vary command for chunking ephemeris data
       // (Fix for GMT-4097 LOJ: 2014.04.04)
       std::vector<GmatCommand*>::iterator node;
-      GmatCommand *currentPtr;
+      GmatCommand *currentPtr = NULL;
       GmatCommand *lastVary = NULL;
       
       for (node = branch.begin(); node != branch.end(); ++node)
       {
          currentPtr = *node;
-         while (currentPtr != this)
+         while (currentPtr && (currentPtr != this))
          {
             if (currentPtr->IsOfType("Vary"))
                lastVary = currentPtr;

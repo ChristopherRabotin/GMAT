@@ -1,0 +1,240 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>ImpulsiveBurn</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="GroundTrackPlot.html" title="GroundTrackPlot"><link rel="next" href="LibrationPoint.html" title="LibrationPoint"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">ImpulsiveBurn</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="GroundTrackPlot.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="LibrationPoint.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="ImpulsiveBurn"></a><div class="titlepage"></div><a name="N1A31C" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ImpulsiveBurn</span></h2><p>ImpulsiveBurn &mdash; An impulsive maneuver</p></div><div class="refsection"><a name="N1A32D"></a><h2>Description</h2><p>The <span class="guilabel">ImpulsiveBurn</span> resource allows the
+    spacecraft to undergo an instantaneous Delta-V (&#916;V), as opposed to a
+    finite burn which is not instantaneous, by specifying the three vector
+    components of the Delta-V. You can configure the burn by defining its
+    coordinate system and vector component values. For
+    <span class="guilabel">Loca</span><span class="guilabel">l</span> coordinate systems, the
+    user can choose the <span class="guilabel">Origin</span> and type of
+    <span class="guilabel">Axes</span>. Depending on the mission, it may be simpler to
+    use one coordinate system over another.</p><p>See Also <a class="xref" href="Maneuver.html" title="Maneuver"><span class="refentrytitle">Maneuver</span></a>,<a class="xref" href="FuelTank.html" title="ChemicalTank"><span class="refentrytitle">ChemicalTank</span></a>,<a class="xref" href="BeginFiniteBurn.html" title="BeginFiniteBurn"><span class="refentrytitle">BeginFiniteBurn</span></a></p></div><div class="refsection"><a name="N1A34A"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Axes </span></td><td><p>Allows you to define a spacecraft centered set of
+            axes for the impulsive burn. This field cannot be modified in the
+            Mission Sequence. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">VNB</span>, <span class="guilabel">LVLH</span>,
+                    <span class="guilabel">MJ2000Eq</span>,
+                    <span class="guilabel">SpacecraftBody</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">VNB</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">B</span></td><td><p> Deprecated. Z-component of the applied impulsive
+            burn (Delta-V) </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km/s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">CoordinateSystem</span></td><td><p>Determines what coordinate system the orientation
+            parameters, <span class="guilabel">Element1</span>,
+            <span class="guilabel">Element2</span>, and <span class="guilabel">Element3</span>
+            refer to. This field cannot be modified in the Mission Sequence.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Local</span>,<span class="guilabel">
+                    EarthMJ2000Eq</span>,
+                    <span class="guilabel">EarthMJ2000Ec</span>,
+                    <span class="guilabel">EarthFixed</span>, or any user defined
+                    system</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Local</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DecrementMass </span></td><td><p>Flag which determines if the
+            <span class="guilabel">FuelMass</span> is to be decremented as it used.
+            This field cannot be modified in the Mission Sequence. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true, false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">false</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Element1</span></td><td><p> X-component of the applied impulsive burn (Delta-V)
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km/s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Element2</span></td><td><p> Y-component of the applied impulsive burn (Delta-V)
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km/s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Element3 </span></td><td><p> Z-component of the applied impulsive burn (Delta-V)
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km/s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">GravitationalAccel</span></td><td><p>Value of the gravitational acceleration used to
+            calculate fuel depletion.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; <code class="literal">0</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>9.81</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>m/s^2</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Isp </span></td><td><p>Value of the specific impulse of the fuel </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>300</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">N</span></td><td><p> Deprecated. Y-component of the applied impulsive
+            burn (Delta-V) </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km/s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Origin </span></td><td><p>The <span class="guilabel">Origin</span> field, used in
+            conjunction with the <span class="guilabel">Axes</span> field,&nbsp;allows the
+            user to define a spacecraft centered set of axes for the impulsive
+            burn. This field cannot be modified in the Mission Sequence.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Sun</span>,
+                    <span class="guilabel">Mercury</span>, <span class="guilabel">Venus</span>,
+                    <span class="guilabel">Earth</span>, <span class="guilabel">Luna</span>,
+                    <span class="guilabel">Mars</span>,<span class="guilabel">Jupiter</span>,
+                    <span class="guilabel">Saturn</span>, <span class="guilabel">Uranus</span>,
+                    <span class="guilabel">Neptune</span>,
+                    <span class="guilabel">Pluto</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Earth</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Tank</span></td><td><p><span class="guilabel">ChemicalTank</span> from which the
+            <span class="guilabel">ChemicalThruster</span> draws propellant from. This field
+            cannot be modified in the Mission Sequence. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>User defined list of
+                    <span class="guilabel">ChemicalTanks</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">V</span></td><td><p>Deprecated. X-component of the applied impulsive burn
+            (Delta-V) </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km/s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">VectorFormat</span></td><td><p>Deprecated. Allows you to define the format of the
+            <span class="guilabel">ImpulsiveBurn Delta-V Vector</span>. This field has
+            no affect. The <span class="guilabel">ImpulsiveBurn Delta-V Vector</span>
+            is always given in <code class="literal">Cartesian</code> format. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">Cartesian</code>,
+                    <code class="literal">Spherical</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">Cartesian</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1A640"></a><h2>GUI</h2><p>The <span class="guilabel">ImpulsiveBurn</span> dialog box allows you to
+    specify properties of an <span class="guilabel">ImpulsiveBurn</span> including
+    Delta-V component values and choice of <span class="guimenu">Coordinate
+    System</span>. If you choose to model fuel loss associated with an
+    impulsive burn, you must specify choice of fuel tank as well as ISP value
+    and gravitational acceleration used to calculate fuel use. The layout of
+    the<span class="guilabel"> ImpulsiveBurn</span> dialog box is shown below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ImpulsiveBurn_GUI.png" align="middle" height="432"></td></tr></table></div></div><p>The <span class="guimenu">Origin</span> and <span class="guimenu">Axes</span> fields are
+    only relevant if <span class="guimenu">Coordinate System</span> is set to Local. See
+    the Remarks for more detail on local coordinate systems.</p><p>If <span class="guimenu">Decrement Mass</span> is checked, then you can select
+    the desired <span class="guilabel">ChemicalTank</span> used as the fuel supply for mass
+    depletion.</p></div><div class="refsection"><a name="N1A66D"></a><h2>Remarks</h2><div class="refsection"><a name="N1A670"></a><h3>Local Coordinate Systems</h3><p>Here, a Local <span class="guilabel">Coordinate System</span> is defined as
+      one that we configure "locally" using the
+      <span class="guilabel">ImpulsiveBurn</span> resource interface as opposed to
+      defining a coordinate system using the <span class="guilabel">Coordinate
+      Systems</span> folder in the <span class="guilabel">Resources</span>
+      Tree.</p><p>To configure a Local <span class="guilabel">Coordinate System</span>, you
+      must specify the coordinate system of the input Delta-V
+      vector,<span class="guilabel"> Element1-3</span>. If you choose a local
+      <span class="guilabel">Coordinate System</span>, the four choices available, as
+      given by the <span class="guilabel">Axes</span> sub-field, are
+      <span class="guilabel">VNB</span>, <span class="guilabel">LVLH</span>,
+      <span class="guilabel">MJ2000Eq</span>, and <span class="guilabel">SpacecraftBody</span>.
+      <span class="guilabel">VNB</span> or Velocity-Normal-Binormal is a non-inertial
+      coordinate system based upon the motion of the spacecraft with respect
+      to the <span class="guilabel">Origin</span> sub-field. For example, if the
+      <span class="guilabel">Origin</span> is chosen as Earth, then the X-axis of this
+      coordinate system is the along the velocity of the spacecraft with
+      respect to the Earth, the Y-axis is along the instantaneous orbit normal
+      (with respect to the Earth) of the spacecraft, and the Z-axis points
+      away from the Earth as much as possible while remaining orthogonal to
+      the other two axes, completing the right-handed set.</p><p>Similarly, Local Vertical Local Horizontal or
+      <span class="guilabel">LVLH</span> is a non-inertial coordinate system based upon
+      the motion of the spacecraft with respect to the body specified in the
+      Origin sub-field. If you choose Earth as the origin, then the X-axis of
+      this coordinate system points from the center of the Earth to the
+      spacecraft, the Z-axis is along the instantaneous orbit normal (with
+      respect to the Earth) of the spacecraft, and the Y-axis completes the
+      right-handed set. For typical bound orbits, the Y-axis is approximately
+      aligned with the velocity vector. In the event of a perfectly circular
+      orbit, the Y axis is exactly along the velocity vector.</p><p><span class="guilabel">MJ2000Eq</span> is the J2000-based Earth-centered
+      Earth mean equator inertial <span class="guilabel">Coordinate System</span>. Note
+      that the <span class="guilabel">Origin</span> sub-field is not needed to define
+      this coordinate system.</p><p><span class="guilabel">SpacecraftBody</span> is the coordinate system used
+      by the spacecraft. Since the thrust is applied in this system, GMAT uses
+      the attitude of the spacecraft, a spacecraft attribute, to determine the
+      inertial thrust direction. Note that the <span class="guilabel">Origin</span>
+      sub-field is not needed to define this coordinate system.</p></div><div class="refsection"><a name="N1A6BA"></a><h3>Deprecated Field Names for an ImpulsiveBurn</h3><p>Note that the standard method, as shown below, for specifying the
+      components of an ImpulsiveBurn is to use the
+      <span class="guilabel">Element1</span>, <span class="guilabel">Element2</span>, and
+      <span class="guilabel">Element3</span> field names.</p><pre class="programlisting"><code class="code">Create ImpulsiveBurn DefaultIB
+DefaultIB.Element1 = -3
+DefaultIB.Element2 = 7
+DefaultIB.Element3 = -2</code>    </pre><p>For this current version of GMAT, you may also use the field names
+      <span class="guilabel">V</span>, <span class="guilabel">N</span>, and
+      <span class="guilabel">B</span> in place of <span class="guilabel">Element1</span>,
+      <span class="guilabel">Element2</span>, and <span class="guilabel">Element3</span>,
+      respectively. The commands below are equivalent to the commands
+      above.</p><pre class="programlisting"><code class="code">Create ImpulsiveBurn DefaultIB
+DefaultIB.V = -3
+DefaultIB.N = 7
+DefaultIB.B = -2</code></pre><p>It is important to note that the <span class="guilabel">V</span>,
+      <span class="guilabel">N</span>, <span class="guilabel">B</span> field names do not
+      necessarily correspond to some Velocity, Normal, Binormal coordinate
+      system. The coordinate system of any <span class="guilabel">ImpulsiveBurn</span>
+      is always specified by the <span class="guilabel">CoordinateSystem</span>,
+      <span class="guilabel">Origin</span>, and <span class="guilabel">Axes</span> fields.
+      Because of the confusion that the <span class="guilabel">V</span>,
+      <span class="guilabel">N</span>, <span class="guilabel">B</span> field names can cause,
+      their use will not be allowed in future versions of GMAT. If you use the
+      <span class="guilabel">V</span>, <span class="guilabel">N</span>, <span class="guilabel">B</span>
+      field names in this version of GMAT, you will receive a warning to this
+      affect.</p></div><div class="refsection"><a name="N1A70C"></a><h3>Backwards-propagated Impulsive maneuvers defined using the
+      spacecraft velocity</h3><p>Examples of axes defined using the spacecraft velocity are the
+      <span class="guilabel">VNB</span> and <span class="guilabel">LVLH</span> axes discussed
+      above as well as some user-defined axes. The behavior when applying an
+      impulsive maneuver using these types of axes during a
+      backwards-propagation is subtle and requires some explanation. In the
+      examples that follow, we will focus our discussion on a
+      <span class="guilabel">VNB</span> maneuver.</p><p>As will be shown in the script samples below, an impulsive
+      maneuver is applied during a backwards propagation using the &lsquo;BackProp&rsquo;
+      keyword. The maneuver components that you specify for a backwards
+      propagation are used to calculate the components of the maneuver
+      actually applied. Refer to the script sample below where a
+      backwards-propagated impulsive maneuver is followed by the same maneuver
+      using a normal formal propagation. The impulsive maneuver is defined so
+      that the velocity of the spacecraft is unchanged after the script is
+      run.</p><pre class="programlisting">Create Spacecraft Sat;
+Create ImpulsiveBurn myImpulsiveBurn;
+GMAT myImpulsiveBurn.CoordinateSystem = Local;
+GMAT myImpulsiveBurn.Origin = Earth;
+GMAT myImpulsiveBurn.Axes = VNB;
+myImpulsiveBurn.Element1 = 3.1
+myImpulsiveBurn.Element2 = -0.1
+myImpulsiveBurn.Element3 = 0.2
+
+BeginMissionSequence
+Maneuver BackProp myImpulsiveBurn(Sat);
+Maneuver myImpulsiveBurn(Sat);</pre><p>To calculate the actual maneuver components applied, GMAT,
+      internally, uses an iterative calculation method. This iteration method
+      works best for maneuver magnitudes that are not an appreciable fraction
+      of the overall spacecraft velocity. In addition, for
+      <span class="guilabel">VNB</span> maneuvers, the iteration method works best for
+      maneuvers where the &lsquo;<span class="guilabel">N</span>&rsquo; and
+      &lsquo;<span class="guilabel">B</span>&rsquo; component magnitudes are relatively small as
+      compared to the '<span class="guilabel">V</span>' component magnitude. If the
+      GMAT internal iterative method fails to converge, a warning message will
+      be generated. Currently, there is not an easy way for the user to report
+      out the actual applied back-propagated maneuver components. (The
+      maneuver report outputs the user supplied <span class="guilabel">VNB</span>
+      coordinates). After the back-propagated maneuver has been applied,
+      however, we do know what the components of the maneuver are. If the
+      <span class="guilabel">VNB</span> maneuver has user-supplied components, (Vx, Vy,
+      Vz), then after the back-propagated maneuver has been applied, the
+      <span class="guilabel">VNB</span> components of the maneuver are (-Vx, -Vy,
+      -Vz).</p><p>Consider the script sample below where the
+      &lsquo;<span class="guilabel">N</span>&rsquo; and &lsquo;<span class="guilabel">B</span>&rsquo; components of the
+      maneuver are zero and the &lsquo;<span class="guilabel">V</span>&rsquo; component is +5 km/s.
+      If the spacecraft velocity is (7,0,0) km/s in J2000 inertial
+      coordinates, then after the backwards-propagated impulsive maneuver, the
+      velocity of the spacecraft will be (2,0,0) km/s.</p><pre class="programlisting"><code class="code">Create Spacecraft Sat;
+Create ImpulsiveBurn myImpulsiveBurn;
+GMAT myImpulsiveBurn.CoordinateSystem = Local;
+GMAT myImpulsiveBurn.Origin = Earth;
+GMAT myImpulsiveBurn.Axes = VNB;
+
+myImpulsiveBurn.Element1 = 5
+myImpulsiveBurn.Element2 = 0.0
+myImpulsiveBurn.Element3 = 0.0
+
+BeginMissionSequence
+Maneuver BackProp myImpulsiveBurn(Sat);</code></pre><p>Finally, we note that when mass change is modeled for a
+      backwards-propagated impulsive maneuver, mass is added to the tank. This
+      is done so there is no change in mass when a backwards-propagated
+      impulsive maneuver is followed by the same maneuver using a normal
+      forward propagation.</p></div><div class="refsection"><a name="N1A745"></a><h3>Interactions</h3><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Resource</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Spacecraft resource</span></td><td><p> Must be created in order to apply any
+              <span class="guilabel">ImpulsiveBurn</span></p></td></tr><tr><td><span class="guilabel">ChemicalTank resource</span></td><td><p> If you want to model mass depletion for an
+              <span class="guilabel">ImpulsiveBurn</span>, attach a
+              <span class="guilabel">ChemicalTank</span> to the maneuvered
+              <span class="guilabel">Spacecraft</span> as a source of fuel mass.
+              </p></td></tr><tr><td><span class="guilabel">Maneuver command</span></td><td><p> Must use the <span class="guilabel">Maneuver</span> command
+              to apply an <span class="guilabel">ImpulsiveBurn</span> to a
+              <span class="guilabel">Spacecraft</span>. </p></td></tr><tr><td><span class="guilabel">Vary command</span></td><td><p> If you want to allow the<span class="guilabel">
+              ImpulsiveBurn</span> components to vary in order to achieve
+              some goal, then the <span class="guilabel">Vary</span> command, as part
+              of a <span class="guilabel">Targe</span>t or
+              <span class="guilabel">Optimize</span> command sequence, must be used.
+              </p></td></tr></tbody></table></div></div></div><div class="refsection"><a name="N1A796"></a><h2>Examples</h2><div class="informalexample"><p>Create a default <span class="guilabel">ChemicalTank</span> and an
+      <span class="guilabel">ImpulsiveBurn</span> that allows for fuel depletion,
+      assign the <span class="guilabel">ImpulsiveBurn</span> the default
+      <span class="guilabel">ChemicalTank</span>, attach the <span class="guilabel">ChemicalTank</span>
+      to a <span class="guilabel">Spacecraft</span>, and apply the
+      <span class="guilabel">ImpulsiveBurn</span> to the
+      <span class="guilabel">Spacecraft</span>.</p><pre class="programlisting">%  Create the ChemicalTank Resource
+Create ChemicalTank FuelTank1
+FuelTank1.AllowNegativeFuelMass = false
+FuelTank1.FuelMass = 756
+FuelTank1.Pressure = 1500
+FuelTank1.Temperature = 20
+FuelTank1.RefTemperature = 20
+FuelTank1.Volume = 0.75
+FuelTank1.FuelDensity = 1260
+FuelTank1.PressureModel = PressureRegulated
+
+Create ImpulsiveBurn DefaultIB
+DefaultIB.CoordinateSystem = Local
+DefaultIB.Origin = Earth
+DefaultIB.Axes = VNB
+DefaultIB.Element1 = 0.001
+DefaultIB.Element2 = 0
+DefaultIB.Element3 = 0
+DefaultIB.DecrementMass = true
+DefaultIB.Tank = {FuelTank1}
+DefaultIB.Isp = 300
+DefaultIB.GravitationalAccel = 9.810000000000001
+
+%  Add the the ChemicalTank to a Spacecraft
+Create Spacecraft DefaultSC
+DefaultSC.Tanks = {FuelTank1}
+
+BeginMissionSequence
+Maneuver DefaultIB(DefaultSC) </pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="GroundTrackPlot.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="LibrationPoint.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">GroundTrackPlot&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;LibrationPoint</td></tr></table></div></body></html>

@@ -1,24 +1,52 @@
 Welcome to the wonderful world of GMAT!
 
-GMAT is a space trajectory optimization and mission analysis system
-developed by NASA and private industry in the spirit of the NASA
-Vision. It is a collaboratively developed, open-source tool written to
-enable the development of new mission concepts and to improve current
-missions.
-
-This release of GMAT introduces production quality orbit determination
-functionality along with other important improvements and bug fixes. 
+GMAT is a space trajectory optimization, navigation, and mission 
+analysis system developed by NASA and private industry in the spirit 
+of the NASA Vision. It is a collaboratively developed, open-source 
+tool written to enable the development of new mission concepts and
+to improve current missions.
 
 -----------------------------------------------------------------------
                           License and Copyright
 -----------------------------------------------------------------------
 
-Copyright (c) 2002 - 2016 United States Government as represented by
+Copyright (c) 2002 - 2017 United States Government as represented by
 the Administrator of the National Aeronautics and Space Administration.
 All Other Rights Reserved.
 
 GMAT is licensed under the Apache License, Version 2.0 found
 in the License.txt file contained in this distribution.
+
+-----------------------------------------------------------------------
+                           Contact Information
+-----------------------------------------------------------------------
+
+For general project info see: http://gmatcentral.org
+
+For source code and application distributions see:
+http://sourceforge.net/projects/gmat/
+
+For other comments and questions, email: gmat@gsfc.nasa.gov
+
+-----------------------------------------------------------------------
+                      Credits and Acknowledgments
+-----------------------------------------------------------------------
+GMAT uses:
+- wxWidgets 3.0.2 (http://www.wxwidgets.org/) 
+- TSPlot (http://sourceforge.net/projects/tsplot/)
+- SPICE (http://naif.jpl.nasa.gov/naif/toolkit.html)
+- SOFA (http://www.iausofa.org/)
+- Apache Xerces (http://xerces.apache.org)
+- JPL SPICE (https://naif.jpl.nasa.gov/naif/)
+- Boost (http://www.boost.org/)
+
+Planetary images are courtesy of: 
+- JPL/Caltech/USGS (http://maps.jpl.nasa.gov/)
+- Celestia Motherlode (http://www.celestiamotherlode.net/)
+- Bjorn Jonsson (http://www.mmedia.is/~bjj/)
+- NASA World Wind (http://worldwind.arc.nasa.gov/)
+
+Some icons are courtesy of Mark James ( http://www.famfamfam.com/ )
 
 -----------------------------------------------------------------------
                       Installation and Configuration
@@ -32,31 +60,46 @@ does not require administrative privileges, and will install by
 default to your personal %LOCALAPPDATA% folder. This can be customized
 during installation.
 
-
 LINUX
 
 There are two precompiled Linux distributions of GMAT, packaged as 
 compressed TAR files, ready for expansion and use.  The precompiled 
-releases were built and tested on Ubuntu 14.04 LTS and on Red Hat 
-Enterprise Linux 5.  Linux users on those platforms can download the 
+releases were built and tested on Ubuntu 16.04 LTS and on Red Hat 
+Enterprise Linux 7.2.  Linux users on those platforms can download the 
 tarball file and uncompress it into place using the command
 
     tar -zxf <TarballPackageName>
 
-where <TarballPackageName> is either gmat-ubuntu-x64-R2016a.tar.gz
-or gmat-rhel5-x64-R2016a.tar.gz.  
+where <TarballPackageName> is either gmat-ubuntu-x64-R2017a.tar.gz
+or gmat-rhel7-x64-R2017a.tar.gz.  
 
 MAC
 
-The Mac distribution is packaged as a compressed TAR file, ready for 
+The Mac distribution is packaged as a ZIP file, ready for
 expansion and use.  This prebuilt release was built and tested on 
 Mac OS X 10.11.  
 
-Mac users can download the tarball file and uncompress it into place 
-using the Finder or by opening a Terminal window and typing the 
-command
+Mac users can download the zip archive and uncompress it into place
+by double-clicking it in the Finder or by opening a Terminal window
+and typing the command
 
-    tar -zxf gmat-macosx-x64-R2016a.tar.gz
+    unzip gmat-macosx-x64-R2017a.zip
+
+NOTE that there is a Gatekeeper/translocation issue with OS X Sierra.
+Since the GMAT application is currently unsigned, the Gatekeeper will not
+allow it to run in the bin folder and will make a copy of it in a 
+temporary location.  This can be fixed manually by doing the following:
+
+1. Open the Finder
+2. Browse to the location of the GMAT application (in the bin folder)
+3. Using the Finder, drag the application only (not the entire bin 
+folder!) to a different location (e.g. the Desktop)
+4. Drag and drop the GMAT application back into the bin folder
+
+This will clear the ‘UseAppTranslocation’ flag in Sierra and will allow
+GMAT to be run from the bin folder.
+
+A future release of GMAT will address the signing issue further.
 
 BUILDING FROM SOURCE
 
@@ -71,29 +114,30 @@ http://gmatcentral.org/display/GW/GMAT+CMake+Build+System.
 WINDOWS
 
 On Windows, click Start, and then point to All Programs. Point to GMAT,
-GMAT R2016a, and then click GMAT R2016a. If you are using the zip-file bundle,
-double-click the bin\GMAT.exe application.
+GMAT R2017a, and then click GMAT R2017a. If you are using the zip-file
+bundle, double-click the bin\GMAT.exe application.
 
 LINUX
 
 On Linux, open a terminal window and change directories to the GMAT bin 
-folder.  The GMAT command line program is executed by running the GmatConsole 
-application in that folder:
+folder.  The GMAT command line program is executed by running the 
+GmatConsole application in that folder:
 
    ./GmatConsole
 
-The Beta GUI can be run using the same terminal window by running Gmat_Beta:
+The Beta GUI can be run using the same terminal window by running 
+Gmat_Beta:
 
-   ./Gmat_Beta
+   ./GMAT_Beta
 
-Linux users can create a launcher for either the command line application or 
-the GUI application by following the instructions for that process for their
-Linux distribution.
+Linux users can create a launcher for either the command line 
+application or the GUI application by following the instructions for 
+that process for their Linux distribution.
 
 MATLAB interface note for Linux users:
 
 If the Matlab interface does not work with the GmatConsole command line 
-application (or the Gmat_Beta GUI), you may need to set the library load 
+application (or the GMAT_Beta GUI), you may need to set the library load 
 path to include the path to your installed Matlab libraries.  For example, 
 if MATLAB is installed in the /usr/local/MATLAB/R2016b folder and the GMAT 
 console application is not loading the MATLAB plugin, you may need to 
@@ -102,6 +146,9 @@ update the library path before starting the application, like this:
 export LD_LIBRARY_PATH=/usr/local/MATLAB/R2016b/bin/glnxa64:./libwx:$LD_LIBRARY_PATH 
 ./GmatConsole
 
+Finally, the MATLAB engine used in the Linux release runs under the C shell, 
+csh.  If you plan to use the MATLAB interface, make sure that you have csh
+installed on your Linux machine.
 
 MAC
 
@@ -114,24 +161,28 @@ application in that folder:
 The Beta GUI application can be run using the ‘open’ Terminal command, 
 executed in the bin folder:
 
-   open GMAT_Beta.app
+   open GMAT-R2017a_Beta.app
 
-or by double-clicking the GMAT_Beta.app in the Finder.
+or by double-clicking the GMAT-R2017a_Beta.app in the Finder.  If running
+GMAT fails and you see an error message about GMAT not being able to 
+read the startup file in a temporary location that includes 
+“AppTranslocation” in the path, see the note above about OS X Sierra and 
+the Gatekeeper.
 
 Python Interface note for Mac users:
 
 Currently, GMAT will only be able to interface with Python if your Python 
 is installed into a specific directory: 
-/Library/Frameworks/Python.framework/Versions/3.4
+/Library/Frameworks/Python.framework/Versions/3.6 
 
 GMAT will be updated for a future release to allow use of a 
 Python installation elsewhere.
 
 MATLAB interface note for Mac users:
 
-To use the Matlab interface with the Mac GMAT_Beta.app application, 
-you must open the gmat_startup_file.txt and edit the MATLAB_APP_PATH field 
-to point to the location of your MATLAB installation. 
+To use the Matlab interface with the Mac GMAT-R2017a_Beta.app application, 
+you must open the MATLABConfigure.txt in the bin directory and edit the 
+MATLAB_APP_PATH field to point to the location of your MATLAB installation. 
 
 If the Matlab interface does not work with the GmatConsole command line 
 application, you may need to set up your Terminal so that the system can
@@ -142,134 +193,39 @@ export MATLAB = <your MATLAB app location here>
 export DYLD_LIBRARY_PATH=$MATLAB/bin/maci64:$DYLD_LIBRARY_PATH
 export PATH=$PATH:$MATLAB/bin
 
-
 -----------------------------------------------------------------------
-                           Documentation
------------------------------------------------------------------------
-GMAT is extensively documented in the docs folder of this distribution.
-End-user documentation can be found in the docs\help folder (for offline
-use) or online at http://gmat.sf.net/docs.
-
------------------------------------------------------------------------
-            HOW TO RUN THE DEMOS INCLUDED IN THIS DISTRIBUTION
+                           User Information
 -----------------------------------------------------------------------
 
-We've included over 70 sample missions in the distribution.
-The sample missions show how to apply GMAT to problems ranging from
-the Hohmann transfer to Libration point stationkeeping to trajectory
-optimization to orbit determination.
+User docs are available in pdf and html format.  The pdf documentation
+is distributed in letter and A4 size in this package.  The files are
+located here: /doc/help/help-letter.pdf and /doc/help/ help-a4.pdf
+Online documentation is available here: http://gmat.sf.net/docs.
 
-Here are instructions for running the sample missions:
+For new users, see the Getting Started and Tour of GMAT sections first,
+then take the tutorials.  The tutorials are included in print versions
+in the help documents, and are available in video form here:
+https://www.youtube.com/channel/UCt-REODJNr2mB3t-xH6kbjg
 
-  - Download and install the GMAT application.
-  - Start GMAT and choose File > Open from the menu.
-  - Navigate to the samples folder which is
-    located in the GMAT root directory.
-  - Choose the script file of your choice.
-  - Click the blue "Run" button on the toolbar
-    and watch the mission evolve.
-
-NOTE: There are several samples that require enabling optional plugins.
-For those samples in the NeedMatlab folder, you must enable the
-libMatlabInterface plugin in the gmat_startup_file.txt (located in the bin
-folder). External configuration is necessary to successfully connect
-to Matlab. See the documentation for instructions. The NeedVF13ad folder
-contains samples that require libVf13adOptimizer, which is not shipped
-with this distribution. It is available for internal NASA users. 
+For a list of new functionality, compatibility changes, and known issues,
+see the Release Notes section in the user guide.  
 
 -----------------------------------------------------------------------
-                      Credits and Acknowledgments
------------------------------------------------------------------------
-GMAT uses:
-- wxWidgets 3.0.2 (http://www.wxwidgets.org/) 
-- TSPlot (http://sourceforge.net/projects/tsplot/)
-- SPICE (http://naif.jpl.nasa.gov/naif/toolkit.html)
-- SOFA (http://www.iausofa.org/)
-- Apache Xerces (http://xerces.apache.org)
+                         Developer Information
+----------------------------------------------------------------------
 
-Planetary images are courtesy of: 
-JPL/Caltech/USGS (http://maps.jpl.nasa.gov/)
-Celestia Motherlode (http://www.celestiamotherlode.net/)
-Bjorn Jonsson (http://www.mmedia.is/~bjj/)
-NASA World Wind (http://worldwind.arc.nasa.gov/)
+For a complete list of changes made in this version see the Release 
+Notes section of the user guide.
 
-Some icons are courtesy of Mark James ( http://www.famfamfam.com/ )
+Source code is available here:
+https://sourceforge.net/p/gmat/git/ci/GMAT-R2016a/tree/
 
------------------------------------------------------------------------
-                           Contact Information
------------------------------------------------------------------------
+Compilation instructions are available here: 
+http://gmatcentral.org/display/GW/GMAT+CMake+Build+System
 
-For general project info see: http://gmatcentral.org
+Design Documentation is available at the links below:
+http://gmatcentral.org/display/GW/Design+Documents
+http://gmatcentral.org/display/GW/How+To+Write+New+Components
 
-For source code and application distributions see:
-http://sourceforge.net/projects/gmat/
-
-For other comments and questions, email: gmat@gsfc.nasa.gov
-
------------------------------------------------------------------------
-                         Known Issues and Status
------------------------------------------------------------------------
-
-NOTES ON THE LINUX AND MAC RELEASES
-
-GMAT R2016a is the first non-beta release of GMAT on Mac and Linux 
-workstations.  The release on those platforms is production quality for 
-the command line application, GmatConsole, and beta quality for the GMAT
-graphical user interface, GMAT, which has been renamed Gmat_Beta.
-
-The following plugin modules do not run under this release of GMAT on
-Mac and Linux platforms:
-
-  libFminconOptimizer
-  libMarsGRAM
-
-In addition, the RHEL5 build of GMAT does not run the following plugin
-modules:
-
-  libMatlabInterface
-  libPythonInterface
-
-and the Mac release does not support the following plugin:
- 
-  libMsise86
-
-The GMAT console application provides the interface into the validated 
-GMAT numerical engine.  There are two options for the console application 
-that are not recommended for use in this release: the --save option and
-the --verbose option.
-
-NOTES ON THE Windows RELEASE 
-
-Please see the release notes, located online at http://gmat.sf.net/docs.
-and in the user guide for a list of new features and known issues.
-
-The following plugins are included and have the listed status:
-
-Official plugins:
-  libDataInterface
-  libEphemPropagator
-  libEventLocator
-  libFormation
-  libGmatFunction
-  libNewParameters
-  libPythonInterface
-  libStation
-  libMatlabInterface
-  libFminconOptimizer
-  libProductionPropagators
-  libGmatEstimation
-
-Alpha plugins (disabled by default):
-  libCInterface
-  libGeometricMeasurements
-  libExtraPropagators
-  libPolyhedronGravity
-  libSaveCommand
-  libThrustFile
-
-Internal-only plugins (disabled for public releases):
-  proprietary/libMarsGRAM
-  proprietary/libMsise86
-  proprietary/libNRLMsise00
-  proprietary/libSNOptimizer
-  proprietary/libVF13Optimizer
+You can sign up for mailing lists here:
+https://sourceforge.net/p/gmat/mailman/

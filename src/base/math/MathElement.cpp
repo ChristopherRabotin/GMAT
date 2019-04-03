@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -713,7 +713,7 @@ const StringArray& MathElement::GetRefObjectNameArray(const Gmat::ObjectType typ
       MessageInterface::ShowMessage("   [%d] %s\n", i, wrapperObjectNames[i].c_str());
    #endif
    
-   if (type == Gmat::PARAMETER || Gmat::UNKNOWN_OBJECT)
+   if ((type == Gmat::PARAMETER) || (type == Gmat::UNKNOWN_OBJECT))
    {      
       #ifdef DEBUG_WRAPPERS
       MessageInterface::ShowMessage

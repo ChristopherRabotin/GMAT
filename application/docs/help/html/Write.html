@@ -1,0 +1,69 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Write</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="While.html" title="While"><link rel="next" href="System.html" title="System"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Write</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="While.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="System.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Write"></a><div class="titlepage"></div><a name="N25D89" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Write</span></h2><p>Write &mdash; Writes data to one or more of the following three
+    destinations: the message window, the log file, or a
+    <span class="guilabel">ReportFile</span> resource.</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis">Write ResourceList [{ MessageWindow = true, LogFile = false,  
+                    Style = Concise, ReportFile = myReport }]</pre></div><div class="refsection"><a name="N25DA2"></a><h2>Description</h2><p>The <span class="guilabel">Write</span> command allows you to selectively
+    write information to GMAT output destinations during execution. The
+    <span class="guilabel">Write</span> command can aid in automated QA by writing data
+    to the GMAT log file or <span class="guilabel">ReportFile</span> resource for an
+    independent QA systems to process, or to write data to the message window
+    to aid in troubleshooting and debugging script configurations.</p></div><div class="refsection"><a name="N25DB0"></a><h2>Options</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">LogFile</span></td><td><p>Flag to specify if output should be written to the
+            log file </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>{True, False}</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>False</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MessageWindow</span></td><td><p>Flag to specify if output should be displayed in the
+            Message Window</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>{True, False}</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>True</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ReportFile</span></td><td><p>Name of <span class="guilabel">ReportFile</span> resource
+            where output data will be written to. If this field is not set, no
+            <span class="guilabel">ReportFile</span> resource will be written to. The
+            user can set formatting options on a
+            <span class="guilabel">ReportFile</span> like
+            <span class="guilabel">Precision</span> and
+            <span class="guilabel">ColumnWidth</span>. When writing data using the
+            <span class="guilabel">Write</span> command, those settings are not used.
+            </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p><span class="guilabel">ReportFile</span> resource</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any user-defined <span class="guilabel">ReportFile</span>
+                    resource</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">None</span></p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ResourceList</span></td><td><p>A list of one or more GMAT resources and/or resource
+            fields whose values we wish to output</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>
+                      <span class="guilabel">List of GMAT resources and/or resource
+                      fields</span>
+                    </p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any GMAT resource name or resource.field name</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">None</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Style</span></td><td><p>Parameter to specify format of output. Concise means
+            that, where appropriate, output will be values only and will not
+            contain the object name. The exception to this is when you output
+            an object with fields such as a <span class="guilabel">Spacecraft</span>.
+            In this case, the object and field will be output. Verbose means
+            that object names and fields will always be output. Script means
+            that script-parseable (i.e., the output, when pasted into an
+            existing GMAT script, will syntax check) output will be
+            generated</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>{Concise, Verbose, Script}</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Concise</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N25EA8"></a><h2>GUI</h2><p>In the example below, the value of <span class="guilabel">myVar</span> would
+    be written to the message window only.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Write_GUI.png" align="middle" height="147"></td></tr></table></div></div></div><div class="refsection"><a name="N25EB9"></a><h2>Examples</h2><div class="informalexample"><p>Below are some sample scripts using the <span class="guilabel">Write</span>
+      command with the output shown in bold font.</p><pre class="programlisting"><code class="code">Create ChemicalTank ChemicalTank1
+Create Spacecraft Sat
+Create String myString1 myString2
+Create Variable myVar
+Create Array myArray[2,2]
+
+myVar        = 3.1415
+myString1    = 'This is my string'
+myArray(1,1) = 1
+myArray(2,2) = 1
+
+BeginMissionSequence
+
+Write ChemicalTank1 {Style =  Script}</code></pre><p><span class="bold"><strong>Create ChemicalTank ChemicalTank1;
+      </strong></span></p><p><span class="bold"><strong>GMAT ChemicalTank1.AllowNegativeFuelMass =
+      false; </strong></span></p><p><span class="bold"><strong>GMAT ChemicalTank1.FuelMass = 756;
+      </strong></span></p><p><span class="bold"><strong>GMAT ChemicalTank1.Pressure = 1500;
+      </strong></span></p><p><span class="bold"><strong>GMAT ChemicalTank1.Temperature = 20;
+      </strong></span></p><p><span class="bold"><strong>GMAT ChemicalTank1.RefTemperature =
+      20;</strong></span></p><p><span class="bold"><strong>GMAT ChemicalTank1.Volume = 0.75;
+      </strong></span></p><p><span class="bold"><strong>GMAT ChemicalTank1.FuelDensity =
+      1260;</strong></span></p><p><span class="bold"><strong>GMAT ChemicalTank1.PressureModel =
+      PressureRegulated;</strong></span></p><pre class="programlisting"><code class="code">Write Sat.X Sat.VZ</code></pre><p><span class="bold"><strong>7100</strong></span></p><p><span class="bold"><strong>1</strong></span></p><pre class="programlisting"><code class="code">Write myVar myString1</code></pre><p><span class="bold"><strong>3.1415 </strong></span></p><p><span class="bold"><strong>'This is my string'</strong></span></p><pre class="programlisting"><code class="code">Write myArray</code></pre><p><span class="bold"><strong>1 0 </strong></span></p><p><span class="bold"><strong>0 1</strong></span></p><pre class="programlisting"><code class="code">Write myArray(2,2)</code></pre><p><span class="bold"><strong>1</strong></span></p><pre class="programlisting"><code class="code">myString2 = sprintf('%10.7f',Sat.X)  
+Write myString2 {Style = Script}</code></pre><p><span class="bold"><strong>Create String myString2;</strong></span></p><p><span class="bold"><strong>myString2 =
+      '7100.0000000';</strong></span></p><pre class="programlisting"><code class="code">Write myString2</code></pre><p><span class="bold"><strong>'7100.0000000'</strong></span></p></div><div class="informalexample"><p>The example below writes out a report that can be read into a GMAT
+      script using the <span class="guilabel">#Include</span> capability.</p><pre class="programlisting"><code class="code">Create Spacecraft Sat;
+Create ReportFile rf;
+rf.Filename = 'GMAT.script';
+Create Variable myVar;
+GMAT myVar = 11;
+
+BeginMissionSequence;
+
+Write Sat {Style = Script, MessageWindow = false, ReportFile = rf}</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="While.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="System.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">While&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;System</td></tr></table></div></body></html>

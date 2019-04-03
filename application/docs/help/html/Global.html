@@ -1,0 +1,172 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Global</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="GetEphemStates_Function.html" title="GetEphemStates()"><link rel="next" href="If.html" title="If"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Global</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="GetEphemStates_Function.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="If.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Global"></a><div class="titlepage"></div><a name="N238D2" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Global</span></h2><p>Global &mdash; Declare Objects as global</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><code class="literal">Global</code> <em class="replaceable"><code>ObjectList</code></em>
+
+<em class="replaceable"><code>ObjectList</code></em>
+  <em class="replaceable"><code>ObjectList</code></em> List all GMAT objects that you want to declare as global.</pre></div><div class="refsection"><a name="N238F3"></a><h2>Description</h2><p>In GMAT you can use a special command that allows you to declare
+    GMAT objects as global. By using the <span class="guilabel">Global</span> command,
+    you can declare GMAT's objects as global either through the GUI or the
+    script mode.</p><p>The syntax for declaring objects as global is very simple. After
+    using the <span class="guilabel">Global</span> command, simply list the name of the
+    objects that needs global declaration. Once the
+    <span class="guilabel">GmatFunction</span> resource has been declared during
+    initialization, arguments can be passed to and from the function as
+    input/output by using GMAT's <span class="guilabel">CallGmatFunction</span>
+    command. Data that is passed into the function as input or received from
+    the function as output can be declared as global by using the
+    <span class="guilabel">Global</span> command. See the <a class="xref" href="Global.html#Global_Remarks" title="Remarks">Remarks</a> section for more
+    details on the <span class="guilabel">Global</span> command.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="GmatFunction.html" title="GMATFunction"><span class="refentrytitle">GMATFunction</span></a>, <a class="xref" href="CallGmatFunction.html" title="CallGmatFunction"><span class="refentrytitle">CallGmatFunction</span></a></p></div><div class="refsection"><a name="N2391A"></a><h2>GUI</h2><p>Figure below shows default settings of the
+    <span class="guilabel">Global</span> command. By default, only
+    <span class="guilabel">Spacecraft</span> object is checked and declared as global.
+    As more objects are created by the user in GMAT's
+    <span class="guilabel">Resources</span> tree, the list of objects that are
+    available to be declared as global increases.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Global_DefaultPanel_1.png" align="middle" height="466"></td></tr></table></div></div><p>Notice in the above figure that GMAT by default already considers
+    objects such as the default coordinate systems,
+    <span class="guilabel">SolarSystemBarycenter</span>,
+    <span class="guilabel">DefaultProp</span> and <span class="guilabel">SolarSystem</span> as
+    automatic global objects. Furthermore whenever new coordinate systems or
+    propagators are created in the <span class="guilabel">Resources</span> tree, GMAT
+    automatically declares the newly created coordinate systems and
+    propagators as global objects. Since GMAT always declares default or newly
+    created coordinate systems and propagators as global, hence you do not
+    need to use <span class="guilabel">Global</span> command on coordinate system and
+    propagator objects.</p></div><div class="refsection"><a name="Global_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N23946"></a><h3>Declaration of Global Objects</h3><p>GMAT objects can be passed into the GMAT function as input and can
+      also be returned from the function as output. Refer to both
+      <span class="guilabel">GmatFunction</span> resource and
+      <span class="guilabel">CallGmatFunction</span> command's Remarks sections to
+      learn more about list of allowed objects that can be passed as input and
+      output to and from the function. By default, in GMAT any objects that
+      are created inside the main script are considered local to the main
+      script. Similarly any objects that may be created inside the GMAT
+      function are considered local to that function. In GMAT, in order to
+      declare objects as global, you must declare the objects as global in
+      both your main script and inside the function. It is a good practice to
+      declare objects as global right after the
+      <code class="literal">BeginMissionSequence</code> line in both the main script and
+      inside the function.</p><p>If a given GMAT object is not declared as global in both the main
+      script and in the function, then all objects that are passed into the
+      function as input and/or received as output from the function are
+      considered to be local to that function and the main script.</p><p>Often times, you will propagate a spacecraft, perform differential
+      correction (DC) or optimization routines interchangeably from both the
+      main script and inside the function. Whenever you want to plot
+      continuous set of spacecraft trajectory data and report parameters to
+      same subscribers interchangeably from both inside the main script and
+      the function, then always declare your <span class="guilabel">Spacecraft</span>
+      object and subscriber objects (i.e. <span class="guilabel">OrbitView</span>,
+      <span class="guilabel">GroundTrackPlot</span>, <span class="guilabel">XYPlot</span>,
+      <span class="guilabel">ReportFile</span>, <span class="guilabel">EphemerisFile</span>) as
+      global both in the main script and inside the function. Abiding by this
+      rule draws plots, reports and ephemeris files correctly and flow of data
+      will be reported continuously to all the subscribers.</p><p>GMAT allows globally declared objects such as
+      <span class="guilabel">Spacecraft</span>, global variables/arrays/strings to be
+      passed as input/output argument to and from the function. Globally
+      declared objects such as <span class="guilabel">Spacecraft</span>,
+      variables/arrays/strings can be plotted or reported interchangeably both
+      from the main script and inside the function as long as all subscribers
+      are also declared global.</p><p>Refer to <span class="guilabel">GmatFunction</span> resource's <a class="xref" href="GmatFunction.html#GmatFunction_Examples" title="Examples">Examples</a> section that
+      shows three more examples of how to declare spacecraft, five
+      subscribers, arrays/variables/strings as global in both the main script
+      and inside the function.</p></div></div><div class="refsection"><a name="Global_Examples"></a><h2>Examples</h2><div class="informalexample"><p>Declare spacecraft, all subscribers and variables as global.
+      Global variables are passed as input and received as global output from
+      the function. As you run the example, notice that data is reported
+      continuously to all 5 subscribers.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+
+Create ForceModel aFM
+aFM.CentralBody = Earth
+aFM.PointMasses = {Earth}
+
+Create Propagator aProp
+aProp.FM = aFM
+
+Create ImpulsiveBurn TOI
+Create ImpulsiveBurn GOI
+
+Create DifferentialCorrector DC
+
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, Earth}
+
+Create GroundTrackPlot GroundTrackPlot1
+GroundTrackPlot1.Add = {aSat}
+GroundTrackPlot1.CentralBody = Earth
+
+Create XYPlot XYPlot1
+XYPlot1.XVariable = aSat.ElapsedDays
+XYPlot1.YVariables = {aSat.EarthMJ2000Eq.X}
+
+Create ReportFile rf
+rf.Add = {aSat.UTCGregorian, aSat.EarthMJ2000Eq.X, ... 
+aSat.EarthMJ2000Eq.Y, aSat.EarthMJ2000Eq.Z, ...
+aSat.EarthMJ2000Eq.VX, aSat.EarthMJ2000Eq.VY, aSat.EarthMJ2000Eq.VZ}
+
+Create ReportFile rf2
+rf2.WriteHeaders = false
+
+Create EphemerisFile anEphemerisFile
+GMAT anEphemerisFile.Spacecraft = aSat
+
+Create GmatFunction Global_Objects
+Global_Objects.FunctionPath = ...
+'C:\Users\rqureshi\Desktop\Global_Objects.gmf'
+
+Create Variable T X Y Z VX VY VZ
+
+
+BeginMissionSequence
+
+Global aSat
+Global aFM TOI GOI DC
+Global anOrbitView GroundTrackPlot1 XYPlot1 rf rf2 anEphemerisFile
+Global T X Y Z VX VY VZ 
+
+% Report initial state to Global 'rf2':
+Report rf2 aSat.UTCGregorian aSat.X aSat.Y aSat.Z ...
+aSat.VX aSat.VY aSat.VZ
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 1.0}
+
+T = aSat.UTCModJulian
+X = aSat.X
+Y = aSat.Y
+Z = aSat.Z
+VX = aSat.VX
+VY = aSat.VY
+VZ = aSat.VZ
+
+% Call function. Pass Global Variables as input:
+% Receive updated global S/C state via global variables:
+[T,X,Y,Z,VX,VY,VZ] = Global_Objects(T,X,Y,Z,VX,VY,VZ)
+
+% Report global variables to global 'rf2':
+Report rf2 T X Y Z VX VY VZ
+
+% Re-report global S/C state:
+Report rf2 aSat.UTCGregorian aSat.X aSat.Y aSat.Z ...
+aSat.VX aSat.VY aSat.VZ
+
+
+%%%%%%%% Function begins below:
+
+function [T,X,Y,Z,VX,VY,VZ] = Global_Objects(T,X,Y,Z,VX,VY,VZ)
+
+
+BeginMissionSequence
+
+Global aSat
+Global aFM TOI GOI DC
+Global anOrbitView GroundTrackPlot1 XYPlot1 rf rf2 anEphemerisFile
+Global T X Y Z VX VY VZ 
+
+% Report global variables to global 'rf2':
+Report rf2 T X Y Z VX VY VZ
+
+While aSat.ElapsedDays &lt; 5
+   Propagate aProp(aSat) {aSat.ElapsedDays = 0.5}
+EndWhile
+
+% Send global variables back to main script:
+T = aSat.UTCModJulian
+X = aSat.X
+Y = aSat.Y
+Z = aSat.Z
+VX = aSat.VX
+VY = aSat.VY
+VZ = aSat.VZ</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="GetEphemStates_Function.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="If.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">GetEphemStates()&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;If</td></tr></table></div></body></html>

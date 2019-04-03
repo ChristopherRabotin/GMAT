@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,6 +39,27 @@
 //---------------------------------
 //  public methods
 //---------------------------------
+
+//------------------------------------------------------------------------------
+// GmatBase* CreateObject(const std::string & ofType, const std::string & withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates and returns an object of the MeasurementModel class
+ *
+ * @param ofType the MeasurementModel object to create and return.
+ * @param withName the name to give the newly-created MeasurementModel object.
+ *
+ * @return The MeasurementModel
+ *
+ * @note We are ignoring the ofType parameter.  Use of this parameter may be
+ * added later.
+ */
+//------------------------------------------------------------------------------
+GmatBase* MeasurementModelFactory::CreateObject(
+      const std::string & ofType, const std::string & withName)
+{
+   return CreateMeasurementModel(ofType, withName);
+}
 
 //------------------------------------------------------------------------------
 // MeasurementModel *CreateMeasurementModel(const std::string & ofType,

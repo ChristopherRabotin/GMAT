@@ -1,0 +1,5 @@
+#-----------------------------------------------------------
+# Base location of MATLAB libraries (required only for OS X)
+#-----------------------------------------------------------
+MATLAB_APP_PATH          = /Applications/MATLAB_R2017a.app
+

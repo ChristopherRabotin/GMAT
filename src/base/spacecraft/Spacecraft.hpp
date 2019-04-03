@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -284,6 +284,9 @@ public:
 
    virtual void      UpdateElementLabels();
    virtual void      UpdateElementLabels(const std::string &displayStateType);
+
+   /// Get tranformation matrix to convert state from spacecraft's coordinate system to its internal coordinate system
+   Rmatrix66         GetCoordinateSystemTransformMatrix();
 
 protected:
    enum SC_Param_ID
@@ -665,6 +668,11 @@ protected:
    bool              constrainCd;
    /// Internal flag used to relax constraint for Cr
    bool              constrainCr;
+
+   /// Transformation matrix converting from spacecraft cooredinate system to its internal coordinate system
+   Rmatrix           csTransformMatrix;
+   /// Flag to indicate transoformation matrix is set or not
+   bool              isCSTransformMatrixSet;
 
    /// list of to-be-deleted obsolete objects
    ObjectArray       obsoleteObjects;

@@ -1,0 +1,56 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Formation</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="ForceModel.html" title="ForceModel"><link rel="next" href="FuelTank.html" title="ChemicalTank"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Formation</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ForceModel.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="FuelTank.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Formation"></a><div class="titlepage"></div><a name="N193F9" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Formation</span></h2><p><span class="guilabel">Formation</span> &mdash; A collection of spacecraft.</p></div><div class="refsection"><a name="N1940B"></a><h2>Description</h2><p>A <span class="guilabel">Formation</span> resource allows you to combine
+    spacecraft in a &ldquo;container&rdquo; object and then GMAT&rsquo;s propagation subsystem
+    will model the collection of spacecraft as a coupled dynamic system. You
+    can only propagate <span class="guilabel">Formation</span> resources using
+    numerical-integrator type propagators. This resource cannot be modified in
+    the Mission Sequence.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Propagate.html" title="Propagate"><span class="refentrytitle">Propagate</span></a>, <a class="xref" href="Color.html" title="Color"><span class="refentrytitle">Color</span></a></p></div><div class="refsection"><a name="Formation_Resource_Fields"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Add</span></td><td><p>Adds a list of <span class="guilabel">Spacecraft</span> to the
+            <span class="guilabel">Formation</span>. The list cannot be empty.
+            </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Resource array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>array of spacecraft</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>empty list</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N19468"></a><h2>GUI</h2><p>To create a simple <span class="guilabel">Formation</span> and configure its
+    <span class="guilabel">Spacecraft</span>, in the <span class="guilabel">Resource
+    Tree</span>:</p><div class="orderedlist"><ol class="orderedlist compact" type="1"><li class="listitem"><p>Right-click the <span class="guilabel">Spacecraft</span> folder and
+        select <span class="guilabel">Add Spacecraft</span>.</p></li><li class="listitem"><p>Right click the <span class="guilabel">Formations</span> folder and
+        select <span class="guilabel">Add Formation</span>.</p></li><li class="listitem"><p>Double-click <span class="guilabel">Formation1</span> to open its dialog
+        box.</p></li><li class="listitem"><p>Click the right-arrow button twice to add
+        <span class="guilabel">DefaultSC</span> and <span class="guilabel">Spacecraft1</span> to
+        <span class="guilabel">Formation1</span>.</p></li><li class="listitem"><p>Click <span class="guilabel">Ok</span>.</p></li></ol></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="60%"><tr><td align="center"><img src="../files/images/Resources_Formation_GUIHelp.png" align="middle" height="352"></td></tr></table></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>A <span class="guilabel">Spacecraft</span> can only be added to one
+      Formation.</p></div></div><div class="refsection"><a name="N194B1"></a><h2>Remarks</h2><p>A <span class="guilabel">Formation</span> is a container object that allows
+    you to model a group of <span class="guilabel">Spacecraft</span> as a coupled
+    system. You can add <span class="guilabel">Spacecraft</span> to a
+    <span class="guilabel">Formation</span> using the <span class="guilabel">Add</span> field as
+    shown in the script examples below or in the GUI example above. The
+    primary reasons to use a <span class="guilabel">Formation</span>
+    <span class="guilabel">Resource</span> are (1) to simplify the propagation of
+    multiple spacecraft and (2) for performance reasons. You can only add a
+    spacecraft to a one formation, and you cannot add a formation to a
+    formation. GMAT&rsquo;s propagation subsystem models
+    <span class="guilabel">Formations</span> as a coupled dynamic system. Once
+    spacecraft have been added to a <span class="guilabel">Formation</span>, you can
+    easily propagate all of the spacecraft by simply including the formation
+    in the <span class="guilabel">Propagate</span> command statement like this:</p><pre class="programlisting">Propagate aPropagator(aFormation) {aSat1.ElapsedSecs = 12000.0}</pre><p>You can only propagate <span class="guilabel">Formation</span> resources
+    using numerical-integrator type propagators. GMAT does not support
+    propagation of the orbit state transition matrix when propagating
+    formations.</p><p>When propagating a <span class="guilabel">Formation</span>, all spacecraft in
+    the <span class="guilabel">Formation</span> must have equivalent epochs. GMAT will
+    allow you to separately propagate a <span class="guilabel">Spacecraft</span> that
+    has been added to a <span class="guilabel">Formation</span>, like this:</p><pre class="programlisting"><code class="computeroutput">aFormation.Add = {aSat1, aSat2}
+Propagate aPropagator(aSat1) {aSat1.ElapsedSecs = 12000.0}</code></pre><p>However, when a <span class="guilabel">Formation</span> is propagated, if the
+    epochs of all <span class="guilabel">Spacecraft</span> in the
+    <span class="guilabel">Formation</span> are not equivalent to a tolerance of a few
+    microseconds, <span class="guilabel">GMAT</span> will throw an error and execution
+    will stop.</p><div class="refsection"><a name="N194FA"></a><h3>Setting Colors On Spacecrafts In Formation Resource</h3><p>If you want to set unique colors on spacecraft trajectories that
+      are nested in the <span class="guilabel">Formation</span> resource, then change
+      colors through either the <span class="guilabel">Spacecraft</span> resource or
+      the <span class="guilabel">Propagate</span> command. See the <a class="xref" href="Color.html" title="Color"><span class="refentrytitle">Color</span></a> documentation for discussion and examples on
+      how to set unique colors on <span class="guilabel">Spacecraft</span> resource and
+      <span class="guilabel">Propagate</span> command.</p></div></div><div class="refsection"><a name="N19511"></a><h2>Examples</h2><div class="informalexample"><p>Create two <span class="guilabel">Spacecraft</span>, add them to a
+      <span class="guilabel">Formation</span>, and propagate the
+      <span class="guilabel">Formation</span>.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat1 aSat2
+
+Create Formation aFormation
+aFormation.Add = {aSat1, aSat2}
+
+Create Propagator aPropagator
+
+BeginMissionSequence
+
+Propagate aPropagator(aFormation) {aSat1.ElapsedSecs = 12000.0}</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ForceModel.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="FuelTank.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">ForceModel&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;ChemicalTank</td></tr></table></div></body></html>

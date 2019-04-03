@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,7 +39,14 @@ public:
    STKEphemerisFile(const STKEphemerisFile &copy);
    STKEphemerisFile& operator=(const STKEphemerisFile &copy);
    virtual ~STKEphemerisFile();
+
    
+   struct GMAT_API EphemData
+   {
+      Real timeFromEpoch;
+      Real theState[6];
+   };
+
    void InitializeData(); // Move to protected?
    
    /// Open the ephemeris file for reading/writing
@@ -47,7 +54,11 @@ public:
    bool OpenForWrite(const std::string &filename, const std::string &ephemType);
    void CloseForRead();
    void CloseForWrite();
-   
+
+   bool ReadDataRecords(int logOption = 0);
+   void GetStartAndEndEpochs(GmatEpoch &startEpoch, GmatEpoch &endEpoch,
+         std::vector<EphemData> **records);
+
    // For ephemeris file reading
    bool GetInitialAndFinalStates(Real &initialA1Mjd, Real &finalA1Mjd,
                                  Rvector6 &initialState, Rvector6 &finalState,
@@ -66,15 +77,25 @@ public:
                          bool canFinalize = false);
    void FinalizeEphemeris();
    
+   std::string GetDistanceUnit();
+   void SetDistanceUnit(const std::string &dU);
+
+   bool GetIncludeEventBoundaries();
+   void SetIncludeEventBoundaries(bool iEB);
+
 protected:
 
    bool        firstTimeWriting;
    bool        openForTempOutput;
    
+   bool        includeEventBoundaries;
+
    Real        scenarioEpochA1Mjd;
    Real        coordinateSystemEpochA1Mjd;
    Real        beginSegmentTime;
-   Real        lastEpochWrote;
+   Real        lastEpochWritten;
+   // If we need to compare full states, this field is a start
+//   Rvector6  lastDataWritten;
    
    RealArray   beginSegmentArray;
    Integer     numberOfEphemPoints;
@@ -106,8 +127,7 @@ protected:
    std::ofstream stkOutStream;
    
    // Epoch and state buffer for read/write
-   RealArray     a1MjdArray;
-   StateArray    stateArray;
+   std::vector<EphemData> ephemRecords;
    
    // Initial/Final epochs and states read from file
    Real          initialSecsFromEpoch;

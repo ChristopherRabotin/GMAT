@@ -1,0 +1,174 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>XYPlot</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="VF13ad.html" title="VF13ad"><link rel="next" href="Commands.html" title="Commands"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">XYPlot</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="VF13ad.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Commands.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="XYPlot"></a><div class="titlepage"></div><a name="N2222A" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">XYPlot</span></h2><p>XYPlot &mdash; Plots data onto the X and Y axes of a graph</p></div><div class="refsection"><a name="N2223B"></a><h2>Description</h2><p>The <span class="guilabel">XYPlot</span> resource allows you to plot data
+    onto the X and Y axis of the graph. You can choose to plot any number of
+    parameters as a function of a single independent variable. GMAT allows you
+    to plot user-defined variables, array elements, or spacecraft parameters.
+    You can create multiple <span class="guilabel">XYPlots</span> by using either the
+    GUI or script interface of GMAT. GMAT also provides the option of when to
+    plot and stop plotting data to a XYPlot through the <span class="guilabel">Toggle
+    On</span>/<span class="guilabel">Off</span> command. See the <a class="xref" href="XYPlot.html#XYPlot_Remarks" title="Remarks">Remarks</a> section
+    below for detailed discussion of the interaction between an
+    <span class="guilabel">XYPlot</span> resource and the <span class="guilabel">Toggle</span>
+    command. GMAT&rsquo;s <span class="guilabel">Spacecraft</span> and
+    <span class="guilabel">XYPlot</span> resources also interact with each other
+    throughout the entire mission duration. Discussion of the interaction
+    between <span class="guilabel">Spacecraft</span> and <span class="guilabel">XYPlot</span>
+    resources can also be found in the <a class="xref" href="XYPlot.html#XYPlot_Remarks" title="Remarks">Remarks</a> section.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Toggle.html" title="Toggle"><span class="refentrytitle">Toggle</span></a>, <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a></p></div><div class="refsection"><a name="N22270"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Maximized</span></td><td><p>Allows the user to maximize the
+            <span class="guilabel">XYPlot</span> window. This field cannot be modified
+            in the Mission Sequence. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true,false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>false</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">UpperLeft</span></td><td><p>Allows the user to pan the
+            <span class="guilabel">XYPlot</span> display window in any direction. First
+            value in [0 0] matrix helps to pan the <span class="guilabel">XYPlot</span>
+            window horizontally and second value helps to pan the window
+            vertically. This field cannot be modified in the Mission
+            Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any Real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>[0 0]</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RelativeZOrder</span></td><td><p>Allows the user to select which
+            <span class="guilabel">XYPlot</span> window to display first on the screen.
+            The <span class="guilabel">XYPlot</span> with lowest
+            <span class="guilabel">RelativeZOrder</span> value will be displayed last
+            while <span class="guilabel">XYPlot</span> with highest
+            <span class="guilabel">RelativeZOrder</span> value will be displayed first.
+            This field cannot be modified in the Mission Sequence.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Integer &ge; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ShowGrid</span></td><td><p> When the <span class="guilabel">ShowGrid</span> field is set
+            to <span class="guilabel">True</span>, then a grid is drawn on an xy-plot.
+            When the <span class="guilabel">ShowGrid</span> field is set to
+            <span class="guilabel">False</span>, then a grid is not drawn. This field
+            cannot be modified in the Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>True,False</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>True</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ShowPlot</span></td><td><p>Allows the user to turn off a plot for a particular
+            run, without deleting the XYPlot resource, or removing it from the
+            script. If you select <span class="guilabel">True</span>, then the plot
+            will be shown. If you select <span class="guilabel">False</span>, then the
+            plot will not be shown. This field cannot be modified in the
+            Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>True,False</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>True</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Size</span></td><td><p>Allows the user to control the display size of
+            <span class="guilabel">XYPlot</span> window. First value in [0 0] matrix
+            controls horizonal size and second value controls vertical size of
+            <span class="guilabel">XYPlot</span> display window. This field cannot be
+            modified in the Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any Real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>[ 0 0 ]</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SolverIterations</span></td><td><p>This field determines whether or not data associated
+            with perturbed trajectories during a solver
+            (<span class="guilabel">Targeter</span>, <span class="guilabel">Optimize</span>)
+            sequence is displayed in the <span class="guilabel">XYPlot</span>. When
+            <span class="guilabel">SolverIterations</span> is set to
+            <span class="guilabel">All</span>, all perturbations/iterations are plotted
+            in the <span class="guilabel">XYPlot</span>. When
+            <span class="guilabel">SolverIterations</span> is set to
+            <span class="guilabel">Current</span>, only the current solution or
+            perturbation is plotted in <span class="guilabel">XYPlot</span>. When
+            <span class="guilabel">SolverIterations</span> is set to
+            <span class="guilabel">None</span>, only the final nominal run is plotted
+            on the <span class="guilabel">XYPlot</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">All</span>,
+                    <span class="guilabel">Current</span>,
+                    <span class="guilabel">None</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Current</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">XVariable</span></td><td><p>Allows the user to define the independent variable
+            for an <span class="guilabel">XYPlot</span>. Only one variable can be
+            defined as an independent variable. For example, the line
+            <code class="literal">MyXYPlot.XVariable = DefaultSC.A1ModJulian</code> sets
+            the independent variable to be the epoch of
+            <span class="guilabel">DefaultSC</span> in the A1 time system and modified
+            Julian format. This field cannot be modified in the Mission
+            Sequence. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Resource reference </p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Variable</span>,
+                    <span class="guilabel">Array</span>, array element,
+                    <span class="guilabel">Spacecraft</span> parameter that evaluates
+                    to a real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>get, set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DefaultSC.A1ModJulian</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">YVariable</span></td><td><p>Allows the user to add dependent variables to an
+            xy-plot. All dependent variables are plotted on the y-axis vs the
+            independent variable defined by <span class="guilabel">XVariable</span>
+            field. The dependent variable(s) should always be included in
+            curly braces. For example, <code class="literal">MyXYPlot.YVariables =
+            {DefaultSC.EarthMJ2000Eq.Y, DefaultSC.EarthMJ2000Eq.Z}</code>.
+            This field cannot be modified in the Mission Sequence.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Reference array </p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any user variable, array element, or spacecraft
+                    parameter that evaluates to a real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>get, set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DefaultSC.EarthMJ2000Eq.X</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N22495"></a><h2>GUI</h2><p>The figure below shows the default settings for the
+    <span class="guilabel">XYPlot</span> resource:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_XYPlot_GUI_3.png" align="middle" height="382"></td></tr></table></div></div></div><div class="refsection"><a name="XYPlot_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N224AA"></a><h3>Behavior when using XYPlot Resource &amp; Toggle Command</h3><p>The <span class="guilabel">XYPlot</span> resource plots data onto the X and
+      Y axis of the graph at each propagation step of the entire mission
+      duration. If you want to report data to an <span class="guilabel">XYPlot</span>
+      at specific points in your mission, then a <span class="guilabel">Toggle
+      On</span>/<span class="guilabel">Off</span> command can be inserted into the
+      mission sequence to control when the <span class="guilabel">XYPlot</span> is to
+      plot data. When <span class="guilabel">Toggle Off</span> command is issued for a
+      <span class="guilabel">XYPlot</span>, no data is plotted onto the X and Y axis of
+      the graph until a <span class="guilabel">Toggle On</span> command is issued.
+      Similarly when a <span class="guilabel">Toggle On</span> command is used, data is
+      plotted onto the X and Y axis at each integration step until a
+      <span class="guilabel">Toggle Off</span> command is used.</p><p>Below is an example script snippet that shows how to use
+      <span class="guilabel">Toggle Off</span> and <span class="guilabel">Toggle On</span>
+      commands while using the <span class="guilabel">XYPlot</span> resource.
+      <span class="guilabel">Spacecraft&rsquo;s</span> position magnitude and semi-major-axis
+      are plotted as a function of time.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create XYPlot aXYPlot
+aXYPlot.XVariable = aSat.ElapsedDays
+aXYPlot.YVariables = {aSat.Earth.RMAG, aSat.Earth.SMA}
+
+BeginMissionSequence
+
+Toggle aXYPlot Off
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+Toggle aXYPlot On
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></pre></div><div class="refsection"><a name="N224DE"></a><h3>Behavior when using XYPlot &amp; Spacecraft resources</h3><p><span class="guilabel">Spacecraft</span> resource contains information
+      about spacecraft&rsquo;s orbit, its attitude, physical parameters (such as
+      mass and drag coefficient) and any attached hardware, including
+      thrusters and fuel tanks. <span class="guilabel">Spacecraft</span> resource
+      interacts with <span class="guilabel">XYPlot</span> throughout the entire mission
+      duration. The data retrieved from the spacecraft is what gets plotted
+      onto the X and Y axis of the graph at each propagation step of the
+      entire mission duration.</p></div><div class="refsection"><a name="N224EB"></a><h3>Behavior When Specifying Empty Brackets in XYPlot's YVariables
+      Field</h3><p>When using <span class="guilabel">XYPlot.YVariables</span> field, GMAT does
+      not allow brackets to be left empty. The brackets must always be
+      populated with values that you wish to plot against a variable in
+      <span class="guilabel">XVariable </span>field. If brackets are left empty, then
+      GMAT throws in an exception. Below is a sample script snippet that shows
+      an example of empty brackets. If you were to run this script, then GMAT
+      throws in an execption reminding you that brackets for
+      <span class="guilabel">YVariables</span> field cannot be left empty.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+Create XYPlot aXYPlot
+
+aXYPlot.XVariable = aSat.ElapsedDays
+aXYPlot.YVariables = {}
+
+BeginMissionSequence
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}</code></pre></div><div class="refsection"><a name="N224FC"></a><h3>Behavior when Reporting Data in Iterative Processes</h3><p>GMAT allows you to specify how data is plotted onto a plot during
+      iterative processes such as differential correction or optimization. The
+      <span class="guilabel">SolverIterations</span> field of an
+      <span class="guilabel">XYPlot</span> resource supports three options which are
+      described in the table below:</p><div class="informaltable"><table border="1"><colgroup><col width="20%"><col width="80%"></colgroup><thead><tr><th>SolverIterations options</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Current</span></td><td><p> Shows only current iteration/perturbation in an
+              iterative process and plots current iteration to a plot.
+              </p></td></tr><tr><td><span class="guilabel">All</span></td><td><p> Shows all iterations/perturbations in an iterative
+              process and plots all iterations/perturbations to a plot.
+              </p></td></tr><tr><td><span class="guilabel">None</span></td><td><p> Shows only the final solution after the end of an
+              iterative process and plots only that final solution to the
+              plot. </p></td></tr></tbody></table></div></div></div><div class="refsection"><a name="N2252E"></a><h2>Examples</h2><div class="informalexample"><p>Propagate an orbit and plot the spacecraft&rsquo;s altitude as a
+      function of time at every integrator step:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create XYPlot aXYPlot
+aXYPlot.XVariable = aSat.ElapsedSecs
+aXYPlot.YVariables = {aSat.Earth.Altitude}
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></pre></div><div class="informalexample"><p>Plotting data during an iterative process. Notice
+      <span class="guilabel">SolverIterations</span> field is selected as
+      <span class="guilabel">All</span>. This means all iterations/perturbations will
+      be plotted.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create ImpulsiveBurn TOI
+Create DifferentialCorrector aDC
+
+Create XYPlot aXYPlot
+aXYPlot.SolverIterations = All
+aXYPlot.XVariable = aSat.ElapsedDays
+aXYPlot.YVariables = {aSat.Earth.RMAG}
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.Earth.Periapsis}
+Target aDC
+ Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, ...
+ Upper = 3.14159, MaxStep = 0.5})
+ Maneuver TOI(aSat)
+ Propagate aProp(aSat) {aSat.Earth.Apoapsis}
+ Achieve aDC(aSat.Earth.RMAG = 42165)
+EndTarget</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="VF13ad.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Commands.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">VF13ad&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Commands</td></tr></table></div></body></html>

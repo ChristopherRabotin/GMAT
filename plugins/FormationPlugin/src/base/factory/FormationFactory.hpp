@@ -34,9 +34,11 @@ public:
    virtual ~FormationFactory();
    FormationFactory(const FormationFactory& elf);
    FormationFactory& operator=(const FormationFactory& elf);
-
-   virtual SpaceObject*     CreateSpacecraft(const std::string &ofType,
-                                             const std::string &withName = "");
+   
+   virtual GmatBase*        CreateObject(const std::string &ofType,
+                                         const std::string &withName = "");
+   virtual SpaceObject*     CreateFormation(const std::string &ofType,
+                                            const std::string &withName = "");
 };
 
 #endif /* FormationFactory_hpp */

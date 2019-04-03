@@ -1,0 +1,110 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>PenUpPenDown</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="Optimize.html" title="Optimize"><link rel="next" href="Propagate.html" title="Propagate"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">PenUpPenDown</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Optimize.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Propagate.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="PenUpPenDown"></a><div class="titlepage"></div><a name="N242D0" class="indexterm"></a><a name="N242D3" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">PenUpPenDown</span></h2><p>PenUpPenDown &mdash; Allows you to stop or begin drawing data on a
+    plot</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><code class="literal">PenUp</code>  <em class="replaceable"><code>OutputNames</code></em>
+
+<em class="replaceable"><code>OutputNames</code></em>
+  <em class="replaceable"><code>OutputNames</code></em> is the list of subscribers that 
+  <em class="replaceable"><code>PenUp</code></em> command operates on. When <em class="replaceable"><code>PenUp</code></em> 
+  command is used on multiple subscribers, then the subscribers 
+  need to be separated by a space.
+
+<code class="literal">PenDown</code> <em class="replaceable"><code>OutputNames</code></em>
+
+<em class="replaceable"><code>OutputNames</code></em>
+  <em class="replaceable"><code>OutputNames</code></em> is the list of subscribers 
+  that <em class="replaceable"><code>PenDown</code></em> command operates on. 
+  When <em class="replaceable"><code>PenDown</code></em> command is used on multiple subscribers, then the 
+  subscribers need to be separated by a space.</pre></div><div class="refsection"><a name="N2430C"></a><h2>Description</h2><p>The <span class="guilabel">PenUp</span> and <span class="guilabel">PenDown</span>
+    commands allow you to stop or begin drawing data on a plot. The
+    <span class="guilabel">PenUp</span> and <span class="guilabel">PenDown</span> commands
+    operate on <span class="guilabel">XYPlot</span>, <span class="guilabel">OrbitView</span> and
+    <span class="guilabel">GroundTrackPlot</span> subscribers. GMAT allows you to
+    insert <span class="guilabel">PenUp</span> and <span class="guilabel">PenDown</span>
+    commands into the <span class="guilabel">Mission</span> tree at any location. This
+    allows you to stop or begin drawing data output on a plot at any point in
+    your mission. The <span class="guilabel">PenUp</span> and
+    <span class="guilabel">PenDown</span> commands can be used through GMAT&rsquo;s GUI or
+    the script interface.</p></div><div class="refsection"><a name="N24335"></a><h2>Options</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">OutputNames</span></td><td><p> When a <span class="guilabel">PenUp</span> command is issued
+            for a plot, no data is drawn to that plot until a
+            <span class="guilabel">PenDown</span> command is issued for that plot
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Resource reference</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">XYPlot</span>,
+                    <span class="guilabel">OrbitView</span> or
+                    <span class="guilabel">GroundTrackPlot</span> resources</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DefaultOrbitview</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">OutputNames</span></td><td><p> When a <span class="guilabel">PenDown</span> command is
+            issued for a plot, data is drawn for each integration step until a
+            <span class="guilabel">PenUp</span> command is issued for that plot.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Resource reference</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">XYPlot</span>,
+                    <span class="guilabel">OrbitView</span> or
+                    <span class="guilabel">GroundTrackPlot</span> resources</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DefaultOrbitview</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N243BA"></a><h2>GUI</h2><p>Figures below show default settings for <span class="guilabel">PenUp</span>
+    and <span class="guilabel">PenDown</span> commands:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_PenUp_GUI_2.png" align="middle" height="190"></td></tr></table></div></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_PenDown_GUI_2.png" align="middle" height="191"></td></tr></table></div></div></div><div class="refsection"><a name="N243D7"></a><h2>Remarks</h2><p><span class="guilabel">XYPlot</span>, <span class="guilabel">OrbitView</span> and
+    <span class="guilabel">GroundTrackPlot</span> subscribers plot data at each
+    integration step of the entire mission duration. If you want to plot data
+    at specific points in your mission, then a <span class="guilabel">PenUp</span> and
+    <span class="guilabel">PenDown</span> command can be inserted into the mission
+    sequence to control when a subscriber plots data. For example, when a
+    <span class="guilabel">PenUp</span> command is issued for
+    <span class="guilabel">XYPlot</span>, <span class="guilabel">OrbitView</span> or
+    <span class="guilabel">GroundTrackPlot</span>, no data is drawn to that plot until
+    a <span class="guilabel">PenDown</span> command is issued for that same plot.
+    Similarly, when a <span class="guilabel">PenDown</span> command is issued for any
+    of the three <span class="guilabel">subscribers</span>, then data is drawn for each
+    integration step until a <span class="guilabel">PenUp</span> command is issued for
+    that specific subscriber. Refer to the <a class="xref" href="PenUpPenDown.html#PenUpPenDown_Examples" title="Examples">Examples</a> section below to see how
+    <span class="guilabel">PenUp</span> and <span class="guilabel">PenDown</span> commands can
+    be used in the <span class="guilabel">Mission</span> tree.</p></div><div class="refsection"><a name="PenUpPenDown_Examples"></a><h2>Examples</h2><div class="informalexample"><p>This example shows how to use <span class="guilabel">PenUp</span> and
+      <span class="guilabel">PenDown</span> commands on multiple subscribers.
+      <span class="guilabel">PenUp</span> and <span class="guilabel">PenDown</span> commands are
+      used on <span class="guilabel">XYPlot</span>, <span class="guilabel">OrbitView</span> and
+      <span class="guilabel">GroundTrackPlot</span>. Data is drawn to the plots for
+      first day of the propagation, turned off for second day of propagation
+      and then data is drawn for third day of the propagation:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create XYPlot aPlot
+aPlot.XVariable = aSat.ElapsedDays
+aPlot.YVariables = {aSat.Earth.SMA}
+
+Create OrbitView anOrbitViewPlot
+anOrbitViewPlot.Add = {aSat, Earth}
+
+Create GroundTrackPlot aGroundTrackPlot
+aGroundTrackPlot.Add = {aSat, Earth}
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+PenUp aGroundTrackPlot anOrbitViewPlot aPlot
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+PenDown aGroundTrackPlot anOrbitViewPlot aPlot
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></pre></div><div class="informalexample"><p>This example shows how to use <span class="guilabel">PenUp</span> and
+      <span class="guilabel">PenDown</span> commands on a single
+      <span class="guilabel">XYPlot</span> subscriber. Data is drawn to the plot for
+      one-third of the day, turned off for second one-third of the day and
+      then data is drawn again for last one-third of the day:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create XYPlot aPlot1
+aPlot1.XVariable = aSat.ElapsedDays
+aPlot1.YVariables = {aSat.Earth.Altitude}
+
+Create Variable I
+I = 0
+
+BeginMissionSequence
+
+While aSat.ElapsedDays &lt; 1.0
+   
+ Propagate aProp(aSat) {aSat.ElapsedSecs = 60}
+ If I == 480
+ PenUp aPlot1
+ EndIf
+   
+ If I == 960
+ PenDown aPlot1
+ EndIf
+   
+ GMAT I = I +1
+
+EndWhile</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Optimize.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Propagate.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Optimize&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Propagate</td></tr></table></div></body></html>

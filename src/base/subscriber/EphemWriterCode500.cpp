@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -29,7 +29,7 @@
 
 #include "EphemWriterCode500.hpp"
 #include "SubscriberException.hpp"   // for exception
-#include "TimeSystemConverter.hpp"   // For NumberOfLeapSecondsFrom()
+#include "TimeSystemConverter.hpp"   // For IsInLeapSecond()
 #include "MessageInterface.hpp"
 
 
@@ -43,6 +43,7 @@
 //#define DEBUG_EPHEMFILE_WRITE
 //#define DEBUG_EPHEMFILE_FINISH
 //#define DEBUG_EPHEMFILE_RESTART
+//#define DEBUG_LEAP_SECOND
 //#define DEBUG_EPHEMFILE_READBACK
 
 //#ifndef DEBUG_MEMORY
@@ -230,8 +231,8 @@ void EphemWriterCode500::BufferOrbitData(Real epochInDays, const Real state[6])
 {
    #ifdef DEBUG_EPHEMFILE_BUFFER
    MessageInterface::ShowMessage
-      ("BufferOrbitData() <%p>'%s' entered, epochInDays=%.15f, state[0]=%.15f\n",
-       this, ephemName.c_str(), epochInDays, state[0]);
+      ("EphemWriterCode500::BufferOrbitData() <%p>'%s' entered, epochInDays=%.15f, "
+       "state[0]=%.15f\n", this, ephemName.c_str(), epochInDays, state[0]);
    DebugWriteTime("   epochInDays = ", epochInDays, true, 2);
    #endif
    
@@ -239,25 +240,10 @@ void EphemWriterCode500::BufferOrbitData(Real epochInDays, const Real state[6])
    if (a1MjdArray.size() >= maxSegmentSize)
       WriteCode500OrbitDataSegment(false);
    
-   // Check if epochInDays is in leap second
-   // Add new data point only if not in leap second
-   Real taiMjd = TimeConverterUtil::ConvertToTaiMjd(TimeConverterUtil::A1MJD, epochInDays);
-   bool isInLeapSecond = TimeConverterUtil::IsInLeapSecond(taiMjd);
-   if (isInLeapSecond)
-   {
-      #ifdef DEBUG_LEAP_SECOND
-      DebugWriteTime("   epochInDays = ", epochInDays, true, 2);
-      MessageInterface::ShowMessage
-         ("   =====> epochInDays %.12f is in leap second, so skipping...\n", epochInDays);
-      #endif
-   }
-   else
-   {
-      A1Mjd *a1mjd = new A1Mjd(epochInDays);
-      Rvector6 *rv6 = new Rvector6(state);
-      a1MjdArray.push_back(a1mjd);
-      stateArray.push_back(rv6);
-   }
+   A1Mjd *a1mjd = new A1Mjd(epochInDays);
+   Rvector6 *rv6 = new Rvector6(state);
+   a1MjdArray.push_back(a1mjd);
+   stateArray.push_back(rv6);
    
    #ifdef DEBUG_EPHEMFILE_BUFFER
    MessageInterface::ShowMessage
@@ -549,57 +535,6 @@ void EphemWriterCode500::FinishUpWriting()
 
 
 //------------------------------------------------------------------------------
-// void HandleWriteOrbit()
-//------------------------------------------------------------------------------
-void EphemWriterCode500::HandleWriteOrbit()
-{
-   #ifdef DEBUG_EPHEMFILE_WRITE
-   MessageInterface::ShowMessage
-      ("EphemWriterCode500::HandleWriteOrbit() entered, useFixedStepSize=%d, "
-       "interpolateInitialState=%d, interpolateFinalState=%d\n", useFixedStepSize,
-       interpolateInitialState, interpolateFinalState);
-   DebugWriteTime("   nextReqEpochInSecs = ", nextReqEpochInSecs);
-   #endif
-   
-   if (useFixedStepSize)
-   {
-      WriteOrbitAt(nextReqEpochInSecs, currState);
-   }
-   else if (interpolateInitialState)
-   {
-      WriteOrbitAt(nextReqEpochInSecs, currState);
-      if (nextReqEpochInSecs == (initialEpochA1Mjd * GmatTimeConstants::SECS_PER_DAY))
-      {
-         #ifdef DEBUG_EPHEMFILE_WRITE
-         MessageInterface::ShowMessage
-            ("===> State at initial epoch has been written, so turning off "
-             "interpolateInitialState flag\n");
-         #endif
-         interpolateInitialState = false;
-         // Reset to write integrator steps
-         initialEpochA1Mjd = -999.999;
-         nextOutEpochInSecs = -999.999;
-      }
-   }
-   else if (interpolateFinalState)
-   {
-      if (currEpochInDays < finalEpochA1Mjd)
-         WriteOrbit(currEpochInSecs, currState);
-      else
-         WriteOrbitAt(nextReqEpochInSecs, currState);
-   }
-   else
-   {
-      WriteOrbit(currEpochInSecs, currState);
-   }
-   
-   #ifdef DEBUG_EPHEMFILE_WRITE
-   MessageInterface::ShowMessage("EphemWriterCode500::HandleWriteOrbit() leaving\n");
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
 // void HandleCode500OrbitData(bool writeData, bool timeToWrite)
 //------------------------------------------------------------------------------
 void EphemWriterCode500::HandleCode500OrbitData(bool writeData, bool timeToWrite)
@@ -785,7 +720,8 @@ void EphemWriterCode500::WriteCode500OrbitDataSegment(bool canFinish)
             (".....Calling code500EphemFile->WriteDataSegment() isEndOfRun=%d, "
              "canFinish=%d, epochsOnWaiting.size()=%d\n", isEndOfRun, canFinish,
              epochsOnWaiting.size());
-         DebugWriteTime("   lastEpochOnWaiting = ", epochsOnWaiting.back());
+         DebugWriteEpochsOnWaiting("   ");
+         //DebugWriteTime("   lastEpochOnWaiting = ", epochsOnWaiting.back());
          #endif
          // Check if Code500 ephemeris file can be finalized (GMT-4060 fix)
          bool finalize = isEndOfRun && canFinish;

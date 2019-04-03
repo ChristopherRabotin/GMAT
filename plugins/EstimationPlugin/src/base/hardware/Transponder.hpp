@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,7 +35,7 @@
 class ESTIMATION_API Transponder: public RFHardware
 {
 public:
-   Transponder(const std::string &name);
+   Transponder(const std::string &ofType, const std::string &name);
    virtual ~Transponder();
    Transponder(const Transponder& trans);
    Transponder& operator=(const Transponder& trans);

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -286,11 +286,11 @@ void Write::CheckForOptions(std::string &opts)
       else if (opt0 == "STYLE")
       {
          if (opt1 == "CONCISE")
-            outputStyle = OutputStyle::CONCISE;
+            outputStyle = CONCISE;
          else if (opt1 == "VERBOSE")
-            outputStyle = OutputStyle::VERBOSE;
+            outputStyle = VERBOSE;
          else if (opt1 == "SCRIPT")
-            outputStyle = OutputStyle::SCRIPTABLE;
+            outputStyle = SCRIPTABLE;
          else
             throw CommandException(typeName + "::InterpretAction() Write Command "
             "Style option " + option[1] +

@@ -20,6 +20,7 @@
 
 #include "ThrustSegment.hpp"
 #include "MessageInterface.hpp"
+#include "ODEModelException.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -68,9 +69,9 @@ ThrustSegment::ThrustSegment(const std::string &name) :
    massFlowFactor          (1.0)
 {
    objectTypes.push_back(Gmat::INTERFACE);
+   objectTypeNames.push_back("Interface");
    objectTypeNames.push_back("ThrustSegment");
    parameterCount = ThrustSegmentParamCount;
-
 }
 
 //------------------------------------------------------------------------------
@@ -313,8 +314,17 @@ Real ThrustSegment::SetRealParameter(const Integer id, const Real value)
 {
    if (id == THRUSTSCALEFACTOR)
    {
-      if (value > 0.0)
+      if (value >= 0.0)
          thrustScaleFactor = value;
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
+         throw ODEModelException(
+               "The value of \"" + buffer.str() + "\" for field \"ThrustScaleFactor\""
+               " on object \"" + instanceName + "\" is not an allowed value.\n"
+               "The allowed values are: [ Real Number >= 0.0 ].");
+      }
       return thrustScaleFactor;
    }
 
@@ -327,8 +337,17 @@ Real ThrustSegment::SetRealParameter(const Integer id, const Real value)
 
    if (id == MASSFLOWSCALEFACTOR)
    {
-      if (value > 0.0)
+      if (value >= 0.0)
          massFlowFactor = value;
+      else
+      {
+          std::stringstream buffer;
+          buffer << value;
+          throw ODEModelException(
+                "The value of \"" + buffer.str() + "\" for field \"MassFlowFactor\""
+                " on object \"" + instanceName + "\" is not an allowed value.\n"
+                "The allowed values are: [ Real Number >= 0.0 ].");
+      }
       return massFlowFactor;
    }
 

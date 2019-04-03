@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -57,7 +57,7 @@ ObservationData::ObservationData() :
 ///// TBD: Determine if there is a more generic way to add these, and if they go here
    unit              ("km"),
    uplinkBand        (0),
-   uplinkFreq        (0.0),
+//   uplinkFreq        (0.0),
    uplinkFreqAtRecei (0.0),
    rangeModulo       (1.0),
    dopplerCountInterval   (1.0e-10),
@@ -105,6 +105,7 @@ ObservationData::ObservationData(const ObservationData& od):
    epochAtEnd              (od.epochAtEnd),
    epochAtIntegrationEnd   (od.epochAtIntegrationEnd),
    participantIDs          (od.participantIDs),
+   sensorIDs               (od.sensorIDs),
    strands                 (od.strands),
    value                   (od.value),
    dataMap                 (od.dataMap),
@@ -116,7 +117,7 @@ ObservationData::ObservationData(const ObservationData& od):
    extraData               (od.extraData),
 //   dataFormat              (od.dataFormat),
    uplinkBand              (od.uplinkBand),
-   uplinkFreq              (od.uplinkFreq),
+//   uplinkFreq              (od.uplinkFreq),
    uplinkFreqAtRecei       (od.uplinkFreqAtRecei),
    rangeModulo             (od.rangeModulo),
    dopplerCountInterval	   (od.dopplerCountInterval),
@@ -156,6 +157,7 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
       epochAtEnd              = od.epochAtEnd;
       epochAtIntegrationEnd   = od.epochAtIntegrationEnd;
       participantIDs          = od.participantIDs;
+      sensorIDs               = od.sensorIDs;
       strands                 = od.strands;
       value                   = od.value;
       dataMap                 = od.dataMap;
@@ -167,7 +169,7 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
       extraData               = od.extraData;
       dataFormat              = od.dataFormat;
       uplinkBand              = od.uplinkBand;
-      uplinkFreq              = od.uplinkFreq;
+//      uplinkFreq              = od.uplinkFreq;
       uplinkFreqAtRecei       = od.uplinkFreqAtRecei;
       rangeModulo             = od.rangeModulo;
       dopplerCountInterval    = od.dopplerCountInterval;
@@ -199,6 +201,7 @@ void ObservationData::Clear()
    uniqueID                = -1;
    epoch                   = 0.0;
    participantIDs.clear();
+   sensorIDs.clear();
    value.clear();
    dataMap.clear();
    strands.clear();
@@ -208,7 +211,7 @@ void ObservationData::Clear()
    extraData.clear();
 ///// TBD: Determine if there is a more generic way to add these
    uplinkBand              = 0;
-   uplinkFreq              = 0.0;
+//   uplinkFreq              = 0.0;
    uplinkFreqAtRecei       = 0.0;
    rangeModulo             = 1.0;
    dopplerCountInterval    = 1.0e-10;
@@ -242,20 +245,31 @@ StringArray ObservationData::GetAvailableMeasurementTypes()
    StringArray typeList;
 
    // New syntax's measurement types
-   typeList.push_back("Range_KM");
-   typeList.push_back("DSNRange");
-   typeList.push_back("Doppler");
-   typeList.push_back("Doppler_RangeRate");
-   typeList.push_back("TDRSDoppler_HZ");
+   typeList.push_back("DSN_SeqRange");
+   typeList.push_back("DSN_TCP");
+   typeList.push_back("GPS_PosVec");
+   //typeList.push_back("Range_KM");
+   typeList.push_back("Range");
+   //typeList.push_back("Doppler_RangeRate");
+   typeList.push_back("RangeRate");
 
-   // Old syntax's measurement types
-   typeList.push_back("DSNTwoWayRange");
-   typeList.push_back("DSNTwoWayDoppler");
-   typeList.push_back("USNTwoWayRange");
-   typeList.push_back("GeometricRange");
-   typeList.push_back("GeometricRangeRate");
-   typeList.push_back("GeometricRADec");
-   typeList.push_back("GeometricAzEl");
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+   if (runmode == GmatGlobal::TESTING)
+   {
+      // Old syntax's measurement types
+      typeList.push_back("DSNTwoWayRange");
+      typeList.push_back("DSNTwoWayDoppler");
+      typeList.push_back("USNTwoWayRange");
+      typeList.push_back("GeometricRange");
+      typeList.push_back("GeometricRangeRate");
+      typeList.push_back("GeometricRADec");
+      typeList.push_back("GeometricAzEl");
+
+      // new syntax's untested measurement types
+      typeList.push_back("SN_Range");
+      //typeList.push_back("TDRSDoppler_HZ");
+      typeList.push_back("SN_Doppler");
+   }
 
    return typeList;
 }

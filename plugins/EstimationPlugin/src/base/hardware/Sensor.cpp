@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -443,6 +443,30 @@ bool Sensor::SetStringParameter(const Integer id, const std::string &value)
 bool Sensor::SetStringParameter(const std::string &label, const std::string &value)
 {
    return SetStringParameter(GetParameterID(label), value);
+}
+
+
+std::string Sensor::GetStringParameter(const Integer id, const Integer index) const
+{
+   return Hardware::GetStringParameter(id, index);
+}
+
+
+bool Sensor::SetStringParameter(const Integer id, const std::string &value, const Integer index)
+{
+   return Hardware::SetStringParameter(id, value, index);
+}
+
+
+std::string Sensor::GetStringParameter(const std::string &label, const Integer index) const
+{
+   return GetStringParameter(GetParameterID(label), index);
+}
+
+
+bool Sensor::SetStringParameter(const std::string &label, const std::string &value, const Integer index)
+{
+   return SetStringParameter(GetParameterID(label), value, index);
 }
 
 

@@ -21,6 +21,7 @@
 #include "EphemPropFactory.hpp"
 #include "Code500Propagator.hpp"
 #include "SPKPropagator.hpp"
+#include "StkEPropagator.hpp"
 
 #include "MessageInterface.hpp"
 
@@ -30,7 +31,20 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  PhysicalModel* VernerFactory::(const std::string &ofType,
+//  GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * @see CreatePropagator()
+ */
+//------------------------------------------------------------------------------
+GmatBase* EphemPropFactory::CreateObject(const std::string &ofType,
+                                         const std::string &withName)
+{
+   return CreatePropagator(ofType, withName);
+}
+
+//------------------------------------------------------------------------------
+//  Propagator* CreatePropagator(const std::string &ofType,
 //                               const std::string &withName)
 //------------------------------------------------------------------------------
 /**
@@ -51,6 +65,9 @@ Propagator* EphemPropFactory::CreatePropagator(const std::string &ofType,
    if (ofType == "Code500")
       return new Code500Propagator(withName);
 
+   if (ofType == "STK")
+      return new StkEPropagator(withName);
+
    return NULL;
 }
 
@@ -70,6 +87,7 @@ EphemPropFactory::EphemPropFactory() :
    {
       creatables.push_back("SPK");
       creatables.push_back("Code500");
+      creatables.push_back("STK");
    }
 }
 
@@ -105,6 +123,7 @@ EphemPropFactory::EphemPropFactory(const EphemPropFactory& fact) :
    {
       creatables.push_back("SPK");
       creatables.push_back("Code500");
+      creatables.push_back("STK");
    }
 }
 

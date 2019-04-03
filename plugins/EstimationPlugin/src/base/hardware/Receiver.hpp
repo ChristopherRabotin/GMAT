@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,7 +35,7 @@
 class ESTIMATION_API Receiver: public RFHardware
 {
 public:
-   Receiver(const std::string &name);
+   Receiver(const std::string &ofType, const std::string &name);
    virtual ~Receiver();
    Receiver(const Receiver& recei);
    Receiver& operator=(const Receiver& recei);
@@ -90,6 +90,38 @@ public:
    virtual bool         SetStringParameter(const std::string &label,
                                          const std::string &value);
 
+   virtual std::string  GetStringParameter(const Integer id, const Integer index) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                         const std::string &value, const Integer index);
+   virtual std::string  GetStringParameter(const std::string &label, const Integer index) const;
+   virtual bool         SetStringParameter(const std::string &label,
+                                         const std::string &value, const Integer index);
+
+   
+   //virtual Integer      GetIntegerParameter(const Integer id) const;
+   //virtual Integer      SetIntegerParameter(const Integer id, const Integer value);
+   //virtual Integer      GetIntegerParameter(const std::string &label) const;
+   //virtual Integer      SetIntegerParameter(const std::string &label, const Integer value);
+
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type, const std::string &name);
+//   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type, const std::string &name, const Integer index);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type, const std::string &name = "");
+//   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type, const std::string &name, const Integer index);
+   
+   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+   virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
+
+   virtual const StringArray&
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual const StringArray&
+                        GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
+   virtual bool         RenameRefObject(const Gmat::ObjectType type, const std::string &oldName,
+                                        const std::string &newName);
+   virtual const ObjectTypeArray& GetRefObjectTypeArray();
+   virtual bool         HasRefObjectTypeArray(){return true;}
+
    virtual bool         Initialize();
 
    virtual Real         GetDelay(Integer whichOne=0);
@@ -100,12 +132,17 @@ public:
    virtual Signal*      GetSignal(Integer whichOne=0);
    virtual bool         SetSignal(Signal* s,Integer whichOne=0);
 
-   DEFAULT_TO_NO_REFOBJECTS
+   //DEFAULT_TO_NO_REFOBJECTS
+   DEFAULT_TO_NO_CLONES
 
 protected:
    std::string   frequencyModel;
    Real          centerFrequency;
    Real          bandwidth;
+   //Integer       receiverId;          // it is used for GPS Point Solution measurement
+   std::string   receiverId;          // it is used for GPS Point Solution measurement
+   StringArray   errorModelNames;     // list of error model names
+   ObjectArray   errorModels;         // list of error model objects
 
    /// Published parameters for the RF hardware
    enum
@@ -113,6 +150,8 @@ protected:
       FREQUENCY_MODEL = RFHardwareParamCount,
       CENTER_FREQUENCY,
       BANDWIDTH,
+      RECEIVER_ID,
+      ERROR_MODELS,
       ReceiverParamCount,
    };
 

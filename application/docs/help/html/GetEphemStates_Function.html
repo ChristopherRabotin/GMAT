@@ -1,0 +1,204 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>GetEphemStates()</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="For.html" title="For"><link rel="next" href="Global.html" title="Global"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">GetEphemStates()</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="For.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Global.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="GetEphemStates_Function"></a><div class="titlepage"></div><a name="N23830" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">GetEphemStates()</span></h2><p>GetEphemStates() &mdash; Function used to output initial and final spacecraft states
+    from an ephemeris file</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis">[initialEpoch, initialState, finalEpoch, finalState] = 
+      <code class="literal">GetEphemStates</code>(ephemType, sat, epochFormat, coordinateSystem)
+	  
+<em class="replaceable"><code>Inputs:</code></em>
+  ephemType    : Ephemeris type ('STK', 'SPK', 'Code500') 
+  sat          : Spacecraft with an associated ephemeris file
+  epochFormat  : String in single quotes containing a valid epoch
+                 format for the resulting epoch output
+  coordSystem  : CoordinateSystem for the resulting state output
+  
+<em class="replaceable"><code>Outputs:</code></em>
+  initialEpoch : String of initial epoch on the file in requested
+                 epochFormat 
+  initialState : 6-element Array in the requested coordinateSystem 
+  finalEpoch   : String of final epoch on the file in requested
+                 epochFormat
+  finalState   : 6-element Array in the requested coordinateSystem</pre></div><div class="refsection"><a name="N2384F"></a><h2>Description</h2><p><span class="guilabel">GetEphemStates()</span> is a special function that
+    allows you to output initial and final spacecraft ephemeris states from a
+    generated spacecraft ephemeris file. The
+    <span class="guilabel">GetEphemStates()</span> function can query through the
+    following ephemeris types: STK-TimePosVel (i.e. STK .e ephemeris), spice
+    (SPK) and Code-500. You can request the resulting initial epoch, initial
+    state, final epoch and final state in the epoch format and coordinate
+    system of your choice.</p><p>The initial state output stored in the
+    <code class="literal">initialState</code> array corresponds to the state in the
+    ephemeris file at ephemeris file's initial epoch. Similarly, the final
+    state output stored in the <code class="literal">finalState</code> array corresponds
+    to the final state in the ephemeris file at ephemeris file's final epoch.
+    You can request both the initial and final epochs in any of the epoch
+    formats that GMAT supports. Also both initial and final states can be
+    requested in any of GMAT's default or user-defined coordinate
+    systems.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="EphemerisFile.html" title="EphemerisFile"><span class="refentrytitle">EphemerisFile</span></a>, <a class="xref" href="CoordinateSystem.html" title="CoordinateSystem"><span class="refentrytitle">CoordinateSystem</span></a>, <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a></p></div><div class="refsection"><a name="N2386E"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_GetEphemStates_GUI_1.png" align="middle" height="210"></td></tr></table></div></div><p>The <span class="guilabel">GetEphemStates()</span> GUI is a very simply one
+    and it simply reflects how you implement this function in the script mode.
+    It is easiest to work with <span class="guilabel">GetEphemStates()</span> function
+    in the script mode.</p></div><div class="refsection"><a name="GetEphemStates_Remarks"></a><h2>Remarks</h2><p>Before using <span class="guilabel">GetEphemStates()</span> function to query
+    through either STK .e or Code-500 ephemeris files, you must first set the
+    STK .e or Code-500 ephemeris files to <span class="guilabel">Spacecraft</span>
+    resource's script-only field called <span class="guilabel">EphemerisName</span>
+    (i.e.
+    <span class="guilabel"><em class="replaceable"><code>Spacecraft</code></em>.EphemerisName</span>).
+    The STK .e or Code-500 ephemeris files can be set to this script-only
+    <span class="guilabel">EphemerisName</span> field either through a relative or an
+    absolute path.</p><p>When using <span class="guilabel">GetEphemStates()</span> function to query
+    through a spice ephemeris, you do not have to use
+    <span class="guilabel">EphemerisName</span> field at all. Rather you must set spice
+    ephemeris file to a <span class="guilabel">Spacecraft</span> resource's field
+    called <span class="guilabel">OrbitSpiceKernelName</span> (i.e.
+    <span class="guilabel"><em class="replaceable"><code>Spacecraft</code></em>.OrbitSpiceKernelName</span>).
+    The spice ephemeris file can be set to
+    <span class="guilabel">OrbitSpiceKernelName</span> field either through a relative
+    or an absolute path.</p><p>The <a class="xref" href="GetEphemStates_Function.html#GetEphemStates_Examples" title="Examples">Examples</a> section will show simple examples in how to use
+    <span class="guilabel">GetEphemStates()</span> function to extract initial and final spacecraft states
+    for all three STK .e, Code-500 and Spice ephemeris types.</p></div><div class="refsection"><a name="GetEphemStates_Examples"></a><h2>Examples</h2><div class="informalexample"><p>First run only 'Example 1A' to generate STK-TimePosVel (i.e. STK
+      .e) ephemeris file. Now run 'Example 1B' that shows you how to read
+      through a generated STK .e ephemeris file and retrieve spacecraft's
+      initial/final states in the desired epoch format and coordinate system.
+      Before running Example 1B, make sure that you put 'STK_Ephemeris.e'
+      ephemeris file in the same directory as your main GMAT script</p><pre class="programlisting"><code class="code">%% Example 1A. Generate STK .e ephemeris file:
+
+Create Spacecraft aSat
+
+Create Propagator aProp
+
+Create EphemerisFile anEphmerisFile
+anEphmerisFile.Spacecraft = aSat
+anEphmerisFile.Filename = 'STK_Ephemeris.e'
+anEphmerisFile.FileFormat = STK-TimePosVel
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+
+
+%%% Example 1B. Read through .e ephemeris file using GetEphemStates():
+
+Create Spacecraft aSat
+aSat.EphemerisName = './STK_Ephemeris.e'
+
+Create Propagator aProp
+
+Create EphemerisFile anEphmerisFile
+anEphmerisFile.Spacecraft = aSat
+anEphmerisFile.Filename = 'STK_Ephemeris.e'
+anEphmerisFile.FileFormat = STK-TimePosVel
+
+Create Array initialState[6,1] finalState[6,1] 
+Create String initialEpoch finalEpoch
+
+Create ReportFile rf
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+
+[initialEpoch, initialState, finalEpoch, finalState] = ...
+ GetEphemStates('STK', aSat, 'UTCGregorian', EarthMJ2000Eq)
+
+Report rf initialEpoch initialState finalEpoch finalState</code></pre></div><div class="informalexample"><p>First run only 'Example 2A' to generate a Code-500 ephemeris file.
+      Now run 'Example 2B' that shows you how to read through a generated
+      Code-500 ephemeris file and retrieve spacecraft's initial/final states
+      in the desired epoch format and coordinate system. Before running
+      Example 2B, make sure that you put 'Code500_Ephemeris.eph' ephemeris
+      file in the same directory as your main GMAT script</p><pre class="programlisting"><code class="code">%% Example 2A. Generate Code-500 ephemeris file:
+
+Create Spacecraft aSat
+
+Create Propagator aProp
+
+Create EphemerisFile anEphmerisFile
+anEphmerisFile.Spacecraft = aSat
+anEphmerisFile.Filename = 'Code500_Ephemeris.eph'
+anEphmerisFile.FileFormat = Code-500
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+
+
+%%% Example 2B. Read through Code-500 ephemeris file using GetEphemStates():
+
+Create Spacecraft aSat
+aSat.EphemerisName = './Code500_Ephemeris.eph'
+
+Create Propagator aProp
+
+Create EphemerisFile anEphmerisFile
+anEphmerisFile.Spacecraft = aSat
+anEphmerisFile.Filename = 'Code500_Ephemeris.eph'
+anEphmerisFile.FileFormat = Code-500
+
+Create Array initialState[6,1] finalState[6,1] 
+Create String initialEpoch finalEpoch
+
+Create ReportFile rf
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+
+[initialEpoch, initialState, finalEpoch, finalState] = ...
+ GetEphemStates('Code500', aSat, 'TDBGregorian', EarthMJ2000Ec)
+
+Report rf initialEpoch initialState finalEpoch finalState</code></pre></div><div class="informalexample"><p>First run only 'Example 3A' to generate a Spice ephemeris file.
+      Now run 'Example 3B' that shows you how to read through a generated
+      spice ephemeris file and retrieve spacecraft's initial/final states in
+      the desired epoch format and coordinate system. Before running Example
+      3B, make sure that you put 'SPK_Ephemeris.bsp' ephemeris file in the
+      same directory as your main GMAT script</p><pre class="programlisting"><code class="code">%% Example 3A. Generate a Spice ephemeris file:
+
+Create Spacecraft aSat
+aSat.NAIFId = -10025001;
+aSat.NAIFIdReferenceFrame = -9025001;
+
+Create Propagator aProp
+
+Create ImpulsiveBurn IB
+IB.Element1 = 0.5
+
+Create EphemerisFile anEphmerisFile
+anEphmerisFile.Spacecraft = aSat
+anEphmerisFile.Filename = 'SPK_Ephemeris.bsp'
+anEphmerisFile.FileFormat = SPK
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 0.25}
+Maneuver IB(aSat)
+Propagate aProp(aSat) {aSat.ElapsedDays = 0.25}
+
+
+%%% Example 3B. Read through a Spice ephemeris file using GetEphemStates():
+
+Create Spacecraft aSat
+aSat.NAIFId = -10025001
+aSat.NAIFIdReferenceFrame = -9025001
+aSat.OrbitSpiceKernelName = {'./SPK_Ephemeris.bsp'}
+
+Create Propagator aProp
+
+Create ImpulsiveBurn IB
+IB.Element1 = 0.5
+
+Create EphemerisFile anEphmerisFile
+anEphmerisFile.Spacecraft = aSat
+anEphmerisFile.Filename = 'SPK_Ephemeris.bsp'
+anEphmerisFile.FileFormat = SPK
+
+Create Array initialState[6,1] finalState[6,1] 
+Create String initialEpoch finalEpoch
+
+Create ReportFile rf
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 0.25}
+Maneuver IB(aSat)
+Propagate aProp(aSat) {aSat.ElapsedDays = 0.25}
+
+
+[initialEpoch, initialState, finalEpoch, finalState] = ...
+ GetEphemStates('SPK', aSat, 'UTCGregorian', EarthMJ2000Eq)
+
+Report rf initialEpoch initialState finalEpoch finalState</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="For.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Global.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">For&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Global</td></tr></table></div></body></html>

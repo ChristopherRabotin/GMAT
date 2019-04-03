@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -82,7 +82,7 @@ EstimatorHardwareFactory::~EstimatorHardwareFactory()
  */
 //------------------------------------------------------------------------------
 EstimatorHardwareFactory::EstimatorHardwareFactory(StringArray createList) :
-   Factory        (createList)
+   Factory        (createList, Gmat::HARDWARE)
 {
    if (creatables.empty())
    {
@@ -134,6 +134,7 @@ EstimatorHardwareFactory& EstimatorHardwareFactory::operator=(
    if (this != &fact)
    {
       Factory::operator=(fact);
+
       if (creatables.empty())
       {
       	creatables.push_back("Antenna");
@@ -141,13 +142,28 @@ EstimatorHardwareFactory& EstimatorHardwareFactory::operator=(
          creatables.push_back("Receiver");
          creatables.push_back("Transponder");
       }
-
    }
 
    return *this;
 }
 
-
+//------------------------------------------------------------------------------
+// GmatBase* CreateObject(const std::string& ofType, const std::string& withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates a new hardware element
+ *
+ * @param ofType The scripted type name for the new object
+ * @param withName The name of the new object
+ *
+ * @return The new object
+ */
+//------------------------------------------------------------------------------
+GmatBase* EstimatorHardwareFactory::CreateObject(const std::string& ofType,
+         const std::string& withName)
+{
+   return CreateHardware(ofType, withName);
+}
 
 //------------------------------------------------------------------------------
 // Hardware* CreateHardware(const std::string& ofType,
@@ -170,11 +186,11 @@ Hardware* EstimatorHardwareFactory::CreateHardware(const std::string& ofType,
    if (ofType == "Antenna")
    	retval = new Antenna(ofType, withName);
    else if (ofType == "Transmitter")
-      retval = new Transmitter(withName);
+      retval = new Transmitter(ofType, withName);
    else if (ofType == "Receiver")
-   	retval = new Receiver(withName);
+   	retval = new Receiver(ofType, withName);
    else if (ofType == "Transponder")
-   	retval = new Transponder(withName);
+   	retval = new Transponder(ofType, withName);
 
    return retval;
 }

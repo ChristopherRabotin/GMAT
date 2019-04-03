@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -52,41 +52,38 @@
 //  CreateObject(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
- * This method creates and returns an object of the requested ODEModel class
+ * This method creates and returns an object of the requested Subscriber class
  * in generic way.
  *
- * @param <ofType> the ODEModel object to create and return.
- * @param <withName> the name to give the newly-created ODEModel object.
+ * @param <ofType> the Subscriber object to create and return.
+ * @param <withName> the name to give the newly-created Subscriber object.
  *
  */
 //------------------------------------------------------------------------------
-Subscriber* SubscriberFactory::CreateObject(const std::string &ofType,
+GmatBase* SubscriberFactory::CreateObject(const std::string &ofType,
                                           const std::string &withName)
 {
    return CreateSubscriber(ofType, withName);
 }
 
 //------------------------------------------------------------------------------
-//  CreateSubscriber(const std::string &ofType, const std::string &withName,
-//                   const std::string &fileName)
+//  CreateSubscriber(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested Subscriber class
  *
  * @param <ofType>   the Subscriber object to create and return.
  * @param <withName> the name to give the newly-created Subscriber object.
- * @param <fileName> the file name if subscriber is ReportFile, ignored otherwise
  *
  */
 //------------------------------------------------------------------------------
 Subscriber* SubscriberFactory::CreateSubscriber(const std::string &ofType,
-                                                const std::string &withName,
-                                                const std::string &fileName)
+                                                const std::string &withName)
 {
    if (ofType == "ReportFile")
-      return new ReportFile(ofType, withName, fileName);
+      return new ReportFile(ofType, withName);
    else if (ofType == "TextEphemFile")
-      return new TextEphemFile(ofType, withName, fileName);
+      return new TextEphemFile(ofType, withName);
    else if (ofType == "MessageWindow")
       return new MessageWindow(withName);
    else if (ofType == "XYPlot")

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -87,7 +87,9 @@ public:
                         GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& 
                         GetStringArrayParameter(const std::string &label) const;
-   
+
+   virtual const        ObjectTypeArray& GetRefObjectTypeArray();
+
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,

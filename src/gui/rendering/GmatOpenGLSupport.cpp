@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -29,6 +29,7 @@
 #include "GmatOpenGLSupport.hpp"   // for OpenGL support
 #include "gmatwxdefs.hpp"          // for WX and GL
 #include "MessageInterface.hpp"
+#include "FallbackFont.hpp"
 
 //#define DEBUG_INIT_GL
 //#define TRAP_PIXEL_FORMAT_ERRORS  // Enable this to work on pixel format error
@@ -140,6 +141,18 @@ void SetDefaultGLFont()
 
    wglUseFontBitmaps(hdc, 0, 255, 1000);
    glListBase(1000); // base for displaying
+#else
+   //RRC: Added fallback: cheap fixed-width font baked in (BET, 2016-10-19)
+   unsigned int charidx;
+   for(charidx = 0; charidx < 256; charidx++)
+   {
+      //Archaic GL, but equivalent to the above
+      glNewList(charidx + 1000, GL_COMPILE);
+      glBitmap(8, 8, 0, 0, 8, 0, &(FallbackFont[charidx*8]));
+      glEndList();
+   }
+
+   glListBase(1000);
 #endif
 }
 

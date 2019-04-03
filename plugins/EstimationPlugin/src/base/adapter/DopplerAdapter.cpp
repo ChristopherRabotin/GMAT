@@ -75,7 +75,7 @@ DopplerAdapter::DopplerAdapter(const std::string& name) :
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("DopplerAdapter default constructor <%p>\n", this);
 #endif
-   typeName = "Doppler";              // change type name from "RangeKm" to "Doppler"
+   typeName = "DSN_TCP";                 // change type name from "RangeKm" to "DSN_TCP"
 }
 
 
@@ -292,7 +292,7 @@ std::string DopplerAdapter::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool DopplerAdapter::SetStringParameter(const Integer id, const std::string& value)
 {
-   // Note that: measurement type of adapter is always "Range_KM", so it does not need to change
+   // Note that: measurement type of adapter is always "DSN_TCP", so it does not need to change
    bool retval = true;
    if ((id != MEASUREMENT_TYPE)&&(id != SIGNAL_PATH))
       retval = adapterS->SetStringParameter(id, value);
@@ -863,12 +863,12 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
       
       Real C_idealVal = cMeasurement.value[i];
       
-      if (measurementType == "Doppler")
+      if (measurementType == "DSN_TCP")
       {         
          // Compute bias
-         ComputeMeasurementBias("Bias", "Doppler_HZ", 2);
+         ComputeMeasurementBias("Bias", "DSN_TCP", 2);
          // Compute noise sigma
-         ComputeMeasurementNoiseSigma("NoiseSigma", "Doppler_HZ", 2);
+         ComputeMeasurementNoiseSigma("NoiseSigma", "DSN_TCP", 2);
          // Compute measurement error covariance matrix
          ComputeMeasurementErrorCovarianceMatrix();
 
@@ -914,7 +914,7 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("      . Multiplier factor for S-path: %.12lf\n", multiplierS);
          MessageInterface::ShowMessage("      . Multiplier factor for E-path: %.12lf\n", multiplierE);
          MessageInterface::ShowMessage("      . C-value w/o noise and bias  : %.12lf Hz\n", C_idealVal);
-         if (measurementType == "Doppler")
+         if (measurementType == "DSN_TCP")
          {
             MessageInterface::ShowMessage("      . Doppler noise sigma  : %.12lf Hz \n", noiseSigma[i]);
             MessageInterface::ShowMessage("      . Doppler bias         : %.12lf Hz \n", measurementBias[i]);
@@ -998,7 +998,7 @@ const std::vector<RealArray>& DopplerAdapter::CalculateMeasurementDerivatives(
 
    if (paramName == "Bias")
    {
-      if (((ErrorModel*)obj)->GetStringParameter("Type") == "Doppler_HZ")
+      if (((ErrorModel*)obj)->GetStringParameter("Type") == "DSN_TCP")
          theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, id);
       else
       {

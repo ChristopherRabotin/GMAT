@@ -37,21 +37,36 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CreateSubscriber(const std::string &ofType, const std::string &withName,
-//                   const std::string &fileName)
+// GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Returns a GmatBase object pointer to a new object.
+ *
+ * @param <ofType>   the Subscriber object to create and return.
+ * @param <withName> the name to give the newly-created Subscriber object.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* DataCallbackFactory::CreateObject(const std::string &ofType,
+                                            const std::string &withName)
+{
+   return CreateSubscriber(ofType, withName);
+}
+
+
+//------------------------------------------------------------------------------
+//  CreateSubscriber(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested Subscriber class
  *
  * @param <ofType>   the Subscriber object to create and return.
  * @param <withName> the name to give the newly-created Subscriber object.
- * @param <fileName> the file name if subscriber is ReportFile, ignored otherwise
  *
  */
 //------------------------------------------------------------------------------
 Subscriber* DataCallbackFactory::CreateSubscriber(const std::string &ofType,
-                                                const std::string &withName,
-                                                const std::string &fileName)
+                                                  const std::string &withName)
 {
    if (ofType == "DataCallback")
       return new DataCallback(ofType, withName);
@@ -66,7 +81,6 @@ Subscriber* DataCallbackFactory::CreateSubscriber(const std::string &ofType,
 /**
  * This method creates an object of the class DataCallbackFactory
  * (default constructor).
- *
  *
  */
 //------------------------------------------------------------------------------

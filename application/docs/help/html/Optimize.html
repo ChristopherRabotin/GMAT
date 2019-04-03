@@ -1,0 +1,202 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Optimize</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="NonlinearConstraint.html" title="NonlinearConstraint"><link rel="next" href="PenUpPenDown.html" title="PenUpPenDown"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Optimize</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="NonlinearConstraint.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="PenUpPenDown.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Optimize"></a><div class="titlepage"></div><a name="N23FE0" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Optimize</span></h2><p>Optimize &mdash; Solve for condition(s) by varying one or more
+    parameters</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><code class="literal">Optimize</code> SolverName [{[<code class="literal">SolveMode</code> = <em class="replaceable"><code>value</code></em>], [<code class="literal">ExitMode</code> = <em class="replaceable"><code>value</code></em>],
+                      [<code class="literal">ShowProgressWindow</code> = <em class="replaceable"><code>value</code></em>] }]
+      <em class="replaceable"><code>Vary command</code></em> &hellip;
+      <em class="replaceable"><code>script statement</code></em> &hellip;
+      <em class="replaceable"><code>NonlinearConstraint command</code></em> &hellip;
+      <em class="replaceable"><code>Minimize command</code></em> &hellip;
+<code class="literal">EndOptimize</code>    </pre></div><div class="refsection"><a name="N24019"></a><h2>Description</h2><p>The <span class="guilabel">Optimize</span> command in GMAT allows you to
+    solve optimization problems by using a solver object. Currently, you can
+    choose from one of two available solvers, the
+    <span class="guilabel">FminconOptimizer</span> solver object available to all GMAT
+    users with access to the Matlab optimization toolbox and the
+    <span class="guilabel">VF13ad</span> solver object plug-in that you must install
+    yourself.</p><p>You use the <span class="guilabel">Optimize</span> and
+    <span class="guilabel">EndOptimize</span> commands to define an
+    <span class="guilabel">Optimize</span> sequence to determine, for example, the
+    maneuver components required to raise orbit apogee to 42164 km while
+    simultaneously minimizing the DeltaV required to do so.
+    <span class="guilabel">Optimize</span> sequences in GMAT are applicable to a wide
+    variety of problems and this is just one example. Let&rsquo;s define the
+    quantities that you don&rsquo;t know precisely, but need to determine, as the
+    Control Variables. We define the conditions that must be satisfied as the
+    Constraints and we define the quantity to be minimized (e.g., DeltaV) as
+    the Objective function. An <span class="guilabel">Optimize </span>sequence
+    numerically solves a boundary value problem to determine the value of the
+    Control Variables required to satisfy the Constraints while simultaneously
+    minimizing the Objective function. As was the case for the
+    <span class="guilabel">Target</span>/<span class="guilabel">EndTarget</span> command
+    sequence, you define your control variables by using
+    <span class="guilabel">Vary</span> commands. You define the constraints that must
+    be satisfied by using the <span class="guilabel">NonlinearConstraint</span> command
+    and you define the objective function to be minimized by using the
+    <span class="guilabel">Minimize</span> command. The
+    <span class="guilabel">Optimize</span>/<span class="guilabel">EndOptimize</span> sequence is
+    an advanced command. The examples later in this section give a more
+    detailed explanation.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Vary.html" title="Vary"><span class="refentrytitle">Vary</span></a>, <a class="xref" href="NonlinearConstraint.html" title="NonlinearConstraint"><span class="refentrytitle">NonlinearConstraint</span></a>, <a class="xref" href="Minimize.html" title="Minimize"><span class="refentrytitle">Minimize</span></a>, <a class="xref" href="VF13ad.html" title="VF13ad"><span class="refentrytitle">VF13ad</span></a></p></div><div class="refsection"><a name="N2405D"></a><h2>Options</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">ApplyCorrections</span></td><td><p>The <span class="guilabel">ApplyCorrections</span> GUI button
+            replaces the initial guess values specified in the
+            <span class="guilabel">Vary</span> commands with those computed by the
+            optimizer during a run. If the <span class="guilabel">Optimize</span>
+            sequence converged, the converged values are applied. If the
+            <span class="guilabel">Optimize</span> sequence did not converge, the last
+            calculated values are applied. There is one situation where the
+            action specified above, where the initial guess values specified
+            in the <span class="guilabel">Vary</span> commands are replaced, does not
+            occur. This happens when the initial guess value specified in the
+            <span class="guilabel">Vary</span> command is given by a variable. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ExitMode</span></td><td><p>Controls the initial guess values for
+            <span class="guilabel">Optimize</span> sequences nested in control flow. If
+            <span class="guilabel">ExitMode</span> is set to
+            <code class="literal">SaveAndContinue</code>, the solution of an
+            <span class="guilabel">Optimize</span> sequence is saved and used as the
+            initial guess for the next time this Optimize sequence is run. The
+            rest of the mission sequence is then executed. If
+            <span class="guilabel">ExitMode</span> is set to
+            <span class="guilabel">DiscardAndContinue</span>, then the solution is
+            discarded and the initial guess values specified in the
+            <span class="guilabel">Vary</span> commands are used for each
+            <span class="guilabel">Optimize</span> sequence execution. The rest of the
+            mission sequence is then executed. If
+            <span class="guilabel">ExitMode</span> is set to <span class="guilabel">Stop</span>,
+            the <span class="guilabel">Optimize</span> sequence is executed, the
+            solution is discarded, and the rest of the mission sequence is not
+            executed. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">DiscardAndContinue</span>,<span class="guilabel">SaveAndContinue</span>,
+                    <span class="guilabel">Stop</span></p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">DiscardAndContinu</span>e</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ShowProgressWindow</span></td><td><p>Flag to indicate if solver progress window should be
+            displayed. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true,false</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>true</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SolveMode</span></td><td><p>Specifies how the optimization loop behaves during
+            mission execution. When <span class="guilabel">SolveMode</span> is set to
+            <span class="guilabel">Solve</span>, the optimization loop executes and
+            attempts to solve the optimization problem. When
+            <span class="guilabel">SolveMode</span> is set to
+            <span class="guilabel">RunInitialGuess</span>, the Optimizer does not
+            attempt to solve the optimization problem and the commands in the
+            <span class="guilabel">Optimize</span> sequence execute using the initial
+            guess values defined in the <span class="guilabel">Vary</span> commands.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Solve</span>,
+                    <span class="guilabel">RunInitialGuess</span></p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Solve</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SolverName</span></td><td><p>Specifies the solver/optimizer object&nbsp;used in the
+            <span class="guilabel">Optimize</span> sequence </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any <span class="guilabel">VD13ad</span> or
+                    <span class="guilabel">FminconOptimizer</span> resource</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DefaultSQP</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N24196"></a><h2>GUI</h2><p>The <span class="guilabel">Optimize</span> command allows you to use an
+    optimization process to solve problems. To solve a given problem, you need
+    to create a so-called <span class="guilabel">Optimize</span> sequence which we now
+    define. When you add an <span class="guilabel">Optimize</span> command to the
+    mission sequence, an <span class="guilabel">EndOptimize</span> command is
+    automatically added as shown below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Optimize_GUI_1.png" align="middle" height="54"></td></tr></table></div></div><p>In the example above, the <span class="guilabel">Optimize</span> command
+    sequence is defined as all of the commands between the
+    <span class="guilabel">Optimize1</span> and <span class="guilabel">EndOptimize1</span>
+    commands, inclusive. Although not shown above, an
+    <span class="guilabel">Optimize</span> command sequence must contain a
+    <span class="guilabel">Vary</span> command which is used to define the control
+    variables that can be varied in order to help solve our problem. An
+    <span class="guilabel">Optimize</span> command must also contain a
+    <span class="guilabel">Minimize</span> command and/or one or more
+    <span class="guilabel">NonlinearConstraint</span> commands. You use a
+    <span class="guilabel">Minimize</span> command to define a cost function that you
+    wish to minimize and you use the<span class="guilabel"> NonlinearConstraint</span>
+    command to define either an equality or inequality constraint that you
+    want to be satisfied at the end of the optimization process.</p><p>Double click on the <span class="guilabel">Optimize1</span> command above to
+    open the <span class="guilabel">Optimize</span> command dialog box, shown below,
+    which allows you to specify your choice of Solver (i.e., your choice of
+    optimizer), <span class="guilabel">Solver Mode</span>, and <span class="guilabel">Exit
+    Mode</span>. As described in the Remarks section, the
+    <span class="guilabel">Optimize</span> command dialog box also allows you to apply
+    corrections to your <span class="guilabel">Optimize</span> command sequence.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Optimize_GUI_2.png" align="middle" height="227"></td></tr></table></div></div><p>If you set <span class="guilabel">ShowProgressWindow</span> to true, then a
+    dynamic display is shown during optimization that contains values of
+    variables and constraints as shown below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Optimize_SolverStatusWindow.png" align="middle" height="422"></td></tr></table></div></div></div><div class="refsection"><a name="N241FB"></a><h2>Remarks</h2><div class="refsection"><a name="N241FE"></a><h3>Content of an Optimize/EndOptimize Sequence</h3><p>An <span class="guilabel">O</span><span class="guilabel">ptimize/EndOptimize</span>
+      sequence must contain at least one <span class="guilabel">Vary</span> command and
+      at least one of the following commands:
+      <span class="guilabel">NonlinearConstraint</span> and
+      <span class="guilabel">Minimize</span>. See the <span class="guilabel">Vary</span>,
+      <span class="guilabel">NonlinearConstraint</span>, and
+      <span class="guilabel">Minimize</span> command sections for details on the syntax
+      for those commands. The first <span class="guilabel">Vary</span> command must
+      occur before the first <span class="guilabel">NonlinearConstraint</span> or
+      <span class="guilabel">Minimize</span> command. Each
+      <span class="guilabel">Optimize</span> command field in the curly braces is
+      optional. You can omit the entire list and the curly braces and the
+      default values will be used for <span class="guilabel">Optimize</span>
+      configuration fields such as <span class="guilabel">SolveMode</span> and
+      <span class="guilabel">ExitMode</span>.</p></div><div class="refsection"><a name="N2422F"></a><h3>Relation to Target/EndTarget Command Sequence</h3><p>There are some functional similarities between the
+      <span class="guilabel">Target/EndTarge</span>t and
+      <span class="guilabel">Optimize/EndOptimize</span> command sequences. In both
+      cases, we define Control Variables and Constraints. For both
+      <span class="guilabel">Target</span> and <span class="guilabel">Optimize</span> sequences,
+      we use the <span class="guilabel">Vary</span> command to define the Control
+      Variables. For the <span class="guilabel">Target</span> sequence, we use the
+      <span class="guilabel">Achieve</span> command to define the constraints whereas,
+      for an <span class="guilabel">Optimize</span> sequence, we use the
+      <span class="guilabel">NonlinearConstraint</span> command. The big difference
+      between the <span class="guilabel">Target</span> and
+      <span class="guilabel">Optimize</span> sequences is that the
+      <span class="guilabel">Optimize</span> sequence allows for the minimization of an
+      Objective function through the use of the <span class="guilabel">Minimize</span>
+      command.</p></div><div class="refsection"><a name="N2425B"></a><h3>Command Interactions</h3><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><tbody><tr><td><span class="guilabel">Vary command</span></td><td><p> Every <span class="guilabel">Optimize</span> sequence must
+              contain at least one <span class="guilabel">Vary
+              </span>command.<span class="guilabel"> Vary</span> commands are used
+              to define the control variables associated with an
+              <span class="guilabel">Optimize</span> sequence. </p></td></tr><tr><td><span class="guilabel">NonlinearConstraint command</span></td><td><p> <span class="guilabel">NonlinearConstraint</span> commands
+              are used to define the constraints associated with an
+              <span class="guilabel">Optimize</span> sequence. Note that multiple
+              <span class="guilabel">NonlinearConstraint</span> commands are allowed
+              within an <span class="guilabel">Optimize</span> sequence.
+              </p></td></tr><tr><td><span class="guilabel">Minimize command</span></td><td><p> A <span class="guilabel">Minimize</span> command is used
+              within an <span class="guilabel">Optimize</span> sequence to define the
+              Objective function that will be minimized. Note that an
+              <span class="guilabel">Optimize</span> sequence is allowed to contain, at
+              most, one <span class="guilabel">Minimize</span> command. (An
+              <span class="guilabel">Optimize</span> sequence is not required to
+              contain a <span class="guilabel">Minimize</span> command) </p></td></tr></tbody></table></div></div></div><div class="refsection"><a name="N242A9"></a><h2>Examples</h2><div class="informalexample"><p>Use an <span class="guilabel">Optimize</span> sequence with the fmincon
+      solver object to find the point, (x, y), on the unit circle with the
+      smallest y value. Note that the use of the
+      <span class="guilabel">FminconOptimizer</span> solver assumes you have access to
+      the Matlab optimization toolbox.</p><pre class="programlisting"><code class="code">Create FminconOptimizer SQP1
+SQP1.MaximumIterations = 50
+Create Variable x y Circle
+
+BeginMissionSequence
+Optimize SQP1
+  Vary SQP1(x = 1)
+  Vary SQP1(y = 1)
+  Circle = x*x + y*y
+  NonlinearConstraint SQP1(Circle = 1)
+  Minimize SQP1(y)
+EndOptimize </code></pre></div><div class="informalexample"><p>Similar to the example given in the <span class="guilabel">Target</span>
+      command Help, use an <span class="guilabel">Optimize</span> sequence to raise
+      orbit apogee. In the <span class="guilabel">Target</span> command example, we had
+      one control variable, the velocity component of an
+      <span class="guilabel">ImpulsiveBurn</span> object, and the single constraint
+      that the position vector magnitude at orbit apogee equals 42164. For
+      this example, we keep this control variable and constraint but we now
+      add a second control variable, the true anomaly of where the burn
+      occurs. In addition, we ask the optimizer to minimize the Delta-V cost
+      of the burn. As expected, the best (DV minimizing) orbit location to
+      perform an apogee raising burn is near perigee (i.e., nearTA = 0). In
+      this example, since the force model in use in not perfectly two body
+      Keplerian, the optimal TA value obtained is close to but not exactly 0.
+      Note that the use of the <span class="guilabel">VF13ad</span> solver object in
+      this example assumes that you have installed this optional plug-in.
+      Finally, report the convergence status to a file.</p><pre class="programlisting">Create Spacecraft aSat
+Create Propagator aPropagator
+Create ImpulsiveBurn aBurn
+Create VF13ad VF13ad1
+VF13ad1.Tolerance = 1e-008
+Create OrbitView EarthView
+EarthView.Add = {Earth, aSat}
+EarthView.ViewScaleFactor = 5
+Create Variable ApogeeRadius DVCost
+Create ReportFile aReport
+
+BeginMissionSequence
+Optimize VF13ad1
+  Vary VF13ad1(aSat.TA = 100, {MaxStep = 10})
+  Vary VF13ad1(aBurn.Element1 = 1, {MaxStep = 1})
+  Maneuver aBurn(aSat)
+  Propagate aPropagator(aSat) {aSat.Apoapsis}
+  GMAT ApogeeRadius = aSat.RMAG
+  NonlinearConstraint VF13ad1(ApogeeRadius=42164)
+  GMAT DVCost = aBurn.Element1
+  Minimize VF13ad1(DVCost)
+EndOptimize 
+Report aReport VF13ad1.SolverStatus VF13ad1.SolverState     </pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="NonlinearConstraint.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="PenUpPenDown.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">NonlinearConstraint&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;PenUpPenDown</td></tr></table></div></body></html>

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General MiHeaderssion Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1757,7 +1757,7 @@ bool GmatCommand::ForceSetPrevious(GmatCommand *toCmd) // dangerous!
 //------------------------------------------------------------------------------
 /**
  * Adds GmatCommand at the end of the GmatCommand sequence
- * 
+ *
  * @param cmd Pointer to GmatCommand that is added at the end
  *
  * @return true on success, false on failure.
@@ -1770,41 +1770,108 @@ bool GmatCommand::Append(GmatCommand *cmd)
    ShowCommand("GmatCommand::", "Append() cmd = ", cmd);
    #endif
    
+   if (!cmd)
+      throw CommandException("Attempting to add a NULL GmatCommand");
+
    if (cmd == this)
       throw CommandException("Attempting to add GmatCommand already in list");
-   
-   if (next)
+
+   GmatCommand *current = this;
+
+   while (current->next)
    {
       #ifdef DEBUG_COMMAND_APPEND
       ShowCommand("GmatCommand::", " appending ", cmd, " to ", next);
       #endif
-      next->Append(cmd);
+      current = current->next;
+
+      // Call into BranchCommand Append() and let it handle the rest
+      if (current->IsOfType("BranchCommand"))
+      {
+         current->Append(cmd);
+         current = NULL;
+         break;
+      }
    }
-   else
+
+   if (current)
    {
       // Always set the command changed flag when a command is added to the list
-      commandChanged = true;
-      
+      current->commandChanged = true;
+
       #ifdef DEBUG_COMMAND_APPEND
-      ShowCommand("GmatCommand::", " Setting next of ", this, " to ", cmd);
+      ShowCommand("GmatCommand::", " Setting next of ", current, " to ", cmd);
       #endif
-      
-      next = cmd;
-      
-      // Do not set previous command if this is branch end 
-      if (!this->IsOfType("BranchEnd"))
+
+      current->next = cmd;
+
+      // Do not set previous command if this is branch end
+      if (!current->IsOfType("BranchEnd"))
       {
          #ifdef DEBUG_COMMAND_APPEND
          ShowCommand("GmatCommand::", " Setting previous of ", cmd, " to ", this);
          #endif
-         
-         cmd->previous = this;
+
+         cmd->previous = current;
       }
    }
-   
+
    return true;
 }
-
+//#else
+////------------------------------------------------------------------------------
+////  bool Append(GmatCommand *cmd)
+////------------------------------------------------------------------------------
+///**
+// * Adds GmatCommand at the end of the GmatCommand sequence
+// *
+// * @param cmd Pointer to GmatCommand that is added at the end
+// *
+// * @return true on success, false on failure.
+// */
+////------------------------------------------------------------------------------
+//bool GmatCommand::Append(GmatCommand *cmd)
+//{
+//   #if DEBUG_COMMAND_APPEND > 1
+//   ShowCommand("GmatCommand::", "Append() this = ", this, " next = ", next);
+//   ShowCommand("GmatCommand::", "Append() cmd = ", cmd);
+//   #endif
+//
+//   if (cmd == this)
+//      throw CommandException("Attempting to add GmatCommand already in list");
+//
+//   if (next)
+//   {
+//      #ifdef DEBUG_COMMAND_APPEND
+//      ShowCommand("GmatCommand::", " appending ", cmd, " to ", next);
+//      #endif
+//      next->Append(cmd);
+//   }
+//   else
+//   {
+//      // Always set the command changed flag when a command is added to the list
+//      commandChanged = true;
+//
+//      #ifdef DEBUG_COMMAND_APPEND
+//      ShowCommand("GmatCommand::", " Setting next of ", this, " to ", cmd);
+//      #endif
+//
+//      next = cmd;
+//
+//      // Do not set previous command if this is branch end
+//      if (!this->IsOfType("BranchEnd"))
+//      {
+//         #ifdef DEBUG_COMMAND_APPEND
+//         ShowCommand("GmatCommand::", " Setting previous of ", cmd, " to ", this);
+//         #endif
+//
+//         cmd->previous = this;
+//      }
+//   }
+//
+//   return true;
+//}
+//#endif
 
 //------------------------------------------------------------------------------
 //  bool Insert(GmatCommand *cmd, GmatCommand *prev)
@@ -2096,36 +2163,51 @@ bool GmatCommand::SkipInterrupt()
  * to reset the commands to an idle state.
  */
 //------------------------------------------------------------------------------
+void GmatCommand::RunComplete(bool isHead)
+{
+   #if DEBUG_RUN_COMPLETE
+   MessageInterface::ShowMessage
+      ("GmatCommand::RunComplete(%s) for (%p)%s\n", (isHead ? "true" : "false"),
+            this, typeName.c_str());
+   #endif
+
+   RunComplete();
+   
+   if (IsOfType("BranchEnd"))
+      return;
+   
+   if (isHead)
+   {
+      GmatCommand *current = next;
+
+      // By default, just call RunComplete on the next command.
+      while (current)
+      {
+         // Branch command ends point back to start; this line prevents looping
+         if (!current->IsOfType("BranchEnd"))
+            current->RunComplete();
+         current = current->GetNext();
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+// void RunComplete()
+//------------------------------------------------------------------------------
+/**
+ * Finalizes the run for this command
+ */
+//------------------------------------------------------------------------------
 void GmatCommand::RunComplete()
 {
    #if DEBUG_RUN_COMPLETE
    MessageInterface::ShowMessage
       ("GmatCommand::RunComplete for (%p)%s\n", this, typeName.c_str());
    #endif
-   
+
    // Reset stream ID and initialized flag
    streamID = -1;
    isInitialized = false;
-   
-   if (this->IsOfType("BranchEnd"))
-      return;
-   
-   // By default, just call RunComplete on the next command.
-   if (next)
-   {
-      #if DEBUG_RUN_COMPLETE
-      MessageInterface::ShowMessage("   Next cmd is a <%p><%s>'%s'\n", next,
-                                    (next->GetTypeName()).c_str(), next->GetGeneratingString().c_str());
-      if (next->IsOfType("BranchEnd"))
-         MessageInterface::ShowMessage
-            ("   .. and that cmd is a branchEnd!!!!!!!!! %s\n",
-             (next->GetTypeName()).c_str());
-      #endif
-      
-      // Branch command ends point back to start; this line prevents looping
-      if (!next->IsOfType("BranchEnd"))
-         next->RunComplete();
-   }
 }
 
 

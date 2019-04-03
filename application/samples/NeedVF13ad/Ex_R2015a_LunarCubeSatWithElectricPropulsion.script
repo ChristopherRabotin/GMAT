@@ -7,8 +7,8 @@
 %----------------------------------------
 
 Create Spacecraft DefaultSC;
-GMAT DefaultSC.DateFormat = UTCGregorian;
-GMAT DefaultSC.Epoch = '15 Dec 2017 14:56:42.200';
+GMAT DefaultSC.DateFormat = TAIGregorian;
+GMAT DefaultSC.Epoch = '15 Dec 2017 14:57:17.200';
 GMAT DefaultSC.CoordinateSystem = EarthMJ2000Eq;
 GMAT DefaultSC.DisplayStateType = Cartesian;
 GMAT DefaultSC.X = -15015.40312811781;

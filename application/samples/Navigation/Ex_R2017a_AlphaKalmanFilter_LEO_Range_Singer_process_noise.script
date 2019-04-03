@@ -1,0 +1,848 @@
+%Kalman_LEO_Range_Mult_Singer_00
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft SimSat;
+SimSat.DateFormat = TAIModJulian;
+SimSat.Epoch = 27529.54724537037;
+SimSat.CoordinateSystem = EarthMJ2000Eq;
+SimSat.DisplayStateType = Cartesian;
+SimSat.X = -5166.062095060738;
+SimSat.Y = 3544.319602030322;
+SimSat.Z = 2270.24832244043;
+SimSat.VX = -2.966484720960293;
+SimSat.VY = -6.387995015434735;
+SimSat.VZ = 3.214525798878569;
+SimSat.DryMass = 850;
+SimSat.Cd = 2.2;
+SimSat.Cr = 1.8;
+SimSat.DragArea = 15;
+SimSat.SRPArea = 1;
+SimSat.NAIFId = -10001001;
+SimSat.NAIFIdReferenceFrame = -9001001;
+SimSat.OrbitColor = Red;
+SimSat.TargetColor = Teal;
+SimSat.Id = 1984;
+SimSat.Attitude = CoordinateSystemFixed;
+SimSat.SPADSRPScaleFactor = 1;
+SimSat.AddHardware = {SatTransponder, SatAntenna};
+SimSat.ModelFile = 'aura.3ds';
+SimSat.ModelOffsetX = 0;
+SimSat.ModelOffsetY = 0;
+SimSat.ModelOffsetZ = 0;
+SimSat.ModelRotationX = 0;
+SimSat.ModelRotationY = 0;
+SimSat.ModelRotationZ = 0;
+SimSat.ModelScale = 1;
+SimSat.AttitudeDisplayStateType = 'Quaternion';
+SimSat.AttitudeRateDisplayStateType = 'AngularVelocity';
+SimSat.AttitudeCoordinateSystem = EarthMJ2000Eq;
+SimSat.EulerAngleSequence = '321';
+
+Create Spacecraft EstSat;
+EstSat.DateFormat = TAIModJulian;
+EstSat.Epoch = 27529.54724537037;
+EstSat.CoordinateSystem = EarthMJ2000Eq;
+EstSat.DisplayStateType = Cartesian;
+EstSat.X = -5166.1;
+EstSat.Y = 3544.3;
+EstSat.Z = 2270.2;
+EstSat.VX = -2.966;
+EstSat.VY = -6.388;
+EstSat.VZ = 3.215;
+EstSat.DryMass = 850;
+EstSat.Cd = 2.2;
+EstSat.Cr = 1.8;
+EstSat.DragArea = 15;
+EstSat.SRPArea = 1;
+EstSat.NAIFId = -10002001;
+EstSat.NAIFIdReferenceFrame = -9002001;
+EstSat.OrbitColor = Green;
+EstSat.TargetColor = LightGray;
+EstSat.Id = '1984';
+EstSat.Attitude = CoordinateSystemFixed;
+EstSat.SPADSRPScaleFactor = 1;
+EstSat.AddHardware = {SatTransponder, SatAntenna};
+EstSat.ModelFile = 'aura.3ds';
+EstSat.ModelOffsetX = 0;
+EstSat.ModelOffsetY = 0;
+EstSat.ModelOffsetZ = 0;
+EstSat.ModelRotationX = 0;
+EstSat.ModelRotationY = 0;
+EstSat.ModelRotationZ = 0;
+EstSat.ModelScale = 1;
+EstSat.AttitudeDisplayStateType = 'Quaternion';
+EstSat.AttitudeRateDisplayStateType = 'AngularVelocity';
+EstSat.AttitudeCoordinateSystem = EarthMJ2000Eq;
+EstSat.EulerAngleSequence = '321';
+EstSat.SolveFors = {CartesianState}; 
+
+%----------------------------------------
+%---------- Communications Hardware
+%----------------------------------------
+
+%
+% Spacecraft electronics
+%
+
+Create Antenna SatAntenna;
+
+Create Transponder SatTransponder;
+SatTransponder.PrimaryAntenna = SatAntenna;
+SatTransponder.HardwareDelay = 0;
+SatTransponder.TurnAroundRatio = '240/221'; %'221/1498'  ;%'240/221';
+
+%
+% Ground electronics
+%
+Create Transmitter UplinkTransmitter;
+UplinkTransmitter.PrimaryAntenna = UplinkAntenna;
+UplinkTransmitter.Frequency = 2067.5; %% MHz
+
+Create Antenna UplinkAntenna;
+
+Create Receiver GroundReceiver;
+GroundReceiver.PrimaryAntenna = UplinkAntenna;
+
+%----------------------------------------
+%---------- GroundStations
+%----------------------------------------
+Create GroundStation VailAZ;
+VailAZ.OrbitColor = Thistle;
+VailAZ.TargetColor = DarkGray;
+VailAZ.CentralBody = Earth;
+VailAZ.StateType = Spherical;
+VailAZ.HorizonReference = Ellipsoid;
+VailAZ.Location1 = 32.05443;
+VailAZ.Location2 = 250.70103;
+VailAZ.Location3 = 0.953;
+VailAZ.Id = '10';
+VailAZ.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+VailAZ.IonosphereModel = 'None';
+VailAZ.TroposphereModel = 'None';
+VailAZ.DataSource = 'Constant';
+VailAZ.Temperature = 295.1;
+VailAZ.Pressure = 1013.5;
+VailAZ.Humidity = 55;
+VailAZ.MinimumElevationAngle = 7;
+VailAZ.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation WallopsVA;
+WallopsVA.OrbitColor = Thistle;
+WallopsVA.TargetColor = DarkGray;
+WallopsVA.CentralBody = Earth;
+WallopsVA.StateType = Spherical;
+WallopsVA.HorizonReference = Ellipsoid;
+WallopsVA.Location1 = 37.95;
+WallopsVA.Location2 = 284.5333;
+WallopsVA.Location3 = 0.0125;
+WallopsVA.Id = '11';
+WallopsVA.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+WallopsVA.IonosphereModel = 'None';
+WallopsVA.TroposphereModel = 'None';
+WallopsVA.DataSource = 'Constant';
+WallopsVA.Temperature = 295.1;
+WallopsVA.Pressure = 1013.5;
+WallopsVA.Humidity = 55;
+WallopsVA.MinimumElevationAngle = 7;
+WallopsVA.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation KaulanaHI;
+KaulanaHI.OrbitColor = Thistle;
+KaulanaHI.TargetColor = DarkGray;
+KaulanaHI.CentralBody = Earth;
+KaulanaHI.StateType = Spherical;
+KaulanaHI.HorizonReference = Ellipsoid;
+KaulanaHI.Location1 = 18.9111;
+KaulanaHI.Location2 = 204.3189;
+KaulanaHI.Location3 = 0;
+KaulanaHI.Id = '12';
+KaulanaHI.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+KaulanaHI.IonosphereModel = 'None';
+KaulanaHI.TroposphereModel = 'None';
+KaulanaHI.DataSource = 'Constant';
+KaulanaHI.Temperature = 295.1;
+KaulanaHI.Pressure = 1013.5;
+KaulanaHI.Humidity = 55;
+KaulanaHI.MinimumElevationAngle = 7;
+KaulanaHI.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation Florida;
+Florida.OrbitColor = Thistle;
+Florida.TargetColor = DarkGray;
+Florida.CentralBody = Earth;
+Florida.StateType = Spherical;
+Florida.HorizonReference = Ellipsoid;
+Florida.Location1 = 27.9236;
+Florida.Location2 = 278.1623;
+Florida.Location3 = 0;
+Florida.Id = '13';
+Florida.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+Florida.IonosphereModel = 'None';
+Florida.TroposphereModel = 'None';
+Florida.DataSource = 'Constant';
+Florida.Temperature = 295.1;
+Florida.Pressure = 1013.5;
+Florida.Humidity = 55;
+Florida.MinimumElevationAngle = 7;
+Florida.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation SscSantiagoChile;
+SscSantiagoChile.OrbitColor = Thistle;
+SscSantiagoChile.TargetColor = DarkGray;
+SscSantiagoChile.CentralBody = Earth;
+SscSantiagoChile.StateType = Spherical;
+SscSantiagoChile.HorizonReference = Ellipsoid;
+SscSantiagoChile.Location1 = -33.1333;
+SscSantiagoChile.Location2 = 289.3333000000001;
+SscSantiagoChile.Location3 = 0.7234;
+SscSantiagoChile.Id = '20';
+SscSantiagoChile.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+SscSantiagoChile.IonosphereModel = 'None';
+SscSantiagoChile.TroposphereModel = 'None';
+SscSantiagoChile.DataSource = 'Constant';
+SscSantiagoChile.Temperature = 295.1;
+SscSantiagoChile.Pressure = 1013.5;
+SscSantiagoChile.Humidity = 55;
+SscSantiagoChile.MinimumElevationAngle = 7;
+SscSantiagoChile.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation SouthAmerica1;
+SouthAmerica1.OrbitColor = Thistle;
+SouthAmerica1.TargetColor = DarkGray;
+SouthAmerica1.CentralBody = Earth;
+SouthAmerica1.StateType = Spherical;
+SouthAmerica1.HorizonReference = Ellipsoid;
+SouthAmerica1.Location1 = -26.42;
+SouthAmerica1.Location2 = 310.1671;
+SouthAmerica1.Location3 = 0.5234;
+SouthAmerica1.Id = '21';
+SouthAmerica1.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+SouthAmerica1.IonosphereModel = 'None';
+SouthAmerica1.TroposphereModel = 'None';
+SouthAmerica1.DataSource = 'Constant';
+SouthAmerica1.Temperature = 295.1;
+SouthAmerica1.Pressure = 1013.5;
+SouthAmerica1.Humidity = 55;
+SouthAmerica1.MinimumElevationAngle = 7;
+SouthAmerica1.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation SouthAmerica2;
+SouthAmerica2.OrbitColor = Thistle;
+SouthAmerica2.TargetColor = DarkGray;
+SouthAmerica2.CentralBody = Earth;
+SouthAmerica2.StateType = Spherical;
+SouthAmerica2.HorizonReference = Ellipsoid;
+SouthAmerica2.Location1 = -6.22912;
+SouthAmerica2.Location2 = 323.6993;
+SouthAmerica2.Location3 = 0.02234;
+SouthAmerica2.Id = '22';
+SouthAmerica2.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+SouthAmerica2.IonosphereModel = 'None';
+SouthAmerica2.TroposphereModel = 'None';
+SouthAmerica2.DataSource = 'Constant';
+SouthAmerica2.Temperature = 295.1;
+SouthAmerica2.Pressure = 1013.5;
+SouthAmerica2.Humidity = 55;
+SouthAmerica2.MinimumElevationAngle = 7;
+SouthAmerica2.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation SouthAmerica3;
+SouthAmerica3.OrbitColor = Thistle;
+SouthAmerica3.TargetColor = DarkGray;
+SouthAmerica3.CentralBody = Earth;
+SouthAmerica3.StateType = Spherical;
+SouthAmerica3.HorizonReference = Ellipsoid;
+SouthAmerica3.Location1 = -0.859189;
+SouthAmerica3.Location2 = 279.2363;
+SouthAmerica3.Location3 = 0.02234;
+SouthAmerica3.Id = '23';
+SouthAmerica3.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+SouthAmerica3.IonosphereModel = 'None';
+SouthAmerica3.TroposphereModel = 'None';
+SouthAmerica3.DataSource = 'Constant';
+SouthAmerica3.Temperature = 295.1;
+SouthAmerica3.Pressure = 1013.5;
+SouthAmerica3.Humidity = 55;
+SouthAmerica3.MinimumElevationAngle = 7;
+SouthAmerica3.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation SouthAmerica4;
+SouthAmerica4.OrbitColor = Thistle;
+SouthAmerica4.TargetColor = DarkGray;
+SouthAmerica4.CentralBody = Earth;
+SouthAmerica4.StateType = Spherical;
+SouthAmerica4.HorizonReference = Ellipsoid;
+SouthAmerica4.Location1 = 6.22912;
+SouthAmerica4.Location2 = 302.4344;
+SouthAmerica4.Location3 = 0.02234;
+SouthAmerica4.Id = '24';
+SouthAmerica4.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+SouthAmerica4.IonosphereModel = 'None';
+SouthAmerica4.TroposphereModel = 'None';
+SouthAmerica4.DataSource = 'Constant';
+SouthAmerica4.Temperature = 295.1;
+SouthAmerica4.Pressure = 1013.5;
+SouthAmerica4.Humidity = 55;
+SouthAmerica4.MinimumElevationAngle = 7;
+SouthAmerica4.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation CentralAmerica;
+CentralAmerica.OrbitColor = Thistle;
+CentralAmerica.TargetColor = DarkGray;
+CentralAmerica.CentralBody = Earth;
+CentralAmerica.StateType = Spherical;
+CentralAmerica.HorizonReference = Ellipsoid;
+CentralAmerica.Location1 = 15.6802;
+CentralAmerica.Location2 = 269.1408;
+CentralAmerica.Location3 = 0.52234;
+CentralAmerica.Id = '25';
+CentralAmerica.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+CentralAmerica.IonosphereModel = 'None';
+CentralAmerica.TroposphereModel = 'None';
+CentralAmerica.DataSource = 'Constant';
+CentralAmerica.Temperature = 295.1;
+CentralAmerica.Pressure = 1013.5;
+CentralAmerica.Humidity = 55;
+CentralAmerica.MinimumElevationAngle = 7;
+CentralAmerica.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation SansaSA;
+SansaSA.OrbitColor = Thistle;
+SansaSA.TargetColor = DarkGray;
+SansaSA.CentralBody = Earth;
+SansaSA.StateType = Spherical;
+SansaSA.HorizonReference = Ellipsoid;
+SansaSA.Location1 = -25.8833;
+SansaSA.Location2 = 27.7;
+SansaSA.Location3 = 1.555;
+SansaSA.Id = '30';
+SansaSA.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+SansaSA.IonosphereModel = 'None';
+SansaSA.TroposphereModel = 'None';
+SansaSA.DataSource = 'Constant';
+SansaSA.Temperature = 295.1;
+SansaSA.Pressure = 1013.5;
+SansaSA.Humidity = 55;
+SansaSA.MinimumElevationAngle = 7;
+SansaSA.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation Africa1;
+Africa1.OrbitColor = Thistle;
+Africa1.TargetColor = DarkGray;
+Africa1.CentralBody = Earth;
+Africa1.StateType = Spherical;
+Africa1.HorizonReference = Ellipsoid;
+Africa1.Location1 = 24.63229752337072;
+Africa1.Location2 = 344.7494;
+Africa1.Location3 = 0.02;
+Africa1.Id = '31';
+Africa1.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+Africa1.IonosphereModel = 'None';
+Africa1.TroposphereModel = 'None';
+Africa1.DataSource = 'Constant';
+Africa1.Temperature = 295.1;
+Africa1.Pressure = 1013.5;
+Africa1.Humidity = 55;
+Africa1.MinimumElevationAngle = 7;
+Africa1.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation Africa2;
+Africa2.OrbitColor = Thistle;
+Africa2.TargetColor = DarkGray;
+Africa2.CentralBody = Earth;
+Africa2.StateType = Spherical;
+Africa2.HorizonReference = Ellipsoid;
+Africa2.Location1 = 10.0955;
+Africa2.Location2 = 9.02148;
+Africa2.Location3 = 1.578;
+Africa2.Id = '32';
+Africa2.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+Africa2.IonosphereModel = 'None';
+Africa2.TroposphereModel = 'None';
+Africa2.DataSource = 'Constant';
+Africa2.Temperature = 295.1;
+Africa2.Pressure = 1013.5;
+Africa2.Humidity = 55;
+Africa2.MinimumElevationAngle = 7;
+Africa2.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation Africa3;
+Africa3.OrbitColor = Thistle;
+Africa3.TargetColor = DarkGray;
+Africa3.CentralBody = Earth;
+Africa3.StateType = Spherical;
+Africa3.HorizonReference = Ellipsoid;
+Africa3.Location1 = -5.2844;
+Africa3.Location2 = 33.578;
+Africa3.Location3 = 1.312;
+Africa3.Id = '33';
+Africa3.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+Africa3.IonosphereModel = 'None';
+Africa3.TroposphereModel = 'None';
+Africa3.DataSource = 'Constant';
+Africa3.Temperature = 295.1;
+Africa3.Pressure = 1013.5;
+Africa3.Humidity = 55;
+Africa3.MinimumElevationAngle = 7;
+Africa3.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation Africa4;
+Africa4.OrbitColor = Thistle;
+Africa4.TargetColor = DarkGray;
+Africa4.CentralBody = Earth;
+Africa4.StateType = Spherical;
+Africa4.HorizonReference = Ellipsoid;
+Africa4.Location1 = 4.51074;
+Africa4.Location2 = 42.315;
+Africa4.Location3 = 0.8000;
+Africa4.Id = '34';
+Africa4.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+Africa4.IonosphereModel = 'None';
+Africa4.TroposphereModel = 'None';
+Africa4.DataSource = 'Constant';
+Africa4.Temperature = 295.1;
+Africa4.Pressure = 1013.5;
+Africa4.Humidity = 55;
+Africa4.MinimumElevationAngle = 7;
+Africa4.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation Madagascar;
+Madagascar.OrbitColor = Thistle;
+Madagascar.TargetColor = DarkGray;
+Madagascar.CentralBody = Earth;
+Madagascar.StateType = Spherical;
+Madagascar.HorizonReference = Ellipsoid;
+Madagascar.Location1 = -15.4128;
+Madagascar.Location2 = 49.8716;
+Madagascar.Location3 = 1.553;
+Madagascar.Id = '35';
+Madagascar.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+Madagascar.IonosphereModel = 'None';
+Madagascar.TroposphereModel = 'None';
+Madagascar.DataSource = 'Constant';
+Madagascar.Temperature = 295.1;
+Madagascar.Pressure = 1013.5;
+Madagascar.Humidity = 55;
+Madagascar.MinimumElevationAngle = 7;
+Madagascar.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation DongaraAust;
+DongaraAust.OrbitColor = Thistle;
+DongaraAust.TargetColor = DarkGray;
+DongaraAust.CentralBody = Earth;
+DongaraAust.StateType = Spherical;
+DongaraAust.HorizonReference = Ellipsoid;
+DongaraAust.Location1 = -29.25;
+DongaraAust.Location2 = 114.93;
+DongaraAust.Location3 = 0.034;
+DongaraAust.Id = '40';
+DongaraAust.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+DongaraAust.IonosphereModel = 'None';
+DongaraAust.TroposphereModel = 'None';
+DongaraAust.DataSource = 'Constant';
+DongaraAust.Temperature = 295.1;
+DongaraAust.Pressure = 1013.5;
+DongaraAust.Humidity = 55;
+DongaraAust.MinimumElevationAngle = 7;
+DongaraAust.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation Aus1;
+Aus1.OrbitColor = Thistle;
+Aus1.TargetColor = DarkGray;
+Aus1.CentralBody = Earth;
+Aus1.StateType = Spherical;
+Aus1.HorizonReference = Ellipsoid;
+Aus1.Location1 = -17.3986;
+Aus1.Location2 = 144.558;
+Aus1.Location3 = 0.034;
+Aus1.Id = '41';
+Aus1.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+Aus1.IonosphereModel = 'None';
+Aus1.TroposphereModel = 'None';
+Aus1.DataSource = 'Constant';
+Aus1.Temperature = 295.1;
+Aus1.Pressure = 1013.5;
+Aus1.Humidity = 55;
+Aus1.MinimumElevationAngle = 7;
+Aus1.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation Sea1;
+Sea1.OrbitColor = Thistle;
+Sea1.TargetColor = DarkGray;
+Sea1.CentralBody = Earth;
+Sea1.StateType = Spherical;
+Sea1.HorizonReference = Ellipsoid;
+Sea1.Location1 = 15.6802;
+Sea1.Location2 = 102.888;
+Sea1.Location3 = 0.004;
+Sea1.Id = '50';
+Sea1.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+Sea1.IonosphereModel = 'None';
+Sea1.TroposphereModel = 'None';
+Sea1.DataSource = 'Constant';
+Sea1.Temperature = 295.1;
+Sea1.Pressure = 1013.5;
+Sea1.Humidity = 55;
+Sea1.MinimumElevationAngle = 7;
+Sea1.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation Sea2;
+Sea2.OrbitColor = Thistle;
+Sea2.TargetColor = DarkGray;
+Sea2.CentralBody = Earth;
+Sea2.StateType = Spherical;
+Sea2.HorizonReference = Ellipsoid;
+Sea2.Location1 = 15.6802;
+Sea2.Location2 = 102.888;
+Sea2.Location3 = 0.004;
+Sea2.Id = '51';
+Sea2.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+Sea2.IonosphereModel = 'None';
+Sea2.TroposphereModel = 'None';
+Sea2.DataSource = 'Constant';
+Sea2.Temperature = 295.1;
+Sea2.Pressure = 1013.5;
+Sea2.Humidity = 55;
+Sea2.MinimumElevationAngle = 7;
+Sea2.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation Japan;
+Japan.OrbitColor = Thistle;
+Japan.TargetColor = DarkGray;
+Japan.CentralBody = Earth;
+Japan.StateType = Spherical;
+Japan.HorizonReference = Ellipsoid;
+Japan.Location1 = 34.5823;
+Japan.Location2 = 134.248;
+Japan.Location3 = 0.851;
+Japan.Id = '52';
+Japan.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+Japan.IonosphereModel = 'None';
+Japan.TroposphereModel = 'None';
+Japan.DataSource = 'Constant';
+Japan.Temperature = 295.1;
+Japan.Pressure = 1013.5;
+Japan.Humidity = 55;
+Japan.MinimumElevationAngle = 7;
+Japan.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation Oceana1;
+Oceana1.OrbitColor = Thistle;
+Oceana1.TargetColor = DarkGray;
+Oceana1.CentralBody = Earth;
+Oceana1.StateType = Spherical;
+Oceana1.HorizonReference = Ellipsoid;
+Oceana1.Location1 = -4.94033;
+Oceana1.Location2 = 140.692;
+Oceana1.Location3 = 0.004;
+Oceana1.Id = '60';
+Oceana1.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+Oceana1.IonosphereModel = 'None';
+Oceana1.TroposphereModel = 'None';
+Oceana1.DataSource = 'Constant';
+Oceana1.Temperature = 295.1;
+Oceana1.Pressure = 1013.5;
+Oceana1.Humidity = 55;
+Oceana1.MinimumElevationAngle = 7;
+Oceana1.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation Oceana2;
+Oceana2.OrbitColor = Thistle;
+Oceana2.TargetColor = DarkGray;
+Oceana2.CentralBody = Earth;
+Oceana2.StateType = Spherical;
+Oceana2.HorizonReference = Ellipsoid;
+Oceana2.Location1 = -0.644391;
+Oceana2.Location2 = 101.384;
+Oceana2.Location3 = 0.004;
+Oceana2.Id = '61';
+Oceana2.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+Oceana2.IonosphereModel = 'None';
+Oceana2.TroposphereModel = 'None';
+Oceana2.DataSource = 'Constant';
+Oceana2.Temperature = 295.1;
+Oceana2.Pressure = 1013.5;
+Oceana2.Humidity = 55;
+Oceana2.MinimumElevationAngle = 7;
+Oceana2.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation MidEast1;
+MidEast1.OrbitColor = Thistle;
+MidEast1.TargetColor = DarkGray;
+MidEast1.CentralBody = Earth;
+MidEast1.StateType = Spherical;
+MidEast1.HorizonReference = Ellipsoid;
+MidEast1.Location1 = 17.6134;
+MidEast1.Location2 = 55.2029;
+MidEast1.Location3 = 0.004;
+MidEast1.Id = '70';
+MidEast1.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+MidEast1.IonosphereModel = 'None';
+MidEast1.TroposphereModel = 'None';
+MidEast1.DataSource = 'Constant';
+MidEast1.Temperature = 295.1;
+MidEast1.Pressure = 1013.5;
+MidEast1.Humidity = 55;
+MidEast1.MinimumElevationAngle = 7;
+MidEast1.ErrorModels = {Range_ErrorModel};
+
+Create GroundStation India;
+India.OrbitColor = Thistle;
+India.TargetColor = DarkGray;
+India.CentralBody = Earth;
+India.StateType = Spherical;
+India.HorizonReference = Ellipsoid;
+India.Location1 = 11.3842;
+India.Location2 = 78.6158;
+India.Location3 = 0.736;
+India.Id = '71';
+India.AddHardware = {UplinkTransmitter, GroundReceiver, UplinkAntenna};
+India.IonosphereModel = 'None';
+India.TroposphereModel = 'None';
+India.DataSource = 'Constant';
+India.Temperature = 295.1;
+India.Pressure = 1013.5;
+India.Humidity = 55;
+India.MinimumElevationAngle = 7;
+India.ErrorModels = {Range_ErrorModel};
+
+%----------------------------------------
+%---------- Simulation Force Model
+%----------------------------------------
+Create ForceModel SimForceModel;
+SimForceModel.CentralBody = Earth;
+SimForceModel.PointMasses = {Earth};
+SimForceModel.Drag = None;
+SimForceModel.SRP = Off;
+SimForceModel.RelativisticCorrection = Off;
+SimForceModel.ErrorControl = RSSStep;
+
+
+
+%----------------------------------------
+%---------- Estimator Force Model
+%----------------------------------------
+Create ForceModel EstForceModel;
+EstForceModel.CentralBody = Earth;
+EstForceModel.PointMasses = {Earth};
+EstForceModel.Drag = None;
+EstForceModel.SRP = Off;
+EstForceModel.RelativisticCorrection = Off;
+EstForceModel.ErrorControl = RSSStep;
+
+%----------------------------------------
+%---------- Additional Force Model Options
+%----------------------------------------
+%SimForceModel.Drag.AtmosphereModel = MSISE90;
+%SimForceModel.Drag.HistoricWeatherSource = 'ConstantFluxAndGeoMag';
+%SimForceModel.Drag.PredictedWeatherSource = 'ConstantFluxAndGeoMag';
+%SimForceModel.Drag.CSSISpaceWeatherFile = 'CSSI_2004To2026.txt';
+%SimForceModel.Drag.SchattenFile = 'SchattenPredict.txt';
+%SimForceModel.Drag.F107 = 150;
+%SimForceModel.Drag.F107A = 150;
+%SimForceModel.Drag.MagneticIndex = 3;
+%SimForceModel.Drag.SchattenErrorModel = 'Nominal';
+%SimForceModel.Drag.SchattenTimingModel = 'NominalCycle';
+
+%----------------------------------------
+%---------- Simulation Propagator
+%----------------------------------------
+Create Propagator SimProp;
+SimProp.FM = SimForceModel;
+SimProp.Type = RungeKutta89;
+SimProp.InitialStepSize = 1;
+SimProp.Accuracy = 1e-13;
+SimProp.MinStep = 0;
+SimProp.MaxStep = 2700;
+SimProp.MaxStepAttempts = 50;
+SimProp.StopIfAccuracyIsViolated = true;
+
+%----------------------------------------
+%---------- Estimator Propagator
+%----------------------------------------
+Create Propagator EstProp;
+EstProp.FM = EstForceModel;
+EstProp.Type = RungeKutta89;
+EstProp.InitialStepSize = 1;
+EstProp.Accuracy = 1e-13;
+EstProp.MinStep = 0;
+EstProp.MaxStep = 2700;
+EstProp.MaxStepAttempts = 50;
+EstProp.StopIfAccuracyIsViolated = true;
+
+%----------------------------------------
+%---------- Error Models
+%----------------------------------------
+Create ErrorModel Range_ErrorModel;
+Range_ErrorModel.Type = 'Range';
+Range_ErrorModel.NoiseSigma = 0.003;           % unit: km
+Range_ErrorModel.Bias = 0;
+
+%----------------------------------------
+%---------- Datafiles
+%----------------------------------------
+
+Create TrackingFileSet simData;
+simData.AddTrackingConfig = {{VailAZ, SimSat, VailAZ}, 'Range'};
+simData.AddTrackingConfig = {{WallopsVA, SimSat, WallopsVA}, 'Range'};
+simData.AddTrackingConfig = {{KaulanaHI, SimSat, KaulanaHI}, 'Range'};
+simData.AddTrackingConfig = {{Florida, SimSat, Florida}, 'Range'};
+simData.AddTrackingConfig = {{SscSantiagoChile, SimSat, SscSantiagoChile}, 'Range'};
+simData.AddTrackingConfig = {{SouthAmerica1, SimSat, SouthAmerica1}, 'Range'};
+simData.AddTrackingConfig = {{SouthAmerica2, SimSat, SouthAmerica2}, 'Range'};
+simData.AddTrackingConfig = {{SouthAmerica3, SimSat, SouthAmerica3}, 'Range'};
+simData.AddTrackingConfig = {{SouthAmerica4, SimSat, SouthAmerica4}, 'Range'};
+simData.AddTrackingConfig = {{CentralAmerica, SimSat, CentralAmerica}, 'Range'};
+simData.AddTrackingConfig = {{SansaSA, SimSat, SansaSA}, 'Range'};
+simData.AddTrackingConfig = {{Africa1, SimSat, Africa1}, 'Range'};
+simData.AddTrackingConfig = {{Africa2, SimSat, Africa2}, 'Range'};
+simData.AddTrackingConfig = {{Africa3, SimSat, Africa3}, 'Range'};
+simData.AddTrackingConfig = {{Africa4, SimSat, Africa4}, 'Range'};
+simData.AddTrackingConfig = {{Madagascar, SimSat, Madagascar}, 'Range'};
+simData.AddTrackingConfig = {{DongaraAust, SimSat, DongaraAust}, 'Range'};
+simData.AddTrackingConfig = {{Aus1, SimSat, Aus1}, 'Range'};
+simData.AddTrackingConfig = {{Sea1, SimSat, Sea1}, 'Range'};
+simData.AddTrackingConfig = {{Sea2, SimSat, Sea2}, 'Range'};
+simData.AddTrackingConfig = {{Japan, SimSat, Japan}, 'Range'};
+simData.AddTrackingConfig = {{Oceana1, SimSat, Oceana1}, 'Range'};
+simData.AddTrackingConfig = {{Oceana2, SimSat, Oceana2}, 'Range'};
+simData.AddTrackingConfig = {{MidEast1, SimSat, MidEast1}, 'Range'};
+simData.AddTrackingConfig = {{India, SimSat, India}, 'Range'};
+simData.FileName = {'Kalman_LEO_Range_Mult_Grav_00_TrkSet'};
+simData.UseLightTime = true;
+simData.UseRelativityCorrection = false;
+simData.UseETminusTAI = false;
+simData.SimRangeModuloConstant = 33554432;
+simData.SimDopplerCountInterval = 1;
+simData.SimTDRSNode4Frequency = 2000;
+simData.SimTDRSNode4FrequencyBand = 1;
+simData.SimTDRSSmarId = 0;
+simData.SimTDRSDataFlag = 0;
+
+Create TrackingFileSet estData;
+estData.AddTrackingConfig = {{VailAZ, EstSat, VailAZ}, 'Range'};
+estData.AddTrackingConfig = {{WallopsVA, EstSat, WallopsVA}, 'Range'};
+estData.AddTrackingConfig = {{KaulanaHI, EstSat, KaulanaHI}, 'Range'};
+estData.AddTrackingConfig = {{Florida, EstSat, Florida}, 'Range'};
+estData.AddTrackingConfig = {{SscSantiagoChile, EstSat, SscSantiagoChile}, 'Range'};
+estData.AddTrackingConfig = {{SouthAmerica1, EstSat, SouthAmerica1}, 'Range'};
+estData.AddTrackingConfig = {{SouthAmerica2, EstSat, SouthAmerica2}, 'Range'};
+estData.AddTrackingConfig = {{SouthAmerica3, EstSat, SouthAmerica3}, 'Range'};
+estData.AddTrackingConfig = {{SouthAmerica4, EstSat, SouthAmerica4}, 'Range'};
+estData.AddTrackingConfig = {{CentralAmerica, EstSat, CentralAmerica}, 'Range'};
+estData.AddTrackingConfig = {{SansaSA, EstSat, SansaSA}, 'Range'};
+estData.AddTrackingConfig = {{Africa1, EstSat, Africa1}, 'Range'};
+estData.AddTrackingConfig = {{Africa2, EstSat, Africa2}, 'Range'};
+estData.AddTrackingConfig = {{Africa3, EstSat, Africa3}, 'Range'};
+estData.AddTrackingConfig = {{Africa4, EstSat, Africa4}, 'Range'};
+estData.AddTrackingConfig = {{Madagascar, EstSat, Madagascar}, 'Range'};
+estData.AddTrackingConfig = {{DongaraAust, EstSat, DongaraAust}, 'Range'};
+estData.AddTrackingConfig = {{Aus1, EstSat, Aus1}, 'Range'};
+estData.AddTrackingConfig = {{Sea1, EstSat, Sea1}, 'Range'};
+estData.AddTrackingConfig = {{Sea2, EstSat, Sea2}, 'Range'};
+estData.AddTrackingConfig = {{Japan, EstSat, Japan}, 'Range'};
+estData.AddTrackingConfig = {{Oceana1, EstSat, Oceana1}, 'Range'};
+estData.AddTrackingConfig = {{Oceana2, EstSat, Oceana2}, 'Range'};
+estData.AddTrackingConfig = {{MidEast1, EstSat, MidEast1}, 'Range'};
+estData.AddTrackingConfig = {{India, EstSat, India}, 'Range'};
+estData.FileName = {'Kalman_LEO_Range_Mult_Grav_00_TrkSet'};
+estData.UseLightTime = true;
+estData.UseRelativityCorrection = false;
+estData.UseETminusTAI = false;
+estData.SimRangeModuloConstant = 33554432;
+estData.SimDopplerCountInterval = 1;
+estData.SimTDRSNode4Frequency = 2000;
+estData.SimTDRSNode4FrequencyBand = 1;
+estData.SimTDRSSmarId = 0;
+estData.SimTDRSDataFlag = 0;
+ 
+%----------------------------------------
+%---------- Solvers
+%----------------------------------------
+Create Simulator simmer;
+simmer.AddData = {simData};
+simmer.Propagator = SimProp;
+simmer.EpochFormat = TAIModJulian;
+simmer.InitialEpoch = '27529.54724537037';
+simmer.FinalEpoch = '27530.04724537037';
+simmer.MeasurementTimeStep = 1;
+simmer.AddNoise            = On;
+
+Create ExtendedKalmanFilter      kalman;
+kalman.ShowProgress            = true;
+%kalman.ReportStyle             = Verbose;
+kalman.ReportFile              = 'Kalman_LEO_Range_Mult_Singer_00_WorkingFile.report';
+kalman.Measurements            = {estData};
+kalman.MeasNoiseType           = Filter;
+kalman.MeasNoiseSigma          = [0.003];
+kalman.ProcessNoiseType        = SingerModel;
+kalman.ProcessSingerTimeConst  = 1e0;    % seconds
+kalman.ProcessSingerSigma      = 1e-7;   % km/s^2
+kalman.Propagator              = EstProp;
+kalman.ShowAllResiduals        = Off;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create ReportFile rfFinalError;
+rfFinalError.SolverIterations = Current;
+rfFinalError.UpperLeft = [ 0.144047619047619 0.03587443946188341 ];
+rfFinalError.Size = [ 0.9976190476190476 0.9618834080717489 ];
+rfFinalError.RelativeZOrder = 57;
+rfFinalError.Maximized = true;
+rfFinalError.Filename = 'Kalman_LEO_Range_Mult_Singer_00_FinalError.report';
+rfFinalError.Precision = 16;
+rfFinalError.WriteHeaders = true;
+rfFinalError.LeftJustify = On;
+rfFinalError.ZeroFill = Off;
+rfFinalError.FixedWidth = true;
+rfFinalError.Delimiter = ' ';
+rfFinalError.ColumnWidth = 23;
+rfFinalError.WriteReport = true;
+
+Create ReportFile rfSimSat;
+rfSimSat.SolverIterations = Current;
+rfSimSat.UpperLeft = [ 0 0 ];
+rfSimSat.Size = [ 0 0 ];
+rfSimSat.RelativeZOrder = 0;
+rfSimSat.Maximized = false;
+rfSimSat.Filename = 'Kalman_LEO_Range_Mult_Singer_00_SimSat.report';
+rfSimSat.Precision = 18;
+rfSimSat.Add = {SimSat.TAIModJulian, SimSat.EarthMJ2000Eq.X, SimSat.EarthMJ2000Eq.Y, SimSat.EarthMJ2000Eq.Z, SimSat.EarthMJ2000Eq.VX, SimSat.EarthMJ2000Eq.VY, SimSat.EarthMJ2000Eq.VZ};
+rfSimSat.WriteHeaders = true;
+rfSimSat.LeftJustify = On;
+rfSimSat.ZeroFill = Off;
+rfSimSat.FixedWidth = true;
+rfSimSat.Delimiter = ' ';
+rfSimSat.ColumnWidth = 23;
+rfSimSat.WriteReport = true;
+
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+Create Variable PosError VelError;
+Create Array Initial_Covariance[6,6];
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+BeginMissionSequence;
+RunSimulator simmer;
+
+Initial_Covariance = diag([3.0e-2 3.0e-2 3.0e-2 4.0e-7 4.0e-7 4.0e-7]);
+EstSat.OrbitErrorCovariance = Initial_Covariance
+
+RunEstimator kalman;
+
+PosError = sqrt (  (EstSat.X - SimSat.X)^2 + (EstSat.Y - SimSat.Y)^2 + (EstSat.Z - SimSat.Z)^2 );
+VelError = sqrt (  (EstSat.VX - SimSat.VX)^2  + (EstSat.VY - SimSat.VY)^2  + (EstSat.VZ - SimSat.VZ)^2 );
+
+Report rfFinalError SimSat.TAIModJulian SimSat.EarthMJ2000Eq.X SimSat.EarthMJ2000Eq.Y SimSat.EarthMJ2000Eq.Z SimSat.EarthMJ2000Eq.VX SimSat.EarthMJ2000Eq.VY SimSat.EarthMJ2000Eq.VZ;
+Report rfFinalError EstSat.TAIModJulian EstSat.EarthMJ2000Eq.X EstSat.EarthMJ2000Eq.Y EstSat.EarthMJ2000Eq.Z EstSat.EarthMJ2000Eq.VX EstSat.EarthMJ2000Eq.VY EstSat.EarthMJ2000Eq.VZ;
+Report rfFinalError PosError VelError;

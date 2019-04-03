@@ -51,7 +51,7 @@ const Gmat::ParameterType StatisticAcceptFilter::PARAMETER_TYPE[] =
 
 
 //------------------------------------------------------------------------------
-// StatisticAcceptFilter(const std::string name)
+// StatisticAcceptFilter(const std::string &ofType, const std::string name)
 //------------------------------------------------------------------------------
 /**
  * Constructor for StatisticAcceptFilter objects
@@ -59,8 +59,8 @@ const Gmat::ParameterType StatisticAcceptFilter::PARAMETER_TYPE[] =
  * @param name The name of the object
  */
 //------------------------------------------------------------------------------
-StatisticAcceptFilter::StatisticAcceptFilter(const std::string name) :
-   DataFilter        (name),
+StatisticAcceptFilter::StatisticAcceptFilter(const std::string &ofType, const std::string name) :
+   DataFilter        (ofType, name),
    thinMode          ("Frequency"),
    thinningFrequency (1)
 {
@@ -68,7 +68,6 @@ StatisticAcceptFilter::StatisticAcceptFilter(const std::string name) :
 	MessageInterface::ShowMessage("StatisticAcceptFilter default constructor <%s,%p>\n", GetName().c_str(), this);
 #endif
 
-   objectTypes.push_back(Gmat::DATA_FILTER);
    objectTypeNames.push_back("StatisticsAcceptFilter");
 
    parameterCount = StatisticAcceptFilterParamCount;

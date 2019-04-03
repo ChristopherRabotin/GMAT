@@ -1,0 +1,319 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Tracking Data Types for OD</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="System.html" title="System"><link rel="prev" href="StartupFile.html" title="Startup File"><link rel="next" href="ReleaseNotes.html" title="Release Notes"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Tracking Data Types for OD</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="StartupFile.html">Prev</a>&nbsp;</td><th align="center" width="60%">System</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ReleaseNotes.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="TrackingDataTypes"></a><div class="titlepage"></div><a name="N29800" class="indexterm"></a><a name="N29803" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Tracking Data Types for OD</span></h2><p>Tracking Data Types for Orbit Determination &mdash; This section describes tracking data types and file formats
+    for orbit determination.</p></div><div class="refsection"><a name="N29814"></a><h2>Measurement Types Supported</h2><p>GMAT supports the following measurement types for orbit
+    determination.</p><div class="informaltable"><table border="1"><colgroup><col width="21%"><col width="61%"><col width="18%"></colgroup><thead><tr><th align="center">GMAT Measurement Type Name</th><th align="center">Measurement Description</th><th align="center">Measurement Units</th></tr></thead><tbody><tr><td>DSN_SeqRange</td><td>DSN Sequential Ranging (TRK-2-34 data Type 7), ramped and
+            un-ramped</td><td>Range Units</td></tr><tr><td>DSN_TCP</td><td>DSN Total Count Phase (TRK-2-34 data Type 17) measurements,
+            implemented as a derived "Doppler" type measurement using
+            successive phase measurements</td><td>Hertz</td></tr><tr><td>GPS_PosVec</td><td>Earth-fixed position vectors from a spacecraft on-board GPS
+            receiver</td><td>Kilometers</td></tr><tr><td>Range</td><td>Two-way transponder range. A round-trip range measurement
+            which includes the Spacecraft
+            <span class="guilabel">Transponder.HardwareDelay</span></td><td>Kilometers</td></tr><tr><td>RangeRate</td><td>Two-way coherent transponder range-rate. This is modeled as
+            the difference between range measurements at the end and start of
+            the Doppler count interval, divided by the length of the count
+            interval. The measurement is time-tagged at the end of the
+            interval.</td><td>Kilometers/sec</td></tr></tbody></table></div><p>The GMAT measurement type names listed are the string names to be
+    used in instances of <span class="guilabel">ErrorModel</span>,
+    <span class="guilabel">AcceptFilter</span>, <span class="guilabel">RejectFilter</span>, and
+    <span class="guilabel">TrackingFileSet</span>, and in the GMAT GMD-format tracking
+    data file to identify each measurement type to GMAT.</p></div><div class="refsection"><a name="N29861"></a><h2>Deprecated Measurement Type Names</h2><p>This version of GMAT deprecates the DSNRange/Range_RU and
+    Doppler/Doppler_HZ measurement type names. They are replaced by the new
+    consistent naming convention introduced in the previous section. The old
+    names will still work in the current version of GMAT, but users are
+    encouraged to transition their scripts to use of the new type
+    names.</p><p>The new data type names employ the same name in the GMD file, error
+    model, and tracking file set tracking configuration, eliminating the need
+    for a mapping between the names employed in each resource. For those still
+    using the deprecated data type names, the following table provides a
+    guide.</p><div class="informaltable"><table border="1"><colgroup><col width="50%"><col width="50%"></colgroup><thead><tr><th align="center">GMD File and
+            TrackingFileSet.AddTrackingConfig Measurement Type Name</th><th align="center">ErrorModel and StatisticsAccept/RejectFilter
+            Measurement Type Name</th></tr></thead><tbody><tr><td>DSNRange</td><td>Range_RU</td></tr><tr><td>Doppler</td><td>Doppler_HZ</td></tr></tbody></table></div></div><div class="refsection"><a name="N2987E"></a><h2>GMAT Tracking Data File Formats</h2><p>GMAT uses a native ASCII tracking data file format called a &ldquo;GMAT
+    Measurement Data File&rdquo;, or GMD file. This file format currently implements
+    the following observation measurement types:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>DSN Sequential Ranging, TRK-2-34 data Type 7</p></li><li class="listitem"><p>Derived Doppler using successive DSN Total Count Phase Doppler
+        tracking measurements, TRK-2-34 data Type 17</p></li><li class="listitem"><p>DSN transmit frequency ramp records, TRK-2-34 data Type 9</p></li><li class="listitem"><p>Earth-fixed position vectors from a spacecraft on-board GPS
+        receiver</p></li><li class="listitem"><p>Two-way coherent transponder range measurements</p></li><li class="listitem"><p>Two-way coherent transponder range-rate measurements</p></li></ul></div><p>Each GMD file consists of a series of space-delimited ASCII records.
+    Details of the GMD file format for each observation type are provided in
+    the following sections. A single GMD file may contain one or more of the
+    record types described below, but ramp records must be in a separate file.
+    For further details on the TRK-2-34 data formats, please consult the
+    <span class="emphasis"><em>TRK-2-34 DSN Tracking System Data Archival Format, 820-013 Deep
+    Space Network External Interface Specification</em></span>.</p><div class="refsection"><a name="N2989B"></a><h3>DSN Sequential Range</h3><p>DSN TRK-2-34 Sequential Ranging employs the
+      <span class="guilabel">DSN_SeqRange</span> measurement type. DSN_SeqRange is a
+      round-trip range observation measured in range units. The GMD record
+      format for DSN_SeqRange tracking data is shown in the table
+      below.</p><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th align="center">Field</th><th align="center">Description</th></tr></thead><tbody><tr><td>1</td><td>Observation receive time in TAIModJulian</td></tr><tr><td>2</td><td>Observation type name - DSN TRK-2-34 Type 7 Sequential
+              Range = DSN_SeqRange</td></tr><tr><td>3</td><td><p>Observation type index number - 9004 = DSN_SeqRange
+              (TRK-2-34)</p></td></tr><tr><td>4</td><td>Downlink Ground station pad ID</td></tr><tr><td>5</td><td>Spacecraft ID</td></tr><tr><td>6</td><td>Range observable (<span class="emphasis"><em>meas_rng</em></span> or
+              <span class="emphasis"><em>rng_obs</em></span> from TRK-2-34 Sequential Range
+              CHDO)</td></tr><tr><td>7</td><td>Uplink frequency band indicator - 0 = unknown, 1 =
+              S-band, 2 = X-band, 3 = Ka-band, 4 = Ku-band, 5 = L-band</td></tr><tr><td>8</td><td>Uplink frequency in Hz</td></tr><tr><td>9</td><td>Range modulo value (<span class="emphasis"><em>rng_modulo</em></span> from
+              TRK-2-34 Sequential Range CHDO)</td></tr></tbody></table></div><p>The transmit frequency specified in the TRK-2-34 range data GMD
+      file is only used if a frequency ramp table is not available. If a
+      transmit frequency ramp record file is provided on the
+      <span class="guilabel">TrackingFileSet.RampTable</span> field, the transmit
+      frequency will be determined from the ramp table and the frequency
+      specified in the range data GMD file will be ignored. A sample of GMD
+      data records for TRK-2-34 Sequential Range data is shown below.</p><pre class="programlisting">%    - 1 -         - 2 -      3     4  5        - 6 -           7        - 8 -               - 9 -
+27236.157789352 DSN_SeqRange 9004  45 59 +9.810325186004e+005   1 +2.091414432000e+009 +1.048576000000e+006
+27236.158240741 DSN_SeqRange 9004  45 59 +5.813243487947e+005   1 +2.091414432000e+009 +1.048576000000e+006
+27236.158692130 DSN_SeqRange 9004  45 59 +1.863046908683e+005   1 +2.091414432000e+009 +1.048576000000e+006
+27236.159143519 DSN_SeqRange 9004  45 59 +8.450116485521e+005   1 +2.091414432000e+009 +1.048576000000e+006</pre></div><div class="refsection"><a name="N298F2"></a><h3>DSN Total Count Phase</h3><p>DSN TRK-2-34 Total Count Phase employs the
+      <span class="guilabel">DSN_TCP</span> measurement type. As shown below, the GMAT
+      Doppler measurement type, measured in Hz, is derived from successive
+      Total Phase Count (TCP) observations.</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+          <m:mrow>
+            <m:mtext>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Derived&nbsp;"Doppler"&nbsp;Observation=</m:mtext>
+
+            <m:mo>&minus;</m:mo>
+
+            <m:mfrac>
+              <m:mrow>
+                <m:mrow>
+                  <m:mo>[</m:mo>
+
+                  <m:mrow>
+                    <m:mi>&#981;</m:mi>
+
+                    <m:mo stretchy="false">(</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>3</m:mn>
+
+                        <m:mi>e</m:mi>
+                      </m:mrow>
+                    </m:msub>
+
+                    <m:mo stretchy="false">)</m:mo>
+
+                    <m:mo>&minus;</m:mo>
+
+                    <m:mi>&#981;</m:mi>
+
+                    <m:mo stretchy="false">(</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>3</m:mn>
+
+                        <m:mi>s</m:mi>
+                      </m:mrow>
+                    </m:msub>
+
+                    <m:mo stretchy="false">)</m:mo>
+                  </m:mrow>
+
+                  <m:mo>]</m:mo>
+                </m:mrow>
+              </m:mrow>
+
+              <m:mrow>
+                <m:msub>
+                  <m:mi>t</m:mi>
+
+                  <m:mrow>
+                    <m:mn>3</m:mn>
+
+                    <m:mi>e</m:mi>
+                  </m:mrow>
+                </m:msub>
+
+                <m:mo>&minus;</m:mo>
+
+                <m:msub>
+                  <m:mi>t</m:mi>
+
+                  <m:mrow>
+                    <m:mn>3</m:mn>
+
+                    <m:mi>s</m:mi>
+                  </m:mrow>
+                </m:msub>
+              </m:mrow>
+            </m:mfrac>
+
+            <m:mtext>&nbsp;=&nbsp;</m:mtext>
+
+            <m:mo>&minus;</m:mo>
+
+            <m:mfrac>
+              <m:mrow>
+                <m:mrow>
+                  <m:mo>[</m:mo>
+
+                  <m:mrow>
+                    <m:mi>&#981;</m:mi>
+
+                    <m:mo stretchy="false">(</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>3</m:mn>
+
+                        <m:mi>e</m:mi>
+                      </m:mrow>
+                    </m:msub>
+
+                    <m:mo stretchy="false">)</m:mo>
+
+                    <m:mo>&minus;</m:mo>
+
+                    <m:mi>&#981;</m:mi>
+
+                    <m:mo stretchy="false">(</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>3</m:mn>
+
+                        <m:mi>s</m:mi>
+                      </m:mrow>
+                    </m:msub>
+
+                    <m:mo stretchy="false">)</m:mo>
+                  </m:mrow>
+
+                  <m:mo>]</m:mo>
+                </m:mrow>
+              </m:mrow>
+
+              <m:mrow>
+                <m:mtext>DCI</m:mtext>
+              </m:mrow>
+            </m:mfrac>
+
+            <m:mtext>&nbsp;&nbsp;(Hz)</m:mtext>
+          </m:mrow>
+        </m:math></div><p>where</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+          <m:mtable columnalign="left">
+            <m:mtr/>
+
+            <m:mtr/>
+
+            <m:mtr>
+              <m:mtd>
+                <m:msub>
+                  <m:mi>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t</m:mi>
+
+                  <m:mrow>
+                    <m:mn>3</m:mn>
+
+                    <m:mi>s</m:mi>
+                  </m:mrow>
+                </m:msub>
+
+                <m:mo>,</m:mo>
+
+                <m:msub>
+                  <m:mi>t</m:mi>
+
+                  <m:mrow>
+                    <m:mn>3</m:mn>
+
+                    <m:mi>e</m:mi>
+                  </m:mrow>
+                </m:msub>
+
+                <m:mo>=</m:mo>
+
+                <m:mtext>start&nbsp;and&nbsp;end&nbsp;of&nbsp;reception&nbsp;interval</m:mtext>
+              </m:mtd>
+            </m:mtr>
+
+            <m:mtr>
+              <m:mtd>
+                <m:mtext>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DCI &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Doppler Count Interval in
+                seconds</m:mtext>
+              </m:mtd>
+            </m:mtr>
+
+            <m:mtr>
+              <m:mtd>
+                <m:mi>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#981;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</m:mi>
+
+                <m:mo>=</m:mo>
+
+                <m:mtext>Total&nbsp;Count&nbsp;Phase&nbsp;(from
+                type&nbsp;17&nbsp;TRK-2-34&nbsp;record)</m:mtext>
+              </m:mtd>
+            </m:mtr>
+          </m:mtable>
+        </m:math></div><p>The GMD record format for DSN_TCP tracking data is shown in the
+      table below.</p><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th align="center">Field</th><th align="center">Description</th></tr></thead><tbody><tr><td>1</td><td>Observation receive time in TAIModJulian</td></tr><tr><td>2</td><td>Observation type name - DSN TRK-2-34 Type 17 Total Count
+              Phase = DSN_TCP</td></tr><tr><td>3</td><td>Observation type index number - 9006 = DSN_TCP
+              (TRK-2-34)</td></tr><tr><td>4</td><td>Downlink ground station pad ID</td></tr><tr><td>5</td><td>Spacecraft ID</td></tr><tr><td>6</td><td>Uplink frequency band indicator - 0 = unknown, 1 =
+              S-band, 2 = X-band, 3 = Ka-band, 4 = Ku-band, 5 = L-band</td></tr><tr><td>7</td><td>Doppler count interval in seconds</td></tr><tr><td>8</td><td>Observation value - Doppler observable derived from Total
+              Count Phase (TCP) TRK-2-34 Type 17 measurements</td></tr></tbody></table></div><p>A sample of GMD data records for TRK-2-34 Total Count Phase
+      derived Doppler data is shown below.</p><pre class="programlisting">%    - 1 -        - 2 -     3   4   5    6   7            - 8 -
+27226.011944444  DSN_TCP  9006 15 6241   1  10  -2.2445668331979342e+09
+27226.012060185  DSN_TCP  9006 15 6241   1  10  -2.2445668330920730e+09
+27226.012175926  DSN_TCP  9006 15 6241   1  10  -2.2445668329843016e+09
+27226.012291667  DSN_TCP  9006 15 6241   1  10  -2.2445668328729177e+09</pre></div><div class="refsection"><a name="N29A5E"></a><h3>Transmit Frequency Ramp Records</h3><p>GMAT supports DSN tracking utilizing both constant and ramped
+      transmit frequencies. If the transmit frequency is constant, GMAT will
+      use the transmit frequency specified on the DSN_SeqRange measurement
+      records for the computation of the range observation and a ramp table
+      file is not required. If the transmit frequency is ramped, the user must
+      generate a GMD file of ramp records from TRK-2-34 Type 9 raw data, and
+      provide the GMD ramp table on the
+      <span class="guilabel">TrackingFileSet.RampTable</span> object field. If a ramp
+      table is provided, GMAT ignores the frequency specified on the
+      DSN_SeqRange records and instead computes the transmit frequency from
+      the ramp records.</p><p>The record format for ground-based range-rate tracking data is
+      shown in the table below.</p><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th align="center">Field</th><th align="center">Description</th></tr></thead><tbody><tr><td>1</td><td>Observation receive time in TAIModJulian</td></tr><tr><td>2</td><td>Ground station pad ID</td></tr><tr><td>3</td><td>Spacecraft ID</td></tr><tr><td>4</td><td>Uplink frequency band indicator - 0 = unknown, 1 =
+              S-band, 2 = X-band, 3 = Ka-band, 4 = Ku-band, 5 = L-band</td></tr><tr><td>5</td><td>Ramp type - 0 = snap, 1 = start of new ramp, 2 = medial
+              report, 3 = periodic report, 4 = end of ramps, 5 = ramping
+              terminated by operator, 6 = invalid/unknown</td></tr><tr><td>6</td><td>Ramp frequency in Hz</td></tr><tr><td>7</td><td>Ramp rate in Hz/sec</td></tr></tbody></table></div><p>A sample GMD ramp file is shown below.</p><pre class="programlisting">
+%     - 1 -      2  3    4   5         - 6 -              - 7 -
+27238.640625000 34 234   2   1 +7.186571173393e+09 +6.010599999990e-01
+27238.654513889 34 234   2   1 +7.186571894665e+09 +5.822699999990e-01
+27238.659664352 34 234   2   3 +7.186572153775e+09 +5.822699999990e-01
+27238.668402778 34 234   2   1 +7.186572593389e+09 +5.590199999990e-01
+27238.682291667 34 234   2   1 +7.186573264213e+09 +5.315100000000e-01</pre></div><div class="refsection"><a name="N29AA0"></a><h3>Earth-fixed Position Vectors from a Spacecraft On-board GPS
+      Receiver</h3><p>GPS-derived Earth-fixed position vectors employ the
+      <span class="guilabel">GPS_PosVec</span> measurement type. The fixed frame
+      assumed for the vector components is GMAT's EarthFixed reference frame
+      (see <a class="xref" href="CoordinateSystem.html" title="CoordinateSystem"><span class="refentrytitle">CoordinateSystem</span></a>). The record format for
+      GPS_PosVec tracking data is shown in the table below.</p><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th align="center">Field</th><th align="center">Description</th></tr></thead><tbody><tr><td>1</td><td>Observation receive time in TAIModJulian</td></tr><tr><td>2</td><td>Observation type name - GPS_PosVec</td></tr><tr><td>3</td><td>Observation type index number - 9014 = GPS_PosVec</td></tr><tr><td>4</td><td>GPS receiver ID</td></tr><tr><td>5</td><td>Earth-fixed position X component (km)</td></tr><tr><td>6</td><td>Earth-fixed position Y component (km)</td></tr><tr><td>7</td><td>Earth-fixed position Z component (km)</td></tr></tbody></table></div><p>The GMAT user should be aware that the GPS_PosVec measurement is
+      currently treated as a vector quantity. The vector components are not
+      treated as independent observations. If any component of a vector
+      observation (X, Y, or Z) is edited from the solution by the user or by
+      autonomous sigma editing, the other components associated with that
+      observation will also be edited out, regardless of their quality.</p><p>A sample GMD GPS_PosVec file is shown below.</p><pre class="programlisting">
+%     - 1 -           - 2 -     3   4              - 5 -               - 6 -                 - 7 -
+26112.586516203704 GPS_PosVec 9014 800         -3575.594419         -5758.828897          1440.891615
+26112.587210648147 GPS_PosVec 9014 800         -3257.134099         -5984.420574          1265.579859
+26112.587905092594 GPS_PosVec 9014 800         -2926.558570         -6187.149174          1084.793371
+26112.588599537037 GPS_PosVec 9014 800         -2585.076391         -6366.230816           899.311591
+26112.589293981480 GPS_PosVec 9014 800         -2233.950454         -6520.997704           709.941434
+</pre></div><div class="refsection"><a name="N29AE5"></a><h3>Two-Way Transponder Range</h3><p>Two-way range measurements that pass through a Spacecraft
+      transponder use the <span class="guilabel">Range</span> measurement type. Range
+      is a round-trip range observation measured in kilometers. The
+      measurement model in GMAT will include the Spacecraft
+      <span class="guilabel">Transponder.HardwareDelay</span>, but the HardwareDelay
+      may be set to zero. The GMD record format for Range data is shown in the
+      table below.</p><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th align="center">Field</th><th align="center">Description</th></tr></thead><tbody><tr><td>1</td><td>Observation receive time in TAIModJulian</td></tr><tr><td>2</td><td>Observation type name - Range</td></tr><tr><td>3</td><td><p>Observation type index number - 9002 =
+              Range</p></td></tr><tr><td>4</td><td>Downlink ground station pad ID</td></tr><tr><td>5</td><td>Spacecraft ID</td></tr><tr><td>6</td><td>Two-way (round-trip) range observation in
+              kilometers</td></tr></tbody></table></div><p>A sample of GMD data records for Range data is shown below.</p><pre class="programlisting">%    - 1 -         - 2 -  3    4   5         - 6 -
+27182.022395833334 Range 9002 117 322 +7.447171160686e+04
+27182.022511574076 Range 9002 117 322 +7.447456623065e+04
+27182.022627314815 Range 9002 117 322 +7.447742325277e+04
+27182.022743055557 Range 9002 117 322 +7.448028087448e+04</pre></div><div class="refsection"><a name="N29B23"></a><h3>Two-Way Range-rate</h3><p>Two-way coherent range-rate tracking uses the
+      <span class="guilabel">RangeRate</span> measurement type. RangeRate is the
+      difference of the range observation at the end of the averaging interval
+      and the start of the averaging interval, divided by the averaging
+      interval duration. The time tag is at the end of the averaging interval.
+      The GMD record format for RangeRate data is shown in the table
+      below.</p><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th align="center">Field</th><th align="center">Description</th></tr></thead><tbody><tr><td>1</td><td>Observation receive time in TAIModJulian</td></tr><tr><td>2</td><td>Observation type name - RangeRate</td></tr><tr><td>3</td><td><p>Observation type index number - 9012 =
+              RangeRate</p></td></tr><tr><td>4</td><td>Downlink ground station pad ID</td></tr><tr><td>5</td><td>Spacecraft ID</td></tr><tr><td>6</td><td>Uplink frequency band indicator - 0 = unknown, 1 =
+              S-band, 2 = X-band, 3 = Ka-band, 4 = Ku-band, 5 = L-band</td></tr><tr><td>7</td><td>Doppler averaging interval in seconds</td></tr><tr><td>8</td><td>Range-rate observation in kilometers/second</td></tr></tbody></table></div><p>A sample of GMD data records for RangeRate data is shown
+      below.</p><pre class="programlisting">%    - 1 -              - 2 -        3      4       5       6     7               - 8 -
+23430.503148148146    RangeRate    9012    GDS    LEOSat    1    10            -11.61467029
+23430.503842592592    RangeRate    9012    GDS    LEOSat    1    10            -11.45104085
+23430.504537037035    RangeRate    9012    GDS    LEOSat    1    10            -11.18499007
+23430.505231481478    RangeRate    9012    GDS    LEOSat    1    10            -10.76465017</pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="StartupFile.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="System.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ReleaseNotes.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Startup File&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Release Notes</td></tr></table></div></body></html>

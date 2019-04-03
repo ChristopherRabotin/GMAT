@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -415,10 +415,12 @@ void ExtendedKalmanInv::ComputeObs()
       throw EstimatorException("No measurement was calculated!");
 
    Real ocDiff;
+   RealArray ocDiffVec;
    yi.clear();
    for (UnsignedInt k = 0; k < measSize; ++k)
    {
       ocDiff = currentObs->value[k] - calculatedMeas->value[k];
+      ocDiffVec.push_back(ocDiff);
       measurementEpochs.push_back(currentEpoch);
       measurementResiduals.push_back(ocDiff);
       measurementResidualID.push_back(calculatedMeas->uniqueID);
@@ -427,6 +429,9 @@ void ExtendedKalmanInv::ComputeObs()
          MessageInterface::ShowMessage("*** Current O-C = %.12lf\n", ocDiff);
       #endif
    }
+   measurementResVectors.push_back(ocDiffVec);
+   measurementTimes.push_back(currentEpoch);
+   observationID.push_back(calculatedMeas->uniqueID);
 
    if (currentObs->noiseCovariance == NULL)
       measCovariance = calculatedMeas->covariance;

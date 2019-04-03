@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -267,7 +267,7 @@ Real GmatCalcUtil::CalculateAngularData(const std::string &item, const Rvector6 
  */
 //------------------------------------------------------------------------------
 Real GmatCalcUtil::CalculateKeplerianData(const std::string &item, const Rvector6 &state,
-                                          const Real originMu)
+                   const Real originMu)
 {
    Rvector3 pos(state[0], state[1], state[2]);
    Rvector3 vel(state[3], state[4], state[5]);
@@ -292,29 +292,29 @@ Real GmatCalcUtil::CalculateKeplerianData(const std::string &item, const Rvector
   if (item == "MeanMotion")
   {
      if (ecc < (1.0 - GmatOrbitConstants::KEP_ECC_TOL))      // Ellipse
-        return Sqrt(originMu / (sma*sma*sma));
+        return Sqrt(originMu / (sma*sma*sma));                               // unit: radian/s
      else if (ecc > (1.0 + GmatOrbitConstants::KEP_ECC_TOL)) // Hyperbola
-        return Sqrt(-(originMu / (sma*sma*sma)));
+        return Sqrt(-(originMu / (sma*sma*sma)));                            // unit: radian/s
      else
-        return 2.0 * Sqrt(originMu); // Parabola
+        return 2.0 * Sqrt(originMu); // Parabola             // It should be 0.0 for parabola ????                      
   }
   else if (item == "VelApoapsis")
   {
      if ( (ecc < 1.0 - GmatOrbitConstants::KEP_ECC_TOL) || (ecc > 1.0 + GmatOrbitConstants::KEP_ECC_TOL))  //Ellipse and Hyperbola
-        return Sqrt( (originMu/sma)*((1-ecc)/(1+ecc)) );
+        return Sqrt( (originMu/sma)*((1-ecc)/(1+ecc)) );                       // unit: km/s
      else
-        return 0.0; // Parabola
+        return 0.0; // Parabola                                                // unit: km/s
   }
   else if (item == "VelPeriapsis")
   {
-     return Sqrt( (originMu/sma)*((1+ecc)/(1-ecc)) );
+     return Sqrt( (originMu/sma)*((1+ecc)/(1-ecc)) );                          // unit: km/s
   }
   else if (item == "OrbitPeriod")
   {
      if (sma < 0.0)
-        return 0.0;
+        return 0.0;                                                            // unit: s
      else
-        return GmatMathConstants::TWO_PI * Sqrt((sma * sma * sma)/ originMu);
+        return GmatMathConstants::TWO_PI * Sqrt((sma * sma * sma)/ originMu);  // unit: s
   }
   else if (item == "RadApoapsis")
   {
@@ -329,7 +329,7 @@ Real GmatCalcUtil::CalculateKeplerianData(const std::string &item, const Rvector
   }
   else if (item == "C3Energy")
   {
-     return -originMu / sma;
+     return -originMu / sma;                                    // unit: (km/s)^2
   }
   else if (item == "Energy")
   {
@@ -342,8 +342,24 @@ Real GmatCalcUtil::CalculateKeplerianData(const std::string &item, const Rvector
   }
 }
 
+
+//----------------------------------------------------------------
+// Real GmatCalcUtil::CalculatePlanetData(const std::string &item, 
+//      const Rvector6 &state, const Real originRadius, 
+//      const Real originFlattening, const Real originHourAngle)
+//----------------------------------------------------------------
+/**
+*     This function is used to calculate plenet data
+* @param item              Name of planet data element
+* @param state             State in the planet's body fixed coordinate system
+* @param originRadius      Radius of the planet
+* @param originFlattening  Flattening of the planet
+*
+* @return      longitude in degree     for item = "Longitude"
+*/
+//----------------------------------------------------------------
 Real GmatCalcUtil::CalculatePlanetData(const std::string &item, const Rvector6 &state,
-                                       const Real originRadius, const Real originFlattening, const Real originHourAngle)
+   const Real originRadius, const Real originFlattening, const Real originHourAngle)
 {
    if (item == "MHA")
    {

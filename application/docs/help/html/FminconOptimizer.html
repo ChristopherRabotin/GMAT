@@ -1,0 +1,108 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>FminconOptimizer</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="FiniteBurn.html" title="FiniteBurn"><link rel="next" href="ForceModel.html" title="ForceModel"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">FminconOptimizer</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="FiniteBurn.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ForceModel.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="FminconOptimizer"></a><div class="titlepage"></div><a name="N19113" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">FminconOptimizer</span></h2><p>FminconOptimizer &mdash; The Sequential Quadratic Programming (SQP) optimizer,
+    fmincon</p></div><div class="refsection"><a name="N19124"></a><h2>Description</h2><p><span class="guilabel">fmincon</span> is a Nonlinear Programming solver
+    provided in MATLAB's Optimization Toolbox. <span class="guilabel">fmincon</span>
+    performs nonlinear constrained optimization and supports linear and
+    nonlinear constraints. To use this solver, you must configure the solver
+    options including convergence criteria, maximum iterations, and how the
+    gradients will be calculated. In the mission sequence, you implement an
+    optimizer such as fmincon by using an
+    <span class="guilabel">Optimize</span>/<span class="guilabel">EndOptimize</span> sequence.
+    Within this sequence, you define optimization variables by using the
+    <span class="guilabel">Vary</span> command, and define cost and constraints by
+    using the <span class="guilabel">Minimize</span> and
+    <span class="guilabel">NonlinearConstraint</span> commands respectively.</p><p>This resource cannot be modified in the Mission Sequence.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="VF13ad.html" title="VF13ad"><span class="refentrytitle">VF13ad</span></a>,<a class="xref" href="Optimize.html" title="Optimize"><span class="refentrytitle">Optimize</span></a>,<a class="xref" href="Vary.html" title="Vary"><span class="refentrytitle">Vary</span></a>,
+    <a class="xref" href="NonlinearConstraint.html" title="NonlinearConstraint"><span class="refentrytitle">NonlinearConstraint</span></a>, <a class="xref" href="Minimize.html" title="Minimize"><span class="refentrytitle">Minimize</span></a></p></div><div class="refsection"><a name="N19152"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">DiffMaxChange</span></td><td><p>Upper limit on the perturbation used in MATLAB's
+            finite differencing algorithm. For fmincon, you don't specify a
+            single perturbation value, but rather give MATLAB a range, and it
+            uses an adaptive algorithm that attempts to find the optimal
+            perturbation. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DiffMinChange</span></td><td><p>Lower limit on the perturbation used in MATLAB's
+            finite differencing algorithm. For fmincon, you don't specify a
+            single perturbation value, but rather give MATLAB a range, and it
+            uses an adaptive algorithm that attempts to find the optimal
+            perturbation. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1e-8</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MaxFunEvals</span></td><td><p>Specifies the maximum number of cost function
+            evaluations used in an attempt to find an optimal solution. This
+            is equivalent to setting the maximum number of passes through an
+            optimization loop in a GMAT script. If a solution is not found
+            before the maximum function evaluations, fmincon outputs an
+            ExitFlag of zero, and GMAT continues. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Integer &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1000</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">MaximumIterations</span></td><td><p>Specifies the maximum allowable number of nominal
+            passes through the optimizer.&nbsp; Note that this is not the same as
+            the number of optimizer iterations that is shown for the
+            <span class="guilabel">VF13ad</span> optimzer.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Integer &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>25</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ReportFile</span></td><td><p>Contains the path and file name of the report file.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any user-defined file name</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">FminconOptimizerSQP1.data</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ReportStyle</span></td><td><p>Determines the amount and type of data written to the
+            message window and to the report specified by field
+            <span class="guilabel">ReportFile</span> for each iteration of the solver
+            (when <span class="guilabel">ShowProgress</span> is true).&nbsp; Currently, the
+            <span class="guilabel">Normal</span>, <span class="guilabel">Debug</span>, and
+            <span class="guilabel">Concise</span> options contain the same information:
+            the values for the control variables, the constraints, and the
+            objective function.&nbsp; In addition to this information, the
+            <span class="guilabel">Verbose</span> option also contains values of the
+            optimizer-scaled control variables.&nbsp; </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Normal</span>,
+                    <span class="guilabel">Concise</span>,
+                    <span class="guilabel">Verbose</span>,
+                    <span class="guilabel">Debug</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">Normal</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ShowProgress</span></td><td><p>Determines whether data pertaining to iterations of
+            the solver is both displayed in the message window and written to
+            the report specified by the <span class="guilabel">ReportFile</span> field.
+            When <span class="guilabel">ShowProgress</span> is true, the amount of
+            information contained in the message window and written in the
+            report&nbsp;is controlled by the <span class="guilabel">ReportStyle</span>
+            field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">true</code>,
+                    <code class="literal">false</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">true</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">TolCon</span></td><td><p>Specifies the convergence tolerance on the constraint
+            functions. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1e-4</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">TolFun</span></td><td><p>Specifies the convergence tolerance on the cost
+            function value. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1e-4</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">TolX</span></td><td><p>Specifies the termination tolerance on the vector of
+            independent variables, and is used only if the user sets a value
+            for this field.&nbsp; </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real Number &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1e-4</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1935E"></a><h2>GUI</h2><p>The <span class="guilabel">FminconOptimizer</span> dialog box allows you to
+    specify properties of a <span class="guilabel">FminconOptimizer</span> resource
+    such as maximum iterations, maximum function evaluations, control variable
+    termination tolerance, constraint tolerance, cost function tolerance,
+    finite difference algorithm parameters, and choice of reporting
+    options.</p><p>To create a <span class="guilabel">FminconOptimizer</span> resource, navigate
+    to the <span class="guilabel">Resources</span> tree, expand the
+    <span class="guilabel">Solvers</span> folder, highlight and then right-click on the
+    <span class="guilabel">Optimizers</span> sub-folder, point to
+    <span class="guilabel">Add</span> and then select <span class="guilabel">SQP</span>
+    (<span class="guilabel">fmincon</span>). This will create a new
+    <span class="guilabel">FminconOptimizer</span> resource, <span class="guilabel">SQP1</span>.
+    Double-click on <span class="guilabel">SQP1</span> to bring up the
+    <span class="guilabel">FminconOptimizer</span> dialog box shown below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_fmincon_GUI.png" align="middle" height="395"></td></tr></table></div></div></div><div class="refsection"><a name="N19395"></a><h2>Remarks</h2><div class="refsection"><a name="N19398"></a><h3>fmincon Optimizer Availability</h3><p>This optimizer is only available if you have access to both MATLAB
+      and MATLAB's Optimization toolbox. GMAT contains an interface to the
+      fmincon optimizer and it will appear to you that fmincon is a built in
+      optimizer in GMAT. Field names for this resource have been copied from
+      those used in MATLAB&rsquo;S optimset function for consistency with MATLAB in
+      contrast with other solvers in GMAT.</p></div><div class="refsection"><a name="N1939D"></a><h3>GMAT Stop Button Does Not work, in Some Situations, When Using
+      Fmincon</h3><p>Sometimes, when developing GMAT scripts, you may inadvertently
+      create a situation where GMAT goes into an inifinite propagation loop.
+      The usual remedy for this situation is to apply the GMAT
+      <span class="guilabel">Stop</span> button. Currently, however, if the infinite
+      loop occurs within an <span class="guilabel">Optimize</span> sequence using
+      fmincon, there is no way to stop GMAT and you have to shut GMAT down.
+      Fortunately, there are some procedures you can employ to avoid this
+      situation. You should use multiple stopping conditions so that a long
+      propagation cannot occur. For example, if fmincon controls
+      variable,<span class="guilabel"> myVar</span>, and we know
+      <span class="guilabel">myVar</span> should never be more than 2, then do
+      this.</p><pre class="programlisting"><code class="code">Propagate myProp(mySat){mySat.ElapsedDays = myVar, mySat.ElapsedDays = 2}     </code></pre></div><div class="refsection"><a name="N193B1"></a><h3>Resource and Command Interactions</h3><p>The <span class="guilabel">FminconOptimizer</span> resource can only be
+      used in the context of optimization-type commands. Please see the
+      documentation for <span class="guilabel">Optimize</span>,
+      <span class="guilabel">Vary</span>, <span class="guilabel">NonlinearConstraint</span>, and
+      <span class="guilabel">Minimize</span> for more information and worked
+      examples.</p></div></div><div class="refsection"><a name="N193C5"></a><h2>Examples</h2><div class="informalexample"><p>Create a <span class="guilabel">FminconOptimizer</span> resource named
+      SQP1.</p><pre class="programlisting"><code class="code">Create FminconOptimizer SQP1
+SQP1.ShowProgress = true
+SQP1.ReportStyle = Normal
+SQP1.ReportFile = 'FminconOptimizerSQP1.data'
+SQP1.MaximumIterations = 25
+SQP1.DiffMaxChange = '0.1000'
+SQP1.DiffMinChange = '1.0000e-08'
+SQP1.MaxFunEvals = '1000'
+SQP1.TolX = '1.0000e-04'
+SQP1.TolFun = '1.0000e-04'
+SQP1.TolCon = '1.0000e-04'     </code>      </pre></div><p>For an example of how a <span class="guilabel">FminconOptimizer</span>
+    resource can be used within an optimize sequence, see the
+    <span class="guilabel">Optimize</span> command examples.</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="FiniteBurn.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ForceModel.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">FiniteBurn&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;ForceModel</td></tr></table></div></body></html>

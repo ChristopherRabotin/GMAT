@@ -70,7 +70,7 @@ const Gmat::ParameterType DataFilter::PARAMETER_TYPE[] =
 
 
 //------------------------------------------------------------------------------
-// DataFilter(const std::string name)
+// DataFilter(const std::string &ofType, const std::string name)
 //------------------------------------------------------------------------------
 /**
  * Constructor for DataFilter objects
@@ -78,18 +78,16 @@ const Gmat::ParameterType DataFilter::PARAMETER_TYPE[] =
  * @param name The name of the object
  */
 //------------------------------------------------------------------------------
-DataFilter::DataFilter(const std::string name) :
-   GmatBase          (Gmat::DATA_FILTER, "DataFilter", name),
+DataFilter::DataFilter(const std::string &ofType, const std::string name) :
+   GmatBase          (Gmat::DATA_FILTER, ofType, name),
    epochFormat       ("TAIModJulian"),
    initialEpoch      (DateUtil::EARLIEST_VALID_MJD), 
    finalEpoch        (DateUtil::LATEST_VALID_MJD),
-   //epochStart        (6116.0000003979367),
-   //epochEnd          (58127.500000397937),
    isChecked         (false),
-   allDataFile       (false),
-   allObserver       (false),
-   allTracker        (false),
-   allDataType       (false),
+   isDataFileDefaultVal  (true),
+   isObserverDefaultVal  (true),
+   isTrackerDefaultVal   (true),
+   isDataTypeDefaultVal  (true),
    isEpochFormatSet  (false)
 {
 #ifdef DEBUG_CONSTRUCTION
@@ -110,11 +108,8 @@ DataFilter::DataFilter(const std::string name) :
    trackers.push_back("All");
    dataTypes.push_back("All");
 
-   dataTypesMap["Range_KM"]          = "Range_KM";
-   dataTypesMap["Range_RU"]          = "DSNRange";
-   dataTypesMap["Doppler_HZ"]        = "Doppler";
-   dataTypesMap["Doppler_RangeRate"] = "Doppler_RangeRate";
-   dataTypesMap["TDRSDoppler_HZ"]    = "TDRSDoppler_HZ";
+   depTypeMap["Range_RU"]   = "DSN_SeqRange";
+   depTypeMap["Doppler_HZ"] = "DSN_TCP";
 }
 
 
@@ -142,22 +137,22 @@ DataFilter::~DataFilter()
 DataFilter::DataFilter(const DataFilter& saf) :
    GmatBase              (saf),
    fileNames             (saf.fileNames),
-   allDataFile           (saf.allDataFile),
+   isDataFileDefaultVal  (saf.isDataFileDefaultVal),
    observers             (saf.observers),
    observerObjects       (saf.observerObjects),
-   allObserver           (saf.allObserver),
+   isObserverDefaultVal  (saf.isObserverDefaultVal),
    trackers              (saf.trackers),
    trackerObjects        (saf.trackerObjects),
-   allTracker            (saf.allTracker),
+   isTrackerDefaultVal   (saf.isTrackerDefaultVal),
    dataTypes             (saf.dataTypes),
-   allDataType           (saf.allDataType),
+   isDataTypeDefaultVal  (saf.isDataTypeDefaultVal),
    epochFormat           (saf.epochFormat),
    initialEpoch          (saf.initialEpoch),
    finalEpoch            (saf.finalEpoch),
    epochStart            (saf.epochStart),
    epochEnd              (saf.epochEnd),
    strands               (saf.strands),
-   dataTypesMap          (saf.dataTypesMap),
+   //dataTypesMap          (saf.dataTypesMap),
    isChecked             (false),
    isEpochFormatSet      (saf.isEpochFormatSet)
 {
@@ -189,23 +184,23 @@ DataFilter& DataFilter::operator=(const DataFilter& saf)
    {
       GmatBase::operator=(saf);
 
-      fileNames    = saf.fileNames;
-      allDataFile  = saf.allDataFile;
-      observers    = saf.observers;
-      observerObjects = saf.observerObjects;
-      allObserver  = saf.allObserver;
-      trackers     = saf.trackers;
-      trackerObjects  = saf.trackerObjects;
-      allTracker   = saf.allTracker;
-      dataTypes    = saf.dataTypes;
-      allDataType  = saf.allDataType;
+      fileNames            = saf.fileNames;
+      isDataFileDefaultVal = saf.isDataFileDefaultVal;
+      observers            = saf.observers;
+      observerObjects      = saf.observerObjects;
+      isObserverDefaultVal = saf.isObserverDefaultVal;
+      trackers             = saf.trackers;
+      trackerObjects       = saf.trackerObjects;
+      isTrackerDefaultVal  = saf.isTrackerDefaultVal;
+      dataTypes            = saf.dataTypes;
+      isDataTypeDefaultVal = saf.isDataTypeDefaultVal;
       epochFormat  = saf.epochFormat;
       initialEpoch = saf.initialEpoch;
       finalEpoch   = saf.finalEpoch;
       epochStart   = saf.epochStart;
       epochEnd     = saf.epochEnd;
       strands      = saf.strands;
-      dataTypesMap = saf.dataTypesMap;
+      //dataTypesMap = saf.dataTypesMap;
       isChecked    = false;
       isEpochFormatSet = saf.isEpochFormatSet;
    }
@@ -445,6 +440,12 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
 #endif
    if (id == FILENAMES)
    {
+      if (isDataFileDefaultVal)
+      {
+         fileNames.clear();
+         isDataFileDefaultVal = false;
+      }
+
       // Check for empty list
       if (value == "")
          throw MeasurementException("Error: an empty string is set to " + GetName() + ".FileNames parameter.\n");
@@ -452,26 +453,26 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
       {
          // throw MeasurementException("Error: an empty list of file name was set to " + GetName() + ".FileNames parameter.\n");
          // We accept an empty list of file names
-         allDataFile = false;
+         //allDataFile = false;
          fileNames.clear();
       }
       else
       {
          // If is not empty list, it is a name containing file name or "All"
-         if (value == "All")
-         {
-            allDataFile = true;
-         }
-         else
-         {
+         //if (value == "All")
+         //{
+         //   allDataFile = true;
+         //}
+         //else
+         //{
             // Check for valid file name
             Integer err = 0;
             if (!GmatStringUtil::IsValidFullFileName(value, err))
                throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".FileNames parameter is an invalid file name.\n");
-         }
+         //}
 
-         if ((allDataFile == false) && (fileNames[0] == "All"))
-            fileNames.erase(fileNames.begin());
+         //if ((allDataFile == false) && (fileNames[0] == "All"))
+         //   fileNames.erase(fileNames.begin());
 
          if (find(fileNames.begin(), fileNames.end(), value) == fileNames.end())
             fileNames.push_back(value);
@@ -520,22 +521,24 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == OBSERVED_OBJECTS)
    {
+      // Remove default value whenever setting value
+      if (isObserverDefaultVal)
+      {
+         observers.clear();
+         isObserverDefaultVal = false;
+      }
+
       if (value == "")
          throw MeasurementException("Error: an empty string is set to " + GetName() + ".ObservedObjects.\n");  
       else if (GmatStringUtil::RemoveSpaceInBrackets(value,"{}") == "{}")
       {
-         allObserver = false;
+         //allObserver = false;
          observers.clear();
       }
       else
       {
-         if (value == "All")
-            allObserver = true;
-         else if (!GmatStringUtil::IsValidIdentity(value))
+         if (!GmatStringUtil::IsValidExtendedIdentity(value))        // it is for GPS Point Solution
             throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".ObservedObjects parameter is an invalid observed object's name.\n");
-
-         if ((allObserver == false) && (observers[0] == "All"))
-            observers.erase(observers.begin());
 
          if (find(observers.begin(), observers.end(), value) == observers.end())
             observers.push_back(value);
@@ -545,22 +548,29 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == TRACKERS)
    {
+      if (isTrackerDefaultVal)
+      {
+         trackers.clear();
+         isTrackerDefaultVal = false;
+      }
+
       if (value == "")
          throw MeasurementException("Error: an empty string is set to " + GetName() + ".Trackers.\n");  
       else if (GmatStringUtil::RemoveSpaceInBrackets(value,"{}") == "{}")
       {
-         allTracker = false;
+         //allTracker = false;
          trackers.clear();
       }
       else
       {
-         if (value == "All")
-            allTracker = true;
-         else if (!GmatStringUtil::IsValidIdentity(value))
+         //if (value == "All")
+         //   allTracker = true;
+         //else 
+         if (!GmatStringUtil::IsValidIdentity(value))
             throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".Trackers parameter is invalid tracker's name.\n");
 
-         if ((allTracker == false) && (trackers[0] == "All"))
-            trackers.erase(trackers.begin());
+         //if ((allTracker == false) && (trackers[0] == "All"))
+         //   trackers.erase(trackers.begin());
 
          if (find(trackers.begin(), trackers.end(), value) == trackers.end())
             trackers.push_back(value);
@@ -570,29 +580,51 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == DATA_TYPES)
    {
+      if (isDataTypeDefaultVal)
+      {
+         dataTypes.clear();
+         isDataTypeDefaultVal = false;
+      }
+
       if (value == "")
          throw MeasurementException("Error: an empty string is set to " + GetName() + ".DataTypes.\n");
       else if (GmatStringUtil::RemoveSpaceInBrackets(value,"{}") == "{}")
       {
-         allDataType = false;
+         //allDataType = false;
          dataTypes.clear();
       }
       else
       {
-         if (value == "All")
-            allDataType = true;
-         else
-         {
+         std::string name = value;
+         //if (name == "All")
+         //   allDataType = true;
+         //else
+         //{
+            // Check for deprecation
+            std::map<std::string,std::string> typeMap = GetDeprecatedTypeMap();
+            for (std::map<std::string, std::string>::iterator i = typeMap.begin(); i != typeMap.end(); ++i)
+            {
+               if ((*i).first == name)
+               {
+                  MessageInterface::ShowMessage("Warning: '" + GetName() + ".DataTypes name + '" 
+                     + name + "' is deprecated and will be removed in a future release. Use '"
+                     + (*i).second + "' instead.\n");
+                  name = (*i).second;
+                  break;
+               }
+            }
+
+            // Check for valid measurement type
             ObservationData obData;
-            if (!obData.IsValidMeasurementType(value))
-               throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".DataTypes parameter is an invalid measurement type.\n");
-         }
+            if (!obData.IsValidMeasurementType(name))
+               throw MeasurementException("Error: '" + name + "' set to " + GetName() + ".DataTypes parameter is an invalid measurement type.\n");
+         //}
 
-         if ((allDataType == false) && (dataTypes[0] == "All"))
-            dataTypes.erase(dataTypes.begin());
+         //if ((allDataType == false) && (dataTypes[0] == "All"))
+         //   dataTypes.erase(dataTypes.begin());
 
-         if (find(dataTypes.begin(), dataTypes.end(), value) == dataTypes.end())
-            dataTypes.push_back(value);
+         if (find(dataTypes.begin(), dataTypes.end(), name) == dataTypes.end())
+            dataTypes.push_back(name);
       }
       return true;
    }
@@ -767,6 +799,12 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
 
    if (id == OBSERVED_OBJECTS)
    {
+      if (isObserverDefaultVal)
+      {
+         observers.clear();
+         isObserverDefaultVal = false;
+      }
+
       // an empty list is set to ObservedObjects parameter when index == -1 
       if (index == -1)
       {
@@ -777,10 +815,8 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
       {
          if (value == "")
             throw MeasurementException("Error: cannot assign an empty string to observer ID.\n");
-         else if (value == "All")
-            allObserver = true;          // set flag to indicate choosing all observers
 
-         if (!GmatStringUtil::IsValidIdentity(value))
+         if (!GmatStringUtil::IsValidExtendedIdentity(value))           // It is for GPS Point Solution
             throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".ObservedObjects parameter is an invalid GMAT object name.\n");
 
          if (index == observers.size())
@@ -799,6 +835,12 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
 
    if (id == TRACKERS)
    {
+      if (isTrackerDefaultVal)
+      {
+         trackers.clear();
+         isTrackerDefaultVal = false;
+      }
+
       // an empty list is set to Trackers parameter when index == -1
       if (index == -1)
       {
@@ -809,8 +851,8 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
       {
          if (value == "")
             throw MeasurementException("Error: cannot accept an empty string to a tracker ID.\n");
-         else
-            allTracker = true;         // set flag to indicate choosing all trackers
+         //else
+         //   allTracker = true;         // set flag to indicate choosing all trackers
 
          if (!GmatStringUtil::IsValidIdentity(value))
             throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".Trackers parameter is an invalid GMAT object name.\n");
@@ -839,14 +881,30 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
       } 
       else if ((0 <= index)&&(index <= (Integer)dataTypes.size()))
       {
+         // Check for deprecation
+         std::string name = value;
+         std::map<std::string, std::string> typeMap = GetDeprecatedTypeMap();
+         for (std::map<std::string, std::string>::iterator i = typeMap.begin(); i != typeMap.end(); ++i)
+         {
+            if ((*i).first == name)
+            {
+               MessageInterface::ShowMessage("Warning: " + GetName() + ".DataTypes name '" 
+                  + name + "' is deprecated and will be removed in a future release. Use '"
+                  + (*i).second + "' instead.\n");
+               name = (*i).second;
+               break;
+            }
+         }
+
+         // Check for valid measurement type
          StringArray nameList = GetListOfMeasurementTypes();
-         if ((value != "All")&&(find(nameList.begin(), nameList.end(), value) == nameList.end()))
-            throw MeasurementException("Error: Value '" + value + "' set to " + GetName() + ".DataTypes parameter is invalid.\n");
+         if ((name != "All")&&(find(nameList.begin(), nameList.end(), name) == nameList.end()))
+            throw MeasurementException("Error: Value '" + name + "' set to " + GetName() + ".DataTypes parameter is invalid.\n");
 
          if (index == dataTypes.size())
-            dataTypes.push_back(value);
+            dataTypes.push_back(name);
          else
-            dataTypes[index] = value;
+            dataTypes[index] = name;
          return true;
       }
       else
@@ -1335,14 +1393,27 @@ Real DataFilter::ConvertToRealEpoch(const std::string &theEpoch,
 //-------------------------------------------------------------------------------
 StringArray DataFilter::GetListOfMeasurementTypes()
 {
-   StringArray typeList;
+   static StringArray typeList;
+   typeList.clear();
 
    //@todo: need to add any new measurement type here
-   typeList.push_back("Range_KM");
-   typeList.push_back("Range_RU");
-   typeList.push_back("Doppler_HZ");
-   typeList.push_back("Doppler_RangeRate");
-   typeList.push_back("TDRSDoppler_HZ");
+   typeList.push_back("DSN_SeqRange");
+   typeList.push_back("DSN_TCP");
+   typeList.push_back("GPS_PosVec");
+   //typeList.push_back("Range_KM");
+   typeList.push_back("Range");
+   //typeList.push_back("Doppler_RangeRate");
+   typeList.push_back("RangeRate");
+
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+   if (runmode == GmatGlobal::TESTING)
+   {
+      typeList.push_back("SN_Range");
+      //typeList.push_back("TDRSDoppler_HZ");
+      typeList.push_back("SN_Doppler");
+   }
+
+   
    return typeList;
 }
 
@@ -1521,7 +1592,7 @@ ObjectArray DataFilter::GetListOfFiles()
 //}
 
 
-ObservationData* DataFilter::FilteringData(ObservationData* dataObject, Integer& rejectedReason)
+ObservationData* DataFilter::FilteringData(ObservationData* dataObject, Integer& rejectedReason, Integer obDataId)
 {
    throw MeasurementException("Error: Do not allow to run DataFilter::FilteringData()\n");
    return NULL;
@@ -1620,7 +1691,8 @@ bool DataFilter::HasDataType(ObservationData* dataObject)
       {
          for(UnsignedInt i = 0; i < dataTypes.size(); ++i)
          {
-            if (dataTypesMap[dataTypes[i]] == dataObject->typeName)
+            //if (dataTypesMap[dataTypes[i]] == dataObject->typeName)
+            if (dataTypes[i] == dataObject->typeName)
             {
                has = true;
                break;
@@ -1647,3 +1719,5 @@ bool DataFilter::IsInTimeWindow(ObservationData* dataObject)
    //MessageInterface::ShowMessage("It is %s in time window:  currentEpoch = %.12lf    epochStart = %.12lf     epochEnd = %.12lf    epsilon = %le\n", (isIn? "":"not"), currentEpoch, epochStart, epochEnd, epsilon); 
    return isIn;
 }
+
+

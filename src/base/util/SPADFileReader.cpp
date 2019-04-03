@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -860,8 +860,8 @@ void SPADFileReader::ValidateMetaData()
       throw UtilityException(errmsg);
    }
 
-   azStepSize = az->itsStep;
-   elStepSize = el->itsStep;
+   azStepSize = (Integer)az->itsStep;
+   elStepSize = (Integer)el->itsStep;
    if ((azStepSize == -999) || (elStepSize == -999))
    {
       std::string errmsg = "\"Step\" field for Azimuth or Elevation record ";
@@ -870,8 +870,8 @@ void SPADFileReader::ValidateMetaData()
       throw UtilityException(errmsg);
    }
 
-   azCount    = 360./ azStepSize + 1;
-   elCount    = 180./ elStepSize + 1;
+   azCount    = (Integer)(360./ azStepSize + 1);
+   elCount    = (Integer)(180./ elStepSize + 1);
 }
 
 // -----------------------------------------------------------------------------
@@ -880,8 +880,8 @@ void SPADFileReader::ValidateMetaData()
 // -----------------------------------------------------------------------------
 void SPADFileReader::ValidateData()
 {
-   Integer azStep = spadMotion.at(0)->itsStep;
-   Integer elStep = spadMotion.at(1)->itsStep;
+   Integer azStep = (Integer)spadMotion.at(0)->itsStep;
+   Integer elStep = (Integer)spadMotion.at(1)->itsStep;
 
    bool azEvenlyDiv = true;
    bool elEvenlyDiv = true;
@@ -998,8 +998,8 @@ Rvector3 SPADFileReader::GetForceAt(Real azVal, Real elVal)
    Integer azRecords = Integer((azVal + 180) / azStepSize) * elCount;
    for (Integer ii = azRecords; ii < recordCount; ii++)
    {
-      Integer theAZ = spadData.at(ii)->azimuth;
-      Integer theEL = spadData.at(ii)->elevation;
+      Integer theAZ = (Integer)spadData.at(ii)->azimuth;
+      Integer theEL = (Integer)spadData.at(ii)->elevation;
       if (GmatMathUtil::IsEqual(theAZ, azVal) && (GmatMathUtil::IsEqual(theEL, elVal)))
          return spadData.at(ii)->force;
    }

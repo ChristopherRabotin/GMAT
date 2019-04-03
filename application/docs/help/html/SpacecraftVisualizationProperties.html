@@ -1,0 +1,95 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Spacecraft Visualization Properties</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="SpacecraftOrbitState.html" title="Spacecraft Orbit State"><link rel="next" href="String.html" title="String"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Spacecraft Visualization Properties</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="SpacecraftOrbitState.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="String.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="SpacecraftVisualizationProperties"></a><div class="titlepage"></div><a name="N20CE5" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Spacecraft Visualization Properties</span></h2><p>SpacecraftVisualizationProperties &mdash; The visual properties of the spacecraft</p></div><div class="refsection"><a name="N20CF6"></a><h2>Description</h2><p>The <span class="guilabel">Spacecraft Visualization Properties</span> lets
+    you define a spacecraft model, translate the spacecraft in X,Y, Z
+    directions or apply a fixed rotation to the attitude orientation of the
+    model. You can also adjust the scale factor of the spacecraft model size.
+    GMAT lets you set orbit colors via the spacecraft visualization properties
+    as well. You can set colors to spacecraft orbital trajectories and any
+    perturbing trajectories that are drawn during iterative processes. See
+    <a class="xref" href="Color.html" title="Color"><span class="refentrytitle">Color</span></a> documentation for discussion and examples
+    on how to set orbital colors using <span class="guilabel">Spacecraft</span>
+    object's <span class="guilabel">OrbitColor</span> and
+    <span class="guilabel">TargetColor</span> fields. Also see the <a class="xref" href="SpacecraftVisualizationProperties.html#SpacecraftVisProp_Fields" title="Fields">Fields</a> section
+    below to read more about these two fields. The Spacecraft visualization
+    properties can be configured either through GMAT&rsquo;s GUI or the script
+    interface.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="OrbitView.html" title="OrbitView"><span class="refentrytitle">OrbitView</span></a>, <a class="xref" href="Color.html" title="Color"><span class="refentrytitle">Color</span></a></p></div><div class="refsection"><a name="SpacecraftVisProp_Fields"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">ModelOffsetX</span></td><td><p> This field lets you translate a spacecraft in +X or
+            -X axis of central body's coordinate system. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-3.5 &lt;= Real &lt;= 3.5</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.000000</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ModelOffsetY</span></td><td><p>Allows you to translate a spacecraft in +Y or -Y axis
+            of central body's coordinate system.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-3.5 &lt;= Real &lt;= 3.5</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.000000</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ModelOffsetZ</span></td><td><p>Allows you to translate a spacecraft in +Z or -Z axis
+            of central body's coordinate system. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-3.5 &lt;= Real &lt;= 3.5</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.000000</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ModelRotationX</span></td><td><p>Allows you to perform a fixed rotation of
+            spacecraft's attitude w.r.t X-axis of central body's coordinate
+            system. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-180 &lt;= Real &lt;= 180</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.000000</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Deg.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ModelRotationY</span></td><td><p>Allows you to perform a fixed rotation of
+            spacecraft's attitude w.r.t Y-axis of central body's coordinate
+            system. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-180 &lt;= Real &lt;= 180</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.000000</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Deg.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ModelRotationZ</span></td><td><p>Allows you to perform a fixed rotation of
+            spacecraft's attitude w.r.t Z-axis of central body's coordinate
+            system. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-180 &lt;= Real &lt;= 180</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0.000000</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Deg.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ModelScale</span></td><td><p>Allows you to apply a scale factor to the spacecraft
+            model's size.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0.001 &lt;= Real &lt;= 1000</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>3.000000</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ModelFile</span></td><td><p>Allows you to load spacecraft models that are in .3ds
+            model formats. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>. 3ds spacecraft model formats only</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">../data/vehicle/models/aura.3ds</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">OrbitColor</span></td><td><p>Allows you to set available colors on spacecraft
+            orbits. The spacecraft orbits are drawn using the
+            <span class="guilabel">OrbitView</span> graphics displays. The colors can
+            be identified through a string or an integer array. For example:
+            Setting spacecraft's orbit color to red can be done in following
+            two ways: <code class="literal">DefaultSC.OrbitColor = Red</code> or
+            <code class="literal">DefaultSC.OrbitColor = [255 0 0]</code>. This field
+            can be modified in the Mission Sequence as well.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer Array or String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any color available from the Orbit Color Picker in
+                    GUI. Valid predefined color name or RGB triplet value
+                    between 0 and 255.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Red</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">TargetColor</span></td><td><p>Allows you to set available colors on a spacecraft's
+            perturbing trajectories during iterative processes such as
+            Differential Correction or Optimization. The perturbing
+            trajectories are drawn through the <span class="guilabel">OrbitView</span>
+            resource. The target color can be identified through a string or
+            an integer array. For example: Setting spacecraft's perturbing
+            trajectories to yellow color can be done in following two ways:
+            <code class="literal">DefaultSC.TargetColor = Yellow</code> or
+            <code class="literal">DefaultSC.TargetColor = [255 255 0]</code> . This
+            field can be modified in the Mission Sequence as well.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer Array or String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any color available from the Orbit Color Picker in
+                    GUI. Valid predefined color name or RGB triplet value
+                    between 0 and 255.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Teal</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N20F05"></a><h2>GUI</h2><p>The figure below shows the default settings for the
+    <span class="guilabel">Spacecraft Visualization Properties</span> resource:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftVisualizationProperties_GUI_3.png" align="middle" height="609"></td></tr></table></div></div><p>The GUI interface for <span class="guilabel">Spacecraft Visualization
+    Properties</span> is contained on the Visualization tab of the
+    <span class="guilabel">Spacecraft</span> resource. You can configure visualization
+    properties of the spacecraft and visualize the changes in the
+    <span class="guilabel">Display</span> window.</p><p>Within the <span class="guilabel">Display </span>window, you can
+    <span class="guilabel">Left </span>click and drag your mouse to change camera
+    orientation. Camera orientation can be changed in
+    <span class="guilabel">Up/Down/Left/Righ</span>t directions. You can also
+    <span class="guilabel">Right</span> click and drag your mouse to zoom in and out of
+    the <span class="guilabel">Display</span> window. <span class="guilabel">Right</span> click
+    and moving the cursor in <span class="guilabel">Up </span>direction helps to zoom
+    out and moving the cursor in <span class="guilabel">Down</span> direction helps to
+    zoom in.</p></div><div class="refsection"><a name="N20F3B"></a><h2>Remarks</h2><div class="refsection"><a name="N20F3E"></a><h3>Configuring Spacecraft Visualization Properties</h3><p>GMAT lets you define any spacecraft model but currently GMAT
+      supports only .3ds model format. Several .3ds spacecraft model formats
+      are available <a class="link" href="http://www.nasa.gov/multimedia/3d_resources/models.html" target="_top">here.</a>
+      You can also download more .3ds models by clicking <a class="link" href="http://www.celestiamotherlode.net/" target="_top">here.</a> Most of
+      these models are in .3ds format, which can be read by most 3D
+      programs.</p><p>GMAT lets you apply fixed rotation to the attitude orientation of
+      the spacecraft model or translate the model in any of the X, Y and Z
+      directions. You can also apply a scale factor to the selected spacecraft
+      model to adjust the size of the model. Any changes that are made to the
+      spacecraft model, attitude orientation, translation or scale size factor
+      will also be displayed in <span class="guilabel">OrbitView</span> resource&rsquo;s
+      graphics window. The configured spacecraft visualization properties will
+      only show up in OrbitView graphics window after you have run the
+      mission. See <span class="guilabel">OrbitView</span> resource&rsquo;s
+      user-specification document to learn more about
+      <span class="guilabel">OrbitView</span> graphics window.</p></div></div><div class="refsection"><a name="N20F56"></a><h2>Examples</h2><div class="informalexample"><p>This example shows you how to configure <span class="guilabel">Spacecraft
+      Visualization Properties</span> resource. All values are non-default
+      values.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+aSat.ModelFile = '../data/vehicle/models/aura.3ds'
+aSat.ModelOffsetX = 1.5
+aSat.ModelOffsetY = -2
+aSat.ModelOffsetZ = 3
+aSat.ModelRotationX = 180
+aSat.ModelRotationY = 180
+aSat.ModelRotationZ = 90
+aSat.ModelScale = 15
+
+Create Propagator aProp
+
+Create OrbitView anOrbitView
+anOrbitView.Add = {aSat, Earth}
+
+BeginMissionSequence
+Propagate aProp(aSat) {aSat.ElapsedSecs = 9000}</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="SpacecraftOrbitState.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="String.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Spacecraft Orbit State&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;String</td></tr></table></div></body></html>

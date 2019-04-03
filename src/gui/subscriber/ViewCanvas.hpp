@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -166,7 +166,7 @@ public:
    
    // Double buffer activation needed in Linux (Patch from Tristan Moody)
    // Moved from gmatwxdefs.hpp to remove compiler warning: defined but not used (LOJ: 2012.05.29)
-   static int GmatGLCanvasAttribs[2]; // = {WX_GL_DOUBLEBUFFER, 0};
+   static int GmatGLCanvasAttribs[4]; // = {WX_GL_DOUBLEBUFFER, 0};
    
 protected:
 

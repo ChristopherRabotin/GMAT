@@ -1,0 +1,348 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Configure the Mission Sequence</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="OptimalLunarFlyby.html" title="Chapter&nbsp;9.&nbsp;Optimal Lunar Flyby using Multiple Shooting"><link rel="prev" href="ch09s02.html" title="Configure Coordinate Systems, Spacecraft, Optimizer, Propagators, Maneuvers, Variables, and Graphics"><link rel="next" href="ch09s04.html" title="Design the Trajectory"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Configure the Mission Sequence</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ch09s02.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;9.&nbsp;Optimal Lunar Flyby using Multiple Shooting</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ch09s04.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N12B22"></a>Configure the Mission Sequence</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12B25"></a>Overview of the Mission Sequence</h3></div></div></div><p>Now that the resources are created and configured, we will
+      construct the optimization sequence. Pseudo-script for the optimization
+      sequence is shown below. We will start by defining initial guesses for
+      the control point optimization variables. Next, selected variables are
+      initialized. Take some time and study the structure of the optimization
+      loop before moving on to the next step.</p><div class="informalexample"><pre class="programlisting"><code class="code">Define optimization initial guesses
+Initialize variables
+Optimize
+      Loop initializations
+      Vary control point epochs
+      Set epochs on spacecraft
+      Vary control point state values
+      Set state values on spacecraft 
+      Apply constraints on control points (i.e before propagation)
+      Propagate spacecraft
+      Apply patch point constraints (i.e. after propagation)
+      Apply constraints on mission orbit
+      Apply cost function
+EndOptimize
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12B2E"></a>Define Initial Guesses</h3></div></div></div><p>Below we define initial guesses for the optimization variables.
+      Initial guesses are often difficult to generate and to ensure you can
+      take this tutorial we have provided a reasonable initial guess for this
+      problem. You can use GMAT to produce initial guesses and the sample
+      script named Ex_GivenEpochGoToTheMoon distributed with GMAT can be used
+      for that purpose for this tutorial.</p><p>The time variables <span class="guilabel">launchEpoch</span>,
+      <span class="guilabel">flybyEpoch</span> and <span class="guilabel">moiEpoch</span> are
+      the TAI modified Julian epochs of the launch, flyby, and MOI. It is not
+      obvious yet that these are TAI modified Julian epochs, but later we use
+      statements like this to set the epoch: satTOI.Epoch.TAIModJulian =
+      launchEpoch. Recall that we previously set up the spacecraft to used
+      coordinate systems appropriate to the problem. Setting
+      <span class="guilabel">satTOI.X</span> sets the quantity in
+      <span class="guilabel">EarthMJ2000Eq</span> and
+      <span class="guilabel">satFlyBy_Forward.X</span> sets the quantity in
+      <span class="guilabel">MoonMJ2000Eq</span> because of the configuration of the
+      spacecraft.</p><div class="informalexample"><pre class="programlisting"><code class="code">BeginMissionSequence
+
+%  Define initial guesses for optimization variables
+BeginScript 'Initial Guess Values'
+
+   %  Robust intial guess but not feasible  
+   toiEpoch = 27698.1612435
+   flybyEpoch = 27703.7658714
+   moiEpoch = 27723.305398
+   satTOI.X = -6659.70273964
+   satTOI.Y = -229.327053112
+   satTOI.Z = -168.396030559
+   satTOI.VX = 0.26826479315
+   satTOI.VY = -9.54041067213
+   satTOI.VZ = 5.17141415746
+   satFlyBy_Forward.X = 869.478955662
+   satFlyBy_Forward.Y = -6287.76679557
+   satFlyBy_Forward.Z = -3598.47087228
+   satFlyBy_Forward.VX = 1.14619150302
+   satFlyBy_Forward.VY = -0.73648611256
+   satFlyBy_Forward.VZ = -0.624051812914
+   satMOI_Backward.X = -53544.9703742
+   satMOI_Backward.Y = -68231.6310266
+   satMOI_Backward.Z = -1272.76362793
+   satMOI_Backward.VX = 2.051823425
+   satMOI_Backward.VY = -1.91406286218
+   satMOI_Backward.VZ = -0.280408526046
+   MOI.Element1 = -0.0687322937282
+  
+EndScript
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12B4E"></a>Initialize Variables</h3></div></div></div><p>The script below is used to define some constants and to define
+      the values for various constraints applied to the trajectory. Pay
+      particular attention to the constraint values and time values. For
+      example, the variable <span class="guilabel">conTOIPeriapsis</span> defines the
+      periapsis radius at launch constraint to be at about 285 km (geodetics
+      will cause altitude to vary slightly). The variable
+      <span class="guilabel">conMOIApoapsis</span> defines the mission orbit apoapsis
+      to be 60 earth radii. The variables
+      <span class="guilabel">patchOneElapsedDays</span>,
+      <span class="guilabel">patchTwoElapsedDays</span>, and
+      <span class="guilabel">refEpoch</span> are particularly important as they define
+      the epochs of the patch points later in the script using lines like this
+      <span class="guilabel">patchOneEpoch = refEpoch +
+      patchOneElapsedDayspatchOneEpoch</span>. The preceding line defines
+      the epoch of the first patch point to be one day after
+      <span class="guilabel">refEpoch</span> (<span class="guilabel">refEpoch</span> is set to
+      <span class="guilabel">launchEpoch</span>). Similarly, the epoch of the second
+      patch point is defined as 13 days after <span class="guilabel">refEpoch</span>.
+      Note, the patch point epochs can be treated as optimization variables
+      but that was not done to reduce complexity of the tutorial.</p><div class="informalexample"><pre class="programlisting"><code class="code">%  Define constants and configuration settings
+BeginScript 'Constants and Init'
+   
+   %  Some constants
+   earthRadius          = 6378.1363
+      
+   %  Define constraint values and other constants 
+   conTOIPeriapsis     = 6378 + 285   % constraint on launch periapsis
+   conTOIInclination   = 28.5         % constraint launch inclination
+   conLunarPeriapsis   = 8000         % constraint on flyby altitude
+   conMOIApoapsis      = 60*earthRadius  % constraint on mission apoapsis
+   conMOIInclination   = 10              % constraint on mission inc.
+   conMOIPeriapsis     = 15*earthRadius  % constraint on mission periapsis
+   patchOneElapsedDays = 1               % define epoch of patch 1
+   patchTwoElapsedDays = 13              % define epoch of patch 2
+   refEpoch            = toiEpoch     % ref. epoch for time quantities
+   
+EndScript
+
+%  The optimization loop
+Optimize 'Optimize Flyby' NLPOpt ...
+   {SolveMode = Solve, ExitMode = DiscardAndContinue}
+   
+   %   Loop initializations
+   loopIdx = loopIdx + 1
+   
+EndOptimize
+</code></pre></div><div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Caution</h3><p>In the above script snippet, we have included the EndOptimize
+        command so that your script will continue to build while we construct
+        the optimization sequence. You must paste subsequence script snippets
+        inside of the optimization loop.</p></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12B78"></a>Vary and Set Spacecraft Epochs</h3></div></div></div><p>Now we will write the commands that vary the control point epochs
+      and apply those epochs to the spacecraft. The first three script lines
+      below define <span class="guilabel">launchEpoch</span>,
+      <span class="guilabel">flybyEpoch</span>, and <span class="guilabel">moiEpoch</span> to be
+      optimization variables. It is important to note that when a
+      <span class="guilabel">Vary </span>command is written like this</p><p><strong class="userinput"><code>Vary NLPOpt(launchEpoch = launchEpoch, . . .
+      </code></strong></p><p>that you are telling the optimizer to vary
+      <span class="guilabel">launchEpoch</span> (the RHS of the equal sign), and to use
+      as the initial guess the value contained in
+      <span class="guilabel">launchEpoch</span> when the command is first executed.
+      This will allow us to easily change initial guess values and perform
+      &ldquo;Apply Corrections&rdquo; via the script interface which will be shown later.
+      Continuing with the script explanation, the last five lines below set
+      the epochs of the spacecraft according to the optimization variables and
+      set up the patch point epochs.</p><div class="informalexample"><pre class="programlisting"><code class="code">   %  Vary the epochs 
+   Vary NLPOpt(toiEpoch = toiEpoch, {Perturbation = 0.0001, MaxStep = 0.5})
+   Vary NLPOpt(flybyEpoch = flybyEpoch,{Perturbation=0.0001,MaxStep=0.5})
+   Vary NLPOpt(moiEpoch = moiEpoch, {Perturbation = 0.0001,MaxStep=0.5})
+
+   %  Configure epochs and spacecraft
+   satTOI.Epoch.TAIModJulian           = toiEpoch
+   satMOI_Backward.Epoch.TAIModJulian  = moiEpoch
+   satFlyBy_Forward.Epoch.TAIModJulian = flybyEpoch
+   patchOneEpoch                       = refEpoch + patchOneElapsedDays
+   patchTwoEpoch                       = refEpoch + patchTwoElapsedDays
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12B98"></a>Vary Control Point States</h3></div></div></div><p>The script below defines the control point optimization variables
+      and defines the initial guess values for each optimization variable. For
+      example, the following line</p><p><strong class="userinput"><code>Vary NLPOpt(satTOI.X = satTOI.X, {Perturbation =
+      0.00001, MaxStep = 100}) </code></strong></p><p>tells GMAT to vary the X Cartesian value of
+      <span class="guilabel">satTOI</span> using as the initial guess the value of
+      <span class="guilabel">satTOI.X</span> at initial command execution. The
+      <span class="guilabel">Perturbation</span> used to compute derivatives is 0.00001
+      and the optimizer will not take steps larger than 100 for this variable.
+      Note: units of settings like <span class="guilabel">Perturbation</span> are the
+      same as the unit for the optimization variable.</p><p>Notice the lines at the bottom of this script snippet that look
+      like this:</p><p><strong class="userinput"><code>satFlyBy_Backward = satFlyBy_Forward</code></strong></p><p>This line assigns an entire <span class="guilabel">Spacecraft</span> to
+      another <span class="guilabel">Spacecraft</span>. Because we are varying one
+      control point in the middle of a segment, this assignment allows us to
+      conveniently set the second <span class="guilabel">Spacecraft</span> without
+      independently varying its state properties.</p><div class="informalexample"><pre class="programlisting"><code class="code">   %  Vary the states and delta V
+   Vary NLPOpt(satTOI.X            = ...
+   satTOI.X, {Perturbation = 0.00001, MaxStep = 100})
+   Vary NLPOpt(satTOI.Y            = ...
+   satTOI.Y, {Perturbation = 0.000001, MaxStep = 100})
+   Vary NLPOpt(satTOI.Z            = ...
+   satTOI.Z, {Perturbation = 0.00001, MaxStep = 100})
+   Vary NLPOpt(satTOI.VX           = ...
+   satTOI.VX, {Perturbation = 0.00001, MaxStep = 0.05})
+   Vary NLPOpt(satTOI.VY           = ...
+   satTOI.VY, {Perturbation = 0.000001, MaxStep = 0.05})
+   Vary NLPOpt(satTOI.VZ           = ...
+   satTOI.VZ, {Perturbation = 0.000001, MaxStep = 0.05})
+   Vary NLPOpt(satFlyBy_Forward.X  = ...
+   satFlyBy_Forward.MoonMJ2000Eq.X, {Perturbation = 0.00001, MaxStep = 100})
+   Vary NLPOpt(satFlyBy_Forward.Y  = ...
+   satFlyBy_Forward.MoonMJ2000Eq.Y, {Perturbation = 0.00001, MaxStep = 100})
+   Vary NLPOpt(satFlyBy_Forward.Z  = ...
+   satFlyBy_Forward.MoonMJ2000Eq.Z, {Perturbation = 0.00001, MaxStep = 100})
+   Vary NLPOpt(satFlyBy_Forward.VX = ...
+   satFlyBy_Forward.MoonMJ2000Eq.VX, {Perturbation = 0.00001, MaxStep = 0.1})
+   Vary NLPOpt(satFlyBy_Forward.VY = ...
+   satFlyBy_Forward.MoonMJ2000Eq.VY, {Perturbation = 0.00001, MaxStep = 0.1})
+   Vary NLPOpt(satFlyBy_Forward.VZ = ...
+   satFlyBy_Forward.MoonMJ2000Eq.VZ, {Perturbation = 0.00001, MaxStep = 0.1})
+   Vary NLPOpt(satMOI_Backward.X   = ...
+   satMOI_Backward.X, {Perturbation = 0.000001, MaxStep = 40000})
+   Vary NLPOpt(satMOI_Backward.Y   = ...
+   satMOI_Backward.Y, {Perturbation = 0.000001, MaxStep = 40000})
+   Vary NLPOpt(satMOI_Backward.Z   = ...
+   satMOI_Backward.Z, {Perturbation = 0.000001, MaxStep = 40000})
+   Vary NLPOpt(satMOI_Backward.VX  = ...
+   satMOI_Backward.VX, {Perturbation = 0.00001, MaxStep = 0.1})
+   Vary NLPOpt(satMOI_Backward.VY  = ...
+   satMOI_Backward.VY, {Perturbation = 0.00001, MaxStep = 0.1})
+   Vary NLPOpt(satMOI_Backward.VZ  = ...
+   satMOI_Backward.VZ, {Perturbation = 0.00001, MaxStep = 0.1})
+   Vary NLPOpt(MOI.Element1        = ...
+   MOI.Element1, {Perturbation = 0.0001, MaxStep = 0.005})
+   
+   %  Initialize spacecraft and do some reporting
+   satFlyBy_Backward = satFlyBy_Forward
+   satMOI_Forward    = satMOI_Backward
+   deltaTimeFlyBy    = flybyEpoch - toiEpoch
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12BC2"></a>Apply Constraints at Control Points</h3></div></div></div><p>Now that the control points have been set, we can apply
+      constraints that occur at the control points (i.e. before propagation to
+      the patch point). Notice below that the
+      <span class="guilabel">NonlinearContraint</span> commands are commented out. We
+      will uncomment those constraints later. The commands below, when
+      uncommented, will apply constraints on the launch inclination, the
+      launch periapsis radius, the mission orbit periapsis, and the last
+      constraint ensures that TOI occurs at periapsis of the transfer
+      orbit.</p><div class="informalexample"><pre class="programlisting"><code class="code">    %  Apply constraints on initial states
+   %NonlinearConstraint NLPOpt(satTOI.INC=conTOIInclination)
+   %NonlinearConstraint NLPOpt(satTOI.RadPer=conTOIPeriapsis)
+   %NonlinearConstraint NLPOpt(satMOI_Backward.RadPer = conMOIPeriapsis)
+   errorMOIRadPer = satMOI_Backward.RadPer - conMOIPeriapsis
+   
+   %  This constraint ensures that satTOI state is at periapsis at injection
+   launchRdotV = (satTOI.X *satTOI.VX + satTOI.Y *satTOI.VY + ...
+   satTOI.Z *satTOI.VZ)/1000
+   %NonlinearConstraint NLPOpt(launchRdotV=0)
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12BCE"></a>Propagate the Segments</h3></div></div></div><p>We are now ready to propagate the spacecraft to the patch points.
+      We must propagate <span class="guilabel">satTOI</span> forward to
+      <span class="guilabel">patchOneEpoch</span>, propagate
+      s<span class="guilabel">atFlyBy_Backward</span> backwards to
+      <span class="guilabel">patchOneEpoch</span>, propagate
+      <span class="guilabel">satFlyBy_Forward</span> to
+      <span class="guilabel">patchTwoEpoch</span>, and propagate
+      <span class="guilabel">satMOI_Backward</span> to
+      <span class="guilabel">patchTwoEpoch</span>. Notice that some
+      <span class="guilabel">Propagate</span> commands are applied inside of
+      <span class="guilabel">If</span> statements to ensure that propagation is
+      performed in the correct direction.%</p><div class="informalexample"><pre class="programlisting"><code class="code">%  DO NOT PASTE THESE LINES INTO THE SCRIPT, THEY ARE 
+%  INCLUDED IN THE COMPLETE SNIPPET LATER IN THIS SECTION
+If satFlyBy_Forward.TAIModJulian &gt; patchTwoEpoch
+      Propagate BackProp NearMoonProp(satFlyBy_Forward) . . .
+   Else
+      Propagate NearMoonProp(satFlyBy_Forward) . . .
+EndIf
+</code></pre></div><p>If In the script below, you will notice like this:</p><div class="informalexample"><pre class="programlisting"><code class="code">%  DO NOT PASTE THESE LINES INTO THE SCRIPT, THEY ARE 
+%  INCLUDED IN THE COMPLETE SNIPPET LATER IN THIS SECTION
+Propagate NearEarthProp(satTOI) {satTOI.TAIModJulian = patchOneEpoch, &hellip;
+PenUp EarthView    %  The next three lines handle plot epoch discontinuity 
+Propagate BackProp NearMoonProp(satFlyBy_Backward)
+PenDown EarthView  
+</code></pre></div><p>These lines are used to clean up discontinuities in the
+      <span class="guilabel">OrbitView</span> that occur because we are making
+      discontinuous changes to time in this complex script.</p><div class="informalexample"><pre class="programlisting"><code class="code">%  Propagate the segments
+   Propagate NearEarthProp(satTOI) {satTOI.TAIModJulian = ...
+    patchOneEpoch, StopTolerance = 1e-005}
+   PenUp EarthView  %  The next three lines handle discontinuity in plots
+   Propagate BackProp NearMoonProp(satFlyBy_Backward)
+   PenDown EarthView  
+   Propagate BackProp NearMoonProp(satFlyBy_Backward)...
+   {satFlyBy_Backward.TAIModJulian = patchOneEpoch, StopTolerance = 1e-005}
+   
+   %  Propagate FlybySat to Apogee and apply apogee constraints
+   PenUp EarthView  %  The next three lines handle discontinuity in plots
+   Propagate NearMoonProp(satFlyBy_Forward)
+   PenDown EarthView
+   Propagate NearMoonProp(satFlyBy_Forward) ...
+   {satFlyBy_Forward.Earth.Apoapsis, StopTolerance = 1e-005}
+   Report debugData satFlyBy_Forward.RMAG
+ 
+   %  Propagate FlybSat and satMOI_Backward to patchTwoEpoch
+   If satFlyBy_Forward.TAIModJulian &gt; patchTwoEpoch
+      Propagate BackProp NearMoonProp(satFlyBy_Forward)...
+   {satFlyBy_Forward.TAIModJulian = patchTwoEpoch, StopTolerance = 1e-005}
+   Else
+      Propagate NearMoonProp(satFlyBy_Forward)...
+   {satFlyBy_Forward.TAIModJulian = patchTwoEpoch, StopTolerance = 1e-005}
+   EndIf
+   PenUp EarthView    %  The next three lines handle discontinuity in plots
+   Propagate BackProp NearMoonProp(satMOI_Backward)
+   PenDown EarthView
+   Propagate BackProp NearMoonProp(satMOI_Backward)...
+  {satMOI_Backward.TAIModJulian = patchTwoEpoch, StopTolerance = 1e-005}
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12C04"></a>Compute Some Quantities and Apply Patch Constraints</h3></div></div></div><p>The variables <span class="guilabel">errorPos1</span> and others below are
+      used in <span class="guilabel">XYPlots</span> to display position and velocity
+      errors at the patch points.</p><div class="informalexample"><pre class="programlisting"><code class="code">   %  Compute constraint errors for plots
+   errorPos1 = sqrt((satTOI.X - satFlyBy_Backward.X)^2 + ...
+   (satTOI.Y - satFlyBy_Backward.Y)^2 + (satTOI.Z - satFlyBy_Backward.Z)^2)
+   errorVel1 = sqrt((satTOI.VX - satFlyBy_Backward.VX)^2 + ...
+   (satTOI.VY-satFlyBy_Backward.VY)^2+(satTOI.VZ-satFlyBy_Backward.VZ)^2)
+   errorPos2 = sqrt((satMOI_Backward.X - satFlyBy_Forward.X)^2 + ...
+   (satMOI_Backward.Y - satFlyBy_Forward.Y)^2 + ...
+   (satMOI_Backward.Z - satFlyBy_Forward.Z)^2)
+   errorVel2 = sqrt((satMOI_Backward.VX - satFlyBy_Forward.VX)^2 + ...
+   (satMOI_Backward.VY - satFlyBy_Forward.VY)^2 + ...
+   (satMOI_Backward.VZ - satFlyBy_Forward.VZ)^2)
+   
+   </code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12C13"></a>Apply Patch Point Constraints</h3></div></div></div><p>The <span class="guilabel">NonlinearConstraint</span> commands below apply
+      the patch point constraints.</p><div class="informalexample"><pre class="programlisting"><code class="code">   %  Apply the collocation constraints constraints on final states
+   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.X=...
+   satFlyBy_Backward.EarthMJ2000Eq.X)
+   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.Y=...
+   satFlyBy_Backward.EarthMJ2000Eq.Y)
+   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.Z=... 
+   satFlyBy_Backward.EarthMJ2000Eq.Z)
+   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.VX=...
+   satFlyBy_Backward.EarthMJ2000Eq.VX)
+   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.VY=...
+   satFlyBy_Backward.EarthMJ2000Eq.VY)
+   NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.VZ=...
+   satFlyBy_Backward.EarthMJ2000Eq.VZ)
+   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.X=...
+   satFlyBy_Forward.EarthMJ2000Eq.X)
+   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.Y=...
+   satFlyBy_Forward.EarthMJ2000Eq.Y)
+   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.Z=...
+   satFlyBy_Forward.EarthMJ2000Eq.Z)
+   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.VX=...
+   satFlyBy_Forward.EarthMJ2000Eq.VX)
+   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.VY=...
+   satFlyBy_Forward.EarthMJ2000Eq.VY)
+   NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.VZ=...
+   satFlyBy_Forward.EarthMJ2000Eq.VZ)
+
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12C1F"></a>Apply Constraints on Mission Orbit</h3></div></div></div><p>We can now apply constraints on the final mission orbit that
+      cannot be applied until after propagation. The script snippet below
+      applies the inclination constraint on the final mission orbit, and
+      applies the apogee radius constraint on the final mission orbit after
+      <span class="guilabel">MOI</span> is applied.</p><div class="informalexample"><pre class="programlisting"><code class="code">   %  Apply mission orbit constraints/others on segments after propagation
+   errorMOIInclination = satMOI_Forward.INC - conMOIInclination
+   %NonlinearConstraint NLPOpt(satMOI_Forward.EarthMJ2000Eq.INC = ...
+   % conMOIInclination)
+      %  Propagate satMOI_Forward to apogee
+   PenUp EarthView    %  The next three lines handle discontinuity in plots
+   Propagate NearEarthProp(satMOI_Forward)
+   PenDown EarthView
+   If satMOI_Forward.Earth.TA &gt; 180
+     Propagate NearEarthProp(satMOI_Forward){satMOI_Forward.Earth.Periapsis}
+   Else
+      Propagate BackProp NearEarthProp(satMOI_Forward)...
+      {satMOI_Forward.Earth.Periapsis}
+   EndIf
+   Maneuver MOI(satMOI_Forward)
+   Propagate NearEarthProp(satMOI_Forward) {satMOI_Forward.Earth.Apoapsis}
+   %NonlinearConstraint NLPOpt(satMOI_Forward.RadApo=conMOIApoapsis)
+   errorMOIRadApo = satMOI_Forward.Earth.RadApo - conMOIApoapsis
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12C2B"></a>Apply Cost Function</h3></div></div></div><p>The last script snippet applies the cost function and a Stop
+      command. The <span class="guilabel">Stop</span> command is so that we can QA your
+      script configuration and make sure the initial guess is providing
+      reasonable results before attempting optimization.</p><div class="informalexample"><pre class="programlisting"><code class="code">   %  Apply cost function and 
+   Cost = sqrt( MOI.Element1^2 + MOI.Element2^2 + MOI.Element3^2)
+   %Minimize NLPOpt(Cost)
+   
+   %  Report stuff at the end of the loop
+   Report debugData MOI.Element1
+   Report debugData satMOI_Forward.RMAG conMOIApoapsis conMOIInclination
+   
+   Stop  
+</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ch09s02.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="OptimalLunarFlyby.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ch09s04.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Configure Coordinate Systems, Spacecraft, Optimizer, Propagators,
+    Maneuvers, Variables, and Graphics&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Design the Trajectory</td></tr></table></div></body></html>

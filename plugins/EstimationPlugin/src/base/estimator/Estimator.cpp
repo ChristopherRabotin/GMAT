@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -34,12 +34,15 @@
 #include "GmatState.hpp"
 #include "GmatGlobal.hpp"
 #include "PropagationStateManager.hpp"
-//#include "SolverException.hpp"
+#include "SolverException.hpp"
 #include "SpaceObject.hpp"
 #include "MessageInterface.hpp"
 #include "EstimatorException.hpp"
 #include "Spacecraft.hpp"
 #include "GroundstationInterface.hpp"
+#include "AcceptFilter.hpp"
+#include "RejectFilter.hpp"
+#include "StateConversionUtil.hpp"
 #include "StringUtil.hpp"
 
 #include <sstream>
@@ -50,6 +53,10 @@
 //#define DEBUG_ESTIMATOR_INITIALIZATION
 //#define DEBUG_INITIALIZE
 //#define DEBUG_CLONED_PARAMETER UPDATES
+//#define DEBUG_FILTER
+//#define DEBUG_CLONED_PARAMETER UPDATES
+//#define DEBUG_RESIDUAL_PLOTS
+//#define DEBUG_RESIDUALS
 
 //------------------------------------------------------------------------------
 // static data
@@ -69,6 +76,7 @@ Estimator::PARAMETER_TEXT[] =
    "OLSEMultiplicativeConstant",
    "OLSEAdditiveConstant",
    "ResetBestRMSIfDiverging",
+   "DataFilters",
    "ConvergentStatus",
 };
 
@@ -86,6 +94,7 @@ Estimator::PARAMETER_TYPE[] =
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::BOOLEAN_TYPE,
+   Gmat::STRINGARRAY_TYPE,
    Gmat::STRING_TYPE,
 };
 
@@ -156,7 +165,18 @@ Estimator::~Estimator()
       delete propagator;
 
    for (UnsignedInt i = 0; i < residualPlots.size(); ++i)
-      delete residualPlots[i];
+   {
+      if (residualPlots[i])
+         delete residualPlots[i];
+   }
+   residualPlots.clear();
+
+   for (UnsignedInt i = 0; i < dataFilterObjs.size(); ++i)
+   {
+      if (dataFilterObjs[i])
+         delete dataFilterObjs[i];
+   }
+   dataFilterObjs.clear();
 }
 
 
@@ -196,7 +216,8 @@ Estimator::Estimator(const Estimator& est) :
    maxResidualMult      (est.maxResidualMult),
    constMult            (est.constMult),
    additiveConst        (est.additiveConst),
-   resetBestRMSFlag     (est.resetBestRMSFlag)
+   resetBestRMSFlag     (est.resetBestRMSFlag),
+   dataFilterStrings    (est.dataFilterStrings)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("Estimator::Estimator() enter: <%p,%s> copy constructor from <%p,%s>\n", this, GetName().c_str(), &est, est.GetName().c_str());  
@@ -252,7 +273,7 @@ Estimator& Estimator::operator=(const Estimator& est)
       else
          propagator = NULL;
 
-      measManager = est.measManager;
+      measManager          = est.measManager;
 
       estimationEpoch      = est.estimationEpoch;
       currentEpoch         = est.currentEpoch;
@@ -273,6 +294,8 @@ Estimator& Estimator::operator=(const Estimator& est)
       constMult            = est.constMult;
       additiveConst        = est.additiveConst;
       resetBestRMSFlag     = est.resetBestRMSFlag;
+
+      dataFilterStrings    = est.dataFilterStrings;
    }
 
    return *this;
@@ -374,7 +397,7 @@ bool Estimator::Initialize()
          }
 
          if (!found)
-            throw EstimatorException("Cannot initialize estimator; '" + name +
+            throw EstimatorException("Error: Cannot initialize estimator; '" + name +
                   "' object is not defined in script.\n");
       }
 
@@ -383,8 +406,35 @@ bool Estimator::Initialize()
       tfs.clear();
       measNames.clear();
 
+      // Set estimation data filter objects
+      ObjectMap objMap = GetConfiguredObjectMap();
+      for (UnsignedInt i = 0; i < dataFilterStrings.size(); ++i)
+      {
+         for (UnsignedInt j = 0; j < dataFilterObjs.size(); ++j)
+         {
+            if (dataFilterStrings[i] == dataFilterObjs[j]->GetName())
+            {
+               throw EstimatorException("Error: Cannot initialize estimator '"
+                  + GetName() + "';  in the estimation data filter list, estimation data filter '" 
+                  + dataFilterStrings[i] + "' object is duplicated.\n");
+            }
+         }
+
+         GmatBase* obj = objMap[dataFilterStrings[i]];
+         if (obj == NULL)
+            throw EstimatorException("Error: Cannot initialize estimator '"
+            + GetName() + "'; Estimation data filter '" + dataFilterStrings[i] +
+            "' object is not defined in script.\n");
+         else
+         {
+            GmatBase* obj1 = obj->Clone();
+            obj1->Initialize();
+            dataFilterObjs.push_back(obj1);
+         }
+      }
+
       // Get EOP time range
-      GmatGlobal::Instance()->GetEopFile()->GetTimeRage(eopTimeMin, eopTimeMax);
+      GmatGlobal::Instance()->GetEopFile()->GetTimeRange(eopTimeMin, eopTimeMax);
    }
 
 #ifdef DEBUG_INITIALIZE
@@ -404,8 +454,9 @@ bool Estimator::Reinitialize()
       bool measOK = measManager.SetPropagator(propagator);
       measOK = measOK && measManager.Initialize();
       if (!measOK)
+         // Note that this could be the Batch estimator or the EKF
          throw EstimatorException(
-           "BatchEstimator::CompleteInitialization - error initializing "
+           "Estimator::CompleteInitialization - error initializing "
             "MeasurementManager.\n");
       
       //@todo: auto generate tracking data adapters from observation data
@@ -447,6 +498,9 @@ void Estimator::CompleteInitialization()
       stm = esm.GetSTM();
       stateCovariance = esm.GetCovariance();
    }
+#ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("Exit Estimator::CompleteInitialization()\n");
+#endif
 }
 
 
@@ -462,6 +516,18 @@ void Estimator::CompleteInitialization()
 bool Estimator::Finalize()
 {
    bool retval = Solver::Finalize();
+
+   // Remove all estimation data filters in finalized stage
+   for (UnsignedInt i = 0; i < dataFilterObjs.size(); ++i)
+   {
+      if (dataFilterObjs[i])
+         delete dataFilterObjs[i];
+   }
+   dataFilterObjs.clear();
+
+   // clear all estimation flags
+   editedRecords.clear();
+
    return retval;
 }
 
@@ -787,6 +853,15 @@ std::string Estimator::GetStringParameter(const Integer id,
       //return addedPlots.at(index);
    }
 
+   if (id == DATA_FILTERS)
+   {
+      if (((Integer)dataFilterStrings.size() > index) && (index >= 0))
+         return dataFilterStrings[index];
+      else
+         throw EstimatorException("Index out of bounds when trying to access "
+         "a estimation data filters");
+   }
+
    return Solver::GetStringParameter(id, index);
 }
 
@@ -847,6 +922,16 @@ bool Estimator::SetStringParameter(const Integer id,
             "The value of \"" + value + "\" for field \"Report Style\""
             " on object \"" + instanceName + "\" is not an allowed value.\n"
             "The allowed values are: [Normal].\n");
+      }
+   }
+
+   if (id == DATA_FILTERS)
+   {
+      //MessageInterface::ShowMessage("%s.DataFilters = %s\n", GetName().c_str(), value.c_str());
+      if (GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}")) == "")
+      {
+         dataFilterStrings.clear();
+         return true;
       }
    }
 
@@ -956,6 +1041,27 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
       return true;
    }
 
+   if (id == DATA_FILTERS)
+   {
+      // Nothing to do when an empty list is added to DataFilters parameter
+      if (index == -1)
+         return true;
+
+      Integer sz = (Integer)dataFilterStrings.size();
+      if (index == sz) // needs to be added to the end of the list
+         dataFilterStrings.push_back(value);
+      else if ((index) < 0 || (index > sz)) // out of bounds
+      {
+         std::string errmsg = "Estimator::SetStringParameter error - index "
+            "into data filter array is out of bounds.\n";
+         throw EstimatorException(errmsg);
+      }
+      else // is in bounds
+         dataFilterStrings.at(index) = value;
+
+      return true;
+   }
+
    return Solver::SetStringParameter(id, value, index);
 }
 
@@ -983,6 +1089,9 @@ const StringArray& Estimator::GetStringArrayParameter(const Integer id) const
 
    if (id == ADD_RESIDUAL_PLOT)
       return addedPlots;
+
+   if (id == DATA_FILTERS)
+      return dataFilterStrings;
 
    return Solver::GetStringArrayParameter(id);
 }
@@ -1391,7 +1500,7 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       {
          // Handle MeasurmentModel and TrackingFileSet
          #ifdef DEBUG_ESTIMATOR_INITIALIZATION
-            MessageInterface::ShowMessage("Handle MeasurementModel and TrackingFileSet: <%s>\n", name.c_str());
+            MessageInterface::ShowMessage("Estimator::SetRefObject Handle MeasurementModel and TrackingFileSet: <%s>\n", name.c_str());
          #endif
 
          modelNames.push_back(obj->GetName());
@@ -1402,7 +1511,7 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       {
          // Handle for TrackingSystem
          #ifdef DEBUG_ESTIMATOR_INITIALIZATION
-            MessageInterface::ShowMessage("Handle TrackingSystem: <%s>\n", name.c_str());
+            MessageInterface::ShowMessage("Estimator::SetRefObject Handle TrackingSystem: <%s>\n", name.c_str());
          #endif
 
          // Add to tracking system list
@@ -1414,7 +1523,7 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                   i < ((TrackingSystem*)obj)->GetMeasurementCount(); ++i)
          {
             #ifdef DEBUG_ESTIMATOR_INITIALIZATION
-               MessageInterface::ShowMessage("   Measurement %d\n", i);
+               MessageInterface::ShowMessage("Estimator::SetRefObject  Measurement %d\n", i);
             #endif
 
             // ...and pass them to the measurement manager
@@ -1784,21 +1893,30 @@ void Estimator::BuildResidualPlot(const std::string &plotName,
          for (UnsignedInt j = 0; j < adapters->size(); ++j)
          {
             Integer id = adapters->at(j)->GetModelID();
-
-            std::stringstream ss;
-            ss << adapters->at(j)->GetName();
-            std::string pName = ss.str();
-
-            std::stringstream ss1;
-            ss1 << pName << " Residuals";
-            std::string curveName = ss1.str();
-            
+            std::string pName = adapters->at(j)->GetName();
 
             rPlot = new OwnedPlot(pName);
             rPlot->SetStringParameter("PlotTitle", plotName);
             rPlot->SetBooleanParameter("UseLines", false);
             rPlot->SetBooleanParameter("UseHiLow", showErrorBars);
-            rPlot->SetStringParameter("Add", curveName);
+            StringArray dimNames = adapters->at(j)->GetMeasurementDimension();
+            Integer dim = dimNames.size();
+            if (dimNames.size() > 1)
+            {
+               for (Integer k = 0; k < dim; ++k)
+               {
+                  std::stringstream ss;
+                  ss << pName << "." << dimNames[k] << " Residuals";
+                  rPlot->SetStringParameter("Add", ss.str());
+               }
+            }
+            else
+            {
+               std::stringstream ss;
+               ss << pName << " Residuals";
+               rPlot->SetStringParameter("Add", ss.str());
+            }
+
             rPlot->SetUsedDataID(id);
             rPlot->Initialize();
 
@@ -1825,11 +1943,12 @@ void Estimator::PlotResiduals()
       MessageInterface::ShowMessage("Processing plot with %d Residuals\n",
             measurementResiduals.size());
    #endif
-
+   
    std::vector<RealArray*> dataBlast;
    RealArray epochs;
-   RealArray values;
-   RealArray hiErrors;
+   //RealArray values;
+   std::vector<RealArray> values;
+   RealArray hiErrors; 
    RealArray lowErrors;
 
    RealArray *hi = NULL, *low = NULL;
@@ -1838,6 +1957,8 @@ void Estimator::PlotResiduals()
    {
       dataBlast.clear();
       epochs.clear();
+      for (UnsignedInt j = 0; j < values.size(); ++j)
+         values[j].clear();
       values.clear();
 
       if (showErrorBars)
@@ -1855,12 +1976,29 @@ void Estimator::PlotResiduals()
       }
 
       // Collect residuals by plot
-      for (UnsignedInt j = 0; j < measurementResiduals.size(); ++j)
+      Integer dim = 0;
+      //for (UnsignedInt j = 0; j < measurementResiduals.size(); ++j)
+      for (UnsignedInt j = 0; j < measurementResVectors.size(); ++j)
       {
-         if (residualPlots[i]->UsesData(measurementResidualID[j]) >= 0)
+         // for each measurement
+         //if (residualPlots[i]->UsesData(measurementResidualID[j]) >= 0)
+         if (residualPlots[i]->UsesData(observationID[j]) >= 0)
          {
-            epochs.push_back(measurementEpochs[j]);
-            values.push_back(measurementResiduals[j]);
+            // Specify measurement dimension
+            if (values.size() == 0)
+            {
+               RealArray yval;
+               dim = measurementResVectors[j].size();
+               for (Integer k = 0; k < dim; ++k)
+                  values.push_back(yval);
+            }
+
+            //epochs.push_back(measurementEpochs[j]);
+            epochs.push_back(measurementTimes[j]);
+
+            for (Integer k = 0; k < measurementResVectors[j].size(); ++k)
+               values[k].push_back(measurementResVectors[j][k]);
+            
             if (hi && showErrorBars)
             {
                hiErrors.push_back((*hi)[j]);
@@ -1873,7 +2011,9 @@ void Estimator::PlotResiduals()
       if (epochs.size() > 0)
       {
          dataBlast.push_back(&epochs);
-         dataBlast.push_back(&values);
+         RealArray yval;
+         for (UnsignedInt j = 0; j < values.size(); ++j)   // for j = X, Y, or Z
+            dataBlast.push_back(&values[j]);
 
          residualPlots[i]->TakeAction("ClearData");
          residualPlots[i]->Deactivate();
@@ -1884,24 +2024,29 @@ void Estimator::PlotResiduals()
 
       #ifdef DEBUG_RESIDUALS
          // Dump the data to screen
-         MessageInterface::ShowMessage("DataDump for residuals plot %d:\n", i);
-         for (UnsignedInt k = 0; k < epochs.size(); ++k)
+         MessageInterface::ShowMessage("DataDump for residuals plot %d:  number of measurement = %d\n", i, dataBlast[0]->size());
+         for (UnsignedInt k = 0; k < dataBlast[0]->size(); ++k)
          {
-            MessageInterface::ShowMessage("   %.12lf  %.12lf", epochs[k], values[k]);
+            MessageInterface::ShowMessage("  dim = %d\n", dataBlast.size());
+            for (UnsignedInt n = 0; n < dataBlast.size(); ++n)
+            {
+               MessageInterface::ShowMessage("%.12lf  ", dataBlast[n]->at(k));    // measurement kth's value[n] 
 
-            if (hi)
-               if (hi->size() > k)
-                  if (low)
-                     MessageInterface::ShowMessage("   + %.12lf", (*hi)[k]);
-                  else
-                     MessageInterface::ShowMessage("   +/- %.12lf", (*hi)[k]);
-            if (low)
-               if (low->size() > k)
-                  MessageInterface::ShowMessage(" - %.12lf", (*low)[k]);
+               //if (hi)
+               //   if (hi->size() > k)
+               //      if (low)
+               //         MessageInterface::ShowMessage("   + %.12lf", (*hi)[k]);
+               //      else
+               //         MessageInterface::ShowMessage("   +/- %.12lf", (*hi)[k]);
+               //if (low)
+               //   if (low->size() > k)
+               //      MessageInterface::ShowMessage(" - %.12lf", (*low)[k]);
+            }
             MessageInterface::ShowMessage("\n");
          }
       #endif
    }
+
 }
 
 //------------------------------------------------------------------------------
@@ -1962,88 +2107,47 @@ void Estimator::SetResultValue(Integer, Real, const std::string&)
 
 //------------------------------------------------------------------------------
 // bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, 
-//                    Real inputStateElement, Real* outputStateElement)
+//                    Rvector6 &inState, Rvector6 &outState)
 //------------------------------------------------------------------------------
 /**
- * Method used to convert result of a state's element in A1mjd to participant's 
- * coordinate system
+ * Method used to convert result of a spacecraft state from internal coordinate
+ * system to the coordinate system specified in script
  *
- * @param infor                 information about state's element
- * @param epoch                 the epoch at which the state is converted it's 
- *                              coordinate system
- * @param inputStateElement     state's element in GMAT internal coordinate system
+ * @param infor       information about state's element
+ * @param epoch       the epoch at which the state is converted it's 
+ *                    coordinate system
+ * @param inState     spacecraft's state in its internal coordinate system
  *                              (A1Mjd)
- * @param outputStateElemnet    state's element in participant's coordinate system
+ * @param outState    spacecraft's state in its apparent coordinate system
  *
 */
 //------------------------------------------------------------------------------
-bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement)
+bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Rvector &inState, Rvector &outState)
 {
-
-   (*outputStateElement) = inputStateElement;
+   outState = inState;
 
    if (infor->object->IsOfType(Gmat::SPACEOBJECT))
    {
-      if ((infor->elementName == "CartesianState")||(infor->elementName == "Position")||(infor->elementName == "Velocity"))
+      if ((infor->elementName == "CartesianState") || (infor->elementName == "Position") || (infor->elementName == "Velocity"))
       {
-         SpaceObject* obj = (SpaceObject*) (infor->object);
+         Spacecraft* obj = (Spacecraft*)(infor->object);
          std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
-         CoordinateSystem* cs = (CoordinateSystem*) obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+         CoordinateSystem* cs = (CoordinateSystem*)obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+         CoordinateSystem* internalcs = obj->GetInternalCoordSystem();
+
          if (cs == NULL)
-            throw EstimatorException("Coordinate system for "+obj->GetName()+" is not set\n");
+            throw EstimatorException("Coordinate system for " + obj->GetName() + " is not set\n");
+         if (internalcs == NULL)
+            throw EstimatorException("Internal coordinate system for " + obj->GetName() + " is not set\n");
 
-         SpacePoint* sp = obj->GetJ2000Body();
-         CoordinateSystem* gmatcs = CoordinateSystem::CreateLocalCoordinateSystem("bodyInertial",
-            "MJ2000Eq", sp, NULL, NULL, sp, cs->GetSolarSystem());
-        
          CoordinateConverter* cv = new CoordinateConverter();
-         Rvector6 inState(0.0,0.0,0.0,0.0,0.0,0.0);
-         Integer index;
-         if ((infor->elementName == "CartesianState")||(infor->elementName == "Position"))
-            index = infor->subelement-1;
-         else if (infor->elementName == "Velocity")
-            index = infor->subelement+2;
-         else
-            throw EstimatorException("Error in Estimator object: Parameter %s has not defined in GMAT\n");
+         cv->Convert(A1Mjd(epoch), inState, internalcs, outState, cs);
 
-         inState.SetElement(index, inputStateElement);
-         Rvector6 outState;
-        
-         cv->Convert(A1Mjd(epoch), inState, gmatcs, outState, cs);
-
-         (*outputStateElement) = outState[index]; 
          delete cv;
-         delete gmatcs;
       }
    }
 
    return true;
-}
-
-
-//-------------------------------------------------------------------------
-// void Estimator::GetEstimationState(GmatState& outputState)
-//-------------------------------------------------------------------------
-/**
- * This Method used to convert result of estimation state to participants'
- * coordinate system
- *
- * @param outState        estimation state in participants' coordinate systems
- *
-*/
-//-------------------------------------------------------------------------
-void Estimator::GetEstimationState(GmatState& outputState)
-{
-    const std::vector<ListItem*> *map = esm.GetStateMap();
-
-    Real outputStateElement;
-    outputState.SetSize(map->size());
-
-    for (UnsignedInt i = 0; i < map->size(); ++i)
-    {
-        ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, (*estimationState)[i], &outputStateElement);
-        outputState[i] = outputStateElement;
-    }
 }
 
 
@@ -2061,21 +2165,134 @@ void Estimator::GetEstimationState(GmatState& outputState)
 //-------------------------------------------------------------------------
 void Estimator::GetEstimationStateForReport(GmatState& outputState)
 {
-    const std::vector<ListItem*> *map = esm.GetStateMap();
+   const std::vector<ListItem*> *map = esm.GetStateMap();
 
-    Real outputStateElement;
-    outputState.SetSize(map->size());
+   Real outputStateElement;
+   outputState.SetSize(map->size());
 
-    for (UnsignedInt i = 0; i < map->size(); ++i)
-    {
-        ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, (*estimationState)[i], &outputStateElement);
-        outputState[i] = outputStateElement;
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      //ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, (*estimationState)[i], &outputStateElement);
+      //outputState[i] = outputStateElement;
 
-        // get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
-        if ((*map)[i]->elementName == "Cr_Epsilon")
-           outputState[i] = ((Spacecraft*) (*map)[i]->object)->GetRealParameter("Cr");
-        else if ((*map)[i]->elementName == "Cd_Epsilon")
-           outputState[i] = ((Spacecraft*) (*map)[i]->object)->GetRealParameter("Cd");
-    }
+      // get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+      if ((*map)[i]->elementName == "Cr_Epsilon")
+         outputState[i] = ((Spacecraft*) (*map)[i]->object)->GetRealParameter("Cr");
+      else if ((*map)[i]->elementName == "Cd_Epsilon")
+         outputState[i] = ((Spacecraft*) (*map)[i]->object)->GetRealParameter("Cd");
+      else if (((*map)[i]->elementName == "CartesianState") || 
+               ((*map)[i]->elementName == "Position"))
+      {
+         if ((*map)[i]->subelement == 1)
+         {
+            Rvector inState(6,
+               (*estimationState)[i],
+               (*estimationState)[i + 1],
+               (*estimationState)[i + 2],
+               (*estimationState)[i + 3],
+               (*estimationState)[i + 4],
+               (*estimationState)[i + 5]);
+
+            Rvector outState(6);
+            ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, inState, outState);
+            for (Integer j = 0; j < 6; ++j)
+               outputState[i + j] = outState[j];
+
+            i = i + 5;
+         }
+      }
+      else if ((*map)[i]->elementName == "Bias")
+      {
+         Rvector inState(1, (*estimationState)[i]);
+         Rvector outState(1);
+         ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, inState, outState);
+         outputState[i] = outState[0];
+      }
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// ObservationData* FilteringData(ObservationData* obsData, Integer obDataId)
+//------------------------------------------------------------------------------
+/**
+* This function performs second level data editing.
+*
+* @param obsData     Observation data object needed for filtering
+* @param obDataId    record number of the observation data
+*
+* @return            a pointer to the observation data object if observation
+*                    data meet criteria defined in data filter objects, NULL
+*                    otherwise
+*/
+//------------------------------------------------------------------------------
+ObservationData* Estimator::FilteringData(ObservationData* dataObject, Integer obDataId, Integer& filterIndex)
+{
+#ifdef DEBUG_FILTER
+   MessageInterface::ShowMessage("Enter Estimator<%s,%p>::FilteringData(dataObject = <%p>, obDataId = %d).\n", GetName().c_str(), this, dataObject, obDataId);
+#endif
+
+   Integer rejReason;
+
+   filterIndex = dataFilterObjs.size();
+   ObservationData* obdata = dataObject;
+
+   // Run estimation reject filters
+   if (obdata)
+   {
+      for (UnsignedInt i = 0; i < dataFilterObjs.size(); ++i)
+      {
+         if (dataFilterObjs[i]->IsOfType("RejectFilter"))
+         {
+            rejReason = 0;
+            obdata = ((RejectFilter*)dataFilterObjs[i])->FilteringData(dataObject, rejReason, obDataId);
+
+            // it is rejected when it has been rejected by any reject filter
+            if (obdata == NULL)
+            {
+               filterIndex = i;
+               break;
+            }
+         }
+      }
+   }
+
+   // Run statistic accept filters when it passes reject filters
+   if (obdata)
+   {
+      ObservationData* obdata1 = NULL;
+      ObservationData* od;
+      bool hasAcceptFilter = false;
+      for (UnsignedInt i = 0; i < dataFilterObjs.size(); ++i)
+      {
+         if (dataFilterObjs[i]->IsOfType("AcceptFilter"))
+         {
+            hasAcceptFilter = true;
+            rejReason = 0;
+            od = ((AcceptFilter*)dataFilterObjs[i])->FilteringData(dataObject, rejReason, obDataId);
+            //MessageInterface::ShowMessage("   od = <%p>   rejReason = %d   \n", od, rejReason);
+            // it is accepted when it has been accepted by any accept filter
+            if (od)
+            {
+               obdata1 = od;
+            }
+            else
+               filterIndex = i;
+         }
+      }
+
+      if (hasAcceptFilter)
+      {
+         obdata = obdata1;
+         if (obdata1)
+            filterIndex = dataFilterObjs.size();
+      }
+   }
+
+#ifdef DEBUG_FILTER
+   MessageInterface::ShowMessage("Enter Estimator<%s,%p>::FilteringData(dataObject = <%p>, obDataId = %d).\n", GetName().c_str(), this, dataObject, obDataId);
+#endif
+
+   return obdata;
 }
 

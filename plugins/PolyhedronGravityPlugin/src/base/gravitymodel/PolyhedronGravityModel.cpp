@@ -456,12 +456,13 @@ bool PolyhedronGravityModel::Calculation(Rvector6 x, Rvector6& xdot, Rmatrix66& 
    Integer face1, face2;
    Rvector3 na, nb;
    Rvector3 na12, nb21;
-   Rvector3 a2b;
+   //Rvector3 a2b;
    Rmatrix33 Ee;
    Rvector3 re, R1, R2;
    Real e, r1, r2;
    Real Le;
 
+   Rvector3 a2v, b2v;
 
    for (Integer i = polybody->E.size()-1; i >= 0; --i)
    {
@@ -471,7 +472,7 @@ bool PolyhedronGravityModel::Calculation(Rvector6 x, Rvector6& xdot, Rmatrix66& 
 
       // Define edge unit vectors:
 	   P1 = polybody->verticesList[edge.vertex1];					// the first vertex of edge e
-	   P2 = polybody->verticesList[edge.vertex2];					// the first vertex of edge e
+	   P2 = polybody->verticesList[edge.vertex2];					// the second vertex of edge e
 	   P1P2 = P2-P1;
 	   n12 = P1P2; n12 = n12.Normalize();
 	   n21 = -n12;
@@ -500,14 +501,26 @@ bool PolyhedronGravityModel::Calculation(Rvector6 x, Rvector6& xdot, Rmatrix66& 
 //	  MessageInterface::ShowMessage("face2 = %d: nb21 = n21 x nb = (%le,  %le,  %le)\n", face2, nb21(0), nb21(1), nb21(2));
 
 	  // Ensure outward-pointing edge normals:
-//      a2b = ici(2,:)-ici(1,:);
-      a2b = polybody->ic[face2] - polybody->ic[face1];
+//      a2b = ici(2,:)-ici(1,:);                           // old MatLab code
+     // a2b = polybody->ic[face2] - polybody->ic[face1];
 
-      if (a2b*na12<0.0)
-          na12 = -na12;
+     // if (a2b*na12<0.0)
+     //     na12 = -na12;
 
-      if (-a2b*nb21<0.0)
-          nb21 = -nb21;
+     // if (-a2b*nb21<0.0)
+     //     nb21 = -nb21;
+
+      // New normal check
+      // a2v = V(E(i,1),:)-ici(1,:);      // MatLab code
+      a2v = P1 - polybody->ic[face1];
+      if (a2v*na12<0.0)
+         na12 = -na12;
+
+      // b2v = V(E(i,1),:)-ici(2,:);     // MatLab code
+      b2v = P1 - polybody->ic[face2];
+      if (b2v*nb21<0.0)
+           nb21 = -nb21;
+
 //      MessageInterface::ShowMessage("After adjustment:\n");
 //	  MessageInterface::ShowMessage("face1 = %d: na12 = n12 x na = (%le,  %le,  %le)\n", face1, na12(0), na12(1), na12(2));
 //	  MessageInterface::ShowMessage("face2 = %d: nb21 = n21 x nb = (%le,  %le,  %le)\n", face2, nb21(0), nb21(1), nb21(2));

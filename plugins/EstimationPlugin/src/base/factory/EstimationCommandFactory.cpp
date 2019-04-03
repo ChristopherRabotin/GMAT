@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -36,6 +36,7 @@
 
 #include "RunEstimator.hpp"   // for RunEstimator command
 #include "RunSimulator.hpp"   // for RunSimulator command
+//#include "SetSeed.hpp"        // ekf mod 12/16
 
 
 //---------------------------------
@@ -62,6 +63,8 @@ GmatCommand* EstimationCommandFactory::CreateCommand(const std::string &ofType,
        return new RunSimulator;
    if (ofType == "RunEstimator")
        return new RunEstimator;
+//   if (ofType == "SetSeed")         // ekf mod 12/16
+//       return new SetSeed;          // ekf mod 12/16
    // add more here .......
    else
    {
@@ -86,6 +89,7 @@ EstimationCommandFactory::EstimationCommandFactory() :
    {
       creatables.push_back("RunEstimator");
       creatables.push_back("RunSimulator");
+//      creatables.push_back("SetSeed");          // ekf mod 12/16
    }
 }
 
@@ -120,6 +124,7 @@ EstimationCommandFactory::EstimationCommandFactory(const EstimationCommandFactor
    {
       creatables.push_back("RunEstimator");
       creatables.push_back("RunSimulator");
+//      creatables.push_back("SetSeed");        // ekf mod 12/16
    }
 }
 

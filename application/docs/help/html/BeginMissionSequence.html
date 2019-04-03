@@ -1,0 +1,20 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>BeginMissionSequence</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="BeginFiniteBurn.html" title="BeginFiniteBurn"><link rel="next" href="BeginScript.html" title="BeginScript"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">BeginMissionSequence</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="BeginFiniteBurn.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="BeginScript.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="BeginMissionSequence"></a><div class="titlepage"></div><a name="N22F10" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">BeginMissionSequence</span></h2><p>BeginMissionSequence &mdash; Begin the mission sequence portion of a script</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis">BeginMissionSequence</pre></div><div class="refsection"><a name="N22F26"></a><h2>Description</h2><p>The <span class="guilabel">BeginMissionSequence</span> command indicates the
+    end of resource initialization and the beginning of the mission sequence
+    portion of a GMAT script. It must appear once as the first command in the
+    script, and must follow all resource creation lines.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="ScriptLanguage.html" title="Script Language"><span class="refentrytitle">Script Language</span></a></p></div><div class="refsection"><a name="N22F35"></a><h2>GUI</h2><p>The <span class="guilabel">BeginMissionSequence</span> command is managed
+    automatically when building mission sequences using the GUI mission tree.
+    However, when editing the GMAT script directly, either with the GMAT
+    script editor or with an external editor, you must insert the
+    <span class="guilabel">BeginMissionSequence</span> command manually.</p></div><div class="refsection"><a name="N22F40"></a><h2>Remarks</h2><p>The <span class="guilabel">BeginMissionSequence</span> is a script-only
+    command that is not needed when working from the GUI. It indicates to GMAT
+    that the portion of the script above the command consists of static
+    resource initialization that can be performed in any order, and that the
+    portion below the command consists of mission sequence commands that must
+    be executed sequentially. This and other rules of the scripting language
+    are discussed in detail in the <a class="link" href="ScriptLanguage.html" title="Script Language">script
+    language reference</a>.</p></div><div class="refsection"><a name="N22F4C"></a><h2>Examples</h2><div class="informalexample"><p>A minimal GMAT script that propagates a spacecraft:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="BeginFiniteBurn.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="BeginScript.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">BeginFiniteBurn&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;BeginScript</td></tr></table></div></body></html>

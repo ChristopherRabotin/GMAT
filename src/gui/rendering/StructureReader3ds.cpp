@@ -433,25 +433,28 @@ void StructureReader3ds::ReadChunk (const Integer& level)
          break;
       case 0x4100: // NAMED_TRIANGLE_OBJECT
          {
-         diffpos = ReadChunks(level,startpos,length);
-         int count = GmatMathUtil::Max (1,Ob4130_MaterialSize);
-         for (int i=0;  i<=count-1;  ++i)
-            {
-            std::string meshname = *Ob4000_Name;
-            if (Ob4130_MaterialSize > 0) meshname += "_" + 
-               GmatStringUtil::ToString(i+1,4);
-            for (Integer ii=1;  ii<=meshname.length()-1;  ++ii)
-               if (meshname[ii] == ' ')
-                  meshname[ii] = '0';
+             diffpos = ReadChunks(level,startpos,length);
+             // There's something odd about casting integers to real, using a real function
+             // and casting the function back to an integer to assign the result. There should be an overloaded
+             // max function for integers in RealUtilities
+             Integer count = (Integer)GmatMathUtil::Max (1.0,(Real)Ob4130_MaterialSize);
+             for (int i=0;  i<=count-1;  ++i)
+                {
+                std::string meshname = *Ob4000_Name;
+                if (Ob4130_MaterialSize > 0) meshname += "_" + 
+                   GmatStringUtil::ToString(i+1,4);
+                for (Integer ii=1;  ii<=meshname.length()-1;  ++ii)
+                   if (meshname[ii] == ' ')
+                      meshname[ii] = '0';
 
-            SurfaceMesh* mesh = BuildMesh (meshname,i);                
-            mesh->BuildNormals();
-            if (Ob4130_MaterialSize > 0)
-               mesh->TheMaterial = Ob4130_Material[i]->Name;
-            TheStructure->Appendages[0]->Body.AddChild(mesh);
-            }
+                SurfaceMesh* mesh = BuildMesh (meshname,i);                
+                mesh->BuildNormals();
+                if (Ob4130_MaterialSize > 0)
+                   mesh->TheMaterial = Ob4130_Material[i]->Name;
+                TheStructure->Appendages[0]->Body.AddChild(mesh);
+                }
 
-         Clear4100();
+             Clear4100();
          }
          break;
       case 0x4110: // POINT_ARRAY

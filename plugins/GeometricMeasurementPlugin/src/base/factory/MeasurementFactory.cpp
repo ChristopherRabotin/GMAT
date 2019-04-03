@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,6 +39,18 @@
 #include "GeometricAzEl.hpp"
 #include "GeometricRADec.hpp"
 
+//-----------------------------------------------------------------------------
+// GmatBase* CreateObject(const std::string & ofType, const std::string & withName)
+//-----------------------------------------------------------------------------
+/**
+ * @see CreateMeasurement()
+ */
+//-----------------------------------------------------------------------------
+GmatBase* MeasurementFactory::CreateObject(
+      const std::string & ofType, const std::string & withName)
+{
+   return CreateMeasurement(ofType, withName);
+}
 
 //-----------------------------------------------------------------------------
 // CoreMeasurement *MeasurementFactory::CreateMeasurement(

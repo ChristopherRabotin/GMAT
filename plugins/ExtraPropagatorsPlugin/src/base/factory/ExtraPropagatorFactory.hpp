@@ -34,6 +34,8 @@
 class PROPAGATOR_API ExtraPropagatorFactory : public Factory
 {
 public:
+   virtual GmatBase* CreateObject(const std::string &ofType,
+                                const std::string &withName /* = "" */);
    virtual Propagator* CreatePropagator(const std::string &ofType,
                                 const std::string &withName /* = "" */);
 

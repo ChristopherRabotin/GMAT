@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1048,7 +1048,9 @@ void ResourceTree::AddDefaultResources()
 
    //----- Formations
    // Only do this if the Formation object is available
-   StringArray scos = theGuiInterpreter->GetListOfFactoryItems(Gmat::SPACECRAFT);
+   // Now it uses its own object ID (LOJ: 2016.09.21)
+   //StringArray scos = theGuiInterpreter->GetListOfFactoryItems(Gmat::SPACECRAFT);
+   StringArray scos = theGuiInterpreter->GetListOfFactoryItems(Gmat::FORMATION);
    if (find(scos.begin(), scos.end(), "Formation") != scos.end())
    {
       mFormationItem =
@@ -2504,7 +2506,7 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
    if (selItemData == NULL)
       MessageInterface::ShowMessage("selItemData is NULL!!!!!!!\n");
    MessageInterface::ShowMessage
-      ("ResourceTree::OnDelete() name=%s\n", selItemData->GetName().c_str());
+      ("ResourceTree::OnDelete() entered, name='%s'\n", selItemData->GetName().WX_TO_C_STRING);
    #endif
    GmatTree::ItemType itemType = selItemData->GetItemType();
    wxString itemName = selItemData->GetName();
@@ -2529,7 +2531,8 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
    
    #ifdef DEBUG_DELETE
    MessageInterface::ShowMessage
-      ("ResourceTree::OnDelete() name=%s\n", selItemData->GetName().c_str());
+      ("ResourceTree::OnDelete() now deleting name='%s'\n",
+       selItemData->GetName().WX_TO_C_STRING);
    #endif
    
    // delete item if object successfully deleted
@@ -2562,8 +2565,7 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
       wxLog::FlushActive();
    }
    #ifdef DEBUG_DELETE
-   MessageInterface::ShowMessage
-      ("exiting ResourceTree::OnDelete()\n");
+   MessageInterface::ShowMessage("ResourceTree::OnDelete() exiting\n");
    #endif
 }
 

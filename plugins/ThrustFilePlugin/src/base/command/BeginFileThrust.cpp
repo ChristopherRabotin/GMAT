@@ -551,12 +551,13 @@ bool BeginFileThrust::Execute()
          if ((*i)->IsOfType("FileThrust"))
          {
             FileThrust *transient = (FileThrust*)(*i);
+
             if (transient == burnForce)
             {
                alreadyThere = true;
                fileForceConfigured = true;
             }
-
+            else
             if ((*transient) == (*burnForce))
             {
                MessageInterface::ShowMessage("Burn activated by the line\n   "

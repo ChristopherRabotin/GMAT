@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -67,6 +67,10 @@ GmatObType::GmatObType(const std::string withName) :
    #endif
 
    header = "% GMAT Internal Measurement Data File\n\n";
+
+   // Define deprecated type map
+   depTypeMap["DSNRange"] = "DSN_SeqRange";
+   depTypeMap["Doppler"]  = "DSN_TCP";
 }
 
 //-----------------------------------------------------------------------------
@@ -325,7 +329,12 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
    }
    else
    {
-      if ((md->participantIDs[0] == md->participantIDs[md->participantIDs.size()-1])&&(md->participantIDs.size() == 3))
+      if (md->participantIDs.size() == 1)
+      {
+         // for one participant (GPS Point Solution)
+         dataLine << md->sensorIDs[0] << "    ";
+      }
+      else if ((md->participantIDs[0] == md->participantIDs[md->participantIDs.size()-1])&&(md->participantIDs.size() == 3))
       {
          // if the first participant and the last participant are the same, write in a list w/o brackets containing all but the last one 
          for (UnsignedInt j = 0; j < md->participantIDs.size()-1; ++j)
@@ -351,12 +360,12 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
       dataLine << md->participantIDs[j] << "    ";
 #endif
 
-   if ((md->typeName == "Doppler")||(md->typeName == "Doppler_RangeRate"))
+   if ((md->typeName == "DSN_TCP")||(md->typeName == "RangeRate"))
    {
       dataLine << md->uplinkBand << "    ";
       dataLine << md->dopplerCountInterval << "    ";
    }
-   else if (md->typeName == "TDRSDoppler_HZ")
+   else if (md->typeName == "SN_Doppler")                    //else if (md->typeName == "TDRSDoppler_HZ")
    {
       sprintf(databuffer, "    %.15le    %d    %s    %d   %d   %f",
          md->tdrsNode4Freq, md->tdrsNode4Band, md->tdrsServiceID.c_str(), md->tdrsDataFlag, md->tdrsSMARID, md->dopplerCountInterval);
@@ -365,7 +374,7 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
 
    for (UnsignedInt k = 0; k < md->value.size(); ++k)
    {
-      if (md->typeName == "DSNRange")
+      if (md->typeName == "DSN_SeqRange")
          sprintf(databuffer, "%20.8lf",GmatMathUtil::Mod(md->value[k],md->rangeModulo));      // increasing 6 decimal places to 8 decimal places
       else
          sprintf(databuffer, "%20.8lf", md->value[k]);                                        // increasing 6 decimal places to 8 decimal places
@@ -375,7 +384,7 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
    }
 
    // extended information:
-   if (md->typeName == "DSNRange")
+   if (md->typeName == "DSN_SeqRange")
    {
       sprintf(databuffer, "    %d    %.15le    %.15le",
 //         md->uplinkBand, md->uplinkFreq, md->rangeModulo);
@@ -461,6 +470,8 @@ ObservationData* GmatObType::ReadObservation()
                GmatTimeConstants::JD_NOV_17_1858));
 
    theLine >> currentObs.typeName;
+   // Check type deprecation
+   currentObs.typeName = CheckTypeDeprecation(currentObs.typeName);
 
    Integer type;
    theLine >> type;
@@ -533,11 +544,19 @@ ObservationData* GmatObType::ReadObservation()
       }
 #endif
 
-      if ((currentObs.typeName == "Range_KM")||(currentObs.typeName == "DSNRange")
-         ||(currentObs.typeName == "Doppler_RangeRate")||(currentObs.typeName == "Doppler")
-         ||(currentObs.typeName == "TDRSDoppler_HZ"))
+      //if ((currentObs.typeName == "Range_KM") || (currentObs.typeName == "DSN_SeqRange")
+      //   || (currentObs.typeName == "Doppler_RangeRate") || (currentObs.typeName == "DSN_TCP")
+      //   || (currentObs.typeName == "TDRSDoppler_HZ"))
+      if ((currentObs.typeName == "Range") || (currentObs.typeName == "DSN_SeqRange")
+         || (currentObs.typeName == "RangeRate") || (currentObs.typeName == "DSN_TCP")
+         || (currentObs.typeName == "SN_Doppler") || (currentObs.typeName == "SN_Range"))
       {
          dataSize = 1;
+      }
+      else if (currentObs.typeName == "GPS_PosVec")
+      {
+         participantSize = 1;
+         dataSize = 3;
       }
 
       theLine >> str;
@@ -551,19 +570,31 @@ ObservationData* GmatObType::ReadObservation()
          while(str.substr(str.length()-1) != "}")
          {
             currentObs.participantIDs.push_back(str);
+            currentObs.sensorIDs.push_back("");
             theLine >> str;
          }
          str = str.substr(0,str.length()-1);
          if (str != "")
+         {
             currentObs.participantIDs.push_back(str);
+            currentObs.sensorIDs.push_back("");
+         }
+      }
+      else if (currentObs.typeName == "GPS_PosVec")
+      {
+         currentObs.participantIDs.push_back(str);        // content of participantIDs will be updated later based on sensorIDs (for GPS Point Solution)
+         currentObs.sensorIDs.push_back(str);
       }
       else
       {
          currentObs.participantIDs.push_back(str);
+         currentObs.sensorIDs.push_back("");
          std::string str1;
          theLine >> str1;
          currentObs.participantIDs.push_back(str1);
+         currentObs.sensorIDs.push_back("");
          currentObs.participantIDs.push_back(str);
+         currentObs.sensorIDs.push_back("");
       }
    }
 
@@ -579,23 +610,24 @@ ObservationData* GmatObType::ReadObservation()
 //#endif
 
 
-   if (currentObs.typeName == "Range_KM")
+   //if ((currentObs.typeName == "Range_KM") || (currentObs.typeName == "GPS_PosVec"))
+   if ((currentObs.typeName == "Range") || (currentObs.typeName == "SN_Range") || (currentObs.typeName == "GPS_PosVec"))
    {
       currentObs.unit = "km";
    }
-   else if (currentObs.typeName == "Doppler")
+   else if (currentObs.typeName == "DSN_TCP")
    {
       theLine >> currentObs.uplinkBand;
       theLine >> currentObs.dopplerCountInterval;
       currentObs.unit = "Hz";
    }
-   else if (currentObs.typeName == "Doppler_RangeRate")
+   else if (currentObs.typeName == "RangeRate")      //else if (currentObs.typeName == "Doppler_RangeRate")
    {
       theLine >> currentObs.uplinkBand;
       theLine >> currentObs.dopplerCountInterval;
       currentObs.unit = "km/s";
    }
-   else if (currentObs.typeName == "TDRSDoppler_HZ")
+   else if (currentObs.typeName == "SN_Doppler")     //else if (currentObs.typeName == "TDRSDoppler_HZ")
    {
       theLine >> currentObs.tdrsNode4Freq;            // this field is used to received frequency at the return-link TDRS 
       theLine >> currentObs.tdrsNode4Band;            // this field is used to received frequency band at the return-link TDRS 
@@ -606,8 +638,6 @@ ObservationData* GmatObType::ReadObservation()
       currentObs.unit = "Hz";
    }
 
-
-
    for (Integer i = 0; i < dataSize; ++i)
    {
       theLine >> value;
@@ -616,7 +646,7 @@ ObservationData* GmatObType::ReadObservation()
    }
 
    // read extended infor from data record
-   if (currentObs.typeName == "DSNRange")
+   if (currentObs.typeName == "DSN_SeqRange")
    {
       theLine >> currentObs.uplinkBand;
 //      theLine >> currentObs.uplinkFreq;
@@ -643,12 +673,12 @@ ObservationData* GmatObType::ReadObservation()
       for (Integer i = 0; i < dataSize; ++i)
 		  MessageInterface::ShowMessage("%.12lf    ", currentObs.value.at(i));
 
-      if (currentObs.typeName == "DSNRange")
+      if (currentObs.typeName == "DSN_SeqRange")
       {
          //MessageInterface::ShowMessage("   %d   %.12le   %.12le", currentObs.uplinkBand, currentObs.uplinkFreq, currentObs.rangeModulo);
          MessageInterface::ShowMessage("   %d   %.12le   %.12le", currentObs.uplinkBand, currentObs.uplinkFreqAtRecei, currentObs.rangeModulo);
       }
-      else if ((currentObs.typeName == "Doppler")||(currentObs.typeName == "Doppler_RangeRate"))
+      else if ((currentObs.typeName == "DSN_TCP")||(currentObs.typeName == "RangeRate"))    //else if ((currentObs.typeName == "DSN_TCP")||(currentObs.typeName == "Doppler_RangeRate"))
       {
          MessageInterface::ShowMessage("   %d   %.12le", currentObs.uplinkBand, currentObs.dopplerCountInterval);
       }
@@ -789,3 +819,31 @@ bool GmatObType::ProcessSignals(const std::string str, Integer& participantSize,
 
    return retval;
 }
+
+
+std::string GmatObType::CheckTypeDeprecation(const std::string datatype)
+{
+   std::string typeName = datatype;
+   for (std::map<std::string, std::string>::iterator i = depTypeMap.begin();
+      i != depTypeMap.end(); ++i)
+   {
+      if ((*i).first == datatype)
+      {
+         std::stringstream ss;
+         ss << "Warning: measurement type name '" << datatype << 
+            "' in .gmd data file is deprecated and will be removed in a future release. Use '" <<
+            (*i).second << "' instead.\n";
+         
+         if (find(mesg.begin(), mesg.end(), ss.str()) == mesg.end())
+         {
+            MessageInterface::ShowMessage(ss.str());
+            mesg.push_back(ss.str());
+         }
+         typeName = (*i).second;
+         break;
+      }
+   }
+
+   return typeName;
+}
+

@@ -52,12 +52,16 @@ SignalData::SignalData() :
    arriveFreq           (-1.0),
    transmitFreq         (0.0),
    receiveFreq          (0.0),
+   tSTM                 (6,6),
+   rSTM                 (6,6),
+   tSTMtm               (6,6),
+   rSTMtm               (6,6),
    next                 (NULL)
 {
-   tSTM.ChangeSize(6,6,true);
-   rSTM.ChangeSize(6,6,true);
-   tSTMtm.ChangeSize(6,6,true);
-   rSTMtm.ChangeSize(6,6,true);
+   //tSTM.ChangeSize(6,6,true);
+   //rSTM.ChangeSize(6,6,true);
+   //tSTMtm.ChangeSize(6,6,true);
+   //rSTMtm.ChangeSize(6,6,true);
    for(UnsignedInt i = 0; i < 6; ++i)
    {
       tSTM(i,i) = 1.0;
@@ -117,9 +121,9 @@ SignalData::SignalData(const SignalData& sd) :
    rOStateSSB           (sd.rOStateSSB),
    rLocRcs              (sd.rLocRcs),
    tVel                 (sd.tVel),
-   tVelTcs              (sd.tVelTcs),
+//   tVelTcs              (sd.tVelTcs),
    rVel                 (sd.rVel),
-   rVelRcs              (sd.rVelRcs),
+//   rVelRcs              (sd.rVelRcs),
    j2kOriginSep         (sd.j2kOriginSep),
    j2kOriginVel         (sd.j2kOriginVel),
    rangeVecInertial     (sd.rangeVecInertial),
@@ -182,9 +186,9 @@ SignalData& SignalData::operator=(const SignalData& sd)
       rOStateSSB           = sd.rOStateSSB;
       rLocRcs              = sd.rLocRcs;
       tVel                 = sd.tVel;
-      tVelTcs              = sd.tVelTcs;
+//      tVelTcs              = sd.tVelTcs;
       rVel                 = sd.rVel;
-      rVelRcs              = sd.rVelRcs;
+//      rVelRcs              = sd.rVelRcs;
       j2kOriginSep         = sd.j2kOriginSep;
       j2kOriginVel         = sd.j2kOriginVel;
       rangeVecInertial     = sd.rangeVecInertial;

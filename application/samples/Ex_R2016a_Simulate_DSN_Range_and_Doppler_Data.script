@@ -62,12 +62,12 @@ CAN.TroposphereModel      = 'HopfieldSaastamoinen';
 
 
 Create ErrorModel DSNrange;
-DSNrange.Type             = 'Range_RU';
+DSNrange.Type             = 'DSN_SeqRange';
 DSNrange.NoiseSigma       = 10.63;
 DSNrange.Bias             = 0.0;
 
 Create ErrorModel DSNdoppler;
-DSNdoppler.Type       		= 'Doppler_HZ';
+DSNdoppler.Type       		= 'DSN_TCP';
 DSNdoppler.NoiseSigma		= 0.0282;
 DSNdoppler.Bias  				= 0.0;
 
@@ -78,8 +78,8 @@ CAN.ErrorModels           = {DSNrange, DSNdoppler};
 %-----------------------------------------------------------------------------------------
 
 Create TrackingFileSet DSNsimData;
-DSNsimData.AddTrackingConfig 			= {{CAN, Sat, CAN}, 'DSNRange'};   
-DSNsimData.AddTrackingConfig 			= {{CAN, Sat, CAN}, 'Doppler'}; 
+DSNsimData.AddTrackingConfig 			= {{CAN, Sat, CAN}, 'DSN_SeqRange'};   
+DSNsimData.AddTrackingConfig 			= {{CAN, Sat, CAN},'DSN_TCP'}; 
                    
 DSNsimData.FileName 						= {'Sat_dsn_range_and_doppler_measurements.gmd'};
 DSNsimData.UseLightTime 				= true;

@@ -1,0 +1,136 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Barycenter</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="Array.html" title="Array"><link rel="next" href="BatchEstimatorInv.html" title="BatchEstimatorInv"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Barycenter</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Array.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="BatchEstimatorInv.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Barycenter"></a><div class="titlepage"></div><a name="N1567A" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Barycenter</span></h2><p>Barycenter &mdash; The center of mass of selected celestial bodies</p></div><div class="refsection"><a name="N1568B"></a><h2>Description</h2><p>A <span class="guilabel">Barycenter</span> is the center of mass of a set of
+    celestial bodies. GMAT contains two barycenter resources: a built-in
+    <span class="guilabel">SolarSystemBarycenter</span> resource and the
+    <span class="guilabel">Barycenter</span> resource that allows you to build a custom
+    <span class="guilabel">Barycenter</span> such as the Earth-Moon barycenter. This
+    resource cannot be modified in the Mission Sequence.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="LibrationPoint.html" title="LibrationPoint"><span class="refentrytitle">LibrationPoint</span></a>, <a class="xref" href="CoordinateSystem.html" title="CoordinateSystem"><span class="refentrytitle">CoordinateSystem</span></a>, <a class="xref" href="CelestialBody.html" title="CelestialBody"><span class="refentrytitle">CelestialBody</span></a>, <a class="xref" href="SolarSystem.html" title="SolarSystem"><span class="refentrytitle">SolarSystem</span></a>, <a class="xref" href="Color.html" title="Color"><span class="refentrytitle">Color</span></a></p></div><div class="refsection"><a name="Barycenter_Resource_Fields"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">BodyNames</span></td><td><p>The list of <span class="guilabel">CelestialBody</span>
+            resources included in the Barycenter. Providing empty brackets
+            sets the bodies to the default list described
+            below.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>array of celestial bodies. You cannot add bodies to
+                    the built-in <span class="guilabel">SolarySystemBarycenter</span>
+                    resource. A <span class="guilabel">CelestialBody</span> can only
+                    appear once in the <span class="guilabel">BodyNames</span>
+                    list.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">Earth</span>,
+                    <span class="guilabel">Luna</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">OrbitColor</span></td><td><p>Allows you to set available colors on user-defined
+            <span class="guilabel">Barycenter</span> object orbits. The barycenter
+            orbits are drawn using the <span class="guilabel">OrbitView</span> graphics
+            resource. Colors on <span class="guilabel">Barycenter</span> object can be
+            set through a string or an integer array. For example: Setting a
+            barycenter's orbit color to red can be done in the following two
+            ways: <code class="literal">Barycenter.OrbitColor = Red</code> or
+            <code class="literal">Barycenter.OrbitColor = [255 0 0]</code>. This field
+            can be modified in the Mission Sequence as well.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer Array or String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any color available from the Orbit Color Picker in
+                    GUI. Valid predefined color name or RGB triplet value
+                    between 0 and 255.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Gold</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">TargetColor</span></td><td><p>Allows you to select available colors for
+            <span class="guilabel">Barycenter</span> object's perturbing orbital
+            trajectories that are drawn during iterative processes such as
+            Differential Correction or Optimization. The target color can be
+            identified through a string or an integer array. For example:
+            Setting a barycenter's perturbing trajectory color to yellow can
+            be done in following two ways: <code class="literal">Barycenter.TargetColor =
+            Yellow</code> or <code class="literal">Barycenter.TargetColor = [255 255
+            0]</code>. This field can be modified in the Mission Sequence
+            as well.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer Array or String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any color available from the Orbit Color Picker in
+                    GUI. Valid predefined color name or RGB triplet value
+                    between 0 and 255.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>DarkGray</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N15773"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Barycenter_BarycenterObjectDialogBox.png" align="middle" height="433"></td></tr></table></div></div><p>The <span class="guibutton">Barycenter</span> dialog box allows you to
+    define the celestial bodies included in a custom
+    <span class="guibutton">Barycenter</span>. All celestial bodies, including
+    user-defined bodies, are available for use in a
+    <span class="guibutton">Barycenter</span> and appear in either the
+    <span class="guibutton">Available Bodies</span> list or the <span class="guibutton">Selected
+    Bodies</span> list. The example above illustrates the default
+    configuration which contains <span class="guibutton">Earth</span> and
+    <span class="guibutton">Luna</span>.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Barycenter_SSBDialogBox.png" align="middle" height="439"></td></tr></table></div></div><p>The <span class="guibutton">SolarySystemBarycenter</span> dialog box shown
+    above is a built-in object and you cannot modify its configuration. See
+    the Remarks section for details regarding the model for the
+    <span class="guibutton">SolarSystemBarycenter</span>.</p></div><div class="refsection"><a name="N157A7"></a><h2>Remarks</h2><p><span class="emphasis"><em>Built-in SolarSystemBarycenter Object</em></span></p><p>The built-in <span class="guilabel">SolarSystemBarycenter</span> is modelled
+    using the ephemerides selected in the
+    <span class="guilabel">SolarySystem.EphemerisSource</span> field. For example, if
+    you select <span class="guilabel">DE421</span> for
+    <span class="guilabel">SolarSystem.EphemerisSource</span>, then the barycenter
+    location is computed by calling the DE421 ephemeris routines. For DE and
+    SPICE ephemerides, the model for the solar system barycenter includes the
+    planets and several hundred minor planets and asteroids. Note that you
+    cannot add bodies to the
+    <span class="guilabel">SolarSystemBarycenter</span>.</p><p><span class="emphasis"><em>Custom Barycenter Objects</em></span></p><p>You can create a custom barycenter using the
+    <span class="guilabel">Barycenter</span> resource. The position and velocity of a
+    <span class="guilabel">Barycenter</span> is a mass-weighted average of the position
+    and velocity of the included celestial bodies. In the equations below
+    <span class="emphasis"><em>m</em></span><sub>i</sub>,
+    <span class="emphasis"><em>r</em></span><sub>i</sub>, and
+    <span class="emphasis"><em>v</em></span><sub>i</sub> are respectively the mass,
+    position, and velocity of the
+    <span class="emphasis"><em>i</em></span><sup>th</sup> body in the
+    barycenter, and <span class="emphasis"><em>r</em></span><sub>b</sub> and
+    <span class="emphasis"><em>v</em></span><sub>b</sub> are respectively the
+    position and velocity of the barycenter.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Barycenter_PositionEquation.jpeg" align="middle" height="133"></td></tr></table></div></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Barycenter_VelocityEquation.jpeg" align="middle" height="147"></td></tr></table></div></div><div class="refsection"><a name="N157F9"></a><h3>Setting Colors On Barycenter Orbits</h3><p>GMAT allows you to assign colors to barycenter orbits that are
+      drawn using the <span class="guilabel">OrbitView</span> graphics resource. GMAT
+      also allows you to assign colors to perturbing barycenter orbital
+      trajectories which are drawn during iterative processes such as
+      differential correction or optimization. The
+      <span class="guilabel">Barycenter</span> object's <span class="guilabel">OrbitColor</span>
+      and <span class="guilabel">TargetColor</span> fields are used to assign colors to
+      both orbital and perturbing trajectories. See the <a class="xref" href="Barycenter.html#Barycenter_Resource_Fields" title="Fields">Fields</a> section
+      to learn more about these two fields. Also see <a class="xref" href="Color.html" title="Color"><span class="refentrytitle">Color</span></a>
+      documentation for discussion and examples on how to set colors on a
+      barycenter orbit.</p></div></div><div class="refsection"><a name="N15811"></a><h2>Examples</h2><div class="informalexample"><p>Define the state of a spacecraft in
+      <span class="guilabel">SolarSystemBarycenter</span> coordinates.</p><pre class="programlisting"><code class="code">Create CoordinateSystem SSB
+SSB.Origin = SolarSystemBarycenter
+SSB.Axes   = MJ2000Eq
+
+Create ReportFile aReport
+
+Create Spacecraft aSpacecraft
+aSpacecraft.CoordinateSystem = SSB
+aSpacecraft.X  = -27560491.88656896
+aSpacecraft.Y  = 132361266.8009069
+aSpacecraft.Z  = 57419875.95483227
+aSpacecraft.VX = -29.78491261798486
+aSpacecraft.VY = 2.320067257851091
+aSpacecraft.VZ = -1.180722388963864
+
+BeginMissionSequence
+
+Report aReport aSpacecraft.EarthMJ2000Eq.X aSpacecraft.EarthMJ2000Eq.Y ...                
+             aSpacecraft.EarthMJ2000Eq.Z </code></pre></div><div class="informalexample"><p>Report the state of a spacecraft in
+      <span class="guilabel">SolarSystemBarycenter</span> coordinates.</p><pre class="programlisting"><code class="code">Create CoordinateSystem SSB
+SSB.Origin = SolarSystemBarycenter
+SSB.Axes   = MJ2000Eq
+
+Create Spacecraft aSpacecraft
+Create ReportFile aReport
+
+BeginMissionSequence
+
+Report aReport aSpacecraft.SSB.X aSpacecraft.SSB.Y aSpacecraft.SSB.Z ...
+      aSpacecraft.SSB.VX aSpacecraft.SSB.VY aSpacecraft.SSB.VZ</code></pre></div><div class="informalexample"><p>Create an Earth-Moon <span class="guilabel">Barycenter</span> and use it in
+      a Sun-Earth-Moon <span class="guilabel">LibrationPoint</span>.</p><pre class="programlisting"><code class="code">Create Barycenter EarthMoonBary
+EarthMoonBary.BodyNames = {Earth,Luna}
+
+Create LibrationPoint SunEarthMoonL2
+SunEarthMoonL2.Primary   = Sun
+SunEarthMoonL2.Secondary = EarthMoonBary
+SunEarthMoonL2.Point     = L2
+
+Create CoordinateSystem SEML2Coordinates
+SEML2Coordinates.Origin = SunEarthMoonL2
+SEML2Coordinates.Axes   = MJ2000Eq
+
+Create Spacecraft aSpacecraft
+GMAT aSpacecraft.DateFormat = UTCGregorian
+GMAT aSpacecraft.Epoch = '09 Dec 2005 13:00:00.000'
+GMAT aSpacecraft.CoordinateSystem = SEML2Coordinates
+GMAT aSpacecraft.X  = -32197.88223741966
+GMAT aSpacecraft.Y  = 211529.1500044117
+GMAT aSpacecraft.Z  = 44708.57017366499
+GMAT aSpacecraft.VX = 0.03209516489451751
+GMAT aSpacecraft.VY = 0.06086386504053736
+GMAT aSpacecraft.VZ = 0.0550442738917212
+
+Create ReportFile aReport
+
+BeginMissionSequence
+
+Report aReport aSpacecraft.EarthMJ2000Eq.X aSpacecraft.EarthMJ2000Eq.Y ...                
+             aSpacecraft.EarthMJ2000Eq.Z </code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Array.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="BatchEstimatorInv.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Array&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;BatchEstimatorInv</td></tr></table></div></body></html>

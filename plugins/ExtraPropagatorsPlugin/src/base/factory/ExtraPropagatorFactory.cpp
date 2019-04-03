@@ -29,7 +29,20 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  PhysicalModel* ExtraPropagatorFactory::(const std::string &ofType,
+//  GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * @see CreatePropagator()
+ */
+//------------------------------------------------------------------------------
+GmatBase* ExtraPropagatorFactory::CreateObject(const std::string &ofType,
+                                    const std::string &withName)
+{
+   return CreatePropagator(ofType, withName);
+}
+
+//------------------------------------------------------------------------------
+// Propagator* CreatePropagator(const std::string &ofType,
 //                               const std::string &withName)
 //------------------------------------------------------------------------------
 /**

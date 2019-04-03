@@ -922,11 +922,11 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
       }
    }
 
-   dataBlock[5] = (*segments)[index].segData.accelIntType;
-   dataBlock[6] = (*segments)[index].segData.massIntType;
-
    if (index != -1)
    {
+      dataBlock[5] = (*segments)[index].segData.accelIntType;
+      dataBlock[6] = (*segments)[index].segData.massIntType;
+
       // Interpolate the thrust/acceleration
       GetSegmentData(index, atEpoch);
       switch ((Integer)dataBlock[5])
@@ -1054,6 +1054,8 @@ void FileThrust::GetSegmentData(Integer atIndex, GmatEpoch atEpoch)
             atIndex, atEpoch);
    #endif
 
+   dataBlock[0] = dataBlock[1] = dataBlock[2] = dataBlock[3] = dataBlock[4] = 0.0;
+
    // If at the end point; use its data
    if ((*segments)[atIndex].segData.endEpoch == atEpoch)
    {
@@ -1084,6 +1086,7 @@ void FileThrust::GetSegmentData(Integer atIndex, GmatEpoch atEpoch)
                    (dataBlock[6] == ThfDataSegment::NONE))
                   dataBlock[3] = (*segments)[atIndex].segData.profile[i].mdot;
                dataBlock[4] = (*segments)[atIndex].segData.profile[i].time;
+               break;
             }
          }
          break;
@@ -1307,7 +1310,7 @@ void FileThrust::SplineInterpolate(Integer atIndex, GmatEpoch atEpoch)
          data[2] = (*segments)[atIndex].segData.profile[interpolatorData[i]].vector[2];
          data[3] = (*segments)[atIndex].segData.profile[interpolatorData[i]].mdot;
 
-         spliner->AddPoint((*segments)[atIndex].segData.profile[i].time, data);
+         spliner->AddPoint((*segments)[atIndex].segData.profile[interpolatorData[i]].time, data);
       }
 
       Real offset = atEpoch - (*segments)[atIndex].segData.startEpoch;

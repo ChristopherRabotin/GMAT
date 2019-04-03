@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -112,12 +112,6 @@ bool CCSDSOEMWriter::WriteMetaData()
       return false;
    
    emOutStream << currentOemSegment.GetMetaDataForWriting();
-   // Write 3 more blank lines to match with old code
-   // This code block can be removed when script test system can ignore
-   // blank spaces for comparison (LOJ: 2016.01.20)
-   std::string emptySpaces =
-      "                                                                                   \n";
-   emOutStream << std::endl << emptySpaces << std::endl;
    emOutStream.flush();
    
    ClearMetaData();

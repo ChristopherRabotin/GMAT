@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -148,12 +148,12 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
       gmatCompiledBitSize = " (32-bit)";
    releaseNumber = releaseNumber + gmatCompiledBitSize;
    wxStaticText *releaseText = new wxStaticText(this, -1, releaseNumber);
-   
+
    // Build date
    wxString buildDate;
    buildDate.Printf("Build Date: %s %s\n", __DATE__, __TIME__);
    wxStaticText *buildText = new wxStaticText(this, -1, buildDate);
-   
+
    #ifdef __WXMAC__
    font1.SetPointSize(12);
    #else
@@ -166,18 +166,23 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    releaseText->SetFont(font1);
    buildText->SetFont(font1);
    
-   // website and contact email
+   // website, contact email, and link to license
    wxStaticText *webText = new wxStaticText(this, -1, "Website: ");
-   wxString gmatUrl = "http://gmat.gsfc.nasa.gov";
+   wxString gmatUrl = "http://gmatcentral.org";
    wxHyperlinkCtrl *webLink = new wxHyperlinkCtrl(this, -1, gmatUrl, gmatUrl);
    wxStaticText *contactText = new wxStaticText(this, -1, "Contact: ");
    wxStaticText *emailText = new wxStaticText(this, -1, "gmat@gsfc.nasa.gov");
+   wxStaticText *licenseText = new wxStaticText(this, -1, "License: ");
+   wxString licenseUrl = "https://www.apache.org/licenses/LICENSE-2.0";
+   wxHyperlinkCtrl *licenseLink = new wxHyperlinkCtrl(this, -1, licenseUrl, licenseUrl);
    
    wxFlexGridSizer *contactSizer = new wxFlexGridSizer(2);
    contactSizer->Add(webText, 0, wxALIGN_RIGHT|wxALL, 2);
    contactSizer->Add(webLink, 0, wxALIGN_LEFT|wxALL, 2);
    contactSizer->Add(contactText, 0, wxALIGN_RIGHT|wxALL, 2);
    contactSizer->Add(emailText, 0, wxALIGN_LEFT|wxALL, 2);
+   contactSizer->Add(licenseText, 0, wxALIGN_RIGHT | wxALL, 2);
+   contactSizer->Add(licenseLink, 0, wxALIGN_LEFT | wxALL, 2);
    
    wxBoxSizer *gmatSizer = new wxBoxSizer(wxVERTICAL);
    gmatSizer->Add(gmatText, 0, wxALIGN_CENTRE|wxALL, 4);
@@ -190,29 +195,20 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    topSizer->Add(aboutButton, 0, wxALIGN_CENTRE|wxALL, 4);
    topSizer->Add(gmatSizer, 0, wxALIGN_CENTRE|wxALL, 4);
    
-   // licence and thrid party
-   wxStaticText *licenceText = new wxStaticText(this, -1, " - Licensed under");
-   //wxString agreement = "NASA Open Source Agreement";
-   wxString agreement = "Apache License, Version 2.0";
-   theLicenseLink =
-      new wxHyperlinkCtrl(this, ID_HYPERLINK, agreement, "");
-   wxBoxSizer *licenceSizer = new wxBoxSizer(wxHORIZONTAL);
-   licenceSizer->Add(licenceText, 0, wxALIGN_CENTRE|wxALL, 1);
-   licenceSizer->Add(theLicenseLink, 0, wxALIGN_CENTRE|wxALL, 1);
-   
    wxString use;
-   use = use + " - Uses " + wxVERSION_STRING + "\n";
-   use = use + " - Uses TSPlot\n";
+   use = use + "GMAT uses the following third party content:\n";
+   use = use + " - " + wxVERSION_STRING + "\n";
+   use = use + " - TSPlot\n";
    //use = use + " - Uses Perl Compatible Regular Expressions\n";
-   use = use + " - Uses JPL SPICE Library\n";
-   use = use + " - Uses IAU SOFA Library\n";
-   use = use + " - Uses Apache Xerces 3.1\n";
+   use = use + " - JPL SPICE Library\n";
+   use = use + " - IAU SOFA Library\n";
+   use = use + " - Apache Xerces 3.1\n";
    use = use + " - Planetary images courtesy of JPL/Caltech/USGS, Celestia \n";
-   use = use + "   Motherlode, Bjorn Jonsson, and NASA World Wind";
+   use = use + "   Motherlode, Bjorn Jonsson, and NASA World Wind \n";
+   use = use + " - Boost";
    wxStaticText *useText = new wxStaticText(this, -1, use);
    
    wxBoxSizer *useSizer = new wxBoxSizer(wxVERTICAL);
-   useSizer->Add(licenceSizer, 0, wxALIGN_LEFT|wxALL, 2);
    useSizer->Add(useText, 0, wxALIGN_CENTRE|wxALL, 4);
    
    // OK button

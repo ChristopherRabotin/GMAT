@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -85,11 +85,16 @@ Moon::Moon(std::string name) :
    else                                rotationSrc         = Gmat::IAU_SIMPLIFIED;
    
 
-   if (name == SolarSystem::MOON_NAME)  // HARD-CODE default PCK and FK for now
+   if (name == SolarSystem::MOON_NAME)  
    {
-      std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
-      attitudeSpiceKernelNames.push_back(path+"moon_pa_de421_1900-2050.bpc");
-      frameSpiceKernelNames.push_back(path+"moon_080317.tf");
+      FileManager *fm = FileManager::Instance();
+      std::string path = fm->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+      std::string lunaCurrent = fm->GetFilename(FileManager::LUNA_PCK_CURRENT_FILE);
+      std::string lunaFrame   = fm->GetFilename(FileManager::LUNA_FRAME_KERNEL_FILE);
+      attitudeSpiceKernelNames.push_back(path+lunaCurrent);
+      frameSpiceKernelNames.push_back(path+lunaFrame);
+//      attitudeSpiceKernelNames.push_back(path+"moon_pa_de421_1900-2050.bpc");
+//      frameSpiceKernelNames.push_back(path+"moon_080317.tf");
    }
 
    DeterminePotentialFileNameFromStartup();
@@ -121,11 +126,16 @@ Moon::Moon(std::string name, const std::string &cBody) :
    if (name == SolarSystem::MOON_NAME) rotationSrc         = Gmat::DE_405_FILE;
    else                                rotationSrc         = Gmat::IAU_SIMPLIFIED;
 
-   if (name == SolarSystem::MOON_NAME)  // HARD-CODE default PCK and FK for now
+   if (name == SolarSystem::MOON_NAME)  
    {
-      std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
-      attitudeSpiceKernelNames.push_back(path+"moon_pa_de421_1900-2050.bpc");
-      frameSpiceKernelNames.push_back(path+"moon_080317.tf");
+      FileManager *fm = FileManager::Instance();
+      std::string path = fm->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+      std::string lunaCurrent = fm->GetFilename(FileManager::LUNA_PCK_CURRENT_FILE);
+      std::string lunaFrame   = fm->GetFilename(FileManager::LUNA_FRAME_KERNEL_FILE);
+      attitudeSpiceKernelNames.push_back(path+lunaCurrent);
+      frameSpiceKernelNames.push_back(path+lunaFrame);
+//      attitudeSpiceKernelNames.push_back(path+"moon_pa_de421_1900-2050.bpc");
+//      frameSpiceKernelNames.push_back(path+"moon_080317.tf");
    }
 
    DeterminePotentialFileNameFromStartup();

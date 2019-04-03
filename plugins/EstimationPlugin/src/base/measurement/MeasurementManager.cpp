@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -40,6 +40,10 @@
 #include "PropSetup.hpp"
 #include "StatisticAcceptFilter.hpp"
 #include "StatisticRejectFilter.hpp"
+#include "AcceptFilter.hpp"
+#include "RejectFilter.hpp"
+#include "Spacecraft.hpp"
+#include "Receiver.hpp"
 
 // Temporary to get Adapters hooked up
 #include "GmatObType.hpp"
@@ -489,12 +493,18 @@ bool MeasurementManager::SetStatisticsDataFiltersToDataFiles(UnsignedInt i)
       for (UnsignedInt k = 0; k < dataFilterObjects.size(); ++k)
       {
          // set tracking configs to statistics accept filter
+         // @todo: StatisticsAcceptFilter is deprecated and will be removed in a future build.
          if (dataFilterObjects[k]->IsOfType("StatisticsAcceptFilter"))
             ((StatisticAcceptFilter*)dataFilterObjects[k])->SetTrackingConfigs(tkconfigs);
+         if (dataFilterObjects[k]->IsOfType("AcceptFilter"))
+            ((AcceptFilter*)dataFilterObjects[k])->SetTrackingConfigs(tkconfigs);
 
          // set tracking configs to statistics reject filter
+         // @todo: StatisticsRejectFilter is deprecated and will be removed in a future build.
          if (dataFilterObjects[k]->IsOfType("StatisticsRejectFilter"))
             ((StatisticRejectFilter*)dataFilterObjects[k])->SetTrackingConfigs(tkconfigs);
+         if (dataFilterObjects[k]->IsOfType("RejectFilter"))
+            ((RejectFilter*)dataFilterObjects[k])->SetTrackingConfigs(tkconfigs);
       }
 
       // 4. Get list of all file names defined in trackingSet[i]
@@ -1021,6 +1031,53 @@ bool MeasurementManager::WriteMeasurement(const Integer measurementToWrite)
  * sort the observations into time order.
  */
 //-----------------------------------------------------------------------------
+void MeasurementManager::UpdateObservationContent(ObservationData* odPointer)
+{
+   if (odPointer == NULL)
+      return;
+
+   StringArray scNames = trackingSets[0]->GetListOfObjects(Gmat::SPACECRAFT);
+
+   // Specify spacecraft Id based on sensor Id for GPS Point Solution 
+   if (odPointer->typeName == "GPS_PosVec")
+   {
+      // Get receiver Id
+      std::string receiveId = odPointer->sensorIDs[0];
+
+      // Specify spacecraft Id for given receiver Id
+      std::string scId = "";
+      for (UnsignedInt j = 0; j < scNames.size(); ++j)
+      {
+         bool found = false;
+         Spacecraft* sc = (Spacecraft*)(trackingSets[0]->GetConfiguredObject(scNames[j]));
+         ObjectArray objList = sc->GetRefObjectArray(Gmat::HARDWARE);
+         for (UnsignedInt k = 0; k < objList.size(); ++k)
+         {
+            if (objList[k]->IsOfType("Receiver"))
+            {
+               std::string id = ((Receiver*)objList[k])->GetStringParameter("Id");
+               if (id == receiveId)
+               {
+                  found = true;
+                  break;
+               }
+            }
+         }
+
+         // Get spacecraft Id
+         if (found)
+         {
+            scId = sc->GetStringParameter("Id");
+            break;
+         }
+      }
+
+      // Update participantID in ObservationData object
+      odPointer->participantIDs[0] = scId;
+      
+   }
+}
+
 UnsignedInt MeasurementManager::LoadObservations()
 {
    #ifdef DEBUG_LOAD_OBSERVATIONS
@@ -1059,7 +1116,7 @@ UnsignedInt MeasurementManager::LoadObservations()
       StringArray sa;
       trackingConfigsMap[i] = sa;
    }
-
+   
 
    std::map<std::string, Integer> totalCount;
    totalCount["Invalid measurement value"]        = 0;
@@ -1074,10 +1131,15 @@ UnsignedInt MeasurementManager::LoadObservations()
    std::vector<UnsignedInt> count;                     // count[i] is number of all accepted records associated with file specified by streamList[i] after applying statistic filters
    std::vector<ObservationData*> dataBuffer;           // dataBuffer[i] contains the current data record read from streamList[i]  
    ObservationData* odPointer;
-
+   
+   // Get A list of GMAT objects
+   if (trackingSets.size() == 0)
+      throw MeasurementException("Error: No TrackingFileSet was defined in GMAT script.\n");
+   
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
    {
       odPointer = streamList[i]->ReadObservation();
+      UpdateObservationContent(odPointer);             // It is only used for GPS Point Solution
       dataBuffer.push_back(odPointer);
       
       if (odPointer == NULL)
@@ -1132,6 +1194,8 @@ UnsignedInt MeasurementManager::LoadObservations()
             if (i != 0)
                ss << ",";
             ss << od.participantIDs[i];
+            if (od.sensorIDs[i] != "")
+               ss << "." << od.sensorIDs[i];
          }
          ss << "}," << od.typeName;
 
@@ -1168,11 +1232,17 @@ UnsignedInt MeasurementManager::LoadObservations()
                   if (filterIndex < filters.size())
                   {
                      std::string filterName = "";
-                     if (filters[filterIndex]->IsOfType("StatisticsAcceptFilter"))
-                        filterName += "All Statistics Accept Filter";
-                     else if  (filters[filterIndex]->IsOfType("StatisticsRejectFilter"))
+                     if (filters[filterIndex]->IsOfType("StatisticsAcceptFilter") ||              //@todo: StatisticsAcceptFilter is deprecated and will be remove in a future GMAT build.
+                        filters[filterIndex]->IsOfType("AcceptFilter"))
                      {
-                        filterName += "StatisticsRejectFilter ";
+                        //filterName += "All Statistics Accept Filter";
+                        filterName = "All Accept Filter";
+                     }
+                     else if (filters[filterIndex]->IsOfType("StatisticsRejectFilter") ||         //@todo: StatisticsAcceptFilter is deprecated and will be remove in a future GMAT build.
+                              filters[filterIndex]->IsOfType("RejectFilter"))
+                     {
+                        //filterName += "StatisticsRejectFilter ";
+                        filterName = "RejectFilter ";
                         filterName += filters[filterIndex]->GetName();
                      }
                      ++totalCount[filterName];
@@ -1185,11 +1255,12 @@ UnsignedInt MeasurementManager::LoadObservations()
       if (dataBuffer[minIndex] != NULL)
       {
          dataBuffer[minIndex] = streamList[minIndex]->ReadObservation();
+         UpdateObservationContent(dataBuffer[minIndex]);             // It is only used for GPS Point Solution
          if (dataBuffer[minIndex] != NULL)
             numRec[minIndex] = numRec[minIndex] + 1;        // count up number of read records if it really has one record read from file
       }
    }
-
+   
    // 7. Display all statistic of data records
    Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
    MessageInterface::ShowMessage("Number of thrown records due to:\n");
@@ -1204,15 +1275,20 @@ UnsignedInt MeasurementManager::LoadObservations()
       MessageInterface::ShowMessage("     .%s : %d\n", i->first.c_str(), i->second); 
    }
 
-
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
       MessageInterface::ShowMessage("Data file '%s' has %d of %d records used for estimation.\n", streamList[i]->GetStringParameter("Filename").c_str(), count[i], numRec[i]);
 
    #ifdef DEBUG_LOAD_OBSERVATIONS
+      MessageInterface::ShowMessage(" observations.size() = %d\n", observations.size());
       for (UnsignedInt i = 0; i < observations.size(); ++i)
-         MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf\n", observations[i].dataFormat.c_str(), observations[i].epoch, observations[i].typeName.c_str(), observations[i].type, observations[i].participantIDs[0].c_str(), observations[i].participantIDs[1].c_str(), observations[i].value[0]);
+      {
+         if (observations[i].typeName == "GPS_PosVec")
+            MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participant: %s  sensor: %s   observation data: %.12lf   %.12lf   %.12lf\n", observations[i].dataFormat.c_str(), observations[i].epoch, observations[i].typeName.c_str(), observations[i].type, observations[i].participantIDs[0].c_str(), observations[i].sensorIDs[0].c_str(), observations[i].value[0], observations[i].value[1], observations[i].value[2]);
+         else
+            MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf\n", observations[i].dataFormat.c_str(), observations[i].epoch, observations[i].typeName.c_str(), observations[i].type, observations[i].participantIDs[0].c_str(), observations[i].participantIDs[1].c_str(), observations[i].value[0]);
+      }
    #endif
-
+   
    // Set the current data pointer to the first observation value
    currentObs = observations.begin();
    MessageInterface::ShowMessage("Total number of load records : %d\n\n", observations.size());
@@ -1302,12 +1378,16 @@ bool MeasurementManager::AutoGenerateTrackingDataAdapters()
 
          // 2.1. Prepare all inputs
          std::vector<StringArray> strands;
+         std::vector<StringArray> sensors;
          StringArray types;
 
          for (UnsignedInt j = 0; j < createList.size(); ++j)
          {
             StringArray participants;
+            StringArray sens;
             std::string participantID;
+            StringArray nameList;
+            std::string sensorID;
             Integer count;
             GmatBase* obj;
 
@@ -1315,17 +1395,26 @@ bool MeasurementManager::AutoGenerateTrackingDataAdapters()
             size_t pos = config.find_last_of(',');                     // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
             std::string type = config.substr(pos+1, config.size()-(pos+1));
             std::string strand = config.substr(1, pos-2);
+
             while (strand != "")
             {
                pos = strand.find_first_of(',');
                if (pos != strand.npos)
                {
-                  participantID = strand.substr(0,pos);
+                  nameList = GmatStringUtil::ParseName(strand.substr(0, pos));
+                  participantID = nameList[0];
+                  if (nameList.size() == 2)
+                     sensorID = nameList[1];
+
                   strand = strand.substr(pos+1);
                }
                else
                {
-                  participantID = strand;
+                  nameList = GmatStringUtil::ParseName(strand);
+                  participantID = nameList[0];
+                  if (nameList.size() == 2)
+                     sensorID = nameList[1];
+
                   strand = "";
                }
 
@@ -1336,17 +1425,45 @@ bool MeasurementManager::AutoGenerateTrackingDataAdapters()
                {
                   if (partList[k]->GetStringParameter("Id") == participantID)
                   {
-                     ++count;
                      obj = partList[k];
+                     ++count;
                   }
                }
                if (count == 0)
-                  throw MeasurementException("Error: Failed to generate tracking configuration due to neither station nor spacecraft defined in your script has Id = '" + participantID + "'\n" );
+                  throw MeasurementException("Error: Failed to generate tracking configuration due to neither station nor spacecraft defined in your script has Id = '" + participantID + "'\n");
                else if (count > 1)
                   throw MeasurementException("Error: Failed to generate tracking configuation due to 2 or more GMAT objects having the same Id = '" + participantID + "'\n");
 
+               
+               GmatBase* receiver = NULL;
+               if (sensorID != "")
+               {
+                  if ((obj!= NULL)&&(obj->IsOfType(Gmat::SPACECRAFT)))
+                  {
+                     // Get Receiver sensor from spacecraft 
+                     ObjectArray hwList = ((Spacecraft*)obj)->GetRefObjectArray("Hardware");
+                     for (UnsignedInt hwIndex = 0; hwIndex < hwList.size(); ++hwIndex)
+                     {
+                        if ((hwList[hwIndex]->GetTypeName() == "Receiver") && (hwList[hwIndex]->GetStringParameter("Id") == sensorID))
+                        {
+                           receiver = hwList[hwIndex];
+                           break;
+                        }
+                     }
+                     if (receiver == NULL)
+                        --count;
+                  }
+               }               
+               if (count == 0)
+                  throw MeasurementException("Error: Failed to generate tracking configuration due to neither station nor spacecraft defined in your script has Id = '" + participantID + "'\n" );
+               
                // Set name
                participants.push_back(obj->GetName());
+               if (receiver == NULL)
+                  sens.push_back("");
+               else
+                  sens.push_back(receiver->GetName());
+
                // Set reference object for tracking file set
                try
                {
@@ -1357,15 +1474,15 @@ bool MeasurementManager::AutoGenerateTrackingDataAdapters()
                   // skip when it fail to set referent object
                }
             }
-
-            //participants.push_back(strand);
+            
             strands.push_back(participants);
+            sensors.push_back(sens);
             types.push_back(type);
          }
-
+         
          // 2.2. Generate tracking configs
-         trackingSets[i]->GenerateTrackingConfigs(strands, types);
-
+         trackingSets[i]->GenerateTrackingConfigs(strands, sensors, types);
+         
          // 3. Set stream objects and data filters for all observation data files in trackingSet[i]
          // 3.1. Get list of all data filters defined in trackingSet[i]
          ObjectArray dataFilterObjects = trackingSets[i]->GetRefObjectArray(Gmat::DATA_FILTER);
@@ -1392,7 +1509,10 @@ bool MeasurementManager::AutoGenerateTrackingDataAdapters()
             #endif
             for (UnsignedInt k = 0; k < dataFilterObjects.size(); ++k)
             {
-               if ((dataFilterObjects[k]->IsOfType("StatisticsAcceptFilter"))||(dataFilterObjects[k]->IsOfType("StatisticsRejectFilter")))
+               if (dataFilterObjects[k]->IsOfType("StatisticsAcceptFilter") ||   //@todo: StatisticsAcceptFilter is deprecated and will be removed in the future GMAT build.
+                   dataFilterObjects[k]->IsOfType("StatisticsRejectFilter")||    //@todo: StatisticsRejectFilter is deprecated and will be removed in the future GMAT build.
+                   dataFilterObjects[k]->IsOfType("AcceptFilter")||
+                   dataFilterObjects[k]->IsOfType("RejectFilter"))
                {
                   // data filter is only set to data file if and only if datafilter.Filenames parameter 
                   // is an empty list or contains the name of data file.
@@ -1403,7 +1523,8 @@ bool MeasurementManager::AutoGenerateTrackingDataAdapters()
                      setfilter = true;
                   else
                   {
-                     if ((dataFilterObjects[k]->IsOfType("StatisticsAcceptFilter"))&&
+                     if ((dataFilterObjects[k]->IsOfType("StatisticsAcceptFilter")||        //@todo: StatisticsAcceptFilter is deprecated and will be removed in the future GMAT build.
+                          dataFilterObjects[k]->IsOfType("AcceptFilter")) && 
                          ((find(nameList.begin(), nameList.end(), "From_AddTrackingConfig") != nameList.end())||
                           (find(nameList.begin(), nameList.end(), "All") != nameList.end())))
                         setfilter = true;
@@ -1455,308 +1576,6 @@ bool MeasurementManager::AutoGenerateTrackingDataAdapters()
 #endif
    return true;
 }
-
-
-
-//UnsignedInt MeasurementManager::LoadObservationsOld()
-//{
-//   #ifdef DEBUG_LOAD_OBSERVATIONS
-//      MessageInterface::ShowMessage(
-//         "Entered MeasurementManager::LoadObservations() method\n");
-//   #endif
-//
-//   #ifdef USE_DATAFILE_PLUGINS
-//      DataFileAdapter dfa;
-//   #endif
-//
-//   std::vector<ObservationData>     obsTable;
-//   std::vector<UnsignedInt>         startIndexes;
-//   std::vector<UnsignedInt>         endIndexes;
-//   observations.clear();
-//   
-//   for (UnsignedInt i = 0; i < streamList.size(); ++i)
-//   {
-//      startIndexes.push_back(obsTable.size());
-//
-//      ObservationData *od;
-/////// TBD: Look at file handlers here once data file pieces are designed
-//      ObservationData od_old;
-//      od_old.epoch = -1.0;
-//
-//      std::string streamFormat = streamList[i]->GetStringParameter("Format");
-//
-/////// TBD: Especially here; this style will cause maintenence issues as more types are added
-//      if ((streamFormat == "GMAT_OD") || (streamFormat == "GMAT_ODDoppler") ||
-//          (streamFormat == "GMATInternal") || (streamFormat == "TDM"))      // It needs for loading all type of observation data (except ramp table)
-//      {
-//      #ifdef USE_DATAFILE_PLUGINS
-//         if (streamList[i]->GetIsOpen())
-//         {
-//            ObType *obs;
-//
-//            // This part needs some design information from Matt
-//            ObType *obd = dfa.GetObTypeObject(streamList[i]);
-//            if (!streamList[i]->GetData(obd))
-//            {
-//               throw MeasurementException("Could not load observation\n");
-//            }
-//            dfa.LoadObservation(*obd, *od);
-//
-//            while (!streamList[i]->IsEOF())
-//            {
-//               if (streamList[i]->GetData(obs))
-//               {
-//                  // Store the data for processing
-//               }
-//               streamList[i]->AdvanceToNextOb();
-//            }
-//         }
-//      #else
-//
-//         if (streamList[i]->IsOpen())
-//         {
-//            UnsignedInt filter0Num;
-//            filter0Num = 0;
-//            UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, count, numRec;
-//            filter1Num = filter2Num = filter3Num = filter4Num = filter5Num =  count = numRec = 0;
-//            Real acc = 1.0;
-//
-//            Real epoch1 = 0.0;
-//            Real epoch2 = 0.0;
-//
-//            Real thinningRatio = streamList[i]->GetRealParameter("DataThinningRatio"); 
-//            StringArray selectedStations = streamList[i]->GetStringArrayParameter("SelectedStationIDs"); 
-//            bool EndofFile = false;
-//            while (true)
-//            {
-//               od = streamList[i]->ReadObservation();
-//               ++numRec;
-//               
-//               // End of file
-//               if (EndofFile)
-//               {
-//                  --numRec;
-//                  break;
-//               }
-//
-//               if (od == NULL)
-//               {
-//                  ++filter0Num;
-//                  continue;
-//               }
-//
-//               #ifdef DUMP_OBSDATA
-//                  // Write out the observation
-//                  MessageInterface::ShowMessage("In MeasurementManager: Observation record at %p:\n", od);
-//                  MessageInterface::ShowMessage("   typeName:  %s\n", od->typeName.c_str());
-//                  MessageInterface::ShowMessage("   type:  %d\n", od->type);
-//                  MessageInterface::ShowMessage("   inUsed:  %s\n", (od->inUsed ? "true" : "false"));
-//                  MessageInterface::ShowMessage("   removedReason:  %s\n", od->removedReason.c_str());
-//                  MessageInterface::ShowMessage("   uniqueID:  %d\n", od->uniqueID);
-//                  MessageInterface::ShowMessage("   epochSystem:  %d\n", od->epochSystem);
-//                  MessageInterface::ShowMessage("   epoch:  %.12le\n", od->epoch);
-//                  MessageInterface::ShowMessage("   epochAtEnd:  %s\n", (od->epochAtEnd ? "true" : "false"));
-//                  MessageInterface::ShowMessage("   epochAtIntegrationEnd:  %s\n", (od->epochAtIntegrationEnd ? "true" : "false"));
-//                  MessageInterface::ShowMessage("   participantIDs:  %d members\n", od->participantIDs.size());
-//                  for (UnsignedInt i = 0; i < od->participantIDs.size(); ++i)
-//                     MessageInterface::ShowMessage("      %d: %s\n", i, od->participantIDs[i].c_str());
-//                  MessageInterface::ShowMessage("   strands: %d strands in the record\n", od->strands.size());
-//                  MessageInterface::ShowMessage("   value:  %d members\n", od->value.size());
-//                  MessageInterface::ShowMessage("   dataMap:  %d members\n", od->dataMap.size());
-//                  for (UnsignedInt i = 0; i < od->value.size(); ++i)
-//                  {
-//                     if (od->dataMap.size() > i)
-//                        MessageInterface::ShowMessage("      %s --> ", od->dataMap[i].c_str());
-//                     else
-//                        MessageInterface::ShowMessage("      ");
-//                     MessageInterface::ShowMessage("%.12lf\n", od->value[i]);
-//                  }
-//                  MessageInterface::ShowMessage("   value_orig:  %d members\n", od->value_orig.size());
-//                  for (UnsignedInt i = 0; i < od->value_orig.size(); ++i)
-//                  {
-//                     if (od->dataMap.size() > i)
-//                        MessageInterface::ShowMessage("      %s --> ", od->dataMap[i].c_str());
-//                     else
-//                        MessageInterface::ShowMessage("      ");
-//                     MessageInterface::ShowMessage("%.12lf\n", od->value_orig[i]);
-//                  }
-//                  MessageInterface::ShowMessage("   unit:  %s\n", od->unit.c_str());
-//                  MessageInterface::ShowMessage("   noiseCovariance:  <%p>\n", od->noiseCovariance);
-//                  MessageInterface::ShowMessage("   extraDataDescriptions:  %d members\n", od->extraDataDescriptions.size());
-//                  MessageInterface::ShowMessage("   extraTypes:  %d members\n", od->extraTypes.size());
-//                  MessageInterface::ShowMessage("   extraData:  %d members\n", od->extraData.size());
-//                  MessageInterface::ShowMessage("   uplinkBand:  %d\n", od->uplinkBand);
-//                  MessageInterface::ShowMessage("   uplinkFreq:  %.12le\n", od->uplinkFreq);
-//                  MessageInterface::ShowMessage("   rangeModulo: %.12le\n", od->rangeModulo);
-//                  MessageInterface::ShowMessage("   dopplerCountInterval:  %.12le\n", od->dopplerCountInterval);
-//               #endif
-//
-//               // Get start epoch and end epoch when od != NULL
-//               if (epoch1 == 0.0)
-//               {
-//                  epoch1 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("StartEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
-//                  epoch2 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("EndEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
-//               }
-//               
-//               // Data thinning filter
-//               acc = acc + thinningRatio;
-//               if (acc < 1.0)
-//               {
-//                  #ifdef DEBUG_LOAD_OBSERVATIONS
-//                     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to data thinning\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-//                  #endif
-//                  ++filter4Num;
-//                  continue;
-//               }
-//               else
-//                  acc = acc -1.0;
-//               
-//               // Time span filter
-//               if ((od->epoch < epoch1)||(od->epoch > epoch2))
-//               {
-//                  #ifdef DEBUG_LOAD_OBSERVATIONS
-//                     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to time span filter\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-//                  #endif
-//                  ++filter5Num;
-//                  continue;
-//               }
-//               
-//               // Invalid measurement value filter
-//               if (od->value.size() > 0)
-//                  if (od->value[0] == -1.0)      // throw away this observation data if it is invalid
-//                  {
-//                     #ifdef DEBUG_LOAD_OBSERVATIONS
-//                        MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to invalid observation data\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-//                     #endif
-//                     ++filter1Num;
-//                     continue;
-//                  }
-//
-//               
-//               // Duplication or time order filter
-//               if (od_old.epoch >= (od->epoch + 2.0e-12))
-//               {
-//                  #ifdef DEBUG_LOAD_OBSERVATIONS
-//                     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to duplication or time order\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-//                  #endif
-//                  ++filter2Num;
-//                  continue;
-//               }
-//
-//               // Selected stations filter
-//               bool choose = false;
-//               if (selectedStations.size() == 0)
-//                  choose = true;
-//               else
-//               {
-//                  for (int j=0; j < selectedStations.size(); ++j)
-//                  {
-//                     if (selectedStations[j] == od->participantIDs[0])
-//                     {
-//                        choose = true;
-//                         break;
-//                     }
-//                  }
-//               }
-//
-//               if (choose == false)
-//               {
-//                  #ifdef DEBUG_LOAD_OBSERVATIONS
-//                     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to station is not in SelectedStationID\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-//                  #endif
-//                  ++filter3Num;
-//                  continue;
-//               }
-//
-//               obsTable.push_back(*od);
-//               #ifdef DEBUG_LOAD_OBSERVATIONS
-//                  MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf   ", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-//                  if (od->typeName == "DSNTwoWayDoppler")
-//                     MessageInterface::ShowMessage(" Band = %d    Doppler count interval = %le\n", od->uplinkBand, od->dopplerCountInterval);
-//                  else if (od->typeName == "DSNTwoWayRange")
-//                     MessageInterface::ShowMessage(" Band = %d    Frequency = %.15le   Range Modulo = %.15le\n", od->uplinkBand, od->uplinkFreq, od->rangeModulo);
-//                  else
-//                     MessageInterface::ShowMessage("\n");
-//               #endif
-//
-//               ++count;
-//               od_old = *od;
-//            }// endwhile(true)   
-//
-//            MessageInterface::ShowMessage("Number of thrown records in '%s' due to:\n", streamList[i]->GetStringParameter("Filename").c_str());
-//            MessageInterface::ShowMessage("      .Filter by Satistic data filters        : %d\n", filter0Num);
-//            MessageInterface::ShowMessage("      .Invalid measurement value              : %d\n", filter1Num);
-//            MessageInterface::ShowMessage("      .Duplicated record or time order filter : %d\n", filter2Num);
-//            MessageInterface::ShowMessage("      .Selected stations filter               : %d\n", filter3Num);
-//            MessageInterface::ShowMessage("      .Data thinning filter                   : %d\n", filter4Num);
-//            MessageInterface::ShowMessage("      .Time span filter                       : %d\n", filter5Num);
-//            MessageInterface::ShowMessage("Total number of records in '%s': %d\n", streamList[i]->GetStringParameter("Filename").c_str(), numRec);
-//            MessageInterface::ShowMessage("Number of records in '%s' used for estimation: %d\n\n", streamList[i]->GetStringParameter("Filename").c_str(), count);
-//
-//         } // endif (streamList[i]->IsOpen())
-//       
-//      #endif
-//      } // endif ((streamFormat == "GMAT_OD")
-//
-//      // fix bug GMT-4394
-//      if (obsTable.size() == 0)
-//         throw MeasurementException("Error: No observation data in tracking data file '" + streamList[i]->GetStringParameter("Filename") +"'\n"); 
-//      else
-//      {
-//         if ((Integer)startIndexes[i] <= (obsTable.size()-1))
-//            endIndexes.push_back(obsTable.size()-1);
-//         else
-//            throw MeasurementException("Error: No observation data in tracking data file '" + streamList[i]->GetStringParameter("Filename") +"'\n"); 
-//      }
-//     
-//   }// for i loop
-//
-//
-//   // Sort observation data by epoch due to observations table is required to have an epoch ascending order
-//   bool completed = false;
-//   while (!completed)
-//   {
-//      UnsignedInt minIndex = streamList.size();
-//      for (UnsignedInt i = 0; i < streamList.size(); ++i)
-//      {
-//         if (startIndexes[i] > endIndexes[i])
-//            continue;
-//
-//         if (minIndex == streamList.size())
-//            minIndex = i;
-//         else
-//         {
-//            if (obsTable[startIndexes[minIndex]].epoch > obsTable[startIndexes[i]].epoch)
-//               minIndex = i;
-//         }
-//     }
-//     
-//     if (minIndex < streamList.size())
-//     {
-//        observations.push_back(obsTable[startIndexes[minIndex]]);
-//        startIndexes[minIndex]++;
-//     }
-//     else
-//        completed = true;
-//
-//   }
-//   
-//   #ifdef DEBUG_LOAD_OBSERVATIONS
-//      for (UnsignedInt i = 0; i < observations.size(); ++i)
-//         MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf\n", observations[i].dataFormat.c_str(), observations[i].epoch, observations[i].typeName.c_str(), observations[i].type, observations[i].participantIDs[0].c_str(), observations[i].participantIDs[1].c_str(), observations[i].value[0]);
-//   #endif
-//
-//   // Set the current data pointer to the first observation value
-//   currentObs = observations.begin();
-//   MessageInterface::ShowMessage("Total number of load records : %d\n", observations.size());
-//
-//   #ifdef DEBUG_LOAD_OBSERVATIONS
-//     MessageInterface::ShowMessage(
-//         "Exit MeasurementManager::LoadObservations() method\n");
-//   #endif
-//
-//   return observations.size(); 
-//}
 
 
 //-----------------------------------------------------------------------------
@@ -2499,7 +2318,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 
    bool retval = false;
    eventCount = 0;
-
+   
    if (forSimulation)
    {  // This section is used for simulation only:
       for (UnsignedInt j = 0; j < models.size(); ++j)
@@ -2556,7 +2375,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          #endif
 
       } // for j loop
-
+      
       // Now do the same thing for the TrackingDataAdapters
       #ifdef DEBUG_CALCULATE_MEASUREMENTS
       MessageInterface::ShowMessage("adapters size = %d\n", adapters.size());
@@ -2613,9 +2432,12 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          }
          
          #ifdef DEBUG_CALCULATE_MEASUREMENTS
-            MessageInterface::ShowMessage(" Adapter Measurement is %s. Its value is "
-                  "%lf\n", (measurements[i].isFeasible?"feasible":
-                  " not feasible"), measurements[i].value[0]);
+            MessageInterface::ShowMessage(" Adapter Measurement is %s."
+               , (measurements[i].isFeasible?"feasible":" not feasible"));
+            MessageInterface::ShowMessage(" Its value is [");
+            for (Integer k = 0; k < measurements[i].value.size(); ++k)
+               MessageInterface::ShowMessage("%lf  ", measurements[i].value[k]);
+            MessageInterface::ShowMessage("]km\n");
          #endif
       } // for i loop
    }
@@ -2650,28 +2472,23 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             ObjectArray participants = models[j]->GetParticipants();      // participants in measurement model
             if (participants.size() == od->participantIDs.size())
             {
+               isbelong = true;
                int num = participants.size();
                for (int i1 = 0; i1 < num; ++i1)
                {
-                  isbelong = false;
-                  for (int i2 = 0; i2 < num; ++i2)
+                  // when observation data's signal path and measurement model's signal path
+                  // are different, they do not belong each other
+                  if (od->participantIDs[i1] != participants[i1]->GetStringParameter("Id"))
                   {
-                     if (od->participantIDs[i1] == participants[i2]->GetStringParameter("Id"))
-                     {
-                        isbelong = true;
-                        break;
-                     }
-                  } // for i2 loop
-
-                  if (isbelong == false)  
-                     break;              
-               } // for i1 loop
+                     isbelong = false;
+                     break;
+                  }
+               }
             }
          }
        
          if (isbelong == false)
          {
-//          MessageInterface::ShowMessage("This observation data is not belong to model[%d]<%s>: %lf  %s  %s  %s  %lf\n",j, models[j]->GetStringParameter("Type").c_str(), od->epoch, od->typeName.c_str(), od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
             measurements[j].typeName       = models[j]->GetStringParameter("Type");
             measurements[j].epoch          = od->epoch;
             measurements[j].epochSystem        = od->epochSystem;
@@ -2707,7 +2524,11 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          MessageInterface::ShowMessage(" processing for tracking data adapters ...\n");
          MessageInterface::ShowMessage("adapters.size() = %d:\n", adapters.size());
       #endif
-      // Now do the tracking data adapters
+
+      // Now do the tracking data adapters. Obsevation data od belongs to adapters[j] 
+      // when their measurement type and signal path are the same. The measurement[j] associated
+      // to adapter has valid value when they are belong to each other. Otherwise, measurement[j]
+      // will have feasibale to be false.
       for (UnsignedInt j = 0; j < adapters.size(); ++j)
       {
          // Code to verify observation data belonging to the measurement model jth
@@ -2721,7 +2542,9 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
                isbelong = true;
                for (UnsignedInt i1 = 0; i1 < num; ++i1)
                {
-                  if (od->participantIDs[i1] == participantObjLists[0]->at(i1)->GetStringParameter("Id"))
+                  // when observation data's signal path and measurement model's signal
+                  // path are different, they do not belong each other
+                  if (od->participantIDs[i1] != participantObjLists[0]->at(i1)->GetStringParameter("Id"))
                   {
                      isbelong = false;
                      break;
@@ -2732,7 +2555,6 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 
          if (isbelong == false)
          {
-            // MessageInterface::ShowMessage("This observation data is not belong to model[%d]<%s>: %lf  %s  %s  %s  %lf\n",j, adapters[j]->GetStringParameter("MeasurementType").c_str(), od->epoch, od->typeName.c_str(), od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
             measurements[j].typeName         = adapters[j]->GetStringParameter("MeasurementType");
             measurements[j].epoch            = od->epoch;
             measurements[j].epochSystem      = od->epochSystem;

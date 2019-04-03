@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -138,6 +138,24 @@ DataFileFactory& DataFileFactory::operator= (const DataFileFactory& fact)
    return *this;
 }
 
+//-----------------------------------------------------------------------------
+// GmatBase* CreateDataFile(const std::string &ofType,
+//       const std::string &withName)
+//-----------------------------------------------------------------------------
+/**
+ * Creates a DataFile object with the specified name
+ *
+ * @param ofType The scripted type of the object
+ * @param withName The name of the new object
+ *
+ * @return A pointer to the new object, or NULL if no new object was created
+ */
+//-----------------------------------------------------------------------------
+GmatBase* DataFileFactory::CreateObject(const std::string &ofType,
+      const std::string &withName)
+{
+   return CreateDataFile(ofType, withName);
+}
 
 //-----------------------------------------------------------------------------
 // DataFile* CreateDataFile(const std::string &ofType,

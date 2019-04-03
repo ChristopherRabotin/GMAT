@@ -1,0 +1,104 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>SolarSystem</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="SolarPowerSystem.html" title="SolarPowerSystem"><link rel="next" href="Spacecraft.html" title="Spacecraft"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">SolarSystem</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="SolarPowerSystem.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Spacecraft.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="SolarSystem"></a><div class="titlepage"></div><a name="N1D845" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">SolarSystem</span></h2><p>SolarSystem &mdash; High level solar system configuration options</p></div><div class="refsection"><a name="N1D856"></a><h2>Description</h2><p>The <span class="guilabel">SolarSystem</span> resource allows you to define
+    global properties for the model of the solar system including the
+    ephemeris source for built-in celestial bodies and selected settings to
+    improve performance when medium fidelity modelling is acceptable for your
+    application. This resource cannot be modified in the mission
+    sequence.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>As of release R2015a, GMAT uses two separate solar system
+      configurations for core parts of the system. For propagation, GMAT uses
+      the source specified by
+      <span class="guilabel">SolarSystem</span>.<span class="guilabel">EphemerisSource</span>
+      and the <span class="guilabel">CelestialBody</span> properties configured on each
+      resource. For event location with the new
+      <span class="guilabel">ContactLocator</span> and
+      <span class="guilabel">EclipseLocator</span> resources, GMAT always uses SPICE
+      data for <span class="guilabel">SolarSystem</span> and
+      <span class="guilabel">CelestialBody</span> properties. See <a class="xref" href="ContactLocator.html" title="ContactLocator"><span class="refentrytitle">ContactLocator</span></a>, <a class="xref" href="EclipseLocator.html" title="EclipseLocator"><span class="refentrytitle">EclipseLocator</span></a>, and <a class="xref" href="CelestialBody.html" title="CelestialBody"><span class="refentrytitle">CelestialBody</span></a> for details.</p></div><p><span class="ref_seealso">See Also</span>: <a class="xref" href="CelestialBody.html" title="CelestialBody"><span class="refentrytitle">CelestialBody</span></a>, <a class="xref" href="LibrationPoint.html" title="LibrationPoint"><span class="refentrytitle">LibrationPoint</span></a>, <a class="xref" href="Barycenter.html" title="Barycenter"><span class="refentrytitle">Barycenter</span></a>, <a class="xref" href="CoordinateSystem.html" title="CoordinateSystem"><span class="refentrytitle">CoordinateSystem</span></a></p></div><div class="refsection"><a name="N1D88F"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="30%"><col width="70%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">DEFilename</span></td><td><p> The path and name of the DE file. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Valid DE file</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">../data/planetary_ephem/de/leDE1941.405</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EphemerisSource</span></td><td><p> The ephemeris model for built-in celestial bodies.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">DE405</span>,
+                    <span class="guilabel">DE421</span>, <span class="guilabel">DE424</span>, or
+                    <span class="guilabel">SPICE</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DE405</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EphemerisUpdateInterval</span></td><td><p>The time between time updates for celetial body
+            ephemeris. For example, if
+            <span class="guilabel">EphemerisUpdateInterval</span> = 60, if an ephemeris
+            call is made at time t = 1200, and a subsequent call is made at
+            time t = 1210, the same ephemeris will be returned for the second
+            call. This option is for high speed, low fidelity modelling or for
+            use when modelling orbits far from third body perturbation
+            sources. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt;= 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">LSKFilename</span></td><td><p> The path and name of the SPK leap second kernel.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Valid SPK leapsecond kernel</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">../data/time/naif0011.tls</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">PCKFilename</span></td><td><p>The path and name of the PCK planetary constants
+            kernel.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Path to valid PCK planetary constants kernel
+                    (<code class="filename">.tpc</code>)</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><code class="literal">../data/planetary_coeff/pck00010.tpc</code></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SPKFilename</span></td><td><p>The path and name of the SPK orbit ephemeris kernel.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Valid SPK ephemeris kernel (.bsp)</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <code class="literal">../data/planetary_ephem/spk/DE405AllPlanets.bsp</code>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">UseTTForEphemeris</span></td><td><p>Flag to use Terrestrial Time (TT) as input to the
+            orbital ephemeris routines. When set to false, TDB is used.
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>
+                      <span class="guilabel">true,false</span>
+                    </p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">false</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1DA01"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SolarSystem_GUI_1.png" align="middle" height="333"></td></tr></table></div></div><p>The <span class="guilabel">SolarSystem</span> dialog box allows you to
+    configure global properties for solar system modelling. The default
+    configuration is illustrated above. Use <span class="guilabel">Ephemeris
+    Source</span> to choose the ephemeris model for built-in celestial
+    bodies. If you select either <span class="guilabel">DE405</span>,
+    <span class="guilabel">DE421</span>, or <span class="guilabel">DE424</span> the dialog box
+    above illustrates available options.</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>GMAT allows you to provide user-created DE or SPK kernel files but
+      we recommend using the files distributed with GMAT. The files provided
+      with GMAT have been extensively tested for consistency and accuracy with
+      the original data provided by JPL and other models in GMAT. Using
+      inconsistent ephemeris files or user-generated files can result in
+      instability or numerical issues if the files are not generated
+      correctly.</p><p>Changing the ephemeris source for an application is equivalent to
+      making a fundamental change to the model of the solar system. We
+      recommend selecting the <span class="guilabel">EphemerisSource</span> early in
+      the analysis process and using that model consistently. In the event
+      that an ephemeris model change is necessary, we recommend that you
+      change the model in the script file and not via the GUI. We allow you to
+      change <span class="guilabel">EphemerisSource</span> via the GUI for convenience
+      in early design phases when rigorous consistency in modelling is less
+      important.</p><p>Additionally, when using DE as the
+      <span class="guilabel">EphemerisSource</span>, modelling is with respect to
+      planetary system barcyenter. When using SPICE as the
+      <span class="guilabel">EphemerisSource</span>, modelling is with respect to the
+      planet center.</p></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SolarSystem_GUI_2.png" align="middle" height="333"></td></tr></table></div></div><p>If you select <span class="guilabel">SPICE</span> for <span class="guilabel">Ephemeris
+    Source</span>, the <span class="guilabel">SolarSystem</span> dialog box
+    reconfigures to disable the <span class="guilabel">Ephemeris Filename</span>
+    option, indicating that this is no longer used in this mission..</p></div><div class="refsection"><a name="N1DA48"></a><h2>Remarks</h2><p>GMAT uses the ephemeris file selected in the
+    <span class="guilabel">EphemerisSource</span> field for all built-in celestial
+    bodies. For user-defined bodies, the ephemeris model is specified on the
+    <span class="guilabel">CelestialBody</span> object.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>For more information on the DE files provided by JPL see <a class="link" href="http://iau-comm4.jpl.nasa.gov/README" target="_top">here</a>.</p></li><li class="listitem"><p>For general information on SPICE ephemeris files see the <a class="link" href="http://naif.jpl.nasa.gov/naif/toolkit.html" target="_top">JPL NAIF
+        site</a>.</p></li><li class="listitem"><p>For information on the SPK kernel named
+        <code class="literal">DE???AllPlanets.bsp</code> distributed with GMAT, see the
+        <code class="filename">Readme-DE???AllPlanets.txt</code> files located in
+        <code class="literal">\data\planetary_ephem\spk</code> in the GMAT
+        distribution.</p></li></ul></div><p>Note: The <span class="guilabel">SolarSystem</span> and built-in
+    <span class="guilabel">CelestialBody</span> resources require several hundred
+    fields for full configuration. GMAT only saves non-default values for
+    <span class="guilabel">SolarSystem</span> and <span class="guilabel">CelestialBody</span> to
+    the script so that scripts are not populated with hundreds of default
+    settings.</p></div><div class="refsection"><a name="N1DA7C"></a><h2>Examples</h2><div class="informalexample"><p>Use <span class="guilabel">DE421</span> for ephemeris.</p><pre class="programlisting"><code class="code">GMAT SolarSystem.EphemerisSource = 'DE421'
+
+Create Spacecraft aSpacecraft
+Create Propagator aPropagator
+aPropagator.FM = aForceModel
+Create ForceModel aForceModel
+aForceModel.PointMasses = {Luna, Sun}
+
+BeginMissionSequence
+
+Propagate aPropagator(aSpacecraft) {aSpacecraft.ElapsedSecs = 12000.0}</code></pre></div><div class="informalexample"><p>Use <span class="guilabel">SPICE</span> for ephemeris.</p><pre class="programlisting"><code class="code">GMAT SolarSystem.EphemerisSource = 'SPICE'
+
+Create Spacecraft aSpacecraft
+Create Propagator aPropagator
+aPropagator.FM = aForceModel
+Create ForceModel aForceModel
+aForceModel.PointMasses = {Luna, Sun}
+
+BeginMissionSequence
+
+Propagate aPropagator(aSpacecraft) {aSpacecraft.ElapsedSecs = 12000.0}</code>      </pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="SolarPowerSystem.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Spacecraft.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">SolarPowerSystem&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Spacecraft</td></tr></table></div></body></html>

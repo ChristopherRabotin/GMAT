@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -319,30 +319,26 @@ Solver* FactoryManager::CreateSolver(const std::string &ofType,
 
 //------------------------------------------------------------------------------
 //  Subscriber* CreateSubscriber(const std::string &ofType,
-//                               const std::string &withName,
-//                               const std::string &fileName)
+//                               const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type Subscriber, with the name withName.
  *
  * @param <ofType>   type name of the new Subscriber object.
  * @param <withName> name of the new Subscriber object.
- * @param <fileName> file name of Subscriber object, used only if Subscriber
- *                   is ReportFile
  *
  * @return pointer to the newly-created Subscriber object
  */
 //------------------------------------------------------------------------------
 Subscriber* FactoryManager::CreateSubscriber(const std::string &ofType,
-                                             const std::string &withName,
-                                             const std::string &fileName)
+                                             const std::string &withName)
 {
    Factory* f = FindFactory(Gmat::SUBSCRIBER, ofType);
 
    if (f != NULL)
-      return f->CreateSubscriber(ofType, withName, fileName);
+      return f->CreateSubscriber(ofType, withName);
    
-   #ifdef DEBUG_FACTORY_MANAGER
+   #ifdef DEBUG_FACTORY_CREATE
    MessageInterface::ShowMessage("Could not find Factory for %s\n", ofType.c_str());
    #endif
    
@@ -370,7 +366,7 @@ EphemerisFile* FactoryManager::CreateEphemerisFile(const std::string &ofType,
    if (f != NULL)
       return f->CreateEphemerisFile(ofType, withName);
    
-   #ifdef DEBUG_FACTORY_MANAGER
+   #ifdef DEBUG_FACTORY_CREATE
    MessageInterface::ShowMessage("Could not find Factory for %s\n", ofType.c_str());
    #endif
    
@@ -423,26 +419,23 @@ Burn* FactoryManager::CreateBurn(const std::string &ofType,
 
 //------------------------------------------------------------------------------
 //  AtmosphereModel* CreateAtmosphereModel(const std::string &ofType,
-//                                         const std::string &withName,
-//                                         const std::string &forBody)
+//                                         const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type AtmosphereModel, with the name withName.
  *
  * @param <ofType>   type name of the new AtmosphereModel object.
  * @param <withName> name of the new AtmosphereModel object.
- * @param <forBody>  body name of the new AtmosphereModel object.
  *
  * @return pointer to the newly-created AtmosphereModel object
  */
 //------------------------------------------------------------------------------
 AtmosphereModel* FactoryManager::CreateAtmosphereModel(const std::string &ofType,
-                                                       const std::string &withName,
-                                                       const std::string &forBody)
+                                                       const std::string &withName)
 {
    Factory* f = FindFactory(Gmat::ATMOSPHERE, ofType);
    if (f != NULL)
-      return f->CreateAtmosphereModel(ofType, withName, forBody);
+      return f->CreateAtmosphereModel(ofType, withName);
    return NULL;
 }
 
@@ -871,7 +864,8 @@ const StringArray& FactoryManager::GetListOfItems(Gmat::ObjectType byType,
             const std::string &withQualifier)
 {
    entireList.clear();
-   return GetList(byType, withQualifier);
+   GetList(byType, withQualifier);
+   return entireList;
 }
 
 //------------------------------------------------------------------------------
@@ -886,7 +880,7 @@ const StringArray& FactoryManager::GetListOfItems(Gmat::ObjectType byType,
 const StringArray& FactoryManager::GetListOfAllItems()
 {
    entireList.clear();
-
+   
    // Build all creatable object list
    // Now we can do this since data member factoryTypeList was added (LOJ: 2010.08.19)
    // factoryTypeList is filled when factory is registered in the Moderator
@@ -896,25 +890,6 @@ const StringArray& FactoryManager::GetListOfAllItems()
       GetList(*ftype, "");
       ftype++;
    }
-   
-//    // Build all creatable object list
-//    GetList(Gmat::COMMAND);
-//    GetList(Gmat::ATMOSPHERE);
-//    GetList(Gmat::ATTITUDE);
-//    GetList(Gmat::AXIS_SYSTEM);
-//    GetList(Gmat::BURN);
-//    GetList(Gmat::CALCULATED_POINT);
-//    GetList(Gmat::FUNCTION);
-//    GetList(Gmat::HARDWARE);
-//    GetList(Gmat::PARAMETER);
-//    GetList(Gmat::PROPAGATOR);
-//    GetList(Gmat::PHYSICAL_MODEL);
-//    GetList(Gmat::SOLVER);
-//    GetList(Gmat::SPACE_POINT);
-//    GetList(Gmat::STOP_CONDITION);
-//    GetList(Gmat::SUBSCRIBER);
-//    GetList(Gmat::CELESTIAL_BODY);
-//    GetList(Gmat::DATA_FILE);
    
    return entireList;
 }
@@ -981,6 +956,31 @@ const StringArray& FactoryManager::GetListOfUnviewableItems(Gmat::ObjectType byT
    return GetListOfUnviewables(byType);
 }
 
+//------------------------------------------------------------------------------
+// const ObjectTypeArrayMap& GetAllObjectTypeArrayMap()
+//------------------------------------------------------------------------------
+/**
+ * Return a map of all items that can be created.
+ *
+ * @return map of all creatable items with object type as a key
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArrayMap& FactoryManager::GetAllObjectTypeArrayMap()
+{
+   objectTypeArrayMap.clear();
+   
+   std::list<Gmat::ObjectType>::iterator ftype = factoryTypeList.begin();
+   StringArray currList;
+   while (ftype != factoryTypeList.end())
+   {
+      currList = GetList(*ftype, "");
+      // Build creatable object map
+      objectTypeArrayMap.insert(std::make_pair(*ftype, currList));
+      ftype++;
+   }
+   
+   return objectTypeArrayMap;
+}
 
 //------------------------------------------------------------------------------
 // bool DoesObjectTypeMatchSubtype(const std::string &theType,
@@ -1166,6 +1166,8 @@ const StringArray& FactoryManager::GetList(Gmat::ObjectType ofType,
 {
    //entireList.clear();
    std::list<Factory*>::iterator f = factoryList.begin();
+   static StringArray creatables;
+   creatables.clear();
    while (f != factoryList.end())
    {
       if ((*f)->GetFactoryType() == ofType)
@@ -1181,6 +1183,8 @@ const StringArray& FactoryManager::GetList(Gmat::ObjectType ofType,
             {
                if (find(entireList.begin(), entireList.end(), objs[i]) == entireList.end())
                   entireList.push_back(objs[i]);
+               if (find(creatables.begin(), creatables.end(), objs[i]) == creatables.end())
+                  creatables.push_back(objs[i]);
             }
          }
          
@@ -1189,7 +1193,8 @@ const StringArray& FactoryManager::GetList(Gmat::ObjectType ofType,
       }
       ++f;
    }
-   return entireList;
+   
+   return creatables;
 }
 
 //------------------------------------------------------------------------------

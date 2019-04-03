@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -42,6 +42,7 @@
 //#define DEBUG_EPHEMFILE_FINISH
 //#define DEBUG_EPHEMFILE_RESTART
 //#define DEBUG_EPHEMFILE_READBACK
+//#define DEBUG_DISTANCEUNIT
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -164,7 +165,8 @@ bool EphemWriterSTK::Initialize()
    EphemWriterWithInterpolator::Initialize();
    
    // Set maximum segment size
-   maxSegmentSize = 1000;
+   //maxSegmentSize = 1000;
+   maxSegmentSize = 5000;
    
    // Check if interpolator needs to be created
    if (useFixedStepSize || interpolateInitialState || interpolateFinalState)
@@ -323,6 +325,13 @@ void EphemWriterSTK::CreateSTKEphemerisFile()
    try
    {
       stkEphemFile = new STKEphemerisFile;
+      //std::string distanceUnit = stkEphemFile->GetDistanceUnit();
+
+      #ifdef DEBUG_DISTANCEUNIT
+      MessageInterface::ShowMessage
+         ("   Retrieved the following distanceUnit: %s", distanceUnit.c_str());
+      #endif
+
       if (stkEphemFile->OpenForWrite(fullPathFileName, "TimePosVel"))
       {
          stkEphemFile->SetVersion(stkVersion);
@@ -333,6 +342,9 @@ void EphemWriterSTK::CreateSTKEphemerisFile()
          }
          stkEphemFile->SetHeaderForWriting("CentralBody", centralBody);
          stkEphemFile->SetHeaderForWriting("CoordinateSystem", csTypeName);
+         stkEphemFile->SetHeaderForWriting("DistanceUnit", distanceUnit);
+
+         stkEphemFile->SetIncludeEventBoundaries(includeEventBoundaries);
       }
       else
       {
@@ -518,7 +530,10 @@ void EphemWriterSTK::FinishUpWriting()
       {
          if (isEndOfRun)
          {
-            // Close ephemeris file (GMT-4049 fix)
+            #ifdef DEBUG_EPHEMFILE_FINISH
+            MessageInterface::ShowMessage("   It is end of run, so closing ephemeris file\n");
+            #endif
+
             CloseEphemerisFile();
             
             // Check for user defined final epoch (GMT-4108 fix)
@@ -539,65 +554,18 @@ void EphemWriterSTK::FinishUpWriting()
    
    #ifdef DEBUG_EPHEMFILE_FINISH
    MessageInterface::ShowMessage
-      ("EphemWriterSTK::FinishUpWriting() leaving\n");
+      ("EphemWriterSTK::FinishUpWriting() leaving, isFinalized=%d\n", isFinalized);
    #endif
 }
 
 
 //------------------------------------------------------------------------------
-// void HandleWriteOrbit()
+// void CloseEphemerisFile(bool done = true, writeMetaData = true)
 //------------------------------------------------------------------------------
-/**
- * Writes orbit data at current epoch or requested epoch.
- */
-//------------------------------------------------------------------------------
-void EphemWriterSTK::HandleWriteOrbit()
+void EphemWriterSTK::CloseEphemerisFile(bool done, bool writeMetaData)
 {
-   #ifdef DEBUG_EPHEMFILE_WRITE
-   MessageInterface::ShowMessage
-      ("EphemWriterSTK::HandleWriteOrbit() entered, useFixedStepSize=%d, "
-       "interpolateInitialState=%d, interpolateFinalState=%d\n", useFixedStepSize,
-       interpolateInitialState, interpolateFinalState);
-   DebugWriteTime("   nextReqEpochInSecs = ", nextReqEpochInSecs);
-   #endif
-   
-   if (useFixedStepSize)
-   {
-      WriteOrbitAt(nextReqEpochInSecs, currState);
-   }
-   else if (interpolateInitialState)
-   {
-      WriteOrbitAt(nextReqEpochInSecs, currState);
-      if (nextReqEpochInSecs == (initialEpochA1Mjd * GmatTimeConstants::SECS_PER_DAY))
-      {
-         #ifdef DEBUG_EPHEMFILE_WRITE
-         MessageInterface::ShowMessage
-            ("===> State at initial epoch has been written, so turning off "
-             "interpolateInitialState flag\n");
-         #endif
-         interpolateInitialState = false;
-         // Reset to write integrator steps
-         initialEpochA1Mjd = -999.999;
-         nextOutEpochInSecs = -999.999;
-      }
-   }
-   else if (interpolateFinalState)
-   {
-      if (currEpochInDays < finalEpochA1Mjd)
-         WriteOrbit(currEpochInSecs, currState);
-      else
-         WriteOrbitAt(nextReqEpochInSecs, currState);
-   }
-   else
-   {
-      WriteOrbit(currEpochInSecs, currState);
-   }
-   
-   #ifdef DEBUG_EPHEMFILE_WRITE
-   MessageInterface::ShowMessage("EphemWriterSTK::HandleWriteOrbit() leaving\n");
-   #endif
+   FinalizeSTKEphemeris();
 }
-
 
 //------------------------------------------------------------------------------
 // void HandleSTKOrbitData(bool writeData, bool timeToWrite)
@@ -842,4 +810,12 @@ void EphemWriterSTK::FinalizeSTKEphemeris()
    #endif
 }
 
+void EphemWriterSTK::SetDistanceUnit(const std::string &dU)
+{
+   distanceUnit = dU;
+}
 
+void EphemWriterSTK::SetIncludeEventBoundaries(bool iEB)
+{
+   includeEventBoundaries = iEB;
+}

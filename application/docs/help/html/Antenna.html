@@ -1,0 +1,43 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Antenna</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="AcceptFilter.html" title="AcceptFilter"><link rel="next" href="Array.html" title="Array"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Antenna</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="AcceptFilter.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Array.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Antenna"></a><div class="titlepage"></div><a name="N1548C" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Antenna</span></h2><p>Antenna &mdash; Transmits or receives an RF signal.</p></div><div class="refsection"><a name="N1549D"></a><h2>Description</h2><p>A number of GMAT resources, <span class="guilabel">GroundStation</span>,
+    <span class="guilabel">Transponder</span>, <span class="guilabel">Receiver</span>, and
+    <span class="guilabel">Transmitter</span>, use an <span class="guilabel">Antenna</span>
+    resource to transmit and/or receive RF signals.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="GroundStation.html" title="GroundStation"><span class="refentrytitle">GroundStation</span></a>, <a class="xref" href="Transponder.html" title="Transponder"><span class="refentrytitle">Transponder</span></a>, <a class="xref" href="Receiver.html" title="Receiver"><span class="refentrytitle">Receiver</span></a>, <a class="xref" href="Transmitter.html" title="Transmitter"><span class="refentrytitle">Transmitter</span></a></p></div><div class="refsection"><a name="N154C1"></a><h2>Fields</h2><p>There are no fields for the <span class="guilabel">Antenna</span>
+    resource.</p></div><div class="refsection"><a name="N154C9"></a><h2>Examples</h2><div class="informalexample"><p>This example shows how the <span class="guilabel">Antenna</span> resource
+      is used.</p><pre class="programlisting">Create Antenna SatTranponderAntenna DSNReceiverAntenna DSNTransmitterAntenna;
+
+Create Transponder SatTransponder;
+SatTransponder.PrimaryAntenna   = SatTranponderAntenna
+
+Create Spacecraft Sat
+Sat.AddHardware                 = {SatTransponder, SatTranponderAntenna};
+
+Create Transmitter DSNTransmitter
+DSNTransmitter.PrimaryAntenna   = DSNTransmitterAntenna
+
+Create Receiver DSNReceiver
+DSNReceiver.PrimaryAntenna      = DSNReceiverAntenna;
+
+Create GroundStation DSN;
+DSN.AddHardware                 = ...
+ {DSNTransmitter, DSNReceiver, DSNTransmitterAntenna, DSNReceiverAntenna};
+BeginMissionSequence;</pre><p>Since the <span class="guilabel">Antenna</span> resource currently has no
+      fields and thus has no function, for this GMAT release, we only need to
+      create one <span class="guilabel">Antenna</span> resource that can be used
+      multiple times. Thus, the example above simplifies as shown
+      below.</p><pre class="programlisting">Create Antenna GenericAntenna;
+
+Create Transponder SatTransponder;
+SatTransponder.PrimaryAntenna     = GenericAntenna
+
+Create Spacecraft Sat
+Sat.AddHardware                   = {SatTransponder, GenericAntenna};
+
+Create Transmitter DSNTransmitter
+DSNTransmitter.PrimaryAntenna     = GenericAntenna
+Create Receiver DSNReceiver
+DSNReceiver.PrimaryAntenna        = GenericAntenna;
+
+Create GroundStation DSN;
+DSN.AddHardware                   = ...
+                       {DSNTransmitter, DSNReceiver, GenericAntenna};
+BeginMissionSequence;</pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="AcceptFilter.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Array.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">AcceptFilter&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Array</td></tr></table></div></body></html>

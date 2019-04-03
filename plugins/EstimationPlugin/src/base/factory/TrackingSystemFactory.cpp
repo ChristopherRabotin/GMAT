@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -154,6 +154,18 @@ TrackingSystemFactory::TrackingSystemFactory(const TrackingSystemFactory & tsf):
    }
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * @see CreateTrackingSystem()
+ */
+//------------------------------------------------------------------------------
+GmatBase* TrackingSystemFactory::CreateObject(
+         const std::string &ofType, const std::string &withName)
+{
+   return CreateTrackingSystem(ofType, withName);
+}
 
 //------------------------------------------------------------------------------
 // TrackingSystem* CreateTrackingSystem(const std::string &ofType,

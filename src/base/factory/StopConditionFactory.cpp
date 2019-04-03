@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,6 +38,25 @@
 //---------------------------------
 //  public methods
 //---------------------------------
+
+//------------------------------------------------------------------------------
+//  GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates and returns an object of the requested StopCondition class
+ *
+ * @param <ofType> the StopCondition object to create and return.
+ * @param <withName> the name to give the newly-created StopCondition object.
+ *
+ * @note As of 2003/10/14, we are ignoring the withName parameter.  Use of this
+ *       parameter may be added later.
+ */
+//------------------------------------------------------------------------------
+GmatBase* StopConditionFactory::CreateObject(const std::string &ofType,
+                                             const std::string &withName)
+{
+   return CreateStopCondition(ofType, withName);
+}
 
 //------------------------------------------------------------------------------
 //  CreateStopCondition(const std::string &ofType, const std::string &withName)

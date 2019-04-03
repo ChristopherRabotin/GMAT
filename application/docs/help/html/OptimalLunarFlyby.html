@@ -1,0 +1,72 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter&nbsp;9.&nbsp;Optimal Lunar Flyby using Multiple Shooting</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Tutorials.html" title="Tutorials"><link rel="prev" href="ch08s05.html" title="Run the Mission with first and second Target Sequences"><link rel="next" href="ch09s02.html" title="Configure Coordinate Systems, Spacecraft, Optimizer, Propagators, Maneuvers, Variables, and Graphics"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Chapter&nbsp;9.&nbsp;Optimal Lunar Flyby using Multiple Shooting</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ch08s05.html">Prev</a>&nbsp;</td><th align="center" width="60%">Tutorials</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ch09s02.html">Next</a></td></tr></table><hr></div><div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a name="OptimalLunarFlyby"></a>Chapter&nbsp;9.&nbsp;Optimal Lunar Flyby using Multiple Shooting</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="section"><a href="OptimalLunarFlyby.html#N129BF">Objective and Overview</a></span></dt><dt><span class="section"><a href="ch09s02.html">Configure Coordinate Systems, Spacecraft, Optimizer, Propagators,
+    Maneuvers, Variables, and Graphics</a></span></dt><dd><dl><dt><span class="section"><a href="ch09s02.html#N12A44">Create a Moon-centered Coordinate System</a></span></dt><dt><span class="section"><a href="ch09s02.html#N12A53">Create the Spacecraft</a></span></dt><dt><span class="section"><a href="ch09s02.html#N12A94">Create the Propagators</a></span></dt><dt><span class="section"><a href="ch09s02.html#N12AAD">Create the Maneuvers</a></span></dt><dt><span class="section"><a href="ch09s02.html#N12AC2">Create the User Variables</a></span></dt><dt><span class="section"><a href="ch09s02.html#N12AD1">Create the Optimizer</a></span></dt><dt><span class="section"><a href="ch09s02.html#N12AE0">Create the 3-D Graphics</a></span></dt><dt><span class="section"><a href="ch09s02.html#N12AFE">Create XPPlots/Reports</a></span></dt></dl></dd><dt><span class="section"><a href="ch09s03.html">Configure the Mission Sequence</a></span></dt><dd><dl><dt><span class="section"><a href="ch09s03.html#N12B25">Overview of the Mission Sequence</a></span></dt><dt><span class="section"><a href="ch09s03.html#N12B2E">Define Initial Guesses</a></span></dt><dt><span class="section"><a href="ch09s03.html#N12B4E">Initialize Variables</a></span></dt><dt><span class="section"><a href="ch09s03.html#N12B78">Vary and Set Spacecraft Epochs</a></span></dt><dt><span class="section"><a href="ch09s03.html#N12B98">Vary Control Point States</a></span></dt><dt><span class="section"><a href="ch09s03.html#N12BC2">Apply Constraints at Control Points</a></span></dt><dt><span class="section"><a href="ch09s03.html#N12BCE">Propagate the Segments</a></span></dt><dt><span class="section"><a href="ch09s03.html#N12C04">Compute Some Quantities and Apply Patch Constraints</a></span></dt><dt><span class="section"><a href="ch09s03.html#N12C13">Apply Patch Point Constraints</a></span></dt><dt><span class="section"><a href="ch09s03.html#N12C1F">Apply Constraints on Mission Orbit</a></span></dt><dt><span class="section"><a href="ch09s03.html#N12C2B">Apply Cost Function</a></span></dt></dl></dd><dt><span class="section"><a href="ch09s04.html">Design the Trajectory</a></span></dt><dd><dl><dt><span class="section"><a href="ch09s04.html#N12C3A">Overview</a></span></dt><dt><span class="section"><a href="ch09s04.html#N12C50">Step 1: Verify Your Configuration</a></span></dt><dt><span class="section"><a href="ch09s04.html#N12C96">Step 2: Find a Smooth Trajectory</a></span></dt><dt><span class="section"><a href="ch09s04.html#N12D1A">Step 5: Apply a New Constraint</a></span></dt></dl></dd></dl></div><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Audience</span></p></td><td><p>Advanced</p></td></tr><tr><td><p><span class="term">Length</span></p></td><td><p>90 minutes</p></td></tr><tr><td><p><span class="term">Prerequisites</span></p></td><td><p>Complete Simulating an Orbit, Simple Orbit Transfer, Mars
+        B-Plane Targeting tutorial and take GMAT Fundamentals training course
+        or watch videos</p></td></tr><tr><td><p><span class="term">Script File</span></p></td><td><p><code class="filename">Tut_MultipleShootingTutorial_Step1.script,
+        Tut_MultipleShootingTutorial_Step2.script,...
+        Tut_MultipleShootingTutorial_Step5.script</code></p></td></tr></tbody></table></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N129BF"></a>Objective and Overview</h2></div></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>For highly elliptic earth orbits (HEO), it is often cheaper to use
+      the Moon&rsquo;s gravity to raise periapsis or to perform plane changes, than
+      it is to use the spacecraft&rsquo;s propulsion resources. However, designing
+      lunar flyby&rsquo;s to achieve multiple specific mission constraints is
+      non-trivial and requires modern optimization techniques to minimize fuel
+      usage while simultaneously satisfying trajectory constraints. In this
+      tutorial, you will learn how to design flyby trajectories by writing a
+      GMAT script to perform multiple shooting optimization. As the analyst,
+      your goal is to design a lunar flyby that provides a mission orbit
+      periapsis of TBD km and changes the inclination of the mission orbit to
+      TBD degrees. (Note: There are other mission constraints that will be
+      discussed in more detail below.)</p><p>To efficiently solve the problem, we will employ the Multiple
+      Shooting Method to break down the sensitive boundary value problem into
+      smaller, less sensitive problems. We will employ three trajectory
+      segments. The first segment will begin at Transfer Orbit Insertion (TOI)
+      and will propagate forward; the second segment is centered at lunar
+      periapsis and propagates both forward and backwards. The third segment
+      is centered on Mission Orbit Insertion (MOI) and propagates forwards and
+      backwards. See figures 1 and 2 that illustrate the final orbit solution
+      and the &ldquo;Control Points&rdquo; and &ldquo;Patch Points&rdquo; used to solve the
+      problem.</p></div><p>To begin this tutorial we start with a several views of the solution
+    to provide a physical understanding of the problem. In Fig. 1, an
+    illustration of a lunar flyby is shown with the trajectory displayed in
+    red and the Moon&rsquo;s orbit displayed in yellow. The Earth is at the center
+    of the frame. We require that the following constraints are satisfied at
+    TOI:</p><div class="orderedlist"><ol class="orderedlist compact" type="1"><li class="listitem"><p>The spacecraft is at orbit perigee,</p></li><li class="listitem"><p>The spacecraft is at an altitude of 285 km.</p></li><li class="listitem"><p>The inclination of the transfer orbit is 28.5 degrees.</p></li></ol></div><p>At lunar flyby, we only require that the flyby altitude is greater
+    than 100 km. This constraint is satisfied implicitly so we will not
+    explicitly script this constraint. An insertion maneuver is performed at
+    earth perigee after the lunar fly to insert into the mission orbit. The
+    following constraints must be satisfied after MOI.</p><div class="orderedlist"><ol class="orderedlist compact" type="1"><li class="listitem"><p>The mission orbit perigee is 15 Earth radii.</p></li><li class="listitem"><p>The mission orbit apogee is 60 Earth radii.</p></li><li class="listitem"><p>The mission orbit inclination is 10 degrees.</p></li></ol></div><p>Note: (Phasing with the moon is important for these orbits but
+    design considerations for lunar phasing are beyond the scope of this
+    tutorial)</p><div class="figure"><a name="Tut_OptimalFlyby_J2000View"></a><p class="title"><b>Figure&nbsp;9.1.&nbsp;View of Lunar Flyby from Normal to Earth Equator</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_OptimalFlyby_J2000View.png" align="middle" height="536" alt="View of Lunar Flyby from Normal to Earth Equator"></td></tr></table></div></div></div></div><br class="figure-break"><div class="figure"><a name="Tut_OptimalFlyby_J2000View2"></a><p class="title"><b>Figure&nbsp;9.2.&nbsp;View of Lunar Flyby Geometry</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_OptimalFlyby_J2000View2.png" align="middle" height="423" alt="View of Lunar Flyby Geometry"></td></tr></table></div></div></div></div><br class="figure-break"><p>Figure 3 illustrates the mission timeline and how control points and
+    patch points are defined. Control points are drawn using a solid blue
+    circle and are defined as locations where the state of the spacecraft is
+    treated as an optimization variable. Patch points are drawn with an empty
+    blue circle and are defined as locations where position and/or velocity
+    continuity is enforced. For this tutorial, we place control points at TOI,
+    the lunar flyby and MOI. At each patch point, the six Cartesian state
+    elements, and the epoch are varied for a total of 18 optimization
+    variables. At the MOI patch point, there is an additional optimization
+    variable for the delta V to</p><div class="figure"><a name="Tut_OptimalFlyby_Patchpoints"></a><p class="title"><b>Figure&nbsp;9.3.&nbsp;Definition of Control and Patch Points</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_OptimalFlyby_PatchPoints.png" align="middle" height="191" alt="Definition of Control and Patch Points"></td></tr></table></div></div></div></div><br class="figure-break"><p>Notice that while there are only three patch points, we have 5
+    segments (which will result in 5 spacecraft). The state at the lunar
+    flyby, which is defined as a control point, is propagated backwards to a
+    patch point and forwards to a patch point. The same occurs for the MOI
+    control point. To design this trajectory, you will need to create the
+    following GMAT resources.</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Create a Moon-centered coordinate system.</p></li><li class="listitem"><p>Create 5 spacecraft required for modeling segments.</p></li><li class="listitem"><p>Create an Earth-centered and a Moon-centered propagator.</p></li><li class="listitem"><p>Create an impulsive maneuver.</p></li><li class="listitem"><p>Create many user variables for use in the script.</p></li><li class="listitem"><p>Create A VF13ad optimizer.</p></li><li class="listitem"><p>Create plots for tracking the optimization process.</p></li></ol></div><p>After creating the resources using script snippets you will
+    construct the optimization sequence using GMAT script. Pseudo-code for the
+    optimization sequence is shown below.</p><div class="informalexample"><pre class="programlisting"><code class="code">Define optimization initial guesses
+Initialize variables
+Optimize
+      Loop initializations
+      Vary control point epochs
+      Set epochs on spacecraft
+      Vary control point state values
+      Configure/initialize spacecraft 
+      Apply constraints on initial control points (i.e before propagation)
+      Propagate spacecraft
+      Apply patch point constraints
+      Apply constraints on mission orbit
+      Apply cost function
+EndOptimize
+</code></pre></div><p>After constructing the basic optimization sequence we will perform
+    the following steps:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Run the sequence and analyze the initial guess.</p></li><li class="listitem"><p>Run the optimizer satisfying only the patch point
+        constraints.</p></li><li class="listitem"><p>Turn on the mission orbit constraints and find a feasible
+        solution.</p></li><li class="listitem"><p>Use the feasible solution as the initial guess and find an
+        optimal solution.</p></li><li class="listitem"><p>Apply an altitude constraint at lunar orbit periapsis</p></li></ol></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ch08s05.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Tutorials.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ch09s02.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Run the Mission with first and second Target Sequences&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Configure Coordinate Systems, Spacecraft, Optimizer, Propagators,
+    Maneuvers, Variables, and Graphics</td></tr></table></div></body></html>

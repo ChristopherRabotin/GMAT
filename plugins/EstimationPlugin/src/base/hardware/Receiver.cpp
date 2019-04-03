@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -41,15 +41,20 @@ Receiver::PARAMETER_TEXT[ReceiverParamCount - RFHardwareParamCount] =
    "FrequencyModel",
    "CenterFrequency",
    "Bandwidth",
+   "Id",
+   "ErrorModels",
 };
 
 /// Integer IDs associated with the Receiver properties
 const Gmat::ParameterType
 Receiver::PARAMETER_TYPE[ReceiverParamCount - RFHardwareParamCount] =
 {
-   Gmat::STRING_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
+   Gmat::STRING_TYPE,         // FREQUENCY_MODEL
+   Gmat::REAL_TYPE,           // CENTER_FREQUENCY
+   Gmat::REAL_TYPE,           // BANDWIDTH
+   //Gmat::INTEGER_TYPE,        // RECEIVER_ID
+   Gmat::STRING_TYPE,         // RECEIVER_ID
+   Gmat::OBJECTARRAY_TYPE,    // ERROR_MODELS
 };
 
 //------------------------------------------------------------------------------
@@ -57,7 +62,7 @@ Receiver::PARAMETER_TYPE[ReceiverParamCount - RFHardwareParamCount] =
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// Receiver(const std::string &name)
+// Receiver(const std::string &ofType, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Default constructor
@@ -66,12 +71,16 @@ Receiver::PARAMETER_TYPE[ReceiverParamCount - RFHardwareParamCount] =
  */
 //------------------------------------------------------------------------------
 
-Receiver::Receiver(const std::string &name):
-   RFHardware      ("Receiver", name),
+Receiver::Receiver(const std::string &ofType, const std::string &name) :
+   RFHardware      (ofType, name),
    frequencyModel  ("constant"),
    centerFrequency (0.0),
-   bandwidth       (1.0e18)
+   bandwidth       (1.0e18),
+   //receiverId      (-1)
+   receiverId      ("0")
 {
+   //MessageInterface::ShowMessage("Receiver default constructor <%p,%s>\n", this, GetName().c_str());
+
    objectTypeNames.push_back("Receiver");
    parameterCount = ReceiverParamCount;
 
@@ -88,8 +97,17 @@ Receiver::Receiver(const std::string &name):
 //------------------------------------------------------------------------------
 Receiver::~Receiver()
 {
+   //MessageInterface::ShowMessage("Receiver default destructor <%p,%s>\n", this, GetName().c_str());
    if (signal1 != NULL)
       delete signal1;
+   
+   for (UnsignedInt i = 0; i < errorModels.size(); ++i)
+   {
+      if (errorModels[i] != NULL)
+         delete errorModels[i];
+   }
+   errorModels.clear();
+   errorModelNames.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -106,8 +124,19 @@ Receiver::Receiver(const Receiver& recei):
    RFHardware      (recei),
    frequencyModel  (recei.frequencyModel),
    centerFrequency (recei.centerFrequency),
-   bandwidth       (recei.bandwidth)
+   bandwidth       (recei.bandwidth),
+   receiverId      (recei.receiverId),
+   errorModelNames (recei.errorModelNames)
 {
+   //MessageInterface::ShowMessage("Receiver copy constructor <%p,%s>: copy from <%p,%s>\n", this, GetName().c_str(), &recei, recei.GetName().c_str());
+
+   for (UnsignedInt i = 0; i < recei.errorModels.size(); ++i)
+   {
+      if (recei.errorModels[i])
+         errorModels.push_back(recei.errorModels[i]->Clone());
+      else
+         errorModels.push_back(NULL);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -123,13 +152,33 @@ Receiver::Receiver(const Receiver& recei):
 //------------------------------------------------------------------------------
 Receiver& Receiver::operator=(const Receiver& recei)
 {
+   //MessageInterface::ShowMessage("Receiver::opertor= <%p,%s>: copy from <%p,%s>\n", this, GetName().c_str(), &recei, recei.GetName().c_str());
+
    if (this != &recei)
    {
+      RFHardware::operator=(recei);
+
       frequencyModel  = recei.frequencyModel;
       centerFrequency = recei.centerFrequency;
       bandwidth       = recei.bandwidth;
-      
-      RFHardware::operator=(recei);
+      receiverId      = recei.receiverId;
+      errorModelNames = recei.errorModelNames;
+
+      for (UnsignedInt i = 0; i < errorModels.size(); ++i)
+      {
+         if (errorModels[i])
+            delete errorModels[i];
+      }
+      errorModels.clear();
+
+      for (UnsignedInt i = 0; i < recei.errorModels.size(); ++i)
+      {
+         if (recei.errorModels[i])
+            errorModels.push_back(recei.errorModels[i]->Clone());
+         else
+            errorModels.push_back(NULL);
+      }
+
    }
 
    return *this;
@@ -185,7 +234,6 @@ Integer Receiver::GetParameterID(const std::string & str) const
       {
          if (IsParameterReadOnly(i))
             throw HardwareException("Error: '" + str + "' parameter was not defined in GMAT Receiver's syntax.\n");
-
          return i;
       }
    }
@@ -269,6 +317,7 @@ std::string Receiver::GetParameterUnit(const Integer id) const
 {
    switch(id)
    {
+      case RECEIVER_ID:
       case FREQUENCY_MODEL:
          return "";                              // It has no unit
 
@@ -455,6 +504,8 @@ std::string Receiver::GetStringParameter(const Integer id) const
    {
       case FREQUENCY_MODEL:
          return frequencyModel;
+      case RECEIVER_ID:
+         return receiverId;
       default:
          break;
    }
@@ -475,6 +526,7 @@ std::string Receiver::GetStringParameter(const Integer id) const
  * @return true if the setting success
  */
 //------------------------------------------------------------------------------
+#include "StringUtil.hpp"
 bool Receiver::SetStringParameter(const Integer id,
                                   const std::string &value)
 {
@@ -484,7 +536,32 @@ bool Receiver::SetStringParameter(const Integer id,
 //       frequencyModel = value;
          MessageInterface::ShowMessage("Warning: the script to assign '%s' to '%s.%s' parameter was skipped. In the current GMAT version, this parameter is not used.\n", value.c_str(), GetName().c_str(), GetParameterText(id).c_str());
          return true;
+      case RECEIVER_ID:
+      {
+         // Verify input value for ID:
+         Integer iVal;
+         bool pass = GmatStringUtil::ToInteger(value, iVal);
+         if (pass && (iVal >= 0))
+         {
+            receiverId = value;
+            return true;
+         }
+         else
+            return false;
+      }
+      case ERROR_MODELS:
+      {
+         if (!GmatStringUtil::IsValidIdentity(value))
+            throw HardwareException("Error: '" + value + "' set to " + GetName() + ".ErrorModels parameter is an invalid name.\n");
 
+         // Only add error model if it is not in the list already
+         if (find(errorModelNames.begin(), errorModelNames.end(), value) ==
+            errorModelNames.end())
+         {
+            errorModelNames.push_back(value);
+         }
+         return true;
+      }
       default:
          break;
    }
@@ -522,16 +599,292 @@ std::string Receiver::GetStringParameter(const std::string &label) const
  * @return true if the setting success.
  */
 //------------------------------------------------------------------------------
-bool Receiver::SetStringParameter(const std::string &label,
-                                                        const std::string &value)
+bool Receiver::SetStringParameter(const std::string &label, const std::string &value)
 {
    return SetStringParameter(GetParameterID(label), value);
 }
 
 
+std::string Receiver::GetStringParameter(const Integer id, const Integer index) const
+{
+   if (id == ERROR_MODELS)
+   {
+      if ((0 <= index) && (index < errorModelNames.size()))
+         return errorModelNames[index];
+      else
+         throw HardwareException("Error: index is out of bound when getting " + GetName() + ".ErrorModels parameter.\n");
+   }
+
+   return RFHardware::GetStringParameter(id, index);
+}
+
+
+bool Receiver::SetStringParameter(const Integer id, const std::string &value, const Integer index)
+{
+   if (id == ERROR_MODELS)
+   {
+      //if ((0 <= index) && (index < errorModelNames.size()))
+      //{
+      //   errorModelNames[index] = value;
+      //   return true;
+      //}
+      //else if (index == errorModelNames.size())
+      //{
+      //   errorModelNames.push_back(value);
+      //   return true;
+      //}
+      //else
+      //{
+      //   throw HardwareException("Error: index is out of bound when getting " + GetName() + ".ErrorModels parameter.\n");
+      //   return false;
+      //}
+
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw HardwareException("Error: '" + value + "' set to " + GetName() + ".ErrorModels parameter is an invalid name.\n");
+
+      // Only add the error model if it is not in the list already
+      if (find(errorModelNames.begin(), errorModelNames.end(), value) ==
+         errorModelNames.end())
+      {
+         errorModelNames.push_back(value);
+      }
+      return true;
+   }
+
+   return RFHardware::SetStringParameter(id, value, index);
+}
+
+
+std::string Receiver::GetStringParameter(const std::string &label, const Integer index) const
+{
+   return GetStringParameter(GetParameterID(label), index);
+}
+
+
+bool Receiver::SetStringParameter(const std::string &label, const std::string &value, const Integer index)
+{
+   return SetStringParameter(GetParameterID(label), value, index);
+}
+
+
+//Integer Receiver::GetIntegerParameter(const Integer id) const
+//{
+//   if (id == RECEIVER_ID)
+//      return receiverId;
+//
+//   return RFHardware::GetIntegerParameter(id);
+//}
+//
+//Integer Receiver::SetIntegerParameter(const Integer id, const Integer value)
+//{
+//   if (id == RECEIVER_ID)
+//   {
+//      receiverId = value;
+//      return receiverId;
+//   }
+//
+//   return RFHardware::SetIntegerParameter(id, value);
+//}
+//
+//
+//Integer Receiver::GetIntegerParameter(const std::string &label) const
+//{
+//   return GetIntegerParameter(GetParameterID(label));
+//}
+//
+//
+//Integer Receiver::SetIntegerParameter(const std::string &label, const Integer value)
+//{
+//   return SetIntegerParameter(GetParameterID(label), value);
+//}
+
+
+GmatBase* Receiver::GetRefObject(const Gmat::ObjectType type, const std::string &name)
+{
+   if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::ERROR_MODEL))
+   {
+      for (UnsignedInt i = 0; i < errorModels.size(); ++i)
+      {
+         if (errorModels[i]->GetName() == name)
+            return errorModels[i];
+      }
+   }
+
+   return  RFHardware::GetRefObject(type, name);
+}
+
+
+bool Receiver::SetRefObject(GmatBase *obj, const Gmat::ObjectType type, const std::string &name)
+{
+   if (obj == NULL)
+      return false;
+
+   if (type == Gmat::ERROR_MODEL)
+   {
+      if (obj->GetType() == Gmat::ERROR_MODEL)
+      {
+         for (UnsignedInt i = 0; i < errorModels.size(); ++i)
+         {
+            // Don't add if it's already there
+            if (errorModels[i]->GetName() == obj->GetName())
+            {
+               try
+               {
+                  throw GmatBaseException("Error: ErrorModel object " +
+                     errorModels[i]->GetName() + " was added multiple times to " + GetName() + ".ErrorModels parameter.\n");
+               }
+               catch (GmatBaseException &ex)
+               {
+                  ex.SetFatal(true);
+                  throw ex;
+               }
+            }
+
+            // Don't add if it has type (trip and strand) the same as the one in the list
+            if (errorModels[i]->GetStringParameter("Type") == obj->GetStringParameter("Type"))
+            {
+               try
+               {
+                  throw GmatBaseException("Error: ErrorModel objects " +
+                     errorModels[i]->GetName() + " and " + obj->GetName() + " set to " + GetName() + ".ErrorModels parameter have the same measurement type.\n");
+               }
+               catch (GmatBaseException &ex)
+               {
+                  ex.SetFatal(true);
+                  throw ex;
+               }
+            }
+         }
+
+         GmatBase* refObj = obj->Clone();       // a error model needs to be cloned
+         refObj->SetFullName(GetName() + "." + refObj->GetName()); // It needs to have full name. ex: "CAN.ErrorModel1"  
+         errorModels.push_back(refObj);
+
+         return true;
+      }
+      else
+         return false;      // <-- throw here; It was supposed to be error model, but isn't.
+   }
+
+   return RFHardware::SetRefObject(obj, type, name);
+}
+
+
+ObjectArray& Receiver::GetRefObjectArray(const Gmat::ObjectType type)
+{
+   if (type == Gmat::ERROR_MODEL)
+   {
+      return errorModels;
+   }
+
+   return RFHardware::GetRefObjectArray(type);
+}
+
+
+ObjectArray& Receiver::GetRefObjectArray(const std::string& typeString)
+{
+   if (typeString == "ErrorModel")
+      return errorModels;
+
+   RFHardware::GetRefObjectArray(typeString);
+}
+
+
+const StringArray& Receiver::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   RFHardware::GetRefObjectNameArray(type);
+
+   if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::ERROR_MODEL))
+   {
+      for (UnsignedInt i = 0; i < errorModelNames.size(); ++i)
+         refObjectNames.push_back(errorModelNames[i]);
+   }
+
+   return refObjectNames;
+}
+
+
+//------------------------------------------------------------------------------
+//  const StringArray&   GetStringArrayParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the StringArray parameter value, given the input
+* parameter ID.
+*
+* @param <id> ID for the requested parameter.
+*
+* @return  StringArray value of the requested parameter.
+*
+*/
+//------------------------------------------------------------------------------
+const StringArray& Receiver::GetStringArrayParameter(const Integer id) const
+{
+   if (id == ERROR_MODELS)
+      return errorModelNames;
+
+   return RFHardware::GetStringArrayParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  const StringArray&   GetStringArrayParameter((const std::string &label) 
+//                       const
+//------------------------------------------------------------------------------
+/**
+* This method returns the StringArray parameter value, given the input
+* parameter label.
+*
+* @param <label> label for the requested parameter.
+*
+* @return  StringArray value of the requested parameter.
+*
+*/
+//------------------------------------------------------------------------------
+const StringArray& Receiver::GetStringArrayParameter(const std::string &label) const
+{
+   return GetStringArrayParameter(GetParameterID(label));
+}
+
+
+bool Receiver::RenameRefObject(const Gmat::ObjectType type, const std::string &oldName,
+                               const std::string &newName)
+{
+   if ((type == Gmat::UNKNOWN_OBJECT)||(type == Gmat::ERROR_MODEL))
+   {
+      for (UnsignedInt i = 0; i < errorModelNames.size(); ++i)
+      {
+         if (errorModelNames[i] == oldName)
+            errorModelNames[i] = newName;
+      }
+      return true;
+   }
+
+   return RFHardware::RenameRefObject(type, oldName, newName);
+}
+
+
+const ObjectTypeArray& Receiver::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+
+   RFHardware::GetRefObjectTypeArray();
+   refObjectTypes.push_back(Gmat::ERROR_MODEL);
+
+   return refObjectTypes;
+}
+
+
 bool Receiver::Initialize()
 {
-   return RFHardware::Initialize();
+   if (!RFHardware::Initialize())
+      return false;
+
+   for (UnsignedInt i = 0; i < errorModels.size(); ++i)
+   {
+      if (!errorModels[i]->Initialize())
+         return false;
+   }
+
+   return true;
 }
 
 //------------------------------------------------------------------------------

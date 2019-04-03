@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,6 +35,7 @@
 //------------------------------------------------------------------------------
 
 #include "SetSeed.hpp"
+#include "FunctionException.hpp"
 #include "RealUtilities.hpp"       // for SetSeed()
 #include "MessageInterface.hpp"
 
@@ -307,6 +308,11 @@ bool SetSeed::Execute(ObjectInitializer *objInit, bool reinitialize)
           "not found in the objectStore or wrong type to operate on\n");
       #endif
       throw FunctionException(msg + " in \"" + callDescription + "\"");
+   }
+   if (input1_seedValue == NULL) // if inputNames.size() == 0
+   {
+         throw FunctionException
+            ("SetSeed::Execute()  input1_seedValues remains unset\n");
    }
    
    // Set objects to passed in input values

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -31,8 +31,8 @@
 #include <stack>
 
 #include "FunctionManager.hpp"
-#include "MessageInterface.hpp"
 #include "FunctionException.hpp"
+#include "GmatCommand.hpp"
 #include "StringUtil.hpp"
 #include "Array.hpp"
 #include "ElementWrapper.hpp"
@@ -40,6 +40,8 @@
 #include "RealUtilities.hpp"
 #include "Variable.hpp"
 #include "StringVar.hpp"
+#include "UserDefinedFunction.hpp"
+#include "MessageInterface.hpp"
 
 //#define DO_NOT_EXECUTE_NESTED_GMAT_FUNCTIONS
 
@@ -346,23 +348,39 @@ void FunctionManager::SetFunction(Function *theFunction)
 {
    #ifdef DEBUG_FM_SET
    MessageInterface::ShowMessage
-      ("FunctionManager::SetFunction() functionName='%s', theFunction=<%p>\n",
-       functionName.c_str(), theFunction);
+      ("FunctionManager::SetFunction() functionName='%s', theFunction=<%p><%s>\n",
+       functionName.c_str(), theFunction,
+       theFunction ? theFunction->GetTypeName().c_str() : "NULL");
    #endif
-   currentFunction = theFunction;
+   
+   if (theFunction == NULL)
+      return;
+   
+   // This FunctionManger manages ObjectManagedFunction so check it
+   if (!theFunction->IsOfType("ObjectManagedFunction"))
+      return;
+   
+   currentFunction = (ObjectManagedFunction*)theFunction;
    currentFunction->SetStringParameter("FunctionName", functionName);
-   // Now BuiltinGmatFunction should be also allowed (LOJ: 2016.05.04)
-   if (currentFunction->IsOfType("GmatFunction") ||
-       currentFunction->IsOfType("BuiltinGmatFunction"))
+   
+   // // Now BuiltinGmatFunction should be also allowed (LOJ: 2016.05.04)
+   // if (currentFunction->IsOfType("GmatFunction") ||
+   //     currentFunction->IsOfType("BuiltinGmatFunction"))
+   // Now only UserDefinedFunction should be allowed to set FCS
+   // after refactoring of Function (LOJ: 2016.10.25)
+   if (currentFunction->IsOfType("UserDefinedFunction"))
    {
-      fcs = currentFunction->GetFunctionControlSequence();
+      UserDefinedFunction *udf = (UserDefinedFunction*)currentFunction;
+      ////fcs = currentFunction->GetFunctionControlSequence();
+      fcs = udf->GetFunctionControlSequence();
    }
-   else
-   {
-      std::string errMsg = "Function passed to FunctionManager \"";
-      errMsg += functionName + "\" is of wrong type; must be a GmatFunction\n"; // other types in the future?
-      throw FunctionException(errMsg);
-   }
+   ////new commented out
+   // else
+   // {
+   //    std::string errMsg = "Function passed to FunctionManager \"";
+   //    errMsg += functionName + "\" is of wrong type; must be a GmatFunction\n"; // other types in the future?
+   //    throw FunctionException(errMsg);
+   // }
 }
 
 //------------------------------------------------------------------------------
@@ -923,7 +941,7 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    #endif
    
    // pass the FOS/GOS and other objects into the function
-   currentFunction->SetObjectMap(functionObjectStore);
+   currentFunction->SetFunctionObjectMap(functionObjectStore);
    currentFunction->SetGlobalObjectMap(globalObjectStore);
    currentFunction->SetSolarSystem(solarSys);
    currentFunction->SetTransientForces(forces);
@@ -956,7 +974,32 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
       #endif
       delete objInit;
    }
-   
+
+   #ifdef DUMP_OBJECT_STORES
+   MessageInterface::ShowMessage("FunctionObjectStore:\n");
+   for(ObjectMap::iterator it = functionObjectStore->begin(); it != functionObjectStore->end(); ++it)
+   {
+      GmatBase *obj = it->second;
+      MessageInterface::ShowMessage("  %p:  %s ==> %s of type %s\n", obj,
+            it->first.c_str(), obj->GetName().c_str(), obj->GetTypeName().c_str());
+
+      if (obj->IsOfType(Gmat::COORDINATE_SYSTEM))
+         MessageInterface::ShowMessage("%s\n",
+               obj->GetGeneratingString(Gmat::SCRIPTING).c_str());
+   }
+   MessageInterface::ShowMessage("GlobalObjectStore:\n");
+   for(ObjectMap::iterator it = globalObjectStore->begin(); it != globalObjectStore->end(); ++it)
+   {
+      GmatBase *obj = it->second;
+      MessageInterface::ShowMessage("  %p:  %s ==> %s of type %s\n", obj,
+            it->first.c_str(), obj->GetName().c_str(), obj->GetTypeName().c_str());
+
+      if (obj->IsOfType(Gmat::COORDINATE_SYSTEM))
+         MessageInterface::ShowMessage("%s\n",
+               obj->GetGeneratingString(Gmat::SCRIPTING).c_str());
+   }
+   #endif
+
    objInit = new ObjectInitializer(solarSys, functionObjectStore,
                                    globalObjectStore, internalCS, true, true);
    
@@ -989,24 +1032,31 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    
    // tell the fcs that this is the calling function
    #ifdef DEBUG_FM_EXECUTE
-      MessageInterface::ShowMessage("   new objInit=<%p> created\n", objInit);
-      MessageInterface::ShowMessage(
-         "in FM::Execute (%s), calling function is <%p>'%s'\n",
-         functionName.c_str(), callingFunction, callingFunction ?
-         callingFunction->GetFunctionName().c_str() : "NULL");
+   MessageInterface::ShowMessage("   new objInit=<%p> created\n", objInit);
+   MessageInterface::ShowMessage(
+      "in FM::Execute (%s), calling function is <%p>'%s'\n",
+      functionName.c_str(), callingFunction, callingFunction ?
+      callingFunction->GetFunctionName().c_str() : "NULL");
    #endif
-   GmatCommand *cmd = currentFunction->GetFunctionControlSequence();
-   while (cmd) 
+   
+   if (currentFunction->IsOfType("UserDefinedFunction"))
    {
-      #ifdef DEBUG_FM_EXECUTE
+      UserDefinedFunction *udf = (UserDefinedFunction*)currentFunction;
+      ////GmatCommand *cmd = currentFunction->GetFunctionControlSequence();
+      GmatCommand *cmd = udf->GetFunctionControlSequence();
+      while (cmd) 
+      {
+         #ifdef DEBUG_FM_EXECUTE
          MessageInterface::ShowMessage(
             "in FM::Execute, about to set calling function manager <%p> on command '%s'\n",
             this, (cmd->GetTypeName()).c_str());
-      #endif
-      cmd->SetCallingFunction(this);
-      cmd->SetInternalCoordSystem(internalCS);
-      cmd = cmd->GetNext();
+         #endif
+         cmd->SetCallingFunction(this);
+         cmd->SetInternalCoordSystem(internalCS);
+         cmd = cmd->GetNext();
+      }
    }
+   
    
    #ifdef DEBUG_FM_EXECUTE
    MessageInterface::ShowMessage
@@ -2531,7 +2581,7 @@ bool FunctionManager::PopFromStack(ObjectMap* cloned, const StringArray &outName
    #endif
    
    // Set popped FOS to function and re-initialize fcs
-   currentFunction->SetObjectMap(functionObjectStore);
+   currentFunction->SetFunctionObjectMap(functionObjectStore);
    bool retval = currentFunction->Initialize(objInit);
    
    #ifdef DEBUG_FM_STACK
@@ -3028,7 +3078,7 @@ bool FunctionManager::CloneObjectMap(ObjectMap *orig, ObjectMap *cloned)
 //------------------------------------------------------------------------------
 bool FunctionManager::CopyObjectMap(ObjectMap *from, ObjectMap *to)
 {
-   if (from == NULL || from == NULL)
+   if ((from == NULL) || (to == NULL))
       return false;
    
    ObjectMap::iterator omi;   

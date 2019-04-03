@@ -1,0 +1,165 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Create and configure the Ground Station and related parameters</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data"><link rel="prev" href="DSN_Estimation_Create_and_configure_the_spacecraft_spacecraft_transponder_and_related_parameters.html" title="Create and configure the spacecraft, spacecraft transponder, and related parameters"><link rel="next" href="DSN_Estimation_Define_the_types_of_measurements_that_will_be_processed.html" title="Define the types of measurements that will be processed"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Create and configure the Ground Station and related
+    parameters</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="DSN_Estimation_Create_and_configure_the_spacecraft_spacecraft_transponder_and_related_parameters.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="DSN_Estimation_Define_the_types_of_measurements_that_will_be_processed.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="DSN_Estimation_Create_and_configure_the_Ground_Station_and_related_parameters"></a>Create and configure the Ground Station and related
+    parameters</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N14D4D"></a>Create Ground Station Transmitter, Receiver, and Antenna
+      objects</h3></div></div></div><p>Before we create the <span class="guilabel">GroundStation</span> object
+      itself, as shown below, we first create the
+      <span class="guilabel">Transmitter</span>, <span class="guilabel">Receiver</span>, and
+      <span class="guilabel">Antenna</span> objects that must be associated with any
+      <span class="guilabel">GroundStation</span>.</p><pre class="programlisting">%  Ground Station electronics. 
+Create Transmitter DSNTransmitter;
+Create Receiver DSNReceiver;
+Create Antenna DSNAntenna;
+
+DSNTransmitter.PrimaryAntenna     = DSNAntenna;
+DSNReceiver.PrimaryAntenna        = DSNAntenna;
+DSNTransmitter.Frequency          = 7200;   %MHz</pre><p>In the script segment above, we first created
+      <span class="guilabel">Transmitter</span>, <span class="guilabel">Receiver</span>, and
+      <span class="guilabel">Antenna</span> objects. The GMAT script line
+      <code class="code">DSNTransmitter.PrimaryAntenna = DSNAntenna</code>, sets the main
+      antenna that the <span class="guilabel">Transmitter</span> resource,
+      <span class="guilabel">DSNTransmitter</span>, will be using. Likewise, the
+      <code class="code">DSNReceiver.PrimaryAntenna = DSNAntenna</code> script line sets
+      the main antenna that the <span class="guilabel">Receiver</span> resource,
+      <span class="guilabel">DSNReceiver</span>, will be using. As previously
+      mentioned, the <span class="guilabel">Antenna</span> object currently has no
+      function, but we include it here both because GMAT requires it and for
+      completeness since the <span class="guilabel">Antenna</span> resource may have a
+      function in a future GMAT release. Finally, we set the transmitter
+      frequency in the last GMAT script line above. See the
+      <span class="guilabel">RunEstimator</span> Help for a complete description of how
+      this input frequency is used. As described in the Help, since in this
+      example we will be using a ramp table, this input frequency will not be
+      used to calculate the computed value of the range and Doppler
+      observations. Instead, the frequency value in the ramp table will be
+      used to calculate the computed range and Doppler observations.</p><p>There is one clarification to the statement above. As discussed in
+      the <span class="guilabel">RunEstimator</span> Help, the
+      <span class="guilabel">DSNTransmitter.Frequency</span> value discussed above as
+      well as the previously discussed <span class="guilabel">SatTransponder</span>
+      <span class="guilabel">TurnAroundRatio</span> value will be used to calculate
+      the, typically small, media corrections needed to determine the
+      computed, C, value of the range and Doppler measurements.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N14D97"></a>Create Ground Station</h3></div></div></div><p>Below, we create and configure our <span class="guilabel">CAN</span>
+      <span class="guilabel">GroundStation</span> object.</p><pre class="programlisting">%   Create ground station and associated error models
+Create GroundStation CAN;
+CAN.CentralBody           = Earth;
+CAN.StateType             = Cartesian;
+CAN.HorizonReference      = Ellipsoid;
+CAN.Location1             = -4461.083514
+CAN.Location2             = 2682.281745
+CAN.Location3             = -3674.570392
+
+CAN.Id                    = 22222;
+
+CAN.MinimumElevationAngle = 7.0;
+
+CAN.IonosphereModel       = 'IRI2007';
+CAN.TroposphereModel      = 'HopfieldSaastamoinen';
+
+CAN.AddHardware           = {DSNTransmitter, DSNAntenna, ...
+                                DSNReceiver};</pre><p>The script segment above is broken into five sections. In the
+      first section, we create our <span class="guilabel">GroundStation</span> object
+      and we set our Earth-Centered Fixed Cartesian coordinates. In the second
+      section, we set the ID of the ground station so that GMAT will be able
+      to identify data from this ground station contained in the GMD
+      file.</p><p>In the third section, we set the minimum elevation angle to 7
+      degrees. Below this ground station to spacecraft elevation angle, no
+      measurement data will be used to form an orbit estimate. In the fourth
+      section, we specify which troposphere and ionosphere model we wish to
+      use to model RF signal atmospheric refraction effects. Finally, in the
+      fifth section, we attach three pieces of previously created required
+      hardware to our ground station, a transmitter, a receiver, and an
+      antenna.</p><p>Next, we create and configure the <span class="guilabel">GDS</span>
+      <span class="guilabel">GroundStation</span> resource, and associated
+      <span class="guilabel">Transmitter</span> resource.</p><pre class="programlisting">%   Create GDS transmitter and ground station 
+Create Transmitter GDSTransmitter
+GDSTransmitter.Frequency      = 7300;   %MHz.
+GDSTransmitter.PrimaryAntenna = DSNAntenna;
+
+Create GroundStation GDS;  
+GDS.CentralBody               = Earth;
+GDS.StateType                 = Cartesian;
+GDS.HorizonReference          = Ellipsoid;
+GDS.Location1                 = -2353.621251;
+GDS.Location2                 = -4641.341542;
+GDS.Location3                 = 3677.052370;
+GDS.Id                        = '33333';
+GDS.AddHardware               = {GDSTransmitter, ...
+                                 DSNAntenna, DSNReceiver};
+GDS.MinimumElevationAngle     = 7.0;
+GDS.IonosphereModel           = 'IRI2007';</pre><p>Next, we create and configure the <span class="guilabel">MAD</span>
+      <span class="guilabel">GroundStation</span> resource, and associated
+      <span class="guilabel">Transmitter</span> resource.</p><pre class="programlisting">%   Create MAD transmitter and ground station 
+Create Transmitter MADTransmitter
+MADTransmitter.Frequency      = 7400;   %MHz.
+MADTransmitter.PrimaryAntenna = DSNAntenna;
+
+Create GroundStation MAD;  
+MAD.CentralBody               = Earth;
+MAD.StateType                 = Cartesian;
+MAD.HorizonReference          = Ellipsoid;
+MAD.Location1                 = 4849.519988;
+MAD.Location2                 = -360.641653;
+MAD.Location3                 = 4114.504590;
+MAD.Id                        = '44444';
+MAD.AddHardware               = {MADTransmitter, ...
+                                  DSNAntenna, DSNReceiver};
+MAD.MinimumElevationAngle     = 7.0;
+MAD.IonosphereModel           = 'IRI2007';</pre><p>Note that for the <span class="guilabel">GDS</span> and
+      <span class="guilabel">MAD</span> ground stations, we don&rsquo;t re-use the
+      <span class="guilabel">DSNTransmitter</span> resource that we used for the
+      <span class="guilabel">CAN</span> ground station. We do this so we can set the
+      transmitter frequencies for the different ground station to different
+      values. Note that we didn&rsquo;t do this in the Simulator tutorial. This will
+      only add a small error, however, since, because we are using a ramp
+      table, the frequency set on the
+      <span class="guilabel">Transmitter.Frequency</span> field is only used to
+      calculate media corrections.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N14DD6"></a>Create Ground Station Error Models</h3></div></div></div><p>It is well known that all measurement types have random noise
+      and/or biases associated with them. For GMAT, these affects are modelled
+      using ground station error models. Since we have already created the
+      <span class="guilabel">GroundStation</span> object and its related hardware, we
+      now create the ground station error models. Since we wish to form an
+      orbit estimate using both range and Doppler data, we need to create two
+      error models as shown below, one for range measurements and one for
+      Doppler measurements.</p><pre class="programlisting">%   Create Ground station error models
+Create ErrorModel DSNrange;
+DSNrange.Type                   = 'DSN_SeqRange';
+DSNrange.NoiseSigma             = 10.63;
+DSNrange.Bias                   = 0.0;
+
+Create ErrorModel DSNdoppler;
+DSNdoppler.Type                 = 'DSN_TCP';
+DSNdoppler.NoiseSigma           = 0.0282;
+DSNdoppler.Bias                 = 0.0;
+
+CAN.ErrorModels                 = {DSNrange, DSNdoppler};
+GDS.ErrorModels                 = {DSNrange, DSNdoppler};
+MAD.ErrorModels                 = {DSNrange, DSNdoppler};</pre><p>The script segment above is broken into three sections. The first
+      section defines an <span class="guilabel">ErrorModel</span> named
+      <span class="guilabel">DSNrange</span>. The error model Type is DSN_SeqRange
+      which indicates that it is an error model for DSN sequential range
+      measurements. The 1 sigma standard deviation of the Gaussian white noise
+      is set to 10.63 Range Units (RU) and the measurement bias is set to 0
+      RU.</p><p>The second section above defines an
+      <span class="guilabel">ErrorModel</span> named <span class="guilabel">DSNdoppler</span>.
+      The error model <span class="guilabel">Type</span> is DSN_TCP which indicates
+      that it is an error model for DSN total count phase-derived Doppler
+      measurements. The 1 sigma standard deviation of the Gaussian white noise
+      is set to 0.0282 Hz and the measurement bias is set to 0 Hz. The range
+      and Doppler <span class="guilabel">NoiseSigma</span> values above will be used to
+      form measurement weighting matrices used by the estimator
+      algorithm.</p><p>The third section above attaches the two
+      <span class="guilabel">ErrorModel</span> resources we have just created to the
+      <span class="guilabel">CAN</span>, <span class="guilabel">GDS</span>, and
+      <span class="guilabel">MAD</span> <span class="guilabel">GroundStation</span> resources.
+      Note that in GMAT, the measurement noise or bias is defined on a per
+      ground station basis. Thus, any range measurement error involving the
+      <span class="guilabel">CAN</span>, <span class="guilabel">GDS</span>, and
+      <span class="guilabel">MAD</span> <span class="guilabel">GroundStation</span> is defined
+      by the <span class="guilabel">DSNRange</span> <span class="guilabel">ErrorModel</span> and
+      any Doppler measurement error involving the <span class="guilabel">CAN</span>,
+      <span class="guilabel">GDS</span>, and <span class="guilabel">MAD</span>
+      <span class="guilabel">GroundStation</span> is defined by the
+      <span class="guilabel">DSNdoppler</span> <span class="guilabel">ErrorModel</span>. Note
+      that, if desired, we could have created 6 different
+      <span class="guilabel">ErrorModel</span> resources, two error models representing
+      the two data types for 3 ground stations.</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="DSN_Estimation_Create_and_configure_the_spacecraft_spacecraft_transponder_and_related_parameters.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="DSN_Estimation_Define_the_types_of_measurements_that_will_be_processed.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Create and configure the spacecraft, spacecraft transponder, and
+    related parameters&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Define the types of measurements that will be processed</td></tr></table></div></body></html>

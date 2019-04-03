@@ -41,6 +41,9 @@ public:
                                            const std::string &theSubtype);
    virtual StringArray      GetListOfCreatableObjects(
                                   const std::string &qualifier = "");
+   
+   virtual GmatBase*  CreateObject(const std::string &ofType,
+                               const std::string &withName = "");
    virtual Parameter*  CreateParameter(const std::string &ofType,
                                const std::string &withName = "");
 

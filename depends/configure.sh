@@ -135,13 +135,13 @@ function download_depends() {
 		if [ "$arch" = "x86" ]
 		then
 		  echo "Downloading 32-bit CSPICE..."
-		  curl http://naif.jpl.nasa.gov/pub/naif/toolkit/C/"$cspice_type"_32bit/packages/cspice.tar.Z > cspice.tar.Z
+		  curl https://naif.jpl.nasa.gov/pub/naif/toolkit/C/"$cspice_type"_32bit/packages/cspice.tar.Z > cspice.tar.Z
 		  gzip -d cspice.tar.Z
 		  tar -xf cspice.tar
 		  mv cspice cspice32
 		else
 		  echo "Downloading 64-bit CSPICE..."
-		  curl http://naif.jpl.nasa.gov/pub/naif/toolkit/C/"$cspice_type"_64bit/packages/cspice.tar.Z > cspice.tar.Z
+		  curl https://naif.jpl.nasa.gov/pub/naif/toolkit/C/"$cspice_type"_64bit/packages/cspice.tar.Z > cspice.tar.Z
 		  gzip -d cspice.tar.Z
 		  tar -xf cspice.tar
 		  mv cspice cspice64

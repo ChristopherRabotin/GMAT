@@ -886,7 +886,7 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
                while (lastleg->GetNext() !=NULL)
                   lastleg = lastleg->GetNext();
                
-               if ((firstleg->GetSignalData().tNode->IsOfType(Gmat::GROUND_STATION)) && (lastleg->GetSignalData().rNode->IsOfType(Gmat::GROUND_STATION) == false))
+               if ((firstleg->GetSignalDataObject()->tNode->IsOfType(Gmat::GROUND_STATION)) && (lastleg->GetSignalDataObject()->rNode->IsOfType(Gmat::GROUND_STATION) == false))
                {
                   // if ground station is only at first transmit node in signal path, take derivative w.r.t the bias associate to ground station's error mode, otherwise keep default value 0
 
@@ -894,7 +894,7 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
                   std::string derivObjName = obj->GetFullName();
 
                   // Get names of all error models defined in the ground station
-                  GroundstationInterface* gs = (GroundstationInterface*)this->GetSignalData().tNode;
+                  GroundstationInterface* gs = (GroundstationInterface*)this->GetSignalDataObject()->tNode;
                   std::map<std::string,ObjectArray> errmodelMap = gs->GetErrorModelMap();
 
                   // Search for error model
@@ -931,7 +931,7 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
                   std::string derivObjName = obj->GetFullName();
 
                   // Get names of all error models defined in the ground station
-                  GroundstationInterface* gs = (GroundstationInterface*)this->GetSignalData().rNode;
+                  GroundstationInterface* gs = (GroundstationInterface*)this->GetSignalDataObject()->rNode;
                   std::map<std::string,ObjectArray> errmodelMap = gs->GetErrorModelMap();
 
                   // Search for error model

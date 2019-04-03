@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -114,23 +114,40 @@ StationFactory& StationFactory::operator=(
    return *this;
 }
 
-
 //------------------------------------------------------------------------------
-// GmatCommand* CreateCommand(const std::string &ofType,
-//       const std::string &withName)
+// GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
- * Creation method for GMAT commands
+ * Creation method for GMAT SpacePoint
  *
- * @param ofType The subtype of the command
- * @param withName The new command's name
+ * @param ofType The subtype of the SpacePoint
+ * @param withName The name of type to be created
  *
- * @return A newly created GmatCommand (or NULL if this factory doesn't create
+ * @return A newly created SpacePoint (or NULL if this factory doesn't create
+ *         the requested type)
+ */
+//------------------------------------------------------------------------------
+GmatBase* StationFactory::CreateObject(const std::string &ofType,
+                                         const std::string &withName)
+{
+   return CreateSpacePoint(ofType, withName);
+}
+
+//------------------------------------------------------------------------------
+// SpacePoint* CreateSpacePoint(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Creation method for GMAT SpacePoint
+ *
+ * @param ofType The subtype of the SpacePoint
+ * @param withName The name of type to be created
+ *
+ * @return A newly created SpacePoint (or NULL if this factory doesn't create
  *         the requested type)
  */
 //------------------------------------------------------------------------------
 SpacePoint* StationFactory::CreateSpacePoint(const std::string &ofType,
-                                            const std::string &withName)
+                                             const std::string &withName)
 {
    if (ofType == "GroundStation")
       return new GroundStation(withName);
@@ -138,3 +155,4 @@ SpacePoint* StationFactory::CreateSpacePoint(const std::string &ofType,
 
    return NULL;   // doesn't match any type of Command known by this factory
 }
+

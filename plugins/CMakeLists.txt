@@ -90,6 +90,7 @@ OPTION(PLUGIN_CINTERFACE "CInterface Plugin" ON)
 OPTION(PLUGIN_DATAINTERFACE "DataInterface Plugin" ON)
 OPTION(PLUGIN_DATACALLBACK "DataCallback Plugin" OFF)
 OPTION(PLUGIN_EPHEMPROPAGATOR "EphemPropagator Plugin" ON)
+OPTION(PLUGIN_EKF "EKF Plugin" ON)
 OPTION(PLUGIN_ESTIMATION "Estimation Plugins" ON)
 OPTION(PLUGIN_EVENTLOCATOR "EventLocator Plugin" ON)
 OPTION(PLUGIN_EXTRAPROPAGATORS "ExtraPropagators Plugin" ON)
@@ -150,6 +151,15 @@ endif()
 # EphemPropagator Plugin
 if (PLUGIN_EPHEMPROPAGATOR)
   SET(PLUGINDIR "EphemPropagatorPlugin/src/base")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
+endif()
+
+# ====================================================================
+# EKF Plugin
+if (PLUGIN_EKF)
+  SET(PLUGINDIR "ExtendedKalmanFilterPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})

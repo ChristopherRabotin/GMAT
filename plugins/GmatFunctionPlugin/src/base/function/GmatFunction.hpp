@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -34,10 +34,10 @@
 #define GmatFunction_hpp
 
 #include "GmatFunction_defs.hpp"
-#include "Function.hpp"
+#include "UserDefinedFunction.hpp"
 #include "ObjectInitializer.hpp"
 
-class GMATFUNCTION_API GmatFunction : public Function
+class GMATFUNCTION_API GmatFunction : public UserDefinedFunction
 {
 public:
    GmatFunction(const std::string &nomme);

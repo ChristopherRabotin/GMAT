@@ -39,10 +39,10 @@ public:
    virtual GmatTime* Clone();
 
    virtual void SetTimeInSec(const Real sec);
-   const GmatEpoch GetMjd();
-   const Real GetTimeInSec();
-   const Real GetSec();
-   const Real GetFracSec();
+   GmatEpoch GetMjd();
+   Real GetTimeInSec();
+   Real GetSec();
+   Real GetFracSec();
 
 protected:
    Real Sec;		// time in seconds

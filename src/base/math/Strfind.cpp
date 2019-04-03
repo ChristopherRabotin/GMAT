@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -48,7 +48,7 @@
  */
 //------------------------------------------------------------------------------
 Strfind::Strfind(const std::string &name)
-   : StringFunction("Strfind", name)
+   : StringFunctionNode("Strfind", name)
 {
 }
 
@@ -75,7 +75,7 @@ Strfind::~Strfind()
  */
 //------------------------------------------------------------------------------
 Strfind::Strfind(const Strfind &copy) :
-   StringFunction      (copy)
+   StringFunctionNode      (copy)
 {
 }
 

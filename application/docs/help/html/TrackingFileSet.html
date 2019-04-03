@@ -1,0 +1,127 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>TrackingFileSet</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="String.html" title="String"><link rel="next" href="Transmitter.html" title="Transmitter"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">TrackingFileSet</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="String.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Transmitter.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="TrackingFileSet"></a><div class="titlepage"></div><a name="N2103E" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">TrackingFileSet</span></h2><p>TrackingFileSet &mdash; Manages the observation data contained in one or more external
+    tracking data files.</p></div><div class="refsection"><a name="N2104F"></a><h2>Description</h2><p>A <span class="guilabel">TrackingFileSet</span> is required for both
+    simulator and estimator runs. For a data simulation run, the user must
+    specify the desired tracking strings for the simulated data (via
+    <span class="guilabel">AddTrackingConfig</span>) and provide an output file name
+    for the simulated tracking observations (via
+    <span class="guilabel">FileName</span>). In simulation mode, the user may specify a
+    range modulo constant, Doppler count interval, and other parameters,
+    depending on the type of tracking data being simulated. See the remarks
+    below for more details.</p><p>When running the estimator, the <span class="guilabel">FileName</span>
+    parameter specifies the path to a pregenerated external tracking data
+    file. It is not necessary to explicitly specify tracking configurations
+    when running the estimator; GMAT will examine the specified external
+    tracking data file and determine the tracking configurations
+    automatically. GMAT will throw an error message if it is unable to
+    uniquely identify all objects found in the tracking data file.</p><p>When running the estimator, one or more
+    <span class="guilabel">AcceptFilter</span>s and/or
+    <span class="guilabel">RejectFilter</span>s may be employed to select from all
+    available observations a smaller subset for use in the estimation
+    process.</p><p>The <span class="guilabel">SimRangeModuloConstant</span> and
+    <span class="guilabel">SimDopplerCountInterval</span> fields apply only to the
+    simulator and are ignored by the estimator. When running the estimator,
+    these values are provided in the tracking data file. For both the
+    simulator and estimator, relativity, light time, and ET-TAI corrections
+    may optionally be applied.</p><p>See Also: <a class="xref" href="Simulator.html" title="Simulator"><span class="refentrytitle">Simulator</span></a>, <a class="xref" href="BatchEstimatorInv.html" title="BatchEstimatorInv"><span class="refentrytitle">BatchEstimatorInv</span></a>, <a class="xref" href="AcceptFilter.html" title="AcceptFilter"><span class="refentrytitle">AcceptFilter</span></a>, <a class="xref" href="RejectFilter.html" title="RejectFilter"><span class="refentrytitle">RejectFilter</span></a>, <a class="xref" href="TrackingDataTypes.html" title="Tracking Data Types for OD"><span class="refentrytitle">Tracking Data Types for OD</span></a></p></div><div class="refsection"><a name="N21082"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AddTrackingConfig</span></td><td><p>One or more signal paths and measurement types for
+            simulation or estimation. See the Remarks section below for
+            details on the Tracking Strand specification. </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>{{Tracking Strand}, MeasurementType1[,
+                    MeasurementType2, ...]}</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">None</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DataFilters</span></td><td><p>Defines filters to be applied to the data. One or
+            more filters of either type (<span class="guilabel">AcceptFilter</span>,
+            <span class="guilabel">RejectFilter</span>) may be specified. Rules
+            specified by data filters on a
+            <span class="guilabel">TrackingFileSet</span> are applied to determine what
+            data is admitted or rejected as input to the estimation
+            process.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Resource array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>User defined instances of
+                    <span class="guilabel">AcceptFilter</span> and
+                    <span class="guilabel">RejectFilter</span> resources</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">None</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FileName</span></td><td><p>For simulation, specifies an output file for the
+            simulated measurement data. For estimation, specifies one or more
+            preexisting tracking data input files in
+            GMD-format.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Valid file path</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">None</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RampTable</span></td><td><p>Specifies a transmit frequency ramp table to be used
+            when computing measurements for both simulation and
+            estimation.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Valid file path</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">None</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SimDopplerCountInterval</span></td><td><p>Specifies the Doppler count interval used for Doppler
+            and range-rate measurements. This value is only used in simulation
+            mode.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">1.0</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Seconds</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SimRangeModuloConstant</span></td><td><p>Specifies the value of the DSN range ambiguity
+            interval. This value is only used in simulation mode.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">1.00E+18</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Range Units (RU)</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">UseETminusTAI</span></td><td><p>Flag specifying if General Relativistic time
+            corrections should be made to the measurements. If this flag is
+            set, GMAT will apply the adjustment from TAI to Ephemeris Time
+            when solving the light time equations for the computed
+            measurement. See Remarks below for more
+            details.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>True, False</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">False</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">UseLightTime</span></td><td><p>Flag specifying whether light time corrections should
+            be applied to computed measurements. </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>True, False</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">True</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">UseRelativityCorrection</span></td><td><p>Flag specifying if General Relativistic corrections
+            should be made to the computed measurements. If this flag is set,
+            GMAT will adjust the computed light time to include the effects
+            due to the coordinate velocity of light and bending of the signal
+            path. See Remarks below for more details.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>True, False</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">False</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N2123F"></a><h2>Remarks</h2><p>See <a class="xref" href="TrackingDataTypes.html" title="Tracking Data Types for OD"><span class="refentrytitle">Tracking Data Types for OD</span></a> for a detailed listing of
+    all tracking data types and tracking data file formats supported by GMAT
+    for orbit determination.</p><p>Setting <span class="guilabel">UseETminusTAI</span> to True corresponds to
+    inclusion in the computed round-trip light time of the ET-TAI uplink and
+    downlink terms in Eq. 11-7 of Moyer, <span class="emphasis"><em>Formulation of Observed and
+    Computed Values of Deep Space Network Data Types for
+    Navigation</em></span>, JPL Publication 00-7, October 2000. Setting
+    <span class="guilabel">UseRelativityCorrection</span> to True corresponds to
+    inclusion of the RLT uplink and downlink terms in Eq. 11-7 of
+    Moyer.</p><p>The <span class="guilabel">SimRangeModuloConstant</span> field is used only
+    in the simulation of DSN range tracking data. The user may specify a value
+    to be used for this field or may omit it, in which case the default value
+    is used. This field is not applicable to estimation. In estimation, this
+    value is provided in the input tracking data file.</p><p>The <span class="guilabel">SimDopplerCountInterval</span> is used in the
+    simulation of DSN_TCP and RangeRate tracking data. The user may specify a
+    value to be used for this field or may omit it, in which case default
+    value of 1 second is used. This field is not applicable to estimation. In
+    estimation, this value is provided in the input tracking data file.</p><p>When displaying or saving a <span class="guilabel">TrackingFileSet</span>
+    object using the <span class="guilabel">Write</span> command, GMAT will display a
+    number of items relevant to simulating TDRS data formats. These options
+    are not implemented in the current release and should be ignored or
+    manually removed from the output file.</p><div class="refsection"><a name="N21264"></a><h3>Tracking Strand Specification</h3><p>When simulating tracking data, at least one tracking strand must
+      be specified using the <span class="guilabel">AddTrackingConfig</span> parameter.
+      The tracking strand must be enclosed within curly braces. The format of
+      the tracking strand depends on the measurement data type being
+      generated. Use the following table as a guide.</p><div class="informaltable"><table border="1"><colgroup><col width="36%"><col width="64%"></colgroup><thead><tr><th align="center">Measurement Type Name</th><th align="center">Tracking Strand Specification
+              Format</th></tr></thead><tbody><tr><td>DSN_SeqRange, DSN_TCP, Range, RangeRate</td><td>{XMIT_GroundStation, Spacecraft,
+              RECV_GroundStation}</td></tr><tr><td>GPS_PosVec</td><td>{Spacecraft.Receiver}</td></tr></tbody></table></div></div></div><div class="refsection"><a name="N21286"></a><h2>Examples</h2><div class="informalexample"><p>This example illustrates use of the
+      <span class="guilabel">TrackingFileSet</span> object for simulation of DSN
+      tracking data. Specification of the tracking configurations
+      (<span class="guilabel">AddTrackingConfig</span>) is optional when running the
+      estimator. If omitted, GMAT will attempt to automatically detect the
+      tracking configurations present in the tracking data file.</p><p>In this example, the frequency ramp table file
+      <code class="literal">dsn.ramp</code> must be a preexisting ramp table. GMAT will
+      not simulate ramp table records. Alternatively, the user may omit
+      specification of a ramp table when simulating data. If the ramp table is
+      omitted, the simulator will use the frequency specified on the
+      <span class="guilabel">Transmitter</span> object attached to each
+      <span class="guilabel">GroundStation</span>.</p><pre class="programlisting">Create TrackingFileSet dsnObs;
+
+%Create objects referenced by dnsObs
+Create GroundStation GDS CAN MAD;
+Create Spacecraft EstSat;
+Create AcceptFilter af;
+  
+dsnObs.AddTrackingConfig       = {{GDS, EstSat, GDS}, 'DSN_TCP'};
+dsnObs.AddTrackingConfig       = {{CAN, EstSat, CAN}, 'DSN_TCP'};
+dsnObs.AddTrackingConfig       = {{MAD, EstSat, MAD}, 'DSN_TCP', 'DSN_SeqRange'};
+dsnObs.FileName                = {'dsn.gmd'};
+dsnObs.RampTable               = {'dsn.ramp'};
+dsnObs.UseLightTime            = True;
+dsnObs.UseRelativityCorrection = False;
+dsnObs.UseETminusTAI           = False;
+dsnObs.SimRangeModuloConstant  = 67108864;
+dsnObs.SimDopplerCountInterval = 10.; 
+dsnObs.DataFilters             = {af};
+
+BeginMissionSequence;</pre></div><div class="informalexample"><p>This example illustrates use of the
+      <span class="guilabel">TrackingFileSet</span> object for simulation of GPS_PosVec
+      tracking data. This example assumes that <code class="literal">GpsReceiver</code>
+      is a previously created instance of <span class="guilabel">Receiver</span> and
+      has been attached to <code class="literal">SimSat</code> using the
+      <span class="guilabel">AddHardware</span> method.</p><pre class="programlisting">Create TrackingFileSet PosVecObs;
+
+PosVecObs.FileName          = {'posvec_obs.gmd'};
+PosVecObs.AddTrackingConfig = {{SimSat.GpsReceiver}, 'GPS_PosVec'};
+SimMeas.DataFilters         = {};
+
+BeginMissionSequence;</pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="String.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Transmitter.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">String&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Transmitter</td></tr></table></div></body></html>

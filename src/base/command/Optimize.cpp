@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -48,6 +48,8 @@ static GmatInterface *gmatInt = GmatInterface::Instance();
 //#define DEBUG_OPTIMIZE_EXEC
 //#define DEBUG_OPTIMIZE_COMMANDS
 //#define DEBUG_STATE_TRANSITIONS
+//#define DEBUG_COMPLETED_TARGETING_PASS
+
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -427,7 +429,7 @@ bool Optimize::Initialize()
 
    // Set the local copy of the optimizer on each node
    std::vector<GmatCommand*>::iterator node;
-   GmatCommand *currentCmd;
+   GmatCommand *currentCmd = NULL;
    specialState = Solver::INITIALIZING;
 
    Integer constraintCount = 0, variableCount = 0, objectiveCount = 0;
@@ -964,7 +966,7 @@ bool Optimize::RunInternalSolver(Solver::SolverState state)
          ("Executing the Internal Optimizer %s\n", theSolver->GetName().c_str());
       #endif
       
-      GmatCommand *currentCmd;
+      GmatCommand *currentCmd = NULL;
       // Set GMAT run state to SOLVING (LOJ: 2010.01.12)
       publisher->SetRunState(Gmat::SOLVING);
       
@@ -984,7 +986,7 @@ bool Optimize::RunInternalSolver(Solver::SolverState state)
                #endif
                currentCmd = branch[0];
                optimizerConverged = false;
-               while (currentCmd != this)
+               while (currentCmd && (currentCmd != this))
                {
                   std::string type = currentCmd->GetTypeName();
                   if ((type == "Optimize") || (type == "Vary") ||
@@ -1103,7 +1105,7 @@ bool Optimize::RunInternalSolver(Solver::SolverState state)
             currentCmd = branch[0];
             optimizerConverged = false;
             StoreLoopData();
-            while (currentCmd != this)  
+            while (currentCmd && (currentCmd != this))
             {
                std::string type = currentCmd->GetTypeName();
                if ((type == "Optimize") || (type == "Vary") ||
@@ -1143,6 +1145,15 @@ bool Optimize::RunInternalSolver(Solver::SolverState state)
             MessageInterface::ShowMessage
                ("Optimize::Execute - internal solver in PERTURBING state\n");
             #endif
+
+            #ifdef DEBUG_COMPLETED_TARGETING_PASS
+               // Set a breakpoint here to stop after the optimizer is done,
+               // in order to investigate the last optimizer run results
+               // before running with the final variable settings
+               MessageInterface::ShowMessage("\n\n=== RUNNING ONCE MORE "
+                     "THROUGH THE INTERNAL SOLVER CONTROL SEQUENCE\n\n\n");
+            #endif
+
             branchExecuting = true;
             ApplySubscriberBreakpoint();
             ResetLoopData();
@@ -1246,7 +1257,7 @@ bool Optimize::RunExternalSolver(Solver::SolverState state)
          ("Executing the External Optimizer %s\n", theSolver->GetName().c_str());
       #endif
       
-      GmatCommand *currentCmd;
+      GmatCommand *currentCmd = NULL;
       publisher->SetRunState(Gmat::SOLVING);
 
       switch (startMode)
@@ -1262,7 +1273,7 @@ bool Optimize::RunExternalSolver(Solver::SolverState state)
             #endif
             currentCmd = branch[0];
             optimizerConverged = false;
-            while (currentCmd != this)  
+            while (currentCmd && (currentCmd != this))
             {
                std::string type = currentCmd->GetTypeName();
                if ((type == "Optimize") || (type == "Vary") ||
@@ -1335,7 +1346,7 @@ bool Optimize::RunExternalSolver(Solver::SolverState state)
             currentCmd = branch[0];
             optimizerConverged = false;
             StoreLoopData();
-            while (currentCmd != this)  
+            while (currentCmd && (currentCmd != this))
             {
                std::string type = currentCmd->GetTypeName();
                if ((type == "Optimize") || (type == "Vary") ||
@@ -1371,6 +1382,15 @@ bool Optimize::RunExternalSolver(Solver::SolverState state)
                MessageInterface::ShowMessage
                   ("Optimize::Execute - external solver setting publisher with SOLVEDPASS\n");
                #endif
+
+               #ifdef DEBUG_COMPLETED_TARGETING_PASS
+                  // Set a breakpoint here to stop after the optimizer is done,
+                  // in order to investigate the last optimizer run results
+                  // before running with the final variable settings
+                  MessageInterface::ShowMessage("\n\n=== RUNNING ONCE MORE "
+                        "THROUGH THE EXTERNAL SOLVER CONTROL SEQUENCE\n\n\n");
+               #endif
+
                ResetLoopData();
                ApplySubscriberBreakpoint();
                branchExecuting = true;

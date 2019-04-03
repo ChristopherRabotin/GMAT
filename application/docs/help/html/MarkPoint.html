@@ -1,0 +1,68 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>MarkPoint</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="Maneuver.html" title="Maneuver"><link rel="next" href="Minimize.html" title="Minimize"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">MarkPoint</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Maneuver.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Minimize.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="MarkPoint"></a><div class="titlepage"></div><a name="N23BB2" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">MarkPoint</span></h2><p>MarkPoint &mdash; Allows you to add a special mark point character on an
+    XYPlot</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><code class="literal">MarkPoint</code>  <em class="replaceable"><code>OutputNames</code></em>
+<em class="replaceable"><code>
+OutputNames</code></em>
+  <em class="replaceable"><code>OutputNames</code></em> is the list of subscribers and a special mark point
+  will be added to each subscriber&rsquo;s <em class="replaceable"><code>XYPlot</code></em>. When mark points need
+  to be added to multiple subscribers, then the subscribers need
+  to be separated by a space.</pre></div><div class="refsection"><a name="N23BD6"></a><h2>Description</h2><p>The <span class="guilabel">MarkPoint</span> command allows you to add a
+    special mark point character to highlight a single data point on an
+    <span class="guilabel">XYPlot</span>. <span class="guilabel">MarkPoint</span> command works
+    only for <span class="guilabel">XYPlot</span> subscriber. This command also allows
+    you to add special mark points on multiple <span class="guilabel">XYPlot</span>
+    resources. <span class="guilabel">MarkPoint</span> command can be used through
+    GMAT&rsquo;s GUI or the script interface.</p></div><div class="refsection"><a name="N23BED"></a><h2>Options</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">OutputNames</span></td><td><p> The <span class="guilabel">MarkPoint</span> command allows
+            the user to add a special mark point character to highlight an
+            individual data point on an <span class="guilabel">XYPlot</span>. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>Resource reference</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">XYPlot</span> resource</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">DefaultXYPlot</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N23C34"></a><h2>GUI</h2><p>Figure below shows default settings for
+    <span class="guilabel">MarkPoint</span> command:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_MarkPoint_GUI_3.png" align="middle" height="193"></td></tr></table></div></div></div><div class="refsection"><a name="N23C45"></a><h2>Remarks</h2><p>GMAT allows you to insert <span class="guilabel">MarkPoint</span> command
+    into the <span class="guilabel">Mission</span> tree at any location. This allows
+    you to add special mark points on an <span class="guilabel">XYPlot</span> at any
+    point in your mission. The <span class="guilabel">XYPlot</span> subscriber plots
+    data at each propagation step of the entire mission duration. If you to
+    want to place mark points on an <span class="guilabel">XYPlot</span> at specific
+    points, then a <span class="guilabel">MarkPoint</span> command can be inserted into
+    the mission sequence to control when mark points are placed onto an
+    <span class="guilabel">XYPlot</span>. Refer to the <a class="xref" href="MarkPoint.html#MarkPoint_Examples" title="Examples">Examples</a> section below to see
+    how <span class="guilabel">MarkPoint</span> command can be used in the
+    <span class="guilabel">Mission</span> tree.</p></div><div class="refsection"><a name="MarkPoint_Examples"></a><h2>Examples</h2><div class="informalexample"><p>This example shows how to use <span class="guilabel">MarkPoint</span>
+      command on multiple subscribers. Mark points are added on two
+      <span class="guilabel">XYPlots</span> after every 0.2 days through an iterative
+      loop:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create XYPlot aPlot1 aPlot2
+
+aPlot1.XVariable = aSat.A1ModJulian
+aPlot1.YVariables = {aSat.EarthMJ2000Eq.X}
+
+aPlot2.XVariable = aSat.A1ModJulian
+aPlot2.YVariables = {aSat.EarthMJ2000Eq.VX}
+
+BeginMissionSequence;
+
+While aSat.ElapsedDays &lt; 1.0
+ MarkPoint aPlot1 aPlot2
+ Propagate aProp(aSat) {aSat.ElapsedDays = 0.2}
+EndWhile</code></pre></div><div class="informalexample"><p>This example shows how to use <span class="guilabel">MarkPoint</span> on a
+      single subscriber. In this example, mark points are placed on the
+      <span class="guilabel">XYPlot</span> the moment spacecraft&rsquo;s altitude goes below
+      750 Km. Note that mark points are placed on the XYPlot at every
+      integration step:</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
+Create Propagator aProp
+
+Create XYPlot aPlot1
+
+aPlot1.XVariable = aSat.A1ModJulian
+aPlot1.YVariables = {aSat.Earth.Altitude}
+
+BeginMissionSequence
+
+While aSat.ElapsedDays &lt; 2
+ Propagate aProp(aSat)
+ If aSat.Earth.Altitude &lt; 750
+ MarkPoint aPlot1
+ EndIf
+EndWhile</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Maneuver.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Minimize.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Maneuver&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Minimize</td></tr></table></div></body></html>

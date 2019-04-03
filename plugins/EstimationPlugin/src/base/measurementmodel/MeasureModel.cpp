@@ -966,7 +966,8 @@ bool MeasureModel::Initialize()
                      {
                         signalPaths.push_back(sb);
                         head = sb;
-                        theData.push_back(&(sb->GetSignalData()));
+                        //theData.push_back(&(sb->GetSignalData()));
+                        theData.push_back(sb->GetSignalDataObject());
                      }
                      else
                         head->Add(sb);
@@ -1404,7 +1405,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
 
       // 4.4. Get the start signal:
       SignalBase *startSignal = signalPaths[i]->GetStart(epochIsAtEnd);
-      SignalData *sd = &(startSignal->GetSignalData());
+      SignalData *sd = startSignal->GetSignalDataObject();
       #ifdef DEBUG_TIMING
          MessageInterface::ShowMessage("4.4. Get the start signal leg for signal path %d:\n", i);
       #endif
@@ -1922,34 +1923,33 @@ const std::vector<ObjectArray*>& MeasureModel::GetParticipantObjectLists()
 //-------------------------------------------------------------------------------------------------------------
 Real MeasureModel::GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB)
 {
+   
    // 1. Specify the first signal leg
    PhysicalSignal* fleg = (PhysicalSignal*)signalPaths[pathIndex];
-   SignalData sd;
-   sd = fleg->GetSignalData();
-
-
+   SignalData* sd = fleg->GetSignalDataObject();
+   
    // 2. Get frequency from sd.tNode
-   if (sd.tNode == NULL)
+   if (sd->tNode == NULL)
    {
       std::stringstream ss;
       ss << "Error: Transmit participant of signal path is NULL.\n";
       throw MeasurementException(ss.str());
    }
-
+   
    Real frequency;                                                                     // unit: Mhz
-   if (sd.tNode->IsOfType(Gmat::GROUND_STATION))
+   if (sd->tNode->IsOfType(Gmat::GROUND_STATION))
    {
       // Get frequency from ground station's transmiter or from ramped frequency table
       if (rampTB)
       {
          // Get frequency from ramp table if it is used
-         GmatTime t1 = sd.tPrecTime - sd.tDelay/GmatTimeConstants::SECS_PER_DAY;
+         GmatTime t1 = sd->tPrecTime - sd->tDelay/GmatTimeConstants::SECS_PER_DAY;
          frequency = fleg->GetFrequencyFromRampTable(t1.GetMjd(), rampTB)/1.0e6;       // unit: Mhz
       }
       else
       {
          // Get frequency from ground station' transmitter
-         ObjectArray hardwareList = ((GroundstationInterface*)sd.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+         ObjectArray hardwareList = ((GroundstationInterface*)(sd->tNode))->GetRefObjectArray(Gmat::HARDWARE);
          UnsignedInt i;
          for (i = 0; i < hardwareList.size(); ++i)
          {
@@ -1963,7 +1963,7 @@ Real MeasureModel::GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTab
          if (i == hardwareList.size())
          {
             std::stringstream ss;
-            ss << "Error: Ground station " << sd.tNode->GetName() << " does not have a transmitter to transmit signal.\n";
+            ss << "Error: Ground station " << sd->tNode->GetName() << " does not have a transmitter to transmit signal.\n";
             throw MeasurementException(ss.str());
          }
       }
@@ -1971,7 +1971,7 @@ Real MeasureModel::GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTab
    else
    {
       // Get frequency from spacecraft's transmitter or transponder
-      ObjectArray hardwareList = ((Spacecraft*)sd.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+      ObjectArray hardwareList = ((Spacecraft*)sd->tNode)->GetRefObjectArray(Gmat::HARDWARE);
       UnsignedInt i;
       for (i = 0; i < hardwareList.size(); ++i)
       {
@@ -1985,7 +1985,7 @@ Real MeasureModel::GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTab
       if (i == hardwareList.size())
       {
          std::stringstream ss;
-         ss << "Error: Spacecraft " << sd.tNode->GetName() << " does not have a transmitter to transmit signal.\n";
+         ss << "Error: Spacecraft " << sd->tNode->GetName() << " does not have a transmitter to transmit signal.\n";
          throw MeasurementException(ss.str());
       }
    }
@@ -2019,9 +2019,8 @@ Real MeasureModel::GetUplinkFrequencyAtReceivedEpoch(UnsignedInt pathIndex, std:
    if (rampTB)
    {
       // 2.1.1. Get received epoch
-      SignalData sd;
-      sd = lastLeg->GetSignalData();
-      GmatTime t1 = sd.rPrecTime + sd.rDelay / GmatTimeConstants::SECS_PER_DAY;
+      SignalData *sd = lastLeg->GetSignalDataObject();
+      GmatTime t1 = sd->rPrecTime + sd->rDelay / GmatTimeConstants::SECS_PER_DAY;
 
       // 2.1.2. Get frequency from ramp table at received epoch
       frequency = lastLeg->GetFrequencyFromRampTable(t1.GetMjd(), rampTB) / 1.0e6;             // unit: MHz
@@ -2029,15 +2028,14 @@ Real MeasureModel::GetUplinkFrequencyAtReceivedEpoch(UnsignedInt pathIndex, std:
    else
    {
       // 2.2.1. Get frequency from transmitter
-      SignalData sd;
-      sd = fleg->GetSignalData();
-      if (sd.tNode == NULL)
+      SignalData *sd = fleg->GetSignalDataObject();
+      if (sd->tNode == NULL)
          throw MeasurementException("Error: transmit participant of signal path is NULL.\n");
 
-      if (sd.tNode->IsOfType(Gmat::GROUND_STATION))
+      if (sd->tNode->IsOfType(Gmat::GROUND_STATION))
       {
          // Get frequency from ground station' transmitter
-         ObjectArray hardwareList = ((GroundstationInterface*)sd.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+         ObjectArray hardwareList = ((GroundstationInterface*)(sd->tNode))->GetRefObjectArray(Gmat::HARDWARE);
          UnsignedInt i;
          for (i = 0; i < hardwareList.size(); ++i)
          {
@@ -2051,14 +2049,14 @@ Real MeasureModel::GetUplinkFrequencyAtReceivedEpoch(UnsignedInt pathIndex, std:
          if (i == hardwareList.size())
          {
             std::stringstream ss;
-            ss << "Error: Ground station " << sd.tNode->GetName() << " does not have a transmitter to transmit signal.\n";
+            ss << "Error: Ground station " << sd->tNode->GetName() << " does not have a transmitter to transmit signal.\n";
             throw MeasurementException(ss.str());
          }
       }
       else
       {
          // Get frequency from spacecraft's transmitter or transponder
-         ObjectArray hardwareList = ((Spacecraft*)sd.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+         ObjectArray hardwareList = ((Spacecraft*)(sd->tNode))->GetRefObjectArray(Gmat::HARDWARE);
          UnsignedInt i;
          for (i = 0; i < hardwareList.size(); ++i)
          {
@@ -2072,7 +2070,7 @@ Real MeasureModel::GetUplinkFrequencyAtReceivedEpoch(UnsignedInt pathIndex, std:
          if (i == hardwareList.size())
          {
             std::stringstream ss;
-            ss << "Error: Spacecraft " << sd.tNode->GetName() << " does not have a transmitter to transmit signal.\n";
+            ss << "Error: Spacecraft " << sd->tNode->GetName() << " does not have a transmitter to transmit signal.\n";
             throw MeasurementException(ss.str());
          }
       }
@@ -2098,10 +2096,10 @@ Integer MeasureModel::GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<
 {
    // 1. Specify the first signal leg
    PhysicalSignal* fleg = (PhysicalSignal*)signalPaths[pathIndex];
-   SignalData sd = fleg->GetSignalData();
+   SignalData *sd = fleg->GetSignalDataObject();
 
    // 2. Get frequency from sd.tNode
-   if (sd.tNode == NULL)
+   if (sd->tNode == NULL)
    {
       std::stringstream ss;
       ss << "Error: Transmit participant of signal path is NULL.\n";
@@ -2110,19 +2108,19 @@ Integer MeasureModel::GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<
 
    Integer freqBand;
    Real frequency;
-   if (sd.tNode->IsOfType(Gmat::GROUND_STATION))
+   if (sd->tNode->IsOfType(Gmat::GROUND_STATION))
    {
       // Get frequency from ground station's transmiter or from ramped frequency table
       if (rampTB)
       {
          // Get frequency from ramp table if it is used
-         GmatTime t1 = sd.tPrecTime - sd.tDelay/GmatTimeConstants::SECS_PER_DAY;
+         GmatTime t1 = sd->tPrecTime - sd->tDelay/GmatTimeConstants::SECS_PER_DAY;
          freqBand = fleg->GetFrequencyBandFromRampTable(t1.GetMjd(), rampTB);
       }
       else
       {
          // Get frequency from ground station' transmitter
-         ObjectArray hardwareList = ((GroundstationInterface*)sd.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+         ObjectArray hardwareList = ((GroundstationInterface*)(sd->tNode))->GetRefObjectArray(Gmat::HARDWARE);
          UnsignedInt i;
          for (i = 0; i < hardwareList.size(); ++i)
          {
@@ -2137,7 +2135,7 @@ Integer MeasureModel::GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<
          if (i == hardwareList.size())
          {
             std::stringstream ss;
-            ss << "Error: Ground station " << sd.tNode->GetName() << " does not have a transmitter to transmit signal.\n";
+            ss << "Error: Ground station " << sd->tNode->GetName() << " does not have a transmitter to transmit signal.\n";
             throw MeasurementException(ss.str());
          }
       }
@@ -2145,7 +2143,7 @@ Integer MeasureModel::GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<
    else
    {
       // Get frequency from spacecraft's transmitter or transponder
-      ObjectArray hardwareList = ((Spacecraft*)sd.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+      ObjectArray hardwareList = ((Spacecraft*)(sd->tNode))->GetRefObjectArray(Gmat::HARDWARE);
       UnsignedInt i;
       for (i = 0; i < hardwareList.size(); ++i)
       {
@@ -2160,7 +2158,7 @@ Integer MeasureModel::GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<
       if (i == hardwareList.size())
       {
          std::stringstream ss;
-         ss << "Error: Spacecraft " << sd.tNode->GetName() << " does not have a transmitter to transmit signal.\n";
+         ss << "Error: Spacecraft " << sd->tNode->GetName() << " does not have a transmitter to transmit signal.\n";
          throw MeasurementException(ss.str());
       }
    }

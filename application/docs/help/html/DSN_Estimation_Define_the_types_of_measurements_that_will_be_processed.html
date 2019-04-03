@@ -1,0 +1,53 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Define the types of measurements that will be processed</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data"><link rel="prev" href="DSN_Estimation_Create_and_configure_the_Ground_Station_and_related_parameters.html" title="Create and configure the Ground Station and related parameters"><link rel="next" href="DSN_Estimation_Create_and_configure_Force_model_and_propagator.html" title="Create and configure Force model and propagator"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Define the types of measurements that will be processed</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="DSN_Estimation_Create_and_configure_the_Ground_Station_and_related_parameters.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="DSN_Estimation_Create_and_configure_Force_model_and_propagator.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="DSN_Estimation_Define_the_types_of_measurements_that_will_be_processed"></a>Define the types of measurements that will be processed</h2></div></div></div><p>Now we will create and configure a
+    <span class="guilabel">TrackingFileSet</span> resource. This resource defines the
+    type of data to be processed, the ground stations that will be used, and
+    the file name of the input GMD file which will contain the measurement
+    data. Note that in order to just cut and paste from our simulation
+    tutorial, we name our resource <span class="guilabel">DSNsimData</span>. But,
+    since, in this script, we are estimating, perhaps a better name would have
+    been <span class="guilabel">DSNestData</span>.</p><pre class="programlisting">Create TrackingFileSet DSNsimData;
+DSNsimData.AddTrackingConfig         = {{CAN, Sat, CAN}, 'DSN_SeqRange'};   
+DSNsimData.AddTrackingConfig         = {{CAN, Sat, CAN}, 'DSN_TCP'};                 
+DSNsimData.AddTrackingConfig         = {{GDS, Sat, GDS}, 'DSN_SeqRange'};   
+DSNsimData.AddTrackingConfig         = {{GDS, Sat, GDS}, 'DSN_TCP'};                 
+DSNsimData.AddTrackingConfig         = {{MAD, Sat, MAD}, 'DSN_SeqRange'};   
+DSNsimData.AddTrackingConfig         = {{MAD, Sat, MAD}, 'DSN_TCP'};                 
+DSNsimData.FileName                  = ...
+      {'../output/Simulate DSN Range and Doppler Data 3 weeks.gmd'};
+DSNsimData.RampTable                 = ... 
+      {'../output/Simulate DSN Range and Doppler Data 3 weeks.rmp'};
+
+DSNsimData.UseLightTime              = true;
+DSNsimData.UseRelativityCorrection   = true;
+DSNsimData.UseETminusTAI             = true;</pre><p>The script lines above are broken into three sections. In the first
+    section, the resource name, <span class="guilabel">DSNsimData</span>, is declared,
+    the data types are defined, and the input GMD file and ramp table name are
+    specified. <span class="guilabel">AddTrackingConfig</span> is the field that is
+    used to define the data types. The first
+    <span class="guilabel">AddTrackingConfig</span> line tells GMAT to process DSN
+    range two way measurements for the <span class="guilabel">CAN</span> to
+    <span class="guilabel">Sat</span> to <span class="guilabel">CAN</span> measurement strand.
+    The second <span class="guilabel">AddTrackingConfig</span> line tells GMAT to
+    process DSN Doppler two way measurements for the <span class="guilabel">CAN</span>
+    to <span class="guilabel">Sat</span> to <span class="guilabel">CAN</span> measurement
+    strand. The remaining 4 <span class="guilabel">AddTrackingConfig</span> script
+    lines tell GMAT to also process <span class="guilabel">GDS</span> and
+    <span class="guilabel">MAD</span> range and Doppler measurements. Note that the
+    input GMD and ramp table files that we specified are files that we created
+    as part of the <span class="bold"><strong>Simulate DSN Range and Doppler Data
+    Tutorial</strong></span>. Don&rsquo;t forget to put these files in the GMAT &ldquo;output&rdquo;
+    directory.</p><p>The second section above sets some processing parameters that apply
+    to both the range and Doppler measurements. We set
+    <span class="guilabel">UseLightTime</span> to True in order to generate realistic
+    computed, C, measurements that take into account the finite speed of
+    light. The last two parameters in this section,
+    <span class="guilabel">UseRelativityCorrection</span> and
+    <span class="guilabel">UseETminusTAI</span>, are set to True so that general
+    relativistic corrections, as described in Moyer [2000], are applied to the
+    light time equations.</p><p>Note that, in the simulation tutorial, we set two other
+    <span class="guilabel">DSNsimData</span> fields,
+    <span class="guilabel">SimDopplerCountInterval</span> and
+    <span class="guilabel">SimRangeModuloConstant</span>. Since these fields only apply
+    to simulations, there is no need to set them here as their values would
+    only be ignored.</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="DSN_Estimation_Create_and_configure_the_Ground_Station_and_related_parameters.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="DSN_Estimation_Create_and_configure_Force_model_and_propagator.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Create and configure the Ground Station and related
+    parameters&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Create and configure Force model and propagator</td></tr></table></div></body></html>

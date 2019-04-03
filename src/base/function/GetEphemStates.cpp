@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -66,10 +66,8 @@
 #endif
 
 //---------------------------------
-// static data
+// public
 //---------------------------------
-
-
 //------------------------------------------------------------------------------
 //  GetEphemStates(std::string typeStr, std::string name)
 //------------------------------------------------------------------------------
@@ -93,8 +91,9 @@ GetEphemStates::GetEphemStates(const std::string &typeStr, const std::string &na
    ephemFinalA1Mjd   (0.0)
 {
    objectTypeNames.push_back(typeStr);
-   objectTypeNames.push_back("GetEphemStates");
-
+   if (typeStr != "GetEphemStates")
+      objectTypeNames.push_back("GetEphemStates");
+   
    ephemInitialState.Set(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
    ephemFinalState.Set(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
    
@@ -103,24 +102,24 @@ GetEphemStates::GetEphemStates(const std::string &typeStr, const std::string &na
    //     GetEphemStates(ephemType, sat, epochFormat, coordinateSystem)
    
    // Add dummy input names
-   inputNames.push_back("__GetEphemStates_input_1_ephemtype__");
-   inputArgMap.insert(std::make_pair("__GetEphemStates_input_1_ephemtype__", (ElementWrapper*) NULL));
-   inputNames.push_back("__GetEphemStates_input_2_spacecraft__");
-   inputArgMap.insert(std::make_pair("__GetEphemStates_input_2_spacecraft__", (ElementWrapper*) NULL));
-   inputNames.push_back("__GetEphemStates_input_3_epochformat__");
-   inputArgMap.insert(std::make_pair("__GetEphemStates_input_3_epochformat__", (ElementWrapper*) NULL));
-   inputNames.push_back("__GetEphemStates_input_4_coordsys__");
-   inputArgMap.insert(std::make_pair("__GetEphemStates_input_4_coordsys__", (ElementWrapper*) NULL));
+   inputNames.push_back("__BuiltinFunction_GetEphemStates_input_1_ephemtype__");
+   inputArgMap.insert(std::make_pair("__BuiltinFunction_GetEphemStates_input_1_ephemtype__", (ElementWrapper*) NULL));
+   inputNames.push_back("__BuiltinFunction_GetEphemStates_input_2_spacecraft__");
+   inputArgMap.insert(std::make_pair("__BuiltinFunction_GetEphemStates_input_2_spacecraft__", (ElementWrapper*) NULL));
+   inputNames.push_back("__BuiltinFunction_GetEphemStates_input_3_epochformat__");
+   inputArgMap.insert(std::make_pair("__BuiltinFunction_GetEphemStates_input_3_epochformat__", (ElementWrapper*) NULL));
+   inputNames.push_back("__BuiltinFunction_GetEphemStates_input_4_coordsys__");
+   inputArgMap.insert(std::make_pair("__BuiltinFunction_GetEphemStates_input_4_coordsys__", (ElementWrapper*) NULL));
    
    // Add dummy output names
-   outputNames.push_back("__GetEphemStates_output_1_initialepoch__");
-   outputArgMap.insert(std::make_pair("__GetEphemStates_output_1_initialepoch__", (ElementWrapper*) NULL));
-   outputNames.push_back("__GetEphemStates_output_2_initialstate__");
-   outputArgMap.insert(std::make_pair("__GetEphemStates_output_2_initialstate__", (ElementWrapper*) NULL));
-   outputNames.push_back("__GetEphemStates_output_3_finalepoch__");
-   outputArgMap.insert(std::make_pair("__GetEphemStates_output_3_finalepoch__", (ElementWrapper*) NULL));
-   outputNames.push_back("__GetEphemStates_output_4_finalstate__");
-   outputArgMap.insert(std::make_pair("__GetEphemStates_output_4_finalstate__", (ElementWrapper*) NULL));
+   outputNames.push_back("__BuiltinFunction_GetEphemStates_output_1_initialepoch__");
+   outputArgMap.insert(std::make_pair("__BuiltinFunction_GetEphemStates_output_1_initialepoch__", (ElementWrapper*) NULL));
+   outputNames.push_back("__BuiltinFunction_GetEphemStates_output_2_initialstate__");
+   outputArgMap.insert(std::make_pair("__BuiltinFunction_GetEphemStates_output_2_initialstate__", (ElementWrapper*) NULL));
+   outputNames.push_back("__BuiltinFunction_GetEphemStates_output_3_finalepoch__");
+   outputArgMap.insert(std::make_pair("__BuiltinFunction_GetEphemStates_output_3_finalepoch__", (ElementWrapper*) NULL));
+   outputNames.push_back("__BuiltinFunction_GetEphemStates_output_4_finalstate__");
+   outputArgMap.insert(std::make_pair("__BuiltinFunction_GetEphemStates_output_4_finalstate__", (ElementWrapper*) NULL));
    
    // Add output types
    outputWrapperTypes.push_back(Gmat::STRING_OBJECT_WT); // initialEpoch
@@ -280,7 +279,7 @@ bool GetEphemStates::Execute(ObjectInitializer *objInit, bool reinitialize)
    #ifdef DEBUG_FUNCTION_EXEC
    MessageInterface::ShowMessage
       ("GetEphemStates::Execute() <%p>'%s' entered\n", this, GetName().c_str());
-   ShowObjects("In GetEphemStates::Execute()");
+   ShowObjectMap(objectStore, "", "objectStore");
    MessageInterface::ShowMessage("   inputArgMap.size() = %d\n", inputArgMap.size());
    MessageInterface::ShowMessage
       ("   outputArgMap.size() = %d\n   outputWrapperTypes.size() = %d\n",
@@ -305,7 +304,7 @@ bool GetEphemStates::Execute(ObjectInitializer *objInit, bool reinitialize)
    }
    
    // Check for output info, there shoud be 4 outputs
-   // This is internal coding error if not 4
+   // It is an internal coding error if not 4
    if ((outputArgMap.size() != outputWrapperTypes.size()) &&
        outputWrapperTypes.size() != 4)
    {

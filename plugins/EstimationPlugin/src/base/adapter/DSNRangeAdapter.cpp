@@ -62,7 +62,7 @@ DSNRangeAdapter::DSNRangeAdapter(const std::string& name) :
    RangeAdapterKm      (name),
    rangeModulo         (1.0e18)
 {
-   typeName = "DSNRange";              // change type name from "RangeKm" to "DSNRange"
+   typeName = "DSN_SeqRange";              // change type name from "RangeKm" to "DSN_SeqRange"
    rampTB = NULL; 
 }
 
@@ -390,7 +390,7 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
    
    // 2. Compute range in km
    RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);             // it needs to include ramp table in calculation
-   
+
    // 3. Convert range from km to RU and store in cMeasurement:
    for (UnsignedInt i = 0; i < cMeasurement.value.size(); ++i)
    {
@@ -413,7 +413,7 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
       {
          // ramped frequency
          #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("Calculate DSNRange based on ramp table\n");
+            MessageInterface::ShowMessage("Calculate DSN_SeqRange based on ramp table\n");
          #endif
 
          try
@@ -432,19 +432,19 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
       {
          // constant frequency
          #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("Calculate DSNRange based on constant frequency\n");
+            MessageInterface::ShowMessage("Calculate DSN_SeqRange based on constant frequency\n");
          #endif
 
          cMeasurement.value[i] = multiplier*realTravelTime;
       }
       Real C_idealVal = cMeasurement.value[i];
       
-      if (measurementType == "DSNRange")
+      if (measurementType == "DSN_SeqRange")
       {
          // Compute bias
-         ComputeMeasurementBias("Bias", "Range_RU", 2);
+         ComputeMeasurementBias("Bias", "DSN_SeqRange", 2);
          // Compute noise sigma
-         ComputeMeasurementNoiseSigma("NoiseSigma", "Range_RU", 2);
+         ComputeMeasurementNoiseSigma("NoiseSigma", "DSN_SeqRange", 2);
          // Compute measurement error covariance matrix
          ComputeMeasurementErrorCovarianceMatrix();
 
@@ -494,6 +494,8 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("      . Noise adding option        : %s\n", (addNoise?"true":"false"));
          MessageInterface::ShowMessage("      . Range modulo constant      : %.12lf RU\n", rangeModulo);
          MessageInterface::ShowMessage("      . Real travel time           : %.12lf seconds\n", realTravelTime);
+         MessageInterface::ShowMessage("      . Uplink frequency at transmit time: %.12lf Hz\n", uplinkFreq);
+         MessageInterface::ShowMessage("      . Uplink frequency at receive time : %.12lf Hz\n", uplinkFreqAtRecei);
          MessageInterface::ShowMessage("      . Multiplier factor          : %.12lf\n", GetMultiplierFactor());
          MessageInterface::ShowMessage("      . C-value w/o noise and bias : %.12lf RU\n", C_idealVal);
          MessageInterface::ShowMessage("      . DSN Noise sigma            : %.12lf RU\n", noiseSigma[i]);
@@ -573,7 +575,7 @@ const std::vector<RealArray>& DSNRangeAdapter::CalculateMeasurementDerivatives(
 
    if (paramName == "Bias")
    {
-      if (((ErrorModel*)obj)->GetStringParameter("Type") == "Range_RU")
+      if (((ErrorModel*)obj)->GetStringParameter("Type") == "DSN_SeqRange")
          theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, id);
       else
       {

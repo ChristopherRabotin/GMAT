@@ -390,6 +390,7 @@ ObservationData* GmatODType::ReadObservation()
 
    // old format: 21545.05439854615       Range    7000    GS2ID    ODSatID    2713.73185
    // new format: 21545.05439854615    DSNRange    7050    GS2ID    ODSatID    2713.73185		Uplink Band		Uplink Frequency	Range Modulo 
+   // new format: 21545.05439854615    DSN_SeqRange    7050    GS2ID    ODSatID    2713.73185		Uplink Band		Uplink Frequency	Range Modulo 
    Real value; 
 
    GmatEpoch taiEpoch;

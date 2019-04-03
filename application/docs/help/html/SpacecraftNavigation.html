@@ -1,0 +1,77 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Spacecraft Navigation</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="SpacecraftHardware.html" title="Spacecraft Hardware"><link rel="next" href="SpacecraftOrbitState.html" title="Spacecraft Orbit State"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Spacecraft Navigation</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="SpacecraftHardware.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="SpacecraftOrbitState.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="SpacecraftNavigation"></a><div class="titlepage"></div><a name="N1F43E" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Spacecraft Navigation</span></h2><p>Spacecraft Navigation &mdash; There are a number of <span class="guilabel">Spacecraft</span> fields
+    that are used exclusively to support GMAT's navigation
+    capability.</p></div><div class="refsection"><a name="N1F452"></a><h2>Description</h2><p>When using GMAT's navigation capabilities, certain Spacecraft
+    parameters can be "solved-for." As discussed in the <a class="xref" href="SpacecraftBallisticMass.html" title="Spacecraft Ballistic/Mass Properties"><span class="refentrytitle">Spacecraft Ballistic/Mass Properties</span></a> section, the
+    <span class="guilabel">Spacecraft</span> ballistic and mass properties include the
+    coefficient of reflectivity, <span class="guilabel">Cr</span>, and the coefficient
+    of drag, <span class="guilabel">Cd</span>. As discussed in the <a class="xref" href="SpacecraftOrbitState.html" title="Spacecraft Orbit State"><span class="refentrytitle">Spacecraft Orbit State</span></a> section, you can
+    specify the <span class="guilabel">CartesianState</span>, i.e., the
+    <span class="guilabel">X</span>, <span class="guilabel">Y</span>, <span class="guilabel">Z</span>
+    position (km), and the <span class="guilabel">Vx</span>, <span class="guilabel">Vy</span>,
+    <span class="guilabel">Vz</span> velocity (km/s) of a
+    <span class="guilabel">Spacecraft</span>. As part of GMAT's navigation capability,
+    GMAT can ingest measurements and estimate ("solve-for") values for
+    <span class="guilabel">Cr</span>, <span class="guilabel">Cd</span>, and
+    <span class="guilabel">CartesianState</span>.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="BatchEstimatorInv.html" title="BatchEstimatorInv"><span class="refentrytitle">BatchEstimatorInv</span></a></p></div><div class="refsection"><a name="N1F490"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AddHardware</span></td><td><p>List of <span class="guilabel">Antenna</span>,
+            <span class="guilabel">Transmitter</span>, <span class="guilabel">Receiver</span>,
+            and <span class="guilabel">Transponder</span> objects attached to a
+            <span class="guilabel">Spacecraft</span> </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p><span class="guilabel">Antenna</span>,
+                    <span class="guilabel">Transmitter</span>,
+                    <span class="guilabel">Receiver</span>, or
+                    <span class="guilabel">Transponder</span> object</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any user defined <span class="guilabel">Antenna</span>,
+                    <span class="guilabel">Transmitter</span>,
+                    <span class="guilabel">Receiver</span>, or
+                    <span class="guilabel">Transponder</span> object</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">CdSigma</span></td><td><p>Standard deviation of the coefficient of
+            reflectivity, <span class="guilabel">Cd</span>. This field is only used if
+            the <span class="guilabel">UseInitialCovariance</span> field of the
+            <span class="guilabel">BatchEstimatorInv</span> resource is set to
+            <code class="code">True</code> and <span class="guilabel">Cd</span> is being solved for.
+            </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1e70</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">CrSigma</span></td><td><p>Standard deviation of the coefficient of
+            reflectivity, <span class="guilabel">Cr</span>. This field is only used if
+            the <span class="guilabel">UseInitialCovariance</span> field of the
+            <span class="guilabel">BatchEstimatorInv</span> resource is set to
+            <code class="code">True</code> and <span class="guilabel">Cr</span> is being solved for.
+            </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1e70</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EstimationStateType</span></td><td><p>Choice of 6-element state type to be solved for.
+            Currently, <code class="code">Cartesian</code> is the only allowed value. This
+            field only has a function if the
+            <span class="guilabel">CartesianState</span> is being solved-for.
+            </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Cartesian</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Cartesian</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">OrbitErrorCovariance</span></td><td><p>Cartesian State 6x6 error covariance matrix. This
+            field is only used if the
+            <span class="guilabel">UseInitialCovariance</span> of the
+            <span class="guilabel">BatchEstimatorInv</span> resource is set to
+            <code class="code">True</code> and the CartesianState is being solved for.
+            </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real Matrix</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>6x6 positive definite symmetric
+                    <span class="guilabel">Array</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>6x6 diagonal matrix with 1e70 in all diagonal
+                    entries.</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Covariance matrix where position specified in km and
+                    velocity in km/s. (Thus, first three diagonal elements
+                    have units km^2 and last three diagonal elements have
+                    units (km/s)^2)</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SolveFors</span></td><td><p>List of fields to be solved for. Currently, if
+            anything is solved for, then <span class="guilabel">CartesianState</span>
+            must be included as a solve-for. For example,
+            <span class="guilabel">Cr</span> cannot be the only parameter solved for.
+            </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>StringArray</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>CartesianState, Cr, Cd</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1F608"></a><h2>Examples</h2><div class="informalexample"><p>Solve for Cr and the spacecraft Cartesian state.</p><pre class="programlisting"><code class="code">Create Spacecraft Sat
+Create BatchEstimatorInv bat
+Sat.SolveFors = {CartesianState, Cr}
+%User must create a TrackingFileSet
+%and set up bat appropriately
+
+BeginMissionSequence
+RunEstimator bat</code></pre></div><div class="informalexample"><p>Solve for Cd and the spacecraft Cartesian state assuming that the
+      <span class="emphasis"><em>a priori</em></span> information is included in the estimation
+      state vector.</p><pre class="programlisting"><code class="code">Create Spacecraft Sat
+Sat.SolveFors = {CartesianState, Cd}
+
+Create BatchEstimatorInv bat
+bat.UseInitialCovariance= True  
+%User must create a TrackingFileSet
+%and set up bat appropriately
+
+Create Array Initial_6x6_covariance[6,6]
+
+BeginMissionSequence
+Initial_6x6_covariance = ...
+       diag([1e-6 1e70 1e70 1e70 1e70 1e70]) %X pos known very well
+Sat.OrbitErrorCovariance = Initial_6x6_covariance
+Sat.CrSigma = 1e-6   %Cr known very well
+
+RunEstimator bat</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="SpacecraftHardware.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="SpacecraftOrbitState.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Spacecraft Hardware&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Spacecraft Orbit State</td></tr></table></div></body></html>

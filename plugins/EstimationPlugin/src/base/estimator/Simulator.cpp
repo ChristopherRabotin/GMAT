@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -174,13 +174,25 @@ Simulator& Simulator::operator =(const Simulator& sim)
    {
       Solver::operator=(sim);
 
-      if (propagator != NULL)
-         delete propagator;
+      //if (propagator != NULL)
+      //   delete propagator;
 
-      if (sim.propagator) 
-         propagator = ((PropSetup*) (sim.propagator)->Clone());
+      if (sim.propagator)
+      {
+         if (propagator == NULL)
+            propagator = ((PropSetup*)(sim.propagator)->Clone());
+         else if (propagator->GetName() != sim.propagator->GetName())
+         {
+            delete propagator;
+            propagator = ((PropSetup*)(sim.propagator)->Clone());
+         }
+      }
       else
+      {
+         if (propagator)
+            delete propagator;
          propagator = NULL;
+      }
 
       propagatorName      = sim.propagatorName;
       simState            = NULL;   // or clone it here??
@@ -224,6 +236,9 @@ Simulator::~Simulator()
    measList.clear();
    measModelList.clear();
    refObjectList.clear();
+
+   ionoWarningList.clear();
+   tropoWarningList.clear();
 }
 
 
@@ -1175,9 +1190,12 @@ bool Simulator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    {
       if (type == Gmat::PROP_SETUP)
       {
-         if (propagator != NULL)
-            delete propagator;
-         propagator = (PropSetup*)obj->Clone();
+         //if (propagator != NULL)
+         //   delete propagator;
+         //propagator = (PropSetup*)obj->Clone();
+
+         if (propagator == NULL)
+            propagator = (PropSetup*)obj->Clone();
          measManager.SetPropagator(propagator);
          return true;
       }
@@ -1636,7 +1654,7 @@ void Simulator::CompleteInitialization()
    if (eop != NULL)
    {
       Real timeMin, timeMax;
-      eop->GetTimeRage(timeMin, timeMax);
+      eop->GetTimeRange(timeMin, timeMax);
       if (simulationStart < timeMin)
       {
          MessageInterface::ShowMessage("Warning: %s.InitialEpoch has value (%.12lf A1Mjd) outside EOP time range [%.12lf A1Mjd , %.12lf A1Mjd].\n", GetName().c_str(), simulationStart, timeMin, timeMax);
@@ -1744,8 +1762,7 @@ void Simulator::FindTimeStep()
 void Simulator::CalculateData()
 {
    // Tell the measurement manager to calculate the simulation data
-   //if (measManager.CalculateMeasurements(true, false) == false)               // fixed Bug 8 in ticket GMT-4314
-   if (measManager.CalculateMeasurements(true, true, addNoise) == false)        // fixed Bug 8 in ticket GMT-4314
+   if (measManager.CalculateMeasurements(true, true, addNoise) == false)
    {
       // No measurements were possible
       FindNextSimulationEpoch();

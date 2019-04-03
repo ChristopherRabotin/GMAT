@@ -1,0 +1,82 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>GMAT R2013a Release Notes</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ReleaseNotes.html" title="Release Notes"><link rel="prev" href="ReleaseNotesR2013b.html" title="GMAT R2013b Release Notes"><link rel="next" href="ReleaseNotesR2012a.html" title="GMAT R2012a Release Notes"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">GMAT R2013a Release Notes</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ReleaseNotesR2013b.html">Prev</a>&nbsp;</td><th align="center" width="60%">Release Notes</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ReleaseNotesR2012a.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="ReleaseNotesR2013a"></a>GMAT R2013a Release Notes</h2></div></div></div><p>The General Mission Analysis Tool (GMAT) version R2013a was released
+  in April, 2013. This is the first public release since May 23, 2012, and is
+  the 6th public release for the project. R2013a is a major release
+  transitioning GMAT from beta to production status. In this release:</p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p>End-user documentation was rewritten and greatly expanded.</p></li><li class="listitem"><p>11,000 script-based regression tests run nightly.</p></li><li class="listitem"><p>5,000 GUI-based regression tests run weekly.</p></li><li class="listitem"><p>Code and documentation was contributed by 11 developers from 3
+      organizations.</p></li></ul></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2A30F"></a>Licensing</h3></div></div></div><p>GMAT is now licensed under <a class="link" href="http://www.apache.org/licenses/LICENSE-2.0" target="_top">Apache License,
+    Version 2.0</a>. According to the <a class="link" href="http://opensource.org/proliferation-report" target="_top">Open Source
+    Proliferation Report</a>, the Apache License 2.0 is one of the most
+    widely-used open source licenses, thereby making GMAT compatible with more
+    existing software and projects.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2A31C"></a>Major Improvements</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A31F"></a>Production Status</h4></div></div></div><p>Release R2013a is a major release of GMAT that transitions from
+      beta to production status. Most of our efforts have been devoted to
+      improving the quality of the software and its documentation. This year
+      we made a complete sweep through the system, starting by updating
+      engineering specifications for all features, identifying test gaps,
+      writing new tests, addressing known and newly found bugs, and completing
+      user documentation.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A324"></a>Tutorials</h4></div></div></div><p>The GMAT User Guide now contains 5 in-depth tutorials that show
+      how to use GMAT for end-to-end analysis. The tutorials are designed to
+      teach you how to use GMAT in the context of performing real-world
+      analysis and are intended to take between 30 minutes and several hours
+      to complete. Each tutorial has a difficulty level and an approximate
+      duration listed with any prerequisites in its introduction, and is
+      arranged in a general order of difficulty. The simplest tutorial shows
+      you how to enter orbital initial conditions and propagate to orbit
+      perigee, while more advanced tutorials show how to perform
+      finite-maneuver targeting, Mars B-plane targeting, and lunar flyby
+      optimization.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A329"></a>Reference Guide</h4></div></div></div><p>We have written a complete reference manual for GMAT for R2013a.
+      The reference manual contains detailed information on all GMAT
+      components. Whether you need detailed information on syntax or
+      application-specific examples, go here. For each GMAT resource (e.g.
+      <span class="guilabel">Spacecraft</span>, <span class="guilabel">ChemicalThruster</span>,
+      <span class="guilabel">XYPlot</span>) and command (e.g.
+      <span class="guilabel">Optimize</span>, <span class="guilabel">Propagate</span>), the
+      following information is documented:</p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p>Brief description of the feature</p></li><li class="listitem"><p>List of related or coupled features</p></li><li class="listitem"><p>Complete syntactical specification of the interface</p></li><li class="listitem"><p>Tables with detailed options, variable ranges and data types,
+          defaults, and expected behavior</p></li><li class="listitem"><p>Copy-and-paste-ready examples</p></li></ul></div><p>The guide also contains general reference material about the
+      system, such as:</p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p>Script language syntax</p></li><li class="listitem"><p>External interfaces</p></li><li class="listitem"><p>Parameter listings</p></li><li class="listitem"><p>Configuration files</p></li><li class="listitem"><p>Command line interface</p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A361"></a>Testing</h4></div></div></div><p>We have spent much of our time preparing for R2013a on testing.
+      Our script and GUI-based regression test systems doubled in size in the
+      last year. They now contain:</p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p>Over 6,000 new system, validation, and end-to-end script-based
+          tests</p></li><li class="listitem"><p>30 new end-to-end GUI tests</p></li><li class="listitem"><p>3,000 new GUI system tests</p></li></ul></div><p>GUI test are performed using SmartBear&rsquo;s TestComplete software.
+      Script tests are performed using a custom MATLAB-based automated test
+      system. A complete execution of the regression test system now takes
+      almost four days of computer time.</p></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2A373"></a>Minor Enhancements</h3></div></div></div><p>While most of our effort has been focused on quality for this
+    release, we have included some new features.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>ICRF is now supported for input and output of orbit state
+        data:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="70%"><tr><td align="center"><img src="../files/images/ReleaseNotes_R2013a_1.png" align="middle" height="219"></td></tr></table></div></div></li><li class="listitem"><p>The Earth texture map is improved:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="70%"><tr><td align="center"><img src="../files/images/ReleaseNotes_R2013a_2.png" align="middle" height="319"></td></tr></table></div></div></li><li class="listitem"><p>CCSDS ephemeris files are now accessible in the output
+        tab:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="70%"><tr><td align="center"><img src="../files/images/ReleaseNotes_R2013a_3.png" align="middle" height="203"></td></tr></table></div></div></li><li class="listitem"><p>Improved mouse controls for interactive 3-D graphics. See the
+        <a class="xref" href="OrbitView.html" title="OrbitView"><span class="refentrytitle">OrbitView</span></a> reference for
+        details.</p></li><li class="listitem"><p>Improved 3ds model support</p></li><li class="listitem"><p>Improved error messages system-wide</p></li><li class="listitem"><p>New <span class="guilabel">BodySpinSun</span> axis system for asteroid
+        survey missions</p></li><li class="listitem"><p>Improved system modularization by moving more features to
+        plugins</p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2A3B3"></a>Compatibility Changes</h3></div></div></div><p>Our last release, R2012a, was beta software. R2013a is mature,
+    production software. We made some changes that may cause backwards
+    compatibility issues with scripts written in previous beta versions.
+    Examples of changes in R2013a that affect backwards compatibility with
+    previous beta versions include:</p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p>Fixed many poorly-named fields and/or parameters (i.e.
+        <span class="guilabel">OrbitView</span>.<span class="guilabel">CelestialPlane</span> &rarr;
+        <span class="guilabel">OrbitView</span>.<span class="guilabel">EclipticPlane</span>)</p></li><li class="listitem"><p>Corrected missed or invalid data validation checking</p></li><li class="listitem"><p>Removed partially-implemented functionality from previous
+        releases</p></li><li class="listitem"><p>Removed improperly-exposed internal fields and functions</p></li><li class="listitem"><p>Disabled configuration of some resources in the mission
+        sequence</p></li></ul></div><p>In all cases, we modified GMAT to work correctly as specified in the
+    documentation, but did not always maintain backwards compatibility with
+    previous versions. This was a one-time, &ldquo;pull-of-the-Band-Aid&rdquo; approach,
+    and future releases will maintain backwards compatibility with R2013a or
+    provide deprecation notifications of features that are no longer
+    supported.</p><p>In addition, there were some features that did not meet quality
+    expectations for this release and have been turned off in the release
+    package. Most of these features can be turned on for analysis purposes,
+    but they are not fully tested and should be used with caution.</p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p>Orbit Designer (disabled)</p></li><li class="listitem"><p>GMAT functions (<code class="filename">libGmatFunctions</code>)</p></li><li class="listitem"><p>Save command (<code class="filename">libSaveCommand</code>)</p></li><li class="listitem"><p>Bulirsh-Stoer integrator
+        (<code class="filename">libExtraPropagators</code>)</p></li></ul></div><p>To turn on these features, see the <a class="xref" href="StartupFile.html" title="Startup File"><span class="refentrytitle">Startup File</span></a> reference.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2A3F6"></a>Known &amp; Fixed Issues</h3></div></div></div><p>Over 720 bugs and issues were closed in this release. See the <a class="link" href="http://li64-187.members.linode.com:8080/issues/?filter=11803" target="_top">"Critical
+    Issues Fixed for R2013a" report</a> for a list of critical bugs and
+    resolutions for R2013a. See the <a class="link" href="http://li64-187.members.linode.com:8080/issues/?filter=11807" target="_top">"Minor
+    Issues Fixed for R2013a" report</a>" for minor issues addressed in
+    R2013a.</p><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2A403"></a>Known Issues</h4></div></div></div><p>All known issues that affect this version of GMAT can be seen in
+      <a class="link" href="http://li64-187.members.linode.com:8080/issues/?filter=11806" target="_top">the
+      "Known issues in R2013a" report</a> in JIRA.</p><p>There are several known issues in this release that we consider to
+      be significant:</p><div class="informaltable"><table border="1"><colgroup><col width="16%"><col width="84%"></colgroup><thead><tr><th align="left">ID</th><th align="left">Description</th></tr></thead><tbody><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-2561" target="_top">GMT-2561</a></td><td>UTC Epoch Entry and Reporting During Leap Second is
+                incorrect.</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3043" target="_top">GMT-3043</a></td><td>Inconsistent validation when creating variables that
+                shadow built-in math functions</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3108" target="_top">GMT-3108</a></td><td>OrbitView with STM and Propagate Synchronized does not
+                show spacecraft in correct locations </td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3289" target="_top">GMT-3289</a></td><td>First step algorithm fails for backwards propagation
+                using SPK propagator</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3321" target="_top">GMT-3321</a></td><td>MATLAB uses stale version of function if command window
+                isn't restarted between runs</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3350" target="_top">GMT-3350</a></td><td>Single-quote requirements are not consistent across
+                objects and modes</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3556" target="_top">GMT-3556</a></td><td>Unable to associate tank with thruster in command
+                mode</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3629" target="_top">GMT-3629</a></td><td>GUI starts in bad state when started with
+                --minimize</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3669" target="_top">GMT-3669</a></td><td>Planets not drawn during optimization in
+                OrbitView</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3738" target="_top">GMT-3738</a></td><td>Cannot set standalone FuelTank, Thruster fields in
+                CallMatlabFunction</td></tr><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3745" target="_top">GMT-3745</a></td><td>SPICE ephemeris stress tests are not writing out
+                ephemeris for the entire mission sequence</td></tr></tbody></table></div></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ReleaseNotesR2013b.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ReleaseNotes.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ReleaseNotesR2012a.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">GMAT R2013b Release Notes&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;GMAT R2012a Release Notes</td></tr></table></div></body></html>

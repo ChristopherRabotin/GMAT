@@ -64,14 +64,19 @@ SET(PLUGIN_SRCS
     adapter/DopplerAdapter.cpp
     adapter/DSNRangeAdapter.cpp
     adapter/GNDopplerAdapter.cpp
+    adapter/GNRangeAdapter.cpp
+    adapter/GPSAdapter.cpp
     adapter/PointRangeRateAdapterKps.cpp
     adapter/RangeAdapterKm.cpp
     adapter/RangeRateAdapterKps.cpp
     adapter/TDRSDopplerAdapter.cpp
+    adapter/TDRSRangeAdapter.cpp
     adapter/TrackingDataAdapter.cpp
     command/RunEstimator.cpp
     command/RunSimulator.cpp
     datafilter/DataFilter.cpp
+    datafilter/AcceptFilter.cpp
+    datafilter/RejectFilter.cpp
     datafilter/StatisticAcceptFilter.cpp
     datafilter/StatisticRejectFilter.cpp
     errormodel/ErrorModel.cpp
@@ -143,6 +148,7 @@ SET(PLUGIN_SRCS
     measurementfile/RampTableData.cpp
     measurementfile/RampTableType.cpp
     measurementmodel/MeasureModel.cpp
+    measurementmodel/GPSPointMeasureModel.cpp
     plugin/GmatPluginFunctions.cpp
     propagator/RungeKutta4.cpp
     reporter/ProgressReporter.cpp

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -196,7 +196,7 @@ bool ICRFFile::GetICRFRotationVector(Real ind,    Real* icrfRotationVector,
 	// to specify midpoint but binary search:
 	Integer start = 0;
 	Integer end = pointsCount-1;
-	Integer midpoint;
+	Integer midpoint = -999;
 	while (start < end-1)
 	{
 		midpoint = (start + end)/2;
@@ -205,6 +205,8 @@ bool ICRFFile::GetICRFRotationVector(Real ind,    Real* icrfRotationVector,
 		else
 			end = midpoint;
 	}
+   if (midpoint == -999)
+		throw GmatBaseException("ICRFFile::GetICRFRotationVector - ERROR computing midpoint.\n");
 
 	Integer beginIndex = (0 > (midpoint-order/2))? 0:(midpoint-order/2);
 	Integer endIndex = ((pointsCount-1) < (beginIndex+order))? (pointsCount-1):(beginIndex+order);

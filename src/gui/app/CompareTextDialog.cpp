@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -125,7 +125,7 @@ void CompareTextDialog::Create()
                     wxDefaultPosition, wxSize(60,-1), 0);
    
    wxStaticText *numFilesBaseDirLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Number of Files (.txt, .report, .data, .script, .eph, .truth):"),
+      new wxStaticText(this, ID_TEXT, wxT("Number of Files (.txt, .report, .data, .script, .eph, .oem, .e, .truth):"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mNumFilesInBaseDirTextCtrl =
@@ -179,7 +179,7 @@ void CompareTextDialog::Create()
                     wxDefaultPosition, wxSize(60,-1), 0);
    
    wxStaticText *numFilesInCompareDirLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Number of Files (.txt, .report, .data, .script, .eph, .truth):"),
+      new wxStaticText(this, ID_TEXT, wxT("Number of Files (.txt, .report, .data, .script, .eph, .oem, .e, .truth):"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mNumFilesInCompareDirTextCtrl =
@@ -581,14 +581,18 @@ wxArrayString CompareTextDialog::GetFilenames(const wxString &dirname,
    {
       if (filename.Contains(".report") || filename.Contains(".txt") ||
           filename.Contains(".data") || filename.Contains(".script") ||
-          filename.Contains(".eph") || filename.Contains(".truth"))
+          filename.Contains(".eph") || filename.Contains(".oem") ||
+          filename.Contains(".e") || filename.Contains(".truth"))
       {
          // if it has prefix
          if (filename.Left(prefixLen) == prefix)
          {
-            // if not backup files
+            // If not backup files
+            // Add files ending 't' for report, txt, and script
+            // 'a' for data, 'h' for eph and truth, 'm' for .oem, 'e' for .e
             if (filename.Last() == 't' || filename.Last() == 'a' ||
-                filename.Last() == 'h')
+                filename.Last() == 'h' || filename.Last() == 'm' ||
+                filename.Last() == 'e')
             {
                filepath = dirname + "/" + filename;
                fileNames.Add(filepath);

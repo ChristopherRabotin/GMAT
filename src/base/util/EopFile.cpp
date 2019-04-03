@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -26,7 +26,8 @@
 //
 /**
  * Implementation of the EopFile class.  This is the code that reads the polar
- * motion information from EOP file.
+ * motion information from EOP file (type 14 C04 or type 08 C04).  NOTE: reading
+ * of Finals file is no longer supported.
  *
  */
 //------------------------------------------------------------------------------
@@ -211,7 +212,7 @@ void EopFile::Initialize()
       // now start reading the data
       Integer     year, day, mjd;
       std::string month;
-      Real        x, y, ut1_utc, lod; // ignore lod, dPsi, dEpsilon
+      Real        x, y, ut1_utc, lod; // ignore dPsi, dEpsilon (or dX, dY)
       bool done = false;
       while (!done)
       {
@@ -240,7 +241,7 @@ void EopFile::Initialize()
          else                 getline(eopFile, line);
       }
    }
-   else if (eopFType == GmatEop::FINALS)
+   else if (eopFType == GmatEop::FINALS)  // No longer supported!!
    {
       char        ipFlag1, ipFlag2;
       Real        mjd, x, y, ut1_utc, lod;
@@ -561,7 +562,7 @@ bool EopFile::IsBlank(const char* aLine)
 }
 
 
-void EopFile::GetTimeRage(Real& timeMin, Real& timeMax)
+void EopFile::GetTimeRange(Real& timeMin, Real& timeMax)
 {
    static RealArray ra;
    const Real *data = polarMotion->GetDataVector();

@@ -1,0 +1,63 @@
+
+%
+%   Spacecraft
+%
+
+Create Spacecraft STKSat;
+
+GMAT STKSat.DateFormat = UTCGregorian;
+GMAT STKSat.Epoch = '01 Jan 2000 12:00:00.000';
+GMAT STKSat.EphemerisName = '../data/vehicle/ephem/stk/SampleSTKEphem.e';
+
+%
+%   Propagator
+%
+
+Create Propagator STKProp;
+
+GMAT STKProp.Type = STK;
+GMAT STKProp.StepSize = 60;
+GMAT STKProp.CentralBody = Earth;
+GMAT STKProp.EpochFormat = 'A1ModJulian';
+GMAT STKProp.StartEpoch = 'FromSpacecraft';
+
+%
+%   Output 
+%
+
+Create OrbitView OrbitView1;
+GMAT OrbitView1.SolverIterations = Current;
+GMAT OrbitView1.UpperLeft = [ 0 0 ];
+GMAT OrbitView1.Size = [ 0 0 ];
+GMAT OrbitView1.RelativeZOrder = 0;
+GMAT OrbitView1.Maximized = false;
+GMAT OrbitView1.Add = {STKSat, Earth};
+
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+
+Create Array initialState[6,1] finalState[6,1];
+
+%
+% Miscellaneous variables.
+%
+
+Create String initialEpoch finalEpoch;
+
+%
+%   Mission Sequence
+%
+
+BeginMissionSequence;
+
+GMAT [initialEpoch, initialState, finalEpoch, finalState] = GetEphemStates('STK', STKSat, 'UTCGregorian', EarthMJ2000Eq);
+
+GMAT STKSat.Epoch = initialEpoch;
+
+While STKSat.ElapsedDays <= 1
+      
+   Propagate STKProp(STKSat);
+
+EndWhile;

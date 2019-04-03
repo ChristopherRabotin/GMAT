@@ -1,7 +1,0 @@
-SystemTest_Minimal
-SystemTest_Analysis
-SystemTest_Propagation
-UnitTest_EarthModel
-UnitTest_AbsoluteDate
-UnitTest_OrbitState
-UnitTest_PointGroup

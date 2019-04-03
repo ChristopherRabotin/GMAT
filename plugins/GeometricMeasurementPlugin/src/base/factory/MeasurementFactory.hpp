@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -47,6 +47,8 @@ public:
    MeasurementFactory(const MeasurementFactory& fact);
    MeasurementFactory& operator= (const MeasurementFactory& fact);
 
+   GmatBase* CreateObject(const std::string &ofType,
+         const std::string &withName = "");
    CoreMeasurement *CreateMeasurement(const std::string &ofType,
          const std::string &withName = "");
 };

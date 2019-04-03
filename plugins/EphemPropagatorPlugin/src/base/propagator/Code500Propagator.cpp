@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -763,6 +763,7 @@ bool Code500Propagator::Initialize()
       }
    }
 
+   // @todo: This is likely the source of GMT-5959
    if (startEpochSource == FROM_SCRIPT)
       for (UnsignedInt i = 0; i < propObjects.size(); ++i)
          propObjects[i]->SetRealParameter("A1Epoch", currentEpoch);

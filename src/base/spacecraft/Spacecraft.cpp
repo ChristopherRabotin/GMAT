@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -417,7 +417,9 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    cdEpsilon            (0.0),
    crEpsilon            (0.0),
    constrainCd          (true),
-   constrainCr          (true)
+   constrainCr          (true),
+   csTransformMatrix    (6, 6),
+   isCSTransformMatrixSet (false)
 {
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -672,7 +674,6 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    spacecraftId         (a.spacecraftId),
    attitudeModel        (a.attitudeModel),
    ephemerisName        (a.ephemerisName),
-   coordConverter       (a.coordConverter),
    powerSystemName      (a.powerSystemName),
    powerSystem          (NULL),
    totalMass            (a.totalMass),
@@ -692,7 +693,9 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    cdEpsilon            (a.cdEpsilon),
    crEpsilon            (a.crEpsilon),
    constrainCd          (a.constrainCd),
-   constrainCr          (a.constrainCr)
+   constrainCr          (a.constrainCr),
+   csTransformMatrix    (a.csTransformMatrix),
+   isCSTransformMatrixSet (a.isCSTransformMatrixSet)
 {
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -751,12 +754,16 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
 
    // Set Cd covariance
    locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");
-   Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;
-   covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;
+   // Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;
+   Real Cd0 = coeffDrag / (1 + crEpsilon);                                            // Cd0 = Cd / (1+Cd_epsilon)
+   Real Cd_EpsilonSigma = coeffDragSigma / Cd0;                                       // stdiv[Cd_epsilon] = stdiv[Cd]/Cd0
+   covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;      // var[Cd_epsilon] = (stdiv[Cr_epsilon]) ^ 2
    // Set Cr covariance
    locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");
-   Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;
-   covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;
+   // Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;
+   Real Cr0 = reflectCoeff / (1 + crEpsilon);                                         // Cr0 = Cr / (1+Cr_epsilon)
+   Real Cr_EpsilonSigma = reflectCoeffSigma / Cr0;                                    // stdiv[Cr_epsilon] = stdiv[Cr]/Cr0
+   covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;      // var[Cr_epsilon] = (stdiv[Cr_epsilon])^2
 
 
    #ifdef DEBUG_SPACECRAFT
@@ -828,7 +835,10 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    solarSystem          = a.solarSystem;         // need to copy
    internalCoordSystem  = a.internalCoordSystem; // need to copy
    coordinateSystem     = a.coordinateSystem;    // need to copy
-   coordConverter       = a.coordConverter;
+
+   csTransformMatrix      = a.csTransformMatrix;
+   isCSTransformMatrixSet = a.isCSTransformMatrixSet;
+
    powerSystemName      = a.powerSystemName;
    totalMass            = a.totalMass;
    initialDisplay       = false;
@@ -954,12 +964,16 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
    // Set Cd covariance
    locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");
-   Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;
-   covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;
+   // Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag; 
+   Real Cd0 = coeffDrag / (1 + cdEpsilon);                                           // Cd0 = Cd/(1+Cd_epsilon)
+   Real Cd_EpsilonSigma = coeffDragSigma / Cd0;                                      // stdiv[Cd_epsilon] = stdiv[Cd]/Cd0
+   covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;     // var[Cd_epsilon] = (stdiv[Cd_epsilon])^2
    // Set Cr covariance
    locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");
-   Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;
-   covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;
+   // Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff; 
+   Real Cr0 = reflectCoeff / (1 + crEpsilon);                                        // Cr0 = Cr/(1+Cr_epsilon)
+   Real Cr_EpsilonSigma = reflectCoeffSigma / Cr0;                                   // stdiv[Cr_epsilon] = stdiv[Cr]/Cr0
+   covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;     // var[Cd_epsilon] = (stdiv[Cd_epsilon])^2
 
 
    #ifdef DEBUG_SPACECRAFT
@@ -1889,7 +1903,8 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
                   powerSystemName.c_str());
       #endif
       // Add Spacecraft Power System name
-      fullList.push_back(powerSystemName);  // need to check power system for ref object names
+      if (powerSystemName != "")
+         fullList.push_back(powerSystemName);  // need to check power system for ref object names
 
       // Add Tank names
       fullList.insert(fullList.end(), tankNames.begin(), tankNames.end());
@@ -3197,9 +3212,11 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
          throw SpaceObjectException("Error: a nonpositive number was set to CrSigma. A valid value has to be a positive number.\n");
       
       coeffDragSigma = value;
-      Real CdEpsilonSigma = coeffDragSigma / coeffDrag;
+      // Real CdEpsilonSigma = coeffDragSigma / coeffDrag; 
+      Real Cd0 = coeffDrag / (1 + cdEpsilon);                                      // Cd0 = Cd/(1+Cd_epsilon)
+      Real CdEpsilonSigma = coeffDragSigma / Cd0;                                  // stdiv[Cd_epsilon] = stdiv[Cd] / Cd0
       Integer locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");
-      covariance(locationStart, locationStart) = CdEpsilonSigma * CdEpsilonSigma;
+      covariance(locationStart, locationStart) = CdEpsilonSigma * CdEpsilonSigma;  // var[Cd_epsilon] = (stdiv[Cd_epsilon])^2
 
       return coeffDragSigma; 
    }
@@ -3209,9 +3226,11 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
          throw SpaceObjectException("Error: a nonpositive number was set to CdSigma. A valid value has to be a positive number.\n");
 
       reflectCoeffSigma = value;
-      Real CrEpsilonSigma = reflectCoeffSigma / reflectCoeff;
+      // Real CrEpsilonSigma = reflectCoeffSigma / reflectCoeff; 
+      Real Cr0 = reflectCoeff / (1 + crEpsilon);                                    // Cr0 = Cr/(1+Cr_epsilon)
+      Real CrEpsilonSigma = reflectCoeffSigma / Cr0;                                // stdiv[Cr_epsilon] = stdiv[Cr]/Cr0
       Integer locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");
-      covariance(locationStart, locationStart) = CrEpsilonSigma * CrEpsilonSigma;
+      covariance(locationStart, locationStart) = CrEpsilonSigma * CrEpsilonSigma;   // var[Cr_epsilon] = (stdiv[Cr_epsilon])^2
 
       return reflectCoeffSigma;
    }
@@ -4067,6 +4086,21 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == ADD_HARDWARE)
    {
+      // trim off braces:
+      if (GmatStringUtil::IsEnclosedWithBraces(value))
+      {
+         std::string value1 = GmatStringUtil::RemoveEnclosingString(value, "{}");
+         if (GmatStringUtil::Trim(value1) == "")
+            return true;                           // empty list of hardware. Nothing to add
+      }
+
+      // verify input value:
+      if (GmatStringUtil::IsValidIdentity(value) == false)
+      {
+         throw GmatBaseException("Error: The value \"" + value + "\" cannot accepted for " + GetName() + ".AddHardware ");
+         return false;
+      }
+
       // Only add the hardware if it is not in the list already
       if (find(hardwareNames.begin(), hardwareNames.end(), value) ==
           hardwareNames.end())
@@ -4078,17 +4112,38 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 
    if ((id == SOLVEFORS) || (id == STMELEMENTS))
    {
-      if ((id == SOLVEFORS) && (value.substr(0,2) == "{}"))
-      {
-         solveforNames.clear();
-         return true;
-      }
+      //if ((id == SOLVEFORS) && (value.substr(0,2) == "{}"))
+      //{
+      //   solveforNames.clear();
+      //   return true;
+      //}
 
       if (id == SOLVEFORS)
+      {
+         // trim off braces:
+         if (GmatStringUtil::IsEnclosedWithBraces(value))
+         {
+            std::string value1 = GmatStringUtil::RemoveEnclosingString(value, "{}");
+            if (GmatStringUtil::Trim(value1) == "")
+            {
+               solveforNames.clear();               // empty list of solvefors.
+               return true;
+            }
+         }
+
+         // verify input value:
+         if (GmatStringUtil::IsValidIdentity(value) == false)
+         {
+            throw GmatBaseException("Error: The value \"" + value + "\" cannot accepted for " + GetName() + ".SolveFors ");
+            return false;
+         }
+
+         //if (id == SOLVEFORS)
          // Only add the solvefor parameter if it is not in the list already
          if (find(solveforNames.begin(), solveforNames.end(), value) ==
-               solveforNames.end())
+            solveforNames.end())
             solveforNames.push_back(value);
+      }
 
       // Make sure the solve-for list is in the STM
       for (UnsignedInt i = 0; i < solveforNames.size(); ++i)
@@ -4430,6 +4485,13 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
    {
    case ADD_HARDWARE:
       {
+         // verify input value:
+         if (GmatStringUtil::IsValidIdentity(value) == false)
+         {
+            throw GmatBaseException("Error: The value \"" + value + "\" cannot accepted for " + GetName() + ".AddHardware ");
+            return false;
+         }
+
          if (index < (Integer)hardwareNames.size())
             hardwareNames[index] = value;
          else
@@ -5378,12 +5440,26 @@ bool Spacecraft::Initialize()
                         refs[j].c_str(), current->GetName().c_str());
                #endif
 
+               // Connecting up to primary antenna
+               bool found = false;
                for (UnsignedInt k = 0; k < hardwareList.size(); ++k)
                {
                   if (hardwareList[k]->GetName() == refs[j])
+                  {
                      current->SetRefObject(hardwareList[k],
-                           hardwareList[k]->GetType(), hardwareList[k]->GetName());
+                        hardwareList[k]->GetType(), hardwareList[k]->GetName());
+                     found = true;
+                  }
                }
+               if (found)
+                  continue;
+
+               // connecting up to ErrorModels
+               GmatBase* obj = GetConfiguredObject(refs[j])->Clone();
+               if (obj)
+                  current->SetRefObject(obj, obj->GetType(), obj->GetName());
+               else
+                  GmatBaseException("Error: this name '" + refs[j] + "' was not defined in GMAT script.\n");
             }
          }
       }
@@ -5423,6 +5499,9 @@ bool Spacecraft::Initialize()
 //         ephemMgr->Initialize();
 //      }
 
+      // Set transformation matrix to convert from spacecraft's coordinate system to its internal coordinate system
+      GetCoordinateSystemTransformMatrix();
+      isCSTransformMatrixSet = true;
 
       isInitialized = true;
       retval = true;
@@ -7043,6 +7122,8 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    parmOrder[parmIndex++] = FUEL_TANK_ID;
    parmOrder[parmIndex++] = THRUSTER_ID;
    parmOrder[parmIndex++] = POWER_SYSTEM_ID;
+   if (ephemerisName != "")
+      parmOrder[parmIndex++] = EPHEMERIS_NAME;
    parmOrder[parmIndex++] = ORBIT_STM;
    parmOrder[parmIndex++] = ORBIT_A_MATRIX;
    parmOrder[parmIndex++] = ELEMENT1UNIT_ID;
@@ -8059,13 +8140,19 @@ bool Spacecraft::VerifyAddHardware()
             bool check;
             if (primaryAntenna == NULL)
             {
-               MessageInterface::ShowMessage
-                  ("***Error***:primary antenna of %s in %s's AddHardware list is not set \n",
-                   obj->GetName().c_str(), this->GetName().c_str());
                check = false;
+               //MessageInterface::ShowMessage
+               //   ("***Error***:primary antenna of %s in %s's AddHardware list is not set.\n", 
+               //    obj->GetName().c_str(), this->GetName().c_str());
+               throw GmatBaseException("Error: Primary antenna of " + obj->GetName() + " in " 
+                                       + GetName() + ".AddHardware list is not set.\n");
             }
             else
             {
+               if (antennaList.empty())
+                  throw GmatBaseException("Error: primary antenna of " + obj->GetName()
+                                          + "is not set into " + GetName() + ".AddHardware\n");
+
                // Check primary antenna of transmitter, receiver, or transponder is in antenna list:
                check = false;
                for(ObjectArray::iterator j= antennaList.begin(); j != antennaList.end(); ++j)
@@ -8087,9 +8174,11 @@ bool Spacecraft::VerifyAddHardware()
                if (check == false)
                {
                   // Display error message:
-                  MessageInterface::ShowMessage
-                     ("***Error***:primary antenna of %s is not in %s's AddHardware\n",
-                      obj->GetName().c_str(), this->GetName().c_str());
+                  //MessageInterface::ShowMessage 
+                  //   ("***Error***:primary antenna of %s is not in %s's AddHardware\n",
+                  //    obj->GetName().c_str(), this->GetName().c_str());
+                  throw GmatBaseException("Error: Primary antenna of " + obj->GetName()
+                     + " in " + GetName() + ".AddHardware list is not set.\n");
                }
             }
             
@@ -8888,3 +8977,58 @@ void Spacecraft::IsManeuvering(bool mnvrFlag)
    else
       isManeuvering = mnvrFlag;
 }
+
+
+Rmatrix66 Spacecraft::GetCoordinateSystemTransformMatrix()
+{
+   if (!isCSTransformMatrixSet)
+   {
+      if (internalCoordSystem != coordinateSystem)
+      {
+         Rvector inputState(6, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
+         Rvector outputState(6);
+         coordConverter.Convert(GetEpoch(), inputState, coordinateSystem, outputState,
+            internalCoordSystem);
+         Rmatrix33 r = coordConverter.GetLastRotationMatrix();
+         Rmatrix33 rdot = coordConverter.GetLastRotationDotMatrix();
+
+         // Set value for top 3 lines in the matrix
+         for (Integer i = 0; i < 3; ++i)
+         {
+            for (Integer j = 0; j < 6; ++j)
+            {
+               if (j < 3)
+                  csTransformMatrix(i, j) = r(i, j);
+               else
+                  csTransformMatrix(i, j) = 0.0;
+            }
+         }
+
+         // Set value for bottom 3 lines in the matrix
+         for (Integer i = 3; i < 6; ++i)
+         {
+            for (Integer j = 0; j < 6; ++j)
+            {
+               if (j < 3)
+                  csTransformMatrix(i, j) = rdot(i - 3, j);
+               else
+                  csTransformMatrix(i, j) = r(i - 3, j - 3);
+            }
+         }
+      }
+      else
+      {
+         // Set to 6x6 identity matrix
+         for (Integer i = 0; i < 6; ++i)
+         {
+            for (Integer j = 0; j < 6; ++j)
+            {
+               csTransformMatrix(i, j) = ((i == j) ? 1.0 : 0.0);
+            }
+         }
+      }
+   }
+
+   return csTransformMatrix;
+}
+

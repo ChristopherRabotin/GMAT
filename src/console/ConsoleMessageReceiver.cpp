@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                           ConsolMessageReceiver
+//                           ConsoleMessageReceiver
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -39,10 +39,14 @@
 #include <queue>                   // for queue
 #include "MessageInterface.hpp"    // for MessageInterface functions
 #include "BaseException.hpp"
+#include "ConsoleAppException.hpp"
 #include "FileManager.hpp"         // for GetFullPathname()
+#include "FileUtil.hpp"            // for ParsePathName()
 #include "GmatGlobal.hpp"          // for RunBachMode()
 
 #include <cstdlib>                  // For GCC4.4 support
+
+//#define DEBUG_SET_LOG_FILE
 
 //---------------------------------
 //  static data
@@ -325,7 +329,18 @@ void ConsoleMessageReceiver::SetLogPath(const std::string &pathname,
 //------------------------------------------------------------------------------
 void ConsoleMessageReceiver::SetLogFile(const std::string &filename)
 {
-   OpenLogFile(filename);
+   #ifdef DEBUG_SET_LOG_FILE
+      ShowMessage("Log file being set to: %s\n", filename.c_str());
+   #endif
+   std::string fname = filename;
+   FileManager *fm   = FileManager::Instance();
+   
+   if (GmatFileUtil::ParsePathName(fname) == "")
+   {
+      std::string outPath = fm->GetFullPathname(FileManager::OUTPUT_PATH);
+      fname = outPath + fname;
+   }
+   OpenLogFile(fname);
 }
 
 //------------------------------------------------------------------------------
@@ -341,6 +356,16 @@ void ConsoleMessageReceiver::SetLogFile(const std::string &filename)
 void ConsoleMessageReceiver::OpenLogFile(const std::string &filename, 
       bool append)
 {
+   // Make sure we aren't stomping on an already existing non-log file
+   if (logFileName != filename)
+   {
+      if (!IsValidLogFile(filename))
+      {
+         throw ConsoleAppException(
+               "ERROR - specified log file is not a valid log file.\n");
+      }
+   }
+   
    logFileName = filename;
    
    if (logFile)
@@ -368,9 +393,9 @@ void ConsoleMessageReceiver::OpenLogFile(const std::string &filename,
    
    if (logFile)
    {
-      fprintf(logFile, "GMAT Build Date: %s %s\n\n",  __DATE__, __TIME__);
-      fprintf(logFile, "GuiMessageReceiver::SetLogFile() Log file set to \"%s\"\n",
-              logFileName.c_str());
+      std::string logFileStart = GetLogFileText();
+      fprintf(logFile, "%s %s %s\n\n",  logFileStart.c_str(), __DATE__, __TIME__);
+      fprintf(logFile, "GMAT Log file set to %s\n", logFileName.c_str());
       
       if (append)
          fprintf(logFile, "The log file mode is append\n");

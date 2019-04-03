@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -68,6 +68,11 @@ public:
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
+   virtual std::string  GetStringParameter(const Integer id, const Integer index) const;
+   virtual std::string  GetStringParameter(const std::string &label, const Integer index) const;
+   virtual bool         SetStringParameter(const Integer id, const std::string &value, const Integer index);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value, const Integer index);
 
 
    virtual Real         GetRealParameter(const Integer id) const;

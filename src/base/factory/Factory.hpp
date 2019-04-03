@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -81,7 +81,7 @@ class GMAT_API Factory
 public:
    // method to return objects as generic type
    virtual GmatBase*        CreateObject(const std::string &ofType,
-                                         const std::string &withName = "");        
+                                         const std::string &withName = "");
 
    // methods to return objects of specified types
    virtual SpaceObject*     CreateSpacecraft(const std::string &ofType,
@@ -111,15 +111,13 @@ public:
    virtual Solver*          CreateSolver(const std::string &ofType,
                                          const std::string &withName = ""); 
    virtual Subscriber*      CreateSubscriber(const std::string &ofType,
-                                             const std::string &withName = "",
-                                             const std::string &fileName = "");
+                                             const std::string &withName = "");
    virtual EphemerisFile*   CreateEphemerisFile(const std::string &ofType,
                                                 const std::string &withName = "");
    virtual GmatCommand*     CreateCommand(const std::string &ofType,
                                           const std::string &withName = "");
    virtual AtmosphereModel* CreateAtmosphereModel(const std::string &ofType,
-                                                  const std::string &withName = "",
-                                                  const std::string &forBody = "Earth");
+                                                  const std::string &withName = "");
    virtual Function*        CreateFunction(const std::string &ofType,
                                            const std::string &withName = "");
    virtual Hardware*        CreateHardware(const std::string &ofType,

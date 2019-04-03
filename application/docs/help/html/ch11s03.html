@@ -1,0 +1,62 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Configure GMAT for Event Location</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Tut_EventLocation.html" title="Chapter&nbsp;11.&nbsp;Finding Eclipses and Station Contacts"><link rel="prev" href="ch11s02.html" title="Load the Mission"><link rel="next" href="ch11s04.html" title="Configure and Run the Eclipse Locator"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Configure GMAT for Event Location</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ch11s02.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;11.&nbsp;Finding Eclipses and Station Contacts</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ch11s04.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N13A0A"></a>Configure GMAT for Event Location</h2></div></div></div><p>GMAT's event location subsystem is based on the <a class="link" href="http://naif.jpl.nasa.gov/naif/" target="_top">NAIF SPICE library</a>,
+    which uses its own mechanism for configuration of the solar system.
+    Instead of settings specified in GMAT via CelestialBody resources like
+    Earth and Luna, SPICE uses "kernel" files that define similar parameters
+    independently. This is discussed in detail in the <a class="xref" href="ContactLocator.html" title="ContactLocator"><span class="refentrytitle">ContactLocator</span></a> and <a class="xref" href="EclipseLocator.html" title="EclipseLocator"><span class="refentrytitle">EclipseLocator</span></a>
+    references.</p><p>By default, GMAT offers general consistency between both
+    configurations. But, it's useful to verify that the appropriate parameters
+    are correct, and it's necessary for precise applications.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N13A1B"></a>Verify SolarSystem Configuration</h3></div></div></div><p>First, let's verify that the SolarSystem resource is configured
+      properly for both configurations.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>On the <span class="guilabel">Resources</span> tab, double-click the
+          <span class="guilabel">SolarSystem</span> folder. This will display the
+          <span class="guilabel">SolarSystem</span> configuration.</p></li><li class="step"><p>Scroll to the end of each input box to see the actual
+          filenames being loaded.</p></li></ol></div><p>You should see a configuration like this:</p><div class="informalfigure"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_EventLocation_SolarSystem.png" align="middle" height="333"></td></tr></table></div></div></div><p>Note the following items:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="guilabel">Ephemeris Source</span>: This is set to use the
+          DE405 planetary ephemeris, the default in GMAT. If you switch to
+          another ephemeris version, the fields below will update
+          accordingly.</p></li><li class="listitem"><p><span class="guilabel">Ephemeris Filename</span>: This is the DE-format
+          ephemeris file used for propagation and parameter calculations in
+          GMAT itself.</p></li><li class="listitem"><p><span class="guilabel">SPK Kernel</span>: This is the SPICE SPK file
+          used for planetary ephemeris for SPK propagation and for event
+          location. Note that this is set consistent with <span class="guilabel">Ephemeris
+          Filename</span> (both DE405)</p></li><li class="listitem"><p><span class="guilabel">Leap Second Kernel</span>: This is the SPICE LSK
+          file used to keep track of leap seconds in the UTC time system for
+          the SPICE subsystem. This is kept consistent with GMAT's internal
+          leap seconds file (tai-utc.dat) specified in the GMAT startup
+          file.</p></li><li class="listitem"><p><span class="guilabel">Planetary Constants Kernel</span>: This is the
+          SPICE PCK file used for default configuration for all the default
+          celestial bodies. This file contains planetary shape and orientation
+          information, similar to but independent from the settings in GMAT's
+          <span class="guilabel">CelestialBody</span> resources
+          (<span class="guilabel">Earth</span>, <span class="guilabel">Luna</span>,
+          etc.).</p></li></ul></div><p>These are already configured correctly, so we don't need to make
+      any changes.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N13A66"></a>Configure CelestialBody Resources</h3></div></div></div><p>Next, let's configure the Earth model for precise usage with the
+      <span class="guilabel">ContactLocator</span> resource. By default, the Earth size
+      and shape differ by less than 1 m in equatorial and polar radii between
+      the two subsystems But we can make them match exactly by modifying
+      GMAT's <span class="guilabel">Earth</span> properties.</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>On the <span class="guilabel">Resources</span> tab, expand the
+          <span class="guilabel">SolarSystem</span> folder.</p></li><li class="step"><p>Double-click <span class="guilabel">Earth</span> to display the Earth
+          configuration.</p></li><li class="step"><p>Note the various configuration options available:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="guilabel">Equatorial Radius</span> and
+                <span class="guilabel">Flattening</span> define the Earth shape for
+                GMAT itself. <span class="guilabel">PCK Files</span> lists additional
+                SPICE PCK files to load, in addition to the file shown above
+                in the <span class="guilabel">SolarSystem</span> <span class="guilabel">Planetary
+                Constants Kernel</span> box. In this case, these files
+                provide high-fidelity Earth orientation parameters (EOP)
+                data.</p></li><li class="listitem"><p>On the <span class="guilabel">Orientation</span> tab,
+                <span class="guilabel">Spice Frame Id</span> indicates the Earth-fixed
+                frame to use for the SPICE subsystem, and <span class="guilabel">FK
+                Files</span> provides additional FK files that define the
+                frame. In this case, Earth is using the built-in ITRF93 frame,
+                which is different but very close to GMAT's
+                <span class="guilabel">EarthFixed</span> coordinate system. See the
+                <a class="xref" href="CoordinateSystem.html" title="CoordinateSystem"><span class="refentrytitle">CoordinateSystem</span></a> reference for details on
+                that system.</p></li></ul></div></li><li class="step"><p>Set <span class="guilabel">Equatorial Radius</span> to
+          <code class="literal">6378.1366</code>.</p></li><li class="step"><p>Set <span class="guilabel">Flattening</span> to
+          <code class="literal">0.00335281310845547</code>.</p></li><li class="step"><p>Click <span class="guibutton">OK</span>.</p></li></ol></div><p>These two values were taken from the pck00010.tpc file referenced
+      in the <span class="guilabel">SolarSystem</span> configuration. Setting them for
+      <span class="guilabel">Earth</span> ensures that the position of the
+      <span class="guilabel">GroundStation</span> we create later will be referenced to
+      the exact same Earth definition throughout the mission. Note that the
+      exact position may still differ between the two based on the different
+      body-fixed frame definition and the different EOP data sources, but this
+      residual difference is small.</p><p>Your Earth panel should look like this after these steps are
+      complete:</p><div class="informalfigure"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Tut_EventLocation_Earth.png" align="middle" height="322"></td></tr></table></div></div></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ch11s02.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Tut_EventLocation.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ch11s04.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Load the Mission&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Configure and Run the Eclipse Locator</td></tr></table></div></body></html>

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -140,6 +140,7 @@ protected:
    bool        usingDefaultFileName;
    bool        generateInBackground;
    bool        allowMultipleSegments;
+   bool        includeEventBoundaries;
    /// for propagator change
    std::string prevPropName;
    std::string currPropName;
@@ -168,6 +169,8 @@ protected:
    
    FileType    fileType;
    
+   std::string distanceUnit;
+
    /// for maneuver handling
    ObjectArray maneuversHandled;
    
@@ -190,8 +193,12 @@ protected:
    static StringArray writeEphemerisList;
    /// Available interpolator type list
    static StringArray interpolatorTypeList;
-   /// Avilable output format list
+   /// Available output format list
    static StringArray outputFormatList;
+   /// Available distance unit list
+   static StringArray distanceUnitList;
+   /// Available include event boundaries list
+   static StringArray eventBoundariesList;
    
    // Initialization
    void         ValidateParameters(bool forInitialization);
@@ -270,6 +277,8 @@ protected:
       OUTPUT_FORMAT,
       WRITE_EPHEMERIS,
       FILE_NAME,                // deprecated
+      DISTANCE_UNIT,            // Meters or kilometers
+      INCLUDE_EVENT_BOUNDARIES,
       EphemerisFileParamCount   // Count of the parameters for this class
    };
    

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -134,6 +134,11 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "PLANETARY_COEFF_FILE",
    "NUTATION_COEFF_FILE",
    "PLANETARY_PCK_FILE",
+   "EARTH_LATEST_PCK_FILE",
+   "EARTH_PCK_PREDICTED_FILE",
+   "EARTH_PCK_CURRENT_FILE",
+   "LUNA_PCK_CURRENT_FILE",
+   "LUNA_FRAME_KERNEL_FILE",
    "LEAP_SECS_FILE",
    "LSK_FILE",
    "PERSONALIZATION_FILE",
@@ -934,10 +939,10 @@ std::string FileManager::GetFullStartupFilePath()
 }
 
 
-void FileManager::ReadStartupFile(const char *fileName)
-{
-   ReadStartupFile(std::string(fileName));
-}
+//void FileManager::ReadStartupFile(const char *fileName)
+//{
+//   ReadStartupFile(std::string(fileName));
+//}
 
 
 //------------------------------------------------------------------------------
@@ -1038,25 +1043,25 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    else
       tmpStartupFilePath = tmpStartupDir + mPathSeparator + tmpStartupFile;
    
-   // Reworked this part above so removed(LOJ: 2011.12.14)
-   #if 0
-   if (fileName == "")
-   {
-      tmpStartupDir = "";
-      tmpStartupFile = mStartupFileName;
-      tmpStartupFilePath = mStartupFileName;
-   }
-   else
-   {
-      tmpStartupDir = GmatFileUtil::ParsePathName(fileName);
-      tmpStartupFile = GmatFileUtil::ParseFileName(fileName);
-
-      if (tmpStartupDir == "")
-         tmpStartupFilePath = tmpStartupFile;
-      else
-         tmpStartupFilePath = tmpStartupDir + mPathSeparator + tmpStartupFile;
-   }
-   #endif
+//   // Reworked this part above so removed(LOJ: 2011.12.14)
+//   #if 0
+//   if (fileName == "")
+//   {
+//      tmpStartupDir = "";
+//      tmpStartupFile = mStartupFileName;
+//      tmpStartupFilePath = mStartupFileName;
+//   }
+//   else
+//   {
+//      tmpStartupDir = GmatFileUtil::ParsePathName(fileName);
+//      tmpStartupFile = GmatFileUtil::ParseFileName(fileName);
+//
+//      if (tmpStartupDir == "")
+//         tmpStartupFilePath = tmpStartupFile;
+//      else
+//         tmpStartupFilePath = tmpStartupDir + mPathSeparator + tmpStartupFile;
+//   }
+//   #endif
 
    
    #ifdef DEBUG_READ_STARTUP_FILE
@@ -1195,10 +1200,18 @@ void FileManager::ReadStartupFile(const std::string &fileName)
       }
       else if (type == "HIDE_SAVEMISSION")
       {
-          if (name == "TRUE")
-			GmatGlobal::Instance()->AddHiddenCommand("SaveMission");
-		  else
-			  GmatGlobal::Instance()->RemoveHiddenCommand("SaveMission");
+         if (name == "TRUE")
+            GmatGlobal::Instance()->AddHiddenCommand("SaveMission");
+         else
+            GmatGlobal::Instance()->RemoveHiddenCommand("SaveMission");
+      }
+      else if (type == "ECHO_COMMANDS")
+      {
+         if (name == "TRUE")
+            GmatGlobal::Instance()->SetCommandEchoMode(true);
+         else
+            GmatGlobal::Instance()->SetCommandEchoMode(false);
+
       }
       else
       {
@@ -1228,8 +1241,27 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    mStartupFileDir = tmpStartupDir;
    mStartupFileName = tmpStartupFile;
    
-   // now use log file from the startup file
-   MessageInterface::SetLogFile(GetAbsPathname("LOG_FILE"));
+   // Check first to see if the user has set a log file on the command line -
+   // that would take prcedence over a log file specified in the startup
+   // file.  Also, check to see if the command-line-specified file exists and
+   // if so, make sure it is a log file (i.e. starts with the correct text).
+   // TBD
+   
+   // now use log file from the startup file if applicable
+   std::string startupLog = GetAbsPathname("LOG_FILE");
+   GmatGlobal *gmatGlobal = GmatGlobal::Instance();
+   gmatGlobal->SetLogfileName(GmatGlobal::STARTUP, startupLog);
+   
+   Integer logSrc = gmatGlobal->GetLogfileSource();
+   if (logSrc == GmatGlobal::CMD_LINE)
+   {
+      std::string cmdLineLog = gmatGlobal->GetLogfileName(GmatGlobal::CMD_LINE);
+      MessageInterface::SetLogFile(cmdLineLog);
+   }
+   else // can't be SCRIPT yet since startup is read before scripts are parsed
+   {
+      MessageInterface::SetLogFile(startupLog);
+   }
    MessageInterface::SetLogEnable(true);
    mInStream.close();
 
@@ -1247,10 +1279,10 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    #endif
 }
 
-void FileManager::WriteStartupFile(const char *fileName)
-{
-   WriteStartupFile(std::string(fileName));
-}
+//void FileManager::WriteStartupFile(const char *fileName)
+//{
+//   WriteStartupFile(std::string(fileName));
+//}
 
 //------------------------------------------------------------------------------
 // void WriteStartupFile(const std::string &fileName = "")
@@ -1635,6 +1667,13 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    WriteFiles(outStream, "EOP_FILE");
    WriteFiles(outStream, "PLANETARY_COEFF_FILE");
    WriteFiles(outStream, "NUTATION_COEFF_FILE");
+   WriteFiles(outStream, "PLANETARY_PCK_FILE");
+   WriteFiles(outStream, "EARTH_LATEST_PCK_FILE");
+   WriteFiles(outStream, "EARTH_PCK_PREDICTED_FILE");
+   WriteFiles(outStream, "EARTH_PCK_CURRENT_FILE");
+   WriteFiles(outStream, "LUNA_PCK_CURRENT_FILE");
+   WriteFiles(outStream, "LUNA_FRAME_KERNEL_FILE");
+   
    outStream << "#-----------------------------------------------------------\n";
    mPathWrittenOuts.push_back("PLANETARY_COEFF_PATH");
 
@@ -1818,7 +1857,6 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    MessageInterface::ShowMessage("FileManager::WriteStartupFile() exiting\n");
    #endif
 }
-
 
 //------------------------------------------------------------------------------
 // std::string GetRootPath()
@@ -3067,7 +3105,7 @@ const StringArray& FileManager::GetPluginList()
  */
 //------------------------------------------------------------------------------
 void FileManager::AdjustSettings(const std::string &suffix,
-      const StringArray &forEntries)
+                                 const StringArray &forEntries)
 {
    std::string temp;
    for (UnsignedInt i = 0; i < forEntries.size(); ++i)
@@ -3585,6 +3623,13 @@ void FileManager::RefreshFiles()
    AddFileType("PLANETARY_COEFF_FILE", "PLANETARY_COEFF_PATH/NUT85.DAT");
    AddFileType("NUTATION_COEFF_FILE", "PLANETARY_COEFF_PATH/NUTATION.DAT");
 
+   AddFileType("PLANETARY_PCK_FILE", "PLANETARY_COEFF_PATH/SPICEPlanetaryConstantsKernel.tpc");
+   AddFileType("EARTH_LATEST_PCK_FILE", "PLANETARY_COEFF_PATH/earth_latest_high_prec.bpc");
+   AddFileType("EARTH_PCK_PREDICTED_FILE", "PLANETARY_COEFF_PATH/SPICEEarthPredictedKernel.bpc");
+   AddFileType("EARTH_PCK_CURRENT_FILE", "PLANETARY_COEFF_PATH/SPICEEarthCurrentKernel.bpc");
+   AddFileType("LUNA_PCK_CURRENT_FILE", "PLANETARY_COEFF_PATH/SPICELunaCurrentKernel.bpc");
+   AddFileType("LUNA_FRAME_KERNEL_FILE", "PLANETARY_COEFF_PATH/SPICELunaFrameKernel.tf");
+
    // time path and files
    AddFileType("TIME_PATH", "DATA_PATH/time/");
    AddFileType("LEAP_SECS_FILE", "TIME_PATH/tai-utc.dat");
@@ -3716,7 +3761,7 @@ FileManager::FileManager(const std::string &appName)
 /*
  * Sets the paths read from the startup file to absolute paths
  *
- * This method is separate from ReadStartupFile so taht if it is broken, it can 
+ * This method is separate from ReadStartupFile so that if it is broken, it can
  * just be commented out.
  */
 //------------------------------------------------------------------------------

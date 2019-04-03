@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Copyright (c) 2002 - 2017 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,6 +35,7 @@
 #include "Parameter.hpp"
 #include "FiniteThrust.hpp"
 #include "Function.hpp"
+#include "UserDefinedFunction.hpp"
 #include "CallFunction.hpp"
 #include "Assignment.hpp"
 #include "BranchCommand.hpp"
@@ -61,6 +62,8 @@
 //#define DEBUG_EVENTLOCATION
 //#define DEBUG_CLONE_UPDATES
 //#define REPORT_CLONE_UPDATE_STATUS
+
+//#define DEBUG_COMMAND_LOCATION
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -985,7 +988,7 @@ bool Sandbox::Execute()
             else
             {
                //MessageInterface::ShowMessage("Sandbox::Execute() interrupted.\n");
-               sequence->RunComplete();
+               sequence->RunComplete(true);
                
                // notify subscribers end of run
                currentState = Gmat::IDLE;
@@ -1048,6 +1051,21 @@ bool Sandbox::Execute()
          // Added try/catch block to catch exception when user paused the run
          try
          {
+            // Update here if we add another runmode to show command location
+            if (GmatGlobal::Instance()->EchoCommands())
+            {
+               std::string currentCommand = "CurrentCommand: " +
+                     current->GetGeneratingString(Gmat::NO_COMMENTS);
+               if (current->IsOfType("BranchCommand"))
+               {
+                  std::string substring = ((BranchCommand*)current)->
+                        GetCurrentGeneratingString(Gmat::NO_COMMENTS, "  --> ");
+                  if (substring != "")
+                     currentCommand = substring;
+               }
+               MessageInterface::ShowMessage("%s\n", currentCommand.c_str());
+            }
+
             rv = current->Execute();
          
             if (!rv)
@@ -1116,7 +1134,7 @@ bool Sandbox::Execute()
    {
       // Use exception to remove Visual C++ warning
       e.GetMessageType();
-      sequence->RunComplete();
+      sequence->RunComplete(true);
       state = STOPPED;
       
       #if DBGLVL_SANDBOX_RUN
@@ -1129,7 +1147,7 @@ bool Sandbox::Execute()
       throw;
    }
    
-   sequence->RunComplete();
+   sequence->RunComplete(true);
    state = STOPPED;
    
    // notify subscribers end of run
@@ -1676,88 +1694,98 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
          ((Assignment*) cmd)->SetFunction(f);
       
       #ifdef DEBUG_SANDBOX_GMATFUNCTION
-      MessageInterface::ShowMessage(
-         "Now handling function <%p>'%s', whose fcs is %s set, ", f,
-         (f->GetStringParameter("FunctionName")).c_str(), 
-         ((f->IsFunctionControlSequenceSet())? "already" : "NOT"));
       MessageInterface::ShowMessage
-         ("script errors were %sfound.\n", f->ScriptErrorFound() ? "" : "not ");
-      MessageInterface::ShowMessage
-         ("Function type is %s\n", f->GetTypeName().c_str());
+         ("Function type: %s, name: %s\n", f->GetTypeName().c_str(),
+          f->GetStringParameter("FunctionName").c_str());
+      if (f->IsOfType("UserDefinedFunction"))
+      {
+         UserDefinedFunction *udf = (UserDefinedFunction*)f;
+         MessageInterface::ShowMessage(
+            "Now handling function whose fcs is %s set, ",
+            ((udf->IsFunctionControlSequenceSet())? "already" : "NOT"));
+         MessageInterface::ShowMessage
+            ("Errors were %sfound.\n", udf->ErrorFound() ? "" : "not ");
+      }
       #endif
       
       // if function is GmatFunction and no FCS has built and no script error found,
       // build FCS
-      if ((f->GetTypeName() == "GmatFunction") &&
-          (!(f->IsFunctionControlSequenceSet())) &&
-          (!(f->ScriptErrorFound())))
+      if (f->IsOfType("UserDefinedFunction"))
       {
-         // Set SolarSystem first for parsing in two modes (LOJ: 2015.02.06)
-         f->SetSolarSystem(solarSys);
-         
-         #ifdef DEBUG_SANDBOX_GMATFUNCTION
-         MessageInterface::ShowMessage(
-            "About to call InterpretGmatFunction for function '%s'\n",
-            //(f->GetStringParameter("FunctionName")).c_str());
-            (f->GetStringParameter("FunctionPath")).c_str());
-         #endif
-         GmatCommand* fcs = moderator->InterpretGmatFunction(f, usingMap, solarSys);
-
-         // If FCS not created, throw an exception with Gmat::GENERAL_ so that it will not
-         // write error count again for function in Initialize()(Bug 2272 fix)
-         if (fcs == NULL)
+         UserDefinedFunction* udf = (UserDefinedFunction*)f;
+         // if ((f->GetTypeName() == "GmatFunction") &&
+         //     (!(f->IsFunctionControlSequenceSet())) &&
+         //     (!(f->ScriptErrorFound())))
+         if (!(udf->IsFunctionControlSequenceSet()) &&
+             (!(udf->ErrorFound())))
          {
-            errorInPreviousFcs = true;
-            throw SandboxException("Sandbox::HandleGmatFunction - error creating FCS\n",
-                                   Gmat::GENERAL_);
-         }
-         
-         errorInPreviousFcs = false;
-         f->SetFunctionControlSequence(fcs);
-         GmatCommand* fcsCmd = fcs;
-         while (fcsCmd)
-         {
-            #ifdef DISALLOW_NESTED_GMAT_FUNCTIONS
-            if (fcsCmd->HasAFunction())
-            {
-               std::string errMsg = "Sandbox::HandleGmatFunction (";
-               errMsg += fName + ") - nested or recursive GmatFunctions not yet supported.\n";
-               throw SandboxException(errMsg);
-            }
-            #endif
+            //// Use udf instead of f for GMT-5942 (LOJ:2016.10.25)
+            // Set SolarSystem first for parsing in two modes (LOJ: 2015.02.06)
+            udf->SetSolarSystem(solarSys);
             
-            // todo: Figure out what makes sense for the "events" container and functions
-
-            if ((fcsCmd->IsOfType("CallFunction")) ||
-                (fcsCmd->IsOfType("Assignment")))
+            #ifdef DEBUG_SANDBOX_GMATFUNCTION
+            MessageInterface::ShowMessage(
+               "About to call InterpretGmatFunction for function '%s'\n",
+               (udf->GetStringParameter("FunctionPath")).c_str());
+            #endif
+            GmatCommand* fcs = moderator->InterpretGmatFunction(udf, usingMap, solarSys);
+            
+            // If FCS not created, throw an exception with Gmat::GENERAL_ so that it will not
+            // write error count again for function in Initialize()(Bug 2272 fix)
+            if (fcs == NULL)
             {
-               #ifdef DEBUG_SANDBOX_GMATFUNCTION
-               MessageInterface::ShowMessage(
-                  "CallFunction or Assignment (%s)'%s' detected in FCS... now processing\n",
-                  (fcsCmd->GetTypeName()).c_str(),
-                  fcsCmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+               errorInPreviousFcs = true;
+               throw SandboxException("Sandbox::HandleGmatFunction - error creating FCS\n",
+                                      Gmat::GENERAL_);
+            }
+            
+            errorInPreviousFcs = false;
+            udf->SetFunctionControlSequence(fcs);
+            GmatCommand* fcsCmd = fcs;
+            while (fcsCmd)
+            {
+               #ifdef DISALLOW_NESTED_GMAT_FUNCTIONS
+               if (fcsCmd->HasAFunction())
+               {
+                  std::string errMsg = "Sandbox::HandleGmatFunction (";
+                  errMsg += fName + ") - nested or recursive GmatFunctions not yet supported.\n";
+                  throw SandboxException(errMsg);
+               }
                #endif
                
-               //Let's handle GmatFunction first
-               //compiler warning: '+=' : unsafe use of type 'bool' in operation
-               //OK += HandleGmatFunction(fcsCmd, &combinedObjectMap);
-               OK = HandleGmatFunction(fcsCmd, &combinedObjectMap) && OK;
-               // do not set the non-global object map here; it will need to be
-               // setup by the FunctionManager at execution
-               fcsCmd->SetGlobalObjectMap(&globalObjectMap);
-            }
-            if (fcsCmd->IsOfType("BranchCommand"))
-            {
-               std::vector<GmatCommand*> cmdList =
-                  ((BranchCommand*) fcsCmd)->GetCommandsWithGmatFunctions();
-               Integer sz = (Integer) cmdList.size();
-               for (Integer jj = 0; jj < sz; jj++)
+               // todo: Figure out what makes sense for the "events" container and functions
+               
+               if ((fcsCmd->IsOfType("CallFunction")) ||
+                   (fcsCmd->IsOfType("Assignment")))
                {
-                  GmatCommand *childCmd = cmdList.at(jj);
-                  HandleGmatFunction(childCmd, &combinedObjectMap);
+                  #ifdef DEBUG_SANDBOX_GMATFUNCTION
+                  MessageInterface::ShowMessage(
+                     "CallFunction or Assignment (%s)'%s' detected in FCS... now processing\n",
+                     (fcsCmd->GetTypeName()).c_str(),
+                     fcsCmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+                  #endif
+                  
+                  //Let's handle GmatFunction first
+                  //compiler warning: '+=' : unsafe use of type 'bool' in operation
+                  //OK += HandleGmatFunction(fcsCmd, &combinedObjectMap);
+                  OK = HandleGmatFunction(fcsCmd, &combinedObjectMap) && OK;
+                  // do not set the non-global object map here; it will need to be
+                  // setup by the FunctionManager at execution
+                  fcsCmd->SetGlobalObjectMap(&globalObjectMap);
                }
+               if (fcsCmd->IsOfType("BranchCommand"))
+               {
+                  std::vector<GmatCommand*> cmdList =
+                     ((BranchCommand*) fcsCmd)->GetCommandsWithGmatFunctions();
+                  Integer sz = (Integer) cmdList.size();
+                  for (Integer jj = 0; jj < sz; jj++)
+                  {
+                     GmatCommand *childCmd = cmdList.at(jj);
+                     HandleGmatFunction(childCmd, &combinedObjectMap);
+                  }
+               }
+               fcsCmd = fcsCmd->GetNext();
             }
-            fcsCmd = fcsCmd->GetNext();
          }
       }
    }

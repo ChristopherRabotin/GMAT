@@ -1,0 +1,138 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Script Editor</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="TourOfGmat.html" title="Chapter&nbsp;3.&nbsp;Tour of GMAT"><link rel="prev" href="Output.html" title="Output Tree"><link rel="next" href="ConfiguringGmat.html" title="Chapter&nbsp;4.&nbsp;Configuring GMAT"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Script Editor</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Output.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;3.&nbsp;Tour of GMAT</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ConfiguringGmat.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="ScriptEditor"></a>Script Editor</h2></div></div></div><a name="N10A1B" class="indexterm"></a><p>A GMAT mission can be created in either the graphical user interface
+  (GUI), or in a text script language. When a mission is loaded into the GUI
+  from a script, or when it is saved from the GUI, there is a script file that
+  can be accessed from the <span class="guilabel">Scripts</span> folder in the
+  resources tree. When you open this script, it opens in a dedicated editor
+  window called the <span class="guilabel">Script Editor</span>. While a GMAT script
+  can be edited in any text editor, the GMAT script editor offers more
+  features, such as: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>GUI/script synchronization</p></li><li class="listitem"><p>Mission execution from the editor</p></li><li class="listitem"><p>Syntax highlighting</p></li><li class="listitem"><p>Comment/uncomment or indent blocks of text</p></li><li class="listitem"><p>Standard features like copy/paste, line numbering,
+        find-and-replace, etc.</p></li></ul></div><p> The following figure shows a basic script editor session
+  with the major features labeled.</p><div class="figure"><a name="ScriptEditor_Fig1"></a><p class="title"><b>Figure&nbsp;3.8.&nbsp;Parts of the script editor</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Using_ScriptEditor_Tour.png" align="middle" height="599" alt="Parts of the script editor"></td></tr></table></div></div></div></div><br class="figure-break"><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10A44"></a>Active Script</h3></div></div></div><p>When you load a script into the GMAT GUI, it is added to the script
+    list in the resources tree. GMAT can have many scripts loaded at any one
+    time, but only one can be synchronized with the GUI. This script is called
+    the active script, and is distinguished by a bolded name in the script
+    list. The editor status indicator in the script editor for the active
+    script shows &ldquo;<span class="guilabel">Active Script</span>&rdquo; as well. All other
+    scripts are inactive, but can be viewed and edited in the script
+    editor.</p><div class="figure"><a name="N10A4C"></a><p class="title"><b>Figure&nbsp;3.9.&nbsp;Active script indicators</b></p><div class="figure-contents"><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Using_ScriptEditor_ActiveScript.png" align="middle" height="259" alt="Active script indicators"></td></tr></table></div></div></div></div><br class="figure-break"><p>To synchronize with the GUI, you must make an inactive script active
+    by clicking either of the synchronization buttons (described in the next
+    section). This will change the current script to active, synchronize the
+    GUI, and change the the previously active script to inactive. Alternately,
+    you can right-click the script name in the resources tree and click
+    Build.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10A5A"></a>GUI/Script Synchronization</h3></div></div></div><p>GMAT provides two separate representations of a mission: a script
+    file and the GUI resources and mission trees. As shown in <a class="xref" href="ScriptEditor.html#ScriptEditor_Fig1" title="Figure&nbsp;3.8.&nbsp;Parts of the script editor">Figure&nbsp;3.8, &ldquo;Parts of the script editor&rdquo;</a>, you can have both representations open and
+    active at the same time, and can make changes in both places. The
+    <span class="guilabel">GUI/Script Sync Status</span> indicator shows the current
+    status of the two representations relative to each other. The following
+    states are possible:</p><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><tbody><tr><td><span class="guilabel">Synchronized</span></td><td><p>The GUI and script representations are synchronized
+            (they contain the same data). </p></td></tr><tr><td><span class="guilabel">Script Modified</span></td><td><p>The mission has been modified in the script
+            representation, but has not been synchronized to the GUI. Use the
+            synchronization buttons in the script editor to perform this
+            synchronization. To revert the modifications, close the script
+            editor without saving your changes. </p></td></tr><tr><td><span class="guilabel">GUI Modified</span></td><td><p>The mission has been modified in the GUI, but has not
+            been synchronized to the script. To perform this synchronization,
+            click the <span class="guilabel">Save</span> button in the GMAT toolbar. To
+            revert the modifications, use the synchronization buttons in the
+            script editor, or restart GMAT itself. </p></td></tr><tr><td><span class="guilabel">Unsynchronized</span></td><td><p>The mission has been modified both in the GUI and in
+            the script. The changes cannot be merged; you have a choice of
+            whether to save the modifications in either representations, or
+            whether to revert either of them. See the notes above for
+            instructions for either case. </p></td></tr><tr><td><span class="guilabel">Script Error</span></td><td><p>There is an error in the script. This puts the GUI in
+            a minimal safe state. The error must be corrected before
+            continuing. </p></td></tr></tbody></table></div><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>Saving modifications performed in the GUI will overwrite the
+      associated script. The data will be saved as intended, but with full
+      detail, including fields and settings that were not explicitly listed in
+      the original script. A copy of the original script with the extension
+      &ldquo;<code class="literal">.bak</code>&rdquo; will be saved alongside the new
+      version.</p></div><p>The script editor provides two buttons that perform synchronization
+    from the script to the GUI. Both the <span class="guilabel">Save,Sync</span> and
+    the <span class="guilabel">Save,Sync,Run</span> buttons behave identically, except
+    that the <span class="guilabel">Save,Sync,Run</span> button runs the mission after
+    synchronization is complete. The following paragraphs describe the
+    behavior of the <span class="guilabel">Save,Sync</span> button only, but the
+    description applies to both buttons. If you right-click the name of a
+    script in the resources tree, a context menu is displayed with the items
+    <span class="guilabel">Save, Sync</span> and <span class="guimenuitem">Save, Sync,
+    Run</span>. These are identical to the
+    <span class="guibutton">Save,Sync</span> and <span class="guibutton">Save,Sync,Run</span>
+    buttons in the script editor.</p><p>When pressed, the <span class="guilabel">Save,Sync</span> button performs the
+    following steps: </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Saves any modifications to the script</p></li><li class="listitem"><p>Closes all open windows (except the script editor
+          itself)</p></li><li class="listitem"><p>Validates the script file</p></li><li class="listitem"><p>Refreshes the GUI by loading the saved script</p></li><li class="listitem"><p>Sets <span class="guilabel">GUI/Script Sync Status</span> to
+          <span class="guilabel">Synchronized</span>.</p></li></ol></div><p>If the GUI has existing modifications, a confirmation prompt will be
+    displayed. If confirmed, the GUI modifications will be overwritten.</p><p>If the script is not active, a confirmation prompt will be
+    displayed. If confirmed, the script will be made active before the steps
+    above are performed.</p><p>If the script has errors, the GUI will revert to an empty base state
+    until all errors are corrected and the script is synchronized
+    successfully.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10AD8"></a>Scripts List</h3></div></div></div><p>The scripts folder in the Resources tree contains items for each
+    script that has been loaded into GMAT. Individual scripts can be added to
+    the list by right-clicking the <span class="guilabel">Scripts</span> folder and
+    clicking <span class="guimenuitem">Add Script</span>.</p><p>The right-click menu for an individual script contains several
+    options:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="guimenuitem">Open</span>: opens the script in the edit
+        window</p></li><li class="listitem"><p><span class="guimenuitem">Close</span>: closes any open edit windows
+        for this script</p></li><li class="listitem"><p><span class="guimenuitem">Save, Sync</span>: opens the script and
+        synchronizes it with the GUI, making it the active script. This is
+        identical to the <span class="guibutton">Save,Sync</span> button in the script
+        editor.</p></li><li class="listitem"><p><span class="guimenuitem">Save, Sync, Run</span>: builds the script
+        (see above), and also runs it. This is identical to the
+        <span class="guibutton">Save,Sync,Run</span> button on the script
+        editor.</p></li><li class="listitem"><p><span class="guimenuitem">Reload</span>: reloads the script from the
+        last-saved version and refreshes the script editor</p></li><li class="listitem"><p><span class="guimenuitem">Remove</span>: removes the script from the
+        script list</p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10B0A"></a>Edit Window</h3></div></div></div><p>The edit window displays the text of the loaded script and provides
+    tools to edit it. The edit window provides the following features:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Line numbering: Line numbers along the left side of the
+        window</p></li><li class="listitem"><p>Syntax highlighting: Certain elements of the GMAT script
+        language are colored for immediate recognition.</p></li><li class="listitem"><p>Folding: Script blocks (like <span class="guilabel">For</span> loops,
+        <span class="guilabel">Target</span> sequences, etc.) can be collapsed by
+        clicking the black downward-pointing triangle to the left of the
+        command that begins the block.</p></li></ul></div><p>If you right-click anywhere in the edit window, GMAT will display a
+    context menu with the following options:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="guilabel">Undo</span>/<span class="guilabel">Redo</span>: Undo or
+        redo any number of changes since the last time the script was
+        saved</p></li><li class="listitem"><p><span class="guilabel">Cut</span>/<span class="guilabel">Copy</span>/<span class="guilabel">Paste</span>:
+        Cut, copy, or paste over the current selection, or paste the current
+        clipboard contents at the location of the cursor</p></li><li class="listitem"><p><span class="guilabel">Delete</span>: Delete the current selection</p></li><li class="listitem"><p><span class="guilabel">Select All</span>: Select the entire script
+        contents</p></li></ul></div><p>When the script editor is active in the GMAT GUI, the Edit menu is
+    also available with the following options:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="guilabel">Undo</span>/<span class="guilabel">Redo</span>: Undo or
+        redo any number of changes since the last time the script was
+        saved</p></li><li class="listitem"><p><span class="guilabel">Cut</span>/<span class="guilabel">Copy</span>/<span class="guilabel">Paste</span>:
+        Cut, copy, or paste over the current selection, or paste the current
+        clipboard contents at the location of the cursor</p></li><li class="listitem"><p><span class="guilabel">Comment</span>/<span class="guilabel">Uncomment</span>: Add
+        or remove a comment symbol (<code class="literal">%</code>) at the beginning of
+        the current selection</p></li><li class="listitem"><p><span class="guilabel">Select All</span>: Select the entire script
+        contents</p></li><li class="listitem"><p><span class="guilabel">Find</span>/<span class="guilabel">Replace</span>: Starts
+        the <span class="guilabel">Find &amp; Replace</span> utility (see below)</p></li><li class="listitem"><p><span class="guilabel">Show line numbers</span>: When selected (default),
+        the editor window displays line numbering to the left of the script
+        contents.</p></li><li class="listitem"><p><span class="guilabel">Goto</span>: Place the cursor on a specific line
+        number</p></li><li class="listitem"><p><span class="guilabel">Indent more</span>/<span class="guilabel">less</span>: Adds
+        or removes an indentation from the current line or selection. The
+        default indentation is three space characters.</p></li></ul></div><p>See the <a class="link" href="KeyboardShortcuts.html#KeyboardShortcuts_ScriptEditorShortcuts" title="Script editor shortcuts">Keyboard
+    Shortcuts</a> reference page for the list of keyboard shortcuts that
+    are available when working in the script editor:</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10B88"></a>Find and Replace</h3></div></div></div><p>On the <span class="guimenu">Edit</span> menu, if you click
+    <span class="guimenuitem">Find</span> or <span class="guimenuitem">Replace</span> (or
+    press <span class="keycap"><strong>Ctrl</strong></span>+<span class="keycap"><strong>F</strong></span> or <span class="keycap"><strong>Ctrl</strong></span>+<span class="keycap"><strong>H</strong></span>), GMAT displays the <span class="guilabel">Find &amp; Replace</span>
+    utility, which can be used to find text in the active script and
+    optionally replace it with different text. The utility looks like the
+    following figure.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ScriptEditor_GUI_3.png" align="middle" height="155"></td></tr></table></div></div><p>To find text within the active script, type the text you wish to
+    find in the <span class="guilabel">Find What</span> box and click <span class="guilabel">Find
+    Next</span> or <span class="guilabel">Find Previous</span>. <span class="guilabel">Find
+    Next</span> (<span class="keycap"><strong>F3</strong></span>) will start searching forward (below)
+    the current cursor position, while <span class="guilabel">Find Previous</span> will
+    start searching backward (above). If a match is found, the match will be
+    highlighted. You can continue clicking <span class="guilabel">Find Next</span> or
+    <span class="guilabel">Find Previous</span> to continue searching. The search text
+    (in the <span class="guilabel">Find What</span> box) can be literal text only;
+    wildcards are not supported. To replace found instances with different
+    text, type the replacement text in the <span class="guilabel">Replace With</span>
+    box. Click <span class="guilabel">Replace</span> to replace the
+    currently-highlighted match and highlight the next match, or click
+    <span class="guibutton">Replace All</span> to replace all matches in the file at
+    once. The <span class="guilabel">Find &amp; Replace</span> utility saves a history
+    of text previously entered in the <span class="guilabel">Find What</span> and
+    <span class="guilabel">Replace</span> With boxes in the current session. Click the
+    down arrow in each box to choose a previously-entered value.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10BE1"></a>File Controls</h3></div></div></div><p>The <span class="guilabel">Save</span> button saves the current script
+    without checking syntax or synchronizing with the GUI, and without
+    switching the active script. The <span class="guilabel">Save As</span> button is
+    identical, but allows you to save to a different file.</p><p>The <span class="guilabel">Close</span> button closes the script editor, and
+    prompts you to save any unsaved changes.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10BF1"></a>Save Status Indicator</h3></div></div></div><p>When the contents of the script have been modified, the script
+    editor displays &ldquo;<span class="guilabel">**modified**</span>&rdquo; in the save status
+    indicator. This is a visual indicator that there are unsaved changes in
+    the script. Once the changes are saved or reverted, the indicator turns
+    blank.</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Output.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="TourOfGmat.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ConfiguringGmat.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Output Tree&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;4.&nbsp;Configuring GMAT</td></tr></table></div></body></html>

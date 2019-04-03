@@ -1,0 +1,63 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Command Summary</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="TourOfGmat.html" title="Chapter&nbsp;3.&nbsp;Tour of GMAT"><link rel="prev" href="MissionTree.html" title="Mission Tree"><link rel="next" href="Output.html" title="Output Tree"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Command Summary</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="MissionTree.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;3.&nbsp;Tour of GMAT</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Output.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="CommandSummary"></a>Command Summary</h2></div></div></div><a name="N10976" class="indexterm"></a><p>The <span class="guilabel">Command Summary</span> is a summary of orbit and
+  spacecraft state information after execution of a command. For example, if
+  the command is a <span class="guilabel">Propagate</span> command, the
+  <span class="guilabel">Command Summary</span> contains state data after propagation
+  is performed.</p><p>To view the <span class="guilabel">Command Summary</span>, right-click on the
+  desired command, and select <span class="guilabel">Command Summary</span>. Or
+  alternatively, double-click on the desired command, and click the
+  <span class="guilabel">Command Summary</span> icon located near the lower left corner
+  of the panel. You must run the mission before viewing <span class="guilabel">Command
+  Summary</span> data.</p><p>Snapshot of a sample <span class="guilabel">Command Summary</span> is shown in the following figure.</p><div class="screenshot"><div class="mediaobject"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td><img src="../files/images/Using_CommandSummary_DefaultMission.png" height="873"></td></tr></table></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N109A1"></a>Data Availability</h3></div></div></div><p>To view a <span class="guilabel">Command Summary</span>, you must first run
+    the mission. If the mission has not been run during the current session,
+    the <span class="guilabel">Command Summary</span> will be empty. If changes are
+    made to your configuration, you must rerun the mission for those changes
+    to take effect in the <span class="guilabel">Command Summary</span>.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N109AF"></a>Data Contents</h3></div></div></div><p>The <span class="guilabel">Command Summary</span> contains several types of
+    data. Orbit state representations include Cartesian, spherical, and
+    Keplerian. For hyperbolic orbits, B-Plane coordinates, DLA and RLA are
+    provided. Planetodetic information includes Longitude and Latitude among
+    others. For a <span class="guilabel">Maneuver</span> command, the <span class="guilabel">Maneuver</span>
+    properties are displayed in the CoordinateSystem specified on the
+    <span class="guilabel">ImpulsiveBurn</span> resource. See the Coordinate Systems subsection below
+    for more information on the command summary contents when some data is undefined.</p><p>In the event when the orbit is nearly singular conic section and/or any of the
+    keplerian elements are undefined, an abbreviated <span class="guilabel">Command Summary</span> is displayed
+    as shown in the Coordinate Systems subsection below.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N109C5"></a>Supported Commands</h3></div></div></div><p>For performance reasons, propagation in step mode does not write out
+    a command summary. Additionally, if a command is nested in control logic
+    and that command does not execute as a result, no command summary data is
+    available.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N109CA"></a>Coordinate Systems</h3></div></div></div><p>The <span class="guilabel">Coordinate System</span> menu at the top of the
+    <span class="guilabel">Command Summary</span> dialog allows you to select the
+    desired coordinate system for the state data. When the <span class="guilabel">Coordinate System</span>
+    has a celestial body at the origin, the <span class="guilabel">Command Summary</span> shows all supported
+    data including Cartesian, Spherical, Keplerian, Other OrbitData, and Planetodetic properties as shown
+    in the GUI screenshot above. When the <span class="guilabel">Coordinate System</span> does not have a
+    celestial body at the origin, the <span class="guilabel">CommandSummary</span> contains an abbreviated command summary
+    as shown below.</p><p>Note: GMAT currently requires that the selected <span class="guilabel">CoordinateSystem</span> cannot
+    reference a spacecraft.</p><pre class="programlisting"><code class="code">Propagate Command: Propagate1
+        Spacecraft       : DefaultSC
+        Coordinate System: EarthMJ2000Eq
+
+        Time System   Gregorian                     Modified Julian  
+        --------------------------------------------------------------------    
+        UTC Epoch:    01 Jan 2000 15:19:28.000      21545.1385185185
+        TAI Epoch:    01 Jan 2000 15:20:00.000      21545.1388888889
+        TT  Epoch:    01 Jan 2000 15:20:32.184      21545.1392613889
+        TDB Epoch:    01 Jan 2000 15:20:32.184      21545.1392613881
+
+        Cartesian State                       Spherical State 
+        ---------------------------           ------------------------------ 
+        X  =   7047.3574396928 km             RMAG =   7195.1179781105 km
+        Y  =  -821.00373455465 km             RA   =  -6.6448962577676 deg 
+        Z  =   1196.0053110175 km             DEC  =   9.5683789596091 deg 
+        VX =   0.8470865225276 km/sec         VMAG =   7.4415324037805 km/s
+        VY =   7.3062391027010 km/sec         AZI  =   81.377585410118 deg
+        VZ =   1.1303623817297 km/sec         VFPA =   88.583915406742 deg  
+                                              RAV  =   83.386645244484 deg
+                                              DECV =   8.7370006427902 deg
+
+        Spacecraft Properties 
+        ------------------------------
+        Cd                    =   2.200000
+        Drag area             =   15.00000 m^2
+        Cr                    =   1.800000
+        Reflective (SRP) area =   1.000000 m^2
+        Dry mass              =   850.00000000000 kg
+        Total mass            =   850.00000000000 kg</code></pre></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="MissionTree.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="TourOfGmat.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Output.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Mission Tree&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Output Tree</td></tr></table></div></body></html>
