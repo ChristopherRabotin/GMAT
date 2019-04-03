@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -195,7 +195,7 @@ protected:
    Real                     processSingerSigma;
 
    /// previous measurement epoch
-   GmatEpoch               prevObsEpoch;
+   GmatTime                 prevObsEpochGT;
 
    /// Parameter IDs for the BatchEstimators
    enum
@@ -245,7 +245,8 @@ protected:
 
    // Additional methods used by the EKF
    virtual void            GetEstimationState(GmatState& outputState);
-   bool                    ConvertToPartCoordSys(ListItem* infor, Real epoch,
+
+   bool                    ConvertToPartCoordSys(ListItem* infor, GmatTime epoch,
                                  Real inputStateElement,
                                  Real* outputStateElement);
 

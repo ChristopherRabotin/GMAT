@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1203,7 +1203,7 @@ const StringArray& Thruster::GetPropertyEnumStrings(const std::string &label) co
 }
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Retrieves object type of parameter of given id.
@@ -1213,7 +1213,7 @@ const StringArray& Thruster::GetPropertyEnumStrings(const std::string &label) co
  * @return parameter ObjectType
  */
 //---------------------------------------------------------------------------
-Gmat::ObjectType Thruster::GetPropertyObjectType(const Integer id) const
+UnsignedInt Thruster::GetPropertyObjectType(const Integer id) const
 {
    switch (id)
    {
@@ -1229,9 +1229,9 @@ Gmat::ObjectType Thruster::GetPropertyObjectType(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
-std::string Thruster::GetRefObjectName(const Gmat::ObjectType type) const
+std::string Thruster::GetRefObjectName(const UnsignedInt type) const
 {
    #ifdef DEBUG_THRUSTER_REF_OBJ
    MessageInterface::ShowMessage
@@ -1280,9 +1280,9 @@ const ObjectTypeArray& Thruster::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& Thruster::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Thruster::GetRefObjectNameArray(const UnsignedInt type)
 {
    #ifdef DEBUG_THRUSTER_REF_OBJ
    MessageInterface::ShowMessage
@@ -1326,10 +1326,10 @@ const StringArray& Thruster::GetRefObjectNameArray(const Gmat::ObjectType type)
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool Thruster::RenameRefObject(const Gmat::ObjectType type,
+bool Thruster::RenameRefObject(const UnsignedInt type,
                                const std::string &oldName,
                                const std::string &newName)
 {
@@ -1365,7 +1365,7 @@ bool Thruster::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -1378,7 +1378,7 @@ bool Thruster::RenameRefObject(const Gmat::ObjectType type,
  * @return true if the ref object was set, false if not.
  */
 //------------------------------------------------------------------------------
-bool Thruster::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool Thruster::SetRefObject(GmatBase *obj, const UnsignedInt type,
                             const std::string &name)
 {
    #ifdef DEBUG_THRUSTER_REF_OBJ
@@ -1488,7 +1488,7 @@ bool Thruster::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //---------------------------------------------------------------------------
-//  ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+//  ObjectArray& GetRefObjectArray(const UnsignedInt type)
 //---------------------------------------------------------------------------
 /**
  * Obtains an array of GmatBase pointers by type.
@@ -1498,7 +1498,7 @@ bool Thruster::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return Reference to the array.
  */
 //---------------------------------------------------------------------------
-ObjectArray& Thruster::GetRefObjectArray(const Gmat::ObjectType type)
+ObjectArray& Thruster::GetRefObjectArray(const UnsignedInt type)
 {
    if (type == Gmat::HARDWARE)
    {
@@ -1966,7 +1966,7 @@ void Thruster::ConvertDirectionToInertial(Real *dir, Real *dirInertial, Real epo
 //      coordSystem->ToMJ2000Eq(epoch, inDir, outDir, true);
       // Now rotate to base system axes, we don't want to translate so
       // set coincident to true
-      coordSystem->ToBaseSystem(epoch, inDir, outDir, true); // @todo - need ToMJ2000Eq here?
+      coordSystem->ToBaseSystem(A1Mjd(epoch), inDir, outDir, true); // @todo - need ToMJ2000Eq here?
       
       #ifdef DEBUG_BURN_CONVERT_ROTMAT
       Rmatrix33 rotMat = coordSystem->GetLastRotationMatrix();
@@ -2013,7 +2013,7 @@ void Thruster::ConvertDirectionToInertial(Real *dir, Real *dirInertial, Real epo
          #endif
 
 
-         localCoordSystem->ToBaseSystem(epoch, inDir, outDir, true);  // @todo - do we need ToMJ2000Eq here?
+         localCoordSystem->ToBaseSystem(A1Mjd(epoch), inDir, outDir, true);  // @todo - do we need ToMJ2000Eq here?
          
          dirInertial[0] = outDir[0];
          dirInertial[1] = outDir[1];

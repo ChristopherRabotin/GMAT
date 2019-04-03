@@ -70,6 +70,11 @@ MdiTableViewFrame::MdiTableViewFrame(wxMDIParentFrame *parent,
 #endif
    Create();
    
+#ifdef DEBUG_MDI_TABLE_FRAME_CLOSE
+      MessageInterface::ShowMessage
+         ("MdiTableViewFrame() created with plot name %s\n",
+          mPlotTitle.WX_TO_C_STRING);
+#endif
 }
 
 
@@ -80,17 +85,22 @@ MdiTableViewFrame::~MdiTableViewFrame()
 {   
    #ifdef DEBUG_MDI_TABLE_FRAME_CLOSE
    MessageInterface::ShowMessage
-      ("~MdiTableViewFrame() mChildName=%s\n", mChildName.c_str());
+      ("~MdiTableViewFrame() mChildName=%s\n", mChildName.WX_TO_C_STRING);
    #endif
    
    // make sure GUI Listener Manager knows that there is one less window
    GuiListenerManager::ClosingSolverListener();
 
    #ifdef DEBUG_MDI_TABLE_FRAME_CLOSE
-   MessageInterface::ShowMessage
-      ("~MdiTableViewFrame() exiting\n",
-       MdiGlPlot::numChildren);
+//   MessageInterface::ShowMessage
+//      ("~MdiTableViewFrame() exiting\n",
+//       MdiGlPlot::numChildren);
    #endif
+#ifdef DEBUG_MDI_TABLE_FRAME_CLOSE
+   MessageInterface::ShowMessage
+   ("MdiTableViewFrame() DESTRUCTED with plot name %s\n",
+    mPlotTitle.WX_TO_C_STRING);
+#endif
 }
 
 
@@ -251,7 +261,7 @@ void MdiTableViewFrame::OnClose(wxCloseEvent &event)
 {
    #ifdef DEBUG_MDI_TABLE_FRAME_CLOSE
    MessageInterface::ShowMessage
-      ("\nMdiTableViewFrame::OnClose() '%s' entered, mCanClose=%d\n", mChildName.c_str(), mCanClose);
+      ("\nMdiTableViewFrame::OnClose() '%s' entered, mCanClose=%d\n", mChildName.WX_TO_C_STRING, mCanClose);
    #endif
    
    GmatMdiChildFrame::OnClose(event);
@@ -259,7 +269,7 @@ void MdiTableViewFrame::OnClose(wxCloseEvent &event)
    
    #ifdef DEBUG_MDI_TABLE_FRAME_CLOSE
    MessageInterface::ShowMessage
-      ("MdiTableViewFrame::OnClose() '%s' exiting, mCanClose=%d\n", mChildName.c_str(), mCanClose);
+      ("MdiTableViewFrame::OnClose() '%s' exiting, mCanClose=%d\n", mChildName.WX_TO_C_STRING, mCanClose);
    #endif
 }
 

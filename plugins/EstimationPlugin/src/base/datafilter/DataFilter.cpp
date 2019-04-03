@@ -1033,8 +1033,25 @@ const StringArray& DataFilter::GetStringArrayParameter(const std::string &label)
 }
 
 
+Real DataFilter::GetRealParameter(const Integer id) const
+{
+   if (id == INITIAL_EPOCH)
+      return epochStart;
+   else if (id == FINAL_EPOCH)
+      return epochEnd;
+
+   return GmatBase::GetRealParameter(id);
+}
+
+
+Real DataFilter::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type,
+// bool RenameRefObject(const UnsignedInt type,
 //------------------------------------------------------------------------------
 /**
  * Renames references objects
@@ -1046,7 +1063,7 @@ const StringArray& DataFilter::GetStringArrayParameter(const std::string &label)
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool DataFilter::RenameRefObject(const Gmat::ObjectType type,
+bool DataFilter::RenameRefObject(const UnsignedInt type,
       const std::string & oldName, const std::string & newName)
 {
    /// @todo Estimator rename code needs to be implemented
@@ -1066,7 +1083,7 @@ bool DataFilter::RenameRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 const ObjectTypeArray& DataFilter::GetRefObjectTypeArray()
 {
-   static std::vector<Gmat::ObjectType> objTypes;
+   static std::vector<UnsignedInt> objTypes;
    objTypes.clear();
 
    objTypes.push_back(Gmat::SPACECRAFT);
@@ -1076,7 +1093,7 @@ const ObjectTypeArray& DataFilter::GetRefObjectTypeArray()
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Initialization method that identifies the reference objects needed
@@ -1086,7 +1103,7 @@ const ObjectTypeArray& DataFilter::GetRefObjectTypeArray()
  * @return A StringArray with all of the object names.
  */
 //------------------------------------------------------------------------------
-const StringArray& DataFilter::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& DataFilter::GetRefObjectNameArray(const UnsignedInt type)
 {
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage(
@@ -1155,7 +1172,7 @@ const StringArray& DataFilter::GetRefObjectNameArray(const Gmat::ObjectType type
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Retrieves the name of a referenced object of a given type
@@ -1165,14 +1182,14 @@ const StringArray& DataFilter::GetRefObjectNameArray(const Gmat::ObjectType type
  * @return The name of the associated object
  */
 //------------------------------------------------------------------------------
-std::string DataFilter::GetRefObjectName(const Gmat::ObjectType type) const
+std::string DataFilter::GetRefObjectName(const UnsignedInt type) const
 {
    return GmatBase::GetRefObjectName(type);
 }
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string & name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string & name)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a pointer to a referenced object of a given type and name
@@ -1183,7 +1200,7 @@ std::string DataFilter::GetRefObjectName(const Gmat::ObjectType type) const
  * @return The pointer to the associated object
  */
 //------------------------------------------------------------------------------
-GmatBase* DataFilter::GetRefObject(const Gmat::ObjectType type,
+GmatBase* DataFilter::GetRefObject(const UnsignedInt type,
       const std::string & name)
 {
    if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::SPACECRAFT))
@@ -1209,7 +1226,7 @@ GmatBase* DataFilter::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string & name,
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string & name,
 //       const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -1223,7 +1240,7 @@ GmatBase* DataFilter::GetRefObject(const Gmat::ObjectType type,
  * @return The pointer to the associated object
  */
 //------------------------------------------------------------------------------
-GmatBase* DataFilter::GetRefObject(const Gmat::ObjectType type,
+GmatBase* DataFilter::GetRefObject(const UnsignedInt type,
       const std::string & name, const Integer index)
 {
    return GmatBase::GetRefObject(type, name, index);
@@ -1231,7 +1248,7 @@ GmatBase* DataFilter::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string & name)
 //------------------------------------------------------------------------------
 /**
@@ -1244,7 +1261,7 @@ GmatBase* DataFilter::GetRefObject(const Gmat::ObjectType type,
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool DataFilter::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool DataFilter::SetRefObject(GmatBase *obj, const UnsignedInt type,
       const std::string & name)
 {
    #ifdef DEBUG_INITIALIZATION
@@ -1296,7 +1313,7 @@ ObjectArray& DataFilter::GetRefObjectArray(const std::string & typeString)
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string &name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -1311,7 +1328,7 @@ ObjectArray& DataFilter::GetRefObjectArray(const std::string & typeString)
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool DataFilter::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool DataFilter::SetRefObject(GmatBase *obj, const UnsignedInt type,
       const std::string & name, const Integer index)
 {
    #ifdef DEBUG_INITIALIZATION
@@ -1325,7 +1342,7 @@ bool DataFilter::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// ObjectArray & GetRefObjectArray(const Gmat::ObjectType type)
+// ObjectArray & GetRefObjectArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * This method retrieves an array of reference objects of a given type
@@ -1335,7 +1352,7 @@ bool DataFilter::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return The array of objects
  */
 //------------------------------------------------------------------------------
-ObjectArray & DataFilter::GetRefObjectArray(const Gmat::ObjectType type)
+ObjectArray & DataFilter::GetRefObjectArray(const UnsignedInt type)
 {
    if (type == Gmat::SPACECRAFT)
    {

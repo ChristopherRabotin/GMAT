@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -32,6 +32,9 @@
 #define GuiInterpreter_hpp
 
 #include "ScriptInterpreter.hpp"
+#include "GuiFactory.hpp"
+#include "GmatWidget.hpp"
+
 #include "gmatdefs.hpp"
 #include <sstream>      // for std::istringstream
 
@@ -44,6 +47,8 @@ public:
 
    // Interpreter abstract methods
    virtual bool Interpret(GmatCommand *inCmd, std::istringstream *ss);
+   virtual std::vector<Integer> GetErrorLines();
+   virtual std::vector<Integer> GetWarningLines();
    
    void Finalize();
    
@@ -53,22 +58,22 @@ public:
    
    //----- factory
    const StringArray& GetListOfAllFactoryItems();
-   const StringArray& GetListOfFactoryItems(Gmat::ObjectType type, const char *qualifier);
-   const StringArray& GetListOfFactoryItems(Gmat::ObjectType type, const std::string &qualifier = "");
+   const StringArray& GetListOfFactoryItems(UnsignedInt type, const char *qualifier);
+   const StringArray& GetListOfFactoryItems(UnsignedInt type, const std::string &qualifier = "");
    const StringArray& GetListOfAllFactoryItemsExcept(const ObjectTypeArray &types);
-   std::string GetStringOfAllFactoryItems(Gmat::ObjectType type);
+   std::string GetStringOfAllFactoryItems(UnsignedInt type);
    std::string GetStringOfAllFactoryItemsExcept(const ObjectTypeArray &types);
    
    //----- configuration
    std::string GetNewName(const std::string &name, Integer startCount);
    GmatBase* AddClone(const std::string &name, std::string &newName);
-   bool RenameObject(Gmat::ObjectType type, const char *oldName,
+   bool RenameObject(UnsignedInt type, const char *oldName,
                      const char *newName);
-   bool RenameObject(Gmat::ObjectType type, const std::string &oldName,
+   bool RenameObject(UnsignedInt type, const std::string &oldName,
                      const std::string &newName);
-   bool RemoveObject(Gmat::ObjectType type, const std::string &name);
-   bool RemoveObjectIfNotUsed(Gmat::ObjectType type, const char *name);
-   bool RemoveObjectIfNotUsed(Gmat::ObjectType type, const std::string &name);
+   bool RemoveObject(UnsignedInt type, const std::string &name);
+   bool RemoveObjectIfNotUsed(UnsignedInt type, const char *name);
+   bool RemoveObjectIfNotUsed(UnsignedInt type, const std::string &name);
    bool HasConfigurationChanged(Integer sandboxNum = 1);
    void ConfigurationChanged(GmatBase *obj, bool tf);
    void ResetConfigurationChanged(bool resetResource = true,
@@ -80,8 +85,10 @@ public:
                           Integer manage = 1, bool createDefault = false);
    GmatBase* CreateObject(const char *type, const char *name,
                           Integer manage = 1, bool createDefault = false);
-   GmatBase* CreateObject(const std::string &type, const std::string &name,
-                          Integer manage = 1, bool createDefault = false);
+   virtual GmatBase* CreateObject(const std::string &type, const std::string &name,
+                          Integer manage = 1, bool createDefault = false,
+                          bool includeLineOnError = false, bool showWarning = false);
+
    
    // SolarSystem
    SolarSystem* GetDefaultSolarSystem();
@@ -184,7 +191,11 @@ public:
    void UpdateOutputTree();
    virtual void StartMatlabServer();
    
+   // GUI Plugins
+   std::vector<GuiFactory*> RetrieveGuiFactories();
    std::vector<Gmat::PluginResource*> *GetUserResources();
+   static GmatWidget* CreateWidget(const std::string &ofType, GmatBase *forObject,
+         void *withParent);
 
 private:
 

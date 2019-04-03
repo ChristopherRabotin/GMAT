@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -177,8 +177,7 @@ DragForce::DragForce(const std::string &name) :
    fillCartesian           (false),
    cbFixed                 (NULL),
    internalCoordSystem     (NULL),
-   kpApConversion          (0),
-   warnSTMMath             (true)            // TEMPORARY
+   kpApConversion          (0)
 {
    #ifdef DEBUG_CONSTRUCTION
       MessageInterface::ShowMessage("DragForce default construction "
@@ -336,8 +335,7 @@ DragForce::DragForce(const DragForce& df) :
    fillCartesian           (df.fillCartesian),
    cbFixed                 (NULL),
    internalCoordSystem     (NULL),
-   kpApConversion          (df.kpApConversion),
-   warnSTMMath             (true)            // TEMPORARY
+   kpApConversion          (df.kpApConversion)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DragForce copy construction from <'%s',%p> to <'%s',%p>   enetered\n", df.GetName().c_str(), &df, GetName().c_str(), &(*this));
@@ -454,8 +452,6 @@ DragForce& DragForce::operator=(const DragForce& df)
    cdInitial             = df.cdInitial;
    useCentralDifferences = df.useCentralDifferences;
    finiteDifferenceDv    = df.finiteDifferenceDv;
-
-   warnSTMMath           = true;            // TEMPORARY
 
    if (internalAtmos != NULL)
    {
@@ -1433,15 +1429,6 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
    if (fillSTM || fillAMatrix)
    {
 
-      if (warnSTMMath)
-      {
-         MessageInterface::ShowMessage("Warning: The orbit state transition "
-               "matrix does not currently contain drag contribution "
-               "partial derivatives.\n");
-
-         warnSTMMath = false;
-      }
-
       Real *aTilde;
       Integer stmSize = stmRowCount * stmRowCount;
       aTilde = new Real[stmSize];
@@ -1455,15 +1442,11 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
                aTilde[ix+k] = 0.0;
          }
 
-// Turn off finite differencing partials for now
-if (0)
-{
-
          // Build the base acceleration
          Rvector3 accel = Accelerate(&state[i*6], now, prefactor[0]);
 
          Rvector3 daccel, daccelm;
-         Real pert = 1.0e-3;
+         Real pert = 1.0e-2;
          Real val;
 
          // Finite difference the position submatrix
@@ -1472,11 +1455,11 @@ if (0)
             val = state[i*6 + j];
             state[i*6 + j] += pert;
             daccel = Accelerate(&state[i*6], now, prefactor[0]);
-            ix = stmRowCount * (3 + j);
+            ix = stmRowCount * 3 + j;
 
             if (useCentralDifferences)
             {
-               state[j] -= 2.0 * pert;
+               state[i*6 + j] -= 2.0 * pert;
                daccelm = Accelerate(&state[i*6], now, prefactor[0]);
 
                #ifdef DEBUG_FINITEDIFF
@@ -1485,11 +1468,11 @@ if (0)
                #endif
 
                for (UnsignedInt k = 0; k < 3; ++k)
-                  aTilde[ix+k] = (daccel[k] - daccelm[k]) / (2.0 * pert);
+                  aTilde[ix+k*stmRowCount] = (daccel[k] - daccelm[k]) / (2.0 * pert);
 
                #ifdef DEBUG_FINITEDIFF
                   MessageInterface::ShowMessage("[%le  %le  %le]\n",
-                        aTilde[ix], aTilde[ix+1], aTilde[ix+2]);
+                        aTilde[ix], aTilde[ix+1*stmRowCount], aTilde[ix+2*stmRowCount]);
                #endif
             }
             else
@@ -1500,17 +1483,17 @@ if (0)
                #endif
 
                for (UnsignedInt k = 0; k < 3; ++k)
-                  aTilde[ix+k] = (daccel[k] - accel[k]) / pert;
+                  aTilde[ix+k*stmRowCount] = (daccel[k] - accel[k]) / pert;
 
                #ifdef DEBUG_FINITEDIFF
                   MessageInterface::ShowMessage("[%le  %le  %le]\n",
-                        aTilde[ix], aTilde[ix+1], aTilde[ix+2]);
+                        aTilde[ix], aTilde[ix+1*stmRowCount], aTilde[ix+2*stmRowCount]);
                #endif
             }
 
             #ifdef DEBUG_A_MATRIX
                MessageInterface::ShowMessage("%d: [%.12le  %.12le  %.12le]\n", j,
-                     aTilde[ix], aTilde[ix+1], aTilde[ix+2]);
+                     aTilde[ix], aTilde[ix+1*stmRowCount], aTilde[ix+2*stmRowCount]);
             #endif
 
             state[i*6 + j] = val;
@@ -1524,11 +1507,11 @@ if (0)
                val = state[i*6 + j+3];
                state[i*6 + j+3] += pert;
                daccel = Accelerate(&state[i*6], now, prefactor[0]);
-               ix = stmRowCount * (3 + j);
+               ix = stmRowCount * 3 + j+3;
 
                if (useCentralDifferences)
                {
-                  state[j+3] -= 2.0 * pert;
+                  state[i*6 + j+3] -= 2.0 * pert;
                   daccelm = Accelerate(&state[i*6], now, prefactor[0]);
 
                   #ifdef DEBUG_FINITEDIFF
@@ -1537,11 +1520,11 @@ if (0)
                   #endif
 
                   for (UnsignedInt k = 0; k < 3; ++k)
-                     aTilde[ix+k+3] = (daccel[k] - daccelm[k]) / (2.0 * pert);
+                     aTilde[ix+k*stmRowCount] = (daccel[k] - daccelm[k]) / (2.0 * pert);
 
                   #ifdef DEBUG_FINITEDIFF
                      MessageInterface::ShowMessage("[%le  %le  %le]\n",
-                           aTilde[ix+3], aTilde[ix+4], aTilde[ix+5]);
+                           aTilde[ix], aTilde[ix+1*stmRowCount], aTilde[ix+2*stmRowCount]);
                   #endif
                }
                else
@@ -1552,16 +1535,16 @@ if (0)
                   #endif
 
                   for (UnsignedInt k = 0; k < 3; ++k)
-                     aTilde[ix+k+3] = (daccel[k] - accel[k]) / pert;
+                     aTilde[ix+k*stmRowCount] = (daccel[k] - accel[k]) / pert;
 
                   #ifdef DEBUG_FINITEDIFF
                      MessageInterface::ShowMessage("[%le  %le  %le]\n",
-                           aTilde[ix+3], aTilde[ix+4], aTilde[ix+5]);
+                           aTilde[ix], aTilde[ix+1*stmRowCount], aTilde[ix+2*stmRowCount]);
                   #endif
                }
                #ifdef DEBUG_A_MATRIX
                   MessageInterface::ShowMessage("%d: [%.12le  %.12le  %.12le]\n",
-                        j+3, aTilde[ix+3], aTilde[ix+4], aTilde[ix+5]);
+                        j+3, aTilde[ix], aTilde[ix+1*stmRowCount], aTilde[ix+2*stmRowCount]);
                #endif
                state[i*6 + j+3] = val;
             }
@@ -1571,7 +1554,7 @@ if (0)
             throw ODEModelException("Analytic differencing for drag model A-matrix "
                   "d(accel)/dv terms in not yet implemented");
          }
-}
+
          if (estimatingCd)
          {
             for (UnsignedInt j = 0; j < 3; ++j)
@@ -1683,13 +1666,21 @@ Rvector6 DragForce::GetDerivativesForSpacecraft(Spacecraft* sc)
    Real *j2kState = sc->GetState().GetState();
    Real state[6];
    Real now = sc->GetEpoch();
+   GmatTime nowgt = sc->GetEpochGT();
 
-   BuildModelState(now, state, j2kState);
+   if (hasPrecisionTime)
+      BuildModelStateGT(nowgt, state, j2kState);
+   else
+      BuildModelState(now, state, j2kState);
 
    Real dens = 0.0;
    if (atmos != NULL)
    {
-      atmos->Density(state, &dens, now, 1);
+      if (hasPrecisionTime) 
+         atmos->Density(state, &dens, nowgt.GetMjd(), 1);
+      else
+         atmos->Density(state, &dens, now, 1);
+
       if (angVel == NULL)
          angVel = atmos->GetAngularVelocity();
    }
@@ -1701,7 +1692,11 @@ Rvector6 DragForce::GetDerivativesForSpacecraft(Spacecraft* sc)
       Real wind[6];
 
       // v_rel = v - w x R
-      atmos->Wind(&(state[0]), wind, now, 1);
+      if (hasPrecisionTime)
+         atmos->Wind(&(state[0]), wind, nowgt.GetMjd(), 1);
+      else
+         atmos->Wind(&(state[0]), wind, now, 1);
+
       vRelative[0] = state[3] - wind[3];
       vRelative[1] = state[4] - wind[4];
       vRelative[2] = state[5] - wind[5];
@@ -2385,7 +2380,7 @@ Integer DragForce::SetIntegerParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//  GmatBase* GetRefObject(const UnsignedInt type,
 //                         const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -2398,7 +2393,7 @@ Integer DragForce::SetIntegerParameter(const std::string &label,
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* DragForce::GetRefObject(const Gmat::ObjectType type,
+GmatBase* DragForce::GetRefObject(const UnsignedInt type,
                                       const std::string &name)
 {
    switch (type)
@@ -2421,7 +2416,7 @@ GmatBase* DragForce::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// void SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// void SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                              const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -2432,7 +2427,7 @@ GmatBase* DragForce::GetRefObject(const Gmat::ObjectType type,
  * @param name Name of the object.
  */
 //------------------------------------------------------------------------------
-bool DragForce::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool DragForce::SetRefObject(GmatBase *obj, const UnsignedInt type,
                              const std::string &name)
 {
    #ifdef DEBUG_DRAGFORCE_REFOBJ

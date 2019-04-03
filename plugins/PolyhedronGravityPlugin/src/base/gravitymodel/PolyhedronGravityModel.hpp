@@ -36,7 +36,7 @@ public:
 //   virtual bool         SupportsDerivative(Gmat::StateElementId id);
 //   virtual bool         SetStart(Gmat::StateElementId id, Integer index, Integer quantity);
 
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
 

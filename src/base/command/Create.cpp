@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -246,9 +246,9 @@ bool Create::SetStringParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* Create::GetRefObject(const Gmat::ObjectType type,
+GmatBase* Create::GetRefObject(const UnsignedInt type,
                                const std::string &name)
 {
    if ((refObj->GetType() == type) &&
@@ -258,10 +258,10 @@ GmatBase* Create::GetRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name)
 //------------------------------------------------------------------------------
-bool Create::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool Create::SetRefObject(GmatBase *obj, const UnsignedInt type,
                           const std::string &name)
 {
    #ifdef DEBUG_CREATE

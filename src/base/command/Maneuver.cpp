@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -178,9 +178,9 @@ Maneuver& Maneuver::operator=(const Maneuver& m)
 }
 
 ////------------------------------------------------------------------------------
-////  bool SetObject(const std::string &name, const Gmat::ObjectType type,
+////  bool SetObject(const std::string &name, const UnsignedInt type,
 ////                 const std::string &associate,
-////                 const Gmat::ObjectType associateType)
+////                 const UnsignedInt associateType)
 ////------------------------------------------------------------------------------
 ///**
 // * Sets an object used by the Maneuver command.
@@ -193,16 +193,16 @@ Maneuver& Maneuver::operator=(const Maneuver& m)
 // * @return true if the object was set.
 // */
 ////------------------------------------------------------------------------------
-//bool Maneuver::SetObject(const std::string &name, const Gmat::ObjectType type,
+//bool Maneuver::SetObject(const std::string &name, const UnsignedInt type,
 //                         const std::string &associate,
-//                         const Gmat::ObjectType associateType)
+//                         const UnsignedInt associateType)
 //{
 //   return GmatCommand::SetObject(name, type, associate, associateType);
 //}
 //
 //
 ////------------------------------------------------------------------------------
-////  bool SetObject(GmatBase *obj, const Gmat::ObjectType type)
+////  bool SetObject(GmatBase *obj, const UnsignedInt type)
 ////------------------------------------------------------------------------------
 ///**
 // * Sets an object used by the Maneuver command.
@@ -213,7 +213,7 @@ Maneuver& Maneuver::operator=(const Maneuver& m)
 // * @return true if the object was set.
 // */
 ////------------------------------------------------------------------------------
-//bool Maneuver::SetObject(GmatBase *obj, const Gmat::ObjectType type)
+//bool Maneuver::SetObject(GmatBase *obj, const UnsignedInt type)
 //{
 //   return GmatCommand::SetObject(obj, type);
 //}
@@ -269,7 +269,7 @@ const std::string& Maneuver::GetGeneratingString(Gmat::WriteMode mode,
 
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -282,7 +282,7 @@ const std::string& Maneuver::GetGeneratingString(Gmat::WriteMode mode,
  * @return true if a name was changed, otherwise false
  */
 //------------------------------------------------------------------------------
-bool Maneuver::RenameRefObject(const Gmat::ObjectType type,
+bool Maneuver::RenameRefObject(const UnsignedInt type,
                                const std::string &oldName,
                                const std::string &newName)
 {
@@ -333,7 +333,7 @@ const ObjectTypeArray& Maneuver::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves the list of ref objects used by the Maneuver.
@@ -345,7 +345,7 @@ const ObjectTypeArray& Maneuver::GetRefObjectTypeArray()
  *
  */
 //------------------------------------------------------------------------------
-const StringArray& Maneuver::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Maneuver::GetRefObjectNameArray(const UnsignedInt type)
 {
    #ifdef DEBUG_MANEUVER_REFOBJ
    MessageInterface::ShowMessage("Maneuver::GetRefObjectNameArray(%d)\n", type);

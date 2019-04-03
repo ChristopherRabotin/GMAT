@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -45,7 +45,7 @@ class GMAT_API BurnData : public RefData
 public:
 
    BurnData(const std::string &name = "", const std::string &typeName = "",
-            const Gmat::ObjectType paramOwnerType = Gmat::BURN);
+            const UnsignedInt paramOwnerType = Gmat::BURN);
    BurnData(const BurnData &data);
    BurnData& operator= (const BurnData& right);
    virtual ~BurnData();
@@ -64,7 +64,7 @@ protected:
 
    // The inherited methods from RefData
    virtual void InitializeRefObjects();
-   virtual bool IsValidObjectType(Gmat::ObjectType type);
+   virtual bool IsValidObjectType(UnsignedInt type);
    
    SolarSystem* GetSolarSystem();
    CoordinateSystem* GetInternalCoordSys();

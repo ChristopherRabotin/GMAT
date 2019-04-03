@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -868,9 +868,9 @@ const ObjectTypeArray& FiniteBurn::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& FiniteBurn::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& FiniteBurn::GetRefObjectNameArray(const UnsignedInt type)
 {
    #ifdef DEBUG_FINITEBURN_OBJECT
    MessageInterface::ShowMessage
@@ -911,13 +911,13 @@ const StringArray& FiniteBurn::GetRefObjectNameArray(const Gmat::ObjectType type
 
 
 //---------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name)
 //---------------------------------------------------------------------------
 /**
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-GmatBase* FiniteBurn::GetRefObject(const Gmat::ObjectType type,
+GmatBase* FiniteBurn::GetRefObject(const UnsignedInt type,
                                    const std::string &name)
 {
    if (type == Gmat::THRUSTER)
@@ -933,14 +933,14 @@ GmatBase* FiniteBurn::GetRefObject(const Gmat::ObjectType type,
 
 
 //---------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name)
 //---------------------------------------------------------------------------
 /**
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-bool FiniteBurn::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool FiniteBurn::SetRefObject(GmatBase *obj, const UnsignedInt type,
                               const std::string &name)
 {
    if (type == Gmat::THRUSTER)
@@ -986,7 +986,7 @@ void FiniteBurn::Copy(const GmatBase* orig)
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 /**
@@ -999,7 +999,7 @@ void FiniteBurn::Copy(const GmatBase* orig)
  * @return true if object name changed, false if not.
  */
 //---------------------------------------------------------------------------
-bool FiniteBurn::RenameRefObject(const Gmat::ObjectType type,
+bool FiniteBurn::RenameRefObject(const UnsignedInt type,
                                  const std::string &oldName,
                                  const std::string &newName)
 {
@@ -1045,7 +1045,7 @@ bool FiniteBurn::DepletesMass()
 }
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Retrieves object type of parameter of given id.
@@ -1055,7 +1055,7 @@ bool FiniteBurn::DepletesMass()
  * @return parameter ObjectType
  */
 //---------------------------------------------------------------------------
-Gmat::ObjectType FiniteBurn::GetPropertyObjectType(const Integer id) const
+UnsignedInt FiniteBurn::GetPropertyObjectType(const Integer id) const
 {
    switch (id)
    {

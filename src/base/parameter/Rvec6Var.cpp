@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -43,7 +43,7 @@
 // Rvec6Var::Rvec6Var(const std::string &name, const std::string &typeStr,
 //                    GmatParam::ParameterKey key, GmatBase *obj,
 //                    const std::string &desc, const std::string &unit,
-//                    GmatParam::DepObject depObj, Gmat::ObjectType ownerType)
+//                    GmatParam::DepObject depObj, UnsignedInt ownerType)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -61,7 +61,7 @@
 Rvec6Var::Rvec6Var(const std::string &name, const std::string &typeStr,
                    GmatParam::ParameterKey key, GmatBase *obj,
                    const std::string &desc, const std::string &unit,
-                   GmatParam::DepObject depObj, Gmat::ObjectType ownerType)
+                   GmatParam::DepObject depObj, UnsignedInt ownerType)
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, false,
                false, false, false)
 {
@@ -153,6 +153,7 @@ bool Rvec6Var::operator!=(const Rvec6Var &right) const
 //------------------------------------------------------------------------------
 std::string Rvec6Var::ToString()
 {
+   Evaluate(); // WCS 2018.01.09 add to get latest & correct value to report(s)
    return mRvec6Value.ToString();
 }
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -60,6 +60,9 @@ public:
    // user interrupt
    virtual void SetUserInterrupt() { mHasUserInterrupted = true; }
    
+   //Max data point option
+   virtual void SetMaxDataPoints(Integer);
+
    // drawing options
    virtual bool GetUseInitialViewDef() { return mUseInitialViewPoint; }   
    virtual void SetUseInitialViewDef(bool flag) { mUseInitialViewPoint = flag; }
@@ -167,12 +170,11 @@ public:
    // Double buffer activation needed in Linux (Patch from Tristan Moody)
    // Moved from gmatwxdefs.hpp to remove compiler warning: defined but not used (LOJ: 2012.05.29)
    static int GmatGLCanvasAttribs[4]; // = {WX_GL_DOUBLEBUFFER, 0};
-   
+
 protected:
 
    enum
    {
-      MAX_DATA = 20000,
       UNINIT_TEXTURE = 999,
       UNKNOWN_BODY = -1,
       UNKNOWN_OBJ_ID = -999,
@@ -219,6 +221,7 @@ protected:
    // Data points
    int  mNumData;
    int  mTotalPoints;
+   int  maxData;
    
    // Data control flags
    bool mIsEndOfData;

@@ -23,7 +23,7 @@
 # PYTHON_MODULE_PATH lines. GMAT will search the paths in top-to-bottom order
 # and use the first function file found.
 #
-# In order for an plugin to work, the path to the plugin library for Windows
+# In order for a plugin to work, the path to the plugin library for Windows
 # (.dll), Linux (.so) or OS X (.dylib) must be specified in a PLUGIN line below.
 # The plugin name should be specified without the file extension. Plugins are
 # loaded in the order listed.
@@ -37,6 +37,9 @@
 #MATLAB_MODE           = SHARED
 #MATLAB_MODE           = NO_MATLAB
 #WRITE_GMAT_KEYWORD    = ON
+#WRITE_PERSONALIZATION_FILE = ON
+#NO_SPLASH             = TRUE
+#ECHO_COMMANDS         = TRUE
 
 #-----------------------------------------------------------
 # Plugins
@@ -54,6 +57,8 @@ PLUGIN                  = ../plugins/libMatlabInterface
 PLUGIN                  = ../plugins/libFminconOptimizer
 PLUGIN                  = ../plugins/libProductionPropagators
 PLUGIN                  = ../plugins/libGmatEstimation
+PLUGIN			         = ../plugins/libYukonOptimizer
+PLUGIN                  = ../plugins/libScriptTools
 
 # Alpha plugins (disabled by default)
 # PLUGIN                  = ./libCInterface
@@ -65,6 +70,7 @@ PLUGIN                  = ../plugins/libGmatEstimation
 # PLUGIN                  = ../plugins/libEKF
 
 # Internal-only plugins
+# PLUGIN                  = ../plugins/proprietary/libCsaltInterface
 # PLUGIN                  = ../plugins/proprietary/libMarsGRAM
 # PLUGIN                  = ../plugins/proprietary/libMsise86
 # PLUGIN                  = ../plugins/proprietary/libNRLMsise00
@@ -179,6 +185,7 @@ SPAD_SRP_FILE          = SPAD_PATH/SphericalModel.spo
 ATMOSPHERE_PATH        = DATA_PATH/atmosphere/earth
 CSSI_FLUX_FILE         = ATMOSPHERE_PATH/SpaceWeather-All-v1.2.txt
 SCHATTEN_FILE          = ATMOSPHERE_PATH/SchattenPredict.txt
+MARINI_TROPO_FILE      = ATMOSPHERE_PATH/marini.dat
 #-----------------------------------------------------------
 HELP_FILE              = ROOT_PATH/docs/help/help.chm
 #-----------------------------------------------------------
@@ -188,12 +195,11 @@ ICRF_FILE              = DATA_PATH/icrf/ICRF_Table.txt
 #-----------------------------------------------------------
 # Debug options
 #-----------------------------------------------------------
-#RUN_MODE              = TESTING
-#RUN_MODE              = TESTING_NO_PLOTS
-#RUN_MODE              = EXIT_AFTER_RUN
-#ECHO_COMMANDS         = TRUE
-#DEBUG_MATLAB          = ON
-#DEBUG_PARAMETERS      = ON
-#DEBUG_FILE_PATH       = ON
-#HIDE_SAVEMISSION      = TRUE
-#PLOT_MODE             = TILE
+#RUN_MODE                 = TESTING
+#RUN_MODE                 = TESTING_NO_PLOTS
+#RUN_MODE                 = EXIT_AFTER_RUN
+#DEBUG_MATLAB             = ON
+#DEBUG_PARAMETERS         = ON
+#DEBUG_FILE_PATH          = ON
+#HIDE_SAVEMISSION         = TRUE
+#PLOT_MODE                = TILE

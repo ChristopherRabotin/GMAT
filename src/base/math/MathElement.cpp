@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -446,7 +446,7 @@ MathNode* MathElement::GetRight()
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 /*
@@ -459,7 +459,7 @@ MathNode* MathElement::GetRight()
  * @return always true to indicate RenameRefObject() was implemented.
  */
 //---------------------------------------------------------------------------
-bool MathElement::RenameRefObject(const Gmat::ObjectType type,
+bool MathElement::RenameRefObject(const UnsignedInt type,
                                   const std::string &oldName,
                                   const std::string &newName)
 {
@@ -576,7 +576,7 @@ GmatBase* MathElement::Clone(void) const
 }
 
 //---------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name)
 //---------------------------------------------------------------------------
 /**
  * Returns the reference object pointer.
@@ -587,7 +587,7 @@ GmatBase* MathElement::Clone(void) const
  * @return reference object pointer.
  */
  //---------------------------------------------------------------------------
-GmatBase* MathElement::GetRefObject(const Gmat::ObjectType type, 
+GmatBase* MathElement::GetRefObject(const UnsignedInt type,
                                     const std::string &name)
 {
    switch (type)
@@ -604,7 +604,7 @@ GmatBase* MathElement::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -616,7 +616,7 @@ GmatBase* MathElement::GetRefObject(const Gmat::ObjectType type,
  * @return true if successful false otherwise.
  */
  //---------------------------------------------------------------------------
-bool MathElement::SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
+bool MathElement::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                const std::string &name)
 {
    switch (type)
@@ -635,7 +635,7 @@ bool MathElement::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * This method returns a name of the referenced objects.
@@ -643,7 +643,7 @@ bool MathElement::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return the name of the object of the requested type.
  */
  //------------------------------------------------------------------------------
-std::string MathElement::GetRefObjectName(const Gmat::ObjectType type) const
+std::string MathElement::GetRefObjectName(const UnsignedInt type) const
 {
    switch (type)
    {
@@ -659,7 +659,7 @@ std::string MathElement::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * This method sets the name of the referenced objects.
@@ -667,7 +667,7 @@ std::string MathElement::GetRefObjectName(const Gmat::ObjectType type) const
  * @return true when referenced object name is set sucessfully otherwise false.
  */
  //------------------------------------------------------------------------------
-bool MathElement::SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+bool MathElement::SetRefObjectName(const UnsignedInt type, const std::string &name)
 {
    #ifdef DEBUG_MATH_ELEMENT
    MessageInterface::ShowMessage
@@ -690,7 +690,7 @@ bool MathElement::SetRefObjectName(const Gmat::ObjectType type, const std::strin
 
 
 //------------------------------------------------------------------------------
-//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//  const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Returns the names of the reference object.
@@ -701,7 +701,7 @@ bool MathElement::SetRefObjectName(const Gmat::ObjectType type, const std::strin
  * @return The names of the reference object.
  */
 //------------------------------------------------------------------------------
-const StringArray& MathElement::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& MathElement::GetRefObjectNameArray(const UnsignedInt type)
 {
    #ifdef DEBUG_WRAPPERS
    MessageInterface::ShowMessage

@@ -5,7 +5,7 @@
 %  Create the Sun-centered J2000 frame.
 Create CoordinateSystem SunMJ2000Eq;
 SunMJ2000Eq.Origin = Sun;
-SunMJ2000Eq.Axes   = MJ2000Eq;
+SunMJ2000Eq.Axes   = MJ2000Eq;  %Earth mean equator axes
 
 %  Specify the satellite orbit and the satellite parameters
 Create Spacecraft Sat;
@@ -97,10 +97,11 @@ Create Propagator Prop;
 Fm.CentralBody            = Sun;
 Fm.PointMasses            = {Sun, Earth, Luna, Mars, Saturn, ...
                              Uranus, Mercury, Venus, Jupiter};
+Fm.ErrorControl 		     = None;
 Fm.SRP                    = On;
 Fm.RelativisticCorrection = On;
 Prop.FM                   = Fm;
-
+Prop.MinStep 			  = 0;
 %-----------------------------------------------------------------------------------------
 %%		5.  Create and configure Simulator object
 %-----------------------------------------------------------------------------------------

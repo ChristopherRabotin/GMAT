@@ -1,4 +1,4 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Target</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="Stop.html" title="Stop"><link rel="next" href="Toggle.html" title="Toggle"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Target</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Stop.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Toggle.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Target"></a><div class="titlepage"></div><a name="N25467" class="indexterm"></a><a name="N2546A" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Target</span></h2><p>Target &mdash; Solve for condition(s) by varying one or more
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Target</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="Stop.html" title="Stop"><link rel="next" href="Toggle.html" title="Toggle"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Target</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Stop.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Toggle.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Target"></a><div class="titlepage"></div><a name="N25BE1" class="indexterm"></a><a name="N25BE4" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Target</span></h2><p>Target &mdash; Solve for condition(s) by varying one or more
     parameters</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><code class="literal">Target</code> <em class="replaceable"><code>SolverName</code></em> [<code class="literal">{</code>[<code class="literal">SolveMode =</code> <em class="replaceable"><code>value</code></em>], [<code class="literal">ExitMode =</code> <em class="replaceable"><code>value</code></em>],
                     [<code class="literal">ShowProgressWindow =</code> <em class="replaceable"><code>value</code></em>]<code class="literal">}</code>]
       <em class="replaceable"><code>Vary command</code></em> &hellip;
@@ -24,7 +24,7 @@
     define the problems constraints using <span class="guilabel">Achieve</span>
     commands. The <span class="guilabel">Target/EndTarget </span> sequence is an
     advanced command. The examples later in this section give additional
-    details.</p><p>See also: <a class="xref" href="DifferentialCorrector.html" title="DifferentialCorrector"><span class="refentrytitle">DifferentialCorrector</span></a>,<a class="xref" href="Vary.html" title="Vary"><span class="refentrytitle">Vary</span></a>,<a class="xref" href="Achieve.html" title="Achieve"><span class="refentrytitle">Achieve</span></a>,<a class="xref" href="Optimize.html" title="Optimize"><span class="refentrytitle">Optimize</span></a>,</p></div><div class="refsection"><a name="N254EE"></a><h2>Options</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">ApplyCorrections</span></td><td><p>This GUI button replaces the initial guess values
+    details.</p><p>See also: <a class="xref" href="DifferentialCorrector.html" title="DifferentialCorrector"><span class="refentrytitle">DifferentialCorrector</span></a>,<a class="xref" href="Vary.html" title="Vary"><span class="refentrytitle">Vary</span></a>,<a class="xref" href="Achieve.html" title="Achieve"><span class="refentrytitle">Achieve</span></a>,<a class="xref" href="Optimize.html" title="Optimize"><span class="refentrytitle">Optimize</span></a>,</p></div><div class="refsection"><a name="N25C68"></a><h2>Options</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">ApplyCorrections</span></td><td><p>This GUI button replaces the initial guess values
             specified in the <span class="guilabel">Vary</span> commands. If the
             <span class="guilabel">Target</span> sequence converged, the converged
             values are applied. If the <span class="guilabel">Target</span> sequence
@@ -76,7 +76,7 @@
                     </p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any user-defined or default
                     <span class="guilabel">DifferentialCorrector</span></p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <span class="guilabel">DefaultDC</span>
-                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N25630"></a><h2>GUI</h2><p>The <span class="guilabel">Target</span> command allows you to use a
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N25DAA"></a><h2>GUI</h2><p>The <span class="guilabel">Target</span> command allows you to use a
     differential correction process to solve problems. To solve a given
     problem, you need to create a so-called <span class="guilabel">Target</span>
     sequence which we now define. When you add a <span class="guilabel">Target</span>
@@ -104,7 +104,7 @@
     allows you to apply corrections to your <span class="guilabel">Target</span>
     command sequence.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Target_Default.png" align="middle" height="232"></td></tr></table></div></div><p>If you set <span class="guilabel">ShowProgressWindow</span> to true, then a
     dynamic display is shown during targeting that contains values of
-    variables and constraints as shown below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Target_SolverStatusWindow.png" align="middle" height="261"></td></tr></table></div></div></div><div class="refsection"><a name="Target_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N256A6"></a><h3>Content of a Target/EndTarget Sequence</h3><p>A <span class="guilabel">Target/EndTarget</span> sequence must contain at
+    variables and constraints as shown below.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Target_SolverStatusWindow.png" align="middle" height="261"></td></tr></table></div></div></div><div class="refsection"><a name="Target_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N25E20"></a><h3>Content of a Target/EndTarget Sequence</h3><p>A <span class="guilabel">Target/EndTarget</span> sequence must contain at
       least one <span class="guilabel">Vary</span> command and at least one
       <span class="guilabel">Achieve</span> Command. See the <span class="guilabel">Vary</span>
       and <span class="guilabel">Achieve</span> command sections for details on the
@@ -116,7 +116,7 @@
       optional. You can omit the entire list and the curly braces and the
       default values will be used for <span class="guilabel">Target</span>
       configuration fields such as <span class="guilabel">SolveMode</span> and
-      <span class="guilabel">ExitMode</span>.</p></div><div class="refsection"><a name="N256D2"></a><h3>Use of a Target/EndTarget Sequence</h3><p>GMAT <span class="guilabel">Target</span> sequences can solve square
+      <span class="guilabel">ExitMode</span>.</p></div><div class="refsection"><a name="N25E4C"></a><h3>Use of a Target/EndTarget Sequence</h3><p>GMAT <span class="guilabel">Target</span> sequences can solve square
       problems (the number of Control Variables equals the number of
       constraints), over-determined problems (the number of Control Variables
       is less than the number of constraints) and under-determined problems
@@ -135,7 +135,7 @@
         variables defined in the <span class="guilabel">Vary</span> commands do not
         affect the constraints defined in the <span class="guilabel">Achieve</span>
         commands. A common mistake in this case is that you forgot to apply a
-        maneuver.</p></div></div><div class="refsection"><a name="N256E9"></a><h3>Note on Using Apply Corrections</h3><p>After the <span class="guilabel">Target</span> sequence has been run, you
+        maneuver.</p></div></div><div class="refsection"><a name="N25E63"></a><h3>Note on Using Apply Corrections</h3><p>After the <span class="guilabel">Target</span> sequence has been run, you
       may choose to apply corrections by navigating to the
       <span class="guilabel">Mission</span> tree, right-clicking the
       <span class="guilabel">Target</span> command to bring up the
@@ -160,7 +160,7 @@ Target aDC
 Vary aDC(BurnDuration = InitialGuess_BurnDuration)
 Achieve aDC(BurnDuration = 10) % atypical Achieve command for
                                % illustrative purposes only
-EndTarget</code>     </pre></div><div class="refsection"><a name="N2571B"></a><h3>Command Interactions</h3><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><tbody><tr><td><span class="guilabel">Vary command </span></td><td><p> Every <span class="guilabel">Target</span> sequence must
+EndTarget</code>     </pre></div><div class="refsection"><a name="N25E95"></a><h3>Command Interactions</h3><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><tbody><tr><td><span class="guilabel">Vary command </span></td><td><p> Every <span class="guilabel">Target</span> sequence must
               contain at least one <span class="guilabel">Vary</span> command.
               <span class="guilabel">Vary</span> commands are used to define the
               control variables associated with a <span class="guilabel">Target</span>
@@ -168,7 +168,7 @@ EndTarget</code>     </pre></div><div class="refsection"><a name="N2571B"></a><h
               contain at least one <span class="guilabel">Achieve</span> command.
               <span class="guilabel">Achieve</span> commands are used to define the
               goals associated with a <span class="guilabel">Target</span> sequence.
-              </p></td></tr></tbody></table></div></div></div><div class="refsection"><a name="N25750"></a><h2>Examples</h2><div class="informalexample"><p>Use a <span class="guilabel">Target </span>sequence to solve for a root of
+              </p></td></tr></tbody></table></div></div></div><div class="refsection"><a name="N25ECA"></a><h2>Examples</h2><div class="informalexample"><p>Use a <span class="guilabel">Target </span>sequence to solve for a root of
       an algebraic equation. Here we provide an initial guess of 5 for the
       Control Variable (or independent variable) x, and solve for the value of
       x that satisfies the Constraint y = 0, where y :=3*x^3 + 2*x^2 - 4*x +

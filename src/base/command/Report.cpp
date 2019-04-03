@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -463,7 +463,7 @@ bool Report::TakeAction(const std::string &action, const std::string &actionData
 
 
 //------------------------------------------------------------------------------
-// bool GetRefObjectName(const Gmat::ObjectType type)
+// bool GetRefObjectName(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves the reference object names.
@@ -473,7 +473,7 @@ bool Report::TakeAction(const std::string &action, const std::string &actionData
  * @return the name of the object.
  */
 //------------------------------------------------------------------------------
-std::string Report::GetRefObjectName(const Gmat::ObjectType type) const
+std::string Report::GetRefObjectName(const UnsignedInt type) const
 {
    switch (type)
    {
@@ -492,7 +492,7 @@ std::string Report::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Accesses arrays of names for referenced objects.
@@ -502,7 +502,7 @@ std::string Report::GetRefObjectName(const Gmat::ObjectType type) const
  * @return the StringArray containing the referenced object names.
  */
 //------------------------------------------------------------------------------
-const StringArray& Report::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Report::GetRefObjectNameArray(const UnsignedInt type)
 {
    static StringArray refObjectNames;
    refObjectNames.clear();
@@ -521,7 +521,7 @@ const StringArray& Report::GetRefObjectNameArray(const Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -543,7 +543,7 @@ const StringArray& Report::GetRefObjectNameArray(const Gmat::ObjectType type)
  * @return true if object successfully set, throws otherwise.
  */
 //------------------------------------------------------------------------------
-bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool Report::SetRefObject(GmatBase *obj, const UnsignedInt type,
                           const std::string &name, const Integer index)
 {
    if (obj == NULL)
@@ -596,7 +596,7 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //---------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type,
+// bool RenameRefObject(const UnsignedInt type,
 //                      const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 /*
@@ -609,7 +609,7 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return always true to indicate RenameRefObject() was implemented.
  */
 //---------------------------------------------------------------------------
-bool Report::RenameRefObject(const Gmat::ObjectType type,
+bool Report::RenameRefObject(const UnsignedInt type,
                              const std::string &oldName,
                              const std::string &newName)
 {

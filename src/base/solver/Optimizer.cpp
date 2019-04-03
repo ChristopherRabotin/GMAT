@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -117,6 +117,7 @@ Optimizer::Optimizer(const Optimizer &opt) :
    ineqConstraintAchievedValues   = opt.ineqConstraintAchievedValues;
    ineqConstraintOp     = opt.ineqConstraintOp;
    gradient             = opt.gradient;
+   jacobian             = opt.jacobian;
    //eqConstraintJacobian = opt.eqConstraintJacobian;
    //ineqConstraintJacobian = opt.ineqConstraintJacobian;
    parameterCount       = opt.parameterCount;
@@ -151,6 +152,7 @@ Optimizer&
    ineqConstraintAchievedValues   = opt.ineqConstraintAchievedValues;
    ineqConstraintOp     = opt.ineqConstraintOp;
    gradient             = opt.gradient;
+   jacobian             = opt.jacobian;
    //eqConstraintJacobian = opt.eqConstraintJacobian;
    //ineqConstraintJacobian = opt.ineqConstraintJacobian;
    parameterCount       = opt.parameterCount;
@@ -824,7 +826,45 @@ bool Optimizer::TakeAction(const std::string &action,
    return Solver::TakeAction(action, actionData);
 }
 
+//------------------------------------------------------------------------------
+//  std::string GetJacobianString()
+//------------------------------------------------------------------------------
+/**
+* This method generates the string of the current Jacobian values.
+*
+* This method is called by internal optimizers when printing to the output
+* file when the verbose report style is used.
+*
+* @return jacString The string containing the Jacobian matrix.
+*/
+//------------------------------------------------------------------------------
+std::string Optimizer::GetJacobianString()
+{
+   std::stringstream jacString;
+   jacString.str("");
+   jacString.precision(12);
 
+   jacString << "\n   Jacobian:\n      ";
+
+   for (Integer i = 0; i < variableCount; ++i)
+      jacString << gradient.at(i) << "    ";
+
+   jacString << "\n      ";
+   for (Integer j = 0; j < eqConstraintCount + ineqConstraintCount; ++j)
+   {
+      for (Integer i = 0; i < variableCount; ++i)
+      {
+         if (j < eqConstraintCount)
+            jacString << jacobian.at(i + variableCount * j) << "    ";
+         else
+            jacString << -jacobian.at(i + variableCount * j) << "    ";
+      }
+      jacString << "\n      ";
+   }
+   jacString << "\n";
+
+   return jacString.str();
+}
 
 //------------------------------------------------------------------------------
 // protected methods
@@ -989,6 +1029,8 @@ void Optimizer::ReportProgress(ISolverListener* listener, const SolverState forS
                   GmatStringUtil::Trim( GmatStringUtil::ToString(iterationsTaken) ) +
                   " passes through the Solver Control Sequence");
             break;
+         default:
+            std::cout << "Default branch taken in Optimizer::ReportProgress\n";
       }
    }
 }

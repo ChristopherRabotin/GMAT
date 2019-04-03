@@ -296,7 +296,7 @@ Real RangeRateAdapterKps::SetRealParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string& oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string& oldName,
 //       const std::string& newName)
 //------------------------------------------------------------------------------
 /**
@@ -309,7 +309,7 @@ Real RangeRateAdapterKps::SetRealParameter(const std::string &label,
  * @return true if a rename happened, false if not
  */
 //------------------------------------------------------------------------------
-bool RangeRateAdapterKps::RenameRefObject(const Gmat::ObjectType type,
+bool RangeRateAdapterKps::RenameRefObject(const UnsignedInt type,
       const std::string& oldName, const std::string& newName)
 {
    bool retval = RangeAdapterKm::RenameRefObject(type, oldName, newName);
@@ -438,12 +438,13 @@ bool RangeRateAdapterKps::Initialize()
 //------------------------------------------------------------------------------
 const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(
                               bool withEvents, ObservationData* forObservation,
-                              std::vector<RampTableData>* rampTB)
+                              std::vector<RampTableData>* rampTB, 
+                              bool forSimulation)
 {
    // Compute range in km, at epoch and at epoch plus offset
-   cMeasurement1 = CalculateMeasurementAtOffset(false, 0.0, NULL, NULL, 0);
+   cMeasurement1 = CalculateMeasurementAtOffset(false, 0.0, NULL, NULL, 0, forSimulation);
    cMeasurement2 = CalculateMeasurementAtOffset(false, dopplerInterval,
-               NULL, NULL, 1);
+                      NULL, NULL, 1, forSimulation);
 
    if ((cMeasurement1.isFeasible) && (cMeasurement2.isFeasible))
    {
@@ -479,8 +480,8 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(
       cMeasurement.isFeasible = true;
 
       // Get measurement epoch in the first signal path. It will apply for all other paths
-      cMeasurement.epoch = cMeasurement1.epoch;
-
+      cMeasurement.epochGT = cMeasurement1.epochGT;
+      cMeasurement.epoch   = cMeasurement1.epoch;
 
       #ifdef DEBUG_RANGE_CALCULATION
         MessageInterface::ShowMessage("epoch %f, range %f, range rate %f, "
@@ -744,7 +745,7 @@ void RangeRateAdapterKps::SetCorrection(const std::string& correctionName,
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase* obj, const UnsignedInt type,
 //       const std::string& name)
 //------------------------------------------------------------------------------
 /**
@@ -759,13 +760,13 @@ void RangeRateAdapterKps::SetCorrection(const std::string& correctionName,
  */
 //------------------------------------------------------------------------------
 bool RangeRateAdapterKps::SetRefObject(GmatBase* obj,
-      const Gmat::ObjectType type, const std::string& name)
+      const UnsignedInt type, const std::string& name)
 {
    return RangeAdapterKm::SetRefObject(obj, type, name);
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase* obj, const UnsignedInt type,
 //       const std::string& name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -781,7 +782,7 @@ bool RangeRateAdapterKps::SetRefObject(GmatBase* obj,
  */
 //------------------------------------------------------------------------------
 bool RangeRateAdapterKps::SetRefObject(GmatBase* obj,
-      const Gmat::ObjectType type, const std::string& name, const Integer index)
+      const UnsignedInt type, const std::string& name, const Integer index)
 {
    return RangeAdapterKm::SetRefObject(obj, type, name, index);
 }
@@ -790,7 +791,7 @@ bool RangeRateAdapterKps::SetRefObject(GmatBase* obj,
 //------------------------------------------------------------------------------
 // const MeasurementData& CalculateMeasurementAtOffset(
 //       bool withEvents, Real dt, ObservationData* forObservation,
-//       std::vector<RampTableData>* rampTB, Integer forStrand)
+//       std::vector<RampTableData>* rampTB, Integer forStrand, bool forSimulation)
 //------------------------------------------------------------------------------
 /**
  * Calculate the measurement at a time offset from the base epoch
@@ -811,13 +812,14 @@ bool RangeRateAdapterKps::SetRefObject(GmatBase* obj,
  * @param forObservation Observation supplying extra data.  Unused in this code.
  * @param rampTB Ramp table data.  Unused in this code.
  * @param forStrand Strand index for the computations.
+ * @param forSimulation     true, if it runs for sumulation, false, it runs for estimation 
  *
  * @return The measurement data
  */
 //------------------------------------------------------------------------------
 const MeasurementData& RangeRateAdapterKps::CalculateMeasurementAtOffset(
       bool withEvents, Real dt, ObservationData* forObservation,
-      std::vector<RampTableData>* rampTB, Integer forStrand)
+      std::vector<RampTableData>* rampTB, Integer forStrand, bool forSimulation)
 {
    static MeasurementData offsetMeas;
 
@@ -829,8 +831,8 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurementAtOffset(
       throw MeasurementException("Strand index is out of bounds");
 
    // Fire the measurement model to build the collection of signal data
-   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB, dt, 
-         forStrand))
+   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB, 
+         forSimulation, dt, forStrand))
    {
       std::vector<SignalData*> data = calcData->GetSignalData();
       std::string unfeasibilityReason;
@@ -853,17 +855,17 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurementAtOffset(
          ++legIndex;
 
          // Set feasibility value
-         if (current->feasibilityReason == "N")
+         if (current->feasibilityReason[0] == 'N')
          {
             if (current->stationParticipant)
                offsetMeas.feasibilityValue = current->feasibilityValue;
          }
-         else if (current->feasibilityReason == "B")
+         else if (current->feasibilityReason[0] == 'B')
          {
             std::stringstream ss;
-            ss << "B" << legIndex;
+            ss << "B" << legIndex << current->feasibilityReason.substr(1);
             current->feasibilityReason = ss.str();
-            if (offsetMeas.unfeasibleReason == "N")
+            if (offsetMeas.unfeasibleReason[0] == 'N')
             {
                offsetMeas.unfeasibleReason = current->feasibilityReason;
                offsetMeas.isFeasible = false;
@@ -883,6 +885,8 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurementAtOffset(
          }// for j loop
 
          // Get measurement epoch from the first member
+         offsetMeas.epochGT = first->tPrecTime - 
+                  first->tDelay / GmatTimeConstants::SECS_PER_DAY;
          offsetMeas.epoch = first->tPrecTime.GetMjd() -
                   first->tDelay/GmatTimeConstants::SECS_PER_DAY;
 

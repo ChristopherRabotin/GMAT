@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -405,7 +405,7 @@ void LibrationPointPanel::UpdateComboBoxes()
 
 
 //------------------------------------------------------------------------------
-// bool RefreshObjects(Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT)
+// bool RefreshObjects(UnsignedInt type = Gmat::UNKNOWN_OBJECT)
 //------------------------------------------------------------------------------
 /**
  * Refreshes the comboboxes.  This is necessary because the comboboxes
@@ -414,7 +414,7 @@ void LibrationPointPanel::UpdateComboBoxes()
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
-bool LibrationPointPanel::RefreshObjects(Gmat::ObjectType type)
+bool LibrationPointPanel::RefreshObjects(UnsignedInt type)
 {
 	if ((type == Gmat::CALCULATED_POINT) || (type == Gmat::CELESTIAL_BODY) ||
        (type == Gmat::SOLAR_SYSTEM))

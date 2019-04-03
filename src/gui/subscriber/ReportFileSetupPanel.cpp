@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -138,7 +138,7 @@ bool ReportFileSetupPanel::PrepareObjectNameChange()
 
 
 //------------------------------------------------------------------------------
-// virtual void ObjectNameChanged(Gmat::ObjectType type, const wxString &oldName,
+// virtual void ObjectNameChanged(UnsignedInt type, const wxString &oldName,
 //                                const wxString &newName)
 //------------------------------------------------------------------------------
 /*
@@ -147,7 +147,7 @@ bool ReportFileSetupPanel::PrepareObjectNameChange()
  * object name, so all we need to do is re-load the data.
  */
 //------------------------------------------------------------------------------
-void ReportFileSetupPanel::ObjectNameChanged(Gmat::ObjectType type,
+void ReportFileSetupPanel::ObjectNameChanged(UnsignedInt type,
                                              const wxString &oldName,
                                              const wxString &newName)
 {

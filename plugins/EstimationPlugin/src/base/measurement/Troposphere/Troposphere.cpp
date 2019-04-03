@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -30,6 +30,8 @@
 #include "GmatConstants.hpp"
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
+#include "Code500EphemerisFile.hpp"
+#include "FileManager.hpp"
 
 //#define DEBUG_TROPOSPHERE_CORRECTION
 
@@ -54,9 +56,8 @@ Troposphere::Troposphere(const std::string& nomme) :
 	objectTypeNames.push_back("Troposphere");
 	model = 1;						// 1 for Troposphere model
 
-	temperature = 295.1;		//286;		// 286K
-	pressure = 1013.5;			//938.0;	// 938.0 hPa = 93800 Pa = 0.926 atm
-	humidityFraction = 0.55;	//0.73;		// 73 %
+	month = 0;
+	mariniData.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -80,12 +81,8 @@ Troposphere::~Troposphere()
 Troposphere::Troposphere(const Troposphere& tps):
 		MediaCorrection(tps)
 {
-	pressure 			= tps.pressure;
-	temperature 		= tps.temperature;
-	humidityFraction 	= tps.humidityFraction;
-	elevationAngle 	= tps.elevationAngle;
-	range 				= tps.range;
-	waveLength 			= tps.waveLength;
+   month     = tps.month;
+   mariniData = tps.mariniData;
 }
 
 
@@ -106,12 +103,8 @@ Troposphere& Troposphere::operator=(const Troposphere& tps)
    {
       MediaCorrection::operator=(tps);
 
-   	temperature 		= tps.temperature;
-   	pressure 			= tps.pressure;
-   	humidityFraction 	= tps.humidityFraction;
-   	waveLength			= tps.waveLength;
-   	elevationAngle		= tps.elevationAngle;
-   	range					= tps.range;
+      month     = tps.month;
+      mariniData = tps.mariniData;
    }
 
    return *this;
@@ -130,84 +123,18 @@ GmatBase* Troposphere::Clone() const
 	return new Troposphere(*this);
 }
 
-
 //------------------------------------------------------------------------------
-// bool SetTemperature(Real T)
-//------------------------------------------------------------------------------
-/**
- * Set temperature
- */
-//------------------------------------------------------------------------------
-bool Troposphere::SetTemperature(Real T)
-{
-	temperature = T;
-	return true;
-}
-
-//------------------------------------------------------------------------------
-// bool SetPressure(Real P)
+// bool SetTime(GmatEpoch ep)
 //------------------------------------------------------------------------------
 /**
- * Set pressure
+ * Set month based on epoch
  */
 //------------------------------------------------------------------------------
-bool Troposphere::SetPressure(Real P)
+bool Troposphere::SetTime(GmatEpoch ep)
 {
-	pressure = P;
-	return true;
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetHumidityFraction(Real humFr)
-//------------------------------------------------------------------------------
-/**
- * Set humidity fraction
- */
-//------------------------------------------------------------------------------
-bool Troposphere::SetHumidityFraction(Real humFr)
-{
-	humidityFraction = humFr;
-	return true;
-}
-
-//------------------------------------------------------------------------------
-// bool SetElevationAngle(Real elevation)
-//------------------------------------------------------------------------------
-/**
- * Set elevation angle
- */
-//------------------------------------------------------------------------------
-bool Troposphere::SetElevationAngle(Real elevation)
-{
-	elevationAngle = elevation;
-	return true;
-}
-
-//------------------------------------------------------------------------------
-// bool SetRange(Real r)
-//------------------------------------------------------------------------------
-/**
- * Set range
- */
-//------------------------------------------------------------------------------
-bool Troposphere::SetRange(Real r)
-{
-	range = r;
-	return true;
-}
-
-//------------------------------------------------------------------------------
-// bool SetWaveLength(Real lambda)
-//------------------------------------------------------------------------------
-/**
- * Set wave length
- */
-//------------------------------------------------------------------------------
-bool Troposphere::SetWaveLength(Real lambda)
-{
-	waveLength = lambda;
-	return true;
+   A1Mjd epoch = ep;
+   month = epoch.ToA1Date().GetMonth();
+   return true;
 }
 
 
@@ -215,6 +142,48 @@ bool Troposphere::SetWaveLength(Real lambda)
 // RealArray Correction()
 //------------------------------------------------------------------------------
 /** Compute refraction corrections.
+*  Parameters required are determined by the Troposphere model used
+*  Supported Troposphere models are HopfieldSaastamoinen and Marini
+*  return double[] containing tropospheric refraction corrections for range (m)
+*                             elevation (arcsec) measurements
+*                             media correction time delay (second)
+*/
+//------------------------------------------------------------------------------
+RealArray Troposphere::Correction()
+{
+   RealArray out;
+
+   if (modelTypeName == "HopfieldSaastamoinen")
+   {
+      out = CalculateHS();
+   }
+   else if (modelTypeName == "Marini")
+   {
+      out = CalculateMarini();
+   }
+   else
+   {
+      MessageInterface::ShowMessage("Troposphere::Correction: Unrecognized Troposphere model " + modelTypeName + " used\n"
+                                    "Supported models are HopfieldSaastamoinen and Marini\n");
+      throw MeasurementException("Troposphere::Correction: Unrecognized Troposphere model " + modelTypeName + " used\n"
+                                 "Supported models are HopfieldSaastamoinen and Marini\n");
+   }
+
+#ifdef DEBUG_TROPOSPHERE_CORRECTION
+   MessageInterface::ShowMessage(" Troposphere correction result:\n");
+   MessageInterface::ShowMessage("   Range correction = %f m\n", out[0]);
+   MessageInterface::ShowMessage("   Elevation angle correction = %f arcsec", out[1]);
+   MessageInterface::ShowMessage("   Time correction = %f sec\n", out[2]); 
+#endif
+
+   return out;
+}
+
+
+//------------------------------------------------------------------------------
+// RealArray CalculateHS()
+//------------------------------------------------------------------------------
+/** Compute refraction corrections using the HopfieldSaastamoinen model.
 *  p double containing pressure in hPa
 *  T double containing temperature in deg K
 *  fh double containing relative humidity (0 <= fh <= 1)
@@ -225,7 +194,7 @@ bool Troposphere::SetWaveLength(Real lambda)
 *                             media correction time delay (second)
 */
 //------------------------------------------------------------------------------
-RealArray Troposphere::Correction()
+RealArray Troposphere::CalculateHS()
 {
    // Determine Re value
    if (!solarSystem)
@@ -242,9 +211,9 @@ RealArray Troposphere::Correction()
    Real Re = earth->GetEquatorialRadius()*GmatMathConstants::KM_TO_M;			// get Earth radius in meters
 
 #ifdef DEBUG_TROPOSPHERE_CORRECTION
-//   MessageInterface::ShowMessage("Troposphere::Correction():\n");
+   MessageInterface::ShowMessage("Troposphere::Correction(): Using HopfieldSaastamoinen model\n");
    MessageInterface::ShowMessage("   temperature = %f K ,  pressure = %f hPa,  humidity = %f\n", temperature, pressure, humidityFraction);
-   MessageInterface::ShowMessage("   range = %lfm ,  elevationAngle = %lf radian,  waveLenght = %lfm\n", range, elevationAngle, waveLength);
+   MessageInterface::ShowMessage("   range = %lfm ,  elevationAngle = %lf radian,  waveLength = %lfm\n", range, elevationAngle, waveLength);
    MessageInterface::ShowMessage("   earth radius = %lf m\n",Re);
 #endif
 
@@ -348,12 +317,245 @@ RealArray Troposphere::Correction()
 	out.push_back(dE);
 	out.push_back(drho/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM);
 
+	return out;
+}
+
+
+//------------------------------------------------------------------------------
+// RealArray CalculateMarini()
+//------------------------------------------------------------------------------
+/** Compute refraction corrections using the Marini model.
+*  Based on GTDS TROPOA.F
+*  
+*  latitude double containing Ground Station latitude in rad
+*  longitude double containing Ground Station longitude in rad
+*  month integer containing month of the year
+*  rho double containing range in m
+*  E double containing elevation angle in radians
+*  return double[] containing tropospheric refraction corrections for range (m)
+*                             elevation (arcsec) measurements
+*                             media correction time delay (second)
+*/
+//------------------------------------------------------------------------------
+RealArray Troposphere::CalculateMarini()
+{
 #ifdef DEBUG_TROPOSPHERE_CORRECTION
-	MessageInterface::ShowMessage(" Troposphere correction result:\n");
-	MessageInterface::ShowMessage("   Range correction = %f m\n", drho);
-	MessageInterface::ShowMessage("   Elevation angle correction = %f arcsec", dE);
-	MessageInterface::ShowMessage("   Time correction = %f sec\n", drho/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM); 
+   MessageInterface::ShowMessage("Troposphere::Correction(): Using Marini model\n");
+   MessageInterface::ShowMessage("   latitude = %f deg ,  longitude = %f deg, month %d\n", latitude*GmatMathConstants::DEG_PER_RAD, longitude*GmatMathConstants::DEG_PER_RAD, month);
+   MessageInterface::ShowMessage("   range = %lf m ,  elevationAngle = %lf radian\n", range, elevationAngle);
 #endif
 
-	return out;
+   if (mariniData.size() == 0)
+   {
+      LoadMariniDataFile();
+   }
+
+   // Specify inputs:
+   double LATITUDE = latitude;
+   double LONGITUDE = longitude;
+   Integer MONTH = month - 1; // January = 0
+   double ELEVATION = elevationAngle;
+   double RGN = range;
+
+   // Specify intermediate variables:
+   Integer NS;
+   Real HT;
+   Real RHO, RS, P, Q, SINEA, COSEA, XIO, XI1, XII1, XII2;
+   Real XKO, XMO, XM1, XMM1, XMM2, I, L, M;
+
+   // Specify outputs:
+   Real drho, dE;
+
+   /*      SUBROUTINE TROPOA 
+
+   C  PURPOSE:  TO COMPUTE CORRECTIONS DUE TO THE TROPOSPHERE              
+                                                                    
+   C  REFERENCE:  "CLOSED FORM SATELLITE TRACKING DATA CORRECTIONS FOR     
+   C        AN ARBITRARY TROPOSPHERIC PROFILE",JOHN W. MARINI,MARCH 1971,  
+   C         GSFC,X-551-71-122.                      */                      
+
+   //C     GET THE MONTHLY MEAN VALUE OF REFRACTIVITY AND SCALE HEIGHT
+   TROGET(LATITUDE, LONGITUDE, MONTH, NS, HT);
+
+   //C     SLANT RANGE
+   RHO = RGN;
+
+   //C     SOME EQUATORIAL RADIUS
+   RS = 6369.96;
+
+   //C     Eq 7-197a p7-83;
+   //P = DSQRT(2.0 * HT / RS);
+   P = GmatMathUtil::Sqrt(2.0 * HT / RS);
+
+   //C     Eq 7-197b p7-84
+   //Q = 1.0D-6 * NS * RS / HT;
+   Q = 1.0E-6 * NS * RS / HT;
+
+   //C     SIN AND COS OF ELEVATION
+   //SINEA = DSIN(ELEVATION);
+   //COSEA = DCOS(ELEVATION);
+   SINEA = GmatMathUtil::Sin(ELEVATION);
+   COSEA = GmatMathUtil::Cos(ELEVATION);
+
+   //C     Eq 7-203c p7-85
+   //XIO = SQRT(PI) / (1.0 - 0.9206 * Q) ** 0.4468
+   XIO = GmatMathUtil::Sqrt(GmatMathConstants::PI) / GmatMathUtil::Pow(1.0 - 0.9206 * Q, 0.4468);
+
+   //C     Eq 7-203d p7-86
+   XI1 = 2.0 / (1.0 - Q);
+
+   //C     Eq 7-203a p7-85
+   //XII = 0.5 - 0.25 * Q;
+   XII1 = 0.5 - 0.25 * Q;
+
+   //C     Eq 7-203b p7-85
+   //XII2 = 0.75 - 0.5625 * Q + 0.125 * Q**2;
+   XII2 = 0.75 - 0.5625 * Q + 0.125 * Q*Q;
+
+   //C     Eq 7-205 p7-86
+   //XKO = SQRT(2 * PI) / (1.0 - 0.9408 * Q) ** 0.4759;
+   XKO = GmatMathUtil::Sqrt(2 * GmatMathConstants::PI) / GmatMathUtil::Pow(1.0 - 0.9408 * Q, 0.4759);
+
+   //C     Eq 7-204c p7-86
+   //XMO = XIO * (1.0 + Q + Q**2 * XIO**2 / 12.0) - 0.5 * Q * XKO;
+   XMO = XIO * (1.0 + Q + Q*Q * XIO*XIO / 12.0) - 0.5 * Q * XKO;
+
+   //C     Eq 7-204d p7-86
+   XM1 = (2.0 + 0.5 * Q * XIO * XIO) / (1.0 - Q);
+
+   //C     Eq 7-204a p7-86
+   XMM1 = 0.5 - 0.375* Q;
+
+   //C     Eq 7-204b p7-86
+   //XMM2 = 0.75 * (1.0 - 25.0 / 24.0 * Q + 11.0 / 36.0 * Q**2);
+   XMM2 = 0.75 * (1.0 - 25.0 / 24.0 * Q + 11.0 / 36.0 * Q*Q);
+
+   //C     Eq 7-200a p7-84 WHERE F = Eq 7-201 p7-85
+   I = BendingIntegral(SINEA, XII1, XII2, XIO, XI1, P);
+
+   //C     Eq 7-199 p7-84
+   //L = 1.D0 - I * SINEA + 0.5D-6 * NS * I**2;
+   L = 1.0 - I * SINEA + 0.5E-6 * NS * I*I;
+
+   //C     Eq 7-200b p7-84 WHERE F = Eq 7-201 p7-85
+   M = BendingIntegral(SINEA, XMM1, XMM2, XMO, XM1, P);
+
+   //C     Range correction in km  = Eq 7-198a p7-84
+   //DRANGE = 1.D - 6 * NS * HT * (M - 0.5D - 6 * NS * (RS * COSEA * L) ** 2 / (RHO * HT))
+   drho = 1.0E-6 * NS * HT * (M - 0.5E-6 * NS * GmatMathUtil::Pow(RS * COSEA * L, 2) / (RHO * HT));
+
+   dE = 1.0E-6 * NS * COSEA * (I - RS * L / RHO);
+
+   drho *= GmatMathConstants::KM_TO_M;
+   dE /= GmatMathConstants::RAD_PER_ARCSEC;
+
+   RealArray out;
+   out.push_back(drho);
+   out.push_back(dE);
+   out.push_back(drho/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM);
+
+   return out;
+}
+
+
+//------------------------------------------------------------------------------
+// void Troposphere::TROGET(Real FLATD, Real FLOND, Integer MON, Integer &NS, Real &HT)
+//------------------------------------------------------------------------------
+/** Load the troposphere data from a data file for the Marini model.
+*  Based on GTDS TROGET.F
+*  
+*  FLATD double containing Ground Station latitude in rad
+*  FLOND double containing Ground Station longitude in rad
+*  MON integer containing month of the year January = 0
+*  NS integer output containing the refractivity
+*  HT double output containing the scale height
+*/
+//------------------------------------------------------------------------------
+void Troposphere::TROGET(Real FLATD, Real FLOND, Integer MON, Integer &NS, Real &HT)
+{
+   Integer NZHMON = 37068;
+
+   for (UnsignedInt ii = 0U; ii < mariniData.size(); ii++)
+   {
+      if (abs(FLATD*GmatMathConstants::DEG_PER_RAD - mariniData[ii].latitude) < 1.0)
+      {
+         Real DLON = abs(FLOND*GmatMathConstants::DEG_PER_RAD - mariniData[ii].longitude);
+
+         if (DLON < 1.0 || (360.0 - DLON) < 1.0)
+         {
+            NZHMON = mariniData[ii].refractivity[MON];
+            break;
+         }
+      }
+   }
+   
+   NS = NZHMON / 100;
+   HT = Real(GmatMathUtil::Mod(NZHMON, 100)) * 1.E-1;
+}
+
+
+//------------------------------------------------------------------------------
+// void Troposphere::BendingIntegral(Real FLATD, Real FLOND, Integer MON, Integer &NS, Real &HT)
+//------------------------------------------------------------------------------
+/** A FUNCTION WHICH APPROXIMATES THE BENDING INTEGRAL, I(ALPHA)
+*  Based on GTDS F.F
+*/
+//------------------------------------------------------------------------------
+Real Troposphere::BendingIntegral(Real ALPHA, Real FF1, Real FF2, Real FO, Real F1, Real P)
+{
+   Real PSQ, X1, X2, X3, X4, F;
+   Real Q1 = 1.0;
+
+   PSQ = P * P;
+   X1 = FF1 * PSQ;
+   X2 = FF2 * PSQ / FF1 - X1;
+   X3 = FO * FO * FF1 * (Q1 + X1 / X2) - (Q1 + F1*FF1);
+   X4 = FO * X1 / X3 / P*1.21313;
+   X3 = X2 / X3 * 1.320903;
+   X2 = X2 * 1.08885;
+   F = X2 / (ALPHA + X3 / (ALPHA + X4));
+   F = Q1 / (ALPHA + X1 / (ALPHA + F));
+
+   return F;
+}
+
+
+//------------------------------------------------------------------------------
+// void LoadMariniDataFile()
+//------------------------------------------------------------------------------
+/** Load the data file containing refractivity data used by the Marini model
+*/
+//------------------------------------------------------------------------------
+void Troposphere::LoadMariniDataFile()
+{
+   FileManager *fm = FileManager::Instance();
+   std::string filename = fm->GetFullPathname(FileManager::MARINI_TROPO_FILE);
+
+   std::ifstream tropoFile(filename.c_str());
+   if (!tropoFile)
+      throw MeasurementException("Error opening troposphere data file \"" + filename + "\"\n");
+   
+   std::string theLine;
+   
+   MariniDataStruct mariniLine;
+   mariniData.clear();
+
+   while(!tropoFile.eof())
+   {
+      std::getline(tropoFile,theLine);
+      
+      std::stringstream ss;
+      ss.str(theLine);
+      ss >> mariniLine.latitude >> mariniLine.longitude;
+      
+      for (UnsignedInt jj = 0U; jj < 12; jj++)
+      {
+         ss >> mariniLine.refractivity[jj];
+      }
+      
+      mariniData.push_back(mariniLine);
+   }
+      
+   if (mariniData.size() == 0)
+      throw MeasurementException("Unable to load refractivity data from troposphere data file \"" + filename + "\"\n");
 }

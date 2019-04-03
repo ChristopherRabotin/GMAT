@@ -69,6 +69,8 @@ if(wxWidgets_FOUND)
       )
 
     # On Mac, change dylib install names to use RPATH
+    # This is required because wxWidgets uses absolute paths for its library
+    # install names, which makes them non-portable.
     if(APPLE)
       # Create command for mac_change_install_names script
       SET(CHNM "./mac_change_install_names.sh")
@@ -82,11 +84,14 @@ if(wxWidgets_FOUND)
       SET(MAC_GUIDIR ${GMAT_MAC_APPBUNDLE_PATH}/MacOS)
       SET(MAC_PLUGINDIR ${GMAT_MAC_APPBUNDLE_PATH}/plugins)
 
+      # GUI uses wxWidgets
       SET(ARGN "${ARGN} \"${CMAKE_INSTALL_PREFIX}/${MAC_GUIDIR}/GMAT*\"")
 
-      if(PLUGIN_MATLABINTERFACE)
-	SET(ARGN "${ARGN} \"${CMAKE_INSTALL_PREFIX}/${MAC_PLUGINDIR}/libMatlabInterface*.dylib\"")
-      endif()
+      # Most plugins do not use wxWidgets. Nevertheless, we can specify
+      # every plugin and the mac_change_install_names script will ignore ones
+      # that do not use wxWidgets. This enables future or 3rd-party plugins 
+      # that use wxWidgets to have their rpaths automatically corrected.
+      SET(ARGN "${ARGN} \"${CMAKE_INSTALL_PREFIX}/${MAC_PLUGINDIR}/lib*.dylib\"")
 
       # Append full pathname of new components here using above pattern
 

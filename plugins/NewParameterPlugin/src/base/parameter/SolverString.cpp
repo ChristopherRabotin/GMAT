@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -59,7 +59,7 @@
 SolverString::SolverString(const std::string &name, const std::string &typeStr,
                        GmatBase *obj, const std::string &desc,
                        const std::string &unit, bool isSettable,
-                       Gmat::ObjectType paramOwnerType)
+                       UnsignedInt paramOwnerType)
    : StringVar(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
                GmatParam::NO_DEP, paramOwnerType, true, isSettable),
      SolverData()
@@ -242,10 +242,10 @@ bool SolverString::Initialize()
 //-------------------------------------
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool SolverString::RenameRefObject(const Gmat::ObjectType type,
+bool SolverString::RenameRefObject(const UnsignedInt type,
                                  const std::string &oldName,
                                  const std::string &newName)
 {
@@ -254,7 +254,7 @@ bool SolverString::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
+// virtual std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Calls SolverData to get reference object name for given type.
@@ -262,7 +262,7 @@ bool SolverString::RenameRefObject(const Gmat::ObjectType type,
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-std::string SolverString::GetRefObjectName(const Gmat::ObjectType type) const
+std::string SolverString::GetRefObjectName(const UnsignedInt type) const
 {
    std::string objName = SolverData::GetRefObjectName(type);
 
@@ -279,7 +279,7 @@ std::string SolverString::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves reference object name array for given type. It will return all
@@ -289,14 +289,14 @@ std::string SolverString::GetRefObjectName(const Gmat::ObjectType type) const
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-const StringArray& SolverString::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& SolverString::GetRefObjectNameArray(const UnsignedInt type)
 {
    return SolverData::GetRefObjectNameArray(type);
 }
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObjectName(const Gmat::ObjectType type,
+// virtual bool SetRefObjectName(const UnsignedInt type,
 //                               const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -307,7 +307,7 @@ const StringArray& SolverString::GetRefObjectNameArray(const Gmat::ObjectType ty
  *
  */
 //------------------------------------------------------------------------------
-bool SolverString::SetRefObjectName(const Gmat::ObjectType type,
+bool SolverString::SetRefObjectName(const UnsignedInt type,
                                  const std::string &name)
 {
    return SolverData::SetRefObjectName(type, name);
@@ -315,7 +315,7 @@ bool SolverString::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+// virtual GmatBase* GetRefObject(const UnsignedInt type,
 //                                const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -327,7 +327,7 @@ bool SolverString::SetRefObjectName(const Gmat::ObjectType type,
  * @return reference object pointer for given object type and name
  */
 //------------------------------------------------------------------------------
-GmatBase* SolverString::GetRefObject(const Gmat::ObjectType type,
+GmatBase* SolverString::GetRefObject(const UnsignedInt type,
                                   const std::string &name)
 {
    return SolverData::GetRefObject(type, name);
@@ -335,7 +335,7 @@ GmatBase* SolverString::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -349,7 +349,7 @@ GmatBase* SolverString::GetRefObject(const Gmat::ObjectType type,
  *
  */
 //------------------------------------------------------------------------------
-bool SolverString::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool SolverString::SetRefObject(GmatBase *obj, const UnsignedInt type,
                               const std::string &name)
 {
    return SolverData::SetRefObject(obj, type, name);

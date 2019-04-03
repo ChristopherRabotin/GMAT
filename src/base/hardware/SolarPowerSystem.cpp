@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -976,7 +976,7 @@ const StringArray& SolarPowerSystem::GetStringArrayParameter(
 }
 
 ////------------------------------------------------------------------------------
-//// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name,
+//// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name,
 ////                        const Integer index)
 ////------------------------------------------------------------------------------
 ///**
@@ -989,7 +989,7 @@ const StringArray& SolarPowerSystem::GetStringArrayParameter(
 // * @return reference object pointer.
 // */
 ////------------------------------------------------------------------------------
-//GmatBase* SolarPowerSystem::GetRefObject(const Gmat::ObjectType type,
+//GmatBase* SolarPowerSystem::GetRefObject(const UnsignedInt type,
 //                                         const std::string &name,
 //                                         const Integer index)
 //{
@@ -1009,7 +1009,7 @@ const StringArray& SolarPowerSystem::GetStringArrayParameter(
 //}
 //
 ////------------------------------------------------------------------------------
-//// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 ////                   const std::string &name, const Integer index)
 ////------------------------------------------------------------------------------
 ///**
@@ -1024,7 +1024,7 @@ const StringArray& SolarPowerSystem::GetStringArrayParameter(
 // */
 ////------------------------------------------------------------------------------
 //bool SolarPowerSystem::SetRefObject(GmatBase *obj,
-//                                    const Gmat::ObjectType type,
+//                                    const UnsignedInt type,
 //                                    const std::string &name)
 //{
 //   if (obj->IsOfType(Gmat::CELESTIAL_BODY))
@@ -1097,7 +1097,7 @@ const StringArray& SolarPowerSystem::GetStringArrayParameter(
 //
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -1110,7 +1110,7 @@ const StringArray& SolarPowerSystem::GetStringArrayParameter(
  * @return true if object name changed, false if not.
  */
 //------------------------------------------------------------------------------
-bool SolarPowerSystem::RenameRefObject(const Gmat::ObjectType type,
+bool SolarPowerSystem::RenameRefObject(const UnsignedInt type,
                                        const std::string &oldName,
                                        const std::string &newName)
 {
@@ -1179,7 +1179,7 @@ bool SolarPowerSystem::WriteEmptyStringArray(Integer id)
 //
 //
 ////------------------------------------------------------------------------------
-////  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+////  const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 ////------------------------------------------------------------------------------
 ///**
 // * Returns the names of the reference object.
@@ -1190,7 +1190,7 @@ bool SolarPowerSystem::WriteEmptyStringArray(Integer id)
 // * @return The names of the reference object.
 // */
 ////------------------------------------------------------------------------------
-//const StringArray& SolarPowerSystem::GetRefObjectNameArray(const Gmat::ObjectType type)
+//const StringArray& SolarPowerSystem::GetRefObjectNameArray(const UnsignedInt type)
 //{
 //   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::CELESTIAL_BODY)
 //   {

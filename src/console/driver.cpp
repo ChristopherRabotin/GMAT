@@ -161,6 +161,7 @@ void RunScriptInterpreter(std::string script, int verbosity, bool batchmode)
    {
       // std::cout << "ERROR!!!!!! ---- " << oops.GetFullMessage();
       MessageInterface::ShowMessage("ERROR!!!!!! ---- %s\n", oops.GetFullMessage().c_str());
+      throw;
    }
    // print out the sequence
    GmatCommand *top = mod->GetFirstCommand();
@@ -193,7 +194,7 @@ void RunScriptInterpreter(std::string script, int verbosity, bool batchmode)
  * 
  * @param <batchfilename> The file containing the list of script files to run.
  * 
- * @return The number of lines parsed from teh batch file.
+ * @return The number of lines parsed from the batch file.
  */
 //------------------------------------------------------------------------------
 Integer RunBatch(std::string& batchfilename)
@@ -534,7 +535,7 @@ StringArray CheckForStartupAndLogFile(int argc, char *argv[])
  * @param <argc> The count of the input arguments.
  * @param <argv> The input arguments.
  *
- * @return 0 on success.
+ * @return EXIT_SUCCESS (platform-specific value) on success.
  */
 //------------------------------------------------------------------------------
 int main(int argc, char *argv[])
@@ -597,7 +598,8 @@ int main(int argc, char *argv[])
       if (mod == NULL || !(mod->Initialize(startUpFile)))
       {
          std::cout << "Moderator failed to initialize!  Unable to run GmatConsole." << std::endl;
-         return 1;
+         exit(EXIT_FAILURE);
+//         return 1;
       }
 
       if (argc < 2)    // interactive mode
@@ -865,13 +867,17 @@ int main(int argc, char *argv[])
          } // !runcomplete
       }
    }
-   catch (BaseException &ex) {
+   catch (BaseException &ex)
+   {
+//      MessageInterface::ShowMessage("EXITing GmatConsole with exit code %d", EXIT_FAILURE);
+      std::cout << "EXITing GmatConsole with exit code " << EXIT_FAILURE << std::endl;
       std::cout << ex.GetFullMessage() << std::endl;
-      exit(0);
+      exit(EXIT_FAILURE);
    }
    
    Moderator::Instance()->Finalize();
    
-   return 0;
+   exit(EXIT_SUCCESS);
+//   return 0; // EXIT_SUCCESS
 }
 

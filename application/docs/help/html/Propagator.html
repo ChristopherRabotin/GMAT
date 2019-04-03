@@ -1,4 +1,4 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Propagator</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="OrbitView.html" title="OrbitView"><link rel="next" href="Receiver.html" title="Receiver"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Propagator</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="OrbitView.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Receiver.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Propagator"></a><div class="titlepage"></div><a name="N1B66F" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Propagator</span></h2><p>Propagator &mdash; A propagator models spacecraft motion</p></div><div class="refsection"><a name="N1B680"></a><h2>Overview of Propagator Components</h2><p>A <span class="guilabel">Propagator</span> is the GMAT component used to
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Propagator</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="OrbitView.html" title="OrbitView"><link rel="next" href="Receiver.html" title="Receiver"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Propagator</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="OrbitView.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Receiver.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Propagator"></a><div class="titlepage"></div><a name="N1B781" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Propagator</span></h2><p>Propagator &mdash; A propagator models spacecraft motion</p></div><div class="refsection"><a name="N1B792"></a><h2>Overview of Propagator Components</h2><p>A <span class="guilabel">Propagator</span> is the GMAT component used to
     model spacecraft motion. GMAT contains two types of propagators: a
     numerical integrator type, and an ephemeris type. When using a numerical
     integrator type <span class="guilabel">Propagator</span>, you can choose among a
@@ -13,7 +13,8 @@
     is broken down into three sections:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>For numerical <span class="guilabel">Propagator</span> documentation see
         <a class="xref" href="Propagator.html#Propagator_NumericalPropagator" title="Numerical Propagator">Numerical Propagator</a></p></li><li class="listitem"><p>For <span class="guilabel">ForceModel</span> documentation see <a class="xref" href="Propagator.html#Propagator_ForceModel" title="Force Model">Force Model</a></p></li><li class="listitem"><p>For SPICE <span class="guilabel">Propagator</span> documentation see
         <a class="xref" href="Propagator.html#Propagator_SPKPropagator" title="SPK-Configured Propagator">SPK-Configured Propagator</a></p></li><li class="listitem"><p>For Code500 ephemeris <span class="guilabel">Propagator</span>
-        documentation see <a class="xref" href="Propagator.html#Propagator_Code500Propagator" title="Code500 Ephemeris-Configured Propagator">Code500 Ephemeris-Configured Propagator</a></p></li></ul></div><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a>, <a class="xref" href="Propagate.html" title="Propagate"><span class="refentrytitle">Propagate</span></a></p></div><div class="refsection"><a name="Propagator_NumericalPropagator"></a><h2>Numerical Propagator</h2><a name="N1B6D5" class="indexterm"></a><div class="refsection"><a name="N1B6D8"></a><h3>Overview</h3><p>A <span class="guilabel">Propagator</span> object that uses a numerical
+        documentation see <a class="xref" href="Propagator.html#Propagator_Code500Propagator" title="Code500 Ephemeris-Configured Propagator">Code500 Ephemeris-Configured Propagator</a></p></li><li class="listitem"><p>For STK ephemeris <span class="guilabel">Propagator</span> documentation
+        see <a class="xref" href="Propagator.html#Propagator_STKPropagator" title="STK Ephemeris-Configured Propagator">STK Ephemeris-Configured Propagator</a></p></li></ul></div><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a>, <a class="xref" href="Propagate.html" title="Propagate"><span class="refentrytitle">Propagate</span></a></p></div><div class="refsection"><a name="Propagator_NumericalPropagator"></a><h2>Numerical Propagator</h2><a name="N1B7F0" class="indexterm"></a><div class="refsection"><a name="N1B7F3"></a><h3>Overview</h3><p>A <span class="guilabel">Propagator</span> object that uses a numerical
       integrator (as opposed to an ephemeris propagator) is one of a few
       objects in GMAT that is configured differently in the scripting and in
       the GUI. In the GUI, you configure the integrator and force model
@@ -26,7 +27,7 @@
       <span class="guilabel">ForceModel</span> object separately from the
       <span class="guilabel">Propagator</span> and specify the force model using the
       &ldquo;<span class="guilabel">FM</span>&rdquo; field on the propagator object. See the <a class="xref" href="Propagator.html#Propagator_Numeric_Examples" title="Examples">Examples</a> section
-      later in this section for details.</p></div><div class="refsection"><a name="N1B6F6"></a><h3>Options</h3><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Accuracy</span></td><td><p>The desired accuracy for an integration step. GMAT
+      later in this section for details.</p></div><div class="refsection"><a name="N1B811"></a><h3>Options</h3><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Accuracy</span></td><td><p>The desired accuracy for an integration step. GMAT
               uses the method selected in the
               <span class="guibutton">ErrorControl</span> field on the Force Model to
               determine a metric of the integration accuracy. For each step,
@@ -64,7 +65,7 @@
                       <span class="guibutton">RungeKutta89</span>,<span class="guibutton">RungeKutta68</span>,
                       <span class="guibutton">RungeKutta56</span>,
                       <span class="guibutton">AdamsBashforthMoulton, SPK,
-                      Code500</span></p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guibutton">RungeKutta89</span></p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1B906"></a><h3>GUI</h3><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_NumericalIntegrators_GUI_1.png" align="middle" height="229"></td></tr></table></div><p>Settings for the embedded Runge-Kutta integrators. Select the
+                      Code500</span></p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guibutton">RungeKutta89</span></p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1BA21"></a><h3>GUI</h3><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_NumericalIntegrators_GUI_1.png" align="middle" height="229"></td></tr></table></div><p>Settings for the embedded Runge-Kutta integrators. Select the
       desired integrator from the <span class="guilabel">Type</span> menu.</p><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_NumericalIntegrators_GUI_2.png" align="middle" height="268"></td></tr></table></div><p>The Adams-Bashforth-Moulton integrator has additional settings as
       shown.</p></div><div class="refsection"><a name="Propagator_Numeric_Remarks"></a><h3>Remarks</h3><p><span class="emphasis"><em>Best Practices for Using Numerical
       Integrators</em></span></p><p>The comparison data presented in a later section suggest that the
@@ -238,7 +239,7 @@ aProp.StopIfAccuracyIsViolated = true
 
 BeginMissionSequence
 
-Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></pre></div></div></div><div class="refsection"><a name="Propagator_ForceModel"></a><h2>Force Model</h2><a name="N1BA5D" class="indexterm"></a><div class="refsection"><a name="N1BA60"></a><h3>Overview</h3><p>A <span class="guilabel">ForceModel</span> is a model of the environmental
+Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></pre></div></div></div><div class="refsection"><a name="Propagator_ForceModel"></a><h2>Force Model</h2><a name="N1BB78" class="indexterm"></a><div class="refsection"><a name="N1BB7B"></a><h3>Overview</h3><p>A <span class="guilabel">ForceModel</span> is a model of the environmental
       forces and dynamics that affect the motion of a spacecraft. GMAT
       supports numerous force models such as point mass and spherical harmonic
       gravity models, atmospheric drag, solar radiation pressure, tide models,
@@ -345,25 +346,38 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></pre></div></div></div><div
                       <span class="guilabel">RSSStep</span>,
                       <span class="guilabel">RSSState</span>,
                       <span class="guilabel">LargestState</span>,
-                      <span class="guilabel">LargestStep</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">RSSStep</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">GravityField.&#8203;Earth.EarthTideModel</span></td><td><p>Flag for type of Earth tide model. This field is
-              always active but only used in the dynamics when there is a
-              harmonic gravity model for Earth.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">None</span>,
-                      <span class="guilabel">SolidAndPole</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">None</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">GravityField.&#8203;<em class="replaceable"><code>PrimaryBodyName</code></em>.Degree
+                      <span class="guilabel">LargestStep</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">RSSStep</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">GravityField.&#8203;<em class="replaceable"><code>PrimaryBodyName</code></em>.Degree
               </span></td><td><p>The degree of the harmonic gravity field. This
               field is only active if there is a
-              <span class="guilabel">PrimaryBody</span>. </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0&lt;<span class="guilabel">Degree</span>&lt;Max Degree On
-                      File</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>4 (When loading a custom file in the GUI, GMAT
+              <span class="guilabel">PrimaryBody</span>. </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0&lt;=<span class="guilabel">Degree</span>&lt;=Max Degree
+                      On File</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>4 (When loading a custom file in the GUI, GMAT
                       sets <span class="guilabel">Degree</span> to the max value on the
                       file)</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">GravityField.&#8203;<em class="replaceable"><code>PrimaryBodyName</code></em>.Order</span></td><td><p>The order of the harmonic gravity field. This field
               is only active if there is a <span class="guilabel">PrimaryBody</span>.
-              </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0&lt;<span class="guilabel">Order</span>&lt;Max Degree On
+              </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0&lt;=<span class="guilabel">Order</span>&lt;=Max Degree On
                       File AND <span class="guilabel">Degree</span> &lt;=
                       <span class="guilabel">Order</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>4 (When loading a custom file in the GUI, GMAT
                       sets <span class="guilabel">Order</span> to the max value on the
                       file)</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">GravityField.&#8203;<em class="replaceable"><code>PrimaryBodyName</code></em>.PotentialFile</span></td><td><p>The gravity potential file. This field is only
-              active if there is a <span class="guilabel">PrimaryBod</span>y. See
+              active if there is a <span class="guilabel">PrimaryBody</span>. See
               discussion below for detailed explanation of supported file
-              types and how to configure gravity files.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>path and name of .cof OR .grv file</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>JGM2.cof</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Model</span></td><td><p>A GUI list of "configured' gravity files defined in
+              types and how to configure gravity files.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>path and name of .cof, .grv, .gfc OR .tab
+                      file</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>JGM2.cof</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">GravityField.&#8203;<em class="replaceable"><code>PrimaryBodyName</code></em>.StmLimit
+              </span></td><td><p>The upper bound on the degree and order to be used
+              when calculating the State Transition Matrix (STM). The STM will
+              not use a degree or order greater than that specified by either
+              the <span class="guilabel">Degree</span> and <span class="guilabel">Order</span>
+              fields or the <span class="guilabel">StmLimit</span>. This field has no
+              effect on the degree or order used to calculate the state, only
+              the STM. This field is only active if there is a
+              <span class="guilabel">PrimaryBody</span>. </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Int &gt;= 0</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>100</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">GravityField.&#8203;<em class="replaceable"><code>PrimaryBodyName</code></em>.TideFile</span></td><td><p>The tide file. This field is only active if there
+              is a <span class="guilabel">PrimaryBody</span>. See discussion below for
+              detailed explanation of supported file types and how to
+              configure tide files.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>path and name of .tide file</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>(None)</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">GravityField.&#8203;<em class="replaceable"><code>PrimaryBodyName</code></em>.TideModel</span></td><td><p>Flag for type of tide model. This field is always
+              active but only used in the dynamics when there is a harmonic
+              gravity model for the body.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">None</span>,
+                      <span class="guilabel">Solid</span>,
+                      <span class="guilabel">SolidAndPole</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">None</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Model</span></td><td><p>A GUI list of "configured' gravity files defined in
               the file gmat_startup_file.txt. <span class="guilabel">Model</span>
               allows you to quickly choose between gravity files distributed
               with GMAT. For example, if <span class="guilabel">PrimaryBody</span> is
@@ -402,7 +416,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></pre></div></div></div><div
               scaling SRP.Flux, which is flux at 1 AU, to the flux at
               spacecraft distance from sun. This field is only active in the
               script if SRP is on. See the Remarks section for a detailed
-              explanation of SRP configuration.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>135e6&lt;<span class="guilabel">Nominal_Sun</span>&lt;165e6</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>149597870.691</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1C087"></a><h3>GUI</h3><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ForceModel.png" align="middle" height="421"></td></tr></table></div></div><p>Settings for the<span class="guilabel"> ForceModel</span> object.</p></div><div class="refsection"><a name="Propagator_ForceModel_Remarks"></a><h3>Remarks</h3><p><span class="emphasis"><em>Overview of Primary Body/Central Body and Field
+              explanation of SRP configuration.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>135e6&lt;<span class="guilabel">Nominal_Sun</span>&lt;165e6</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>149597870.691</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1C216"></a><h3>GUI</h3><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ForceModel.png" align="middle" height="529"></td></tr></table></div></div><p>Settings for the<span class="guilabel"> ForceModel</span> object.</p></div><div class="refsection"><a name="Propagator_ForceModel_Remarks"></a><h3>Remarks</h3><p><span class="emphasis"><em>Overview of Primary Body/Central Body and Field
       Interactions</em></span></p><p>In GMAT, a primary body is a celestial body that is modeled with a
       complex force model which may include a spherical harmonic gravity
       model, tides, or drag. A body cannot appear in both the
@@ -422,10 +436,10 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></pre></div></div></div><div
       <span class="guilabel">PrimaryBodies</span> field. For example, if you select
       Earth as the primary body, you can only select Earth drag models in the
       <span class="guilabel">Drag.AtmosphereModel</span> field. See the field list
-      above for available models.</p><p><span class="emphasis"><em>Configuring Gravitational Models</em></span></p><p>GMAT supports point mass gravity, spherical harmonic, and Earth
-      tide models. On a <span class="guilabel">Propagator</span>, all celestial bodies
-      are classified into two mutually exclusive categories:
-      <span class="guilabel">PrimaryBodies</span>, and <span class="guilabel">Point
+      above for available models.</p><p><span class="emphasis"><em>Configuring Gravitational Models</em></span></p><p>GMAT supports point mass gravity, spherical harmonic, and tide
+      modeling for all celestial bodies. On a <span class="guilabel">Propagator</span>,
+      all celestial bodies are classified into two mutually exclusive
+      categories: <span class="guilabel">PrimaryBodies</span>, and <span class="guilabel">Point
       Masses</span>. To model a body as a point mass, add it to the
       <span class="guilabel">PointMasses</span> list. GMAT currently requires that
       there be only a single body in the <span class="guilabel">PrimaryBodies</span>
@@ -435,22 +449,92 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></pre></div></div></div><div
       gravitational parameter defined on the body (i.e. Earth.Mu) in the
       equations of motion. Bodies defined as
       <span class="guilabel">PrimaryBodies</span> use the constants defined on the
-      potential file in the equations of motion. GMAT supports two gravity
-      file formats: the .cof format and the STK .grv format. You can provide a
-      custom potential file for your application as long as it is one of the
-      supported formats. Potential files defined in the startup file are
-      available in the <span class="guilabel">Model</span> list in the GUI. For
-      example, the following lines in the startup file configure GMAT so that
-      EGM96 is an available option for <span class="guilabel">Model</span> in the GUI
-      when the primary body is Earth:</p><pre class="programlisting">EARTH_POT_PATH         = DATA_PATH/gravity/earth/
+      potential file in the equations of motion. GMAT supports four gravity
+      file formats: the .cof format, the STK .grv format, the .gfc format, and
+      the .tab format. You can provide a custom potential file for your
+      application as long as it is one of the supported formats. Potential
+      files defined in the startup file are available in the
+      <span class="guilabel">Model</span> list in the GUI. For example, the following
+      lines in the startup file configure GMAT so that EGM96 is an available
+      option for <span class="guilabel">Model</span> in the GUI when the primary body
+      is Earth:</p><pre class="programlisting">EARTH_POT_PATH         = DATA_PATH/gravity/earth/
 EGM96_FILE             = EARTH_POT_PATH/EGM96.cof </pre><p>Below is an example script snippet for configuring a custom
-      gravity model including Earth tides.</p><pre class="programlisting">Create ForceModel aForceModel
+      gravity model.</p><pre class="programlisting">Create ForceModel aForceModel
 aForceModel.CentralBody = Earth
 aForceModel.PrimaryBodies = {Earth}
 aForceModel.GravityField.Earth.Degree = 21
 aForceModel.GravityField.Earth.Order  = 21
-aForceModel.GravityField.Earth.PotentialFile = 'c:\MyData\File.cof'
-aForceModel.GravityField.Earth.EarthTideModel = 'SolidAndPole'</pre><p><span class="emphasis"><em>Configuring Drag Models</em></span></p><p>GMAT supports many density models for Earth including
+aForceModel.GravityField.Earth.PotentialFile = 'c:\MyData\File.cof'</pre><p><span class="emphasis"><em>Overview of Tide Model Field
+      Interactions</em></span></p><p>By default, the tide data source is set to
+      <span class="guilabel">None</span> and the tide model selector is disabled if no
+      tide model is selected. To use a tide model, first the tide data source
+      must be changed to either <span class="guilabel">Inherited</span> or
+      <span class="guilabel">Tide File</span>, at which point the Tide Model selector
+      becomes enabled to select from the tide models supported by the tide
+      data source. See the field list above for available models. The
+      <span class="guilabel">Inherited</span> option indicates that the data for the
+      tide model is provided either by the gravity potential file or the data
+      is built into GMAT. The tide data contained in a gravity potential file
+      has precedence over any built-in values. The <span class="guilabel">Tide
+      File</span> option enables the file selector to choose a file
+      containing the Love numbers to be used as the data source for the tide
+      model. The tide data contained in a tide file has precedence over all
+      other tide data sources.</p><p><span class="emphasis"><em>Configuring Tide Models</em></span></p><p>GMAT supports solid tide modeling for all central bodies, and both
+      solid and pole tide modeling for the Earth. Tide models can only be used
+      if a <span class="guilabel">PrimaryBody</span> is set. GMAT contains built-in
+      values for both solid and pole tides for the Earth. External files can
+      also be used to provide the Love numbers to be used in the tide model,
+      either from a gravity file that supports tides, or a separate tide
+      file.</p><p>If a gravity file with Love numbers is provided, those Love
+      numbers will be used for the solid tide model calculations. If a tide
+      file is provided, the Love numbers in the tide file will be used. If
+      both a gravity file with Love numbers and a tide file are provided, the
+      Love numbers from both files will be used, with the Love numbers in the
+      tide file having precedence over the gravity file. Only if no tide file
+      is provided and the gravity potential file has no love numbers are
+      GMAT's default Love numbers used for the Earth. GMAT's built-in values
+      are the only data source for pole tides.</p><p>Below is an example script snippet for configuring a custom
+      gravity model including Lunar solid tides.</p><pre class="programlisting">Create ForceModel aForceModel
+aForceModel.CentralBody = Luna
+aForceModel.PrimaryBodies = {Luna}
+aForceModel.GravityField.Luna.Degree = 21
+aForceModel.GravityField.Luna.Order  = 21
+aForceModel.GravityField.Luna.PotentialFile = 'c:\MyData\File.cof'
+aForceModel.GravityField.Luna.TideFile = 'c:\MyData\File.tide'
+aForceModel.GravityField.Luna.TideModel = 'Solid'</pre><p>Tide files use the .tide file extension. You can provide a custom
+      tide file for your application as long as it is in the supported format.
+      Tide files contain the Love numbers to be used to model the solid tides.
+      Tide files can include the k2, k3, and k+ coefficients. The format used
+      by the tide file is 'k {degree} {order} {value}' or 'kplus {order}
+      {value}' for k+.</p><p>Below is a sample tide file using the built-in values that GMAT
+      uses for the Earth's Love numbers</p><pre class="programlisting">k 2 0 0.30190
+k 2 1 0.29830
+k 2 2 0.30102
+k 3 0 0.093
+k 3 1 0.093
+k 3 2 0.093
+k 3 3 0.094
+kplus 0 -0.00087
+kplus 1 -0.00079
+kplus 2 -0.00057</pre><p><span class="emphasis"><em>Zero Tide and Tide Free Models</em></span></p><p>The selection of a tide model is closely linked to the
+      gravitational potential model that is used. Some gravitational potential
+      models incorporate some tidal effects into the gravitational potential
+      model. Two common ways gravitational models handle modeling tidal forces
+      are by being tide-free and zero-tide. Tide free gravitational models
+      contain no effects of tidal forces in the gravitational potential, while
+      zero tide gravitational models contain the permanent (time-independent)
+      effect of tides on the potential. For STK .grv files, the
+      "IncludesPermTides" keyword is recognized to identify if the
+      gravitational potential model includes permanent tide effects, however
+      the coefficients in the "TideFreeValues" and "ZeroTideValues" keyword
+      blocks are currently ignored.</p><div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Caution</h3><p>Caution: If a zero tide gravitational model is used with the
+        <span class="guilabel">Solid</span> or <span class="guilabel">SolidAndPole</span> tide
+        options, the effect of permanent tides is double counted and may yield
+        inaccurate results. For further a more in-depth discussion, please
+        consult the <span class="emphasis"><em>IERS Conventions (2010)</em></span>. GMAT does
+        not convert between a zero tide and tide free potential, therefore the
+        user must pay attention to which potential they intend on using,
+        particularly when modeling solid tides.</p></div><p><span class="emphasis"><em>Configuring Drag Models</em></span></p><p>GMAT supports many density models for Earth including
       <span class="guilabel">Jacchia-Roberts</span> and various MSISE models. Density
       models for non-Earth bodies -- the Mars-GRAM model for example -- are
       included using custom plug-in components and are currently only
@@ -635,13 +719,13 @@ aForceModel.SRP.Flux_Pressure = 4.53443218374393e-006</pre><div class="caution" 
         Matrix (STM) along with the orbital state. However, not all
         variational terms are implemented for STM propagation. The following
         are implemented: point mass perturbation, spherical harmonics (with
-        tide models), and solar radiation pressure. The following are NOT
-        implemented: drag and relativistic terms, and finite burns.
-        Additionally, the SRP variational term does not include the partial
-        derivative of the percent shadow with respect to orbital state. This
-        approximation is acceptable for orbits with short penumbra durations
-        but is inaccurate for orbits that spend relatively long periods of
-        time in penumbra.</p></div></div><div class="refsection"><a name="N1C2E3"></a><h3>Examples</h3><div class="informalexample"><p>A <span class="guilabel">ForceModel</span> for point mass
+        tide models), drag, and solar radiation pressure. The following are
+        NOT implemented: relativistic terms and finite burns. Additionally,
+        the SRP variational term does not include the partial derivative of
+        the percent shadow with respect to orbital state. This approximation
+        is acceptable for orbits with short penumbra durations but is
+        inaccurate for orbits that spend relatively long periods of time in
+        penumbra.</p></div></div><div class="refsection"><a name="N1C4AB"></a><h3>Examples</h3><div class="informalexample"><p>A <span class="guilabel">ForceModel</span> for point mass
         propagation.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
 
 Create ForceModel aForceModel
@@ -666,7 +750,7 @@ aForceModel.ErrorControl = RSSStep
 aForceModel.GravityField.Earth.Degree = 20
 aForceModel.GravityField.Earth.Order = 20
 aForceModel.GravityField.Earth.PotentialFile = 'EGM96.cof'
-aForceModel.GravityField.Earth.EarthTideModel = 'None'
+aForceModel.GravityField.Earth.TideModel = 'None'
 aForceModel.Drag.AtmosphereModel = MSISE90
 aForceModel.Drag.F107 = 150
 aForceModel.Drag.F107A = 150
@@ -727,7 +811,7 @@ GMAT RKV89.FM = MoonLP165P
 
 BeginMissionSequence
 
-Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></pre></div></div></div><div class="refsection"><a name="Propagator_SPKPropagator"></a><h2>SPK-Configured Propagator</h2><a name="N1C30E" class="indexterm"></a><div class="refsection"><a name="N1C311"></a><h3>Description</h3><p>An SPK-configured <span class="guilabel">Propagator</span> propagates a
+Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></pre></div></div></div><div class="refsection"><a name="Propagator_SPKPropagator"></a><h2>SPK-Configured Propagator</h2><a name="N1C4D6" class="indexterm"></a><div class="refsection"><a name="N1C4D9"></a><h3>Description</h3><p>An SPK-configured <span class="guilabel">Propagator</span> propagates a
       spacecraft by interpolating user-provided SPICE kernels. You configure a
       <span class="guilabel">Propagator</span> to use an SPK kernel by setting the
       <span class="guilabel">Type</span> field to <span class="guilabel">SPK</span>. SPK kernels
@@ -736,9 +820,9 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></pre></div></div></d
       including stopping conditions, using the <span class="guilabel">Propagate</span>
       command. This resource cannot be modified in the Mission Sequence.
       However, you can do whole object assignment in the mission,( i.e.
-      <code class="literal">myPropagator = yourPropagator</code> ).</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a>, <a class="xref" href="Propagate.html" title="Propagate"><span class="refentrytitle">Propagate</span></a></p></div><div class="refsection"><a name="N1C338"></a><h3>Fields</h3><div class="informaltable"><table border="1"><colgroup><col width="30%"><col width="70%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">CentralBody</span></td><td><p>The central body of propagation. This field has no
-              effect for SPK or Code500 propagators.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Resource reference</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Celestial body</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">Earth</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EpochFormat</span></td><td><p> Only used for an SPK or Code500 propagator. The
-              format of the epoch contained in the
+      <code class="literal">myPropagator = yourPropagator</code> ).</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a>, <a class="xref" href="Propagate.html" title="Propagate"><span class="refentrytitle">Propagate</span></a></p></div><div class="refsection"><a name="N1C500"></a><h3>Fields</h3><div class="informaltable"><table border="1"><colgroup><col width="30%"><col width="70%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">CentralBody</span></td><td><p>The central body of propagation. This field has no
+              effect for SPK, Code500, or STK propagators.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Resource reference</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Celestial body</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">Earth</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EpochFormat</span></td><td><p> Only used for an SPK, Code500, or STK propagator.
+              The format of the epoch contained in the
               <span class="guilabel">StartEpoch</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">A1ModJulian</span>,
                       <span class="guilabel">TAIModJulian</span>,
                       <span class="guilabel">UTCModJulian</span>,
@@ -751,13 +835,13 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></pre></div></div></d
                       <span class="guilabel">TDBGregorian</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                         <span class="guilabel">A1ModJulian</span>
                       </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A unless Mod Julian and in that case Modified
-                      Julian Date</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Start Epoch</span></td><td><p>Only used for an SPK or Code500 propagator. The
-              initial epoch of propagation. When an epoch is provided that
+                      Julian Date</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Start Epoch</span></td><td><p>Only used for an SPK, Code500, or STK propagator.
+              The initial epoch of propagation. When an epoch is provided that
               epoch is used as the initial epoch. When the keyword
               "FromSpacecraft" is provided, the start epoch is inherited from
               the spacecraft.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>"Gregorian: 04 Oct 1957 12:00:00.000 &lt;= Epoch
                       &lt;= 28 Feb 2100 00:00:00.000 Modified Julian: 6116.0
-                      &lt;= Epoch &lt;= 58127.5 or "FromSpacecraft"</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>21545</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">StepSize</span></td><td><p> The step size for an SPK or Code500
+                      &lt;= Epoch &lt;= 58127.5 or "FromSpacecraft"</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>21545</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">StepSize</span></td><td><p> The step size for an SPK, Code500, or STK
               Propagator.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>300</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Type</span></td><td><p>Specifies the integrator or analytic propagator
               used to model time evolution of spacecraft motion. </p>
               <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">PrinceDormand78</span>,
@@ -768,7 +852,7 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></pre></div></div></d
                       <span class="guilabel">AdamsBashforthMoulton</span>,
                       <span class="guilabel">SPK, Code500</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                         <span class="guilabel">RungeKutta89</span>
-                      </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1C469"></a><h3>GUI</h3><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_EphemerisPropagator_GUI.png" align="middle" height="455"></td></tr></table></div></div><p>To configure a <span class="guilabel">Propagator</span> to use SPK files,
+                      </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1C631"></a><h3>GUI</h3><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_EphemerisPropagator_GUI.png" align="middle" height="455"></td></tr></table></div></div><p>To configure a <span class="guilabel">Propagator</span> to use SPK files,
       on the <span class="guilabel">Propagator</span> dialog box, select
       <span class="guilabel">SPK</span> in the <span class="guilabel">Type</span> menu. There
       are four fields you can configure for an SPK propagator including
@@ -779,13 +863,13 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></pre></div></div></d
       <strong class="userinput"><code>FromSpacecraft</code></strong> into the
       <span class="guilabel">StartEpoch</span> field and the
       <span class="guilabel">Propagator</span> will use the epoch of the
-      <span class="guilabel">Spacecraft</span> as the initial propagation epoch.</p></div><div class="refsection"><a name="N1C49E"></a><h3>Remarks</h3><p>To use an SPK-configured <span class="guilabel">Propagator</span>, you must
+      <span class="guilabel">Spacecraft</span> as the initial propagation epoch.</p></div><div class="refsection"><a name="N1C666"></a><h3>Remarks</h3><p>To use an SPK-configured <span class="guilabel">Propagator</span>, you must
       specify the SPK kernels and <span class="guilabel">NAIFId</span> on the
       <span class="guilabel">Spacecraft</span>, configure a
       <span class="guilabel">Propagator</span> to use SPK files as opposed to numerical
       methods, and configure the <span class="guilabel">Propagate</span> command to use
       the configured SPK propagator. The subsections and examples below
-      discuss each of these items in detail.</p><div class="refsection"><a name="N1C4B2"></a><h4>Configuring Spacecraft SPK Kernels</h4><p>To use an SPK-configured <span class="guilabel">Propagator</span>, you
+      discuss each of these items in detail.</p><div class="refsection"><a name="N1C67A"></a><h4>Configuring Spacecraft SPK Kernels</h4><p>To use an SPK-configured <span class="guilabel">Propagator</span>, you
         must add the SPK kernels to the <span class="guilabel">Spacecraft</span> and
         define the spacecraft's <span class="guilabel">NAIFId</span>. SPK Kernels for
         selected spacecraft are available <a class="link" href="http://naif.jpl.nasa.gov/naif/data_archived.html" target="_top">here.</a>
@@ -807,7 +891,7 @@ GMAT aSpacecraft.OrbitSpiceKernelName = {...
         define the location of an SPK file. Relative paths are defined with
         respect to the GMAT bin directory of your local installation.</p><pre class="programlisting"><code class="code">Create Spacecraft aSpacecraft
 aSpacecraft.OrbitSpiceKernelName ={'C:\MyDataFiles\GEOSat1.bsp',...
-                                   'C:\MyDataFiles\GEOSat2.bsp'}</code></pre></div><div class="refsection"><a name="N1C4F9"></a><h4>Configuring an SPK Propagator</h4><p>You can define the <span class="guilabel">StartEpoch</span> of
+                                   'C:\MyDataFiles\GEOSat2.bsp'}</code></pre></div><div class="refsection"><a name="N1C6C1"></a><h4>Configuring an SPK Propagator</h4><p>You can define the <span class="guilabel">StartEpoch</span> of
         propagation of an SPK-configured <span class="guilabel">Propagator</span> on
         either the <span class="guilabel">Propagator</span> Resource or inherit the
         <span class="guilabel">StartEpoch</span> from the
@@ -828,7 +912,7 @@ spkProp2.EpochFormat = 'TAIModJulian'
 spkProp2.StartEpoch = '23466.5'</code></pre><p>To configure the step size, use the StepSize field.</p><pre class="programlisting"><code class="code">Create Propagator spkProp
 spkProp.Type = SPK
 spkProp.StepSize = 300
-</code></pre></div><div class="refsection"><a name="N1C539"></a><h4>Interaction with the
+</code></pre></div><div class="refsection"><a name="N1C701"></a><h4>Interaction with the
         Propagate Command</h4><p>An SPK-configured <span class="guilabel">Propagator</span> works with the
         <span class="guilabel">Propagate</span> command in the same way numerical
         propagators work with the <span class="guilabel">Propagate</span> command with
@@ -842,7 +926,7 @@ spkProp.StepSize = 300
         <span class="guilabel">spkProp</span> have been configured a-priori. An example
         command to propagate <span class="guilabel">aSpacecraft</span> to Earth
         Periapsis using <span class="guilabel">spkProp</span> is shown below.</p><pre class="programlisting"><code class="code">Propagate spkProp(aSpacecraft) {aSpacecraft.Earth.Periapsis}</code></pre><p>Below is a script snippet that demonstrates how to propagate
-        backwards using an SPK propagator.</p><pre class="programlisting"><code class="code">Propagate BackProp spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = -1.5}</code></pre></div><div class="refsection"><a name="N1C571"></a><h4>Behavior Near Ephemeris Boundaries</h4><p>In general, ephemeris interpolation is less accurate near the
+        backwards using an SPK propagator.</p><pre class="programlisting"><code class="code">Propagate BackProp spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = -1.5}</code></pre></div><div class="refsection"><a name="N1C739"></a><h4>Behavior Near Ephemeris Boundaries</h4><p>In general, ephemeris interpolation is less accurate near the
         boundaries of ephemeris files and we recommend providing ephemeris for
         significant periods beyond the initial and final epochs of your
         application for this and other reasons. When propagating near the
@@ -862,7 +946,7 @@ spkProp.StepSize = 300
           the stopping condition may not be possible without stepping off the
           ephemeris file which throw an error and execution will stop. In this
           case, you must provide more ephemeris data to locate the desired
-          stopping condition.</p></div></div></div><div class="refsection"><a name="N1C579"></a><h3>Examples</h3><div class="informalexample"><p>Propagate a GEO spacecraft using an SPK-configured
+          stopping condition.</p></div></div></div><div class="refsection"><a name="N1C741"></a><h3>Examples</h3><div class="informalexample"><p>Propagate a GEO spacecraft using an SPK-configured
         <span class="guilabel">Propagator</span>. Define the
         <span class="guilabel">StartEpoch</span> from the spacecraft. Note: the SPK
         kernel GEOSat.bsp is distributed with GMAT.</p><pre class="programlisting"><code class="code">Create Spacecraft aSpacecraft;
@@ -905,7 +989,7 @@ EarthView.ViewPointVector = [ 30000 -20000 10000 ]
 EarthView.ViewScaleFactor = 30
 
 BeginMissionSequence
-Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></pre></div></div></div><div class="refsection"><a name="Propagator_Code500Propagator"></a><h2>Code500 Ephemeris-Configured Propagator</h2><a name="N1C59B" class="indexterm"></a><div class="refsection"><a name="N1C59E"></a><h3>Description</h3><p>A Code500 ephemeris-configured <span class="guilabel">Propagator</span>
+Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></pre></div></div></div><div class="refsection"><a name="Propagator_Code500Propagator"></a><h2>Code500 Ephemeris-Configured Propagator</h2><a name="N1C763" class="indexterm"></a><div class="refsection"><a name="N1C766"></a><h3>Description</h3><p>A Code500 ephemeris-configured <span class="guilabel">Propagator</span>
       propagates a spacecraft by interpolating or stepping along a
       user-provided Code500-format binary ephemeris file. You configure a
       <span class="guilabel">Propagator</span> to use a Code500 ephemeris by setting
@@ -925,13 +1009,14 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></pre></div>
       terminate when attempting to propagate outside the bounds of the
       ephemeris file.</p><p>Code500 ephemeris files are binary-format files. As discussed in
       the <a class="xref" href="EphemerisFile.html" title="EphemerisFile"><span class="refentrytitle">EphemerisFile</span></a> help, GMAT can generate Code500
-      ephemeris files in both PC (little-endian) and UNIX (big-endian) binary
-      format (via <span class="guilabel">EphemerisFile.OutputFormat</span>). The
-      Code500 propagator, however, only permits little-endian formatted
-      files.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a>, <a class="xref" href="Propagate.html" title="Propagate"><span class="refentrytitle">Propagate</span></a>, <a class="xref" href="EphemerisFile.html" title="EphemerisFile"><span class="refentrytitle">EphemerisFile</span></a></p></div><div class="refsection"><a name="N1C5D8"></a><h3>Fields</h3><p>The only <span class="guilabel">Propagator</span> fields applicable to the
+      ephemeris files in both little-endian and big-endian binary format (via
+      <span class="guilabel">EphemerisFile.OutputFormat</span>). The ephemeris
+      propagator can read Code500 ephemeris files in either endian format. The
+      endian format of the ephemeris file will be automatically detected by
+      GMAT.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a>, <a class="xref" href="Propagate.html" title="Propagate"><span class="refentrytitle">Propagate</span></a>, <a class="xref" href="EphemerisFile.html" title="EphemerisFile"><span class="refentrytitle">EphemerisFile</span></a></p></div><div class="refsection"><a name="N1C7A0"></a><h3>Fields</h3><p>The only <span class="guilabel">Propagator</span> fields applicable to the
       Code500 ephemeris propagator are <span class="guilabel">EpochFormat</span>,
       <span class="guilabel">StartEpoch</span>, <span class="guilabel">StepSize</span> and
-      <span class="guilabel">Type</span>.</p><div class="informaltable"><table border="1"><colgroup><col width="30%"><col width="70%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">EpochFormat</span></td><td><p> Only used for an SPK or Code500 propagator.
+      <span class="guilabel">Type</span>.</p><div class="informaltable"><table border="1"><colgroup><col width="30%"><col width="70%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">EpochFormat</span></td><td><p> Only used for an SPK, Code500, or STK propagator.
               Specifies format of the epoch contained in the
               <span class="guilabel">StartEpoch</span> field. </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">A1ModJulian</span>,
                       <span class="guilabel">TAIModJulian</span>,
@@ -943,7 +1028,7 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></pre></div>
                       <span class="guilabel">TTGregorian</span>,
                       <span class="guilabel">UTCGregorian</span>,
                       <span class="guilabel">TDBGregorian</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">A1ModJulian</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A unless Mod Julian and in that case Modified
-                      Julian Date</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Start Epoch</span></td><td><p>Only used for an SPK or Code500 propagator.
+                      Julian Date</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Start Epoch</span></td><td><p>Only used for an SPK, Code500, or STK propagator.
               Specifies initial epoch of propagation. When an epoch is
               provided that epoch is used as the initial epoch. When the
               keyword <strong class="userinput"><code>FromSpacecraft</code></strong> is provided, the
@@ -963,7 +1048,7 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></pre></div>
                       <span class="guilabel">RungeKutta56</span>,
                       <span class="guilabel">BulirschStoer</span>,
                       <span class="guilabel">AdamsBashforthMoulton</span>,
-                      <span class="guilabel">SPK, Code500</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">RungeKutta89</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1C6E9"></a><h3>GUI</h3><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_EphemerisPropagator_Code500_GUI.png" align="middle" height="520"></td></tr></table></div></div><p>To configure a <span class="guilabel">Propagator</span> from the GMAT GUI
+                      <span class="guilabel">SPK, Code500</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">RungeKutta89</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1C8B1"></a><h3>GUI</h3><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_EphemerisPropagator_Code500_GUI.png" align="middle" height="647"></td></tr></table></div></div><p>To configure a <span class="guilabel">Propagator</span> from the GMAT GUI
       to use Code500 ephemeris files, select and open a
       <span class="guilabel">Propagator</span> from the Resources tree. In the
       <span class="guilabel">Integrator</span> category select
@@ -979,12 +1064,12 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></pre></div>
       <span class="guilabel">Propagator</span> will use the epoch of the
       <span class="guilabel">Spacecraft</span> as the initial propagation epoch. The
       <span class="guilabel">CentralBody</span> field is displayed to the user, but is
-      unused when the integrator type is Code500.</p></div><div class="refsection"><a name="N1C724"></a><h3>Remarks</h3><p>There is currently no GUI option to assign the Code500 ephemeris
+      unused when the integrator type is Code500.</p></div><div class="refsection"><a name="N1C8EC"></a><h3>Remarks</h3><p>There is currently no GUI option to assign the Code500 ephemeris
       file to the <span class="guilabel">Spacecraft</span> resource. You must specify
       the Code500 ephemeris file on the
       <span class="guilabel">Spacecraft</span><span class="guilabel">.EphemerisName</span>
       parameter via script. The subsections below provide examples of how to
-      do this.</p><div class="refsection"><a name="N1C731"></a><h4>Configuring Spacecraft Ephemeris Files</h4><p>To use a Code500 ephemeris-configured
+      do this.</p><div class="refsection"><a name="N1C8F9"></a><h4>Configuring Spacecraft Ephemeris Files</h4><p>To use a Code500 ephemeris-configured
         <span class="guilabel">Propagator</span>, you must add the Code500 ephemeris
         file to the <span class="guilabel">Spacecraft</span>. A sample spacecraft
         Code500 ephemeris, (<code class="filename">sat_leo.ephem</code>, in the
@@ -999,7 +1084,7 @@ aSpacecraft.EphemerisName = '../data/vehicle/ephem/code500/sat_leo.ephem'
 
 BeginMissionSequence</code></pre><p>A spacecraft may have only one Code500 ephemeris assigned. There
         is currently no GUI option to add a Code500 ephemeris file to a
-        spacecraft.</p></div><div class="refsection"><a name="N1C74B"></a><h4>Configuring a Code500 Ephemeris Propagator</h4><p>If you have assigned the ephemeris file to your spacecraft,
+        spacecraft.</p></div><div class="refsection"><a name="N1C913"></a><h4>Configuring a Code500 Ephemeris Propagator</h4><p>If you have assigned the ephemeris file to your spacecraft,
         configuring the propagator only requires assigning the
         <span class="guilabel">Code500</span> type and the desired step size on a
         <span class="guilabel">Propagator</span> resource. The central body of
@@ -1017,7 +1102,7 @@ Code500Prop.StepSize = 60.
 BeginMissionSequence</code></pre><p>The same remarks mentioned in the prior section on SPK
         propagators with regard to interaction with the
         <span class="guilabel">Propagate</span> command and behavior near ephemeris
-        boundaries also apply to the Code500 ephemeris propagator.</p></div></div><div class="refsection"><a name="N1C76A"></a><h3>Examples</h3><div class="informalexample"><p>This example propagates a spacecraft using a Code500 ephemeris,
+        boundaries also apply to the Code500 ephemeris propagator.</p></div></div><div class="refsection"><a name="N1C932"></a><h3>Examples</h3><div class="informalexample"><p>This example propagates a spacecraft using a Code500 ephemeris,
         defining the <span class="guilabel">StartEpoch</span> from the spacecraft. The
         ephemeris file used in this example is included in the GMAT
         distribution at the indicated location. The code below will run if you
@@ -1056,4 +1141,202 @@ EndWhile</code></pre></div><p>An additional, more detailed, example of use of th
       the <code class="filename">samples\Navigation</code> directory. This script
       generates a report showing the difference, in RIC coordinates, between
       the orbits in two different Earth-centered Code500 ephemeris
-      files.</p></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="OrbitView.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Receiver.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">OrbitView&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Receiver</td></tr></table></div></body></html>
+      files.</p></div></div><div class="refsection"><a name="Propagator_STKPropagator"></a><h2>STK Ephemeris-Configured Propagator</h2><a name="N1C94B" class="indexterm"></a><div class="refsection"><a name="N1C94E"></a><h3>Description</h3><p>An STK ephemeris-configured <span class="guilabel">Propagator</span>
+      propagates a spacecraft by interpolating or stepping along a
+      user-provided STK-format binary ephemeris file. You configure a
+      <span class="guilabel">Propagator</span> to use an STK ephemeris by setting the
+      <span class="guilabel">Type</span> field to <span class="guilabel">STK</span>. The STK
+      ephemeris file is specified on a Spacecraft resource using the
+      <span class="guilabel">Spacecraft.EphemerisName</span> field. The user controls
+      propagation, including stopping conditions, using the
+      <span class="guilabel">Propagate</span> command. This resource cannot be modified
+      in the Mission Sequence. However, you can do whole object assignment in
+      the mission sequence, (i.e. <code class="literal">myPropagator =
+      yourPropagator</code> ).</p><p>The <span class="guilabel">Propagator</span>
+      <span class="guilabel">CentralBody</span> option is not applicable to the STK
+      propagator and should not be used with the STK propagator type. GMAT
+      will automatically detect and use the central body of the ephemeris
+      file. The <span class="guilabel">Propagate</span> command should be used to
+      traverse the ephemeris file. GMAT will throw an error message and
+      terminate when attempting to propagate outside the bounds of the
+      ephemeris file. The STK propagator includes code that steps the
+      spacecraft to the ephem boundary before stepping out of the span of the
+      ephem</p><p>STK ephemeris files are ASCII files conforming to the Satellite
+      Tool Kit TimePosVel specifications. As discussed in the <a class="xref" href="EphemerisFile.html" title="EphemerisFile"><span class="refentrytitle">EphemerisFile</span></a> help, GMAT can generate STK ephemeris files
+      using the <span class="guilabel">EphemerisFile.OutputFormat</span> field. The STK
+      propagator works with STK formatted files, starting with STK 4.0, or
+      GMAT STK ephemerides.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a>, <a class="xref" href="Propagate.html" title="Propagate"><span class="refentrytitle">Propagate</span></a>, <a class="xref" href="EphemerisFile.html" title="EphemerisFile"><span class="refentrytitle">EphemerisFile</span></a></p></div><div class="refsection"><a name="N1C988"></a><h3>Fields</h3><p>The only <span class="guilabel">Propagator</span> fields applicable to the
+      STK ephemeris propagator are <span class="guilabel">EpochFormat</span>,
+      <span class="guilabel">StartEpoch</span>, <span class="guilabel">StepSize</span> and
+      <span class="guilabel">Type</span>.</p><div class="informaltable"><table border="1"><colgroup><col width="30%"><col width="70%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">EpochFormat</span></td><td><p> Only used for an SPK, Code500, or STK propagator.
+              Specifies format of the epoch contained in the
+              <span class="guilabel">StartEpoch</span> field. </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">A1ModJulian</span>,
+                      <span class="guilabel">TAIModJulian</span>,
+                      <span class="guilabel">UTCModJulian</span>,
+                      <span class="guilabel">TTModJulian</span>,
+                      <span class="guilabel">TDBModJulian</span>,
+                      <span class="guilabel">A1Gregorian</span>,
+                      <span class="guilabel">TAIGregorian</span>,
+                      <span class="guilabel">TTGregorian</span>,
+                      <span class="guilabel">UTCGregorian</span>,
+                      <span class="guilabel">TDBGregorian</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">A1ModJulian</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A unless Mod Julian and in that case Modified
+                      Julian Date</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Start Epoch</span></td><td><p>Only used for an SPK, Code500, or STK propagator.
+              Specifies initial epoch of propagation. When an epoch is
+              provided that epoch is used as the initial epoch. When the
+              keyword <strong class="userinput"><code>FromSpacecraft</code></strong> is provided, the
+              start epoch is inherited from the
+              spacecraft.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>"Gregorian: 04 Oct 1957 12:00:00.000 &lt;= Epoch
+                      &lt;= 28 Feb 2100 00:00:00.000 Modified Julian: 6116.0
+                      &lt;= Epoch &lt;= 58127.5 or "FromSpacecraft"</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>21545</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">StepSize</span></td><td><p>The step size for the Propagator. GMAT will use
+              this step size when traversing the ephemeris file, regardless of
+              the internal step size of the ephemeris. GMAT will perform
+              interpolation between vectors on the file as
+              needed.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>300</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Type</span></td><td><p>Specifies the integrator or analytic propagator
+              used to model time evolution of spacecraft motion. Specify
+              <span class="guilabel">STK</span> for an STK ephemeris
+              propagator.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">PrinceDormand78</span>,
+                      <span class="guilabel">PrinceDormand45</span>,
+                      <span class="guilabel">RungeKutta89</span>,<span class="guilabel">RungeKutta68</span>,
+                      <span class="guilabel">RungeKutta56</span>,
+                      <span class="guilabel">BulirschStoer</span>,
+                      <span class="guilabel">AdamsBashforthMoulton</span>,
+                      <span class="guilabel">SPK, Code500, STK</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">RungeKutta89</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1CA99"></a><h3>GUI</h3><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_EphemerisPropagator_STK_GUI.png" align="middle" height="529"></td></tr></table></div></div><p>To configure a <span class="guilabel">Propagator</span> from the GMAT GUI
+      to use STK ephemeris files, select and open a
+      <span class="guilabel">Propagator</span> from the Resources tree. In the
+      <span class="guilabel">Integrator</span> category select <span class="guilabel">STK</span>
+      from the <span class="guilabel">Type</span> drop-down box. This will display the
+      STK propagator options dialog. There are four fields displayed for an
+      STK propagator that affect propagation - <span class="guilabel">StepSize</span>,
+      <span class="guilabel">CentralBody</span>, <span class="guilabel">EpochFormat</span>, and
+      <span class="guilabel">StartEpoch</span>. Note that changing the
+      <span class="guilabel">EpochFormat</span> setting converts the input epoch to the
+      selected format. You can also type <strong class="userinput"><code>FromSpacecraft</code></strong>
+      into the <span class="guilabel">StartEpoch</span> field and the
+      <span class="guilabel">Propagator</span> will use the epoch of the
+      <span class="guilabel">Spacecraft</span> as the initial propagation epoch. The
+      <span class="guilabel">CentralBody</span> field is displayed to the user, but is
+      unused when the integrator type is STK.</p></div><div class="refsection"><a name="N1CAD4"></a><h3>Implementation Notes</h3><p>Position interpolation by default is performed using a 7th order
+      Hermite-Newton divided difference interpolator using function value only
+      data (i.e. position data for the position interpolation). Velocity
+      interpolation uses the derivative of the position polynomial to produce
+      interpolated values.</p><p>For segmented ephemerides, the interpolator restarts at segment
+      boundaries. If an ephemeris segment has fewer than 8 points, the
+      interpolator activates derivative information for the position
+      interpolation by including the velocity data for the interpolation. The
+      order of the interpolator changes to match the number of points in the
+      segment (for n data points, order = 2n - 1 for position and n - 1 for
+      velocity). The first time this happens, a warning notice is posted to
+      the message window indicating the order of the velocity interpolation.
+      Subsequent changes are not reported, but the interpolation order will
+      adapt to the number of points in subsequent segments.</p><p>Propagating with stopping conditions can show sub-millisecond
+      related differences.</p><p>STK ephemeris files can set an ephemeris epoch that is very
+      different from the data in the file by setting a distant in time
+      Scenario Epoch, and compensating using the time offset for each
+      ephemeris point in the file. This can lead to round-off issues in
+      propagation, particularly when propagating to the end of an ephemeris
+      (or back propagating to the start).</p></div><div class="refsection"><a name="N1CADF"></a><h3>Remarks</h3><p>There is currently no GUI option to assign the STK ephemeris file
+      to the <span class="guilabel">Spacecraft</span> resource. You must specify the
+      STK ephemeris file on the
+      <span class="guilabel">Spacecraft</span><span class="guilabel">.EphemerisName</span>
+      parameter via script. The subsections below provide examples of how to
+      do this.</p><div class="refsection"><a name="N1CAEC"></a><h4>Configuring Spacecraft Ephemeris Files</h4><p>To use a STK ephemeris-configured
+        <span class="guilabel">Propagator</span>, you must add the STK ephemeris file
+        to the <span class="guilabel">Spacecraft</span>. A sample spacecraft Code500
+        ephemeris, (<code class="filename">sat_leo.ephem</code>, in the
+        <code class="filename">data/vehicle/ephem/code500</code> directory) is
+        distributed with GMAT. This sample file has a span of 4/20/2015
+        00:00:00 to 4/30/2015 00:00:00. An example of how to assign this
+        ephemeris to a spacecraft is shown below. Relative paths are defined
+        with respect to the GMAT <code class="filename">bin</code> directory of your
+        local installation.</p><pre class="programlisting"><code class="code">Create Spacecraft aSpacecraft;
+
+aSpacecraft.EphemerisName = '../data/vehicle/ephem/stk/SampleSTKEphem.e';
+
+BeginMissionSequence;</code></pre><p>A spacecraft may have only one STK ephemeris assigned. There is
+        currently no GUI option to add an STK ephemeris file to a
+        spacecraft.</p></div><div class="refsection"><a name="N1CB06"></a><h4>Configuring an STK Ephemeris Propagator</h4><p>If you have assigned the ephemeris file to your spacecraft,
+        configuring the propagator only requires assigning the
+        <span class="guilabel">STK</span> type and the desired step size on a
+        <span class="guilabel">Propagator</span> resource. The central body of
+        propagation will be the central body of the ephemeris file. If
+        desired, you may also specify an <span class="guilabel">EpochFormat</span> and
+        <span class="guilabel">StartEpoch</span> on the propagator to specify an
+        initial epoch from which to start propagation. The same effect can be
+        accomplished with an independent <span class="guilabel">Propagate</span>
+        command (see <a class="xref" href="Propagate.html" title="Propagate"><span class="refentrytitle">Propagate</span></a>) to advance the Spacecraft to
+        the desired starting epoch.</p><pre class="programlisting"><code class="code">Create Propagator STKProp;
+
+STKProp.Type     = 'STK';
+STKProp.StepSize = 60;
+
+BeginMissionSequence;</code></pre><p>The same remarks mentioned in the section on SPK propagators
+        with regard to interaction with the <span class="guilabel">Propagate</span>
+        command and behavior near ephemeris boundaries also apply to the STK
+        ephemeris propagator.</p></div></div><div class="refsection"><a name="N1CB25"></a><h3>Examples</h3><div class="informalexample"><p>This example propagates a spacecraft using an STK ephemeris,
+        defining the <span class="guilabel">StartEpoch</span> from the spacecraft. The
+        ephemeris file used in this example is included in the GMAT
+        distribution at the indicated location. The code below will run if you
+        copy and paste it into a new GMAT script.</p><pre class="programlisting"><code class="code">
+%
+%   Spacecraft
+% 
+Create Spacecraft STKSat;
+
+GMAT STKSat.DateFormat = UTCGregorian;
+GMAT STKSat.Epoch = '01 Jan 2000 12:00:00.000';
+GMAT STKSat.EphemerisName = '../data/vehicle/ephem/stk/SampleSTKEphem.e';
+
+%
+%   Propagator
+%
+
+Create Propagator STKProp;
+
+GMAT STKProp.Type = STK;
+GMAT STKProp.StepSize = 60;
+GMAT STKProp.CentralBody = Earth;
+GMAT STKProp.EpochFormat = 'A1ModJulian';
+GMAT STKProp.StartEpoch = 'FromSpacecraft';
+
+%
+%   Output 
+%
+
+Create OrbitView OrbitView1;
+GMAT OrbitView1.SolverIterations = Current;
+GMAT OrbitView1.UpperLeft = [ 0 0 ];
+GMAT OrbitView1.Size = [ 0 0 ];
+GMAT OrbitView1.RelativeZOrder = 0;
+GMAT OrbitView1.Maximized = false;
+GMAT OrbitView1.Add = {STKSat, Earth};
+
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+
+Create Array initialState[6,1] finalState[6,1];
+
+%
+% Miscellaneous variables.
+%
+
+Create String initialEpoch finalEpoch;
+
+%
+%   Mission Sequence
+%
+
+BeginMissionSequence;
+
+GMAT [initialEpoch, initialState, finalEpoch, finalState] = ...
+   GetEphemStates('STK', STKSat, 'UTCGregorian', EarthMJ2000Eq);
+
+GMAT STKSat.Epoch = initialEpoch;
+
+While STKSat.ElapsedDays &lt;= 1
+      
+   Propagate STKProp(STKSat);
+
+EndWhile;</code></pre></div><p>This example is provided in the samples directory, in the
+      <code class="filename">Ex_2017a_STKEphemPropagation</code> script.</p></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="OrbitView.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Receiver.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">OrbitView&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Receiver</td></tr></table></div></body></html>

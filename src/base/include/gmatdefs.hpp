@@ -13,7 +13,7 @@
 // Modification History      : 5/20/2003 - D. Conway, Thinking Systems, Inc.
 //                             Original delivery
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -43,6 +43,9 @@
 #include <map>                  // For std::map
 #include <stack>                // for std::stack
 #include <list>                 // To fix VS DLL import/export issues
+
+#include "utildefs.hpp"
+
 
 #ifdef _WIN32  // Windows
    #ifdef _MSC_VER  // Microsoft Visual C++
@@ -111,6 +114,9 @@ typedef std::map<std::string, GmatBase*>       ObjectMap;
 typedef std::map<std::string, ElementWrapper*> WrapperMap;
 typedef std::stack<ObjectMap*>                 ObjectMapStack;
 
+/// Forward reference to the event handler class used to plug in GUI components
+class GmatEventHandler;
+
 typedef struct geoparms
 {
    Real xtemp;  /// minimum global exospheric temperature (degrees K)
@@ -125,11 +131,10 @@ typedef Real GmatEpoch;
 // GMAT's Radians representation
 typedef Real Radians;
 
-
 // Macros defining default NULL behavior for RenameRefObject and HasLocalClones
 #define DEFAULT_TO_NO_CLONES virtual bool HasLocalClones() { return false; }
 #define DEFAULT_TO_NO_REFOBJECTS virtual bool RenameRefObject( \
-      const Gmat::ObjectType type, const std::string &oldName, \
+      const UnsignedInt type, const std::string &oldName, \
       const std::string &newName) { return true; }
 
 
@@ -226,77 +231,21 @@ namespace Gmat
       RF_HARDWARE,
       ANTENNA,
       
+      USER_DEFINED_OBJECT, // Used for user defined objects that do not fall
+                           // into any of the above categories, and for 
+                           // internal objects that users don't access
+      
+      USER_OBJECT_ID_NEEDED = USER_DEFINED_OBJECT + 500,
+
+      /// @todo: DJC - Do we need this for backwards compatibility?
       GENERIC_OBJECT,      // Used for user defined objects that do not fall 
                            // into any of the above categories, and for 
                            // internal objects that users don't access
       
+
       UNKNOWN_OBJECT
    };
 
-
-   /**
-    * The list of data types
-    *
-    * This list needs to be synchronized with the GmatBase::PARAM_TYPE_STRING
-    * list found in base/Foundation/GmatBase.cpp
-    */
-   enum ParameterType
-   {
-      INTEGER_TYPE,
-      UNSIGNED_INT_TYPE,
-      UNSIGNED_INTARRAY_TYPE,
-      INTARRAY_TYPE,
-      REAL_TYPE,
-      REAL_ELEMENT_TYPE,
-      STRING_TYPE,
-      STRINGARRAY_TYPE,
-      BOOLEAN_TYPE,
-      BOOLEANARRAY_TYPE,
-      RVECTOR_TYPE,
-      RMATRIX_TYPE,
-      TIME_TYPE,
-      OBJECT_TYPE,
-      OBJECTARRAY_TYPE,
-      ON_OFF_TYPE,
-      ENUMERATION_TYPE,
-      FILENAME_TYPE,
-      COLOR_TYPE,
-      TypeCount,
-      UNKNOWN_PARAMETER_TYPE = -1,
-      PARAMETER_REMOVED = -3,   // For parameters will be removed in the future
-   };
-
-   enum WrapperDataType
-   {
-      NUMBER_WT,          // Real, Integer
-      MATRIX_WT,          // Rmatrix
-      STRING_WT,          // a raw text string
-      STRING_OBJECT_WT,   // name of a String Object
-      OBJECT_PROPERTY_WT,
-      VARIABLE_WT,
-      ARRAY_WT,
-      ARRAY_ELEMENT_WT,
-      PARAMETER_WT,
-      OBJECT_WT,
-      BOOLEAN_WT,
-      INTEGER_WT,
-      ON_OFF_WT,
-      UNKNOWN_WRAPPER_TYPE = -2
-   };
-
-
-   enum RunState
-   {
-      IDLE = 10000,
-      RUNNING,
-      PAUSED,
-      TARGETING,
-      OPTIMIZING,
-      ESTIMATING,
-      SOLVING,
-      SOLVEDPASS,
-      WAITING
-   };
 
    enum WriteMode
    {
@@ -325,28 +274,31 @@ namespace Gmat
 
    typedef struct PluginResource
    {
-      std::string nodeName;         // Identifier for the resource
-      std::string parentNodeName;   // Owning type identifier, if any
-      ObjectType  type;             // Core type
-      std::string subtype;          // Subtype off of the core
+      PluginResource()
+      {
+         trigger = -1;
+         firstId = -1;
+         lastId  = -1;
+         handler = NULL;
+      }
+      std::string  nodeName;         // Identifier for the resource
+      std::string  parentNodeName;   // Owning type identifier, if any
+      ObjectType   type;             // Core type
+      std::string  subtype;          // Subtype off of the core
+
+      // GUI plugin elements; ignore if not needed
+      std::string  toolkit;          // Toolkit used to create the widget
+      std::string  widgetType;       // String identifying the widget to open
+      Integer      trigger;          // Event ID/type triggering the call
+      Integer      firstId;          // Starting ID for event handling
+      Integer      lastId;           // Ending ID for event handling
+
+      // Hook that provides the toolkit specific functions for GUI interfaces
+      GmatEventHandler *handler;
    } PLUGIN_RESOURCE;
-
-
-   enum MessageType
-   {
-      ERROR_ = 10, //loj: cannot have ERROR
-      WARNING_,
-      INFO_,
-      DEBUG_,
-      GENERAL_    // Default type for exceptions
-   };
 
 }
 
-typedef std::vector<Gmat::ObjectType>           ObjectTypeArray;
-typedef std::vector<Gmat::WrapperDataType>      WrapperTypeArray;
-typedef std::map<std::string, Gmat::ObjectType> ObjectTypeMap;
-typedef std::map<Gmat::ObjectType, StringArray> ObjectTypeArrayMap;
 
 #ifdef EXPORT_TEMPLATES
 
@@ -411,8 +363,8 @@ typedef std::map<Gmat::ObjectType, StringArray> ObjectTypeArrayMap;
     EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<bool>;
 
     // Fix ObjectType vector
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<Gmat::ObjectType>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<Gmat::ObjectType>;
+    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<UnsignedInt>;
+    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<UnsignedInt>;
 
     // Fix WrapperDataType
     EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<Gmat::WrapperDataType>;
@@ -524,4 +476,5 @@ typedef std::map<Gmat::ObjectType, StringArray> ObjectTypeArrayMap;
 //    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<char>;
 
 #endif
+
 #endif //GMATDEFS_HPP

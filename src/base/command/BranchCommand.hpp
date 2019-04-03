@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -70,7 +70,7 @@ public:
                                                const std::string &prefix = "",
                                                const std::string &useName = "");
    
-   virtual bool            RenameRefObject(const Gmat::ObjectType type,
+   virtual bool            RenameRefObject(const UnsignedInt type,
                                            const std::string &oldName,
                                            const std::string &newName);
    
@@ -100,7 +100,9 @@ public:
    virtual Integer         GetUpdatedObjectParameterIndex();
 
    virtual std::string     GetCurrentGeneratingString(Gmat::WriteMode mode,
-                                 const std::string &prefix = "");
+                                 const std::string &prefix = "", Integer nestCount = 0);
+
+   virtual bool            GetPropStatus();
 
 protected:
       
@@ -130,6 +132,8 @@ protected:
    GmatCommand                 *current;
    /// Most recently executed member of the branch.  NULL if branch not executed.
    GmatCommand                 *lastFired;
+   /// Current nest depth of the mission sequence being executed.
+   Integer                         nestCountDepth;
    
    std::vector<GmatCommand*>             
                                cmdsWithFunctions;

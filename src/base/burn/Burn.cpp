@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -98,7 +98,7 @@ Burn::PARAMETER_TYPE[BurnParamCount - GmatBaseParamCount] =
  * Constructs the Burn object (default constructor) with default VNB Local
  * CoordinateSystem.
  * 
- * @param <type>    Gmat::ObjectTypes enumeration for the object.
+ * @param <type>    UnsignedInts enumeration for the object.
  * @param <typeStr> String text identifying the object type
  * @param <nomme>   Name for the object
  *
@@ -108,7 +108,7 @@ Burn::PARAMETER_TYPE[BurnParamCount - GmatBaseParamCount] =
  *       spacecraft is set
  */
 //------------------------------------------------------------------------------
-Burn::Burn(Gmat::ObjectType type, const std::string &typeStr,
+Burn::Burn(UnsignedInt type, const std::string &typeStr,
            const std::string &nomme) :
    GmatBase             (type, typeStr, nomme),
    solarSystem          (NULL),
@@ -857,9 +857,9 @@ const ObjectTypeArray& Burn::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& Burn::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Burn::GetRefObjectNameArray(const UnsignedInt type)
 {
    refObjectNames.clear();
    
@@ -879,7 +879,7 @@ const StringArray& Burn::GetRefObjectNameArray(const Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -893,7 +893,7 @@ const StringArray& Burn::GetRefObjectNameArray(const Gmat::ObjectType type)
  *
  */
 //------------------------------------------------------------------------------
-bool Burn::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool Burn::SetRefObject(GmatBase *obj, const UnsignedInt type,
                         const std::string &name)
 {
    #ifdef DEBUG_BURN_SET
@@ -939,7 +939,7 @@ bool Burn::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 /**
@@ -952,7 +952,7 @@ bool Burn::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return true if object name changed, false if not.
  */
 //---------------------------------------------------------------------------
-bool Burn::RenameRefObject(const Gmat::ObjectType type,
+bool Burn::RenameRefObject(const UnsignedInt type,
                            const std::string &oldName,
                            const std::string &newName)
 {
@@ -1223,7 +1223,7 @@ void Burn::ConvertDeltaVToInertial(Real *dv, Real *dvInertial, Real epoch)
    {     
       // Now rotate to MJ2000Eq axes, we don't want to translate so
       // set coincident to true
-      coordSystem->ToBaseSystem(epoch, inDeltaV, outDeltaV, true);  // @todo - need ToMJ2000Eq here?
+      coordSystem->ToBaseSystem(A1Mjd(epoch), inDeltaV, outDeltaV, true);  // @todo - need ToMJ2000Eq here?
       
       #ifdef DEBUG_BURN_CONVERT_ROTMAT
       Rmatrix33 rotMat = coordSystem->GetLastRotationMatrix();
@@ -1266,7 +1266,7 @@ void Burn::ConvertDeltaVToInertial(Real *dv, Real *dvInertial, Real epoch)
 //         // Now rotate to MJ2000Eq axes
 //         localCoordSystem->ToMJ2000Eq(epoch, inDeltaV, outDeltaV, true);
          // Now rotate to base system axes
-         localCoordSystem->ToBaseSystem(epoch, inDeltaV, outDeltaV, true);   // @todo - need ToMJ2000Eq here?
+         localCoordSystem->ToBaseSystem(A1Mjd(epoch), inDeltaV, outDeltaV, true);   // @todo - need ToMJ2000Eq here?
 
          dvInertial[0] = outDeltaV[0];
          dvInertial[1] = outDeltaV[1];

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1129,11 +1129,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
       }
       else
       {
-         #ifdef IONOSPHERE
             if ((troposphere != NULL)||(ionosphere != NULL))
-         #else
-            if (troposphere != NULL)
-         #endif
                throw MeasurementException("Error: missing transmiter, transponder, or receiver in order to compute media correction\n");
 
          // No hardware useage in this case. It will have no media correction and hardware delay

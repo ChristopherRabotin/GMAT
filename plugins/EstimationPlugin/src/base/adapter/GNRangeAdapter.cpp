@@ -24,6 +24,10 @@
 #include "MessageInterface.hpp"
 #include "SignalBase.hpp"
 #include "ErrorModel.hpp"
+#include "BodyFixedPoint.hpp"
+#include "SpaceObject.hpp"
+#include "PropSetup.hpp"
+#include "ODEModel.hpp"
 #include <sstream>
 
 
@@ -135,20 +139,21 @@ GmatBase* GNRangeAdapter::Clone() const
 
 
 const MeasurementData& GNRangeAdapter::CalculateMeasurement(bool withEvents,
-   ObservationData* forObservation, std::vector<RampTableData>* rampTB)
+   ObservationData* forObservation, std::vector<RampTableData>* rampTB,
+   bool forSimulation)
 {
 #ifdef DEBUG_ADAPTER_EXECUTION
    MessageInterface::ShowMessage("GNRangeAdapter::CalculateMeasurement(%s, "
       "<%p>, <%p>) called\n", (withEvents ? "true" : "false"), forObservation,
       rampTB);
 #endif
-
+   
    if (!calcData)
       throw MeasurementException("Measurement data was requested for " +
       instanceName + " before the measurement was set");
-
+   
    // Fire the measurement model to build the collection of signal data
-   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB))
+   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB, forSimulation))
    {
       // QA Media correction:
       cMeasurement.isIonoCorrectWarning = false;
@@ -174,7 +179,7 @@ const MeasurementData& GNRangeAdapter::CalculateMeasurement(bool withEvents,
             cMeasurement.tropoCorrectWarningValue = correction;                  // unit: km
          }
       }
-
+      
       std::vector<SignalBase*> paths = calcData->GetSignalPaths();
       std::string unfeasibilityReason;
       Real        unfeasibilityValue;
@@ -184,12 +189,20 @@ const MeasurementData& GNRangeAdapter::CalculateMeasurement(bool withEvents,
       cMeasurement.unfeasibleReason = "";
       cMeasurement.feasibilityValue = 90.0;
 
-      GmatEpoch transmitEpoch, receiveEpoch;
-      RealArray values;
+      GmatTime transmitEpoch, receiveEpoch;
+      RealArray values, corrections;
+      cMeasurement.rangeVecs.clear();
+      cMeasurement.tBodies.clear();
+      cMeasurement.rBodies.clear();
+      cMeasurement.tPrecTimes.clear();
+      cMeasurement.rPrecTimes.clear();
+      cMeasurement.tLocs.clear();
+      cMeasurement.rLocs.clear();
       for (UnsignedInt i = 0; i < paths.size(); ++i)           // In the current version of GmatEstimation plugin, it has only 1 signal path. The code has to be modified for multiple signal paths 
       {
          // Calculate C-value for signal path ith:
          values.push_back(0.0);
+         corrections.push_back(0.0);
          SignalBase *currentleg = paths[i];
          SignalData *current = ((currentleg == NULL) ? NULL : (currentleg->GetSignalDataObject()));
          SignalData *first = current;
@@ -199,7 +212,7 @@ const MeasurementData& GNRangeAdapter::CalculateMeasurement(bool withEvents,
          {
             ++legIndex;
             // Set feasibility value
-            if (current->feasibilityReason == "N")
+            if (current->feasibilityReason[0] == 'N')
             {
                if ((current->stationParticipant) && (cMeasurement.unfeasibleReason == ""))
                {
@@ -208,10 +221,10 @@ const MeasurementData& GNRangeAdapter::CalculateMeasurement(bool withEvents,
                   cMeasurement.feasibilityValue = current->feasibilityValue;
                }
             }
-            else if (current->feasibilityReason == "B")
+            else if (current->feasibilityReason[0] == 'B')
             {
                std::stringstream ss;
-               ss << "B" << legIndex;
+               ss << "B" << legIndex << current->feasibilityReason.substr(1);
                current->feasibilityReason = ss.str();
                if ((cMeasurement.unfeasibleReason == "") || (cMeasurement.unfeasibleReason == "N"))
                {
@@ -220,47 +233,93 @@ const MeasurementData& GNRangeAdapter::CalculateMeasurement(bool withEvents,
                   cMeasurement.feasibilityValue = current->feasibilityValue;
                }
             }
+            
+            // Get leg participants
+
+            SpacePoint* body;
+            BodyFixedPoint *bf;
+            CoordinateSystem *cs;
+            SpaceObject* spObj;
+
+            if (current->tNode->IsOfType(Gmat::GROUND_STATION))
+            {
+               bf = (BodyFixedPoint*) current->tNode;
+               cs = bf->GetBodyFixedCoordinateSystem();
+               body = cs->GetOrigin();
+            }
+            else
+            {
+               body = current->tPropagator->GetODEModel()->GetForceOrigin();
+            }
+            cMeasurement.tBodies.push_back((CelestialBody*) body);
+
+            if (current->rNode->IsOfType(Gmat::GROUND_STATION))
+            {
+               bf = (BodyFixedPoint*) current->rNode;
+               cs = bf->GetBodyFixedCoordinateSystem();
+               body = cs->GetOrigin();
+            }
+            else
+            {
+               body = current->rPropagator->GetODEModel()->GetForceOrigin();
+            }
+            cMeasurement.rBodies.push_back(body);
+
+            cMeasurement.tPrecTimes.push_back(current->tPrecTime);
+            cMeasurement.rPrecTimes.push_back(current->rPrecTime);
+            cMeasurement.tLocs.push_back(new Rvector3(current->tLoc));
+            cMeasurement.rLocs.push_back(new Rvector3(current->rLoc));
 
             // accumulate all light time range for signal path ith 
             Rvector3 signalVec = current->rangeVecInertial;
+            cMeasurement.rangeVecs.push_back(new Rvector3(signalVec));
             values[i] += signalVec.GetMagnitude();
 
             // accumulate all range corrections for signal path ith
             for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
             {
                if (current->useCorrection[j])
+               {
                   values[i] += current->corrections[j];
+                  corrections[i] += current->corrections[j];
+               }
             }// for j loop
 
             // accumulate all hardware delays for signal path ith
             values[i] += ((current->tDelay + current->rDelay)*
                GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);
+            corrections[i] += ((current->tDelay + current->rDelay)*
+               GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);
 
             // Get measurement epoch in the first signal path. It will apply for all other paths
             if (i == 0)
             {
-               transmitEpoch = first->tPrecTime.GetMjd() - first->tDelay / GmatTimeConstants::SECS_PER_DAY;
-               receiveEpoch = current->rPrecTime.GetMjd() + current->rDelay / GmatTimeConstants::SECS_PER_DAY;
+               transmitEpoch = first->tPrecTime - first->tDelay / GmatTimeConstants::SECS_PER_DAY;
+               receiveEpoch = current->rPrecTime + current->rDelay / GmatTimeConstants::SECS_PER_DAY;
                if (calcData->GetTimeTagFlag())
                {
                   // Measurement epoch will be at the end of signal path when time tag is at the receiver
                   if (current->next == NULL)
-                     cMeasurement.epoch = receiveEpoch;
+                  {
+                     cMeasurement.epochGT = receiveEpoch;
+                     cMeasurement.epoch   = receiveEpoch.GetMjd();
+                  }
                }
                else
                {
                   // Measurement epoch will be at the begin of signal path when time tag is at the transmiter
-                  cMeasurement.epoch = transmitEpoch;
+                  cMeasurement.epochGT = transmitEpoch;
+                  cMeasurement.epoch   = transmitEpoch.GetMjd();
                }
             }
-
+            
             currentleg = currentleg->GetNext();
             current = ((currentleg == NULL) ? NULL : (currentleg->GetSignalDataObject()));
 
          }// while loop
 
       }// for i loop
-
+      
       // Caluclate uplink frequency at received time and transmit time
       cMeasurement.uplinkFreq = calcData->GetUplinkFrequency(0, rampTB) * 1.0e6;                        // unit: Hz
       cMeasurement.uplinkFreqAtRecei = calcData->GetUplinkFrequencyAtReceivedEpoch(0, rampTB) * 1.0e6;   // unit: Hz
@@ -273,15 +332,20 @@ const MeasurementData& GNRangeAdapter::CalculateMeasurement(bool withEvents,
          ComputeMeasurementNoiseSigma("NoiseSigma", measurementType, 2);
          ComputeMeasurementErrorCovarianceMatrix();
       }
-
+      
       // Set measurement values
       cMeasurement.value.clear();
+      cMeasurement.correction.clear();
       for (UnsignedInt i = 0; i < values.size(); ++i)
+      {
          cMeasurement.value.push_back(0.0);
+         cMeasurement.correction.push_back(0.0);
+      }
 
       for (UnsignedInt i = 0; i < values.size(); ++i)
       {
          Real measVal = values[i];
+         Real corrVal = corrections[i];
 #ifdef DEBUG_RANGE_CALCULATION
          MessageInterface::ShowMessage("===================================================================\n");
          MessageInterface::ShowMessage("====  GNRangeAdapter (%s): Range Calculation for Measurement Data %dth  \n", GetName().c_str(), i);
@@ -292,6 +356,7 @@ const MeasurementData& GNRangeAdapter::CalculateMeasurement(bool withEvents,
             MessageInterface::ShowMessage("%s,  ", participantLists[i]->at(k).c_str());
          MessageInterface::ShowMessage("\n");
 
+         MessageInterface::ShowMessage("      . Measurement epoch          : %.12lf\n", cMeasurement.epochGT.GetMjd());
          MessageInterface::ShowMessage("      . Measurement type           : <%s>\n", measurementType.c_str());
          MessageInterface::ShowMessage("      . C-value w/o noise and bias : %.12lf km \n", values[i]);
          MessageInterface::ShowMessage("      . Noise adding option        : %s\n", (addNoise ? "true" : "false"));
@@ -312,6 +377,7 @@ const MeasurementData& GNRangeAdapter::CalculateMeasurement(bool withEvents,
             // Apply multiplier for ("Range_KM") "Range" measurement model. This step has to
             // be done before adding bias and noise
             measVal = measVal*multiplier;
+            corrVal = corrVal*multiplier;
 
             // if need range value only, skip this section, otherwise add noise and bias as possible
             // Note: for Doppler measurement for E and S paths, we only need range value only and no noise and bias are added to measurement value. 
@@ -322,17 +388,22 @@ const MeasurementData& GNRangeAdapter::CalculateMeasurement(bool withEvents,
                {
                   // Add noise here
                   RandomNumber* rn = RandomNumber::Instance();
-                  Real val = rn->Gaussian(measVal, noiseSigma[i]);                  // noise sigma unit: Km
+                  Real val = rn->Gaussian(0.0, noiseSigma[i]);                  // noise sigma unit: Km
                   //val = rn->Gaussian(measVal, noiseSigma[i]);
-                  measVal = val;
+                  measVal += val;
+                  corrVal += val;
                }
 
                // Add bias to measurement value only after noise had been added in order to avoid adding bias' noise 
                if (addBias)
+               {
                   measVal = measVal + measurementBias[i];                          // bias unit: Km
+                  corrVal = corrVal + measurementBias[i];                          // bias unit: Km
+               }
             }
          }
          cMeasurement.value[i] = measVal;
+         cMeasurement.correction[i] = corrVal;
 
 #ifdef DEBUG_RANGE_CALCULATION
          MessageInterface::ShowMessage("      . C-value with noise and bias : %.12lf km\n", cMeasurement.value[i]);

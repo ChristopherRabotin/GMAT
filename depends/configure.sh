@@ -14,6 +14,7 @@
 set -uo pipefail
 
 # Set defaults
+cspice_version=N0065
 wx_build=true 
 wx_version=3.0.2
 xerces_version=3.1.4
@@ -28,10 +29,11 @@ logs_path=$gmat_path/depends/logs
 # ***********************************
 # Input System
 # ***********************************
-while getopts w:h opt; do
+while getopts c:w:h opt; do
   case $opt in
+    c) cspice_version="$OPTARG";;
     w) wx_version="$OPTARG";;
-    h) echo Usage: configure.sh [-w wx_dotted_version] [-help]
+    h) echo Usage: configure.sh [-c cspice_N_version] [-w wx_dotted_version] [-help]
       exit;;
   esac
 done
@@ -130,18 +132,18 @@ function download_depends() {
         	else 
 		  cspice_type=PC_Linux_GCC
         	fi
-	
+
 		# Download and extract Spice (32/64-bit)
 		if [ "$arch" = "x86" ]
 		then
-		  echo "Downloading 32-bit CSPICE..."
-		  curl https://naif.jpl.nasa.gov/pub/naif/toolkit/C/"$cspice_type"_32bit/packages/cspice.tar.Z > cspice.tar.Z
+		  echo "Downloading 32-bit CSPICE $cspice_version..."
+		  curl ftp://naif.jpl.nasa.gov/pub/naif/misc/toolkit_"$cspice_version"/C/"$cspice_type"_32bit/packages/cspice.tar.Z > cspice.tar.Z
 		  gzip -d cspice.tar.Z
 		  tar -xf cspice.tar
 		  mv cspice cspice32
 		else
-		  echo "Downloading 64-bit CSPICE..."
-		  curl https://naif.jpl.nasa.gov/pub/naif/toolkit/C/"$cspice_type"_64bit/packages/cspice.tar.Z > cspice.tar.Z
+		  echo "Downloading 64-bit CSPICE $cspice_version..."
+		  curl ftp://naif.jpl.nasa.gov/pub/naif/misc/toolkit_"$cspice_version"/C/"$cspice_type"_64bit/packages/cspice.tar.Z > cspice.tar.Z
 		  gzip -d cspice.tar.Z
 		  tar -xf cspice.tar
 		  mv cspice cspice64

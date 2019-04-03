@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -64,6 +64,10 @@ public:
    virtual const Rvector3 GetMJ2000Position(const A1Mjd &atTime);
    virtual const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime);
 
+   virtual const Rvector6 GetMJ2000State(const GmatTime &atTime);
+   virtual const Rvector3 GetMJ2000Position(const GmatTime &atTime);
+   virtual const Rvector3 GetMJ2000Velocity(const GmatTime &atTime);
+
    virtual StringArray    GetBuiltInNames();
 
    
@@ -93,11 +97,11 @@ public:
    
    virtual const        ObjectTypeArray& GetRefObjectTypeArray();
    virtual const StringArray& 
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
+                        GetRefObjectNameArray(const UnsignedInt type);
    virtual bool         SetRefObject(GmatBase *obj, 
-                                     const Gmat::ObjectType type,
+                                     const UnsignedInt type,
                                      const std::string &name = "");
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
    

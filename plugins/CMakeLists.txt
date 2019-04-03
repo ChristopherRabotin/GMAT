@@ -61,7 +61,8 @@ MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS INSTALL_DIR)
   SET_TARGET_PROPERTIES(${TargetName} PROPERTIES PROJECT_LABEL "Plugin ${TargetName}")
 
   # ====================================================================
-  # All plugins link to GmatBase
+  # All plugins link to GmatUtil and GmatBase
+  TARGET_LINK_LIBRARIES(${TargetName} PRIVATE GmatUtil)
   TARGET_LINK_LIBRARIES(${TargetName} PRIVATE GmatBase)
 
   # ====================================================================
@@ -104,8 +105,10 @@ OPTION(PLUGIN_POLYHEDRONGRAVITY "PolyhedronGravity Plugin" ON)
 OPTION(PLUGIN_PRODUCTIONPROPAGATORS "ProductionPropagators Plugin" ON)
 OPTION(PLUGIN_PYTHONINTERFACE "PythonInterface Plugin" ON)
 OPTION(PLUGIN_SAVECOMMAND "SaveCommand Plugin" ON)
+OPTION(PLUGIN_SCRIPTTOOLS "ScriptTools Plugin" ON)
 OPTION(PLUGIN_STATION "Station Plugin" ON)
 OPTION(PLUGIN_THRUSTFILE "ThrustFile Plugin" ON)
+OPTION(PLUGIN_YUKONOPTIMIZER "YukonOptimizer Plugin" ON)
 
 # Variable used to collect a list of all enabled plugins
 SET(PluginTargets "")
@@ -283,6 +286,15 @@ if (PLUGIN_SAVECOMMAND)
 endif()
 
 # ====================================================================
+# ScriptTools Plugin
+if (PLUGIN_SCRIPTTOOLS)
+  SET(PLUGINDIR "ScriptToolsPlugin/src/base")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
+endif()
+
+# ====================================================================
 # Station Plugin
 if (PLUGIN_STATION)
   SET(PLUGINDIR "StationPlugin/src/base")
@@ -295,6 +307,16 @@ endif()
 # ThrustFile Plugin
 if (PLUGIN_THRUSTFILE)
   SET(PLUGINDIR "ThrustFilePlugin/src/base")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
+endif()
+
+
+# ====================================================================
+# YukonOptimizer Plugin
+if (PLUGIN_YUKONOPTIMIZER)
+  SET(PLUGINDIR "YukonOptimizerPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})
@@ -320,6 +342,36 @@ if(GMAT_PROPRIETARYPLUGINS_PATH)
   ADD_SUBDIRECTORY(${PLUGINDIR} "${CMAKE_CURRENT_BINARY_DIR}/proprietary")
   GET_DIRECTORY_PROPERTY(ProprietaryTargets DIRECTORY ${PLUGINDIR} DEFINITION PluginTargets)
   SET(PluginTargets ${PluginTargets} ${ProprietaryTargets})
+endif()
+
+# ====================================================================
+# Plugins from Other Sources
+#
+# Add Additional Vendor or Internal Plugins to the GMAT_EXTRA_PLUGINS file
+find_file(GMAT_EXTRA_PLUGINS "ListOfPluginCollections.txt"
+          DOC "Path to third party plugin list (containing group names, if any)")
+if (GMAT_EXTRA_PLUGINS)
+   FILE(READ ${GMAT_EXTRA_PLUGINS} OtherPluginSources)
+   STRING(REGEX REPLACE ";" "\\\\;" OtherPluginSources "${OtherPluginSources}")
+   STRING(REGEX REPLACE "\n" ";" OtherPluginSources "${OtherPluginSources}")
+
+   foreach(folder ${OtherPluginSources})
+      # Search for plugin folder in the folder containing the GMAT repo
+      FIND_PATH(GMAT_ADDITIONAL_PLUGINS_${folder}
+        NAMES CMakeLists.txt
+        PATHS
+          ${PROJECT_SOURCE_DIR}/../${folder}
+        DOC "Path to additional plugin ${folder}"
+        NO_DEFAULT_PATH
+        )
+   
+      if(GMAT_ADDITIONAL_PLUGINS_${folder})
+        SET(PLUGINDIR "${GMAT_ADDITIONAL_PLUGINS_${folder}}")
+        ADD_SUBDIRECTORY(${PLUGINDIR} "${CMAKE_CURRENT_BINARY_DIR}/${folder}")
+        GET_DIRECTORY_PROPERTY(ExtraTargets DIRECTORY ${PLUGINDIR} DEFINITION PluginTargets)
+        SET(PluginTargets ${PluginTargets} ${ExtraTargets})
+      endif()
+   endforeach()
 endif()
 
 # ====================================================================

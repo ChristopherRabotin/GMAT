@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -332,7 +332,7 @@ bool RFHardware::SetStringParameter(const std::string &label, const std::string 
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string & name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string & name)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a reference object
@@ -343,7 +343,7 @@ bool RFHardware::SetStringParameter(const std::string &label, const std::string 
  * @return A pointer to the object, or NULL if the object is not set
  */
 //------------------------------------------------------------------------------
-GmatBase* RFHardware::GetRefObject(const Gmat::ObjectType type,
+GmatBase* RFHardware::GetRefObject(const UnsignedInt type,
                                   const std::string &name)
 {
    // return primary antenna when it is requested:
@@ -356,14 +356,14 @@ GmatBase* RFHardware::GetRefObject(const Gmat::ObjectType type,
 }
 
 
-GmatBase* RFHardware::GetRefObject(const Gmat::ObjectType type, const std::string &name, const Integer index)
+GmatBase* RFHardware::GetRefObject(const UnsignedInt type, const std::string &name, const Integer index)
 {
    return Sensor::GetRefObject(type, name, index);
 }
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string & name)
 //------------------------------------------------------------------------------
 /**
@@ -376,7 +376,7 @@ GmatBase* RFHardware::GetRefObject(const Gmat::ObjectType type, const std::strin
  * @return true if the object was set, false if not
  */
 //------------------------------------------------------------------------------
-bool RFHardware::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool RFHardware::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                   const std::string &name)
 {
    if ((type == Gmat::HARDWARE)&&(name == primaryAntennaName))
@@ -389,7 +389,7 @@ bool RFHardware::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 }
 
 
-bool RFHardware::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool RFHardware::SetRefObject(GmatBase *obj, const UnsignedInt type,
    const std::string &name, const Integer index)
 {
    return Sensor::SetRefObject(obj, type, name, index);
@@ -397,7 +397,7 @@ bool RFHardware::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * This method returns a name of the referenced objects.
@@ -405,7 +405,7 @@ bool RFHardware::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return a name of objects of the requested type.
  */
 //------------------------------------------------------------------------------
-std::string RFHardware::GetRefObjectName(const Gmat::ObjectType type) const
+std::string RFHardware::GetRefObjectName(const UnsignedInt type) const
 {
    if ((type == Gmat::HARDWARE)||(type == Gmat::UNKNOWN_OBJECT))
    {
@@ -420,7 +420,7 @@ std::string RFHardware::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectNameArray(const Gmat::ObjectType type) const
+// std::string GetRefObjectNameArray(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * This method returns an array of names of the referenced objects.
@@ -428,7 +428,7 @@ std::string RFHardware::GetRefObjectName(const Gmat::ObjectType type) const
  * @return an array of names of the objects of the requested type.
  */
 //------------------------------------------------------------------------------
-const StringArray& RFHardware::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& RFHardware::GetRefObjectNameArray(const UnsignedInt type)
 {
    Sensor::GetRefObjectNameArray(type);
 
@@ -477,7 +477,7 @@ bool RFHardware::HasRefObjectTypeArray()
 }
 
 
-Gmat::ObjectType RFHardware::GetPropertyObjectType(const Integer id) const
+UnsignedInt RFHardware::GetPropertyObjectType(const Integer id) const
 {
    if (id == PRIMARY_ANTENNA)
       return Gmat::ANTENNA;

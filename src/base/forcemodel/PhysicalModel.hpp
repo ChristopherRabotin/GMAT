@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -96,7 +96,7 @@
 //                                - Changed constructor from
 //                                    PhysicalModel::PhysicalModel(void)
 //                                  to
-//                                    PhysicalModel(Gmat::ObjectType typeId,
+//                                    PhysicalModel(UnsignedInt typeId,
 //                                          const std::string &typeStr,
 //                                          const std::string &nomme = "")
 //                                - Added parameterCount = 1 in constructors
@@ -142,7 +142,7 @@ class PropagationStateManager;
 class GMAT_API PhysicalModel : public GmatBase
 {
 public:
-   PhysicalModel(Gmat::ObjectType typeId, const std::string &typeStr,
+   PhysicalModel(UnsignedInt typeId, const std::string &typeStr,
                  const std::string &nomme = "");
    virtual ~PhysicalModel(void);
 
@@ -227,6 +227,13 @@ public:
    virtual bool IsParameterReadOnly(const Integer id) const;
    virtual bool IsParameterReadOnly(const std::string &label) const;
 
+   virtual GmatTime     GetGmatTimeParameter(const Integer id) const;
+   virtual GmatTime     SetGmatTimeParameter(const Integer id, 
+                                             const GmatTime value);
+   //virtual GmatTime     GetGmatTimeParameter(const std::string &label) const;
+   //virtual GmatTime     SetGmatTimeParameter(const std::string &label, 
+   //                                          const GmatTime value);
+
    virtual Real GetRealParameter(const Integer id) const;
    virtual Real SetRealParameter(const Integer id, const Real value);
    virtual std::string GetStringParameter(const Integer id) const;
@@ -235,14 +242,14 @@ public:
    virtual std::string GetStringParameter(const std::string &label) const;
    virtual bool        SetStringParameter(const std::string &label,
                                           const std::string &value); 
-   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*   GetRefObject(const UnsignedInt type,
                                     const std::string &name);
-   const StringArray&  GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   const StringArray&  GetRefObjectNameArray(const UnsignedInt type);
+   virtual bool        SetRefObject(GmatBase *obj, const UnsignedInt type,
                                     const std::string &name = "");
-   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool        SetRefObject(GmatBase *obj, const UnsignedInt type,
                               const std::string &name, const Integer index);
-   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*   GetRefObject(const UnsignedInt type,
                               const std::string &name, const Integer index);
 
    virtual void        SetPropStateManager(PropagationStateManager *sm);
@@ -250,7 +257,8 @@ public:
    // Methods used for PM based Parameters
    virtual bool        BuildModelState(GmatEpoch now, Real *state,
                                        Real *j2kState, Integer dimension = 6);
-
+   virtual bool        BuildModelStateGT(GmatTime now, Real *state,
+                                       Real *j2kState, Integer dimension = 6);
 
 protected:
       
@@ -275,6 +283,8 @@ protected:
    Real *rawState;
    /// The base epoch
    Real epoch;
+   GmatTime epochGT;
+
    /// Number of seconds elapsed from the base epoch
    Real elapsedTime;
    /// Number of seconds previously elapsed from the base epoch

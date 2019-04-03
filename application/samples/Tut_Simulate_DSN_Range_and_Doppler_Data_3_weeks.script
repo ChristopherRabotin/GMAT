@@ -133,8 +133,9 @@ Fm.PointMasses            = {Sun, Earth, Luna, Mars, Saturn, ...
                              Uranus, Mercury, Venus, Jupiter};
 Fm.SRP                    = On;
 Fm.RelativisticCorrection = On;
+Fm.ErrorControl 		  = None;
 Prop.FM                   = Fm;
-
+Prop.MinStep              = 0;
 %-----------------------------------------------------------------------------------------
 %%		Create and configure Simulator object
 %-----------------------------------------------------------------------------------------

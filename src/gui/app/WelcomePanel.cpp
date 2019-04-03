@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -288,11 +288,14 @@ void WelcomePanel::OnExit(wxCommandEvent& WXUNUSED(event) )
 //------------------------------------------------------------------------------
 void WelcomePanel::OnShowWelcomePanelClicked(wxCommandEvent& event)
 {
-   wxFileConfig *pConfig = (wxFileConfig *) GmatAppData::Instance()->GetPersonalizationConfig();
-   if (event.IsChecked())
-      pConfig->Write("/Main/ShowWelcomeOnStart", "true");
-   else
-      pConfig->Write("/Main/ShowWelcomeOnStart", "false");
+   if (GmatGlobal::Instance()->GetWritePersonalizationFile())
+   {
+      wxFileConfig *pConfig = (wxFileConfig *) GmatAppData::Instance()->GetPersonalizationConfig();
+      if (event.IsChecked())
+         pConfig->Write("/Main/ShowWelcomeOnStart", "true");
+      else
+         pConfig->Write("/Main/ShowWelcomeOnStart", "false");
+   }
 }
 
 
@@ -314,7 +317,7 @@ wxFlexGridSizer *WelcomePanel::FillGroup(wxFileConfig *config, wxString INIGroup
    #ifdef DEBUG_FILL_GROUP
    MessageInterface::ShowMessage
       ("WelcomePanel::FillGroup() entered, INIGroup='%s', INIIconGroup='%s', "
-       "isFileList=%d\n", INIGroup.c_str(), INIIconGroup.c_str(), isFileList);
+       "isFileList=%d\n", INIGroup.WX_TO_C_STRING, INIIconGroup.WX_TO_C_STRING, isFileList);
    #endif
    
    wxFlexGridSizer *aSizer;
@@ -359,7 +362,7 @@ wxFlexGridSizer *WelcomePanel::FillGroup(wxFileConfig *config, wxString INIGroup
 		linkURLs.Add(aValue);
       
       #ifdef DEBUG_FILL_GROUP
-      MessageInterface::ShowMessage("   aKey='%s', aValue='%s'\n", aKey.c_str(), aValue.c_str());
+      MessageInterface::ShowMessage("   aKey='%s', aValue='%s'\n", aKey.WX_TO_C_STRING, aValue.WX_TO_C_STRING);
       #endif
       
       while (config->GetNextEntry(aKey, dummy))
@@ -386,7 +389,7 @@ wxFlexGridSizer *WelcomePanel::FillGroup(wxFileConfig *config, wxString INIGroup
 			linkURLs.Add(aValue);
          
          #ifdef DEBUG_FILL_GROUP
-         MessageInterface::ShowMessage("   aKey='%s', aValue='%s'\n", aKey.c_str(), aValue.c_str());
+         MessageInterface::ShowMessage("   aKey='%s', aValue='%s'\n", aKey.WX_TO_C_STRING, aValue.WX_TO_C_STRING);
          #endif
       }
    }
@@ -518,7 +521,34 @@ void WelcomePanel::OnOpenHelpLink(wxHyperlinkEvent& event)
 	   link.Contains("\\") || link.Contains("/") || link.Contains(":") )
 	   ::wxLaunchDefaultBrowser(link);
    else
-	   GmatAppData::Instance()->GetMainFrame()->GetHelpController()->DisplaySection(link);		
+   { 
+       // work around for wxWidgets bug: http://trac.wxwidgets.org/ticket/14888
+       // chm help fails for Windows 8,10.
+       // solution taken from: https://stackoverflow.com/questions/29944745/
+
+       bool useHelpController = true;
+
+       #ifdef _WIN32  // All Win platforms define this, even when 64-bit       
+          //For Windows 8 is dwMajorVersion = 6, dwMinorVersion = 2.
+          OSVERSIONINFOEX info;
+          ZeroMemory(&info, sizeof(OSVERSIONINFOEX));
+          info.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+          GetVersionEx((LPOSVERSIONINFO)&info);//info requires typecasting
+
+          Real winVersion = (Real)info.dwMajorVersion + (Real)info.dwMinorVersion / 10.0;
+          if (winVersion > 6.1)
+             useHelpController = false;
+       #endif
+
+       if (useHelpController)
+       {
+          GmatAppData::Instance()->GetMainFrame()->GetHelpController()->DisplaySection(link);
+       }
+       else
+      {
+          GmatAppData::Instance()->GetMainFrame()->GetHelpController()->DisplayContents();
+      }
+   }
 }
 
 

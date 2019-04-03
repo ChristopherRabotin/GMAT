@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -57,7 +57,7 @@ protected:
 
    // The inherited methods from RefData
    virtual void InitializeRefObjects();
-   virtual bool IsValidObjectType(Gmat::ObjectType type);
+   virtual bool IsValidObjectType(UnsignedInt type);
    
    Spacecraft *mSpacecraft;
    
@@ -103,8 +103,8 @@ protected:
    
 private:
    
-   Real GetOwnedObjectProperty(Gmat::ObjectType objType, const std::string &name);
-   Real SetOwnedObjectProperty(Gmat::ObjectType objType, const std::string &name,
+   Real GetOwnedObjectProperty(UnsignedInt objType, const std::string &name);
+   Real SetOwnedObjectProperty(UnsignedInt objType, const std::string &name,
                                Real val);
    
 };

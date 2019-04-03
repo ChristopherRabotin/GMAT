@@ -84,7 +84,7 @@ public:
    virtual Integer      SetIntegerParameter(const std::string &label,
                                             const Integer value);
 
-   //virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   //virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
    //                                  const std::string &name = "");
 
    virtual bool         IsEstimationParameterValid(const Integer id);

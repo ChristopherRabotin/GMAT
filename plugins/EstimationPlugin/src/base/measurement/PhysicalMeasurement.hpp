@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -40,20 +40,7 @@
 #include "ObservationData.hpp"
 #include "RampTableData.hpp"
 
-// Temporary removal of ionosphere from Mac and Linux
-#ifdef _WIN32
-#define __WIN32__
-#endif
-
-#ifdef __WIN32__
-#ifndef IONOSPHERE
-#define IONOSPHERE
-#endif
-#endif
-
-#ifdef IONOSPHERE
-   #include "Ionosphere.hpp"
-#endif
+#include "Ionosphere.hpp"
 
 //#define DEBUG_RANGE_CALC_WITH_EVENTS
 //#define VIEW_PARTICIPANT_STATES_WITH_EVENTS
@@ -74,11 +61,8 @@ public:
 
    void        AddCorrection(const std::string& modelName, const std::string& mediaCorrectionType);
 //   RealArray   TroposphereCorrection(Real freq, Rvector3 rVec, Rmatrix33 Ro_j2k);
-   RealArray   TroposphereCorrection(Real freq, Real distance, Real elevationAngle);
-
-#ifdef IONOSPHERE
+   RealArray   TroposphereCorrection(Real freq, Real distance, Real elevationAngle, Real epoch);
    RealArray   IonosphereCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2);
-#endif
 
    RealArray   CalculateMediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2, Real minElevationAngle);
 
@@ -132,9 +116,7 @@ protected:
 
    /// media correction objects:
    Troposphere*               troposphere;
-#ifdef IONOSPHERE
    Ionosphere*                ionosphere;
-#endif
 
    /// Derived classes override this method to implement measurement
    /// calculations

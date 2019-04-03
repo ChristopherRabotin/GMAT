@@ -115,7 +115,7 @@ GmatBase* EndFileThrust::Clone() const
 }
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string& oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string& oldName,
 //       const std::string& newName)
 //------------------------------------------------------------------------------
 /**
@@ -128,7 +128,7 @@ GmatBase* EndFileThrust::Clone() const
  * @return true if a name change happened
  */
 //------------------------------------------------------------------------------
-bool EndFileThrust::RenameRefObject(const Gmat::ObjectType type,
+bool EndFileThrust::RenameRefObject(const UnsignedInt type,
       const std::string& oldName, const std::string& newName)
 {
    bool retval = false;
@@ -199,7 +199,7 @@ bool EndFileThrust::TakeAction(const std::string& action,
 }
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Retrieves the name of a reference object
@@ -209,7 +209,7 @@ bool EndFileThrust::TakeAction(const std::string& action,
  * @return The name
  */
 //------------------------------------------------------------------------------
-std::string EndFileThrust::GetRefObjectName(const Gmat::ObjectType type) const
+std::string EndFileThrust::GetRefObjectName(const UnsignedInt type) const
 {
    switch (type)
    {
@@ -247,7 +247,7 @@ const ObjectTypeArray& EndFileThrust::GetRefObjectTypeArray()
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a list of the names of reference objects used.
@@ -258,7 +258,7 @@ const ObjectTypeArray& EndFileThrust::GetRefObjectTypeArray()
  */
 //------------------------------------------------------------------------------
 const StringArray& EndFileThrust::GetRefObjectNameArray(
-      const Gmat::ObjectType type)
+      const UnsignedInt type)
 {
    refObjectNames.clear();
 
@@ -279,7 +279,7 @@ const StringArray& EndFileThrust::GetRefObjectNameArray(
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string& name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string& name)
 //------------------------------------------------------------------------------
 /**
  * Sets the name for a reference object
@@ -290,7 +290,7 @@ const StringArray& EndFileThrust::GetRefObjectNameArray(
  * @return true if the reference was set
  */
 //------------------------------------------------------------------------------
-bool EndFileThrust::SetRefObjectName(const Gmat::ObjectType type,
+bool EndFileThrust::SetRefObjectName(const UnsignedInt type,
       const std::string& name)
 {
    switch (type)

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -574,7 +574,7 @@ bool ConditionalBranch::Initialize()
 
 
 //---------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type,
+// bool RenameRefObject(const UnsignedInt type,
 //                      const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 /*
@@ -587,7 +587,7 @@ bool ConditionalBranch::Initialize()
  * @return always true to indicate RenameRefObject() was implemented.
  */
 //---------------------------------------------------------------------------
-bool ConditionalBranch::RenameRefObject(const Gmat::ObjectType type,
+bool ConditionalBranch::RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName)
 {
@@ -638,7 +638,7 @@ const ObjectTypeArray& ConditionalBranch::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves the list of ref objects used by the Achieve.
@@ -650,7 +650,7 @@ const ObjectTypeArray& ConditionalBranch::GetRefObjectTypeArray()
  * 
  */
 //------------------------------------------------------------------------------
-const StringArray& ConditionalBranch::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& ConditionalBranch::GetRefObjectNameArray(const UnsignedInt type)
 {
    refObjectNames.clear();
    
@@ -676,7 +676,7 @@ const StringArray& ConditionalBranch::GetRefObjectNameArray(const Gmat::ObjectTy
 }
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -690,7 +690,7 @@ const StringArray& ConditionalBranch::GetRefObjectNameArray(const Gmat::ObjectTy
  *
  */
 //------------------------------------------------------------------------------
-bool ConditionalBranch::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool ConditionalBranch::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name)
 {
    // Not handled here -- invoke the next higher SetRefObject call
@@ -699,7 +699,7 @@ bool ConditionalBranch::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//  GmatBase* GetRefObject(const UnsignedInt type,
 //                         const std::string &name,
 //                         const Integer index)
 //------------------------------------------------------------------------------
@@ -714,7 +714,7 @@ bool ConditionalBranch::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* ConditionalBranch::GetRefObject(const Gmat::ObjectType type,
+GmatBase* ConditionalBranch::GetRefObject(const UnsignedInt type,
                                           const std::string &name,
                                           const Integer index)
 {
@@ -724,7 +724,7 @@ GmatBase* ConditionalBranch::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -740,7 +740,7 @@ GmatBase* ConditionalBranch::GetRefObject(const Gmat::ObjectType type,
  *
  */
 //------------------------------------------------------------------------------
-bool ConditionalBranch::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool ConditionalBranch::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name, const Integer index)
 {
    // Not handled here -- invoke the next higher SetRefObject call

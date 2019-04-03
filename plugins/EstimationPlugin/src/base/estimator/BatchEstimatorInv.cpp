@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -230,14 +230,10 @@ void BatchEstimatorInv::Accumulate()
          measTypesList.push_back(typeName);
          sumAllRecords.push_back(1);                // set total records to 1 at the first time
          sumAcceptRecords.push_back(0);
-         sumResidual.push_back(0.0);
-         sumResidualSquare.push_back(0.0);
-         sumWeightResidualSquare.push_back(0.0);
 
-         sumSERecords.push_back(0);
-         sumSEResidual.push_back(0.0);
-         sumSEResidualSquare.push_back(0.0);
-         sumSEWeightResidualSquare.push_back(0.0);
+         aveResidual.push_back(0.0);
+         stdResidual2.push_back(0.0);
+         sumWeightResidualSquare.push_back(0.0);
       }
 
       // Set initial value for 2 statistics tables
@@ -400,11 +396,15 @@ void BatchEstimatorInv::Accumulate()
          {
             // Write to report file edit status:
             if (editedRecords[recNum] & USER_FLAG)
+            {
                sLine << "USER" << " ";
+               measManager.GetObsDataObject()->removedReason = "USER";
+            }
             else
                sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 4) + " ";
 
             // Write to report file O-value, C-value, O-C, and elevation angle 
+            // An unmatched record has no C-value, O-C, and elevation angle 
             sprintf(&s[0], "%21.6lf", currentObs->value[k]);
             sLine << s << " ";
             sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";
@@ -416,11 +416,15 @@ void BatchEstimatorInv::Accumulate()
          {
             // Write to report file edit status:
             if (editedRecords[recNum] & USER_FLAG)
+            {
                sLine << "USER" << " ";
+               measManager.GetObsDataObject()->removedReason = "USER";
+            }
             else
                sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 4, GmatStringUtil::LEFT) + " ";  // Edit status
 
             // Write to report file O-value, C-value, O-C, unit, and elevation angle
+            // An unmatched record has no C-value, O-C, and elevation angle
             sprintf(&s[0], "%21.6lf %21.6lf", currentObs->value_orig[k], currentObs->value[k]);
             sLine << s << " ";
             sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // C-value
@@ -453,25 +457,17 @@ void BatchEstimatorInv::Accumulate()
       // verify media correction to be in acceptable range. It is [0m, 60m] for troposphere correction and [0m, 20m] for ionosphere correction
       ValidateMediaCorrection(calculatedMeas);
 
-      measManager.GetObsDataObject()->removedReason = calculatedMeas->unfeasibleReason;
-      //std::string ss = measManager.GetObsDataObject()->removedReason = calculatedMeas->unfeasibleReason;
+      std::string ss = measManager.GetObsDataObject()->removedReason;
+      if (!((freezeEditing) && (iterationsTaken >= freezeIteration) && ((ss == "IRMS") || (ss == "OLSE"))))
+         ss = measManager.GetObsDataObject()->removedReason = calculatedMeas->unfeasibleReason;
+
       if (count == 0)
       {
-         std::string ss = measManager.GetObsDataObject()->removedReason;
-         if (ss.substr(0, 1) == "B")
-         {
-            numRemovedRecords["B"]++;
-            editedRecords[recNum] = editedRecords[recNum] | BLOCKED_FLAG;
-         }
-         else
+         // count = 0 when calulation is out of ramp table
+         if (ss == "R")
          {
             numRemovedRecords[ss]++;
-            if (ss == "R")
-               editedRecords[recNum] = editedRecords[recNum] | RAMP_FLAG;
-            else if (ss == "IRMS")
-               editedRecords[recNum] = editedRecords[recNum] | IRMS_FLAG;
-            else if (ss == "OLSE")
-               editedRecords[recNum] = editedRecords[recNum] | OLSE_FLAG;
+            editedRecords[recNum] = editedRecords[recNum] | RAMP_FLAG;
          }
 
          for (Integer k = 0; k < currentObs->value.size(); ++k)
@@ -482,11 +478,16 @@ void BatchEstimatorInv::Accumulate()
             else
                sLine << linePrefix;                 // write information of the first element for the second and third elements
 
+            // When count = 0, it has no information about measurement data
+            // It has no C-value, O-C, and elevation angle
             if (textFileMode == "Normal")
             {
                // Write to report file edit status:
                if (editedRecords[recNum] & USER_FLAG)
+               {
                   sLine << "USER" << " ";
+                  measManager.GetObsDataObject()->removedReason = "USER";
+               }
                else
                   sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
@@ -500,7 +501,12 @@ void BatchEstimatorInv::Accumulate()
                if (currentObs->typeName == "GPS_PosVec")
                   sprintf(&s[0], "%s", "      ");
                else
-                  sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
+               {
+                  if (calculatedMeas->feasibilityValue == -100.0)
+                     sprintf(&s[0], "%s", "   N/A");
+                  else
+                     sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
+               }
                sLine << s;
                sLine << "\n";
             }
@@ -508,7 +514,10 @@ void BatchEstimatorInv::Accumulate()
             {
                // Write to report file edit status:
                if (editedRecords[recNum] & USER_FLAG)
+               {
                   sLine << "USER" << " ";
+                  measManager.GetObsDataObject()->removedReason = "USER";
+               }
                else
                   sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
@@ -525,7 +534,12 @@ void BatchEstimatorInv::Accumulate()
                if (currentObs->typeName == "GPS_PosVec")
                   sprintf(&s[0], "%s", "                  ");
                else
-                  sprintf(&s[0], "%18.12lf", calculatedMeas->feasibilityValue);
+               {
+                  if (calculatedMeas->feasibilityValue == -100.0)
+                     sprintf(&s[0], "%s", "               N/A");
+                  else
+                     sprintf(&s[0], "%18.12lf", calculatedMeas->feasibilityValue);
+               }
                sLine << s << " ";                                                                         // elevation angle
 
                // fill out N/A for partial derivative
@@ -557,33 +571,44 @@ void BatchEstimatorInv::Accumulate()
                measManager.GetObsDataObject()->value[index] = ObservationDataCorrection(calculatedMeas->value[index], currentObs->value[index], currentObs->rangeModulo);
          }
          
-         // Peform Outloop Sigma Editing
-         bool isReUsed = DataFilter();
-         
+         // Peform Outloop Sigma Editing. It generates IRMS and OLSE flags
+         bool inUsed = true;
+         if (ss.substr(0, 1) == "B")
+            inUsed = false;
+         else
+         {
+            inUsed = measManager.GetObsDataObject()->inUsed;
+            if ((!freezeEditing) || 
+               ((freezeEditing) && (iterationsTaken <= (freezeIteration - 1))))
+               inUsed = DataFilter();
+         }
+
+         // It needs to get "IRMS" or "OLSE" flag
+         std::string ss = measManager.GetObsDataObject()->removedReason;
+
          #ifdef DEBUG_ACCUMULATION
          MessageInterface::ShowMessage("iterationsTaken = %d    inUsed = %s\n", iterationsTaken, (measManager.GetObsDataObject()->inUsed ? "true" : "false"));
          #endif
          
-         if (measManager.GetObsDataObject()->inUsed == false)
+         if (inUsed == false)
          {
-            // Specify removed reason and count number of removed records
-            std::string ss = measManager.GetObsDataObject()->removedReason;         //currentObs->removedReason;
             if (ss.substr(0, 1) == "B")
             {
                numRemovedRecords["B"]++;
-               editedRecords[recNum] = editedRecords[recNum] | BLOCKED_FLAG;
+               //editedRecords[recNum] = editedRecords[recNum] | RAMP_FLAG;
+               editedRecords[recNum] = editedRecords[recNum] | BLOCKED_FLAG;           // Adding blocked flag
             }
-            else
+            else if (ss == "IRMS")
             {
-               numRemovedRecords[ss]++;
-               if (ss == "R")
-                  editedRecords[recNum] = editedRecords[recNum] | RAMP_FLAG;
-               else if (ss == "IRMS")
-                  editedRecords[recNum] = editedRecords[recNum] | IRMS_FLAG;
-               else if (ss == "OLSE")
-                  editedRecords[recNum] = editedRecords[recNum] | OLSE_FLAG;
+               numRemovedRecords["IRMS"]++;
+               editedRecords[recNum] = editedRecords[recNum] | IRMS_FLAG;              // Adding IRMS flag
             }
-            
+            else if (ss == "OLSE")
+            {
+               numRemovedRecords["OLSE"]++;
+               editedRecords[recNum] = editedRecords[recNum] | OLSE_FLAG;              // Adding OSLE flag
+            }
+
             Real ocDiff;
             for (Integer k = 0; k < currentObs->value.size(); ++k)
             {
@@ -605,7 +630,10 @@ void BatchEstimatorInv::Accumulate()
                {
                   // Write to report file edit status:
                   if (editedRecords[recNum] & USER_FLAG)
+                  {
                      sLine << "USER" << " ";
+                     measManager.GetObsDataObject()->removedReason = "USER";
+                  }
                   else
                      sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
@@ -617,7 +645,12 @@ void BatchEstimatorInv::Accumulate()
                   if (currentObs->typeName == "GPS_PosVec")
                      sprintf(&s[0], "%s", "      ");
                   else
-                     sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
+                  {
+                     if (calculatedMeas->feasibilityValue == -100.0)
+                        sprintf(&s[0], "%s", "   N/A");
+                     else
+                        sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
+                  }
                   sLine << s;
                   sLine << "\n";
                }
@@ -625,15 +658,23 @@ void BatchEstimatorInv::Accumulate()
                {
                   // Write to report file edit status:
                   if (editedRecords[recNum] & USER_FLAG)
+                  {
                      sLine << "USER" << " ";
+                     measManager.GetObsDataObject()->removedReason = "USER";
+                  }
                   else
                      sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
                   // Write C, O-C, W, W*(O-C)^2, sqrt(W)*(O-C), and elevation angle
                   if (currentObs->typeName == "GPS_PosVec")
-                     sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), "                  ");
+                     sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le  %s", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*std::abs(ocDiff), "                  ");
                   else
-                     sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+                  {
+                     if (calculatedMeas->feasibilityValue == -100.0)
+                        sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le                N/A", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*std::abs(ocDiff));
+                     else
+                        sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*std::abs(ocDiff), calculatedMeas->feasibilityValue);
+                  }
 
                   sLine << s << " ";
 
@@ -662,9 +703,10 @@ void BatchEstimatorInv::Accumulate()
                matData.realValues[matOmcIndex][matIndex]  = ocDiff;
                matData.stringValues[matObsEditFlagIndex][matIndex] = ss;
             }
-
-            // Reset value for removed reason for all reuseable data records
-            if (isReUsed)
+            
+            // GMAT only resets when measurement editing is not freezed
+            if ((!freezeEditing) || 
+                ((freezeEditing) && (iterationsTaken < (freezeIteration-1))))
             {
                measManager.GetObsDataObject()->inUsed = true;
                measManager.GetObsDataObject()->removedReason = "N";
@@ -827,9 +869,11 @@ void BatchEstimatorInv::Accumulate()
                // if the record has normal flag, store all results needed for calculate statistics
                if (editedRecords[recNum] == NORMAL_FLAG)
                {
-                  measurementEpochs.push_back(currentEpoch);
-                  OData.push_back(currentObs->value[k]);
-                  CData.push_back(calculatedMeas->value[k]);
+                  //measurementEpochs.push_back(currentEpoch);
+                  measurementEpochs.push_back(currentEpochGT);
+                  //OData.push_back(currentObs->value[k]);
+                  //CData.push_back(calculatedMeas->value[k]);
+                  KeyIndex.push_back(indexKey);
                   measurementResiduals.push_back(ocDiff);
                   measurementResidualID.push_back(calculatedMeas->uniqueID);
                   ocDiffVec.push_back(ocDiff);
@@ -892,11 +936,15 @@ void BatchEstimatorInv::Accumulate()
                {
                   // Write to report file edit status:
                   if (editedRecords[recNum] & USER_FLAG)
+                  {
                      sLine << "USER" << " ";
+                     measManager.GetObsDataObject()->removedReason = "USER";
+                  }
                   else
                   {
                      if (ss == "N")
-                        sLine << GmatStringUtil::GetAlignmentString("-", 4, GmatStringUtil::LEFT) + " ";
+                        //sLine << GmatStringUtil::GetAlignmentString("-", 4, GmatStringUtil::LEFT) + " ";    // change "-" to " "
+                        sLine << GmatStringUtil::GetAlignmentString(" ", 4, GmatStringUtil::LEFT) + " ";      // change "-" to " "
                      else
                         sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
                   }
@@ -909,7 +957,12 @@ void BatchEstimatorInv::Accumulate()
                   if (currentObs->typeName == "GPS_PosVec")
                      sprintf(&s[0], "%s", "      ");
                   else
-                     sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
+                  {
+                     if (calculatedMeas->feasibilityValue == -100.0)
+                        sprintf(&s[0], "%s", "   N/A");
+                     else
+                        sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
+                  }
                   sLine << s;
                   sLine << "\n";
                }
@@ -917,19 +970,28 @@ void BatchEstimatorInv::Accumulate()
                {
                   // Write to report file edit status:
                   if (editedRecords[recNum] & USER_FLAG)
+                  {
                      sLine << "USER" << " ";
+                     measManager.GetObsDataObject()->removedReason = "USER";
+                  }
                   else
                   {
                      if (ss == "N")
-                        sLine << GmatStringUtil::GetAlignmentString("-", 4, GmatStringUtil::LEFT) + " ";
+                        sLine << GmatStringUtil::GetAlignmentString("-", 4, GmatStringUtil::LEFT) + " ";         // keep "-" for Verbose report style
+                        //sLine << GmatStringUtil::GetAlignmentString(" ", 4, GmatStringUtil::LEFT) + " ";       // change "-" to " "
                      else
                         sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
                   }
 
                   if (currentObs->typeName == "GPS_PosVec")
-                     sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le %s", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), "                  ");
+                     sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le %s", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*std::abs(ocDiff), "                  ");
                   else
-                     sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+                  {
+                     if (calculatedMeas->feasibilityValue == -100.0)
+                        sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le                N/A", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*std::abs(ocDiff));
+                     else
+                        sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*std::abs(ocDiff), calculatedMeas->feasibilityValue);
+                  }
                   sLine << s << " ";
 
                   // fill out N/A for partial derivative
@@ -955,10 +1017,7 @@ void BatchEstimatorInv::Accumulate()
                   }
 
                   if ((currentObs->typeName == "DSNTwoWayRange") || (currentObs->typeName == "DSN_SeqRange"))
-                  {
-                     //sprintf(&s[0], "            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreqAtRecei, currentObs->rangeModulo);
                      sprintf(&s[0], "            %d   %.15le   %.15le                     N/A", calculatedMeas->uplinkBand, calculatedMeas->uplinkFreqAtRecei, calculatedMeas->rangeModulo);   // use frequency in calculatedMeas
-                  }
                   else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "DSN_TCP")||(currentObs->typeName == "RangeRate"))
                      sprintf(&s[0],"            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
                   else
@@ -971,7 +1030,7 @@ void BatchEstimatorInv::Accumulate()
             
             if (editedRecords[recNum] == NORMAL_FLAG)
             {
-               measurementTimes.push_back(currentEpoch);
+               measurementTimes.push_back(currentEpochGT);
                measurementResVectors.push_back(ocDiffVec);
                observationID.push_back(calculatedMeas->uniqueID);
                
@@ -986,11 +1045,11 @@ void BatchEstimatorInv::Accumulate()
                statisticsTable1["MEAN RESIDUAL"][typeName] += ocDiff;                                 // sum of residual
                statisticsTable1["STANDARD DEVIATION"][typeName] += ocDiff*ocDiff;                     // sum of residual square
 
-               sumAcceptRecords[indexKey] += 1;                             // sum of all accepted records
-               sumResidual[indexKey] += ocDiff;                             // sum of residual
-               Real ocDiff2 = ocDiff*ocDiff;
-               sumResidualSquare[indexKey] += ocDiff2;                      // sum of residual square
-               sumWeightResidualSquare[indexKey] += weight*ocDiff2;         // sum of weigth residual square
+               //sumAcceptRecords[indexKey] += 1;                             // sum of all accepted records
+               //sumResidual[indexKey] += ocDiff;                             // sum of residual
+               //Real ocDiff2 = ocDiff*ocDiff;
+               //sumResidualSquare[indexKey] += ocDiff2;                      // sum of residual square
+               //sumWeightResidualSquare[indexKey] += weight*ocDiff2;         // sum of weigth residual square
             }
             
             #ifdef DEBUG_ACCUMULATION_RESULTS
@@ -1051,6 +1110,10 @@ void BatchEstimatorInv::Accumulate()
       if (matData.stringValues[matObsEditFlagIndex][matIndex] == "N/A")
          matData.stringValues[matObsEditFlagIndex][matIndex] = currentObs->removedReason;
 
+      // reset flag to USER_FLAG when needed
+      if ((editedRecords[recNum] & USER_FLAG) == USER_FLAG)
+         matData.stringValues[matObsEditFlagIndex][matIndex] = "USER";
+
       if (calculatedMeas)
          matData.realValues[matElevationIndex][matIndex] = calculatedMeas->feasibilityValue;
 
@@ -1107,10 +1170,11 @@ void BatchEstimatorInv::Accumulate()
       currentState = ESTIMATING;
    else
    {
-      nextMeasurementEpoch = measManager.GetEpoch();
+      nextMeasurementEpochGT = measManager.GetEpochGT();
       FindTimeStep();
 
-      if (currentEpoch <= (nextMeasurementEpoch + 5.0e-12))       // It needs to add 5.0e-12 in order to avoid accuracy limit of double
+      //if (currentEpoch <= (nextMeasurementEpoch + 5.0e-12))                  // It needs to add 5.0e-12 in order to avoid accuracy limit of double
+      if ((currentEpochGT - nextMeasurementEpochGT).GetTimeInSec() <= 5.0e-7)
          currentState = PROPAGATING;
       else
          currentState = ESTIMATING;
@@ -1137,11 +1201,14 @@ void BatchEstimatorInv::Estimate()
    #ifdef WALK_STATE_MACHINE
       MessageInterface::ShowMessage("BatchEstimator state is ESTIMATING\n");
    #endif
+   
+   // Statistics calculation
+   StatisticsCalculation();
 
    // Plot all residuals
    if (showAllResiduals)
       PlotResiduals();
-
+   
    // Display number of removed records for each type of filters
    if (!numRemovedRecords.empty())
    {
@@ -1169,26 +1236,60 @@ void BatchEstimatorInv::Estimate()
          << " valid observable records remaining after editing. Please modify data editing criteria or provide a better a-priori estimate.\n";
       throw EstimatorException(ss.str());
    }
-
+   
    // Apriori state (initial state for 0th iteration) and initial state for current iteration: 
    if (iterationsTaken == 0)
+   {
       initialEstimationState = (*estimationState);
+      initialEstimationStateS = estimationStateS;
+   }
    oldEstimationState = (*estimationState);
-   // Convert previous state from GMAT internal coordinate system to participants' coordinate system
-   GetEstimationStateForReport(previousSolveForState);
+   oldEstimationStateS = estimationStateS;
 
+   // Convert previous state from GMAT internal coordinate system to participants' coordinate system
+   previousSolveForState = esm.GetEstimationStateForReport();
+   previousSolveForStateC = esm.GetEstimationCartesianStateForReport();
+   
+   // Specify information matrix and residual vector in Solve-for state
+#ifdef DEBUG_VERBOSE
+   MessageInterface::ShowMessage("   Information matrix in Cartesian state:\n");
+   for (UnsignedInt i = 0; i < information.GetNumRows(); ++i)
+   {
+      MessageInterface::ShowMessage("      [");
+      for (UnsignedInt j = 0; j < information.GetNumColumns(); ++j)
+      {
+         MessageInterface::ShowMessage(" %.12lf ", information(i, j));
+      }
+      MessageInterface::ShowMessage("]\n");
+   }
+
+   MessageInterface::ShowMessage("   Derivative conversion matrix from Cartesian to Solve-for state:\n");
+   for (UnsignedInt i = 0; i < cart2SolvMatrix.GetNumRows(); ++i)
+   {
+      MessageInterface::ShowMessage("      [");
+      for (UnsignedInt j = 0; j < cart2SolvMatrix.GetNumColumns(); ++j)
+      {
+         MessageInterface::ShowMessage(" %.12lf ", cart2SolvMatrix(i, j));
+      }
+      MessageInterface::ShowMessage("]\n");
+   }
+#endif
+
+   information = cart2SolvMatrix.Transpose()*information*cart2SolvMatrix;
+   residuals = cart2SolvMatrix.Transpose()*residuals;
 
    // Specify previous, current, and the best weighted RMS:
    // Calculate RMSOLD:
    if (iterationsTaken > 0)
       oldResidualRMS = newResidualRMS;                       // old value is only valid from 1st iteration
-
+   
    // Calculate RMS:    Equation 8-184 GTDS MathSpec
    newResidualRMS = 0.0;
    if (useApriori)
    {
       // The last term of RMSP in equation 8-185 in GTDS MathSpec
       GmatState currentEstimationState = (*estimationState);
+      GmatState currentEstimationStateS = estimationStateS;
 
       Rmatrix Pdx0_inv;
       try
@@ -1210,13 +1311,28 @@ void BatchEstimatorInv::Estimate()
          throw EstimatorException("Error: Apriori covariance matrix is singular. GMAT cannot take inverse of that matrix.\n");
       }
 
+      // adding a priori to information matrix
+      information = information + Pdx0_inv;
+
+      // adding a priori to residual
+      for (Integer i = 0; i < Pdx0_inv.GetNumRows(); ++i)
+      {
+         for (UnsignedInt j = 0; j < stateSize; ++j)
+         {
+            residuals[i] += Pdx0_inv(i, j) * x0bar[j];      // At the beginning of each iteration, [Lambda] = ([Px0]^-1).delta_XTile(i)  the last term in open-close square bracket in euqation 8-57 GTDS MathSpec
+         }
+      }
+
       for (UnsignedInt i = 0; i < stateSize; ++i)
       {
          for (UnsignedInt j = 0; j < stateSize; ++j)
-            newResidualRMS += (currentEstimationState[i] - initialEstimationState[i])*Pdx0_inv(i, j)*(currentEstimationState[j] - initialEstimationState[j]);     // The second term inside square brackets of equation 8-184 GTDS MathSpec
+         {
+            //newResidualRMS += (currentEstimationState[i] - initialEstimationState[i])*Pdx0_inv(i, j)*(currentEstimationState[j] - initialEstimationState[j]);     // The second term inside square brackets of equation 8-184 GTDS MathSpec
+            newResidualRMS += (currentEstimationStateS[i] - initialEstimationStateS[i])*Pdx0_inv(i, j)*(currentEstimationStateS[j] - initialEstimationStateS[j]);   // The second term inside square brackets of equation 8-184 GTDS MathSpec
+         }
       }
    }
-
+   
    // Calculate new residual RMS
    for (Integer i = 0; i < measurementResiduals.size(); ++i)
    {
@@ -1233,17 +1349,8 @@ void BatchEstimatorInv::Estimate()
    if (iterationsTaken == 0)
       bestResidualRMS = newResidualRMS;
    else
-   {
-      //// Reset best RMS as needed                                     // fix bug GMT-5711
-      //if (resetBestRMSFlag)                                           // fix bug GMT-5711
-      //{                                                               // fix bug GMT-5711
-      //   if (estimationStatus == DIVERGING)                           // fix bug GMT-5711
-      //      bestResidualRMS = oldResidualRMS;                         // fix bug GMT-5711
-      //}                                                               // fix bug GMT-5711
-
       bestResidualRMS = GmatMathUtil::Min(bestResidualRMS, newResidualRMS);
-   }
-
+   
    // Solve normal equation
    #ifdef DEBUG_VERBOSE
       MessageInterface::ShowMessage("Accumulation complete; now solving the "
@@ -1253,9 +1360,13 @@ void BatchEstimatorInv::Estimate()
             iterationsTaken+1);
 
       MessageInterface::ShowMessage("   Presolution estimation state:\n      "
-            "epoch = %.12lf\n      [", estimationState->GetEpoch());
+            "epoch = %s\n     Cartesian state: [", estimationState->GetEpochGT().ToString().c_str());
       for (UnsignedInt i = 0; i < stateSize; ++i)
          MessageInterface::ShowMessage("  %.12lf  ", (*estimationState)[i]);
+      MessageInterface::ShowMessage("]\n");
+      MessageInterface::ShowMessage("   Keplerian state: [");
+      for (UnsignedInt i = 0; i < stateSize; ++i)
+         MessageInterface::ShowMessage("  %.12lf  ", estimationStateS[i]);
       MessageInterface::ShowMessage("]\n");
 
       MessageInterface::ShowMessage("   Information matrix:\n");
@@ -1394,7 +1505,7 @@ void BatchEstimatorInv::Estimate()
          throw EstimatorException("Error: Normal matrix is singular.\n");
       }
    }
-
+   
    #ifdef DEBUG_VERBOSE
       MessageInterface::ShowMessage(" residuals: [");
       for (UnsignedInt i = 0; i < stateSize; ++i)
@@ -1411,6 +1522,11 @@ void BatchEstimatorInv::Estimate()
          }
          MessageInterface::ShowMessage("]\n");
       }
+
+      MessageInterface::ShowMessage("   Before solving normal equation, estimationStateS = [\n");
+      for (UnsignedInt i = 0; i < estimationStateS.GetSize(); ++i)
+         MessageInterface::ShowMessage(" %.12lf   ", estimationStateS[i]);
+      MessageInterface::ShowMessage("]\n");
    #endif
 
    // Calculate state change dx in equation 8-57 in GTDS MathSpec
@@ -1422,14 +1538,20 @@ void BatchEstimatorInv::Estimate()
       for (UnsignedInt j = 0; j < stateSize; ++j)
          delta += cov(i,j) * residuals(j);
       dx.push_back(delta);
-      (*estimationState)[i] += delta;                              // Equation 8-24 GTSD MathSpec
+      estimationStateS[i] += delta;                                // Equation 8-24 GTSD MathSpec
    }
+
+
+   // Convert estimation state from Keplerian to Cartesian
+   esm.SetEstimationState(estimationStateS);                       // update the value of estimation state
+
    esm.RestoreObjects(&outerLoopBuffer);                           // Restore solver-object initial state
    esm.MapVectorToObjects();                                       // update objects state to current state
 
    // Convert current estimation state from GMAT internal coordinate system to participants' coordinate system
-   GetEstimationStateForReport(currentSolveForState);
-
+   currentSolveForState = esm.GetEstimationStateForReport();
+   currentSolveForStateC = esm.GetEstimationCartesianStateForReport();
+   
    #ifdef DEBUG_VERBOSE
       MessageInterface::ShowMessage("   State vector change (dx):\n      [");
       for (UnsignedInt i = 0; i < stateSize; ++i)
@@ -1441,6 +1563,12 @@ void BatchEstimatorInv::Estimate()
       for (UnsignedInt i = 0; i < stateSize; ++i)
          MessageInterface::ShowMessage("  %.12lf  ", (*estimationState)[i]);
       MessageInterface::ShowMessage("]\n");
+
+      MessageInterface::ShowMessage("   After solving normal equation, estimationStateS = [\n");
+      for (UnsignedInt i = 0; i < estimationStateS.GetSize(); ++i)
+         MessageInterface::ShowMessage(" %.12lf   ", estimationStateS[i]);
+      MessageInterface::ShowMessage("]\n");
+
    #endif
    
    // Specify RMSP: equation 8-185 in GTDS MathSpec
@@ -1449,6 +1577,7 @@ void BatchEstimatorInv::Estimate()
    {
       // The last term of RMSP in equation 8-185 in GTDS MathSpec
       GmatState currentEstimationState = (*estimationState);
+      GmatState currentEstimationStateS = estimationStateS;
 
       Rmatrix Pdx0_inv;
       try
@@ -1473,7 +1602,10 @@ void BatchEstimatorInv::Estimate()
       for (UnsignedInt i = 0; i < stateSize; ++i)
       {
          for (UnsignedInt j = 0; j < stateSize; ++j)
-            predictedRMS += (currentEstimationState[i] - initialEstimationState[i])*Pdx0_inv(i,j)*(currentEstimationState[j] - initialEstimationState[j]);     // The second term inside square brackets of equation 8-185 GTDS MathSpec
+         {
+            //predictedRMS += (currentEstimationState[i] - initialEstimationState[i])*Pdx0_inv(i, j)*(currentEstimationState[j] - initialEstimationState[j]);     // The second term inside square brackets of equation 8-185 GTDS MathSpec
+            predictedRMS += (currentEstimationStateS[i] - initialEstimationStateS[i])*Pdx0_inv(i, j)*(currentEstimationStateS[j] - initialEstimationStateS[j]);     // The second term inside square brackets of equation 8-185 GTDS MathSpec
+         }
       }
    }
    
@@ -1482,8 +1614,16 @@ void BatchEstimatorInv::Estimate()
    {
       Real temp = 0;
       for (UnsignedInt i = 0; i < hAccum[j].size(); ++i)
-         temp += hAccum[j][i] * dx[i];
+      {
+         // Specify hAccum[j][i] vector in Solve-for state
+         Real hAccumKeplji = 0.0;
+         for (UnsignedInt k = 0; k < cart2SolvMatrix.GetNumColumns(); ++k)
+            hAccumKeplji += hAccum[j][k] * cart2SolvMatrix(k, i);
          
+         //temp += hAccum[j][i] * dx[i];
+         temp += hAccumKeplji * dx[i];
+      }
+      
       predictedRMS += (measurementResiduals[j] - temp)*(measurementResiduals[j] - temp)*Weight[j];          // The first term in equation 8-185 in GTDS MathSpec
    }
 
@@ -1495,12 +1635,11 @@ void BatchEstimatorInv::Estimate()
 
    // Write to report initial state for current iteration
    WriteToTextFile(currentState);
-
-
+   
    // Clear O, C, and W lists
    Weight.clear();
-   OData.clear();
-   CData.clear();
+   //OData.clear();
+   //CData.clear();
 
    currentState = CHECKINGRUN;
 }

@@ -1,5 +1,5 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Tracking Data Types for OD</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="System.html" title="System"><link rel="prev" href="StartupFile.html" title="Startup File"><link rel="next" href="ReleaseNotes.html" title="Release Notes"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Tracking Data Types for OD</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="StartupFile.html">Prev</a>&nbsp;</td><th align="center" width="60%">System</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ReleaseNotes.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="TrackingDataTypes"></a><div class="titlepage"></div><a name="N29800" class="indexterm"></a><a name="N29803" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Tracking Data Types for OD</span></h2><p>Tracking Data Types for Orbit Determination &mdash; This section describes tracking data types and file formats
-    for orbit determination.</p></div><div class="refsection"><a name="N29814"></a><h2>Measurement Types Supported</h2><p>GMAT supports the following measurement types for orbit
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Tracking Data Types for OD</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="System.html" title="System"><link rel="prev" href="StartupFile.html" title="Startup File"><link rel="next" href="ReleaseNotes.html" title="Release Notes"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Tracking Data Types for OD</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="StartupFile.html">Prev</a>&nbsp;</td><th align="center" width="60%">System</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ReleaseNotes.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="TrackingDataTypes"></a><div class="titlepage"></div><a name="N29FCB" class="indexterm"></a><a name="N29FCE" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Tracking Data Types for OD</span></h2><p>Tracking Data Types for Orbit Determination &mdash; This section describes tracking data types and file formats
+    for orbit determination.</p></div><div class="refsection"><a name="N29FDF"></a><h2>Measurement Types Supported</h2><p>GMAT supports the following measurement types for orbit
     determination.</p><div class="informaltable"><table border="1"><colgroup><col width="21%"><col width="61%"><col width="18%"></colgroup><thead><tr><th align="center">GMAT Measurement Type Name</th><th align="center">Measurement Description</th><th align="center">Measurement Units</th></tr></thead><tbody><tr><td>DSN_SeqRange</td><td>DSN Sequential Ranging (TRK-2-34 data Type 7), ramped and
             un-ramped</td><td>Range Units</td></tr><tr><td>DSN_TCP</td><td>DSN Total Count Phase (TRK-2-34 data Type 17) measurements,
             implemented as a derived "Doppler" type measurement using
@@ -14,7 +14,7 @@
     used in instances of <span class="guilabel">ErrorModel</span>,
     <span class="guilabel">AcceptFilter</span>, <span class="guilabel">RejectFilter</span>, and
     <span class="guilabel">TrackingFileSet</span>, and in the GMAT GMD-format tracking
-    data file to identify each measurement type to GMAT.</p></div><div class="refsection"><a name="N29861"></a><h2>Deprecated Measurement Type Names</h2><p>This version of GMAT deprecates the DSNRange/Range_RU and
+    data file to identify each measurement type to GMAT.</p></div><div class="refsection"><a name="N2A02C"></a><h2>Deprecated Measurement Type Names</h2><p>This version of GMAT deprecates the DSNRange/Range_RU and
     Doppler/Doppler_HZ measurement type names. They are replaced by the new
     consistent naming convention introduced in the previous section. The old
     names will still work in the current version of GMAT, but users are
@@ -25,7 +25,7 @@
     using the deprecated data type names, the following table provides a
     guide.</p><div class="informaltable"><table border="1"><colgroup><col width="50%"><col width="50%"></colgroup><thead><tr><th align="center">GMD File and
             TrackingFileSet.AddTrackingConfig Measurement Type Name</th><th align="center">ErrorModel and StatisticsAccept/RejectFilter
-            Measurement Type Name</th></tr></thead><tbody><tr><td>DSNRange</td><td>Range_RU</td></tr><tr><td>Doppler</td><td>Doppler_HZ</td></tr></tbody></table></div></div><div class="refsection"><a name="N2987E"></a><h2>GMAT Tracking Data File Formats</h2><p>GMAT uses a native ASCII tracking data file format called a &ldquo;GMAT
+            Measurement Type Name</th></tr></thead><tbody><tr><td>DSNRange</td><td>Range_RU</td></tr><tr><td>Doppler</td><td>Doppler_HZ</td></tr></tbody></table></div></div><div class="refsection"><a name="N2A049"></a><h2>GMAT Tracking Data File Formats</h2><p>GMAT uses a native ASCII tracking data file format called a &ldquo;GMAT
     Measurement Data File&rdquo;, or GMD file. This file format currently implements
     the following observation measurement types:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>DSN Sequential Ranging, TRK-2-34 data Type 7</p></li><li class="listitem"><p>Derived Doppler using successive DSN Total Count Phase Doppler
         tracking measurements, TRK-2-34 data Type 17</p></li><li class="listitem"><p>DSN transmit frequency ramp records, TRK-2-34 data Type 9</p></li><li class="listitem"><p>Earth-fixed position vectors from a spacecraft on-board GPS
@@ -35,7 +35,7 @@
     record types described below, but ramp records must be in a separate file.
     For further details on the TRK-2-34 data formats, please consult the
     <span class="emphasis"><em>TRK-2-34 DSN Tracking System Data Archival Format, 820-013 Deep
-    Space Network External Interface Specification</em></span>.</p><div class="refsection"><a name="N2989B"></a><h3>DSN Sequential Range</h3><p>DSN TRK-2-34 Sequential Ranging employs the
+    Space Network External Interface Specification</em></span>.</p><div class="refsection"><a name="N2A066"></a><h3>DSN Sequential Range</h3><p>DSN TRK-2-34 Sequential Ranging employs the
       <span class="guilabel">DSN_SeqRange</span> measurement type. DSN_SeqRange is a
       round-trip range observation measured in range units. The GMD record
       format for DSN_SeqRange tracking data is shown in the table
@@ -55,7 +55,7 @@
 27236.157789352 DSN_SeqRange 9004  45 59 +9.810325186004e+005   1 +2.091414432000e+009 +1.048576000000e+006
 27236.158240741 DSN_SeqRange 9004  45 59 +5.813243487947e+005   1 +2.091414432000e+009 +1.048576000000e+006
 27236.158692130 DSN_SeqRange 9004  45 59 +1.863046908683e+005   1 +2.091414432000e+009 +1.048576000000e+006
-27236.159143519 DSN_SeqRange 9004  45 59 +8.450116485521e+005   1 +2.091414432000e+009 +1.048576000000e+006</pre></div><div class="refsection"><a name="N298F2"></a><h3>DSN Total Count Phase</h3><p>DSN TRK-2-34 Total Count Phase employs the
+27236.159143519 DSN_SeqRange 9004  45 59 +8.450116485521e+005   1 +2.091414432000e+009 +1.048576000000e+006</pre></div><div class="refsection"><a name="N2A0BD"></a><h3>DSN Total Count Phase</h3><p>DSN TRK-2-34 Total Count Phase employs the
       <span class="guilabel">DSN_TCP</span> measurement type. As shown below, the GMAT
       Doppler measurement type, measured in Hz, is derived from successive
       Total Phase Count (TCP) observations.</p><div class="informalequation"><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
@@ -254,7 +254,7 @@
 27226.011944444  DSN_TCP  9006 15 6241   1  10  -2.2445668331979342e+09
 27226.012060185  DSN_TCP  9006 15 6241   1  10  -2.2445668330920730e+09
 27226.012175926  DSN_TCP  9006 15 6241   1  10  -2.2445668329843016e+09
-27226.012291667  DSN_TCP  9006 15 6241   1  10  -2.2445668328729177e+09</pre></div><div class="refsection"><a name="N29A5E"></a><h3>Transmit Frequency Ramp Records</h3><p>GMAT supports DSN tracking utilizing both constant and ramped
+27226.012291667  DSN_TCP  9006 15 6241   1  10  -2.2445668328729177e+09</pre></div><div class="refsection"><a name="N2A229"></a><h3>Transmit Frequency Ramp Records</h3><p>GMAT supports DSN tracking utilizing both constant and ramped
       transmit frequencies. If the transmit frequency is constant, GMAT will
       use the transmit frequency specified on the DSN_SeqRange measurement
       records for the computation of the range observation and a ramp table
@@ -274,7 +274,7 @@
 27238.654513889 34 234   2   1 +7.186571894665e+09 +5.822699999990e-01
 27238.659664352 34 234   2   3 +7.186572153775e+09 +5.822699999990e-01
 27238.668402778 34 234   2   1 +7.186572593389e+09 +5.590199999990e-01
-27238.682291667 34 234   2   1 +7.186573264213e+09 +5.315100000000e-01</pre></div><div class="refsection"><a name="N29AA0"></a><h3>Earth-fixed Position Vectors from a Spacecraft On-board GPS
+27238.682291667 34 234   2   1 +7.186573264213e+09 +5.315100000000e-01</pre></div><div class="refsection"><a name="N2A26B"></a><h3>Earth-fixed Position Vectors from a Spacecraft On-board GPS
       Receiver</h3><p>GPS-derived Earth-fixed position vectors employ the
       <span class="guilabel">GPS_PosVec</span> measurement type. The fixed frame
       assumed for the vector components is GMAT's EarthFixed reference frame
@@ -291,7 +291,7 @@
 26112.587905092594 GPS_PosVec 9014 800         -2926.558570         -6187.149174          1084.793371
 26112.588599537037 GPS_PosVec 9014 800         -2585.076391         -6366.230816           899.311591
 26112.589293981480 GPS_PosVec 9014 800         -2233.950454         -6520.997704           709.941434
-</pre></div><div class="refsection"><a name="N29AE5"></a><h3>Two-Way Transponder Range</h3><p>Two-way range measurements that pass through a Spacecraft
+</pre></div><div class="refsection"><a name="N2A2B0"></a><h3>Two-Way Transponder Range</h3><p>Two-way range measurements that pass through a Spacecraft
       transponder use the <span class="guilabel">Range</span> measurement type. Range
       is a round-trip range observation measured in kilometers. The
       measurement model in GMAT will include the Spacecraft
@@ -303,7 +303,7 @@
 27182.022395833334 Range 9002 117 322 +7.447171160686e+04
 27182.022511574076 Range 9002 117 322 +7.447456623065e+04
 27182.022627314815 Range 9002 117 322 +7.447742325277e+04
-27182.022743055557 Range 9002 117 322 +7.448028087448e+04</pre></div><div class="refsection"><a name="N29B23"></a><h3>Two-Way Range-rate</h3><p>Two-way coherent range-rate tracking uses the
+27182.022743055557 Range 9002 117 322 +7.448028087448e+04</pre></div><div class="refsection"><a name="N2A2EE"></a><h3>Two-Way Range-rate</h3><p>Two-way coherent range-rate tracking uses the
       <span class="guilabel">RangeRate</span> measurement type. RangeRate is the
       difference of the range observation at the end of the averaging interval
       and the start of the averaging interval, divided by the averaging

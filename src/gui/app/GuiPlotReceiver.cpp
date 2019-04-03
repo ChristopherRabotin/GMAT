@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -152,19 +152,21 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
       #if DEBUG_PLOTIF_GL_CREATE
       MessageInterface::ShowMessage
          ("GuiPlotReceiver::CreateGlPlotWindow() currPlotName[%d]=<%p>'%s'\n",
-          i, frame, currPlotName.c_str());
+          i, frame, currPlotName.WX_TO_C_STRING);
       #endif
       
       if (currPlotName.IsSameAs(plotName.c_str()))
       {
-         createNewFrame = false;
+         if (!frame->ChildIsClosing())
+            createNewFrame = false;
          break;
       }
       else if (currPlotName.IsSameAs(oldName.c_str()))
       {
          // change plot name
          frame->SetPlotName(wxString(plotName.c_str()));
-         createNewFrame = false;
+         if (!frame->ChildIsClosing())
+            createNewFrame = false;
          break;
       }
    }
@@ -255,7 +257,7 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
       #if DEBUG_PLOTIF_GL_CREATE
       MessageInterface::ShowMessage
          ("GuiPlotReceiver::CreateGlPlotWindow() frame created, frame->GetPlotName()=%s\n",
-          frame->GetPlotName().c_str());
+          frame->GetPlotName().WX_TO_C_STRING);
       #endif
       
       ++MdiGlPlot::numChildren;
@@ -291,7 +293,7 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
    #if DEBUG_PLOTIF_GL_CREATE
    MessageInterface::ShowMessage
       ("GuiPlotReceiver::CreateGlPlotWindow() setting num points to redraw for %s\n",
-       frame->GetPlotName().c_str());
+       frame->GetPlotName().WX_TO_C_STRING);
    #endif
    
    frame->SetNumPointsToRedraw(numPtsToRedraw);
@@ -323,10 +325,11 @@ void GuiPlotReceiver::SetGlSolarSystem(const std::string &plotName, SolarSystem 
    {
       frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(owner.c_str()))
-      {
-         frame->SetSolarSystem(ss);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         {
+            frame->SetSolarSystem(ss);
+         }
    }
 }
 
@@ -351,11 +354,12 @@ void GuiPlotReceiver::SetGlObject(const std::string &plotName,
    {
       frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(owner.c_str()))
-      {
-         //frame->SetGlObject(objNames, objOrbitColors, objArray);
-         frame->SetGlObject(objNames, objArray);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         {
+            //frame->SetGlObject(objNames, objOrbitColors, objArray);
+            frame->SetGlObject(objNames, objArray);
+         }
    }
 }
 
@@ -380,10 +384,11 @@ void GuiPlotReceiver::SetGlCoordSystem(const std::string &plotName,
    {
       frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(owner.c_str()))
-      {
-         frame->SetGlCoordSystem(internalCs, viewCs, viewUpCs);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         {
+            frame->SetGlCoordSystem(internalCs, viewCs, viewUpCs);
+         }
    }
 }
 
@@ -403,11 +408,12 @@ void GuiPlotReceiver::SetGl2dDrawingOption(const std::string &plotName,
    {
       frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
       
-      if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
-      {         
-         frame->SetGl2dDrawingOption(centralBodyName, textureMap, footPrintOption);         
-         break;
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         {         
+            frame->SetGl2dDrawingOption(centralBodyName, textureMap, footPrintOption);         
+            break;
+         }
    }
 }
 
@@ -430,14 +436,15 @@ void GuiPlotReceiver::SetGl3dDrawingOption(const std::string &plotName,
    {
       frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
       
-      if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
-      {
-         frame->SetGl3dDrawingOption(showLabels, drawEcPlane, drawXyPlane, drawWireFrame,
-                                     drawAxes, drawGrid, drawSunLine, overlapPlot,
-                                     usevpInfo, drawStars, drawConstellations,
-                                     starCount);
-         break;
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         {
+            frame->SetGl3dDrawingOption(showLabels, drawEcPlane, drawXyPlane, drawWireFrame,
+                                        drawAxes, drawGrid, drawSunLine, overlapPlot,
+                                        usevpInfo, drawStars, drawConstellations,
+                                        starCount);
+            break;
+         }
    }
 }
 
@@ -464,18 +471,19 @@ void GuiPlotReceiver::SetGl3dViewOption(const std::string &plotName,
    {
       frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
-      {
-         #if DEBUG_PLOTIF_GL_SET
-         MessageInterface::ShowMessage
-            ("GuiPlotReceiver::SetGl3dViewOption() vpRefObj=%d, vsFactor=%f\n",
-             vpRefObj, vsFactor);
-         #endif
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         {
+            #if DEBUG_PLOTIF_GL_SET
+            MessageInterface::ShowMessage
+               ("GuiPlotReceiver::SetGl3dViewOption() vpRefObj=%d, vsFactor=%f\n",
+                vpRefObj, vsFactor);
+            #endif
          
-         frame->SetGl3dViewOption(vpRefObj, vpVecObj, vdObj, vsFactor, vpRefVec,
-                                  vpVec, vdVec, upAxis, usevpRefVec,usevpVec,
-                                  usevdVec);
-      }
+            frame->SetGl3dViewOption(vpRefObj, vpVecObj, vdObj, vsFactor, vpRefVec,
+                                     vpVec, vdVec, upAxis, usevpRefVec,usevpVec,
+                                     usevdVec);
+         }
    }
 }
 
@@ -498,10 +506,11 @@ void GuiPlotReceiver::SetGlDrawOrbitFlag(const std::string &plotName,
    {
       frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
-      {
-         frame->SetGlDrawOrbitFlag(drawArray);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         {
+            frame->SetGlDrawOrbitFlag(drawArray);
+         }
    }
 }
 
@@ -524,10 +533,11 @@ void GuiPlotReceiver::SetGlShowObjectFlag(const std::string &plotName,
    {
       frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
-      {
-         frame->SetGlShowObjectFlag(showArray);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         {
+            frame->SetGlShowObjectFlag(showArray);
+         }
    }
 }
 
@@ -545,10 +555,11 @@ void GuiPlotReceiver::SetGlUpdateFrequency(const std::string &plotName,
    {
       frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
-      {
-         frame->SetGlUpdateFrequency(updFreq);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         {
+            frame->SetGlUpdateFrequency(updFreq);
+         }
    }
 }
 
@@ -571,10 +582,11 @@ bool GuiPlotReceiver::IsThere(const std::string &plotName)
       {
          frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-         if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
-         {
-            return true;
-         }
+         if (frame && !frame->ChildIsClosing())
+            if (frame->GetPlotName().IsSameAs(owner.c_str()))
+            {
+               return true;
+            }
       }
    }
 
@@ -605,10 +617,11 @@ bool GuiPlotReceiver::InitializeGlPlot(const std::string &plotName)
       {
          frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-         if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
-         {
-            frame->InitializePlot();
-         }
+         if (frame && !frame->ChildIsClosing())
+            if (frame->GetPlotName().IsSameAs(owner.c_str()))
+            {
+               frame->InitializePlot();
+            }
       }
    }
 
@@ -639,10 +652,11 @@ bool GuiPlotReceiver::RefreshGlPlot(const std::string &plotName)
       {
          frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-         if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
-         {
-            frame->RefreshPlot();
-         }
+         if (frame && !frame->ChildIsClosing())
+            if (frame->GetPlotName().IsSameAs(owner.c_str()))
+            {
+               frame->RefreshPlot();
+            }
       }
    }
 
@@ -678,20 +692,21 @@ bool GuiPlotReceiver::DeleteGlPlot(const std::string &plotName)
          frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
          
          if (frame)
-         {
-            // Delete GL plot by plot name and type
-            GmatTree::ItemType plotType = frame->GetItemType();
-            wxString plotName = frame->GetPlotName();
-            if (plotName.IsSameAs(owner.c_str()))
+            if (!frame->ChildIsClosing())
             {
-               #if DEBUG_PLOTIF_GL_DELETE
-               MessageInterface::ShowMessage
-                  ("GuiPlotReceiver::DeleteGlPlot() closing child '%s' from the "
-                   "output tab\n", plotName.WX_TO_C_STRING);
-               #endif
-               gmatAppData->GetMainFrame()->CloseChild(owner, plotType);
+               // Delete GL plot by plot name and type
+               GmatTree::ItemType plotType = frame->GetItemType();
+               wxString plotName = frame->GetPlotName();
+               if (plotName.IsSameAs(owner.c_str()))
+               {
+                  #if DEBUG_PLOTIF_GL_DELETE
+                  MessageInterface::ShowMessage
+                     ("GuiPlotReceiver::DeleteGlPlot() closing child '%s' from the "
+                      "output tab\n", plotName.WX_TO_C_STRING);
+                  #endif
+                  gmatAppData->GetMainFrame()->CloseChild(owner, plotType);
+               }
             }
-         }
       }
    }
    
@@ -721,10 +736,11 @@ bool GuiPlotReceiver::SetGlEndOfRun(const std::string &plotName)
       {
          frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
 
-         if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
-         {
-            frame->SetEndOfRun();
-         }
+         if (frame && !frame->ChildIsClosing())
+            if (frame->GetPlotName().IsSameAs(owner.c_str()))
+            {
+               frame->SetEndOfRun();
+            }
       }
    }
 
@@ -769,25 +785,27 @@ bool GuiPlotReceiver::UpdateGlPlot(const std::string &plotName,
       #if DEBUG_PLOTIF_GL_UPDATE
       MessageInterface::ShowMessage
          ("GuiPlotReceiver::UpdateGlPlot() frame[%d]->GetPlotName()=%s "
-          "owner=%s\n", i, frame->GetPlotName().c_str(), owner.c_str());
+          "owner=%s\n", i, frame->GetPlotName().WX_TO_C_STRING,
+          owner.WX_TO_C_STRING);
       #endif
       
-      if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
-      {
-         #if DEBUG_PLOTIF_GL_UPDATE
-         MessageInterface::ShowMessage
-            ("GuiPlotReceiver::UpdateGlPlot() now updating '%s'...\n",
-             frame->GetPlotName().c_str());
-         #endif
-         frame->UpdatePlot(scNames, time, posX, posY, posZ, velX, velY, velZ,
-                           //scColors,
-                           orbitColorMap, targetColorMap,
-                           solving, solverOption, updateCanvas, drawing,
-                           inFunction);
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         {
+            #if DEBUG_PLOTIF_GL_UPDATE
+            MessageInterface::ShowMessage
+               ("GuiPlotReceiver::UpdateGlPlot() now updating '%s'...\n",
+                frame->GetPlotName().WX_TO_C_STRING);
+            #endif
+            frame->UpdatePlot(scNames, time, posX, posY, posZ, velX, velY, velZ,
+                              //scColors,
+                              orbitColorMap, targetColorMap,
+                              solving, solverOption, updateCanvas, drawing,
+                              inFunction);
          
-         updated = true;
-         break;
-      }
+            updated = true;
+            break;
+         }
    }
    
    return updated;
@@ -820,7 +838,7 @@ bool GuiPlotReceiver::TakeGlAction(const std::string &plotName,
           "owner=%s\n", i, frame->GetPlotName().c_str(), owner.c_str());
       #endif
 
-      if (frame)
+      if (frame && !frame->ChildIsClosing())
       {
          if (frame->GetPlotName().IsSameAs(owner.c_str()))
          {
@@ -831,6 +849,33 @@ bool GuiPlotReceiver::TakeGlAction(const std::string &plotName,
    }
 
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// void GuiPlotReceiver::SetMaxGlDataPoints(const std::string &plotName,
+//                                          Integer maxDataPoints)
+//------------------------------------------------------------------------------
+/**
+* Sets the custom max data point setting
+*
+* @param plotName The name of the plot receiving the data
+* @param maxDataPoints The max data points to be plotted
+*/
+//------------------------------------------------------------------------------
+void GuiPlotReceiver::SetMaxGlDataPoints(const std::string &plotName,
+                                         Integer maxDataPoints)
+{
+   MdiChildViewFrame *frame = NULL;
+
+   for (int i = 0; i < MdiGlPlot::numChildren; i++)
+   {
+      frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
+
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+            frame->SetMaxDataPoints(maxDataPoints);
+   }
 }
 
 
@@ -879,7 +924,8 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
 
       if (currPlotName.IsSameAs(plotName.c_str()))
       {
-         createNewFrame = false;
+         if (!frame->ChildIsClosing())
+            createNewFrame = false;
          break;
       }
       else if (currPlotName.IsSameAs(oldName.c_str()))
@@ -892,7 +938,8 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
 
          // change plot name
          frame->SetPlotName(wxString(plotName.c_str()));
-         createNewFrame = false;
+         if (!frame->ChildIsClosing())
+            createNewFrame = false;
          break;
       }
    }
@@ -1023,12 +1070,13 @@ bool GuiPlotReceiver::DeleteXyPlot(const std::string &plotName)
       {
          frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-         if (frame->GetPlotName().IsSameAs(owner.c_str()))
-         {
-            gmatAppData->GetMainFrame()->CloseChild(owner,
-                  GmatTree::OUTPUT_XY_PLOT);
-            break;
-         }
+         if (frame && !frame->ChildIsClosing())
+            if (frame->GetPlotName().IsSameAs(owner.c_str()))
+            {
+               gmatAppData->GetMainFrame()->CloseChild(owner,
+                     GmatTree::OUTPUT_XY_PLOT);
+               break;
+            }
       }
    }
    
@@ -1077,11 +1125,12 @@ bool GuiPlotReceiver::AddXyPlotCurve(const std::string &plotName,
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->AddPlotCurve(curveIndex, wxString(curveTitle.c_str()), localPenColor);
-         added = true;
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            frame->AddPlotCurve(curveIndex, wxString(curveTitle.c_str()), localPenColor);
+            added = true;
+         }
    }
 
    return added;
@@ -1114,11 +1163,12 @@ bool GuiPlotReceiver::DeleteAllXyPlotCurves(const std::string &plotName,
    for (int i=0; i<MdiTsPlot::numChildren; i++)
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()) ||
-          frame->GetPlotName().IsSameAs(oldName.c_str()))
-      {
-         frame->DeleteAllPlotCurves();
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()) ||
+             frame->GetPlotName().IsSameAs(oldName.c_str()))
+         {
+            frame->DeleteAllPlotCurves();
+         }
    }
 
    return true;
@@ -1155,10 +1205,11 @@ bool GuiPlotReceiver::DeleteXyPlotCurve(const std::string &plotName,
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->DeletePlotCurve(curveIndex);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            frame->DeletePlotCurve(curveIndex);
+         }
    }
 
    return true;
@@ -1189,10 +1240,11 @@ void GuiPlotReceiver::ClearXyPlotData(const std::string &plotName)
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->ClearPlotData();
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            frame->ClearPlotData();
+         }
    }
 }
 
@@ -1219,10 +1271,11 @@ void GuiPlotReceiver::XyPlotPenUp(const std::string &plotName)
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->PenUp();
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            frame->PenUp();
+         }
    }
 }
 
@@ -1249,10 +1302,11 @@ void GuiPlotReceiver::XyPlotPenDown(const std::string &plotName)
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->PenDown();
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            frame->PenDown();
+         }
    }
 }
 
@@ -1266,10 +1320,11 @@ void GuiPlotReceiver::XyPlotDarken(const std::string &plotName, Integer factor,
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->Darken(factor, index, forCurve);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            frame->Darken(factor, index, forCurve);
+         }
    }
 }
 
@@ -1283,10 +1338,11 @@ void GuiPlotReceiver::XyPlotLighten(const std::string &plotName, Integer factor,
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->Lighten(factor, index, forCurve);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            frame->Lighten(factor, index, forCurve);
+         }
    }
 }
 
@@ -1319,10 +1375,11 @@ void GuiPlotReceiver::XyPlotMarkPoint(const std::string &plotName,
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->MarkPoint(index, forCurve);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            frame->MarkPoint(index, forCurve);
+         }
    }
 }
 
@@ -1351,10 +1408,11 @@ void GuiPlotReceiver::XyPlotMarkBreak(const std::string &plotName,
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->MarkBreak(index, forCurve);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            frame->MarkBreak(index, forCurve);
+         }
    }
 }
 
@@ -1382,10 +1440,11 @@ void GuiPlotReceiver::XyPlotClearFromBreak(const std::string &plotName,
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->ClearFromBreak(startBreakNumber, endBreakNumber, forCurve);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            frame->ClearFromBreak(startBreakNumber, endBreakNumber, forCurve);
+         }
    }
 }
 
@@ -1418,10 +1477,11 @@ void GuiPlotReceiver::XyPlotChangeColor(const std::string &plotName,
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->ChangeColor(index, newColor, forCurve);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            frame->ChangeColor(index, newColor, forCurve);
+         }
    }
 }
 
@@ -1454,10 +1514,11 @@ void GuiPlotReceiver::XyPlotChangeMarker(const std::string &plotName,
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->ChangeMarker(index, newMarker, forCurve);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            frame->ChangeMarker(index, newMarker, forCurve);
+         }
    }
 }
 
@@ -1488,10 +1549,11 @@ void GuiPlotReceiver::XyPlotChangeWidth(const std::string &plotName,
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->SetLineWidth(newWidth, forCurve);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            frame->SetLineWidth(newWidth, forCurve);
+         }
    }
 }
 
@@ -1522,10 +1584,11 @@ void GuiPlotReceiver::XyPlotChangeStyle(const std::string &plotName,
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->SetLineStyle(newStyle, forCurve);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            frame->SetLineStyle(newStyle, forCurve);
+         }
    }
 }
 
@@ -1553,10 +1616,11 @@ void GuiPlotReceiver::XyPlotRescale(const std::string &plotName)
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->Rescale();
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            frame->Rescale();
+         }
    }
 }
 
@@ -1591,11 +1655,12 @@ void GuiPlotReceiver::XyPlotCurveSettings(const std::string &plotName,
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         frame->CurveSettings(useLines, lineWidth, lineStyle, useMarkers,
-               markerSize, marker, useHiLow, forCurve);
-      }
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            frame->CurveSettings(useLines, lineWidth, lineStyle, useMarkers,
+                  markerSize, marker, useHiLow, forCurve);
+         }
    }
 }
 
@@ -1624,16 +1689,17 @@ void GuiPlotReceiver::SetXyPlotTitle(const std::string &plotName,
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-      {
-         #if DEBUG_PLOTIF_XY
-            MessageInterface::ShowMessage
-               ("GuiPlotReceiver::SetXyPlotTitle() calling "
-                " frame->SetPlotTitle() \n");
-         #endif
+      if (frame && !frame->ChildIsClosing())
+         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+         {
+            #if DEBUG_PLOTIF_XY
+               MessageInterface::ShowMessage
+                  ("GuiPlotReceiver::SetXyPlotTitle() calling "
+                   " frame->SetPlotTitle() \n");
+            #endif
 
-         frame->SetPlotTitle(wxString(plotTitle.c_str()));
-      }
+            frame->SetPlotTitle(wxString(plotTitle.c_str()));
+         }
    }
 }
 
@@ -1656,15 +1722,16 @@ void GuiPlotReceiver::ShowXyPlotLegend(const std::string &plotName)
 //   {
 //      frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 //
-//      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
-//      {
-//         #if DEBUG_PLOTIF_XY
-//            MessageInterface::ShowMessage
-//               ("GuiPlotReceiver::ShowXyPlotLegend() calling  frame->ShowPlotLegend() \n");
-//         #endif
+//      if (frame && !frame->ChildIsClosing())
+//         if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+//         {
+//            #if DEBUG_PLOTIF_XY
+//               MessageInterface::ShowMessage
+//                  ("GuiPlotReceiver::ShowXyPlotLegend() calling  frame->ShowPlotLegend() \n");
+//            #endif
 //
-//         frame->ShowPlotLegend();
-//      }
+//            frame->ShowPlotLegend();
+//         }
 //   }
 }
 
@@ -1695,7 +1762,7 @@ bool GuiPlotReceiver::RefreshXyPlot(const std::string &plotName)
       for (int i=0; i<MdiTsPlot::numChildren; i++)
       {
          frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
-         if (frame)
+         if (frame && !frame->ChildIsClosing())
          {
             if (frame->GetPlotName().IsSameAs(owner.c_str()))
             {
@@ -1759,7 +1826,7 @@ bool GuiPlotReceiver::UpdateXyPlot(const std::string &plotName,
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame)
+      if (frame && !frame->ChildIsClosing())
       {
          if (frame->GetPlotName().IsSameAs(owner.c_str()))
          {
@@ -1822,7 +1889,7 @@ bool GuiPlotReceiver::UpdateXyPlotData(const std::string &plotName,
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame)
+      if (frame && !frame->ChildIsClosing())
       {
          if (frame->GetPlotName().IsSameAs(owner.c_str()))
          {
@@ -1897,7 +1964,7 @@ bool GuiPlotReceiver::UpdateXyPlotCurve(const std::string &plotName,
       {
          frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-         if (frame)
+         if (frame && !frame->ChildIsClosing())
          {
             if (frame->GetPlotName().IsSameAs(owner.c_str()))
             {
@@ -1946,7 +2013,7 @@ bool GuiPlotReceiver::DeactivateXyPlot(const std::string &plotName)
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame)
+      if (frame && !frame->ChildIsClosing())
       {
          if (frame->GetPlotName().IsSameAs(owner.c_str()))
          {
@@ -1984,7 +2051,7 @@ bool GuiPlotReceiver::ActivateXyPlot(const std::string &plotName)
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame)
+      if (frame && !frame->ChildIsClosing())
       {
          if (frame->GetPlotName().IsSameAs(owner.c_str()))
          {
@@ -2022,7 +2089,7 @@ bool GuiPlotReceiver::TakeXYAction(const std::string &plotName,
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
 
-      if (frame)
+      if (frame && !frame->ChildIsClosing())
       {
          if (frame->GetPlotName().IsSameAs(owner.c_str()))
          {
@@ -2109,7 +2176,7 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
          if (mainFrame->IsMissionTreeUndocked(missionTreeX, missionTreeY, missionTreeW))
             screenWidth -= missionTreeW;
          
-         // Get active plot count
+         // Get the count of plots active for this run
          Integer activePlotCount = mainFrame->GetNumberOfActivePlots();
          int newCount = plotCount + 1;
          
@@ -2176,5 +2243,3 @@ bool GuiPlotReceiver::ComputePlotPositionAndSize(bool isGLPlot, Real positionX,
    
    return isPresetSizeUsed;
 }
-
-

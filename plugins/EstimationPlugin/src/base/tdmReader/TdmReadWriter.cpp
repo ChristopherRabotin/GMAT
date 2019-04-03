@@ -153,7 +153,8 @@ bool TdmReadWriter::Initialize()
       }
       catch(const XMLException &xe)
       {
-         std::string errMsg ("Xerces failed to initialize: " + *XMLString::transcode(xe.getMessage()));
+         std::string errMsg ("Xerces failed to initialize: ");
+         errMsg.push_back(*XMLString::transcode(xe.getMessage()));
          throw MeasurementException(errMsg);
       }
    }
@@ -407,7 +408,8 @@ bool TdmReadWriter::Validate(const std::string &tdmFileName)
    }
    catch(const XMLException &xe)
    {
-      std::string errMsg ("Xerces failed to load the file: " + *XMLString::transcode(xe.getMessage()));
+      std::string errMsg ("Xerces failed to load the file: ");
+      errMsg.push_back(*XMLString::transcode(xe.getMessage()));
       throw MeasurementException(errMsg);
    }
 

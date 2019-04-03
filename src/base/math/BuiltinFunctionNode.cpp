@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -258,7 +258,7 @@ MathNode* BuiltinFunctionNode::GetRight()
 
 
 //------------------------------------------------------------------------------
-//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//  const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Returns the names of the reference object.
@@ -269,7 +269,7 @@ MathNode* BuiltinFunctionNode::GetRight()
  * @return The names of the reference object.
  */
 //------------------------------------------------------------------------------
-const StringArray& BuiltinFunctionNode::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& BuiltinFunctionNode::GetRefObjectNameArray(const UnsignedInt type)
 {
    #ifdef DEBUG_WRAPPERS
    MessageInterface::ShowMessage

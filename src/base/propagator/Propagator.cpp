@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -236,7 +236,7 @@ Propagator& Propagator::operator=(const Propagator& p)
 }
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 /**
@@ -249,7 +249,7 @@ Propagator& Propagator::operator=(const Propagator& p)
  * @return true if object name changed, false if not.
  */
 //---------------------------------------------------------------------------
-bool Propagator::RenameRefObject(const Gmat::ObjectType type,
+bool Propagator::RenameRefObject(const UnsignedInt type,
                                  const std::string &oldName,
                                  const std::string &newName)
 {
@@ -680,7 +680,7 @@ bool Propagator::Initialize()
             MessageInterface::ShowMessage("Propagator::Initialize() calling "
                   "physicalModel->Initialize() \n");
          #endif
-
+         
          if ( physicalModel->Initialize() )
             isInitialized = true;
 
@@ -911,6 +911,14 @@ void Propagator::UpdateSpaceObject(Real newEpoch)
 }
 
 
+void Propagator::UpdateSpaceObjectGT(GmatTime newEpoch)
+{
+   if (physicalModel)
+      if (physicalModel->IsOfType(Gmat::ODE_MODEL))
+         ((ODEModel*)(physicalModel))->UpdateSpaceObjectGT(newEpoch);
+}
+
+
 //------------------------------------------------------------------------------
 // void UpdateFromSpaceObject()
 //------------------------------------------------------------------------------
@@ -1038,17 +1046,34 @@ void Propagator::SetForwardPropagation(bool tf)
 
 
 //------------------------------------------------------------------------------
+// Real GetStepSize()
+//------------------------------------------------------------------------------
+/**
+ * Accessor for the current stepSize setting
+ *
+ * @return The stepSize setting
+ */
+//------------------------------------------------------------------------------
+Real Propagator::GetStepSize()
+{
+   return stepSize;
+}
+
+
+//------------------------------------------------------------------------------
 // bool Step(Real dt)
 //------------------------------------------------------------------------------
 /**
  * Evolves the physical model over the specified time
+ *
  * This method sets the default timestep to the input value, and then advances 
  * the system by one timestep.  If the system has not been initialized, then
  * no action is taken.  
- * If the step is taken successfully, the method returns true; otherwise, it 
- * returns false.
  *
  * @param dt    The timestep to take
+ *
+ * @retval If the step is taken successfully, the method returns true;
+ * otherwise, it returns false.
  */
 //------------------------------------------------------------------------------
 bool Propagator::Step(Real dt)
@@ -1127,6 +1152,12 @@ void Propagator::MoveToOrigin(Real newEpoch)
 {
 }
 
+
+void Propagator::MoveToOriginGT(GmatTime newEpoch)
+{
+}
+
+
 //------------------------------------------------------------------------------
 // void ReturnFromOrigin(Real newEpoch)
 //------------------------------------------------------------------------------
@@ -1142,7 +1173,28 @@ void Propagator::ReturnFromOrigin(Real newEpoch)
 }
 
 
+void Propagator::ReturnFromOriginGT(GmatTime newEpoch)
+{
+}
+
+
 void Propagator::TurnDebug(bool debugFlag)
 {
    debug = debugFlag;
+}
+
+//------------------------------------------------------------------------------
+// Real UsesErrorControl()
+//------------------------------------------------------------------------------
+/**
+* Returns the boolean of whether error control is being used or not.  Currently
+* returns true only as the use of error control is dictated by the 
+* hasErrorControl parameter in the integrator if an integrator is being used
+*
+* @return true
+*/
+//------------------------------------------------------------------------------
+bool Propagator::UsesErrorControl()
+{
+   return false;
 }

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -283,19 +283,19 @@ bool GmatPanel::PrepareObjectNameChange()
 
 
 //------------------------------------------------------------------------------
-// virtual void ObjectNameChanged(Gmat::ObjectType type, const wxString &oldName,
+// virtual void ObjectNameChanged(UnsignedInt type, const wxString &oldName,
 //                                const wxString &newName)
 //------------------------------------------------------------------------------
-void GmatPanel::ObjectNameChanged(Gmat::ObjectType type, const wxString &oldName,
+void GmatPanel::ObjectNameChanged(UnsignedInt type, const wxString &oldName,
                                   const wxString &newName)
 {
    // Do we need anything here?
 }
 
 //------------------------------------------------------------------------------
-// virtual bool RefreshObjects(Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT)
+// virtual bool RefreshObjects(UnsignedInt type = Gmat::UNKNOWN_OBJECT)
 //------------------------------------------------------------------------------
-bool GmatPanel::RefreshObjects(Gmat::ObjectType type)
+bool GmatPanel::RefreshObjects(UnsignedInt type)
 {
    // child classes will implement this as needed
    return true;
@@ -454,7 +454,7 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
         MessageInterface::ShowMessage
             ("GmatPanel::OnHelp() theHelpController=<%p>\n   "
             "File to display=%s\n", theHelpController,
-            s.c_str());
+            s.WX_TO_C_STRING);
         #endif
         // displays chm, not html
 
@@ -502,7 +502,7 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
 		#ifdef DEBUG_GMATPANEL
 		  MessageInterface::ShowMessage
 			 ("GmatPanel::OnHelp() Web Page=<%s>\n",
-			  s.c_str());
+			  s.WX_TO_C_STRING);
 		#endif
 
 		// if path is relative, try to append it to gmat root 

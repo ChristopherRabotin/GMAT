@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -294,7 +294,7 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui,
       #endif
       
       // Create script interpreter
-      theScriptInterpreter = ScriptInterpreter::Instance();      
+      theScriptInterpreter = ScriptInterpreter::Instance();
       
       #if DEBUG_INITIALIZE
       MessageInterface::ShowMessage
@@ -352,9 +352,6 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui,
          ("Moderator::Initialize() objectMapInUse was set to the "
           "configuration map <%p>\n", objectMapInUse);
       #endif
-      
-      if (isFromGui)
-         CreateDefaultMission();
    }
    catch (BaseException &e)
    {
@@ -653,6 +650,18 @@ void Moderator::SetRunReady(bool flag)
    isRunReady = flag;
 }
 
+//------------------------------------------------------------------------------
+// Integer GetExitCode()
+//------------------------------------------------------------------------------
+/**
+* Returns the current exit code setting representing a successful or failed run
+*/
+//------------------------------------------------------------------------------
+Integer Moderator::GetExitCode()
+{
+   return exitCode;
+}
+
 
 //------------------------------------------------------------------------------
 // Interface* GetMatlabInterface()
@@ -781,7 +790,8 @@ void Moderator::LoadPlugins()
    
    if (theUiInterpreter != NULL)
       theUiInterpreter->BuildCreatableObjectMaps();
-   theScriptInterpreter->BuildCreatableObjectMaps(true);
+   if (theScriptInterpreter)
+      theScriptInterpreter->BuildCreatableObjectMaps(true);
 }
 
 //------------------------------------------------------------------------------
@@ -930,6 +940,14 @@ void Moderator::LoadAPlugin(std::string pluginName)
                res->nodeName.c_str());
          #endif
       }
+
+      // Get the GUI Factories
+      Integer guiFactoryCount = theLib->GetGuiFactoryCount();
+      for (Integer i = 0; i < guiFactoryCount; ++i)
+      {
+         GuiFactory *guiFact = theLib->GetGuiFactory(i);
+         pluginGuiFactories.push_back(guiFact);
+      }
    }
    else
    {
@@ -987,7 +1005,7 @@ DynamicLibrary *Moderator::LoadLibrary(const std::string &libraryName)
    // libraryName may be a filename or a pathname. If the latter, split
    // it into its actual filename and path components. 
    std::string libName, libPath;
-   unsigned int leafloc = libraryName.find_last_of("/\\"); // *nix or Windows
+   size_t leafloc = libraryName.find_last_of("/\\"); // *nix or Windows
    if(leafloc != std::string::npos) // libraryName is a path
    {
       libPath = libraryName.substr(0, leafloc+1);
@@ -1071,12 +1089,34 @@ void (*Moderator::GetDynamicFunction(const std::string &funName,
    return theFunction;
 }
 
+
+//------------------------------------------------------------------------------
+// std::vector<GuiFactory*> RetrieveGuiFactories()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the GUI plugin factories for use in the GUI
+ *
+ * @return The GUI plugin factory list
+ */
+//------------------------------------------------------------------------------
+std::vector<GuiFactory*> Moderator::RetrieveGuiFactories()
+{
+   #ifdef DEBUG_GUI_PLUGINS
+      MessageInterface::ShowMessage("The Moderator has %d GUI Factories\n",
+            pluginGuiFactories.size());
+      for (UnsignedInt i = 0; i < pluginGuiFactories.size(); ++i)
+         MessageInterface::ShowMessage("   %d: %p\n", i, pluginGuiFactories[i]);
+   #endif
+
+   return pluginGuiFactories;
+}
+
 //------------------------ End of Plug-in Code ---------------------------------
 
 
 //----- ObjectType
 //------------------------------------------------------------------------------
-// std::string GetObjectTypeString(Gmat::ObjectType type)
+// std::string GetObjectTypeString(UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Returns object type name of given object type.
@@ -1086,7 +1126,7 @@ void (*Moderator::GetDynamicFunction(const std::string &funName,
  * @return object type name
  */
 //------------------------------------------------------------------------------
-std::string Moderator::GetObjectTypeString(Gmat::ObjectType type)
+std::string Moderator::GetObjectTypeString(UnsignedInt type)
 {
    return GmatBase::GetObjectTypeString(type);
 }
@@ -1132,6 +1172,7 @@ void Moderator::SetUiInterpreter(ScriptInterpreter *uiInterp)
 {
    theUiInterpreter = uiInterp;
    theUiInterpreter->BuildCreatableObjectMaps();
+   SetScriptInterpreter(uiInterp);
 }
 
 
@@ -1144,7 +1185,6 @@ void Moderator::SetUiInterpreter(ScriptInterpreter *uiInterp)
 //------------------------------------------------------------------------------
 void Moderator::SetScriptInterpreter(ScriptInterpreter *scriptInterp)
 {
-   //loj: allow setting only for the first time?
    if (theScriptInterpreter == NULL)
       theScriptInterpreter = scriptInterp;
 }
@@ -1275,7 +1315,7 @@ void Moderator::ResetObjectPointer(ObjectMap *objMap, GmatBase *newObj,
 
 //----- factory
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfFactoryItems(Gmat::ObjectType type,
+// const StringArray& GetListOfFactoryItems(UnsignedInt type,
 //       const std::string &qualifier)
 //------------------------------------------------------------------------------
 /**
@@ -1287,7 +1327,7 @@ void Moderator::ResetObjectPointer(ObjectMap *objMap, GmatBase *newObj,
  * @return array of configurable item names; return empty array if none
  */
 //------------------------------------------------------------------------------
-const StringArray& Moderator::GetListOfFactoryItems(Gmat::ObjectType type, const std::string &qualifier)
+const StringArray& Moderator::GetListOfFactoryItems(UnsignedInt type, const std::string &qualifier)
 {
    return theFactoryManager->GetListOfItems(type, qualifier);
 }
@@ -1324,7 +1364,7 @@ const StringArray& Moderator::GetListOfAllFactoryItemsExcept(const ObjectTypeArr
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfViewableItems(Gmat::ObjectType type)
+// const StringArray& GetListOfViewableItems(UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Return a list of all viewable objets via the GUI
@@ -1334,13 +1374,13 @@ const StringArray& Moderator::GetListOfAllFactoryItemsExcept(const ObjectTypeArr
  * @return list of all viewable objects
  */
 //------------------------------------------------------------------------------
-const StringArray& Moderator::GetListOfViewableItems(Gmat::ObjectType type)
+const StringArray& Moderator::GetListOfViewableItems(UnsignedInt type)
 {
    return theFactoryManager->GetListOfViewableItems(type);
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfUnviewableItems(Gmat::ObjectType type)
+// const StringArray& GetListOfUnviewableItems(UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Return a list of all unviewable objects via the GUI
@@ -1348,7 +1388,7 @@ const StringArray& Moderator::GetListOfViewableItems(Gmat::ObjectType type)
  * @return list of all viewable objects
  */
 //------------------------------------------------------------------------------
-const StringArray& Moderator::GetListOfUnviewableItems(Gmat::ObjectType type)
+const StringArray& Moderator::GetListOfUnviewableItems(UnsignedInt type)
 {
    return theFactoryManager->GetListOfUnviewableItems(type);
 }
@@ -1383,7 +1423,7 @@ const ObjectTypeArrayMap& Moderator::GetAllObjectTypeArrayMap()
  *         not match the subtype
  */
 //------------------------------------------------------------------------------
-bool Moderator::DoesObjectTypeMatchSubtype(const Gmat::ObjectType coreType,
+bool Moderator::DoesObjectTypeMatchSubtype(const UnsignedInt coreType,
       const std::string &theType, const std::string &theSubtype)
 {
    return theFactoryManager->DoesObjectTypeMatchSubtype(coreType, theType,
@@ -1406,7 +1446,7 @@ ObjectMap* Moderator::GetConfiguredObjectMap()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfObjects(Gmat::ObjectType type,
+// const StringArray& GetListOfObjects(UnsignedInt type,
 //                                     bool excludeDefaultObjects = false)
 //------------------------------------------------------------------------------
 /**
@@ -1420,7 +1460,7 @@ ObjectMap* Moderator::GetConfiguredObjectMap()
  *  return all configured item if type is UNKNOWN_OBJECT
  */
 //------------------------------------------------------------------------------
-const StringArray& Moderator::GetListOfObjects(Gmat::ObjectType type,
+const StringArray& Moderator::GetListOfObjects(UnsignedInt type,
                                                bool excludeDefaultObjects)
 {
    tempObjectNames.clear();
@@ -1749,7 +1789,7 @@ GmatBase* Moderator::AddClone(const std::string &name, std::string &cloneName)
 
 
 //------------------------------------------------------------------------------
-// bool RenameObject(Gmat::ObjectType type, const std::string &oldName
+// bool RenameObject(UnsignedInt type, const std::string &oldName
 //                           const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -1762,7 +1802,7 @@ GmatBase* Moderator::AddClone(const std::string &name, std::string &cloneName)
  * @return true if the item has been removed; false otherwise
  */
 //------------------------------------------------------------------------------
-bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
+bool Moderator::RenameObject(UnsignedInt type, const std::string &oldName,
                                      const std::string &newName)
 {
    #if DEBUG_RENAME
@@ -1811,7 +1851,7 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
       return false;
    }
    
-   std::vector<Gmat::ObjectType> relatedItemType;
+   std::vector<UnsignedInt> relatedItemType;
    StringArray relatedOldName;
    StringArray relatedNewName;
    bool hasRelatedChange = theConfigManager->RelatedNameChange(relatedItemType,
@@ -1892,7 +1932,7 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
 }
 
 //------------------------------------------------------------------------------
-// bool RemoveObject(Gmat::ObjectType type, const std::string &name,
+// bool RemoveObject(UnsignedInt type, const std::string &name,
 //                           bool delIfNotUsed)
 //------------------------------------------------------------------------------
 /**
@@ -1906,7 +1946,7 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
  * @return true if the item has been removed; false otherwise
  */
 //------------------------------------------------------------------------------
-bool Moderator::RemoveObject(Gmat::ObjectType type, const std::string &name,
+bool Moderator::RemoveObject(UnsignedInt type, const std::string &name,
                              bool delOnlyIfNotUsed)
 {
    GmatCommand *cmd = GetFirstCommand();
@@ -2187,10 +2227,10 @@ bool Moderator::SetSolarSystemInUse(const std::string &name)
 
 // Create object
 //------------------------------------------------------------------------------
-// GmatBase* CreateObject(Gmat::ObjectType objTypeId, const std::string &type,
+// GmatBase* CreateObject(UnsignedInt objTypeId, const std::string &type,
 //                        const std::string &name, bool createDefault)
 //------------------------------------------------------------------------------
-GmatBase* Moderator::CreateObject(Gmat::ObjectType objTypeId, const std::string &type,
+GmatBase* Moderator::CreateObject(UnsignedInt objTypeId, const std::string &type,
                                   const std::string &name, bool createDefault)
 {
    #if DEBUG_CREATE_OBJECT
@@ -2281,10 +2321,10 @@ GmatBase* Moderator::CreateObject(Gmat::ObjectType objTypeId, const std::string 
 
 
 //------------------------------------------------------------------------------
-// GmatBase* CreateOtherObject(Gmat::ObjectType objTypeId, const std::string &type,
+// GmatBase* CreateOtherObject(UnsignedInt objTypeId, const std::string &type,
 //                             const std::string &name, bool createDefault)
 //------------------------------------------------------------------------------
-GmatBase* Moderator::CreateOtherObject(Gmat::ObjectType objTypeId, const std::string &type,
+GmatBase* Moderator::CreateOtherObject(UnsignedInt objTypeId, const std::string &type,
                                        const std::string &name, bool createDefault)
 {
    #if DEBUG_CREATE_OTHER_RESOURCE
@@ -6886,6 +6926,9 @@ Integer Moderator::RunMission(Integer sandboxNum)
          
          sandboxes[sandboxNum-1]->Clear();
          
+         if (pCreateWidget)
+            sandboxes[sandboxNum-1]->SetWidgetCreator(pCreateWidget);
+         
          #if DEBUG_RUN
          MessageInterface::ShowMessage
             ("Moderator::RunMission() after sandboxes[%d]->Clear()\n", sandboxNum-1);
@@ -6895,7 +6938,8 @@ Integer Moderator::RunMission(Integer sandboxNum)
       {
          status = -1;
          MessageInterface::PopupMessage(Gmat::ERROR_,
-                                        "Invalid Sandbox number" + sandboxNum);
+                                        "Invalid Sandbox number " +
+                                        std::to_string(sandboxNum));
          return status;
       }
 		
@@ -7078,6 +7122,8 @@ Integer Moderator::RunMission(Integer sandboxNum)
    // changed on the Earth object)
    std::string origEopName = theFileManager->GetFullPathname("EOP_FILE");
    GmatGlobal::Instance()->GetEopFile()->ResetEopFile(origEopName);
+
+   exitCode = status;
 
    return status;
 } // RunMission()
@@ -7354,6 +7400,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
             ("Moderator::InterpretScript() failed to interprete the script\n");
          #endif
          MessageInterface::ShowMessage("\n========================================\n");
+         exitCode = -8;  //Exit code representing a script error
       }
    }
    catch (BaseException &e)
@@ -7696,6 +7743,20 @@ void Moderator::CreatePlanetaryCoeffFile()
 
 
 //------------------------------------------------------------------------------
+// bool SetWidgetCreator(GuiWidgetCreatorCallback creatorFun)
+//------------------------------------------------------------------------------
+/**
+ * Sets the callback function used to create plugin GUI widgets
+ *
+ * @param creatorFun The function pointer that is called to create the widgets
+ */
+//------------------------------------------------------------------------------
+void Moderator::SetWidgetCreator(GuiWidgetCreatorCallback creatorFun)
+{
+   pCreateWidget = creatorFun;
+}
+
+//------------------------------------------------------------------------------
 // void CreateTimeFile()
 //------------------------------------------------------------------------------
 void Moderator::CreateTimeFile()
@@ -7713,9 +7774,14 @@ void Moderator::CreateTimeFile()
    
    filename = theFileManager->GetFullPathname("EOP_FILE");
    theEopFile = new EopFile(filename);
-   theEopFile->Initialize();
+   //theEopFile->Initialize();                                        // made changes by TUAN NGUYEN
    
    TimeConverterUtil::SetLeapSecsFileReader(theLeapSecsFile);
+
+   // The step to initialize EOP file has to be done after Leap Second file is set to TimeConverterUtil 
+   // due to theEopFile->Initialize() has step to convert time from UTC to A1
+   theEopFile->Initialize();                                        // made changes by TUAN NGUYEN
+
    TimeConverterUtil::SetEopFile(theEopFile);
    GmatGlobal::Instance()->SetEopFile(theEopFile);
 }
@@ -8917,7 +8983,7 @@ void Moderator::CheckParameterType(Parameter **param, const std::string &type,
          ("   parameter owner type = %d, object type = %d\n", (*param)->GetOwnerType(),
           obj->GetType());
       #endif
-      Gmat::ObjectType paramType = (*param)->GetOwnerType();
+      UnsignedInt paramType = (*param)->GetOwnerType();
 //      if ((*param)->GetOwnerType() != obj->GetType())
       if (!obj->IsOfType(paramType))
       {
@@ -8978,7 +9044,7 @@ void Moderator::CheckParameterType(Parameter **param, const std::string &type,
                std::string subMsg;
                if (paramInfo->IsForAttachedObject(type))
                {
-                  Gmat::ObjectType ownedObjType = paramInfo->GetOwnedObjectType(type);
+                  UnsignedInt ownedObjType = paramInfo->GetOwnedObjectType(type);
                   subMsg = GetObjectTypeString(ownedObjType) + " attached to ";
                }
                
@@ -9363,10 +9429,10 @@ GmatBase* Moderator::FindObject(const std::string &name)
 
 //------------------------------------------------------------------------------
 // void AddObjectToObjectMapInUse(const std::string &name, GmatBase *obj,
-//                                Gmat::ObjectType objTypeId)
+//                                UnsignedInt objTypeId)
 //------------------------------------------------------------------------------
 void Moderator::AddObjectToObjectMapInUse(const std::string &name, GmatBase *obj,
-                                          Gmat::ObjectType objTypeId)
+                                          UnsignedInt objTypeId)
 {
    try
    {
@@ -10055,7 +10121,7 @@ void Moderator::AddFunctionToGlobalObjectMap(Function *func)
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_, "Adding Function to empty or invalid Sandbox number" +
-          currentSandboxNumber);
+          std::to_string(currentSandboxNumber));
    }
 }
 
@@ -10558,6 +10624,9 @@ Moderator::Moderator()
    
    sandboxes.reserve(Gmat::MAX_SANDBOX);
    commands.reserve(Gmat::MAX_SANDBOX);
+
+   pCreateWidget = NULL;
+   exitCode = 0;
 }
 
 

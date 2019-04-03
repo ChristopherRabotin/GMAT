@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,6 +39,7 @@
 #include "CallFunction.hpp"
 #include "Assignment.hpp"
 #include "BranchCommand.hpp"
+#include "Propagate.hpp"           // For suppression of CommandEcho message repeats
 #include "SubscriberException.hpp"
 #include "CommandUtil.hpp"         // for GetCommandSeqString()
 #include "MessageInterface.hpp"
@@ -98,7 +99,8 @@ Sandbox::Sandbox() :
    objInit           (NULL),
 //   cloneUpdateStyle  (SKIP_UPDATES)
    cloneUpdateStyle  (PASS_TO_ALL),
-   errorInPreviousFcs (false)
+   errorInPreviousFcs (false),
+   pCreateWidget     (NULL)
 {
 }
 
@@ -467,7 +469,7 @@ bool Sandbox::SetPublisher(Publisher *pub)
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetInternalObject(std::string name, Gmat::ObjectType type)
+// GmatBase* GetInternalObject(std::string name, UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  *  Accesses objects managed by this Sandbox.
@@ -478,7 +480,7 @@ bool Sandbox::SetPublisher(Publisher *pub)
  *  @return The pointer to the object.
  */
 //------------------------------------------------------------------------------
-GmatBase* Sandbox::GetInternalObject(std::string name, Gmat::ObjectType type)
+GmatBase* Sandbox::GetInternalObject(std::string name, UnsignedInt type)
 {
    #ifdef DEBUG_INTERNAL_OBJ
    MessageInterface::ShowMessage
@@ -529,6 +531,10 @@ GmatBase* Sandbox::GetInternalObject(std::string name, Gmat::ObjectType type)
 std::map<std::string, GmatBase *> Sandbox::GetObjectMap()
 {
    return objectMap;
+}
+std::map<std::string, GmatBase *> Sandbox::GetGlobalObjectMap()
+{
+   return globalObjectMap;
 }
 
 
@@ -638,6 +644,8 @@ bool Sandbox::Initialize()
    objInit = new ObjectInitializer(solarSys, &objectMap, &globalObjectMap,
          internalCoordSys);
    
+   objInit->SetWidgetCreator(pCreateWidget);
+
    #ifdef DEBUG_MEMORY
    MemoryTracker::Instance()->Add
       (objInit, "objInit", "Sandbox::Initialize()", "objInit = new ObjectInitializer");
@@ -1052,18 +1060,42 @@ bool Sandbox::Execute()
          try
          {
             // Update here if we add another runmode to show command location
+
+            // Printing of command is skipped for propagate after it has 
+            // already been printed once
+            bool skipPrint = false;
             if (GmatGlobal::Instance()->EchoCommands())
             {
-               std::string currentCommand = "CurrentCommand: " +
-                     current->GetGeneratingString(Gmat::NO_COMMENTS);
-               if (current->IsOfType("BranchCommand"))
+               if (current->IsOfType("Propagate"))
                {
-                  std::string substring = ((BranchCommand*)current)->
-                        GetCurrentGeneratingString(Gmat::NO_COMMENTS, "  --> ");
-                  if (substring != "")
-                     currentCommand = substring;
+                  bool currentPropStatus = current->GetPropStatus();
+                  if (currentPropStatus)
+                     skipPrint = true;
                }
-               MessageInterface::ShowMessage("%s\n", currentCommand.c_str());
+
+               else
+               {
+                  if (current->IsOfType("BranchCommand"))
+                  {
+                     bool currentPropStatus = current->GetPropStatus();
+                     if (currentPropStatus)
+                        skipPrint = true;
+                  }
+               }
+
+               if (!skipPrint)
+               {
+                  std::string currentCommand = "CurrentCommand: " +
+                     current->GetGeneratingString(Gmat::NO_COMMENTS);
+                  if (current->IsOfType("BranchCommand"))
+                  {
+                     std::string substring = ((BranchCommand*)current)->
+                        GetCurrentGeneratingString(Gmat::NO_COMMENTS, "  --> ");
+                     if (substring != "")
+                        currentCommand = substring;
+                  }
+                  MessageInterface::ShowMessage("%s\n", currentCommand.c_str());
+               }
             }
 
             rv = current->Execute();
@@ -1486,6 +1518,20 @@ bool Sandbox::AddSubscriber(Subscriber *sub)
    return false;
 }
 
+
+//------------------------------------------------------------------------------
+// void SetWidgetCreator(GuiWidgetCreatorCallback creatorFun)
+//------------------------------------------------------------------------------
+/**
+ * Sets the callback function used to build plugin widgets
+ *
+ * @param creatorFun The callback function
+ */
+//------------------------------------------------------------------------------
+void Sandbox::SetWidgetCreator(GuiWidgetCreatorCallback creatorFun)
+{
+   pCreateWidget = creatorFun;
+}
 
 //------------------------------------------------------------------------------
 // bool AddOwnedSubscriber(Subscriber *sub)

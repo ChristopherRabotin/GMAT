@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -160,7 +160,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    interpolatorName        ("Lagrange"),
    stateType               ("Cartesian"),
    outCoordSystemName      ("EarthMJ2000Eq"),
-   outputFormat            ("PC"),
+   outputFormat            ("LittleEndian"),
    writeEphemeris          (true),
    usingDefaultFileName    (true),
    generateInBackground    (false),
@@ -258,8 +258,8 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    //interpolatorTypeList.push_back("SLERP");
    
    outputFormatList.clear();
-   outputFormatList.push_back("PC");
-   outputFormatList.push_back("UNIX");
+   outputFormatList.push_back("LittleEndian");
+   outputFormatList.push_back("BigEndian");
    
    distanceUnitList.clear();
    distanceUnitList.push_back("Kilometers");
@@ -777,10 +777,10 @@ bool EphemerisFile::TakeAction(const std::string &action,
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool EphemerisFile::RenameRefObject(const Gmat::ObjectType type,
+bool EphemerisFile::RenameRefObject(const UnsignedInt type,
                                     const std::string &oldName,
                                     const std::string &newName)
 {
@@ -903,7 +903,7 @@ bool EphemerisFile::IsParameterReadOnly(const Integer id) const
 bool EphemerisFile::IsParameterCommandModeSettable(const Integer id) const
 {
    // Override this one from the parent class
-   if (id == FILENAME || id == WRITE_EPHEMERIS)
+   if (id == STEP_SIZE || id == FILENAME || id == WRITE_EPHEMERIS)
       return true;
    
    // And let the parent class handle its own
@@ -911,7 +911,7 @@ bool EphemerisFile::IsParameterCommandModeSettable(const Integer id) const
 }
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Retrieves object type of parameter of given id.
@@ -921,7 +921,7 @@ bool EphemerisFile::IsParameterCommandModeSettable(const Integer id) const
  * @return parameter ObjectType
  */
 //---------------------------------------------------------------------------
-Gmat::ObjectType EphemerisFile::GetPropertyObjectType(const Integer id) const
+UnsignedInt EphemerisFile::GetPropertyObjectType(const Integer id) const
 {
    switch (id)
    {
@@ -1140,6 +1140,10 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
        this, GetName().c_str(), id, value.c_str(), isInitialized, firstTimeWriting,
        fileFormat.c_str());
    #endif
+
+   // Write deprecated message for each once per GMAT session
+   static bool pcFormatFirstWarning = true;
+   static bool unixFormatFirstWarning = true;
    
    switch (id)
    {
@@ -1354,6 +1358,34 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
          outputFormat = value;
          return true;
       }
+	   else if (value == "PC")
+	   {
+         if (pcFormatFirstWarning)
+         {
+            MessageInterface::ShowMessage
+               ("*** WARNING *** \"PC\" option for OutputFormat in EphemerisFile "
+                  "is deprecated and will be removed from a future build; "
+                  "please use \"LittleEndian\" instead.\n");
+            pcFormatFirstWarning = false;
+         }
+         
+         outputFormat = "LittleEndian";
+         return true;
+	   }
+	   else if (value == "UNIX")
+	   {
+         if (unixFormatFirstWarning)
+         {
+            MessageInterface::ShowMessage
+               ("*** WARNING *** \"UNIX\" option for OutputFormat in EphemerisFile "
+                  "is deprecated and will be removed from a future build; "
+                  "please use \"BigEndian\" instead.\n");
+            unixFormatFirstWarning = false;
+         }
+
+         outputFormat = "BigEndian";
+         return true;
+	   }
       else
       {
          HandleError(OUTPUT_FORMAT, value, outputFormatList);
@@ -1390,10 +1422,10 @@ bool EphemerisFile::SetStringParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+// virtual GmatBase* GetRefObject(const UnsignedInt type,
 //                                const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* EphemerisFile::GetRefObject(const Gmat::ObjectType type,
+GmatBase* EphemerisFile::GetRefObject(const UnsignedInt type,
                                       const std::string &name)
 {
    if (type == Gmat::SPACECRAFT)
@@ -1407,10 +1439,10 @@ GmatBase* EphemerisFile::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
-bool EphemerisFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool EphemerisFile::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                  const std::string &name)
 {
    #ifdef DEBUG_EPHEMFILE_REF_OBJ
@@ -1449,9 +1481,9 @@ bool EphemerisFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& EphemerisFile::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& EphemerisFile::GetRefObjectNameArray(const UnsignedInt type)
 {
    refObjectNames.clear();
    
@@ -1616,7 +1648,9 @@ void EphemerisFile::ValidateParameters(bool forInitialization)
       MessageInterface::ShowMessage
          ("   outCoordSystem=<%p>'%s'\n", outCoordSystem, outCoordSystem->GetName().c_str());
       #endif
-      if (!outCoordSystem->AreAxesOfType("MJ2000EqAxes"))
+      if (!outCoordSystem->AreAxesOfType("MJ2000EqAxes") && 
+          !outCoordSystem->AreAxesOfType("BodyFixedAxes") && 
+          !outCoordSystem->AreAxesOfType("TrueOfDateAxes"))
       {
          SubscriberException se;
          se.SetDetails("%s ephemeris file \"%s\" only allows coordinate system "
@@ -2097,7 +2131,7 @@ void EphemerisFile::HandlePropDirectionChange()
    else if (prevPropDirection == 0.0 && currPropDirection == -1.0)
       propIndicator = 2; // Initial backward prop
    else if (prevPropDirection == 1.0 && currPropDirection == -1.0)
-      propIndicator = 3; // Changed from foward to backward prop
+      propIndicator = 3; // Changed from forward to backward prop
    else if (prevPropDirection == -1.0 && currPropDirection == 1.0)
       propIndicator = 4; // Changed from backward to forward prop
    

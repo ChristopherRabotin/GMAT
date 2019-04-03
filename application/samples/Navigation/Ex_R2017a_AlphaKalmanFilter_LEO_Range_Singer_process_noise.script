@@ -619,7 +619,7 @@ SimForceModel.PointMasses = {Earth};
 SimForceModel.Drag = None;
 SimForceModel.SRP = Off;
 SimForceModel.RelativisticCorrection = Off;
-SimForceModel.ErrorControl = RSSStep;
+SimForceModel.ErrorControl = None;
 
 
 
@@ -632,7 +632,7 @@ EstForceModel.PointMasses = {Earth};
 EstForceModel.Drag = None;
 EstForceModel.SRP = Off;
 EstForceModel.RelativisticCorrection = Off;
-EstForceModel.ErrorControl = RSSStep;
+EstForceModel.ErrorControl = None;
 
 %----------------------------------------
 %---------- Additional Force Model Options
@@ -654,7 +654,7 @@ EstForceModel.ErrorControl = RSSStep;
 Create Propagator SimProp;
 SimProp.FM = SimForceModel;
 SimProp.Type = RungeKutta89;
-SimProp.InitialStepSize = 1;
+SimProp.InitialStepSize = 60;
 SimProp.Accuracy = 1e-13;
 SimProp.MinStep = 0;
 SimProp.MaxStep = 2700;
@@ -667,7 +667,7 @@ SimProp.StopIfAccuracyIsViolated = true;
 Create Propagator EstProp;
 EstProp.FM = EstForceModel;
 EstProp.Type = RungeKutta89;
-EstProp.InitialStepSize = 1;
+EstProp.InitialStepSize = 60;
 EstProp.Accuracy = 1e-13;
 EstProp.MinStep = 0;
 EstProp.MaxStep = 2700;

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -154,7 +154,7 @@ void GmatCommandPanel::LoadData()
    
    try
    {
-      wxString genStr = theCommand->GetGeneratingString().c_str();
+      wxString genStr = theCommand->GetGeneratingString(Gmat::NO_COMMENTS).c_str();
       commandTextCtrl->SetValue(genStr);
    }
    catch (BaseException &e)
@@ -178,27 +178,51 @@ void GmatCommandPanel::SaveData()
    MessageInterface::ShowMessage("GmatCommandPanel::SaveData() entered\n");
    #endif
    
-   canClose = true;
-   std::string str;
+   canClose         = true;
+//   std::string str;
+   bool interpreted = true;
 //   Integer width, prec;
    
    //-----------------------------------------------------------------
    // save values to base, base code should do the range checking
    //-----------------------------------------------------------------
+   std::string genString = theCommand->GetGeneratingString(Gmat::NO_COMMENTS);
    try
    {
       std::string cmdStr = commandTextCtrl->GetValue().WX_TO_STD_STRING;
       theCommand->SetGeneratingString(cmdStr);
-      theCommand->InterpretAction();
+      if (!theCommand->InterpretAction())
+         canClose = false;
+      
+      else if (!theCommand->VerifyObjects())
+         canClose = false;
       
       // Now validate command and create element wrappers
-      if (!theGuiInterpreter->ValidateCommand(theCommand))
+      else if (!theGuiInterpreter->ValidateCommand(theCommand))
          canClose = false;
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      theCommand->SetGeneratingString(genString);
+      theCommand->InterpretAction();  // objects previously checked
+      // Now re-validate command and create element wrappers
+      if (!theGuiInterpreter->ValidateCommand(theCommand))
+         canClose = false;
       canClose = false;
+      return;
+   }
+   if (!canClose)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_,
+                        "Error validating '%s' Command - "
+                        "Invalid object or field name",
+                        theCommand->GetTypeName().c_str());
+      theCommand->SetGeneratingString(genString);
+      theCommand->InterpretAction();
+      // Now re-validate command and create element wrappers
+      if (!theGuiInterpreter->ValidateCommand(theCommand))
+         canClose = false;
       return;
    }
    

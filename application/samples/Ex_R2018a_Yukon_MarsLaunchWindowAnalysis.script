@@ -1,0 +1,306 @@
+%General Mission Analysis Tool(GMAT) Script
+%Created: 2012-05-25 07:23:08
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft satForward;
+GMAT satForward.DateFormat = TAIModJulian;
+GMAT satForward.Epoch = '21545';
+GMAT satForward.CoordinateSystem = EarthSunRot;
+GMAT satForward.DisplayStateType = Cartesian;
+GMAT satForward.X = 0;
+GMAT satForward.Y = 0;
+GMAT satForward.Z = 0;
+GMAT satForward.VX = 2;
+GMAT satForward.VY = 0;
+GMAT satForward.VZ = 0;
+
+Create Spacecraft satBackward;
+GMAT satBackward.DateFormat = TAIModJulian;
+GMAT satBackward.Epoch = '21545';
+GMAT satBackward.CoordinateSystem = MarsSunRot;
+GMAT satBackward.DisplayStateType = Cartesian;
+GMAT satBackward.X = 0;
+GMAT satBackward.Y = 0;
+GMAT satBackward.Z = 0;
+GMAT satBackward.VX = -5;
+GMAT satBackward.VY = 0;
+GMAT satBackward.VZ = 0;
+
+
+% Spacecraft objects used for intermediate buffering
+Create Spacecraft satBackwardInit satForwardInit;
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel sunProp_ForceModel;
+GMAT sunProp_ForceModel.CentralBody = Sun;
+GMAT sunProp_ForceModel.PointMasses = {Sun};
+GMAT sunProp_ForceModel.Drag = None;
+GMAT sunProp_ForceModel.SRP = Off;
+GMAT sunProp_ForceModel.RelativisticCorrection = Off;
+GMAT sunProp_ForceModel.ErrorControl = RSSStep;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator sunProp;
+GMAT sunProp.FM = sunProp_ForceModel;
+GMAT sunProp.Type = PrinceDormand78;
+GMAT sunProp.InitialStepSize = 60;
+GMAT sunProp.Accuracy = 9.999999999999999e-012;
+GMAT sunProp.MinStep = 0;
+GMAT sunProp.MaxStep = 300000;
+GMAT sunProp.MaxStepAttempts = 50;
+GMAT sunProp.StopIfAccuracyIsViolated = true;
+
+%----------------------------------------
+%---------- Burns
+%----------------------------------------
+
+Create ImpulsiveBurn aDeltaV;
+GMAT aDeltaV.CoordinateSystem = Local;
+GMAT aDeltaV.Origin = Earth;
+GMAT aDeltaV.Axes = VNB;
+GMAT aDeltaV.Element1 = 0;
+GMAT aDeltaV.Element2 = 0;
+GMAT aDeltaV.Element3 = 0;
+GMAT aDeltaV.DecrementMass = false;
+GMAT aDeltaV.Isp = 300;
+GMAT aDeltaV.GravitationalAccel = 9.810000000000001;
+
+
+%----------------------------------------
+%---------- Coordinate Systems
+%----------------------------------------
+
+Create CoordinateSystem EarthSunRot;
+GMAT EarthSunRot.Origin = Earth;
+GMAT EarthSunRot.Axes = ObjectReferenced;
+GMAT EarthSunRot.XAxis = V;
+GMAT EarthSunRot.YAxis = N;
+GMAT EarthSunRot.Primary = Sun;
+GMAT EarthSunRot.Secondary = Earth;
+
+Create CoordinateSystem MarsSunRot;
+GMAT MarsSunRot.Origin = Mars;
+GMAT MarsSunRot.Axes = ObjectReferenced;
+GMAT MarsSunRot.XAxis = V;
+GMAT MarsSunRot.YAxis = N;
+GMAT MarsSunRot.Primary = Sun;
+GMAT MarsSunRot.Secondary = Mars;
+
+Create CoordinateSystem SunMJ2000Ec;
+GMAT SunMJ2000Ec.Origin = Sun;
+GMAT SunMJ2000Ec.Axes = MJ2000Ec;
+
+%----------------------------------------
+%---------- Solvers
+%----------------------------------------
+
+Create Yukon Yukon1;
+GMAT Yukon1.ShowProgress = true;
+GMAT Yukon1.ReportStyle = Normal;
+GMAT Yukon1.ReportFile = 'MinNLPadYukon1.data';
+GMAT Yukon1.MaximumIterations = 500;
+GMAT Yukon1.UseCentralDifferences = false;
+GMAT Yukon1.FeasibilityTolerance = 1;
+GMAT Yukon1.HessianUpdateMethod = SelfScaledBFGS;
+GMAT Yukon1.MaximumFunctionEvals = 1000;
+GMAT Yukon1.OptimalityTolerance = 0.001;
+GMAT Yukon1.FunctionTolerance = 0.0001;
+GMAT Yukon1.MaximumElasticWeight = 10000;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create OrbitView SunInertialView;
+GMAT SunInertialView.SolverIterations = Current;
+GMAT SunInertialView.UpperLeft = [ 0.02 0.01 ];
+GMAT SunInertialView.Size = [ 0.56 0.58 ];
+GMAT SunInertialView.RelativeZOrder = 5;
+GMAT SunInertialView.Maximized = false;
+GMAT SunInertialView.Add = {satForward, satBackward, Earth, Sun, Mars};
+GMAT SunInertialView.CoordinateSystem = SunMJ2000Ec;
+GMAT SunInertialView.DrawObject = [ true true true true true ];
+GMAT SunInertialView.DataCollectFrequency = 1;
+GMAT SunInertialView.UpdatePlotFrequency = 50;
+GMAT SunInertialView.NumPointsToRedraw = 0;
+GMAT SunInertialView.ShowPlot = true;
+GMAT SunInertialView.MaxPlotPoints = 20000;
+GMAT SunInertialView.ShowLabels = true;
+GMAT SunInertialView.ViewPointReference = Sun;
+GMAT SunInertialView.ViewPointVector = [ 0 0 300000000 ];
+GMAT SunInertialView.ViewDirection = Sun;
+GMAT SunInertialView.ViewScaleFactor = 3;
+GMAT SunInertialView.ViewUpCoordinateSystem = SunMJ2000Ec;
+GMAT SunInertialView.ViewUpAxis = X;
+GMAT SunInertialView.EclipticPlane = Off;
+GMAT SunInertialView.XYPlane = On;
+GMAT SunInertialView.WireFrame = Off;
+GMAT SunInertialView.Axes = Off;
+GMAT SunInertialView.Grid = Off;
+GMAT SunInertialView.SunLine = Off;
+GMAT SunInertialView.UseInitialView = On;
+GMAT SunInertialView.StarCount = 7000;
+GMAT SunInertialView.EnableStars = On;
+GMAT SunInertialView.EnableConstellations = On;
+
+Create OrbitView EarthSunRotView;
+GMAT EarthSunRotView.SolverIterations = Current;
+GMAT EarthSunRotView.UpperLeft = [ 0.6 0.01 ];
+GMAT EarthSunRotView.Size = [ 0.38 0.58 ];
+GMAT EarthSunRotView.RelativeZOrder = 796;
+GMAT EarthSunRotView.Maximized = false;
+GMAT EarthSunRotView.Add = {satForward, satBackward, Earth, Sun, Mars};
+GMAT EarthSunRotView.CoordinateSystem = EarthSunRot;
+GMAT EarthSunRotView.DrawObject = [ true true true true true ];
+GMAT EarthSunRotView.DataCollectFrequency = 1;
+GMAT EarthSunRotView.UpdatePlotFrequency = 50;
+GMAT EarthSunRotView.NumPointsToRedraw = 0;
+GMAT EarthSunRotView.ShowPlot = true;
+GMAT EarthSunRotView.MaxPlotPoints = 20000;
+GMAT EarthSunRotView.ShowLabels = true;
+GMAT EarthSunRotView.ViewPointReference = Earth;
+GMAT EarthSunRotView.ViewPointVector = [ 0 300000000 0 ];
+GMAT EarthSunRotView.ViewDirection = Sun;
+GMAT EarthSunRotView.ViewScaleFactor = 3;
+GMAT EarthSunRotView.ViewUpCoordinateSystem = EarthSunRot;
+GMAT EarthSunRotView.ViewUpAxis = X;
+GMAT EarthSunRotView.EclipticPlane = Off;
+GMAT EarthSunRotView.XYPlane = Off;
+GMAT EarthSunRotView.WireFrame = Off;
+GMAT EarthSunRotView.Axes = Off;
+GMAT EarthSunRotView.Grid = Off;
+GMAT EarthSunRotView.SunLine = Off;
+GMAT EarthSunRotView.UseInitialView = On;
+GMAT EarthSunRotView.StarCount = 7000;
+GMAT EarthSunRotView.EnableStars = On;
+GMAT EarthSunRotView.EnableConstellations = On;
+
+Create XYPlot XYPlot1;
+GMAT XYPlot1.SolverIterations = All;
+GMAT XYPlot1.UpperLeft = [ 0.02 0.6 ];
+GMAT XYPlot1.Size = [ 0.46 0.38 ];
+GMAT XYPlot1.RelativeZOrder = 15;
+GMAT XYPlot1.Maximized = false;
+GMAT XYPlot1.XVariable = loopCount;
+GMAT XYPlot1.YVariables = {cost};
+GMAT XYPlot1.ShowGrid = true;
+GMAT XYPlot1.ShowPlot = true;
+
+Create XYPlot XYPlot2;
+GMAT XYPlot2.SolverIterations = All;
+GMAT XYPlot2.UpperLeft = [ 0.5 0.6 ];
+GMAT XYPlot2.Size = [ 0.48 0.38 ];
+GMAT XYPlot2.RelativeZOrder = 10;
+GMAT XYPlot2.Maximized = false;
+GMAT XYPlot2.XVariable = loopCount;
+GMAT XYPlot2.YVariables = {launchEpoch, arrivalEpoch};
+GMAT XYPlot2.ShowGrid = true;
+GMAT XYPlot2.ShowPlot = true;
+
+Create ReportFile rf;
+GMAT rf.SolverIterations = Current;
+GMAT rf.Filename = 'MarsLaunchData.txt';
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+Create Variable launchEpoch arrivalEpoch patchEpoch cost loopCount tofConstraint tofValue I;
+GMAT loopCount = 1;
+GMAT tofConstraint = 270;
+GMAT tofValue = 1;
+
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+BeginMissionSequence;
+BeginScript
+   
+   GMAT satForward.DateFormat = 'TAIModJulian';
+   GMAT satBackward.DateFormat = 'TAIModJulian';
+   GMAT launchEpoch = 29087;
+   GMAT arrivalEpoch = launchEpoch +  258.9234;  % Add hohmann transfer TOF to launchEpoch
+   GMAT patchEpoch = launchEpoch + (arrivalEpoch - launchEpoch)/2;
+   GMAT satForward.Epoch = launchEpoch;
+   GMAT satBackward.Epoch = arrivalEpoch;
+   GMAT tofConstraint = 291;
+   
+   
+   GMAT arrivalEpoch = launchEpoch +  258.9234;  % Add hohmann transfer TOF to launchEpoch
+   GMAT patchEpoch = launchEpoch + (arrivalEpoch - launchEpoch)/2;
+   GMAT launchEpoch = 27357.0637387;
+   GMAT arrivalEpoch = 27722.2678134;
+   GMAT satForward.VX = 1.24242326859;
+   GMAT satForward.VY = 0.857493964283;
+   GMAT satForward.VZ = -7.31156188552;
+   GMAT satBackward.VX = -4.24323514703;
+   GMAT satBackward.VY = -0.238185150576;
+   GMAT satBackward.VZ = -5.58416575838;
+   
+   GMAT satForwardInit = satForward;
+   GMAT satBackwardInit = satBackward;
+   
+EndScript;
+
+For I = 1:1:20;
+   
+   GMAT launchEpoch = 27357.0637387 - 11 + I*2;
+   GMAT satForward = satForwardInit;
+   GMAT satBackward = satBackwardInit;
+   
+   Optimize Yukon1 {SolveMode = Solve, ExitMode = SaveAndContinue, ShowProgressWindow = true};
+      GMAT loopCount = loopCount + 1;
+      
+      %Vary NLP(launchEpoch = launchEpoch, {Perturbation = 1e-4, MaxStep = 125, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+      %Vary NLP(patchEpoch = patchEpoch, {Perturbation = 1e-4, MaxStep = 125, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+      Vary Yukon1(arrivalEpoch = arrivalEpoch, {Perturbation = 1e-4, MaxStep = 125, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+      GMAT tofValue = arrivalEpoch - launchEpoch;
+      
+      GMAT satForward.Epoch = launchEpoch;
+      GMAT satBackward.Epoch = arrivalEpoch;
+      GMAT patchEpoch = launchEpoch + (arrivalEpoch - launchEpoch)/2;
+      
+      Vary Yukon1(satForward.VX = satForward.EarthSunRot.VX, {Perturbation = 1e-6, MaxStep = 1, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+      Vary Yukon1(satForward.VY = satForward.EarthSunRot.VY, {Perturbation = 1e-6, MaxStep = 1, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+      Vary Yukon1(satForward.VZ = satForward.EarthSunRot.VZ, {Perturbation = 1e-6, MaxStep = 1, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+      
+      Vary Yukon1(satBackward.VX = satBackward.MarsSunRot.VX, {Perturbation = 1e-6, MaxStep = 1, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+      Vary Yukon1(satBackward.VY = satBackward.MarsSunRot.VY, {Perturbation = 1e-6, MaxStep = 1, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+      Vary Yukon1(satBackward.VZ = satBackward.MarsSunRot.VZ, {Perturbation = 1e-6, MaxStep = 1, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+      
+      PenUp SunInertialView EarthSunRotView;
+      Propagate sunProp(satForward) {satForward.ElapsedSecs = 5};
+      PenDown SunInertialView EarthSunRotView;
+      Propagate sunProp(satForward) {satForward.TAIModJulian = patchEpoch};
+      PenUp SunInertialView EarthSunRotView;
+      Propagate BackProp sunProp(satBackward) {satBackward.ElapsedSecs = -5};
+      PenDown SunInertialView EarthSunRotView;
+      Propagate BackProp sunProp(satBackward) {satBackward.TAIModJulian = patchEpoch};
+      
+      NonlinearConstraint Yukon1(satForward.SunMJ2000Ec.X=satBackward.SunMJ2000Ec.X);
+      NonlinearConstraint Yukon1(satForward.SunMJ2000Ec.Y=satBackward.SunMJ2000Ec.Y);
+      NonlinearConstraint Yukon1(satForward.SunMJ2000Ec.Z=satBackward.SunMJ2000Ec.Z);
+      NonlinearConstraint Yukon1(satForward.SunMJ2000Ec.VX=satBackward.SunMJ2000Ec.VX);
+      NonlinearConstraint Yukon1(satForward.SunMJ2000Ec.VY=satBackward.SunMJ2000Ec.VY);
+      NonlinearConstraint Yukon1(satForward.SunMJ2000Ec.VZ=satBackward.SunMJ2000Ec.VZ);
+      
+      GMAT cost = sqrt(satForward.EarthSunRot.VX^2 + satForward.EarthSunRot.VY^2 + satForward.EarthSunRot.VZ^2) + sqrt(satBackward.MarsSunRot.VX^2 + satBackward.MarsSunRot.VY^2 + satBackward.MarsSunRot.VZ^2);
+      
+      % Report rf cost satForward.EarthSunRot.VX satForward.EarthSunRot.VY satForward.EarthSunRot.VZ satBackward.MarsSunRot.VX satBackward.MarsSunRot.VY satBackward.MarsSunRot.VZ;
+      Minimize Yukon1(cost);
+   
+   
+   EndOptimize;  % For optimizer NLP
+   Report rf launchEpoch cost;
+EndFor;

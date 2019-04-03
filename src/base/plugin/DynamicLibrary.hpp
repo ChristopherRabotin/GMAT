@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -37,6 +37,9 @@
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "TriggerManager.hpp"
+
+
+class GuiFactory;
 
 /**
  * The DynamicLibrary class defines the interfaces that are needed to build a
@@ -87,7 +90,7 @@
  *
  *      std::string nodeName;         // Identifier for the resource
  *      std::string parentNodeName;   // Optional owning type identifier
- *      Gmat::ObjectType type;        // Core type
+ *      UnsignedInt type;             // Core type
  *      std::string subtype;          // Optional subtype off of the core
  *
  * The nodeName and type enumeration are required parameters.  If the new tree
@@ -107,6 +110,19 @@
  * ResourceTree updates will be loaded.  In other words, if your code does not
  * need any new ResourceTree items, there is no need to implement these
  * functions.
+ *
+ * Finally, plugins that implement GUI controls (panels, dialog boxes, etc)
+ * should implement the following functions:
+ *
+ *    std::string GetGuiToolkitName();
+ *    Integer GetGuiFactoryCount();
+ *    GuiFactory* GetGuiFactory();
+ *
+ * The first method here, GetGuiToolkitName, returns a string identifying the
+ * toolkit used for the GUI components.  Normal usage in GMAT would be to return
+ * "wxWidgets" from this call.  Some third party groups may want to use this
+ * structure to support other toolkits.  The design here is intended to allow
+ * such extensions.
  */
 class GMAT_API DynamicLibrary
 {
@@ -116,22 +132,25 @@ public:
    DynamicLibrary(const DynamicLibrary& dlib);
    DynamicLibrary& operator=(const DynamicLibrary& dlib);
 
-   bool                 LoadDynamicLibrary();
-   void                 (*GetFunction(const std::string &funName))();
+   bool                    LoadDynamicLibrary();
+   void                    (*GetFunction(const std::string &funName))();
 
-   Integer              GetFactoryCount();
-   Factory*             GetGmatFactory(Integer index = 0);
-   Integer              GetTriggerManagerCount();
-   TriggerManager*      GetTriggerManager(Integer index = 0);
+   Integer                 GetFactoryCount();
+   Factory*                GetGmatFactory(Integer index = 0);
+   Integer                 GetTriggerManagerCount();
+   TriggerManager*         GetTriggerManager(Integer index = 0);
 
    // GUI elements
-   Integer               GetMenuEntryCount();
-   Gmat::PluginResource* GetMenuEntry(Integer index);
+   Integer                 GetMenuEntryCount();
+   Gmat::PluginResource*   GetMenuEntry(Integer index);
+   std::string             GetGuiToolkitName();
+   Integer                 GetGuiFactoryCount();
+   GuiFactory*             GetGuiFactory(const Integer whichOne);
 
 protected:
-   std::string          libName;
-   std::string          libPath;
-   void *               libHandle;
+   std::string             libName;
+   std::string             libPath;
+   void *                  libHandle;
 };
 
 #endif /*DynamicLibrary_hpp*/

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -124,7 +124,8 @@ public:
    
    virtual bool TakeGlAction(const std::string &plotName,
                         const std::string &action) = 0;
-   
+   virtual void SetMaxGlDataPoints(const std::string &plotName, Integer maxDataPoints) = 0;
+
    // for XY plot
    virtual bool CreateXyPlotWindow(const std::string &plotName,
                         const std::string &oldName,

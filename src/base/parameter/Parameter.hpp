@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -79,17 +79,17 @@ public:
    Parameter(const std::string &name, const std::string &typeStr,
              GmatParam::ParameterKey key, GmatBase *owner,
              const std::string &desc, const std::string &unit,
-             GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
+             GmatParam::DepObject depObj, UnsignedInt ownerType,
              bool isTimeParam, bool isSettable, bool isPlottable,
              bool isReportable,
-             Gmat::ObjectType ownedObjType = Gmat::UNKNOWN_OBJECT);
+             UnsignedInt ownedObjType = Gmat::UNKNOWN_OBJECT);
    Parameter(const Parameter &copy);
    Parameter& operator= (const Parameter& right);
    virtual ~Parameter();
    
    GmatParam::ParameterKey  GetKey() const;
    GmatBase*                GetOwner() const;
-   Gmat::ObjectType         GetOwnerType() const;
+   UnsignedInt         GetOwnerType() const;
    Gmat::ParameterType      GetReturnType() const;
    GmatParam::CycleType     GetCycleType() const;
    std::string              GetParameterClassType() const;
@@ -169,7 +169,7 @@ public:
    virtual bool         SetName(const std::string &who,
                                 const std::string &oldName = "");
    virtual void         Copy(const GmatBase*);
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
    
@@ -219,8 +219,8 @@ protected:
    std::string   mInitialValue;
    std::string   mParameterClassType;
    
-   Gmat::ObjectType     mOwnerType;
-   Gmat::ObjectType     mOwnedObjectType;
+   UnsignedInt     mOwnerType;
+   UnsignedInt     mOwnedObjectType;
    Gmat::ParameterType  mReturnType;
    GmatParam::DepObject mDepObj;
    GmatParam::CycleType mCycleType;

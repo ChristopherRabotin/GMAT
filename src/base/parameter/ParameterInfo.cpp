@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -106,7 +106,7 @@ Integer ParameterInfo::GetNumParameters() const
 const StringArray& ParameterInfo::GetTypesOfParameters()
 {
    mParamTypes.clear();
-   std::map<std::string, Gmat::ObjectType>::iterator pos;
+   std::map<std::string, UnsignedInt>::iterator pos;
    
    for (pos = mOwnerTypeMap.begin(); pos != mOwnerTypeMap.end(); ++pos)
    {
@@ -139,9 +139,9 @@ const StringArray& ParameterInfo::GetNamesOfParameters()
 
 
 //------------------------------------------------------------------------------
-// Gmat::ObjectType GetObjectType(const std::string &name)
+// UnsignedInt GetObjectType(const std::string &name)
 //------------------------------------------------------------------------------
-Gmat::ObjectType ParameterInfo::GetObjectType(const std::string &name)
+UnsignedInt ParameterInfo::GetObjectType(const std::string &name)
 {
    if (mOwnerTypeMap.find(name) != mOwnerTypeMap.end())
       return mOwnerTypeMap[name];
@@ -151,13 +151,13 @@ Gmat::ObjectType ParameterInfo::GetObjectType(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// Gmat::ObjectType GetOwnedObjectType(const std::string &name)
+// UnsignedInt GetOwnedObjectType(const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Returns owned or attached object type.
  */
 //------------------------------------------------------------------------------
-Gmat::ObjectType ParameterInfo::GetOwnedObjectType(const std::string &name)
+UnsignedInt ParameterInfo::GetOwnedObjectType(const std::string &name)
 {
    if (mOwnedObjTypeMap.find(name) != mOwnedObjTypeMap.end())
    {
@@ -281,10 +281,10 @@ bool ParameterInfo::IsForAttachedObject(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// void Add(const std::string &type, Gmat::ObjectType objectType, ...)
+// void Add(const std::string &type, UnsignedInt objectType, ...)
 //------------------------------------------------------------------------------
-void ParameterInfo::Add(const std::string &type, Gmat::ObjectType objectType,
-                        Gmat::ObjectType ownedObjType, const std::string &name,
+void ParameterInfo::Add(const std::string &type, UnsignedInt objectType,
+                        UnsignedInt ownedObjType, const std::string &name,
                         GmatParam::DepObject depType, bool isPlottable,
                         bool isReportable, bool isSettable, bool isTimeParam,
                         const std::string &desc)

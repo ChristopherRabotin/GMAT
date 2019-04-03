@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -884,7 +884,7 @@ const StringArray& ImpulsiveBurn::GetStringArrayParameter(const Integer id) cons
 
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Retrieves object type of parameter of given id.
@@ -894,7 +894,7 @@ const StringArray& ImpulsiveBurn::GetStringArrayParameter(const Integer id) cons
  * @return parameter ObjectType
  */
 //---------------------------------------------------------------------------
-Gmat::ObjectType ImpulsiveBurn::GetPropertyObjectType(const Integer id) const
+UnsignedInt ImpulsiveBurn::GetPropertyObjectType(const Integer id) const
 {
    switch (id)
    {
@@ -945,9 +945,9 @@ const ObjectTypeArray& ImpulsiveBurn::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& ImpulsiveBurn::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& ImpulsiveBurn::GetRefObjectNameArray(const UnsignedInt type)
 {
    #ifdef DEBUG_IMPBURN_OBJECT
    MessageInterface::ShowMessage
@@ -987,7 +987,7 @@ const StringArray& ImpulsiveBurn::GetRefObjectNameArray(const Gmat::ObjectType t
 
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -1001,7 +1001,7 @@ const StringArray& ImpulsiveBurn::GetRefObjectNameArray(const Gmat::ObjectType t
  *
  */
 //------------------------------------------------------------------------------
-bool ImpulsiveBurn::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool ImpulsiveBurn::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                  const std::string &name)
 {
    #ifdef DEBUG_BURN_SET
@@ -1026,7 +1026,7 @@ bool ImpulsiveBurn::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 /**
@@ -1039,7 +1039,7 @@ bool ImpulsiveBurn::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return true if object name changed, false if not.
  */
 //---------------------------------------------------------------------------
-bool ImpulsiveBurn::RenameRefObject(const Gmat::ObjectType type,
+bool ImpulsiveBurn::RenameRefObject(const UnsignedInt type,
                                     const std::string &oldName,
                                     const std::string &newName)
 {

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -31,21 +31,22 @@
 
 
 #include "Estimator.hpp"
-#include "GmatState.hpp"
-#include "GmatGlobal.hpp"
-#include "PropagationStateManager.hpp"
+//#include "GmatState.hpp"
+//#include "GmatGlobal.hpp"
+//#include "PropagationStateManager.hpp"
 #include "SolverException.hpp"
-#include "SpaceObject.hpp"
+//#include "SpaceObject.hpp"
 #include "MessageInterface.hpp"
 #include "EstimatorException.hpp"
-#include "Spacecraft.hpp"
-#include "GroundstationInterface.hpp"
+//#include "Spacecraft.hpp"
+//#include "GroundstationInterface.hpp"
 #include "AcceptFilter.hpp"
 #include "RejectFilter.hpp"
-#include "StateConversionUtil.hpp"
+//#include "StateConversionUtil.hpp"
 #include "StringUtil.hpp"
+#include "ODEModel.hpp"
 
-#include <sstream>
+//#include <sstream>
 
 //#define DEBUG_CONSTRUCTION
 //#define DEBUG_STATE_MACHINE
@@ -75,6 +76,7 @@ Estimator::PARAMETER_TEXT[] =
    "OLSEInitialRMSSigma",
    "OLSEMultiplicativeConstant",
    "OLSEAdditiveConstant",
+   "OLSEUseRMSP",
    "ResetBestRMSIfDiverging",
    "DataFilters",
    "ConvergentStatus",
@@ -93,6 +95,7 @@ Estimator::PARAMETER_TYPE[] =
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
+   Gmat::BOOLEAN_TYPE,
    Gmat::BOOLEAN_TYPE,
    Gmat::STRINGARRAY_TYPE,
    Gmat::STRING_TYPE,
@@ -122,9 +125,9 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    resetState           (false),
    timeStep             (60.0),
    propagator           (NULL),
-   estimationEpoch      (-1.0),
-   currentEpoch         (-1.0),
-   nextMeasurementEpoch (-1.0),
+   estimationEpochGT      (-1.0),
+   currentEpochGT         (-1.0),
+   nextMeasurementEpochGT (-1.0),
    stm                  (NULL),
    stateCovariance      (NULL),
    estimationState      (NULL),
@@ -137,6 +140,7 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    maxResidualMult      (3000.0),
    constMult            (3.0),
    additiveConst        (0.0),
+   chooseRMSP           (true),                  // true for WRMSP and false for WRMS
    resetBestRMSFlag     (false)
 {
 
@@ -201,10 +205,10 @@ Estimator::Estimator(const Estimator& est) :
    resetState           (false),
    timeStep             (est.timeStep),
    refObjectList        (est.refObjectList),
-   estimationEpoch      (est.estimationEpoch),
-   currentEpoch         (est.currentEpoch),
-   nextMeasurementEpoch (est.nextMeasurementEpoch),
-   stm                  (NULL),
+   estimationEpochGT      (est.estimationEpochGT),
+   currentEpochGT         (est.currentEpochGT),
+   nextMeasurementEpochGT (est.nextMeasurementEpochGT),
+   stm(NULL),
    stateCovariance      (est.stateCovariance),
    estimationState      (NULL),
    stateSize            (0),
@@ -216,6 +220,7 @@ Estimator::Estimator(const Estimator& est) :
    maxResidualMult      (est.maxResidualMult),
    constMult            (est.constMult),
    additiveConst        (est.additiveConst),
+   chooseRMSP           (est.chooseRMSP),
    resetBestRMSFlag     (est.resetBestRMSFlag),
    dataFilterStrings    (est.dataFilterStrings)
 {
@@ -275,9 +280,9 @@ Estimator& Estimator::operator=(const Estimator& est)
 
       measManager          = est.measManager;
 
-      estimationEpoch      = est.estimationEpoch;
-      currentEpoch         = est.currentEpoch;
-      nextMeasurementEpoch = est.nextMeasurementEpoch;
+      estimationEpochGT      = est.estimationEpochGT;
+      currentEpochGT         = est.currentEpochGT;
+      nextMeasurementEpochGT = est.nextMeasurementEpochGT;
       stm                  = NULL;
       covariance           = NULL;
       estimationState      = NULL;
@@ -293,6 +298,7 @@ Estimator& Estimator::operator=(const Estimator& est)
       maxResidualMult      = est.maxResidualMult;
       constMult            = est.constMult;
       additiveConst        = est.additiveConst;
+      chooseRMSP           = est.chooseRMSP;
       resetBestRMSFlag     = est.resetBestRMSFlag;
 
       dataFilterStrings    = est.dataFilterStrings;
@@ -352,6 +358,16 @@ bool Estimator::Initialize()
       if (measurementNames.empty())
          throw EstimatorException("Error: no measurements are set for estimation.\n");
 
+      ODEModel *ode = propagator->GetODEModel();
+      if (ode->GetStringParameter("ErrorControl") != "None")
+         throw EstimatorException("GMAT navigation requires use of fixed "
+               "stepped propagation. The ErrorControl parameter specified for "
+               "the ForceModel resource associated with the propagator, " +
+               propagatorName + ", used  with the " + typeName + " named " +
+               instanceName + " must be 'None.' Of course, when using fixed step "
+               "control, the user must choose a step size, as given by the "
+               "Propagator InitialStepSize field, for the chosen orbit regime "
+               "and force profile, that yields the desired accuracy.");
 
       // Check the names of measurement models shown in est.AddData have to be the names of created objects
       std::vector<MeasurementModel*> measModels = measManager.GetAllMeasurementModels();
@@ -1201,6 +1217,8 @@ bool Estimator::GetBooleanParameter(const Integer id) const
 {
    if (id == RESET_BEST_RMS)
       return resetBestRMSFlag;
+   else if (id == USE_RMSP)
+      return chooseRMSP;
 
    return Solver::GetBooleanParameter(id);
 }
@@ -1225,13 +1243,18 @@ bool Estimator::SetBooleanParameter(const Integer id, const bool value)
       resetBestRMSFlag = value;
       return true;
    }
+   else if (id == USE_RMSP)
+   {
+      chooseRMSP = value;
+      return true;
+   }
 
    return Solver::SetBooleanParameter(id, value);
 }
 
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Retrieves object type of parameter of given id.
@@ -1241,7 +1264,7 @@ bool Estimator::SetBooleanParameter(const Integer id, const bool value)
  * @return parameter ObjectType
  */
 //---------------------------------------------------------------------------
-Gmat::ObjectType Estimator::GetPropertyObjectType(const Integer id) const
+UnsignedInt Estimator::GetPropertyObjectType(const Integer id) const
 {
    if (id == MEASUREMENTS)
       return Gmat::MEASUREMENT_MODEL;
@@ -1263,9 +1286,9 @@ Gmat::ObjectType Estimator::GetPropertyObjectType(const Integer id) const
  * @param newEpoch The new epoch
  */
 //------------------------------------------------------------------------------
-void Estimator::UpdateCurrentEpoch(GmatEpoch newEpoch)
+void Estimator::UpdateCurrentEpoch(GmatTime newEpoch)
 {
-   currentEpoch = newEpoch;
+   currentEpochGT = newEpoch;
 }
 
 
@@ -1278,14 +1301,14 @@ void Estimator::UpdateCurrentEpoch(GmatEpoch newEpoch)
  * @return the current a.1 modified Julian epoch
  */
 //------------------------------------------------------------------------------
-GmatEpoch Estimator::GetCurrentEpoch()
+GmatTime Estimator::GetCurrentEpoch()
 {
-   return currentEpoch;
+   return currentEpochGT;
 }
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type,
+// bool RenameRefObject(const UnsignedInt type,
 //------------------------------------------------------------------------------
 /**
  * Renames references objects
@@ -1297,7 +1320,7 @@ GmatEpoch Estimator::GetCurrentEpoch()
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool Estimator::RenameRefObject(const Gmat::ObjectType type,
+bool Estimator::RenameRefObject(const UnsignedInt type,
       const std::string & oldName, const std::string & newName)
 {
    /// @todo Estimator rename code needs to be implemented
@@ -1306,7 +1329,7 @@ bool Estimator::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string & name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string & name)
 //------------------------------------------------------------------------------
 /**
  * This method sets a reference object's name
@@ -1317,7 +1340,7 @@ bool Estimator::RenameRefObject(const Gmat::ObjectType type,
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool Estimator::SetRefObjectName(const Gmat::ObjectType type,
+bool Estimator::SetRefObjectName(const UnsignedInt type,
       const std::string & name)
 {
    return Solver::SetRefObjectName(type, name);
@@ -1339,7 +1362,7 @@ const ObjectTypeArray& Estimator::GetRefObjectTypeArray()
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Initialization method that identifies the reference objects needed
@@ -1349,7 +1372,7 @@ const ObjectTypeArray& Estimator::GetRefObjectTypeArray()
  * @return A StringArray with all of the object names.
  */
 //------------------------------------------------------------------------------
-const StringArray& Estimator::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Estimator::GetRefObjectNameArray(const UnsignedInt type)
 {
    #ifdef DEBUG_ESTIMATOR_INITIALIZATION
       MessageInterface::ShowMessage(
@@ -1400,7 +1423,7 @@ const StringArray& Estimator::GetRefObjectNameArray(const Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Retrieves the name of a referenced object of a given type
@@ -1410,14 +1433,14 @@ const StringArray& Estimator::GetRefObjectNameArray(const Gmat::ObjectType type)
  * @return The name of the associated object
  */
 //------------------------------------------------------------------------------
-std::string Estimator::GetRefObjectName(const Gmat::ObjectType type) const
+std::string Estimator::GetRefObjectName(const UnsignedInt type) const
 {
    return Solver::GetRefObjectName(type);
 }
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string & name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string & name)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a pointer to a referenced object of a given type and name
@@ -1428,7 +1451,7 @@ std::string Estimator::GetRefObjectName(const Gmat::ObjectType type) const
  * @return The pointer to the associated object
  */
 //------------------------------------------------------------------------------
-GmatBase* Estimator::GetRefObject(const Gmat::ObjectType type,
+GmatBase* Estimator::GetRefObject(const UnsignedInt type,
       const std::string & name)
 {
    return Solver::GetRefObject(type, name);
@@ -1436,7 +1459,7 @@ GmatBase* Estimator::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string & name,
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string & name,
 //       const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -1450,7 +1473,7 @@ GmatBase* Estimator::GetRefObject(const Gmat::ObjectType type,
  * @return The pointer to the associated object
  */
 //------------------------------------------------------------------------------
-GmatBase* Estimator::GetRefObject(const Gmat::ObjectType type,
+GmatBase* Estimator::GetRefObject(const UnsignedInt type,
       const std::string & name, const Integer index)
 {
    return Solver::GetRefObject(type, name, index);
@@ -1458,7 +1481,7 @@ GmatBase* Estimator::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string & name)
 //------------------------------------------------------------------------------
 /**
@@ -1471,7 +1494,7 @@ GmatBase* Estimator::GetRefObject(const Gmat::ObjectType type,
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool Estimator::SetRefObject(GmatBase *obj, const UnsignedInt type,
       const std::string & name)
 {
    #ifdef DEBUG_ESTIMATOR_INITIALIZATION
@@ -1566,7 +1589,7 @@ ObjectArray& Estimator::GetRefObjectArray(const std::string & typeString)
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string &name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -1581,7 +1604,7 @@ ObjectArray& Estimator::GetRefObjectArray(const std::string & typeString)
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool Estimator::SetRefObject(GmatBase *obj, const UnsignedInt type,
       const std::string & name, const Integer index)
 {
    #ifdef DEBUG_ESTIMATOR_INITIALIZATION
@@ -1595,7 +1618,7 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// ObjectArray & GetRefObjectArray(const Gmat::ObjectType type)
+// ObjectArray & GetRefObjectArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * This method retrieves an array of reference objects of a given type
@@ -1605,7 +1628,7 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return The array of objects
  */
 //------------------------------------------------------------------------------
-ObjectArray & Estimator::GetRefObjectArray(const Gmat::ObjectType type)
+ObjectArray & Estimator::GetRefObjectArray(const UnsignedInt type)
 {
    if (type == Gmat::EVENT)
    {
@@ -1813,11 +1836,11 @@ Integer Estimator::TestForConvergence(std::string &reason)
 }
 
 //------------------------------------------------------------------------------
-// Real ConvertToRealEpoch(const std::string &theEpoch,
-//                         const std::string &theFormat)
+// GmatTime ConvertToGmatTimeEpoch(const std::string &theEpoch,
+//                                 const std::string &theFormat)
 //------------------------------------------------------------------------------
 /**
- * Converts an epoch string is a specified format into
+ * Converts an epoch string is a specified format into a GmatTime
  *
  * @param theEpoch The input epoch
  * @param theFormat The format of the input epoch
@@ -1825,11 +1848,11 @@ Integer Estimator::TestForConvergence(std::string &reason)
  * @return The converted epoch
  */
 //------------------------------------------------------------------------------
-Real Estimator::ConvertToRealEpoch(const std::string &theEpoch,
-                                   const std::string &theFormat)
+GmatTime Estimator::ConvertToGmatTimeEpoch(const std::string &theEpoch, 
+                                           const std::string &theFormat)
 {
-   Real fromMjd = -999.999;
-   Real retval = -999.999;
+   GmatTime fromMjd(-999.999);
+   GmatTime retval(-999.999);
    std::string outStr;
 
    TimeConverterUtil::Convert(theFormat, fromMjd, theEpoch, "A1ModJulian",
@@ -1993,8 +2016,7 @@ void Estimator::PlotResiduals()
                   values.push_back(yval);
             }
 
-            //epochs.push_back(measurementEpochs[j]);
-            epochs.push_back(measurementTimes[j]);
+            epochs.push_back(measurementTimes[j].GetMjd());
 
             for (Integer k = 0; k < measurementResVectors[j].size(); ++k)
                values[k].push_back(measurementResVectors[j][k]);
@@ -2105,6 +2127,61 @@ void Estimator::SetResultValue(Integer, Real, const std::string&)
 }
 
 
+//--------------------------------------------------------------------------
+// bool StateConversion(GmatTime forTime, CoordinateSystem* fromCS, 
+//     std::string fromCSType, Rvector fromState, CoordinateSystem* toCS, 
+//     std::string toCSType, Rvector& toState)
+//--------------------------------------------------------------------------
+/** This function is used to convert state in a given coordinate system with 
+*     a give state type (Cartesian or Keplerian) to another coordinate system
+*     with another state type at a given epoch.
+*
+*/
+//--------------------------------------------------------------------------
+//bool Estimator::StateConversion(GmatTime forTime, CoordinateSystem* fromCS, 
+//                                std::string fromCSType, Rvector fromState,
+//                                CoordinateSystem* toCS, std::string toCSType, 
+//                                Rvector& toState)
+//{
+//   // 1. Convert from Keplerian to Cartesian if it needs
+//   Rvector inState;
+//   Rvector outState;
+//   if (fromCSType != "KeplerianState")
+//      inState = fromState;
+//   else
+//   {
+//      // 1.1. Get mu value
+//      Planet* pn = (Planet*)(fromCS->GetOrigin());
+//      Real mu = pn->GetRealParameter("Mu");
+//
+//      // 1.2. Convert from Keplerian to Cartesian
+//      Rvector6 inState6(fromState[0], fromState[1], fromState[2], fromState[3], fromState[4], fromState[5]);
+//      Rvector outState = StateConversionUtil::KeplerianToCartesian(mu, inState6);
+//   }
+//
+//   // 2. Convert from inState from coordinate system fromCS to coordiante system toCS at time fromTime
+//   CoordinateConverter *cv = new CoordinateConverter();
+//   cv->Convert(forTime, inState, fromCS, outState, toCS, false, false);
+//   delete cv;
+//
+//   // 3. Convert from Cartesian to Keplerian if it needs
+//   if (toCSType != "CartesianState")
+//      toState = outState;
+//   else
+//   {
+//      // 3.1. Get mu value
+//      Planet* pn = (Planet*)(toCS->GetOrigin());
+//      Real mu = pn->GetRealParameter("Mu");
+//
+//      // 3.2. Convert from Cartesian to Keplerian
+//      Rvector6 outState6(outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);
+//      toState = StateConversionUtil::CartesianToKeplerian(mu, outState6);
+//   }
+//
+//   return true;
+//}
+
+
 //------------------------------------------------------------------------------
 // bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, 
 //                    Rvector6 &inState, Rvector6 &outState)
@@ -2122,94 +2199,143 @@ void Estimator::SetResultValue(Integer, Real, const std::string&)
  *
 */
 //------------------------------------------------------------------------------
-bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Rvector &inState, Rvector &outState)
-{
-   outState = inState;
-
-   if (infor->object->IsOfType(Gmat::SPACEOBJECT))
-   {
-      if ((infor->elementName == "CartesianState") || (infor->elementName == "Position") || (infor->elementName == "Velocity"))
-      {
-         Spacecraft* obj = (Spacecraft*)(infor->object);
-         std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
-         CoordinateSystem* cs = (CoordinateSystem*)obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
-         CoordinateSystem* internalcs = obj->GetInternalCoordSystem();
-
-         if (cs == NULL)
-            throw EstimatorException("Coordinate system for " + obj->GetName() + " is not set\n");
-         if (internalcs == NULL)
-            throw EstimatorException("Internal coordinate system for " + obj->GetName() + " is not set\n");
-
-         CoordinateConverter* cv = new CoordinateConverter();
-         cv->Convert(A1Mjd(epoch), inState, internalcs, outState, cs);
-
-         delete cv;
-      }
-   }
-
-   return true;
-}
+//bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, GmatTime epoch, Rvector &inState, Rvector &outState)
+//{
+//   outState = inState;
+//
+//   if (infor->object->IsOfType(Gmat::SPACEOBJECT))
+//   {
+//      if ((infor->elementName == "CartesianState") || (infor->elementName == "Position") || (infor->elementName == "Velocity"))
+//      {
+//         Spacecraft* obj = (Spacecraft*)(infor->object);
+//         std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+//         CoordinateSystem* cs = (CoordinateSystem*)obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+//         CoordinateSystem* internalcs = obj->GetInternalCoordSystem();
+//
+//         if (cs == NULL)
+//            throw EstimatorException("Coordinate system for " + obj->GetName() + " is not set\n");
+//         if (internalcs == NULL)
+//            throw EstimatorException("Internal coordinate system for " + obj->GetName() + " is not set\n");
+//
+//         CoordinateConverter* cv = new CoordinateConverter();
+//         //cv->Convert(A1Mjd(epoch), inState, internalcs, outState, cs);
+//         cv->Convert(epoch, inState, internalcs, outState, cs);
+//
+//         delete cv;
+//      }
+//      else if (infor->elementName == "KeplerianState")
+//      {
+//         Spacecraft* obj = (Spacecraft*)(infor->object);
+//         std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+//         CoordinateSystem* cs = (CoordinateSystem*)obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+//         CoordinateSystem* internalcs = obj->GetInternalCoordSystem();
+//
+//         if (cs == NULL)
+//            throw EstimatorException("Coordinate system for " + obj->GetName() + " is not set\n");
+//         if (internalcs == NULL)
+//            throw EstimatorException("Internal coordinate system for " + obj->GetName() + " is not set\n");
+//
+//         CoordinateConverter* cv = new CoordinateConverter();
+//         Rvector6 outStateCart;
+//         cv->Convert(epoch, inState, internalcs, outStateCart, cs);
+//
+//         // Convert Cartesian to Keplerian 
+//         Planet* pn = (Planet*)(cs->GetOrigin());
+//         Real mu = pn->GetRealParameter("Mu");
+//         outState = StateConversionUtil::CartesianToKeplerian(mu, outStateCart);
+//         
+//         delete cv;
+//      }
+//   }
+//
+//   return true;
+//}
 
 
 //-------------------------------------------------------------------------
-// void Estimator::GetEstimationStateForReport(GmatState& outputState)
+// GmatState& Estimator::GetEstimationStateForReport()
 //-------------------------------------------------------------------------
 /**
  * This Method used to convert result of estimation state to participants'
  * coordinate system. For report, it reports Cr and Cd instead of Cr_Epsilon 
  * and Cd_Epsilon.
  *
- * @param outState        estimation state in participants' coordinate systems
+ * @return        estimation state in participants' coordinate systems
  *
 */
 //-------------------------------------------------------------------------
-void Estimator::GetEstimationStateForReport(GmatState& outputState)
-{
-   const std::vector<ListItem*> *map = esm.GetStateMap();
-
-   Real outputStateElement;
-   outputState.SetSize(map->size());
-
-   for (UnsignedInt i = 0; i < map->size(); ++i)
-   {
-      //ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, (*estimationState)[i], &outputStateElement);
-      //outputState[i] = outputStateElement;
-
-      // get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
-      if ((*map)[i]->elementName == "Cr_Epsilon")
-         outputState[i] = ((Spacecraft*) (*map)[i]->object)->GetRealParameter("Cr");
-      else if ((*map)[i]->elementName == "Cd_Epsilon")
-         outputState[i] = ((Spacecraft*) (*map)[i]->object)->GetRealParameter("Cd");
-      else if (((*map)[i]->elementName == "CartesianState") || 
-               ((*map)[i]->elementName == "Position"))
-      {
-         if ((*map)[i]->subelement == 1)
-         {
-            Rvector inState(6,
-               (*estimationState)[i],
-               (*estimationState)[i + 1],
-               (*estimationState)[i + 2],
-               (*estimationState)[i + 3],
-               (*estimationState)[i + 4],
-               (*estimationState)[i + 5]);
-
-            Rvector outState(6);
-            ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, inState, outState);
-            for (Integer j = 0; j < 6; ++j)
-               outputState[i + j] = outState[j];
-
-            i = i + 5;
-         }
-      }
-      else if ((*map)[i]->elementName == "Bias")
-      {
-         Rvector inState(1, (*estimationState)[i]);
-         Rvector outState(1);
-         ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, inState, outState);
-         outputState[i] = outState[0];
-      }
-   }
-}
+//GmatState Estimator::GetEstimationStateForReport()
+//{
+//   GmatState outputState;
+//   const std::vector<ListItem*> *map = esm.GetStateMap();
+//
+//   Real outputStateElement;
+//   outputState.SetSize(map->size());
+//
+//   for (UnsignedInt i = 0; i < map->size(); ++i)
+//   {
+//      //ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, (*estimationState)[i], &outputStateElement);
+//      //outputState[i] = outputStateElement;
+//
+//      // get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+//      if ((*map)[i]->elementName == "Cr_Epsilon")
+//         outputState[i] = ((Spacecraft*) (*map)[i]->object)->GetRealParameter("Cr");
+//      else if ((*map)[i]->elementName == "Cd_Epsilon")
+//         outputState[i] = ((Spacecraft*) (*map)[i]->object)->GetRealParameter("Cd");
+//      else if (((*map)[i]->elementName == "CartesianState") || 
+//               ((*map)[i]->elementName == "KeplerianState") || 
+//               ((*map)[i]->elementName == "Position"))
+//      {
+//         if ((*map)[i]->subelement == 1)
+//         {
+//            Rvector inState(6,
+//               (*estimationState)[i],
+//               (*estimationState)[i + 1],
+//               (*estimationState)[i + 2],
+//               (*estimationState)[i + 3],
+//               (*estimationState)[i + 4],
+//               (*estimationState)[i + 5]);
+//            Rvector outState(6);
+//            
+//            //ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, inState, outState);
+//            ConvertToParticipantCoordSystem((*map)[i], estimationEpochGT, inState, outState);
+//            for (Integer j = 0; j < 6; ++j)
+//               outputState[i + j] = outState[j];
+//
+//            i = i + 5;
+//         }
+//      }
+//      //else if ((*map)[i]->elementName == "KeplerianState")
+//      //{
+//      //   if ((*map)[i]->subelement == 1)
+//      //   {
+//      //      Rvector inState(6,
+//      //         (*estimationState)[i],
+//      //         (*estimationState)[i + 1],
+//      //         (*estimationState)[i + 2],
+//      //         (*estimationState)[i + 3],
+//      //         (*estimationState)[i + 4],
+//      //         (*estimationState)[i + 5]);
+//      //      Rvector outState(6);
+//
+//      //      ConvertToParticipantCoordSystem((*map)[i], estimationEpochGT, inState, outState);
+//      //      for (Integer j = 0; j < 6; ++j)
+//      //         outputState[i + j] = outState[j];
+//
+//      //      i = i + 5;
+//      //   }
+//      //}
+//      else if ((*map)[i]->elementName == "Bias")
+//      {
+//         Rvector inState(1, (*estimationState)[i]);
+//         Rvector outState(1);
+//         ConvertToParticipantCoordSystem((*map)[i], estimationEpochGT, inState, outState);
+//         outputState[i] = outState[0];
+//      }
+//   }
+//
+//   return outputState;
+//}
 
 
 //------------------------------------------------------------------------------
@@ -2294,5 +2420,63 @@ ObservationData* Estimator::FilteringData(ObservationData* dataObject, Integer o
 #endif
 
    return obdata;
+}
+
+
+Integer Estimator::SumAcceptedRecords(Integer key)
+{
+   Integer num = 0;
+   for (Integer i = 0; i < measurementResiduals.size(); ++i)
+   {
+      if (KeyIndex[i] == key)
+         ++num;
+   }
+
+   return num;
+}
+
+
+Real Estimator::SumAllResidual(Integer key)
+{
+   Real sum = 0;
+   for (Integer i = 0; i < measurementResiduals.size(); ++i)
+   {
+      if (KeyIndex[i] == key)
+         sum += measurementResiduals[i];
+   }
+
+   return sum;
+}
+
+
+Real Estimator::SumAllResidualDeviationSqr(Integer key, Real ave)
+{
+   Real sum = 0.0;
+   Real dev;
+   Integer num = 0;
+   for (Integer i = 0; i < measurementResiduals.size(); ++i)
+   {
+      if (KeyIndex[i] == key)
+      {
+         dev = measurementResiduals[i] - ave;
+         sum += dev*dev;
+         ++num;
+      }
+   }
+   
+   return sum;
+}
+
+Real Estimator::SumAllWeightedResidualSqr(Integer key)
+{
+   Real sum = 0;
+   Real dev;
+   for (Integer i = 0; i < measurementResiduals.size(); ++i)
+   {
+      if (KeyIndex[i] == key)
+         sum += measurementResiduals[i] * measurementResiduals[i] * Weight[i];
+   }
+
+   return sum;
 }
 

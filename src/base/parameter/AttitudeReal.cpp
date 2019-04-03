@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -150,10 +150,10 @@ bool AttitudeReal::Initialize()
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string &oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string &oldName,
 //                      const std::string &newName)
 //------------------------------------------------------------------------------
-bool AttitudeReal::RenameRefObject(const Gmat::ObjectType type,
+bool AttitudeReal::RenameRefObject(const UnsignedInt type,
                                    const std::string &oldName,
                                    const std::string &newName)
 {
@@ -162,9 +162,9 @@ bool AttitudeReal::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
-std::string AttitudeReal::GetRefObjectName(const Gmat::ObjectType type) const
+std::string AttitudeReal::GetRefObjectName(const UnsignedInt type) const
 {
    std::string objName = AttitudeData::GetRefObjectName(type);
    
@@ -180,18 +180,18 @@ std::string AttitudeReal::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& AttitudeReal::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& AttitudeReal::GetRefObjectNameArray(const UnsignedInt type)
 {
    return AttitudeData::GetRefObjectNameArray(type);
 }
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
-bool AttitudeReal::SetRefObjectName(const Gmat::ObjectType type,
+bool AttitudeReal::SetRefObjectName(const UnsignedInt type,
                                     const std::string &name)
 {
    bool ret = AttitudeData::SetRefObjectName(type, name);
@@ -207,9 +207,9 @@ bool AttitudeReal::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* AttitudeReal::GetRefObject(const Gmat::ObjectType type,
+GmatBase* AttitudeReal::GetRefObject(const UnsignedInt type,
                                      const std::string &name)
 {
    GmatBase *obj = AttitudeData::GetRefObject(type, name);
@@ -227,10 +227,10 @@ GmatBase* AttitudeReal::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name)
 //------------------------------------------------------------------------------
-bool AttitudeReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool AttitudeReal::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                 const std::string &name)
 {
    #if DEBUG_ATTITUDEREAL

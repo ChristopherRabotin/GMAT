@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -141,7 +141,7 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
      mBodyRotAxis( NULL )
 {
    #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage("ViewCanvas() constructor entered, name='%s'\n", name.c_str());
+   MessageInterface::ShowMessage("ViewCanvas() constructor entered, name='%s'\n", name.WX_TO_C_STRING);
    #endif
    
    // Initialize pointers
@@ -181,6 +181,7 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    // Data points
    mNumData = 0;
    mTotalPoints = 0;
+   maxData = 20000;
    
    // Data control flags
    mOverCounter = 0;
@@ -256,7 +257,7 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    ClearObjectArrays(false);
    
    #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage("ViewCanvas() constructor leaving, name='%s'\n", name.c_str());
+   MessageInterface::ShowMessage("ViewCanvas() constructor leaving, name='%s'\n", name.WX_TO_C_STRING);
    #endif
 }
 
@@ -374,7 +375,7 @@ bool ViewCanvas::InitializePlot()
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage
       ("\nViewCanvas::InitializePlot() '%s' entered, theContext=<%p>, mIsNewFrame=%d, "
-       "mUseInitialViewPoint=%d\n", mPlotName.c_str(), theContext, mIsNewFrame,
+       "mUseInitialViewPoint=%d\n", mPlotName.WX_TO_C_STRING, theContext, mIsNewFrame,
        mUseInitialViewPoint);
    #endif
    
@@ -411,7 +412,7 @@ bool ViewCanvas::InitializePlot()
    
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage
-      ("ViewCanvas::InitializePlot() '%s' leaving\n\n", mPlotName.c_str());
+      ("ViewCanvas::InitializePlot() '%s' leaving\n\n", mPlotName.WX_TO_C_STRING);
    #endif
    
    return true;
@@ -430,7 +431,7 @@ bool ViewCanvas::InitOpenGL()
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage
       ("ViewCanvas::InitOpenGL() '%s' entered, mGlInitialized = %d\n",
-       mPlotName.c_str(), mGlInitialized);
+       mPlotName.WX_TO_C_STRING, mGlInitialized);
    #endif
    
    #ifdef DEBUG_GL_INFO
@@ -456,7 +457,7 @@ bool ViewCanvas::InitOpenGL()
       #ifdef DEBUG_INIT
 		MessageInterface::ShowMessage
 			("ViewCanvas::InitOpenGL() '%s', GL already initialized so returning true\n",
-			 mPlotName.c_str());
+			 mPlotName.WX_TO_C_STRING);
       #endif
 		return true;
 	}
@@ -476,7 +477,7 @@ bool ViewCanvas::InitOpenGL()
    
    #ifdef DEBUG_INIT
    MessageInterface::ShowMessage
-      ("ViewCanvas::InitOpenGL() '%s' returning true\n", mPlotName.c_str());
+      ("ViewCanvas::InitOpenGL() '%s' returning true\n", mPlotName.WX_TO_C_STRING);
    #endif
    
    return true;
@@ -516,7 +517,7 @@ void ViewCanvas::SetGlObject(const StringArray &objNames,
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
       ("ViewCanvas::SetGlObject() '%s' entered, objCount=%d, objArrayCount=%d\n",
-       mPlotName.c_str(), objNames.size(), objArray.size());
+       mPlotName.WX_TO_C_STRING, objNames.size(), objArray.size());
    #endif
    
    mObjectArray = objArray;
@@ -555,7 +556,8 @@ void ViewCanvas::SetGlObject(const StringArray &objNames,
    
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
-      ("ViewCanvas::SetGlObject() '%s' leaving, mScCount=%d\n", mPlotName.c_str(), mScCount);
+      ("ViewCanvas::SetGlObject() '%s' leaving, mScCount=%d\n",
+      mPlotName.WX_TO_C_STRING, mScCount);
    #endif
 }
 
@@ -682,7 +684,7 @@ void ViewCanvas::SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
       draw = mDrawOrbitArray[i] ? true : false;      
       MessageInterface::ShowMessage
          ("ViewCanvas::SetGlDrawOrbitFlag() i=%2d, mDrawOrbitArray[%s]=%d\n",
-          i, mObjectNames[i].c_str(), draw);
+          i, mObjectNames[i].WX_TO_C_STRING, draw);
    }
    #endif
 }
@@ -722,7 +724,7 @@ void ViewCanvas::SetGlShowObjectFlag(const std::vector<bool> &showArray)
       #if DEBUG_OBJECT
       MessageInterface::ShowMessage
          ("ViewCanvas::SetGlShowObjectFlag() i=%2d, mShowObjectMap[%s]=%d\n",
-          i, mObjectNames[i].c_str(), show);
+          i, mObjectNames[i].WX_TO_C_STRING, show);
       #endif
    }
    
@@ -796,7 +798,7 @@ void ViewCanvas::SetEndOfRun(bool flag)
    #if DEBUG_UPDATE
    MessageInterface::ShowMessage
       ("ViewCanvas::SetEndOfRun() '%s' entered, flag=%d, mNumData=%d\n",
-       mPlotName.c_str(), flag, mNumData);
+       mPlotName.WX_TO_C_STRING, flag, mNumData);
    #endif
    
    mIsEndOfRun = flag;
@@ -905,6 +907,9 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    
    SetGLContext();
    
+   // reset the error flag (since the user could fix something then rerun
+   mFatalErrorFound = false;
+   
    mTotalPoints++;
    mInFunction = inFunction;   
    mDrawSolverData = false;
@@ -968,7 +973,7 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    if (solverOption == 1 && solving && mNumData > 1)
       return;
    
-   if (mNumData < MAX_DATA)
+   if (mNumData < maxData)
       mNumData++;
    
    #if 0
@@ -1043,7 +1048,7 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames, bool clearList)
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
       ("ViewCanvas::AddObjectList() '%s' entered, object count=%d, clearList=%d\n",
-       mPlotName.c_str(), objNames.GetCount(), clearList);
+       mPlotName.WX_TO_C_STRING, objNames.GetCount(), clearList);
    #endif
    
    // clear bodies
@@ -1084,7 +1089,8 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames, bool clearList)
       #if DEBUG_OBJECT > 1
       if (i == 0) MessageInterface::ShowMessage("   In AddObjectList()\n");
       MessageInterface::ShowMessage
-         ("   mObjectNames[%2d]=%s, mObjectRadius=%f\n", i, mObjectNames[i].c_str(), mObjectRadius[i]);
+         ("   mObjectNames[%2d]=%s, mObjectRadius=%f\n", i,
+         mObjectNames[i].WX_TO_C_STRING, mObjectRadius[i]);
       #endif
    }
    
@@ -1093,7 +1099,7 @@ void ViewCanvas::AddObjectList(const wxArrayString &objNames, bool clearList)
    
    #if DEBUG_OBJECT
    MessageInterface::ShowMessage
-      ("ViewCanvas::AddObjectList() '%s' leaving\n", mPlotName.c_str());
+      ("ViewCanvas::AddObjectList() '%s' leaving\n", mPlotName.WX_TO_C_STRING);
    #endif
    
 } //AddObjectList()
@@ -1172,7 +1178,8 @@ void ViewCanvas::HandleLightSource()
 void ViewCanvas::ResetPlotInfo()
 {
    #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage("ViewCanvas::ResetPlotInfo() entered\n");
+   MessageInterface::ShowMessage("ViewCanvas::ResetPlotInfo() entered for %s\n",
+   mPlotName.WX_TO_C_STRING);
    #endif
    
    mCurrIndex = -1;
@@ -1326,7 +1333,7 @@ bool ViewCanvas::CreateObjectArrays()
        mObjectCount);
    #endif
    
-   if ((mTime = new Real[MAX_DATA]) == NULL)
+   if ((mTime = new Real[maxData]) == NULL)
    {
       #if DEBUG_OBJECT
       MessageInterface::ShowMessage
@@ -1335,7 +1342,7 @@ bool ViewCanvas::CreateObjectArrays()
       return false;
    }
    
-   if ((mIsDrawing = new bool[MAX_DATA]) == NULL)
+   if ((mIsDrawing = new bool[maxData]) == NULL)
    {
       #if DEBUG_OBJECT
       MessageInterface::ShowMessage
@@ -1377,7 +1384,7 @@ bool ViewCanvas::CreateObjectArrays()
       return false;
    }
    
-   if ((mDrawOrbitFlag = new bool[mObjectCount*MAX_DATA]) == NULL)
+   if ((mDrawOrbitFlag = new bool[mObjectCount*maxData]) == NULL)
    {
       #if DEBUG_OBJECT
       MessageInterface::ShowMessage
@@ -1386,7 +1393,7 @@ bool ViewCanvas::CreateObjectArrays()
       return false;
    }
    
-   if ((mObjectOrbitColor = new UnsignedInt[mObjectCount*MAX_DATA]) == NULL)
+   if ((mObjectOrbitColor = new UnsignedInt[mObjectCount*maxData]) == NULL)
    {
       #if DEBUG_OBJECT
       MessageInterface::ShowMessage
@@ -1395,7 +1402,7 @@ bool ViewCanvas::CreateObjectArrays()
       return false;
    }
    
-   if ((mObjectGciPos = new Real[mObjectCount*MAX_DATA*3]) == NULL)
+   if ((mObjectGciPos = new Real[mObjectCount*maxData*3]) == NULL)
    {
       #if DEBUG_OBJECT
       MessageInterface::ShowMessage
@@ -1404,7 +1411,7 @@ bool ViewCanvas::CreateObjectArrays()
       return false;
    }
    
-   if ((mObjectViewPos = new Real[mObjectCount*MAX_DATA*3]) == NULL)
+   if ((mObjectViewPos = new Real[mObjectCount*maxData*3]) == NULL)
    {
       #if DEBUG_OBJECT
       MessageInterface::ShowMessage
@@ -1414,7 +1421,7 @@ bool ViewCanvas::CreateObjectArrays()
    }
    
    if (mNeedVelocity)
-      if ((mObjectViewVel = new Real[mObjectCount*MAX_DATA*3]) == NULL)
+      if ((mObjectViewVel = new Real[mObjectCount*maxData*3]) == NULL)
       {
          #if DEBUG_OBJECT
          MessageInterface::ShowMessage
@@ -1425,7 +1432,7 @@ bool ViewCanvas::CreateObjectArrays()
    
    if (mNeedAttitude)
    {
-      if ((mObjectQuat = new Real[mObjectCount*MAX_DATA*4]) == NULL)
+      if ((mObjectQuat = new Real[mObjectCount*maxData*4]) == NULL)
       {
          #if DEBUG_OBJECT
          MessageInterface::ShowMessage
@@ -1434,7 +1441,7 @@ bool ViewCanvas::CreateObjectArrays()
          return false;
       }
       
-      if ((mBodyRotAngle = new Real[mObjectCount*MAX_DATA]) == NULL)
+      if ((mBodyRotAngle = new Real[mObjectCount*maxData]) == NULL)
       {
          #if DEBUG_OBJECT
          MessageInterface::ShowMessage
@@ -1443,7 +1450,7 @@ bool ViewCanvas::CreateObjectArrays()
          return false;
       }
       
-      if ((mBodyRotAxis = new Real[mObjectCount*MAX_DATA*3]) == NULL)
+      if ((mBodyRotAxis = new Real[mObjectCount*maxData*3]) == NULL)
       {
          #if DEBUG_OBJECT
          MessageInterface::ShowMessage
@@ -1453,7 +1460,7 @@ bool ViewCanvas::CreateObjectArrays()
       }
    }
    
-   if ((mRotMatViewToInternal = new Real[MAX_DATA*16]) == NULL)
+   if ((mRotMatViewToInternal = new Real[maxData*16]) == NULL)
    {
       #if DEBUG_OBJECT
       MessageInterface::ShowMessage
@@ -1464,7 +1471,7 @@ bool ViewCanvas::CreateObjectArrays()
    
    if (mNeedEcliptic)
    {
-      if ((mRotMatViewToEcliptic = new Real[MAX_DATA*16]) == NULL)
+      if ((mRotMatViewToEcliptic = new Real[maxData*16]) == NULL)
       {
          #if DEBUG_OBJECT
          MessageInterface::ShowMessage
@@ -1487,24 +1494,24 @@ bool ViewCanvas::CreateObjectArrays()
 //------------------------------------------------------------------------------
 /**
  * Computes begin and end index of the data in the ring buffer. When it is filled
- * with MAX_DATA points, the begin index goes back to 0.
+ * with maxData points, the begin index goes back to 0.
  */
 //------------------------------------------------------------------------------
 void ViewCanvas::ComputeRingBufferIndex()
 {
    mCurrIndex++;
    
-   if (mCurrIndex < MAX_DATA)
+   if (mCurrIndex < maxData)
    {
       mEndIndex1 = mNumData - 1;
       if (mEndIndex2 != -1)
       {
          mBeginIndex1++;
-         if (mBeginIndex1 + 1 > MAX_DATA)
+         if (mBeginIndex1 + 1 > maxData)
             mBeginIndex1 = 0;
          
          mEndIndex2++;
-         if (mEndIndex2 + 1 > MAX_DATA)
+         if (mEndIndex2 + 1 > maxData)
             mEndIndex2 = 0;
       }
    }
@@ -1520,19 +1527,19 @@ void ViewCanvas::ComputeRingBufferIndex()
          MessageInterface::ShowMessage
             ("*** WARNING *** %s: '%s' exceed the maximum data points, now "
              "showing %d most recent data points.\n", utcGregorian.c_str(),
-             mPlotName.WX_TO_C_STRING, MAX_DATA);
+             mPlotName.WX_TO_C_STRING, maxData);
          mWriteWarning = false;
       }
       
       mBeginIndex1++;
-      if (mBeginIndex1 + 1 > MAX_DATA)
+      if (mBeginIndex1 + 1 > maxData)
          mBeginIndex1 = 0;
       
-      mEndIndex1 = MAX_DATA - 1;
+      mEndIndex1 = maxData - 1;
       
       mBeginIndex2 = 0;
       mEndIndex2++;
-      if (mEndIndex2 + 1 > MAX_DATA)
+      if (mEndIndex2 + 1 > maxData)
          mEndIndex2 = 0;
       mCurrIndex = 0;
    }
@@ -1592,8 +1599,8 @@ void ViewCanvas::ComputeActualIndex()
          }
          else
          {
-            mRealBeginIndex1 = MAX_DATA + mRealBeginIndex1;
-            mRealEndIndex1 = MAX_DATA - 1;
+            mRealBeginIndex1 = maxData + mRealBeginIndex1;
+            mRealEndIndex1 = maxData - 1;
             mRealBeginIndex2 = 0;
             mRealEndIndex2 = mEndIndex2;
          }
@@ -2423,14 +2430,14 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
       #if DEBUG_UPDATE
       MessageInterface::ShowMessage
          ("   ==> sc=%d, mScCount=%d, satId=%d, scName=%s, mDrawOrbitArray[%d]=%d\n",
-          sc, mScCount, satId, mObjectNames[satId].c_str(), satId,
+          sc, mScCount, satId, mObjectNames[satId].WX_TO_C_STRING, satId,
           satId != UNKNOWN_OBJ_ID ? mDrawOrbitArray[satId] : int(UNKNOWN_OBJ_ID));
       #endif
       
       if (satId != UNKNOWN_OBJ_ID)
       {
          Spacecraft *sat = (Spacecraft*)mObjectArray[satId];
-         int colorIndex = satId * MAX_DATA + mLastIndex;
+         int colorIndex = satId * maxData + mLastIndex;
          #if DEBUG_UPDATE
          MessageInterface::ShowMessage
             ("   sat=<%p>'%s', mLastIndex=%d, colorIndex=%d\n", sat, sat->GetName().c_str(),
@@ -2462,7 +2469,7 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
          
          mObjectOrbitColor[colorIndex] = scColors[sc];
          
-         int posIndex = satId * MAX_DATA * 3 + (mLastIndex*3);
+         int posIndex = satId * maxData * 3 + (mLastIndex*3);
          mObjectViewPos[posIndex+0] = posX[sc];
          mObjectViewPos[posIndex+1] = posY[sc];
          mObjectViewPos[posIndex+2] = posZ[sc];
@@ -2480,7 +2487,7 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
          {
             MessageInterface::ShowMessage
                ("   satId:%d, object=%s, colorIndex=%u, drawOrbit=%d, color=%06X\n",
-                satId, mObjectNames[satId].c_str(), colorIndex, mDrawOrbitFlag[colorIndex],
+                satId, mObjectNames[satId].WX_TO_C_STRING, colorIndex, mDrawOrbitFlag[colorIndex],
                 mObjectOrbitColor[colorIndex]);
             MessageInterface::ShowMessage
                ("   satId:%d, posIndex=%d, gcipos = %f, %f, %f\n", satId,
@@ -2572,14 +2579,14 @@ void ViewCanvas::UpdateOtherData(const Real &time)
          #if DEBUG_UPDATE_OBJECT
          MessageInterface::ShowMessage
             ("ViewCanvas::UpdateOtherData() objId=%d, objName=%s, mDrawOrbitArray[%d]=%d\n",
-             objId, mObjectNames[objId].c_str(), objId,
+             objId, mObjectNames[objId].WX_TO_C_STRING, objId,
              objId != UNKNOWN_OBJ_ID ? mDrawOrbitArray[objId] : int(UNKNOWN_OBJ_ID));
          #endif
          
          // if object id found
          if (objId != UNKNOWN_OBJ_ID)
          {
-            int colorIndex = objId * MAX_DATA + mLastIndex;
+            int colorIndex = objId * maxData + mLastIndex;
             
             if (!mDrawOrbitArray[objId])
                mDrawOrbitFlag[colorIndex] = false;
@@ -2606,11 +2613,17 @@ void ViewCanvas::UpdateOtherData(const Real &time)
             }
             catch (BaseException &)
             {
+               #if DEBUG_UPDATE_OBJECT
+                  MessageInterface::ShowMessage(
+                        "   fatal error found in UpdateOtherData "
+                        "for %s (otherObj = %s)!!!!\n",
+                        mPlotName.WX_TO_C_STRING, otherObj->GetName().c_str());
+               #endif
                mFatalErrorFound = true;
                throw;
             }
             
-            int posIndex = objId * MAX_DATA * 3 + (mLastIndex*3);
+            int posIndex = objId * maxData * 3 + (mLastIndex*3);
             mObjectGciPos[posIndex+0] = objMjEqState[0];
             mObjectGciPos[posIndex+1] = objMjEqState[1];
             mObjectGciPos[posIndex+2] = objMjEqState[2];
@@ -2712,7 +2725,7 @@ void ViewCanvas::UpdateSpacecraftAttitude(Real time, Spacecraft *sat, int satId)
    if (sat == NULL)
       return;
    
-   int attIndex = satId * MAX_DATA * 4 + (mLastIndex*4);
+   int attIndex = satId * maxData * 4 + (mLastIndex*4);
    
    Rmatrix33 cosMat = sat->GetAttitude(time);
    Rvector quat = AttitudeConversionUtility::ToQuaternion(cosMat);
@@ -2737,7 +2750,7 @@ void ViewCanvas::UpdateOtherObjectAttitude(Real time, SpacePoint *sp, int objId)
    if (sp == NULL)
       return;
    
-   int attIndex = objId * MAX_DATA * 4 + (mLastIndex*4);
+   int attIndex = objId * maxData * 4 + (mLastIndex*4);
    wxString objName = sp->GetName().c_str();
    
    // Get attitude matrix   
@@ -2796,7 +2809,7 @@ void ViewCanvas::UpdateBodyRotationData(const wxString &objName, int objId)
    #endif
    
    // Rotate body
-   int attIndex = objId * MAX_DATA * 4 + mLastIndex * 4;
+   int attIndex = objId * maxData * 4 + mLastIndex * 4;
    
    Rvector quat = Rvector(4, mObjectQuat[attIndex+0], mObjectQuat[attIndex+1],
                           mObjectQuat[attIndex+2], mObjectQuat[attIndex+3]);
@@ -2819,7 +2832,7 @@ void ViewCanvas::UpdateBodyRotationData(const wxString &objName, int objId)
    
    // Get the rotation matrix from the coordinate system of the plot to the inertial coordinate system
    Rvector6 inState, outState;
-   int posIndex = objId * MAX_DATA * 3 + mLastIndex * 3;
+   int posIndex = objId * maxData * 3 + mLastIndex * 3;
    inState.Set(mObjectGciPos[posIndex+0], mObjectGciPos[posIndex+1],
                mObjectGciPos[posIndex+2], 0.0, 0.0, 0.0);
    
@@ -2880,8 +2893,8 @@ void ViewCanvas::UpdateBodyRotationData(const wxString &objName, int objId)
 //---------------------------------------------------------------------------
 void ViewCanvas::GetBodyRotationData(int objId, Real &angInDeg, Rvector3 &eAxis)
 {
-   int angIndex = objId * MAX_DATA + mLastIndex;
-   int axisIndex = objId * MAX_DATA * 3 + (mLastIndex * 3);
+   int angIndex = objId * maxData + mLastIndex;
+   int axisIndex = objId * maxData * 3 + (mLastIndex * 3);
    angInDeg = mBodyRotAngle[angIndex];
    eAxis(0) = mBodyRotAxis[axisIndex];
    eAxis(1) = mBodyRotAxis[axisIndex + 1];
@@ -2981,8 +2994,8 @@ void ViewCanvas::ComputeRotMatForEclipticPlane(Real time, Rvector6 &state)
 //---------------------------------------------------------------------------
 void ViewCanvas::SaveBodyRotationData(int objId, Real angInDeg, const Rvector3 &eAxis)
 {
-   int angIndex = objId * MAX_DATA + mLastIndex;
-   int axisIndex = objId * MAX_DATA * 3 + (mLastIndex * 3);
+   int angIndex = objId * maxData + mLastIndex;
+   int axisIndex = objId * maxData * 3 + (mLastIndex * 3);
    mBodyRotAngle[angIndex] = angInDeg;
    mBodyRotAxis[axisIndex] = eAxis(0);
    mBodyRotAxis[axisIndex + 1] = eAxis(1);
@@ -3321,3 +3334,7 @@ void ViewCanvas::DrawDebugMessage(const wxString &msg, unsigned int textColor,
    SetupProjection();
 }
 
+void ViewCanvas::SetMaxDataPoints(Integer maxPlotPoints)
+{
+   maxData = maxPlotPoints;
+}

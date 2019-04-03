@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -70,6 +70,7 @@ EphemerisFilePanel::EphemerisFilePanel(wxWindow *parent, const wxString &name)
 {
    clonedObj = NULL;
    fileDialog = NULL;
+   code500ComboBox = NULL;
    onlyMj2000EqComboBox = NULL;
    
    mObject = theGuiInterpreter->GetConfiguredObject(name.c_str());
@@ -165,6 +166,14 @@ void EphemerisFilePanel::Create()
          _T("CoordinateSystemHint")));
    grid1->Add(allCoordSystemStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
    grid1->Add(allCoordSystemComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
+   // Add code500ComboBox and hide it
+   code500StaticText =
+      new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Coordinate System"),
+      wxDefaultPosition, wxDefaultSize, 0);
+   grid1->Add(code500StaticText, 0, wxALIGN_LEFT|wxALL, bsize );
+   grid1->Add(code500ComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
+   grid1->Hide(code500StaticText);
+   grid1->Hide(code500ComboBox);
    // Add onlyMj2000EqComboBox and hide it
    onlyMJ2000EqStaticText =
       new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Coordinate System"),
@@ -512,7 +521,7 @@ wxControl *EphemerisFilePanel::BuildControl(wxWindow *parent, Integer index)
       break;
    case Gmat::OBJECT_TYPE:
       {
-         Gmat::ObjectType type = mObject->GetPropertyObjectType(index);
+         UnsignedInt type = mObject->GetPropertyObjectType(index);
          if (type == Gmat::SPACE_POINT)
          {
             // The GuiItemManager automatically registers wxComboBox in order to
@@ -554,6 +563,10 @@ wxControl *EphemerisFilePanel::BuildControl(wxWindow *parent, Integer index)
             // in the destructor
             wxComboBox *cbControl =
                theGuiManager->GetCoordSystemComboBox(this, ID_COMBOBOX, wxSize(180,-1));
+            // Create ComboBox showing only CS that Code-500 ephemeris files support
+            if (code500ComboBox == NULL)
+               code500ComboBox =
+               theGuiManager->GetCoordSystemComboBox(this, ID_COMBOBOX, wxSize(180,-1), false, true);
             // Create ComboBox showing only CS with MJ2000Eq axis
             if (onlyMj2000EqComboBox == NULL)
                onlyMj2000EqComboBox =
@@ -561,10 +574,12 @@ wxControl *EphemerisFilePanel::BuildControl(wxWindow *parent, Integer index)
             managedComboBoxMap.insert(std::make_pair("CoordinateSystem", cbControl));
             managedComboBoxMap.insert(std::make_pair("CoordinateSystem", onlyMj2000EqComboBox));
             onlyMj2000EqComboBox->SetName("_MJ2000EqOnly_");
+            managedComboBoxMap.insert(std::make_pair("CoordinateSystem", code500ComboBox));
+            code500ComboBox->SetName("_Code500Only_");
             #ifdef DEBUG_BUILD_CONTROL
             MessageInterface::ShowMessage
-               ("cbControl->GetName()='%s', onlyMj2000EqComboBox->GetName()='%s'\n",
-                cbControl->GetName().c_str(), onlyMj2000EqComboBox->GetName().c_str());
+               ("cbControl->GetName()='%s', onlyMj2000EqComboBox->GetName()='%s, code500ComboBox->GetName()='%s'\n",
+                cbControl->GetName().c_str(), onlyMj2000EqComboBox->GetName().c_str(), code500ComboBox->GetName().c_str());
             #endif
             control = cbControl;
          }
@@ -668,9 +683,11 @@ void EphemerisFilePanel::LoadControl(const std::string &label)
       #endif
       
       allCoordSystemComboBox->SetValue(valueString);
-      // keep 2 comboboxes in sync
+      // keep 3 comboboxes in sync
       if (onlyMj2000EqComboBox->FindString(allCoordSystemComboBox->GetValue()) != wxNOT_FOUND)
          onlyMj2000EqComboBox->SetValue(allCoordSystemComboBox->GetValue());
+      if (code500ComboBox->FindString(allCoordSystemComboBox->GetValue()) != wxNOT_FOUND)
+         code500ComboBox->SetValue(allCoordSystemComboBox->GetValue());
    }
    else if (label == "WriteEphemeris")
    {
@@ -802,6 +819,8 @@ void EphemerisFilePanel::SaveControl(const std::string &label)
       // should be shown for format other than CCSDS-OEM (for GMT-4452 fix - LOJ: 2014.04.01)
       if (fileFormat == "CCSDS-OEM" || fileFormat == "STK-TimePosVel")
          valueString = allCoordSystemComboBox->GetValue();
+      else if (fileFormat == "Code-500")
+         valueString = code500ComboBox->GetValue();
       else
          valueString = onlyMj2000EqComboBox->GetValue();
       #ifdef DEBUG_SAVE_DATA
@@ -1093,16 +1112,27 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
       
       EnableUpdate(true);
    }
-   // keep allCoordSystemComboBox and onlyMj2000EqComboBox in sync if possible 
+   // keep allCoordSystemComboBox, code500ComboBox, and onlyMj2000EqComboBox in sync if possible 
    else if (event.GetEventObject() == allCoordSystemComboBox)
    {
-	   if (onlyMj2000EqComboBox->FindString(allCoordSystemComboBox->GetValue()) != wxNOT_FOUND)
-		   onlyMj2000EqComboBox->SetValue(allCoordSystemComboBox->GetValue());
+      if (code500ComboBox->FindString(allCoordSystemComboBox->GetValue()) != wxNOT_FOUND)
+         code500ComboBox->SetValue(allCoordSystemComboBox->GetValue());
+      if (onlyMj2000EqComboBox->FindString(allCoordSystemComboBox->GetValue()) != wxNOT_FOUND)
+         onlyMj2000EqComboBox->SetValue(allCoordSystemComboBox->GetValue());
+   }
+   else if (event.GetEventObject() == code500ComboBox)
+   {
+      if (allCoordSystemComboBox->FindString(code500ComboBox->GetValue()) != wxNOT_FOUND)
+         allCoordSystemComboBox->SetValue(code500ComboBox->GetValue());
+      if (onlyMj2000EqComboBox->FindString(code500ComboBox->GetValue()) != wxNOT_FOUND)
+         onlyMj2000EqComboBox->SetValue(code500ComboBox->GetValue());
    }
    else if (event.GetEventObject() == onlyMj2000EqComboBox)
    {
-	   if (allCoordSystemComboBox->FindString(onlyMj2000EqComboBox->GetValue()) != wxNOT_FOUND)
-		   allCoordSystemComboBox->SetValue(onlyMj2000EqComboBox->GetValue());
+      if (allCoordSystemComboBox->FindString(onlyMj2000EqComboBox->GetValue()) != wxNOT_FOUND)
+         allCoordSystemComboBox->SetValue(onlyMj2000EqComboBox->GetValue());
+      if (code500ComboBox->FindString(onlyMj2000EqComboBox->GetValue()) != wxNOT_FOUND)
+         code500ComboBox->SetValue(onlyMj2000EqComboBox->GetValue());
    }
    
    //if (theApplyButton != NULL)
@@ -1198,9 +1228,9 @@ void EphemerisFilePanel::OnBrowse(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void EphemerisFilePanel::ShowCoordSystems(const wxString &fileType)
 {
-   bool showAll = false;
-   if (fileType == "CCSDS-OEM" || fileType == "STK-TimePosVel")
-      showAll = true;
+   bool showAll = (fileType == "CCSDS-OEM" || fileType == "STK-TimePosVel");
+   bool show500 = (fileType == "Code-500");
+   bool showOther = !showAll && !show500;
    
    #ifdef DEBUG_CS
    MessageInterface::ShowMessage
@@ -1210,8 +1240,10 @@ void EphemerisFilePanel::ShowCoordSystems(const wxString &fileType)
    
    grid1->Show(allCoordSystemStaticText, showAll);
    grid1->Show(allCoordSystemComboBox, showAll);
-   grid1->Show(onlyMJ2000EqStaticText, !showAll);
-   grid1->Show(onlyMj2000EqComboBox, !showAll);
+   grid1->Show(code500StaticText, show500);
+   grid1->Show(code500ComboBox, show500);
+   grid1->Show(onlyMJ2000EqStaticText, showOther);
+   grid1->Show(onlyMj2000EqComboBox, showOther);
    
    // Commented out for GMT-4452 fix (LOJ: 2014.04.01)
    #if 0
@@ -1254,9 +1286,9 @@ void EphemerisFilePanel::ShowCode500Items(const wxString &fileType)
    grid2->Show(numericStepSizeUnit, show);
    grid2->Layout();
    
-   // If not showing code 500, set output format to "PC"
+   // If not showing code 500, set output format to "LittleEndian"
    if (!show)
-      outputFormatComboBox->SetValue("PC");
+      outputFormatComboBox->SetValue("LittleEndian");
    
    // Enable or disable output format
    outputFormatComboBox->Enable(show);

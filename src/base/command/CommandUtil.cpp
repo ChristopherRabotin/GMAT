@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -979,7 +979,7 @@ bool GmatCommandUtil::HasBranchCommandChanged(GmatCommand *brCmd, Integer level)
 
 
 //------------------------------------------------------------------------------
-// bool FindObject(GmatCommand *cmd, Gmat::ObjectType type, ... )
+// bool FindObject(GmatCommand *cmd, UnsignedInt type, ... )
 //------------------------------------------------------------------------------
 /*
  * Finds if object name is referenced in anywhere in the command sequence.
@@ -995,7 +995,7 @@ bool GmatCommandUtil::HasBranchCommandChanged(GmatCommand *brCmd, Integer level)
  * @return  true  if object name found, false, otherwise
  */
 //------------------------------------------------------------------------------
-bool GmatCommandUtil::FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
+bool GmatCommandUtil::FindObject(GmatCommand *cmd, UnsignedInt objType,
                                  const std::string &objName, std::string &cmdName,
                                  GmatCommand **cmdUsing, bool checkWrappers)
 {
@@ -1114,7 +1114,7 @@ bool GmatCommandUtil::FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
  */
 //------------------------------------------------------------------------------
 bool GmatCommandUtil::FindObjectFromSubCommands(GmatCommand *brCmd, Integer level,
-                         Gmat::ObjectType objType, const std::string &objName,
+                         UnsignedInt objType, const std::string &objName,
                          std::string &cmdName, GmatCommand **cmdUsing, bool checkWrappers)
 {
    GmatCommand* current = brCmd;

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -183,7 +183,7 @@ Integer StateManager::GetStateSize()
 
 
 //------------------------------------------------------------------------------
-// bool GetStateObjects(ObjectArray& pObjects, Gmat::ObjectType type)
+// bool GetStateObjects(ObjectArray& pObjects, UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Fills in the pointers to the objects
@@ -194,7 +194,7 @@ Integer StateManager::GetStateSize()
  * @return true if at least one object pointer was set
  */
 //------------------------------------------------------------------------------
-bool StateManager::GetStateObjects(ObjectArray& pObjects, Gmat::ObjectType type)
+bool StateManager::GetStateObjects(ObjectArray& pObjects, UnsignedInt type)
 {
    bool retval = false;
    

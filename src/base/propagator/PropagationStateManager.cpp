@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -555,7 +555,10 @@ bool PropagationStateManager::MapObjectsToVector()
       MessageInterface::ShowMessage("Epochs do not match\n");
 
    if (objects.size() > 0)
+   {
       state.SetEpoch(objects[0]->GetRealParameter(epochIDs[0]));
+      state.SetEpochGT(objects[0]->GetGmatTimeParameter(epochIDs[0]));
+   }
    
    #ifdef DEBUG_OBJECT_UPDATES
       MessageInterface::ShowMessage(
@@ -598,7 +601,11 @@ bool PropagationStateManager::MapObjectsToVector()
 bool PropagationStateManager::MapVectorToObjects()
 {
    #ifdef DEBUG_OBJECT_UPDATES
-      MessageInterface::ShowMessage("Mapping vector to objects\n"
+      if (state.HasPrecisionTime())
+         MessageInterface::ShowMessage("Mapping vector to objects\n"
+            "   EpochGT = %s\n", state.GetEpochGT().ToString().c_str());
+      else
+         MessageInterface::ShowMessage("Mapping vector to objects\n"
             "   Epoch = %.12lf\n", state.GetEpoch());
 
       // Look at state data before
@@ -652,9 +659,19 @@ bool PropagationStateManager::MapVectorToObjects()
    }
    
 
+   GmatTime  theEpochGT = state.GetEpochGT();
    GmatEpoch theEpoch = state.GetEpoch();
+   if (state.HasPrecisionTime())
+      theEpoch = theEpochGT.GetMjd();
+
    for (UnsignedInt i = 0; i < objects.size(); ++i)
+   {
       objects[i]->SetRealParameter(epochIDs[i], theEpoch);
+      if (state.HasPrecisionTime())
+         objects[i]->SetGmatTimeParameter(epochIDs[i], theEpochGT);
+      else
+         objects[i]->SetGmatTimeParameter(epochIDs[i], GmatTime(theEpoch));
+   }
 
    #ifdef DEBUG_OBJECT_UPDATES
       // Look at object data after
@@ -705,23 +722,47 @@ bool PropagationStateManager::ObjectEpochsMatch()
 
    if (objects.size() > 0)
    {
-      GmatEpoch theEpoch = objects[0]->GetRealParameter(epochIDs[0]);
-      Real diff = 0.0, dt;
-      for (UnsignedInt i = 1; i < objects.size(); ++i)
+      if (((SpacePoint*)objects[0])->HasPrecisionTime())
       {
-         #ifdef DEBUG_OBJECT_UPDATES
+         GmatTime theEpochGT = objects[0]->GetGmatTimeParameter(epochIDs[0]);
+         Real diff = 0.0, dt;
+         for (UnsignedInt i = 1; i < objects.size(); ++i)
+         {
+#ifdef DEBUG_OBJECT_UPDATES
+            MessageInterface::ShowMessage("   Epochs are %s for %s and "
+               "%s for %s\n", theEpochGT.ToString().c_str(), objects[0]->GetName().c_str(),
+               objects[i]->GetGmatTimeParameter(epochIDs[i]).ToString().c_str(),
+               objects[i]->GetName().c_str());
+#endif
+
+            dt = fabs((theEpochGT - objects[i]->GetGmatTimeParameter(epochIDs[i])).GetTimeInSec());
+            if (dt > IDENTICAL_TIME_TOLERANCE)
+            {
+               retval = false;
+            }
+            diff = (diff > dt ? diff : dt);
+         }
+      }
+      else
+      {
+         GmatEpoch theEpoch = objects[0]->GetRealParameter(epochIDs[0]);
+         Real diff = 0.0, dt;
+         for (UnsignedInt i = 1; i < objects.size(); ++i)
+         {
+#ifdef DEBUG_OBJECT_UPDATES
             MessageInterface::ShowMessage("   Epochs are %.12lf for %s and "
                "%.12lf for %s\n", theEpoch, objects[0]->GetName().c_str(),
                objects[i]->GetRealParameter(epochIDs[i]), 
                objects[i]->GetName().c_str());
-         #endif
+#endif
 
-         dt = fabs(theEpoch - objects[i]->GetRealParameter(epochIDs[i]));
-         if (dt > IDENTICAL_TIME_TOLERANCE)
-         {
-            retval = false;
+            dt = fabs(theEpoch - objects[i]->GetRealParameter(epochIDs[i]));
+            if (dt > IDENTICAL_TIME_TOLERANCE)
+            {
+               retval = false;
+            }
+            diff = (diff > dt ? diff : dt);
          }
-         diff = (diff > dt ? diff : dt);
       }
       // Here's how we'll warn if needed:
 //      if (retval && (diff != 0.0))

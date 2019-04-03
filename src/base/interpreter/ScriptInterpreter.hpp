@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -156,6 +156,7 @@ private:
    void WriteStringInitialValues(const ObjectArray &strWithValList,
                                  Gmat::WriteMode mode);
    void WriteOtherParameters(StringArray &objs, Gmat::WriteMode mode);
+   void WriteUserObjects(StringArray &objs, Gmat::WriteMode mode);
    void WriteSubscribers(StringArray &objs, Gmat::WriteMode mode);
    void WriteCommandSequence(Gmat::WriteMode mode);
    

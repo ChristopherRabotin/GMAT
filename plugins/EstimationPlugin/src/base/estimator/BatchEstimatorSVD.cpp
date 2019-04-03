@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -319,10 +319,10 @@ void BatchEstimatorSVD::Accumulate()
 
    // Advance to MeasMan the next measurement and get its epoch
    measManager.AdvanceObservation();
-   nextMeasurementEpoch = measManager.GetEpoch();
+   nextMeasurementEpochGT = measManager.GetEpochGT();
    FindTimeStep();
 
-   if (currentEpoch <= nextMeasurementEpoch)			// change the same as in BatchEstimatorInv.cpp 
+   if (currentEpochGT <= nextMeasurementEpochGT)	   // change the same as in BatchEstimatorInv.cpp
       currentState = PROPAGATING;
    else
       currentState = ESTIMATING;

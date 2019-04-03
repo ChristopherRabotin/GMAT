@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -33,7 +33,6 @@
 #include "StkEPropagator.hpp"
 #include "MessageInterface.hpp"
 #include "FileManager.hpp"
-#include "NotAKnotInterpolator.hpp"    // Only one supported for now
 #include "PropagatorException.hpp"
 
 #include <sstream>                     // for stringstream
@@ -41,6 +40,8 @@
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_PROPAGATION
 //#define DEBUG_INTERPOLATION
+
+#define PAUSE_AT_BOUNDS
 
 
 //---------------------------------
@@ -78,16 +79,17 @@ const Gmat::ParameterType StkEPropagator::PARAMETER_TYPE[
 StkEPropagator::StkEPropagator(const std::string &name) :
    EphemerisPropagator        ("STK", name),
    ephemName                  (""),
-   interp                     (NULL),
    fileDataLoaded             (false),
    ephemRecords               (NULL),
    stateIndex                 (-1),
    timeFromEphemStart         (-1.0),
-   lastEpoch                  (-1.0)
+   lastEpoch                  (-1.0),
+   lastEpochGT                (-1.0)
 {
    // GmatBase data
   objectTypeNames.push_back("StkEPropagator");
-  parameterCount       = StkEPropagatorParamCount;
+  parameterCount        = StkEPropagatorParamCount;
+  theEphem              = &ephem;
 }
 
 
@@ -100,8 +102,6 @@ StkEPropagator::StkEPropagator(const std::string &name) :
 //------------------------------------------------------------------------------
 StkEPropagator::~StkEPropagator()
 {
-   if (interp != NULL)
-      delete interp;
 }
 
 
@@ -117,13 +117,14 @@ StkEPropagator::~StkEPropagator()
 StkEPropagator::StkEPropagator(const StkEPropagator & prop) :
    EphemerisPropagator        (prop),
    ephemName                  (prop.ephemName),
-   interp                     (NULL),
    fileDataLoaded             (false),
    ephemRecords               (NULL),
    stateIndex                 (-1),
    timeFromEphemStart         (-1.0),
-   lastEpoch                  (-1.0)
+   lastEpoch                  (-1.0),
+   lastEpochGT                (-1.0)
 {
+   theEphem              = &ephem;
 }
 
 
@@ -145,20 +146,28 @@ StkEPropagator & StkEPropagator::operator=(const StkEPropagator & prop)
       EphemerisPropagator::operator=(prop);
 
       ephemName = prop.ephemName;
-      if (interp != NULL)
-      {
-         delete interp;
-         interp = NULL;
-      }
       fileDataLoaded = false;
       ephemRecords = NULL;
       stateIndex = -1;
+
       lastEpoch = currentEpoch = prop.currentEpoch;
-      if (lastEpoch != -1.0)
-         timeFromEphemStart = (lastEpoch - ephemStart) *
-               GmatTimeConstants::SECS_PER_DAY;
+      lastEpochGT = currentEpochGT = prop.currentEpochGT;
+
+      if (hasPrecisionTime)
+      {
+         if (lastEpochGT != -1.0)
+            timeFromEphemStart = (lastEpochGT - GmatTime(ephemStart)).GetTimeInSec();
+         else
+            timeFromEphemStart = -1.0;
+      }
       else
-         timeFromEphemStart = -1.0;
+      {
+         if (lastEpoch != -1.0)
+            timeFromEphemStart = (lastEpoch - ephemStart) *
+            GmatTimeConstants::SECS_PER_DAY;
+         else
+            timeFromEphemStart = -1.0;
+      }
    }
 
    return *this;
@@ -607,6 +616,7 @@ bool StkEPropagator::Initialize()
                      "EphemerisName");
 
                currentEpoch = ((Spacecraft*)propObjects[i])->GetEpoch();
+               currentEpochGT = ((Spacecraft*)propObjects[i])->GetEpochGT();
 
                #ifdef DEBUG_INITIALIZATION
                   MessageInterface::ShowMessage("Spacecraft epoch is %.12lf\n",
@@ -614,7 +624,7 @@ bool StkEPropagator::Initialize()
                 #endif
             }
             else
-               throw PropagatorException("STK ephemeris ephemeris propagators only "
+               throw PropagatorException("STK ephemeris propagators only "
                      "work for Spacecraft.");
 
             if (ephemName == "")
@@ -636,14 +646,28 @@ bool StkEPropagator::Initialize()
             #endif
             ephem.ReadDataRecords(dumpdata);
             ephem.GetStartAndEndEpochs(ephemStart, ephemEnd, &ephemRecords);
-
             fileDataLoaded = true;
 
-            // Build the interpolator.  For now, use not-a-knot splines
-            if (interp != NULL)
-               delete interp;
-            interp = new NotAKnotInterpolator("STKEphemNotAKnot", 6);
+            // Setup central body
+            centralBody = ephem.GetCentralBody();
+            if (centralBody == "Moon")
+               centralBody = "Luna";
+            if (centralBody == "")     // STK .e spec: Use "vehicle CB, and Earth by default"
+               centralBody = "Earth";
+
+            propOrigin = solarSystem->GetBody(centralBody);
+
             ephem.CloseForRead();
+
+            Rvector6 interpVal = ephem.InterpolatePoint(currentEpoch);
+            std::memcpy(state, interpVal.GetDataVector(),
+                  dimension*sizeof(Real));
+            lastEpoch = currentEpoch;
+
+            timeFromEphemStart = (lastEpoch - ephemStart) *
+                  GmatTimeConstants::SECS_PER_DAY;
+
+            UpdateSpaceObject(currentEpoch);
          }
       }
    }
@@ -651,7 +675,13 @@ bool StkEPropagator::Initialize()
    // @todo: This is likely the source of GMT-5959
    if (startEpochSource == FROM_SCRIPT)
       for (UnsignedInt i = 0; i < propObjects.size(); ++i)
+      {
          propObjects[i]->SetRealParameter("A1Epoch", currentEpoch);
+         if (hasPrecisionTime)
+            propObjects[i]->SetGmatTimeParameter("A1Epoch", currentEpochGT);
+         else
+            propObjects[i]->SetGmatTimeParameter("A1Epoch", GmatTime(currentEpoch));
+      }
 
 
    #ifdef DEBUG_INITIALIZATION
@@ -673,6 +703,7 @@ bool StkEPropagator::Initialize()
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
+//@todo: need GmatTime modification
 bool StkEPropagator::Step()
 {
    #ifdef DEBUG_PROPAGATION
@@ -684,19 +715,12 @@ bool StkEPropagator::Step()
 
    bool retval = false;
 
-   // Might need to do this:
-   // currentEpoch = ((Spacecraft*)propObjects[i])->GetEpoch();
-   if (stateIndex == -1)
-   {
-      // Initialize the pointers into the ephem data
-      FindRecord(currentEpoch);
-   }
-
-   if (stateIndex < 0)
-      throw PropagatorException("Unable to propagate " + instanceName +
-            ": is the epoch outside of the span of the ephemeris file?");
-
    Rvector6  outState;
+
+   #ifdef DEBUG_FINALSTEP
+      if (currentEpoch == ephemEnd)
+         MessageInterface::ShowMessage("Stepping off the end of the ephem\n");
+   #endif
 
    if (lastEpoch != currentEpoch)
    {
@@ -713,10 +737,22 @@ bool StkEPropagator::Step()
          GmatTimeConstants::SECS_PER_DAY;
 
    #ifdef DEBUG_PROPAGATION
-   MessageInterface::ShowMessage("   ephemStart = %.12lf, timeFromStart = "
-	   "%lf sec => currentEpoch after step = %.12lf; lastEpoch = %.12lf; "
-	   "ephemEnd = %.12lf\n",
-            ephemStart, timeFromEphemStart, currentEpoch, lastEpoch, ephemEnd);
+      MessageInterface::ShowMessage("   ephemStart = %.12lf, timeFromStart = "
+         "%lf sec => currentEpoch after step = %.12lf; lastEpoch = %.12lf; "
+         "ephemEnd = %.12lf\n", ephemStart, timeFromEphemStart, currentEpoch,
+         lastEpoch, ephemEnd);
+   #endif
+
+   #ifdef PAUSE_AT_BOUNDS
+      // Code to step to ephem bound before stepping out of bounds
+      if ((lastEpoch < ephemEnd) && (currentEpoch > ephemEnd))
+         currentEpoch = ephemEnd;
+      if ((lastEpoch > ephemStart) && (currentEpoch < ephemStart))
+         currentEpoch = ephemStart;
+      #ifdef DEBUG_PROPAGATION
+         MessageInterface::ShowMessage("   --> Updated currentEpoch after step "
+               "= %.12lf\n", currentEpoch);
+      #endif
    #endif
 
    // Allow for slop in the last few bits
@@ -734,7 +770,12 @@ bool StkEPropagator::Step()
          currentEpoch = ephemEnd;
       else
          flagOutOfDomain = true;
+
+      #ifdef DEBUG_FINALSTEP
+         MessageInterface::ShowMessage("******** ==> Triggered step past end code\n");
+      #endif
    }
+
    if (flagOutOfDomain)
    {
       std::stringstream errmsg;
@@ -750,14 +791,22 @@ bool StkEPropagator::Step()
       throw PropagatorException(errmsg.str());
    }
 
-   GetState(currentEpoch, outState);
+   #ifdef DEBUG_FINALSTEP
+      MessageInterface::ShowMessage("Last epoch: %.12lf Stepping to %.12lf; step "
+         "size %.12lf\n", lastEpoch, currentEpoch,
+         (currentEpoch - lastEpoch) * 86400.0);
+   #endif
+   
+   Rvector6 interpVal = ephem.InterpolatePoint(currentEpoch);
    lastEpoch = currentEpoch;
-
-   std::memcpy(state, outState.GetDataVector(),
+   std::memcpy(state, interpVal.GetDataVector(),
          dimension*sizeof(Real));
 
-   //MoveToOrigin(currentEpoch);
-
+   #ifdef DEBUG_FINALSTEP
+      if (currentEpoch == ephemEnd)
+         MessageInterface::ShowMessage("Stepped to the end of the ephem\n");
+   #endif
+   
    UpdateSpaceObject(currentEpoch);
 
    #ifdef DEBUG_PROPAGATION
@@ -827,10 +876,9 @@ void StkEPropagator::UpdateState()
             currentEpoch);
    #endif
 
-//   Rvector6 theState;
-//   GetState(currentEpoch, theState);
-//   std::memcpy(state, theState.GetDataVector(),
-//         dimension*sizeof(Real));
+   Rvector6 theState = ephem.InterpolatePoint(currentEpoch);
+   std::memcpy(state, theState.GetDataVector(), //theState.GetDataVector(),
+         dimension*sizeof(Real));
 }
 
 
@@ -849,225 +897,66 @@ void StkEPropagator::SetEphemSpan(Integer whichOne)
    ephem.GetStartAndEndEpochs(ephemStart, ephemEnd, &ephemRecords);
 }
 
-//------------------------------------------------------------------------------
-// void StkEPropagator::FindRecord(GmatEpoch forEpoch)
-//------------------------------------------------------------------------------
-/**
- * Sets up the indices into the ephem data for a input epoch
- *
- * On return, stateIndex points to the record of the data point matching or
- * earlier than forEpoch.
- *
- * @param forEpoch The epoch that is being set up
- */
-//------------------------------------------------------------------------------
-void StkEPropagator::FindRecord(GmatEpoch forEpoch)
-{
-   GmatEpoch currentEpoch;
-
-   stateIndex = -1;
-   for (UnsignedInt i = 0; i < ephemRecords->size(); ++i)
-   {
-      currentEpoch = ephemStart + ephemRecords->at(i).timeFromEpoch /
-              GmatTimeConstants::SECS_PER_DAY;
-
-      if (currentEpoch > forEpoch)
-         break;
-
-      stateIndex = i;
-   }
-}
-
-//------------------------------------------------------------------------------
-// void GetState(GmatEpoch forEpoch, Rvector6 &outstate)
-//------------------------------------------------------------------------------
-/**
- * Returns the state data at the specified epoch
- *
- * @param forEpoch The epoch for the data
- * @param outstate The state vector that receives the data
- */
-//------------------------------------------------------------------------------
-void StkEPropagator::GetState(GmatEpoch forEpoch, Rvector6 &outstate)
-{
-   UpdateInterpolator(forEpoch);
-
-   Real theState[6];
-   if (interp->Interpolate(forEpoch, theState))
-      outstate.Set(theState);
-   else
-   {
-      std::stringstream date;
-	  date.precision(16);
-	  date << forEpoch;
-
-      throw PropagatorException("The propagator " + instanceName +
-               " failed to interpolate a valid state for " +
-               propObjects[0]->GetName() + " for epoch " + date.str());
-   }
-
-   #ifdef DEBUG_INTERPOLATION
-      MessageInterface::ShowMessage("Interpolated state: %.12lf  [%.15lf  "
-            "%.15lf  %.15lf  %.15lf  %.15lf  %.15lf]\n", forEpoch, theState[0],
-            theState[1], theState[2], theState[3], theState[4], theState[5]);
-   #endif
-}
-
-//------------------------------------------------------------------------------
-// void UpdateInterpolator(forEpoch)
-//------------------------------------------------------------------------------
-/**
- * Method that updates buffer data in the interpolator as propagation proceeds
- *
- * This method passes ephem data to the interpolator and resets the time span
- * data to track the data loaded.  The "sweet" region used for interpolation
- * moves as propagation progresses, and is generally chosen, when possible, to
- * keep the points used for interpolation centered on the interpolation epoch.
- * Thus for the cubic spline interpolator used in this implementation, the
- * interpolator data is set so that the interpolation epoch (forEpoch) falls
- * between the second and third ephemeris points when possible, minimizing the
- * likelihood that the interpolation will ring.
- *
- * @param forEpoch The epoch that needs to be covered in the preferred region of
- *                 the interpolator data
- */
-//------------------------------------------------------------------------------
-void StkEPropagator::UpdateInterpolator(const GmatEpoch &forEpoch)
-{
-   GmatEpoch useEpoch = forEpoch;
-
-   if ((forEpoch < ephemStart) || (forEpoch > ephemEnd))
-   {
-      if (ephemStart - forEpoch < 1.0e-10)
-         useEpoch = ephemStart;
-      if (forEpoch - ephemEnd < 1.0e-10)
-         useEpoch = ephemEnd;
-   }
-
-   FindRecord(useEpoch);
-
-   if (stateIndex == -1)
-      throw PropagatorException("Requested epoch is outside of the span "
-            "covered by the ephemeris file " + ephemName);
-
-   Integer startIndex = stateIndex - 1;
-   Integer endIndex   = stateIndex + 3;
-
-   while (startIndex < 0)
-   {
-      ++startIndex;
-      ++endIndex;
-   }
-
-   while (endIndex > ephemRecords->size() - 1)
-   {
-      --startIndex;
-      --endIndex;
-   }
-
-   if (startIndex < 0)
-      throw PropagatorException("Insufficient ephemeris data for propagation");
-
-   Real epoch;
-   Real state[6];
-   Real prevState[6];
-   Integer dupIndex = -1;
-   Real dupEpoch;
-
-   // Brute force for now: refill the interpolator
-   interp->Clear();
-
-   #ifdef DEBUG_INTERPOLATION
-      MessageInterface::ShowMessage("Pairs used for epoch %.12lf:\n", forEpoch);
-   #endif
-
-   for (UnsignedInt i = startIndex; i <= endIndex; ++i)
-   {
-      epoch = ephemStart + ephemRecords->at(i).timeFromEpoch /
-            GmatTimeConstants::SECS_PER_DAY;
-
-      for (UnsignedInt j = 0; j < 3; ++j)
-      {
-         state[j]   = ephemRecords->at(i).theState[j];
-         state[j+3] = ephemRecords->at(i).theState[j+3];
-	  }
-
-//	  if (prevState[0] == state[0] && prevState[1] == state[1] && prevState[2] == state[2] && prevState[3] == state[3]) {
-//		  epoch = ephemStart + ephemRecords->at(i+1).timeFromEpoch /
-//			  GmatTimeConstants::SECS_PER_DAY;
+////------------------------------------------------------------------------------
+//// void StkEPropagator::FindRecord(GmatEpoch forEpoch)
+////------------------------------------------------------------------------------
+///**
+// * Sets up the indices into the ephem data for a input epoch
+// *
+// * On return, stateIndex points to the record of the data point matching or
+// * earlier than forEpoch.
+// *
+// * @param forEpoch The epoch that is being set up
+// */
+////------------------------------------------------------------------------------
+//void StkEPropagator::FindRecord(GmatEpoch forEpoch)
+//{
+//   GmatEpoch currentEpoch;
 //
-//		  for (UnsignedInt j = 0; j < 3; ++j)
-//		  {
-//			  state[j]   = ephemRecords->at(i+1).theState[j];
-//			  state[j+3] = ephemRecords->at(i+1).theState[j+3];
-//		  }
-//	  }
-
-	  if (prevState[0] == state[0]) {
-		  dupIndex = i;
-		  dupEpoch = epoch;
-		  break;
-	  }
-
-	  prevState[0] = state[0];
-	  prevState[1] = state[1];
-	  prevState[2] = state[2];
-	  prevState[3] = state[3];
-	  prevState[4] = state[4];
-	  prevState[5] = state[5];
-	  prevState[6] = state[6];
-
-      interp->AddPoint(epoch, state);
-      #ifdef DEBUG_INTERPOLATION
-         MessageInterface::ShowMessage(" --> [%.12lf %lf %lf...\n", epoch,
-               state[0], state[1]);
-      #endif
-   }
-
-   if (dupIndex > -1) {
-	   #ifdef DEBUG_INTERPOLATION
-		  MessageInterface::ShowMessage("1: dupEpoch: %.12lf    epoch: %.12lf    dupIndex: %d    startIndex: %d    endIndex: %d\n", dupEpoch, epoch, dupIndex, startIndex, endIndex);
-	   #endif
-
-	   if (dupEpoch > forEpoch) {
-		   while (endIndex > dupIndex - 1) {
-			   --startIndex;
-			   --endIndex;
-		   }
-	   }
-	   else {
-		   while (startIndex < dupIndex) {
-			   ++startIndex;
-			   ++endIndex;
-		   }
-	   }
-	   #ifdef DEBUG_INTERPOLATION
-		  MessageInterface::ShowMessage("2: dupEpoch: %.12lf    epoch: %.12lf    dupIndex: %d    startIndex: %d    endIndex: %d\n", dupEpoch, epoch, dupIndex, startIndex, endIndex);
-	   #endif
-
-	   interp->Clear();
-
-	   #ifdef DEBUG_INTERPOLATION
-		  MessageInterface::ShowMessage("Pairs used for epoch %.12lf:\n", forEpoch);
-	   #endif
-
-	   for (UnsignedInt i = startIndex; i <= endIndex; ++i)
-	   {
-		   epoch = ephemStart + ephemRecords->at(i).timeFromEpoch /
-			   GmatTimeConstants::SECS_PER_DAY;
-
-		   for (UnsignedInt j = 0; j < 3; ++j)
-		   {
-			   state[j] = ephemRecords->at(i).theState[j];
-			   state[j + 3] = ephemRecords->at(i).theState[j + 3];
-		   }
-
-		   interp->AddPoint(epoch, state);
-
-		   #ifdef DEBUG_INTERPOLATION
-		   MessageInterface::ShowMessage(" --> [%.12lf %lf %lf...\n", epoch,
-			   state[0], state[1]);
-		   #endif
-	   }
-   }
-}
+//   stateIndex = -1;
+//   for (UnsignedInt i = 0; i < ephemRecords->size(); ++i)
+//   {
+//      currentEpoch = ephemStart + ephemRecords->at(i).timeFromEpoch /
+//              GmatTimeConstants::SECS_PER_DAY;
+//
+//      if (currentEpoch > forEpoch)
+//         break;
+//
+//      stateIndex = i;
+//   }
+//}
+//
+////------------------------------------------------------------------------------
+//// void GetState(GmatEpoch forEpoch, Rvector6 &outstate)
+////------------------------------------------------------------------------------
+///**
+// * Returns the state data at the specified epoch
+// *
+// * @param forEpoch The epoch for the data
+// * @param outstate The state vector that receives the data
+// */
+////------------------------------------------------------------------------------
+//void StkEPropagator::GetState(GmatEpoch forEpoch, Rvector6 &outstate)
+//{
+//   UpdateInterpolator(forEpoch);
+//
+//   Real theState[6];
+//   if (interp->Interpolate(forEpoch, theState))
+//      outstate.Set(theState);
+//   else
+//   {
+//      std::stringstream date;
+//      date.precision(16);
+//      date << forEpoch;
+//
+//      throw PropagatorException("The propagator " + instanceName +
+//               " failed to interpolate a valid state for " +
+//               propObjects[0]->GetName() + " for epoch " + date.str());
+//   }
+//
+//   #ifdef DEBUG_INTERPOLATION
+//      MessageInterface::ShowMessage("Interpolated state: %.12lf  [%.15lf  "
+//            "%.15lf  %.15lf  %.15lf  %.15lf  %.15lf]\n", forEpoch, theState[0],
+//            theState[1], theState[2], theState[3], theState[4], theState[5]);
+//   #endif
+//}

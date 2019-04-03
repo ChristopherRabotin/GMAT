@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -398,7 +398,7 @@ void PropSetup::SetPropagator(Propagator *propagator, bool fromGUI)
          mPropagatorName.c_str(), (mMcsCreated ? "was MCS Created" :
          "was not MCS Created"));
    #endif
-   
+
    if (!fromGUI)
    {
       if ((mPropagatorName != "InternalPropagator") && !mMcsCreated)
@@ -425,6 +425,17 @@ void PropSetup::SetPropagator(Propagator *propagator, bool fromGUI)
    if (mPropagator->UsesODEModel() == false)
       DeleteOwnedObject(ODE_MODEL, true);
    
+   // Check if this propagator has error control, warn the user if not
+   if (mPropagator->IsOfType("Integrator"))
+   {
+      if (!mPropagator->UsesErrorControl() && fromGUI)
+      {
+         MessageInterface::ShowMessage("**** WARNING **** " +
+            mPropagator->GetTypeName() + " is an integrator with no "
+            "error control. The accuracy setting will be ignored.\n");
+      }
+   }
+
    #ifdef DEBUG_PROPSETUP_SET
    MessageInterface::ShowMessage
       ("PropSetup::SetPropagator() this=<%p> '%s' leaving, mPropagator=<%p>, "
@@ -530,7 +541,7 @@ Integer PropSetup::GetParameterCount(void) const
 //------------------------------------
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 /**
@@ -543,7 +554,7 @@ Integer PropSetup::GetParameterCount(void) const
  * @return true if object name changed, false if not.
  */
 //---------------------------------------------------------------------------
-bool PropSetup::RenameRefObject(const Gmat::ObjectType type,
+bool PropSetup::RenameRefObject(const UnsignedInt type,
                                 const std::string &oldName,
                                 const std::string &newName)
 {
@@ -588,14 +599,14 @@ bool PropSetup::RenameRefObject(const Gmat::ObjectType type,
 
 
 //---------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "");
 //---------------------------------------------------------------------------
 /*
  * @see GmatBase
  */
 //---------------------------------------------------------------------------
-bool PropSetup::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool PropSetup::SetRefObject(GmatBase *obj, const UnsignedInt type,
                              const std::string &name)
 {
    #ifdef DEBUG_PROPSETUP_SET
@@ -734,7 +745,7 @@ const ObjectTypeArray& PropSetup::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//  const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves the list of ref objects used by the member forces.
@@ -746,7 +757,7 @@ const ObjectTypeArray& PropSetup::GetRefObjectTypeArray()
  * 
  */
 //------------------------------------------------------------------------------
-const StringArray& PropSetup::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& PropSetup::GetRefObjectNameArray(const UnsignedInt type)
 {
    refObjectNames.clear();
    if (mPropagatorName != "" && mPropagatorName != "InternalPropagator")
@@ -862,6 +873,48 @@ bool PropSetup::IsParameterReadOnly(const Integer id) const
 bool PropSetup::IsParameterReadOnly(const std::string &label) const
 {
    return IsParameterReadOnly(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool PropSetup::IsParameterCommandModeSettable(const Integer id) const
+{
+   switch (id)
+   {
+      case ANALYTIC_CENTRALBODY:
+      case ANALYTIC_EPOCHFORMAT:
+      case ANALYTIC_STARTEPOCH:
+      case ACCURACY:
+      case INITIAL_STEP_SIZE:
+      case ERROR_THRESHOLD:
+      case SMALLEST_INTERVAL:
+      case MIN_STEP:
+      case MAX_STEP:
+      case MAX_STEP_ATTEMPTS:
+      case LOWER_ERROR:
+      case TARGET_ERROR:
+      case ANALYTIC_STEPSIZE:
+      case BULIRSCH_MINIMUMREDUCTION:
+      case BULIRSCH_MAXIMUMREDUCTION:
+      case BULIRSCH_MINIMUMTOLERANCE:
+      case STOP_IF_ACCURACY_VIOLATED:
+         {
+            // Get actual id
+            Integer actualId = GetOwnedObjectId(id, Gmat::PROPAGATOR);
+            return mPropagator->IsParameterCommandModeSettable(actualId);
+         }
+   default:
+      return GmatBase::IsParameterCommandModeSettable(id);
+   }
 }
 
 
@@ -1056,6 +1109,17 @@ Real PropSetup::SetRealParameter(const Integer id, const Real value)
       case BULIRSCH_MAXIMUMREDUCTION:
       case BULIRSCH_MINIMUMTOLERANCE:
          {
+            // Check if this propagator has error control, warn the user if not
+            if (mPropagator->IsOfType("Integrator"))
+            {
+               if (!mPropagator->UsesErrorControl() && id == ACCURACY)
+               {
+                  MessageInterface::ShowMessage("**** WARNING **** " +
+                     mPropagator->GetTypeName() + " is an integrator with no "
+                     "error control. The accuracy setting will be ignored.\n");
+               }
+            }
+
             // Get actual id
             Integer actualId = GetOwnedObjectId(id, Gmat::PROPAGATOR);
             return mPropagator->SetRealParameter(actualId, value);
@@ -1759,13 +1823,13 @@ void PropSetup::DeleteOwnedObject(Integer id, bool forceDelete)
 
 
 //------------------------------------------------------------------------------
-// Integer GetOwnedObjectId(Integer id, Gmat::ObjectType objType) const
+// Integer GetOwnedObjectId(Integer id, UnsignedInt objType) const
 //------------------------------------------------------------------------------
 /**
  * Returns property id of owned object.
  */
 //------------------------------------------------------------------------------
-Integer PropSetup::GetOwnedObjectId(Integer id, Gmat::ObjectType objType) const
+Integer PropSetup::GetOwnedObjectId(Integer id, UnsignedInt objType) const
 {
    Integer actualId = -1;
    
@@ -1800,3 +1864,12 @@ Integer PropSetup::GetOwnedObjectId(Integer id, Gmat::ObjectType objType) const
    return actualId;
 }
 
+
+bool PropSetup::SetPrecisionTimeFlag(bool onOff)
+{
+   mPropagator->SetPrecisionTimeFlag(onOff);
+   mODEModel->SetPrecisionTimeFlag(onOff);
+   psm.GetState()->SetPrecisionTimeFlag(onOff);
+
+   return GmatBase::SetPrecisionTimeFlag(onOff);
+}

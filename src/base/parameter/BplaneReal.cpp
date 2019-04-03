@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -289,10 +289,10 @@ bool BplaneReal::Initialize()
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool BplaneReal::RenameRefObject(const Gmat::ObjectType type,
+bool BplaneReal::RenameRefObject(const UnsignedInt type,
                                 const std::string &oldName,
                                 const std::string &newName)
 {
@@ -301,7 +301,7 @@ bool BplaneReal::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
+// virtual std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Calls BplaneData to get reference object name for given type.
@@ -309,7 +309,7 @@ bool BplaneReal::RenameRefObject(const Gmat::ObjectType type,
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-std::string BplaneReal::GetRefObjectName(const Gmat::ObjectType type) const
+std::string BplaneReal::GetRefObjectName(const UnsignedInt type) const
 {
    std::string objName = BplaneData::GetRefObjectName(type);
    
@@ -325,7 +325,7 @@ std::string BplaneReal::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves reference object name array for given type. It will return all
@@ -335,14 +335,14 @@ std::string BplaneReal::GetRefObjectName(const Gmat::ObjectType type) const
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-const StringArray& BplaneReal::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& BplaneReal::GetRefObjectNameArray(const UnsignedInt type)
 {
    return BplaneData::GetRefObjectNameArray(type);
 }
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObjectName(const Gmat::ObjectType type,
+// virtual bool SetRefObjectName(const UnsignedInt type,
 //                               const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -353,7 +353,7 @@ const StringArray& BplaneReal::GetRefObjectNameArray(const Gmat::ObjectType type
  *
  */
 //------------------------------------------------------------------------------
-bool BplaneReal::SetRefObjectName(const Gmat::ObjectType type,
+bool BplaneReal::SetRefObjectName(const UnsignedInt type,
                                  const std::string &name)
 {
    return BplaneData::SetRefObjectName(type, name);
@@ -361,7 +361,7 @@ bool BplaneReal::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+// virtual GmatBase* GetRefObject(const UnsignedInt type,
 //                                const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -373,7 +373,7 @@ bool BplaneReal::SetRefObjectName(const Gmat::ObjectType type,
  * @return reference object pointer for given object type and name
  */
 //------------------------------------------------------------------------------
-GmatBase* BplaneReal::GetRefObject(const Gmat::ObjectType type,
+GmatBase* BplaneReal::GetRefObject(const UnsignedInt type,
                                   const std::string &name)
 {
    GmatBase *obj = BplaneData::GetRefObject(type, name);
@@ -391,7 +391,7 @@ GmatBase* BplaneReal::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -405,7 +405,7 @@ GmatBase* BplaneReal::GetRefObject(const Gmat::ObjectType type,
  *
  */
 //------------------------------------------------------------------------------
-bool BplaneReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool BplaneReal::SetRefObject(GmatBase *obj, const UnsignedInt type,
                              const std::string &name)
 {
    #if DEBUG_BPLANE_REAL

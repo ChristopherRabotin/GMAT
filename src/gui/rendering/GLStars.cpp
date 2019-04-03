@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -298,7 +298,7 @@ void GLStars::ReadBorders()
          if (dra > 180) dra -=360;
          if (dra < -180) dra +=360;
          double rastep = dra > 0 ? 1 : -1;
-         int steps = floor(abs(dra));
+         int steps = floor(std::abs(dra));
          for (int i=1;  i<=steps;  ++i)
          {
             SetVector (Borders[ix],oldra+rastep*i,dec);

@@ -43,7 +43,7 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
    virtual bool         SetMeasurement(MeasureModel* meas);
@@ -54,7 +54,8 @@ public:
    virtual const MeasurementData&
                         CalculateMeasurement(bool withEvents = false,
                               ObservationData* forObservation = NULL,
-                              std::vector<RampTableData>* rampTB = NULL);
+                              std::vector<RampTableData>* rampTB = NULL,
+                              bool forSimulation = false);
    
    virtual bool         ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex, 
                               Real uplinkFrequency, 
@@ -63,7 +64,8 @@ public:
    virtual const MeasurementData&
                         CalculateMeasurementAtOffset(bool withEvents = false,
                               Real dt = 0.0, ObservationData* forObservation = NULL,
-                              std::vector<RampTableData>* rampTB = NULL);
+                              std::vector<RampTableData>* rampTB = NULL, 
+                              bool forSimulation = false);
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
                               Integer id);
@@ -87,6 +89,10 @@ protected:
    {
       RangeAdapterKmParamCount = AdapterParamCount,
    };
+
+   static const Real USE_TAYLOR_SERIES;
+   static const Real USE_CHEBYSHEV_DIFFERENCE;
+   Real PathMagnitudeDelta(Rvector3 pathVec, Rvector3 delta);
 };
 
 #endif /* RangeAdapterKm_hpp */

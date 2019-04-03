@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -43,6 +43,7 @@
 //#define DEBUG_EVENTLOCATORS
 //#define DEBUG_EVENT_MODEL_FORCE
 //#define DEBUG_TRANSIENT_FORCES
+//#define DEBUG_PROP_STEPS
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -168,7 +169,7 @@ PropagationEnabledCommand& PropagationEnabledCommand::operator=(
       inProgress          = false;
       dim                 = pec.dim;
       epochID             = pec.epochID;
-      isInitialized         = false;
+      isInitialized       = false;
 
       j2kState            = NULL;
       if (pubdata)
@@ -237,7 +238,7 @@ bool PropagationEnabledCommand::Initialize()
       MessageInterface::ShowMessage("  Direction is %s\n",
             (direction == 1.0?"Forwards":"Backwards"));
    #endif
-
+   
    bool retval = false;
 
    if (GmatCommand::Initialize())
@@ -275,6 +276,7 @@ bool PropagationEnabledCommand::Initialize()
             propagators.clear();
             p.clear();
             fm.clear();
+            maxSteps.clear();
          }
 
          // Todo Build the prop clones and set the related pointers
@@ -311,6 +313,8 @@ bool PropagationEnabledCommand::Initialize()
 
          StringArray names = propObjectNames[i];
          PropSetup *currentPS = propagators[i];
+         currentPS->SetPrecisionTimeFlag(true);
+
          Propagator *currentP = currentPS->GetPropagator();
          ODEModel *currentODE = currentPS->GetODEModel();
          PropagationStateManager *currentPSM = currentPS->GetPropStateManager();
@@ -329,6 +333,9 @@ bool PropagationEnabledCommand::Initialize()
                throw CommandException("Cannot find the object named " + (*j) +
                      " needed for propagation in the command\n" +
                      GetGeneratingString());
+            
+            obj->SetPrecisionTimeFlag(true);
+
             if (obj->IsOfType(Gmat::SPACEOBJECT))
             {
                objects->push_back((SpaceObject*)obj);
@@ -648,6 +655,7 @@ bool PropagationEnabledCommand::PrepareToPropagate()
       {
          elapsedTime[n] = 0.0;
          currEpoch[n]   = 0.0;
+         currEpochGT[n] = 0.0;
          fm[n]->SetTime(0.0);
          fm[n]->SetPropStateManager(propagators[n]->GetPropStateManager());
          fm[n]->UpdateInitialData();
@@ -660,6 +668,7 @@ bool PropagationEnabledCommand::PrepareToPropagate()
       }
 
       baseEpoch.clear();
+      baseEpochGT.clear();
 
       for (Integer n = 0; n < (Integer)propagators.size(); ++n)
       {
@@ -669,9 +678,12 @@ bool PropagationEnabledCommand::PrepareToPropagate()
 
          GmatBase* sat1 = FindObject(*(propObjectNames[n].begin()));
          baseEpoch.push_back(sat1->GetRealParameter(epochID));
+         baseEpochGT.push_back(sat1->GetGmatTimeParameter(epochID));
+
          elapsedTime[n] = fm[n]->GetTime();
          currEpoch[n] = baseEpoch[n] + elapsedTime[n] /
             GmatTimeConstants::SECS_PER_DAY;
+         currEpochGT[n] = baseEpochGT[n]; currEpochGT[n].AddSeconds(elapsedTime[n]);
       }
 
       inProgress = true;
@@ -713,9 +725,13 @@ bool PropagationEnabledCommand::PrepareToPropagate()
       p.clear();
       fm.clear();
       psm.clear();
+      maxSteps.clear();
       baseEpoch.clear();
 	   currEpoch.clear();				// fix bug #1 of ticket GMT-4314
 	   elapsedTime.clear();          // fix bug #1 of ticket GMT-4314
+      baseEpochGT.clear();
+      currEpochGT.clear();
+
 
       for (UnsignedInt n = 0; n < propagators.size(); ++n)
       {
@@ -726,16 +742,33 @@ bool PropagationEnabledCommand::PrepareToPropagate()
          #endif
          elapsedTime.push_back(0.0);
 
-         p.push_back(propagators[n]->GetPropagator());
-         fm.push_back(propagators[n]->GetODEModel());
+         Propagator *gator = propagators[n]->GetPropagator();
+         ODEModel *fModel = propagators[n]->GetODEModel();
+         p.push_back(gator);
+
+         if (gator->IsOfType("Integrator"))
+         {
+            // If no error control, use the init step, otherwise maxstep
+            if (fModel->GetStringParameter("ErrorControl") == "None")
+               maxSteps.push_back(gator->GetRealParameter("InitialStepSize"));
+            else
+               maxSteps.push_back(gator->GetRealParameter("MaxStep"));
+         }
+         else
+            maxSteps.push_back(gator->GetRealParameter("InitialStepSize"));
+
+         fm.push_back(fModel);
          psm.push_back(propagators[n]->GetPropStateManager());
+
          currEpoch.push_back(psm[n]->GetState()->GetEpoch());
+         currEpochGT.push_back(psm[n]->GetState()->GetEpochGT());
 
          #ifdef DEBUG_INITIALIZATION
             MessageInterface::ShowMessage(
                   "   Initializing propagator %s\n",
                   propagators[n]->GetName().c_str());
          #endif
+
          p[n]->Initialize();
          psm[n]->MapObjectsToVector();
 
@@ -743,6 +776,7 @@ bool PropagationEnabledCommand::PrepareToPropagate()
 //         state = fm[n]->GetState();
          j2kState = fm[n]->GetJ2KState();
          baseEpoch.push_back(psm[n]->GetState()->GetEpoch());
+         baseEpochGT.push_back(psm[n]->GetState()->GetEpochGT());
 
          dim += fm[n]->GetDimension();
 
@@ -768,7 +802,11 @@ bool PropagationEnabledCommand::PrepareToPropagate()
    #endif
 
    // Publish the data
-   pubdata[0] = currEpoch[0];
+   if (hasPrecisionTime)
+      pubdata[0] = currEpochGT[0].GetMjd();
+   else
+      pubdata[0] = currEpoch[0];
+
    memcpy(&pubdata[1], j2kState, dim*sizeof(Real));
 
    #ifdef DEBUG_PUBLISH_DATA
@@ -884,14 +922,20 @@ bool PropagationEnabledCommand::Step(Real dt)
       elapsedTime[i] = fm[i]->GetTime();
       currEpoch[i] = baseEpoch[i] + elapsedTime[i] /
          GmatTimeConstants::SECS_PER_DAY;
+      currEpochGT[i] = baseEpochGT[i]; currEpochGT[i].AddSeconds(elapsedTime[i]);
 
       // Update spacecraft epoch, without argument the spacecraft epoch
       // won't get updated for consecutive Propagate command
-      fm[i]->UpdateSpaceObject(currEpoch[i]);
+      if (fm[i]->HasPrecisionTime())
+         fm[i]->UpdateSpaceObjectGT(currEpochGT[i]);
+      else
+         fm[i]->UpdateSpaceObject(currEpoch[i]);
 
       #ifdef DEBUG_PROP_STEPS
          MessageInterface::ShowMessage("  ---> elapsed time = %.12lf, epoch "
-               "%.12lf", elapsedTime[i], currEpoch[i]);
+               "%.12lf\n", elapsedTime[i], currEpoch[i]);
+         MessageInterface::ShowMessage("  ---> elapsed time = %.12lf, epochGT "
+            "%s\n", elapsedTime[i], currEpochGT[i].ToString().c_str());
       #endif
    }
 
@@ -902,7 +946,11 @@ bool PropagationEnabledCommand::Step(Real dt)
    if (publishOnStep)
    {
       // Publish the data here
-      pubdata[0] = currEpoch[0];
+      if (hasPrecisionTime)
+         pubdata[0] = currEpochGT[0].GetMjd();
+      else
+         pubdata[0] = currEpoch[0];
+
       memcpy(&pubdata[1], j2kState, dim*sizeof(Real));
 
       #ifdef DEBUG_PUBLISH_DATA

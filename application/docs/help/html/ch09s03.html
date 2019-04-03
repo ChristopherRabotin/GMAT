@@ -1,4 +1,4 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Configure the Mission Sequence</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="OptimalLunarFlyby.html" title="Chapter&nbsp;9.&nbsp;Optimal Lunar Flyby using Multiple Shooting"><link rel="prev" href="ch09s02.html" title="Configure Coordinate Systems, Spacecraft, Optimizer, Propagators, Maneuvers, Variables, and Graphics"><link rel="next" href="ch09s04.html" title="Design the Trajectory"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Configure the Mission Sequence</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ch09s02.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;9.&nbsp;Optimal Lunar Flyby using Multiple Shooting</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ch09s04.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N12B22"></a>Configure the Mission Sequence</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12B25"></a>Overview of the Mission Sequence</h3></div></div></div><p>Now that the resources are created and configured, we will
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Configure the Mission Sequence</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="OptimalLunarFlyby.html" title="Chapter&nbsp;9.&nbsp;Optimal Lunar Flyby using Multiple Shooting"><link rel="prev" href="ch09s02.html" title="Configure Coordinate Systems, Spacecraft, Optimizer, Propagators, Maneuvers, Variables, and Graphics"><link rel="next" href="ch09s04.html" title="Design the Trajectory"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Configure the Mission Sequence</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ch09s02.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;9.&nbsp;Optimal Lunar Flyby using Multiple Shooting</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ch09s04.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N12B3E"></a>Configure the Mission Sequence</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12B41"></a>Overview of the Mission Sequence</h3></div></div></div><p>Now that the resources are created and configured, we will
       construct the optimization sequence. Pseudo-script for the optimization
       sequence is shown below. We will start by defining initial guesses for
       the control point optimization variables. Next, selected variables are
@@ -17,7 +17,7 @@ Optimize
       Apply constraints on mission orbit
       Apply cost function
 EndOptimize
-</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12B2E"></a>Define Initial Guesses</h3></div></div></div><p>Below we define initial guesses for the optimization variables.
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12B4A"></a>Define Initial Guesses</h3></div></div></div><p>Below we define initial guesses for the optimization variables.
       Initial guesses are often difficult to generate and to ensure you can
       take this tutorial we have provided a reasonable initial guess for this
       problem. You can use GMAT to produce initial guesses and the sample
@@ -63,7 +63,7 @@ BeginScript 'Initial Guess Values'
    MOI.Element1 = -0.0687322937282
   
 EndScript
-</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12B4E"></a>Initialize Variables</h3></div></div></div><p>The script below is used to define some constants and to define
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12B6A"></a>Initialize Variables</h3></div></div></div><p>The script below is used to define some constants and to define
       the values for various constraints applied to the trajectory. Pay
       particular attention to the constraint values and time values. For
       example, the variable <span class="guilabel">conTOIPeriapsis</span> defines the
@@ -112,7 +112,7 @@ EndOptimize
 </code></pre></div><div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Caution</h3><p>In the above script snippet, we have included the EndOptimize
         command so that your script will continue to build while we construct
         the optimization sequence. You must paste subsequence script snippets
-        inside of the optimization loop.</p></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12B78"></a>Vary and Set Spacecraft Epochs</h3></div></div></div><p>Now we will write the commands that vary the control point epochs
+        inside of the optimization loop.</p></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12B94"></a>Vary and Set Spacecraft Epochs</h3></div></div></div><p>Now we will write the commands that vary the control point epochs
       and apply those epochs to the spacecraft. The first three script lines
       below define <span class="guilabel">launchEpoch</span>,
       <span class="guilabel">flybyEpoch</span>, and <span class="guilabel">moiEpoch</span> to be
@@ -137,7 +137,7 @@ EndOptimize
    satFlyBy_Forward.Epoch.TAIModJulian = flybyEpoch
    patchOneEpoch                       = refEpoch + patchOneElapsedDays
    patchTwoEpoch                       = refEpoch + patchTwoElapsedDays
-</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12B98"></a>Vary Control Point States</h3></div></div></div><p>The script below defines the control point optimization variables
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12BB4"></a>Vary Control Point States</h3></div></div></div><p>The script below defines the control point optimization variables
       and defines the initial guess values for each optimization variable. For
       example, the following line</p><p><strong class="userinput"><code>Vary NLPOpt(satTOI.X = satTOI.X, {Perturbation =
       0.00001, MaxStep = 100}) </code></strong></p><p>tells GMAT to vary the X Cartesian value of
@@ -195,7 +195,7 @@ EndOptimize
    satFlyBy_Backward = satFlyBy_Forward
    satMOI_Forward    = satMOI_Backward
    deltaTimeFlyBy    = flybyEpoch - toiEpoch
-</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12BC2"></a>Apply Constraints at Control Points</h3></div></div></div><p>Now that the control points have been set, we can apply
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12BDE"></a>Apply Constraints at Control Points</h3></div></div></div><p>Now that the control points have been set, we can apply
       constraints that occur at the control points (i.e. before propagation to
       the patch point). Notice below that the
       <span class="guilabel">NonlinearContraint</span> commands are commented out. We
@@ -213,7 +213,7 @@ EndOptimize
    launchRdotV = (satTOI.X *satTOI.VX + satTOI.Y *satTOI.VY + ...
    satTOI.Z *satTOI.VZ)/1000
    %NonlinearConstraint NLPOpt(launchRdotV=0)
-</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12BCE"></a>Propagate the Segments</h3></div></div></div><p>We are now ready to propagate the spacecraft to the patch points.
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12BEA"></a>Propagate the Segments</h3></div></div></div><p>We are now ready to propagate the spacecraft to the patch points.
       We must propagate <span class="guilabel">satTOI</span> forward to
       <span class="guilabel">patchOneEpoch</span>, propagate
       s<span class="guilabel">atFlyBy_Backward</span> backwards to
@@ -269,7 +269,7 @@ PenDown EarthView
    PenDown EarthView
    Propagate BackProp NearMoonProp(satMOI_Backward)...
   {satMOI_Backward.TAIModJulian = patchTwoEpoch, StopTolerance = 1e-005}
-</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12C04"></a>Compute Some Quantities and Apply Patch Constraints</h3></div></div></div><p>The variables <span class="guilabel">errorPos1</span> and others below are
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12C20"></a>Compute Some Quantities and Apply Patch Constraints</h3></div></div></div><p>The variables <span class="guilabel">errorPos1</span> and others below are
       used in <span class="guilabel">XYPlots</span> to display position and velocity
       errors at the patch points.</p><div class="informalexample"><pre class="programlisting"><code class="code">   %  Compute constraint errors for plots
    errorPos1 = sqrt((satTOI.X - satFlyBy_Backward.X)^2 + ...
@@ -283,7 +283,7 @@ PenDown EarthView
    (satMOI_Backward.VY - satFlyBy_Forward.VY)^2 + ...
    (satMOI_Backward.VZ - satFlyBy_Forward.VZ)^2)
    
-   </code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12C13"></a>Apply Patch Point Constraints</h3></div></div></div><p>The <span class="guilabel">NonlinearConstraint</span> commands below apply
+   </code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12C2F"></a>Apply Patch Point Constraints</h3></div></div></div><p>The <span class="guilabel">NonlinearConstraint</span> commands below apply
       the patch point constraints.</p><div class="informalexample"><pre class="programlisting"><code class="code">   %  Apply the collocation constraints constraints on final states
    NonlinearConstraint NLPOpt(satTOI.EarthMJ2000Eq.X=...
    satFlyBy_Backward.EarthMJ2000Eq.X)
@@ -310,7 +310,7 @@ PenDown EarthView
    NonlinearConstraint NLPOpt(satMOI_Backward.EarthMJ2000Eq.VZ=...
    satFlyBy_Forward.EarthMJ2000Eq.VZ)
 
-</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12C1F"></a>Apply Constraints on Mission Orbit</h3></div></div></div><p>We can now apply constraints on the final mission orbit that
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12C3B"></a>Apply Constraints on Mission Orbit</h3></div></div></div><p>We can now apply constraints on the final mission orbit that
       cannot be applied until after propagation. The script snippet below
       applies the inclination constraint on the final mission orbit, and
       applies the apogee radius constraint on the final mission orbit after
@@ -332,7 +332,7 @@ PenDown EarthView
    Propagate NearEarthProp(satMOI_Forward) {satMOI_Forward.Earth.Apoapsis}
    %NonlinearConstraint NLPOpt(satMOI_Forward.RadApo=conMOIApoapsis)
    errorMOIRadApo = satMOI_Forward.Earth.RadApo - conMOIApoapsis
-</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12C2B"></a>Apply Cost Function</h3></div></div></div><p>The last script snippet applies the cost function and a Stop
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12C47"></a>Apply Cost Function</h3></div></div></div><p>The last script snippet applies the cost function and a Stop
       command. The <span class="guilabel">Stop</span> command is so that we can QA your
       script configuration and make sure the initial guess is providing
       reasonable results before attempting optimization.</p><div class="informalexample"><pre class="programlisting"><code class="code">   %  Apply cost function and 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -106,6 +106,7 @@ using namespace FloatAttUtil;
 //#define DEBUG_ORBIT_LINES 1
 //#define DEBUG_DRAW_DEBUG 1
 //#define DEBUG_DRAW_SPACECRAFT 1
+//#define DEBUG_ONPAINT 2
 
 #define MODE_CENTERED_VIEW 0
 #define MODE_FREE_FLYING 1
@@ -478,8 +479,9 @@ void GroundTrackCanvas::OnPaint(wxPaintEvent& event)
 {
    #ifdef DEBUG_ONPAINT
    MessageInterface::ShowMessage
-      ("GroundTrackCanvas::OnPaint() entered, mFatalErrorFound=%d, mGlInitialized=%d, "
-       "mObjectCount=%d\n", mFatalErrorFound, mGlInitialized, mObjectCount);
+      ("GroundTrackCanvas::OnPaint() entered, mFatalErrorFound=%s, mGlInitialized=%d, "
+       "mObjectCount=%d\n", (mFatalErrorFound? "true" : "false"),
+       mGlInitialized, mObjectCount);
    #endif
    
    // must always be here
@@ -905,6 +907,12 @@ void GroundTrackCanvas::DrawFrame()
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::DrawPlot()
 {
+   #if DEBUG_DRAW
+   MessageInterface::ShowMessage
+      ("GroundTrackCanvas::DrawPlot() entered, mTotalPoints=%d\n",
+       mTotalPoints);
+   #endif
+
    if (mTotalPoints == 0)
       return;
    
@@ -1012,7 +1020,7 @@ void GroundTrackCanvas::DrawObjectOrbit()
       #if DEBUG_DRAW
       MessageInterface::ShowMessage
          ("DrawObjectOrbit() obj=%d, objId=%d, objName='%s'\n",
-          obj, objId, objName.c_str());
+          obj, objId, objName.WX_TO_C_STRING);
       #endif
       
       #if DEBUG_DRAW_DEBUG
@@ -1052,12 +1060,13 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
       return;
    
    int frame = mObjLastFrame[objId];
-   int index2 = objId * MAX_DATA * 3 + frame * 3;
+   int index2 = objId * maxData * 3 + frame * 3;
    
    #if DEBUG_DRAW
    MessageInterface::ShowMessage
       ("DrawObjectTexture() entered, objName='%s', obj=%d, objId=%d, frame=%d, "
-       "index2=%d, mObjLastFrame[%d]=%d\n", objName.c_str(), obj, objId, frame,
+       "index2=%d, mObjLastFrame[%d]=%d\n", objName.WX_TO_C_STRING,
+       obj, objId, frame,
        index2, objId, mObjLastFrame[objId]);
    MessageInterface::ShowMessage
       ("   mObjectViewPos=%f, %f, %f\n", mObjectViewPos[index2+0],
@@ -1085,7 +1094,7 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
       }
       else
       {
-         index = sunId * MAX_DATA * 3 + frame * 3;
+         index = sunId * maxData * 3 + frame * 3;
          mLight.SetPosition(mObjectViewPos[index+0], mObjectViewPos[index+1], mObjectViewPos[index+2]);
          mLight.SetDirectional(false);
       }
@@ -1113,7 +1122,8 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
       if (mIsDrawing[frame])
       {
          #if DEBUG_DRAW
-         MessageInterface::ShowMessage("==> Drawing spacecraft image '%s'\n", objName.c_str());
+         MessageInterface::ShowMessage("==> Drawing spacecraft image '%s'\n",
+         objName.WX_TO_C_STRING);
          #endif
          DrawSpacecraft(objName, objId, index2);
       }
@@ -1124,7 +1134,8 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
       if (mIsDrawing[frame])
       {
          #if DEBUG_DRAW
-         MessageInterface::ShowMessage("   Drawing ground station image '%s'\n", objName.c_str());
+         MessageInterface::ShowMessage("   Drawing ground station image '%s'\n",
+         objName.WX_TO_C_STRING);
          #endif
          DrawGroundStation(objName, objId, index2);
       }
@@ -1132,7 +1143,8 @@ void GroundTrackCanvas::DrawObjectTexture(const wxString &objName, int obj,
    else
    {
       #if DEBUG_DRAW
-      MessageInterface::ShowMessage("==> Drawing body '%s'\n", objName.c_str());
+      MessageInterface::ShowMessage("==> Drawing body '%s'\n",
+      objName.WX_TO_C_STRING);
       #endif
       
       //put object at final position
@@ -1181,7 +1193,7 @@ void GroundTrackCanvas::DrawObject(const wxString &objName, int obj)
    if (mEnableLightSource && mSunPresent)
    {
       int sunId = GetObjectId("Sun");
-      int index = sunId * MAX_DATA * 3 + frame * 3;
+      int index = sunId * maxData * 3 + frame * 3;
       
       if (sunId == UNKNOWN_OBJ_ID)
       {
@@ -1189,7 +1201,7 @@ void GroundTrackCanvas::DrawObject(const wxString &objName, int obj)
       }
       else
       {
-         index = sunId * MAX_DATA * 3 + frame * 3;
+         index = sunId * maxData * 3 + frame * 3;
          mLight.SetPosition(mObjectViewPos[index+0],mObjectViewPos[index+1],mObjectViewPos[index+2]);
       }
       mLight.SetDirectional(true);
@@ -1289,8 +1301,8 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
    // Draw object orbit line
    if (drawLine)
    {
-      index1 = objId * MAX_DATA * 3 + (i-1) * 3;
-      index2 = objId * MAX_DATA * 3 + i * 3;
+      index1 = objId * maxData * 3 + (i-1) * 3;
+      index2 = objId * maxData * 3 + i * 3;
       
       Rvector3 r1(mObjectViewPos[index1+0], mObjectViewPos[index1+1],
                   mObjectViewPos[index1+2]);
@@ -1330,7 +1342,7 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       #endif
       
       // If drawing orbit lines
-      int colorIndex = objId * MAX_DATA + i;
+      int colorIndex = objId * maxData + i;
       if (mDrawOrbitFlag[colorIndex])
       {
          // We are drawing a spacecraft orbit.  This includes solver passes.
@@ -1617,7 +1629,7 @@ void GroundTrackCanvas::DrawCircleAtCurrentPosition(int objId, int index,
    #endif
    
    // Set color
-   *sIntColor = mObjectOrbitColor[objId*MAX_DATA+mObjLastFrame[objId]];
+   *sIntColor = mObjectOrbitColor[objId*maxData+mObjLastFrame[objId]];
    
    // Draw circle
    DrawCircleAt(sGlColor, lon2, lat2, radius, enableTransparency);
@@ -1792,7 +1804,7 @@ void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int i
       #endif
       
       // Set color
-      *sIntColor = mObjectOrbitColor[objId*MAX_DATA+mObjLastFrame[objId]];
+      *sIntColor = mObjectOrbitColor[objId*maxData+mObjLastFrame[objId]];
       // Draw circle for now
       DrawCircleAt(sGlColor, lon2, lat2, 3.0);
    }
@@ -1920,7 +1932,7 @@ void GroundTrackCanvas::RotateBodyUsingAttitude(const wxString &objName, int obj
    // just pass in R_PB.
    
    // Rotate body
-   int attIndex = objId * MAX_DATA * 4 + mLastIndex * 4;
+   int attIndex = objId * maxData * 4 + mLastIndex * 4;
    
    Rvector quat = Rvector(4, mObjectQuat[attIndex+0], mObjectQuat[attIndex+1],
                           mObjectQuat[attIndex+2], mObjectQuat[attIndex+3]);
@@ -1943,7 +1955,7 @@ void GroundTrackCanvas::RotateBodyUsingAttitude(const wxString &objName, int obj
    
    // Get the rotation matrix from the coordinate system of the plot to the inertial coordinate system
    Rvector6 inState, outState;
-   int posIndex = objId * MAX_DATA * 3 + mLastIndex * 3;
+   int posIndex = objId * maxData * 3 + mLastIndex * 3;
    inState.Set(mObjectGciPos[posIndex+0], mObjectGciPos[posIndex+1],
                mObjectGciPos[posIndex+2], 0.0, 0.0, 0.0);
    
@@ -2043,7 +2055,7 @@ bool GroundTrackCanvas::ConvertObjectData()
          // Draw first part from the ring buffer
          for (int i = mRealBeginIndex1 + 1; i <= mRealEndIndex1; i++)
          {
-            index = objId * MAX_DATA * 3 + i * 3;
+            index = objId * maxData * 3 + i * 3;
             CopyVector3(&mObjectViewPos[index], &mObjectGciPos[index]);
          }
          
@@ -2052,7 +2064,7 @@ bool GroundTrackCanvas::ConvertObjectData()
          {
             for (int i = mRealBeginIndex2 + 1; i <= mRealEndIndex2; i++)
             {
-               index = objId * MAX_DATA * 3 + i * 3;
+               index = objId * maxData * 3 + i * 3;
                CopyVector3(&mObjectViewPos[index], &mObjectGciPos[index]);
             }
          }
@@ -2093,7 +2105,7 @@ bool GroundTrackCanvas::ConvertObjectData()
 void GroundTrackCanvas::ConvertObject(int objId, int index)
 {
    Rvector6 inState, outState;
-   int start = objId*MAX_DATA*3+index*3;
+   int start = objId*maxData*3+index*3;
    inState.Set(mObjectGciPos[start+0], mObjectGciPos[start+1],
                mObjectGciPos[start+2], 0.0, 0.0, 0.0);
    
@@ -2115,3 +2127,20 @@ void GroundTrackCanvas::ConvertObject(int objId, int index)
    #endif
 }
 
+
+//---------------------------------------------------------------------------
+// int GetMaxDataPoints()
+//---------------------------------------------------------------------------
+int GroundTrackCanvas::GetMaxDataPoints()
+{
+   return maxData;
+}
+
+
+//---------------------------------------------------------------------------
+// void SetMaxDataPoints(int maxPlotPoints)
+//---------------------------------------------------------------------------
+void GroundTrackCanvas::SetMaxDataPoints(int maxPlotPoints)
+{
+   maxData = maxPlotPoints;
+}

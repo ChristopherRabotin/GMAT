@@ -121,14 +121,14 @@ public:
                                                 const Integer index) const;
 
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                        GetRefObjectNameArray(const UnsignedInt type);
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
-//   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);     // ^^^^
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//   virtual ObjectArray& GetRefObjectArray(const UnsignedInt type);     // ^^^^
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name = "");
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index);
 
@@ -142,7 +142,8 @@ public:
    virtual const MeasurementData&
                         CalculateMeasurement(bool withEvents = false,
                               ObservationData* forObservation = NULL,
-                              std::vector<RampTableData>* rampTB = NULL) = 0;
+                              std::vector<RampTableData>* rampTB = NULL,
+                              bool forSimulation = false) = 0;
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
                               Integer id) = 0;
@@ -300,7 +301,7 @@ protected:
    void                 ComputeMeasurementErrorCovarianceMatrix();
 
    void                 BeginEndIndexesOfRampTable(Integer & err);
-   virtual Real         IntegralRampedFrequency(Real t1, Real delta_t, Integer& err);
+   virtual Real         IntegralRampedFrequency(GmatTime t1, Real delta_t, Integer& err);
 };
 
 #endif /* TrackingDataAdapter_hpp */

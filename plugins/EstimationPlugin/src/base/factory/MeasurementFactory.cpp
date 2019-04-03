@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -118,6 +118,12 @@ MeasurementFactory::MeasurementFactory() :
          creatables.push_back("OpticalAzEl");
       }
    }
+
+   // Register plugin types
+   GmatType::RegisterType("Signal");
+   GmatType::RegisterType(Gmat::CORE_MEASUREMENT, "CoreMeasurement");
+   // Used here:
+   GmatType::RegisterType(Gmat::MEDIA_CORRECTION, "MediaCorrection");
 }
 
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -95,19 +95,20 @@ class GMAT_API HarmonicField : public GravityBase
 {
 public:
     HarmonicField(const std::string &name,
-          const std::string &typeName = "HarmonicField",
-          Integer maxDeg = HF_MAX_DEGREE, Integer maxOrd = HF_MAX_ORDER);
+          const std::string &typeName,
+          Integer maxDeg, Integer maxOrd);
     virtual ~HarmonicField(void);
 
     HarmonicField(const HarmonicField& hf);
     HarmonicField&          operator=(const HarmonicField& hf);
 
-    virtual bool            Initialize();
-    virtual bool            CheckQualifier(const std::string &qualifier,
-                                           const std::string &forType = "");
-    virtual bool            SetDegreeOrder(Integer degree, Integer order);
-    virtual bool            SetFilename(const std::string &fn, bool validateOnly = false);
-    virtual void            SetEopFile(EopFile *eopF);
+    virtual bool Initialize();
+    virtual bool CheckQualifier(const std::string &qualifier,
+       const std::string &forType = "");
+    virtual bool SetDegreeOrder(Integer degree, Integer order,
+       Integer stmlimit);
+    virtual bool SetFilename(const std::string &fn, bool validateOnly = false);
+    virtual void SetEopFile(EopFile *eopF);
 
     // inherited from GmatBase
     virtual std::string GetParameterText(const Integer id) const;
@@ -128,10 +129,10 @@ public:
     virtual std::string GetStringParameter(const std::string &label) const;
     virtual bool        SetStringParameter(const std::string &label,
                                            const std::string &value);
-    virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
+    virtual GmatBase*   GetRefObject(const UnsignedInt type,
                                      const std::string &name);
-    const StringArray&  GetRefObjectNameArray(const Gmat::ObjectType type);
-    virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+    const StringArray&  GetRefObjectNameArray(const UnsignedInt type);
+    virtual bool        SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name = "");
     virtual void        SetForceOrigin(CelestialBody* toBody);
     
@@ -139,10 +140,6 @@ public:
     virtual bool        IsParameterValid(const Integer id, const std::string &value);
     virtual bool        IsParameterValid(const std::string &label, const std::string &value);
     
-    // constants defining maximum degree and order
-    static const Integer HF_MAX_DEGREE = 360;
-    static const Integer HF_MAX_ORDER  = 360;
-
 protected:
 
    enum   // do we need the Abar, etc. to be in this list?
@@ -151,6 +148,7 @@ protected:
       MAX_ORDER,
       DEGREE,
       ORDER,
+      STMLIMIT,
       FILENAME,
       POT_FILE_FULLPATH,
       INPUT_COORD_SYSTEM,
@@ -175,8 +173,8 @@ protected:
    Integer                 degree;
    /// Current order for the field
    Integer                 order;
-   /// transformed spherical coordinates
-   Real                    r,s,t,u;
+   /// Current State Transition Matrix limit for the field
+   Integer                 stmLimit;
    /// The name of the potential file
    std::string             filename;
    /// The full path file name of the potential file

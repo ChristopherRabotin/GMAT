@@ -30,6 +30,7 @@
 #include "EstimationDefs.hpp"
 #include "GmatData.hpp"
 #include "TimeSystemConverter.hpp"
+#include "GmatTime.hpp"
 
 
 /**
@@ -56,6 +57,8 @@ public:
    TimeConverterUtil::TimeSystemTypes  epochSystem;
    /// The start epoch in a ramp 
    GmatEpoch         epoch;						// unit: its unit is defined by epochSystem
+   GmatTime          epochGT;						// unit: its unit is defined by epochSystem
+
    /// Who is involved in the measurement.  First one is the "anchor" node
    StringArray       participantIDs;
    /// Uplink band

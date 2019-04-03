@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -56,6 +56,8 @@
 //------------------------------------------------------------------------------
 GmatState::GmatState(Integer size) :
    theEpoch          (GmatTimeConstants::MJD_OF_J2000),
+   theEpochGT        (GmatTimeConstants::MJD_OF_J2000),
+   hasPrecisionTime  (false),
    stateSize         (size)   
 {
    if (stateSize == 0)
@@ -102,8 +104,10 @@ GmatState::~GmatState()
  */
 //------------------------------------------------------------------------------
 GmatState::GmatState(const GmatState& gs) :
-   theEpoch       (gs.theEpoch),
-   stateSize      (gs.stateSize)
+   theEpoch          (gs.theEpoch),
+   theEpochGT        (gs.theEpochGT),
+   hasPrecisionTime  (gs.hasPrecisionTime),
+   stateSize         (gs.stateSize)
 {
    dataTypes = gs.dataTypes;
 
@@ -142,8 +146,10 @@ GmatState& GmatState::operator=(const GmatState& gs)
 {
    if (this != &gs)
    {
-      theEpoch  = gs.theEpoch;
-      stateSize = gs.stateSize;
+      theEpoch         = gs.theEpoch;
+      theEpochGT       = gs.theEpochGT;
+      hasPrecisionTime = gs.hasPrecisionTime;
+      stateSize        = gs.stateSize;
       
       if (theData != NULL)
          delete [] theData;
@@ -300,6 +306,12 @@ GmatEpoch GmatState::GetEpoch() const
 }
 
 
+GmatTime GmatState::GetEpochGT() const
+{
+   return theEpochGT;
+}
+
+
 //------------------------------------------------------------------------------
 // GmatEpoch SetEpoch(const GmatEpoch ep)
 //------------------------------------------------------------------------------
@@ -310,6 +322,29 @@ GmatEpoch GmatState::SetEpoch(const GmatEpoch ep)
 {
    theEpoch = ep;
    return theEpoch;
+}
+
+
+GmatTime GmatState::SetEpochGT(const GmatTime ep)
+{
+   theEpochGT = ep;
+   return theEpochGT;
+}
+
+
+bool GmatState::SetPrecisionTimeFlag(bool onOff)
+{
+   if ((hasPrecisionTime == false)&& (onOff == true))
+      theEpochGT = theEpoch;
+      
+   hasPrecisionTime = onOff;
+   return hasPrecisionTime;
+}
+
+
+bool GmatState::HasPrecisionTime()
+{
+   return hasPrecisionTime;
 }
 
 

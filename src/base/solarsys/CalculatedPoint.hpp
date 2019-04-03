@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -41,6 +41,7 @@
 #include "Rmatrix.hpp"
 #include "Rvector6.hpp"
 #include "TimeTypes.hpp"
+#include "GmatTime.hpp"
 
 /**
  * CalculatedPoint base class, from which all types of calculated points 
@@ -72,6 +73,8 @@ public:
 
    virtual Real         GetEpoch();
    virtual Real         SetEpoch(const Real ep);
+   virtual Real         SetEpoch(const GmatTime ep);
+
    virtual Rvector6     GetLastState();
 
    // methods inherited from SpacePoint, that must be implemented
@@ -118,20 +121,20 @@ public:
                         GetStringArrayParameter(const Integer id) const;
    virtual const StringArray&  
                         GetStringArrayParameter(const std::string &label) const;
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index);
    virtual bool         SetRefObject(GmatBase *obj, 
-                                     const Gmat::ObjectType type,
+                                     const UnsignedInt type,
                                      const std::string &name = "");
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
    virtual bool         HasRefObjectTypeArray();
    virtual const ObjectTypeArray&
                         GetRefObjectTypeArray();
    virtual const StringArray& 
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
+                        GetRefObjectNameArray(const UnsignedInt type);
    virtual bool         TakeAction(const std::string &action,  
                                    const std::string &actionData = "");
    virtual bool         TakeRequiredAction(const Integer id);
@@ -172,6 +175,8 @@ protected:
    std::string                 builtInType;
 
    A1Mjd                       lastStateTime;
+   GmatTime                    lastStateTimeGT;
+
    Rvector6                    lastState;
 
    bool ValidateBodyName(const std::string &itsName, bool addToList = true, bool addToEnd = true, Integer index = 0);

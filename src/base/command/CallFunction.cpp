@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -781,9 +781,9 @@ bool CallFunction::TakeAction(const std::string &action,
 
 
 //------------------------------------------------------------------------------
-// StringArray GetRefObjectNameArray(const Gmat::ObjectType type) const
+// StringArray GetRefObjectNameArray(const UnsignedInt type) const
 //------------------------------------------------------------------------------
-const StringArray& CallFunction::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& CallFunction::GetRefObjectNameArray(const UnsignedInt type)
 {
    refObjectNames.clear();
    
@@ -801,10 +801,10 @@ const StringArray& CallFunction::GetRefObjectNameArray(const Gmat::ObjectType ty
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool CallFunction::RenameRefObject(const Gmat::ObjectType type,
+bool CallFunction::RenameRefObject(const UnsignedInt type,
                                    const std::string &oldName,
                                    const std::string &newName)
 {
@@ -876,9 +876,9 @@ bool CallFunction::RenameRefObject(const Gmat::ObjectType type,
 
 // Reference object accessor methods
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* CallFunction::GetRefObject(const Gmat::ObjectType type,
+GmatBase* CallFunction::GetRefObject(const UnsignedInt type,
                                      const std::string &name)
 {
    switch (type)
@@ -915,7 +915,7 @@ GmatBase* CallFunction::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type, ...
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type, ...
 //------------------------------------------------------------------------------
 /**
  * Sets reference object pointer.
@@ -923,7 +923,7 @@ GmatBase* CallFunction::GetRefObject(const Gmat::ObjectType type,
  * @return true if object successfully set, false otherwise
  */
 //------------------------------------------------------------------------------
-bool CallFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool CallFunction::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                 const std::string &name)
 {
    #ifdef DEBUG_CALL_FUNCTION_REF_OBJ
@@ -1011,9 +1011,9 @@ bool CallFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+// virtual ObjectArray& GetRefObjectArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-ObjectArray& CallFunction::GetRefObjectArray(const Gmat::ObjectType type)
+ObjectArray& CallFunction::GetRefObjectArray(const UnsignedInt type)
 {
    switch (type)
    {

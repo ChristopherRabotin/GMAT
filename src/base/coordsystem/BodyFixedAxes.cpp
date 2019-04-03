@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -64,6 +64,7 @@ using namespace GmatTimeConstants;   // for JD offsets, etc.
 //#define DEBUG_BF_SC
 //#define DEBUG_BFA_INIT
 //#define DEBUG_SET_REF
+//#define DEBUG_DE_FILE_USED
 
 #ifdef DEBUG_FIRST_CALL
    static bool firstCallFired = false;
@@ -126,7 +127,7 @@ BodyFixedAxes::BodyFixedAxes(const BodyFixedAxes &bfAxes) :
       MessageInterface::ShowMessage("Constructing a new BFA (%p) from the old one (%p)\n",
             this, &bfAxes);
       MessageInterface::ShowMessage("   and prevEpoch(old) %12.10f copied to prevEpoch(new) %12.10f\n",
-            bfAxes.prevEpoch, prevEpoch);
+            bfAxes.prevEpoch.GetMjd(), prevEpoch.GetMjd());
    #endif
 }
 
@@ -283,7 +284,7 @@ GmatBase* BodyFixedAxes::Clone() const
 }
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -299,7 +300,7 @@ GmatBase* BodyFixedAxes::Clone() const
  *
  */
 //------------------------------------------------------------------------------
-bool BodyFixedAxes::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool BodyFixedAxes::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                  const std::string &name)
 {
    #ifdef DEBUG_SET_REF
@@ -349,27 +350,45 @@ bool BodyFixedAxes::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
                                             bool forceComputation) 
 {
+   CalculateRotationMatrix(GmatTime(atEpoch.Get()), forceComputation);
+}
+//------------------------------------------------------------------------------
+//  void CalculateRotationMatrix(const GmatTime &atEpoch, 
+//                               bool forceComputation = false)
+//------------------------------------------------------------------------------
+/**
+ * This method will compute the rotMatrix and rotDotMatrix used for rotations
+ * from/to this AxisSystem to/from the MJ2000Eq system
+ *
+ * @param atEpoch          epoch at which to compute the rotation matrix
+ * @param forceComputation force computation even if it is not time to do it
+ *                         (default is false)
+ */
+//------------------------------------------------------------------------------
+void BodyFixedAxes::CalculateRotationMatrix(const GmatTime &atEpoch,
+                                            bool forceComputation) 
+{
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
          MessageInterface::ShowMessage(
-            "Calling BFA::CalculateRotationMatrix at epoch %.15lf; \n", atEpoch.Get());
+            "Calling BFA::CalculateRotationMatrix at epoch %.15lf; \n", atEpoch.GetMjd());
    #endif
-   Real theEpoch = atEpoch.Get();
+   Real theEpoch = atEpoch.GetMjd();
    #ifdef DEBUG_BF_EPOCHS
       MessageInterface::ShowMessage("BFA::CalculateRotationMatrix(%s)   epoch = %12.10f, prevEpoch = %12.10f ...... ",
-            (coordName.c_str()), theEpoch, prevEpoch);
+            (coordName.c_str()), theEpoch, prevEpoch.GetMjd());
    #endif
    #ifdef DEBUG_BF_RECOMPUTE
       MessageInterface::ShowMessage("Entering BFA::CalculateRotationMatrix on object %s (%p) of type %s, origin = %s\n",
             (coordName.c_str()), this, (GetTypeName()).c_str(), originName.c_str());
-      MessageInterface::ShowMessage("     epoch = %12.10f, prevEpoch = %12.10f\n", theEpoch, prevEpoch);
+      MessageInterface::ShowMessage("     epoch = %12.10f, prevEpoch = %12.10f\n", theEpoch, prevEpoch.GetMjd());
    #endif
 
    // if the origin is a Spacecraft, we need to get attitude data from the
    // spacecraft in order to compute the R and Rdot matrices
    if (origin->IsOfType("Spacecraft"))
    {
-      if ((!forceComputation) && (IsEqual(theEpoch, prevEpoch)))
+      if ((!forceComputation) && (IsEqual(atEpoch, prevEpoch)))
       {
          #ifdef DEBUG_BF_RECOMPUTE
             MessageInterface::ShowMessage(
@@ -463,7 +482,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 
       if ((!forceComputation)                    &&
           (originName == SolarSystem::MOON_NAME) &&
-          (IsEqual(theEpoch,      prevEpoch))    &&
+          (IsEqual(atEpoch,       prevEpoch))    &&
           (prevLunaSrc == ((CelestialBody*)origin)->GetRotationDataSource()))
          {
             #ifdef DEBUG_BF_RECOMPUTE
@@ -477,7 +496,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       {
          Real intervalFromOrigin = ((Planet*) origin)->GetNutationUpdateInterval();
          if ((!forceComputation)                                     &&
-             (IsEqual(theEpoch,           prevEpoch)                 &&
+             (IsEqual(atEpoch,            prevEpoch)                 &&
              (IsEqual(intervalFromOrigin, prevOriginUpdateInterval)) &&
              (IsEqual(updateInterval,     prevUpdateInterval))))
          {
@@ -508,7 +527,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 
          // Convert to MJD UTC to use for polar motion  and LOD
          // interpolations
-         Real mjdUTC = TimeConverterUtil::Convert(theEpoch,
+         GmatTime mjdUTC = TimeConverterUtil::Convert(atEpoch,
                        TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
                        JD_JAN_5_1941);
          Real offset = JD_JAN_5_1941 - JD_NOV_17_1858;
@@ -517,31 +536,28 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 
 
          // convert input time to UT1 for later use (for AST calculation)
-         Real mjdUT1 = TimeConverterUtil::Convert(theEpoch,
+         GmatTime mjdUT1 = TimeConverterUtil::Convert(atEpoch,
                        TimeConverterUtil::A1MJD, TimeConverterUtil::UT1,
                        JD_JAN_5_1941);
 
-         // Compute elapsed Julian centuries (UT1)
-         Real tDiff = JD_JAN_5_1941 - JD_OF_J2000;
-         Real tUT1 = (mjdUT1 + tDiff) / DAYS_PER_JULIAN_CENTURY;
-
          // convert input A1 MJD to TT MJD (for most calculations)
-         Real mjdTT = TimeConverterUtil::Convert(theEpoch,
+         GmatTime mjdTT = TimeConverterUtil::Convert(atEpoch,
                       TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
                       JD_JAN_5_1941);
-         Real jdTT    = mjdTT + JD_JAN_5_1941; // right?
+         GmatTime jdTT    = mjdTT + JD_JAN_5_1941; // right?
          // Compute Julian centuries of TDB from the base epoch (J2000)
          // NOTE - this is really TT, an approximation of TDB *********
-         Real tTDB    = (mjdTT + tDiff) / DAYS_PER_JULIAN_CENTURY;
+         Real tDiff = JD_JAN_5_1941 - JD_OF_J2000;
+         Real tTDB    = (mjdTT + tDiff).GetMjd() / DAYS_PER_JULIAN_CENTURY;
 
          #ifdef DEBUG_FIRST_CALL
             if (!firstCallFired)
             {
-               Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
+               Real jdUT1    = mjdUT1.GetMjd() + JD_JAN_5_1941; // right?
                MessageInterface::ShowMessage(
                   "   Epoch data[mjdUTC, mjdUT1, jdUT1, tUT1, mjdTT1, jdTT, tTDB] "
-                  "=\n        [%.15lf %.15lf %.15lf %.15lf %.15lf %.15lf %.15lf ]\n",
-                  mjdUTC, mjdUT1, jdUT1, tUT1, mjdTT, jdTT, tTDB);
+                  "=\n        [%.15lf %.15lf %.15lf %.15lf %.15lf %.15lf ]\n",
+                  mjdUTC, mjdUT1, jdUT1, mjdTT, jdTT, tTDB);
             }
          #endif
 
@@ -573,16 +589,16 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
          #ifdef DEBUG_BF_ROT_MATRIX
             MessageInterface::ShowMessage("About to call ComputePrecessionMatrix\n");
          #endif
-         ComputePrecessionMatrix(tTDB, atEpoch);
+         ComputePrecessionMatrix(tTDB, atEpoch.GetMjd());
          #ifdef DEBUG_BF_ROT_MATRIX
             MessageInterface::ShowMessage("About to call ComputeNutationMatrix\n");
          #endif
-         ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar,
+         ComputeNutationMatrix(tTDB, atEpoch.GetMjd(), dPsi, longAscNodeLunar, cosEpsbar,
                                forceComputation);
          #ifdef DEBUG_BF_ROT_MATRIX
             MessageInterface::ShowMessage("About to call ComputeSiderealTimeRotation\n");
          #endif
-         ComputeSiderealTimeRotation(jdTT, tUT1, dPsi, longAscNodeLunar, cosEpsbar,
+         ComputeSiderealTimeRotation(jdTT.GetMjd(), mjdUT1, dPsi, longAscNodeLunar, cosEpsbar,
                                 cosAst, sinAst);
          #ifdef DEBUG_BF_ROT_MATRIX
             MessageInterface::ShowMessage("About to call ComputeSiderealTimeDotRotation\n");
@@ -592,13 +608,13 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
          #ifdef DEBUG_BF_ROT_MATRIX
             MessageInterface::ShowMessage("About to call ComputePolarMotionRotation\n");
          #endif
-         ComputePolarMotionRotation(mjdUTC, atEpoch, forceComputation);
+         ComputePolarMotionRotation(mjdUTC.GetMjd(), atEpoch.GetMjd(), forceComputation);
          #ifdef DEBUG_BF_ROT_MATRIX
             MessageInterface::ShowMessage("DONE calling all computation submethods\n");
          #endif
 
       #ifdef DEBUG_BF_MATRICES
-         MessageInterface::ShowMessage("atEpoch = %.15f\n", atEpoch.Get());
+         MessageInterface::ShowMessage("atEpoch = %.15f\n", atEpoch.GetMjd());
         MessageInterface::ShowMessage("PREC = %s\n", PREC.ToString().c_str());
          MessageInterface::ShowMessage("NUT = %s\n", NUT.ToString().c_str());
          MessageInterface::ShowMessage("ST = %s\n", ST.ToString().c_str());
@@ -729,7 +745,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 
       }
       else if ((originName == SolarSystem::MOON_NAME) &&
-              (((CelestialBody*)origin)->GetRotationDataSource() == Gmat::DE_405_FILE))
+              (((CelestialBody*)origin)->GetRotationDataSource() == Gmat::DE_FILE))
       {
          #ifdef DEBUG_BF_RECOMPUTE
             MessageInterface::ShowMessage("   RECOMPUTING!!! - body name is LUNA\n");
@@ -741,6 +757,11 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
             throw CoordinateSystemException(
                   "No DE file specified - cannot get Moon data");
             // De file is initialized in its constructor
+            #ifdef DEBUG_DE_FILE_USED
+               MessageInterface::ShowMessage(
+                                    "In BFA, de file used is <%p> of type %d\n",
+                                    de, de->GetDeFileType());
+            #endif
          }
          bool override = ((CelestialBody*)origin)->GetOverrideTimeSystem();
          Real librationAngles[3], andRates[3];
@@ -817,7 +838,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
          // this method will return alpha (deg), delta (deg),
          // W (deg), and Wdot (deg/day)
          cartCoord           = ((CelestialBody*)origin)->
-                               GetBodyCartographicCoordinates(atEpoch);
+                               GetBodyCartographicCoordinates(atEpoch.GetMjd());
          Real rot1           = GmatMathConstants::PI_OVER_TWO + Rad(cartC[0]);
          Real rot2           = GmatMathConstants::PI_OVER_TWO - Rad(cartC[1]);
          Real W              = Rad(cartC[2]);
@@ -835,7 +856,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
                                     0.0,    0.0,1.0};
          
         #ifdef DEBUG_BF_RECOMPUTE
-           MessageInterface::ShowMessage("At time: %f\n",atEpoch.GetReal());
+           MessageInterface::ShowMessage("At time: %f\n",atEpoch.GetMjd());
            MessageInterface::ShowMessage(" RA = %f rad\n", rot1 - GmatMathConstants::PI_OVER_TWO);
           MessageInterface::ShowMessage(" DEC = %f rad\n", -rot2 + GmatMathConstants::PI_OVER_TWO);
           MessageInterface::ShowMessage(" W = %f rad\n", W);
@@ -921,9 +942,9 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    }   // end else
       
    // Save the epoch for comparison the next time through
-   prevEpoch = theEpoch;
+   prevEpoch = atEpoch;
    #ifdef DEBUG_BF_RECOMPUTE
-      MessageInterface::ShowMessage("at the end, just set prevEpoch to %12.10f\n", prevEpoch);
+      MessageInterface::ShowMessage("at the end, just set prevEpoch to %12.10f\n", prevEpoch.GetMjd());
    #endif
    if (originName == SolarSystem::MOON_NAME)
       prevLunaSrc = ((CelestialBody*)origin)->GetRotationDataSource();

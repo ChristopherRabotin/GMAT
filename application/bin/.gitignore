@@ -16,3 +16,4 @@ inputs*.txt
 *.dll
 *.exp
 *.lib
+Test*

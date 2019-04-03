@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -89,7 +89,7 @@
 //                                          W. Waktola, Missions Applications Branch
 //                              Changes:
 //                                - Changed constructor from PhysicalModel::PhysicalModel(void) to
-//                                  PhysicalModel(Gmat::ObjectType typeId, const std::string &typeStr,
+//                                  PhysicalModel(UnsignedInt typeId, const std::string &typeStr,
 //                                  const std::string &nomme = "")
 //                                - Added parameterCount = 1 in constructors
 //                                - In SetErrorThreshold(), changed statement from relativeErrorThreshold = fabs(thold);
@@ -147,7 +147,7 @@ PhysicalModel::PARAMETER_TYPE[PhysicalModelParamCount - GmatBaseParamCount] =
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// PhysicalModel(Gmat::ObjectType typeId, const std::string &typeStr,
+// PhysicalModel(UnsignedInt typeId, const std::string &typeStr,
 //    const std::string &nomme = "")
 //------------------------------------------------------------------------------
 /**
@@ -159,7 +159,7 @@ PhysicalModel::PARAMETER_TYPE[PhysicalModelParamCount - GmatBaseParamCount] =
  * state data array.
  */
 //------------------------------------------------------------------------------
-PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
+PhysicalModel::PhysicalModel(UnsignedInt id, const std::string &typeStr,
                              const std::string &nomme) :
    GmatBase                    (id, typeStr, nomme),
    body                        (NULL),
@@ -172,6 +172,7 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
    modelState                  (NULL),
    rawState                    (NULL),
    epoch                       (21545.0),
+   epochGT                     (21545.0),
    elapsedTime                 (0.0),
    prevElapsedTime             (0.0),
    deriv                       (NULL),
@@ -274,6 +275,7 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    modelState                  (NULL),
    rawState                    (NULL),
    epoch                       (pm.epoch),
+   epochGT                     (pm.epochGT),
    elapsedTime                 (pm.elapsedTime),
    prevElapsedTime             (pm.prevElapsedTime),
    deriv                       (NULL),
@@ -354,6 +356,9 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
             pm.GetName().c_str());
       MessageInterface::ShowMessage("   epoch = %le\n", pm.epoch);
       MessageInterface::ShowMessage("   epoch from state = %le\n", (pm.theState)->GetEpoch());
+      MessageInterface::ShowMessage("   epochGT = %s\n", GmatTime(pm.epochGT).ToString().c_str());
+      MessageInterface::ShowMessage("   epochGT from state = %s\n", (pm.theState)->GetEpochGT().ToString().c_str());
+
    #endif
    
    /// @note: Since the next two are global objects, assignment works
@@ -364,6 +369,7 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
    dimension       = pm.dimension;
    isInitialized   = false; //pm.initialized;
    epoch           = pm.epoch;
+   epochGT         = pm.epochGT;
    elapsedTime     = pm.elapsedTime;
    prevElapsedTime = pm.prevElapsedTime;
    relativeErrorThreshold = pm.relativeErrorThreshold;
@@ -606,6 +612,8 @@ bool PhysicalModel::Initialize()
    #endif
    
    modelState = new Real[dimension];
+   for (Integer i = 0; i < dimension; ++i)
+      modelState[i] = 0.0;
 
    #ifdef DEBUG_STATE_ALLOCATION
       MessageInterface::ShowMessage("%p\n", modelState);
@@ -802,6 +810,9 @@ void PhysicalModel::SetState(GmatState * st)
    #endif
    theState = st;
    epoch    = st->GetEpoch(); // ***
+   epochGT  = st->GetEpochGT();
+   hasPrecisionTime = st->HasPrecisionTime();
+
    if (dimension != st->GetSize())
       MessageInterface::ShowMessage("Dimension mismatch!!!\n");
    if (modelState != NULL)
@@ -1509,6 +1520,34 @@ bool PhysicalModel::IsParameterReadOnly(const std::string &label) const
    return GmatBase::IsParameterReadOnly(label);
 }
 
+
+GmatTime PhysicalModel::GetGmatTimeParameter(const Integer id) const
+{
+   if (id == EPOCH)
+   {
+      GmatTime gt = epochGT;
+      gt.AddSeconds(elapsedTime);
+      return gt;
+   }
+
+   return GmatBase::GetGmatTimeParameter(id);
+}
+
+
+GmatTime PhysicalModel::SetGmatTimeParameter(const Integer id, const GmatTime value)
+{
+   if (id == EPOCH)
+   {
+      epochGT = value;
+      epoch = epochGT.GetMjd();   //??? Does it need?
+      elapsedTime = 0.0;
+
+      return epochGT;
+   }
+
+   return GmatBase::SetGmatTimeParameter(id, value);
+}
+
 //------------------------------------------------------------------------------
 // Real PhysicalModel::GetRealParameter(const Integer id)
 //------------------------------------------------------------------------------
@@ -1646,7 +1685,7 @@ bool PhysicalModel::SetStringParameter(const std::string &label,
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//  GmatBase* GetRefObject(const UnsignedInt type,
 //                         const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -1659,7 +1698,7 @@ bool PhysicalModel::SetStringParameter(const std::string &label,
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* PhysicalModel::GetRefObject(const Gmat::ObjectType type,
+GmatBase* PhysicalModel::GetRefObject(const UnsignedInt type,
                                       const std::string &name)
 {
    switch (type)
@@ -1678,7 +1717,7 @@ GmatBase* PhysicalModel::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//  const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Returns the names of the reference object. (Derived classes should implement
@@ -1691,7 +1730,7 @@ GmatBase* PhysicalModel::GetRefObject(const Gmat::ObjectType type,
  */
 //------------------------------------------------------------------------------
 const StringArray& PhysicalModel::GetRefObjectNameArray(
-                                  const Gmat::ObjectType type)
+                                  const UnsignedInt type)
 {
    if (type == Gmat::UNKNOWN_OBJECT)
    {
@@ -1714,7 +1753,7 @@ const StringArray& PhysicalModel::GetRefObjectNameArray(
 
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -1729,7 +1768,7 @@ const StringArray& PhysicalModel::GetRefObjectNameArray(
  */
 //------------------------------------------------------------------------------
 bool PhysicalModel::SetRefObject(GmatBase *obj,
-                                 const Gmat::ObjectType type,
+                                 const UnsignedInt type,
                                  const std::string &name)
 {
    if (obj->IsOfType("CelestialBody"))
@@ -1751,7 +1790,7 @@ bool PhysicalModel::SetRefObject(GmatBase *obj,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string &name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -1765,7 +1804,7 @@ bool PhysicalModel::SetRefObject(GmatBase *obj,
  * @return true if a reference was set, false if not
  */
 //------------------------------------------------------------------------------
-bool PhysicalModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool PhysicalModel::SetRefObject(GmatBase *obj, const UnsignedInt type,
                            const std::string &name, const Integer index)
 {
    return GmatBase::SetRefObject(obj, type, name, index);
@@ -1773,7 +1812,7 @@ bool PhysicalModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name,
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name,
 //       const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -1786,7 +1825,7 @@ bool PhysicalModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return The object
  */
 //------------------------------------------------------------------------------
-GmatBase* PhysicalModel::GetRefObject(const Gmat::ObjectType type,
+GmatBase* PhysicalModel::GetRefObject(const UnsignedInt type,
                            const std::string &name, const Integer index)
 {
    return GmatBase::GetRefObject(type, name, index);
@@ -1878,6 +1917,32 @@ bool PhysicalModel::BuildModelState(GmatEpoch now, Real* state, Real* j2kState,
       for (Integer i = 0; i < count; ++i)
       {
          Integer i6 = i*6;
+         for (Integer j = 0; j < 6; ++j)
+            state[i6 + j] = j2kState[i6 + j] - bodyState[j];
+      }
+      retval = true;
+   }
+
+   return retval;
+}
+
+
+bool PhysicalModel::BuildModelStateGT(GmatTime now, Real* state, Real* j2kState,
+   Integer dimension)
+{
+   bool retval = false;
+
+   Integer count = dimension / 6;
+   if (count * 6 != dimension)
+      throw ODEModelException("Error translating states when building the "
+      "model state");
+
+   if (body != NULL)
+   {
+      Rvector6 bodyState = body->GetMJ2000State(now);
+      for (Integer i = 0; i < count; ++i)
+      {
+         Integer i6 = i * 6;
          for (Integer j = 0; j < 6; ++j)
             state[i6 + j] = j2kState[i6 + j] - bodyState[j];
       }

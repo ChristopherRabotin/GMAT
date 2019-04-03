@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -32,6 +32,7 @@
 
 #include "gmatwxdefs.hpp"
 #include "GuiInterpreter.hpp"
+#include "ItemManager.hpp"
 
 #include <wx/sizer.h>
 #include <wx/control.h>
@@ -46,7 +47,7 @@
 
 class GmatPanel; // forward declaration
 
-class GuiItemManager
+class GuiItemManager : public ItemManager
 {
 public:
 
@@ -76,16 +77,16 @@ public:
    // For validation
    wxString GetLastErrorMessage();
    void     SetLastErrorMessage(const wxString &errMsg = "");
-   int IsValidParameter(const std::string &varName, Gmat::ObjectType allowedType,
+   int IsValidParameter(const std::string &varName, UnsignedInt allowedType,
                         bool allowNonPlottable = false, bool allowWholeArray = false);
-   int IsValidObjectProperty(const std::string &varName, Gmat::ObjectType allowedType,
+   int IsValidObjectProperty(const std::string &varName, UnsignedInt allowedType,
                              bool allowNonPlottable = false);
-   int IsValidVariable(const std::string &varName, Gmat::ObjectType allowedType,
+   int IsValidVariable(const std::string &varName, UnsignedInt allowedType,
                        bool allowNumber = false, bool allowNonPlottable = false,
                        bool allowObjectProperty = false, bool allowWholeArray = false);
    
    // For updating GUI items
-   void UpdateAll(Gmat::ObjectType objType = Gmat::UNKNOWN_OBJECT);
+   void UpdateAll(UnsignedInt objType = Gmat::UNKNOWN_OBJECT);
    void UpdateGroundStation(bool updateObjectArray = true);
    void UpdateBurn(bool updateObjectArray = true);
    void UpdateCelestialPoint(bool updateObjectArray = true);
@@ -111,7 +112,7 @@ public:
    void AddToResourceUpdateListeners(GmatPanel *panel);
    void RemoveFromResourceUpdateListeners(GmatPanel *panel);
    bool PrepareObjectNameChange();
-   void NotifyObjectNameChange(Gmat::ObjectType type,
+   void NotifyObjectNameChange(UnsignedInt type,
                                const wxString &oldName,
                                const wxString &newName);
    void UnregisterListBox(const wxString &type, wxListBox *lb,
@@ -204,7 +205,8 @@ public:
                                    const wxSize &size);
    
    wxComboBox* GetCoordSystemComboBox(wxWindow *parent, wxWindowID id,
-                                      const wxSize &size, bool getMJ2000EqOnly = false);
+                                      const wxSize &size, bool getMJ2000EqOnly = false,
+                                      bool getCode500Only = false);
    
    wxComboBox* GetCelestialBodyComboBox(wxWindow *parent, wxWindowID id,
                                         const wxSize &size);

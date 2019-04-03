@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -34,6 +34,7 @@
 
 #include "gmatdefs.hpp"
 #include "A1Mjd.hpp"
+#include "GmatTime.hpp"
 
 namespace Gmat
 {
@@ -100,6 +101,12 @@ public:
    //------------------------------------------------------------------------------
    virtual Real* GetPosVel(Integer forBody, A1Mjd atTime,
                            bool overrideTimeSystem = false) = 0;
+   virtual Real* GetPosVel(Integer forBody, GmatTime atTime, 
+      bool overrideTimeSystem = false) = 0;
+   virtual Real* GetPosDelta(Integer forBody,
+                             const GmatTime &atTime1,
+                             const GmatTime &atTime2,
+                             bool overrideTimeSystem = false) = 0;
 
    //------------------------------------------------------------------------------
    //  Integer* GetStartDayAndYear()

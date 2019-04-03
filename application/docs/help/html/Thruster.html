@@ -1,4 +1,4 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>ChemicalThruster</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="Transponder.html" title="Transponder"><link rel="next" href="Variable.html" title="Variable"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">ChemicalThruster</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Transponder.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Variable.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Thruster"></a><div class="titlepage"></div><a name="N214AB" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ChemicalThruster</span></h2><p>ChemicalThruster &mdash; A chemical thruster model</p></div><div class="refsection"><a name="N214BC"></a><h2>Description</h2><p>The <span class="guilabel">ChemicalThruster</span> resource is a model of a
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>ChemicalThruster</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="Transponder.html" title="Transponder"><link rel="next" href="Variable.html" title="Variable"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">ChemicalThruster</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Transponder.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Variable.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Thruster"></a><div class="titlepage"></div><a name="N21894" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ChemicalThruster</span></h2><p>ChemicalThruster &mdash; A chemical thruster model</p></div><div class="refsection"><a name="N218A5"></a><h2>Description</h2><p>The <span class="guilabel">ChemicalThruster</span> resource is a model of a
     chemical thruster which uses polynomials to model the thrust and specific
     impulse as a function of tank pressure and temperature. The
     <span class="guilabel">ChemicalThruster</span> model also allows you to specify
@@ -8,7 +8,7 @@
     of the thrust by specifying the thrust components in coordinate systems
     such as (locally defined) <span class="guilabel">SpacecraftBody</span> or
     <span class="guilabel">LVLH</span>, or by choosing any configured
-    <span class="guilabel">CoordinateSystem</span> resource.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="BeginFiniteBurn.html" title="BeginFiniteBurn"><span class="refentrytitle">BeginFiniteBurn</span></a>,<a class="xref" href="FuelTank.html" title="ChemicalTank"><span class="refentrytitle">ChemicalTank</span></a>,<a class="xref" href="FiniteBurn.html" title="FiniteBurn"><span class="refentrytitle">FiniteBurn</span></a></p></div><div class="refsection"><a name="N214E3"></a><h2>Fields</h2><p>The constants <span class="guilabel">Ci</span> below are used in the
+    <span class="guilabel">CoordinateSystem</span> resource.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="BeginFiniteBurn.html" title="BeginFiniteBurn"><span class="refentrytitle">BeginFiniteBurn</span></a>,<a class="xref" href="FuelTank.html" title="ChemicalTank"><span class="refentrytitle">ChemicalTank</span></a>,<a class="xref" href="FiniteBurn.html" title="FiniteBurn"><span class="refentrytitle">FiniteBurn</span></a></p></div><div class="refsection"><a name="N218CC"></a><h2>Fields</h2><p>The constants <span class="guilabel">Ci</span> below are used in the
     following equation to calculate thrust (in Newtons),
     F<sub>T</sub>, as a function of pressure P (kPa) and
     temperature T (Celsius).</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Thruster_GUI_1.png" align="middle" height="65"></td></tr></table></div></div><p>The constants <span class="guilabel">Ki</span> below are used in the
@@ -77,7 +77,7 @@
             factor that is multiplied by the thrust vector, for a given
             thruster, before the thrust vector is added into the total
             acceleration. Note that the value of this scale factor does not
-            affect the mass flow rate. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt;= 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N21D66"></a><h2>Interactions</h2><div class="informaltable"><table border="1"><colgroup><col width="23%"><col width="77%"></colgroup><thead><tr><th align="left">Command or Resource</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">BeginFiniteBurn/EndFiniteBurn
+            affect the mass flow rate. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real Number</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt;= 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N2214F"></a><h2>Interactions</h2><div class="informaltable"><table border="1"><colgroup><col width="23%"><col width="77%"></colgroup><thead><tr><th align="left">Command or Resource</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">BeginFiniteBurn/EndFiniteBurn
             command</span></td><td><p>Use these commands, which require a
             <span class="guilabel">Spacecraft</span> and a
             <span class="guilabel">FiniteBurn</span> name as input, to implement a
@@ -94,7 +94,7 @@
             finite burn to. </p></td></tr><tr><td><span class="guilabel">Propagate command</span></td><td><p>In order to implement a non-zero finite burn, a
             <span class="guilabel">Propagate</span> statement must occurr within the
             <span class="guilabel">BeginFiniteBurn</span> and
-            <span class="guilabel">EndFiniteBurn</span> statements. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N21DC6"></a><h2>GUI</h2><p>The <span class="guilabel">ChemicalThruster</span> dialog box allows you to
+            <span class="guilabel">EndFiniteBurn</span> statements. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N221AF"></a><h2>GUI</h2><p>The <span class="guilabel">ChemicalThruster</span> dialog box allows you to
     specify properties of a <span class="guilabel">ChemicalThruster</span> including
     the <span class="guilabel">Coordinate System</span> of the thrust acceleration
     direction vector, the thrust magnitude and Isp coefficients, and choice of
@@ -114,7 +114,7 @@
     up the following dialog box where you may input the coefficients for the
     <span class="guilabel">ChemicalThruster</span> polynomial.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Thruster_GUI_5.png" align="middle" height="424"></td></tr></table></div></div><p>Similarly, clicking the <span class="guilabel">Edit Impulse Coef.</span>
     button brings up the following dialog box where you may input the
-    coefficients for the specific impulse (ISP) polynomial.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Thruster_GUI_6.png" align="middle" height="424"></td></tr></table></div></div></div><div class="refsection"><a name="N21E30"></a><h2>Remarks</h2><div class="refsection"><a name="N21E33"></a><h3>Use of ChemicalThruster Resource in Conjunction With
+    coefficients for the specific impulse (ISP) polynomial.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Thruster_GUI_6.png" align="middle" height="424"></td></tr></table></div></div></div><div class="refsection"><a name="N22219"></a><h2>Remarks</h2><div class="refsection"><a name="N2221C"></a><h3>Use of ChemicalThruster Resource in Conjunction With
       Maneuvers</h3><p>A <span class="guilabel">ChemicalThruster</span> resource is used only in
       association with finite maneuvers. To implement a finite maneuver, you
       must first create both a <span class="guilabel">ChemicalTank</span> and a
@@ -129,7 +129,7 @@
       <span class="guilabel">BeginFiniteBurn</span>/<span class="guilabel">EndFiniteBurn</span>
       command documentation for worked examples on how the
       <span class="guilabel">ChemicalThruster</span> resource is used in conjunction
-      with finite maneuvers.</p></div><div class="refsection"><a name="N21E5C"></a><h3>Thrust and ISP Calculation</h3><p>Unscaled thrust, F<sub>T</sub>, and Isp, as a function
+      with finite maneuvers.</p></div><div class="refsection"><a name="N22245"></a><h3>Thrust and ISP Calculation</h3><p>Unscaled thrust, F<sub>T</sub>, and Isp, as a function
       of Pressure, in kPa, and Temperature, in degrees Celsius, are calculated
       using the following polynomials.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Thruster_GUI_1.png" align="middle" height="65"></td></tr></table></div></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Thruster_GUI_2.png" align="middle" height="71"></td></tr></table></div></div><p>The thrust, T, output in Newtons, is scaled by the <span class="guimenu">Duty
       Cycle</span> and <span class="guimenu">Thrust Scale Factor</span>. The thrust
@@ -142,7 +142,7 @@
       f<sub>d</sub> is the duty cycle, f<sub>s</sub>
       is the thrust scale factor, R<sub>iT</sub> is the rotation
       matrix from the thrust coordinate system to the inertial system, and
-      T<sub>d</sub> is the unitized thrust direction.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Thruster_GUI_8.png" align="middle" height="113"></td></tr></table></div></div></div><div class="refsection"><a name="N21E9E"></a><h3>Local Coordinate Systems</h3><p>Here, a Local coordinate system is defined as one that we
+      T<sub>d</sub> is the unitized thrust direction.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_Thruster_GUI_8.png" align="middle" height="113"></td></tr></table></div></div></div><div class="refsection"><a name="N22287"></a><h3>Local Coordinate Systems</h3><p>Here, a Local coordinate system is defined as one that we
       configure "locally" using the <span class="guilabel">ChemicalThruster</span>
       resource interface as opposed to defining a coordinate system using the
       <span class="guilabel">Coordinate Systems</span> folder in the
@@ -174,7 +174,7 @@
       of the spacecraft. Since the thrust is applied in this system, GMAT uses
       the attitude of the spacecraft, a spacecraft attribute, to determine the
       inertial thrust direction. Note that the <span class="guilabel">Origin</span>
-      sub-field is not needed to define this coordinate system.</p></div><div class="refsection"><a name="N21EDF"></a><h3>Caution When Setting the ChemicalTank Temperature and Reference
+      sub-field is not needed to define this coordinate system.</p></div><div class="refsection"><a name="N222C8"></a><h3>Caution When Setting the ChemicalTank Temperature and Reference
       Temperature</h3><p>Note that both the thrust and ISP polynomials have terms that
       involve the ratio, (Temperature / Reference Temperature). For GMAT, this
       temperature ratio is calculated in Celsius units, and thus, there is a
@@ -195,7 +195,7 @@
       any dependence of thrust and ISP with temperature when using the
       currently implemented <span class="guilabel">ChemicalTank</span> model based upon
       Boyle&rsquo;s Law where the fuel Temperature does not change as fuel is
-      depleted.</p></div></div><div class="refsection"><a name="N21EE9"></a><h2>Examples</h2><div class="informalexample"><p>Create a default <span class="guilabel">ChemicalTank</span> and a
+      depleted.</p></div></div><div class="refsection"><a name="N222D2"></a><h2>Examples</h2><div class="informalexample"><p>Create a default <span class="guilabel">ChemicalTank</span> and a
       <span class="guilabel">ChemicalThruster</span> that allows for fuel depletion,
       assign the <span class="guilabel">ChemicalThruster</span> the default
       <span class="guilabel">ChemicalTank</span>, and attach both the

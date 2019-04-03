@@ -47,7 +47,6 @@ EstSat.DragArea            = 15;
 EstSat.SRPArea             = 15;
 EstSat.Id                  = 'LEOSat';
 EstSat.AddHardware         = {Transponder1, SpacecraftAntenna};
-EstSat.EstimationStateType = 'Cartesian';
 EstSat.SolveFors           = {CartesianState};     
 
 %
@@ -176,7 +175,7 @@ ODProp_ForceModel.CentralBody  = Earth;
 ODProp_ForceModel.PointMasses  = {Earth};
 ODProp_ForceModel.Drag         = None;
 ODProp_ForceModel.SRP          = Off;
-ODProp_ForceModel.ErrorControl = RSSStep;
+ODProp_ForceModel.ErrorControl = None;
 
 Create Propagator ODProp;
 

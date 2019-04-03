@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -612,10 +612,10 @@ bool XyPlot::TakeAction(const std::string &action,
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool XyPlot::RenameRefObject(const Gmat::ObjectType type,
+bool XyPlot::RenameRefObject(const UnsignedInt type,
                              const std::string &oldName,
                              const std::string &newName)
 {
@@ -1162,10 +1162,10 @@ bool XyPlot::SetBooleanParameter(const Integer id, const bool value)
 }
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+// virtual GmatBase* GetRefObject(const UnsignedInt type,
 //                                const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* XyPlot::GetRefObject(const Gmat::ObjectType type,
+GmatBase* XyPlot::GetRefObject(const UnsignedInt type,
                                const std::string &name)
 {
    // if name is X parameter
@@ -1189,10 +1189,10 @@ GmatBase* XyPlot::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
-bool XyPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool XyPlot::SetRefObject(GmatBase *obj, const UnsignedInt type,
                           const std::string &name)
 {
    #if DEBUG_XYPLOT_OBJECT
@@ -1345,9 +1345,9 @@ const ObjectTypeArray& XyPlot::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& XyPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& XyPlot::GetRefObjectNameArray(const UnsignedInt type)
 {
    mAllParamNames.clear();
    
@@ -1390,7 +1390,7 @@ const StringArray& XyPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
 
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Retrieves object type of parameter of given id.
@@ -1400,7 +1400,7 @@ const StringArray& XyPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
  * @return parameter ObjectType
  */
 //---------------------------------------------------------------------------
-Gmat::ObjectType XyPlot::GetPropertyObjectType(const Integer id) const
+UnsignedInt XyPlot::GetPropertyObjectType(const Integer id) const
 {
    switch (id)
    {

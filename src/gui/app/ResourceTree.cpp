@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -146,6 +146,9 @@
 #include <wx/dirdlg.h>
 #include <wx/config.h>
 
+#include "GmatEventHandler.hpp"
+#include "PluginItemManager.hpp"
+
 // If we are ready to handle Constellations, enable this
 //define __ENABLE_CONSTELLATIONS__
 
@@ -169,8 +172,11 @@
 //#define DEBUG_ADD_SCRIPT
 //#define DEBUG_ADD_SOLVER
 //#define DEBUG_USER_GUI
+//#define DEBUG_USER_OBJECT
+//#define DEBUG_MENU_MAP
 //#define DEBUG_GMAT_FUNCTION
 //#define DEBUG_ADD_LOCATOR
+//#define DEBUG_SHOW_MENU
 
 
 // ID macros for plug-ins
@@ -284,7 +290,8 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
                            const wxPoint &pos, const wxSize &size, long style)
-   : wxTreeCtrl(parent, id, pos, size, style)
+   : wxTreeCtrl(parent, id, pos, size, style),
+   nextGuiPluginId (10001)
 {
    // Set GMAT default font
    SetFont(GmatAppData::Instance()->GetFont());
@@ -306,6 +313,10 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    mScriptAdded = false;
    mMatlabServerStarted = false;
    
+   // Setup the popup menus and register GUI plugins
+   CreatePopupMenuMap();
+   RegisterGuiPluginResources();
+
    // @todo Need more work on this automatic loading of icons
    // Use this mapping for getting icon id when work is complete
    // itemIcon = (GmatTree::ResourceIconType)typeIconMap[objTypeName];
@@ -324,7 +335,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    entries[1].Set(wxACCEL_SHIFT | wxACCEL_CTRL,  (int) 'C', POPUP_CLONE);
    entries[2].Set(wxACCEL_NORMAL, WXK_F2, POPUP_RENAME);
    wxAcceleratorTable accel(3, entries);
-   this->SetAcceleratorTable(accel);
+   SetAcceleratorTable(accel);
    
    #ifdef DEBUG_FONT
    wxFont currFont = GetFont();
@@ -354,7 +365,6 @@ void ResourceTree::SetMainFrame(GmatMainFrame *gmf)
 void ResourceTree::ClearResource(bool leaveScripts, bool onlyChildNodes)
 {
    // ag: collapse, so folder icon is closed
-   // djc: Under Linux, this crashes so it only applies to Windows
    #ifdef __WXMSW__
       Collapse(mGroundStationItem);
       Collapse(mSpacecraftItem);
@@ -667,18 +677,21 @@ void ResourceTree::UpdateRecentFiles(wxString filename)
    while (files.GetCount() > 5)
       files.RemoveAt(0);
 
-   // save filenames back to config
-   pConfig->SetPath(wxT("/"));
-   pConfig->DeleteGroup("/RecentFiles");
-   pConfig->SetPath(wxT("/RecentFiles"));
-   for (i = 0; i < files.GetCount(); i++)
+   // save filenames back to config IF we are supposed to
+   if (GmatGlobal::Instance()->GetWritePersonalizationFile())
    {
-      aFilename = files[i];
-      aKey = wxString::Format(wxT("%d"), (int) i);
-      pConfig->Write(aKey, aFilename);
-      //pConfig->Write((GmatFileUtil::ParseFileName(aFilename.c_str())).c_str(), aFilename.c_str());
+      pConfig->SetPath(wxT("/"));
+      pConfig->DeleteGroup("/RecentFiles");
+      pConfig->SetPath(wxT("/RecentFiles"));
+      for (i = 0; i < files.GetCount(); i++)
+      {
+         aFilename = files[i];
+         aKey = wxString::Format(wxT("%d"), (int) i);
+         pConfig->Write(aKey, aFilename);
+         //pConfig->Write((GmatFileUtil::ParseFileName(aFilename.c_str())).c_str(), aFilename.c_str());
+      }
+      pConfig->Flush(false);
    }
-   pConfig->Flush(false);
 
    theMainFrame->UpdateRecentMenu(files);
 
@@ -939,6 +952,16 @@ void ResourceTree::UpdateGuiItem(GmatTree::ItemType itemType)
       theGuiManager->UpdateFunction();
       break;
    default:
+      {
+         if ((itemType >= GmatTree::USER_DEFINED_OBJECT ) &&
+             (itemType < GmatTree::SCRIPT_FILE))
+         {
+            //MessageInterface::ShowMessage("Fell into default in UpdateGuiItem\n");
+            /// @todo Add plugin objects here
+
+            theGuiManager->UpdateAll();
+         }
+      }
       break;
    }
 
@@ -996,6 +1019,7 @@ wxTreeItemId ResourceTree::AddObjectToTree(GmatBase *obj, bool showDebug)
    
    GetItemTypeAndIcon(obj, itemType, itemIcon);
    wxTreeItemId itemId = GetTreeItemId(itemType);
+   Integer itemIconInt = itemIcon;
 
    if (obj->IsOfType("DataInterface"))
    {
@@ -1006,12 +1030,31 @@ wxTreeItemId ResourceTree::AddObjectToTree(GmatBase *obj, bool showDebug)
    {
       #ifdef DEBUG_ADD_OBJECT
       MessageInterface::ShowMessage
-         ("   Now appending '%s' to node %s\n", name.WX_TO_C_STRING, itemId.IsOk() ? "OK" : "Item Not Found");
+         ("   Now appending '%s' to node %s\n", name.WX_TO_C_STRING,
+               itemId.IsOk() ? "OK" : "Item Not Found");
       #endif
-      
-      AppendItem(itemId, name, itemIcon, -1, new GmatTreeItemData(name, itemType));
+
+      GmatTreeItemData *newItemData = new GmatTreeItemData(name, itemType);
+      if (obj->HasGuiPlugin())
+         newItemData->SetPluginGui(true);
+      if (obj->GetIcon())
+      {
+         itemIconInt = obj->GetIconIndex();
+         if (itemIconInt < 0)
+         {
+            const char** iconData = obj->GetIcon();
+            GmatTree::ResourceIconType objectsIcon;
+            wxBitmap *bitmap;
+            theGuiManager->LoadIcon("NoSuchFile", -1, &bitmap, iconData);
+            wxImageList *treeImageList = GetImageList();
+            itemIconInt = treeImageList->Add(*bitmap);
+         }
+      }
+      AppendItem(itemId, name, itemIconInt, -1, newItemData);
    }
    
+   PluginItemManager::Instance()->UpdateObjectList(obj->GetType());
+
    if (showDebug)
       MessageInterface::ShowMessage
                ("ResourceTree::AddObjectToTree() returning itemId = '%s'\n\n",
@@ -1077,7 +1120,7 @@ void ResourceTree::AddDefaultResources()
    }
 
    //----- Hardware
-   mHardwareItem = 
+   mHardwareItem =
       AppendItem(resource, wxT("Hardware"), GmatTree::RESOURCE_ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Hardware"),
                                       GmatTree::HARDWARE_FOLDER));
@@ -1209,7 +1252,7 @@ void ResourceTree::AddDefaultResources()
       SetItemImage(mFunctionItem, GmatTree::RESOURCE_ICON_OPEN_FOLDER,
                    wxTreeItemIcon_Expanded);
    }
-   
+
    // Add default and user resources
    UpdateResource(true, false);
    
@@ -1962,7 +2005,7 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId, bool restartCounte
 {
    StringArray itemNames = theGuiInterpreter->GetListOfObjects(Gmat::SUBSCRIBER);
    int size = itemNames.size();
-   
+
    for (int i = 0; i<size; i++)
    {
       GmatBase *obj = GetObject(itemNames[i]);
@@ -2166,7 +2209,7 @@ void ResourceTree::AddUserObjects()
    #endif
    
    StringArray itemNames;
-   Gmat::ObjectType type;
+   UnsignedInt type;
    std::string subtype;
    wxString objName;
    wxString objTypeName;
@@ -2254,12 +2297,10 @@ void ResourceTree::AddUserObjects()
 //------------------------------------------------------------------------------
 /**
  * On right click show the pop up menu
- *
  */
 //------------------------------------------------------------------------------
 void ResourceTree::OnItemRightClick(wxTreeEvent& event)
 {
-   //wxWidgets-2.6.3 does not need this but wxWidgets-2.8.0 needs to SelectItem
    SelectItem(event.GetItem());
    ShowMenu(event.GetItem(), event.GetPoint());
 }
@@ -2386,7 +2427,7 @@ MessageInterface::ShowMessage("ResourceTree::OnRename() oldName = %s, newName = 
    
    if ( !newName.IsEmpty() && !(newName.IsSameAs(oldName)))
    {
-      Gmat::ObjectType objType = GetObjectType(itemType);
+      UnsignedInt objType = GetObjectType(itemType);
 
       #ifdef DEBUG_RENAME
       MessageInterface::ShowMessage
@@ -2437,6 +2478,9 @@ MessageInterface::ShowMessage("ResourceTree::OnRename() oldName = %s, newName = 
          //UpdateGuiItem(itemType);
          theGuiManager->UpdateAll(objType);
          theGuiManager->NotifyObjectNameChange(objType, oldName, newName);
+
+         PluginItemManager::Instance()->RenameObject(std::string(oldName.mb_str()),
+               std::string(newName.mb_str()), objType);
 
          // Handle potential FM name change due to PropSetup name change
          if ((objType == Gmat::PROPAGATOR) || (objType == Gmat::PROP_SETUP))
@@ -2525,7 +2569,7 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
                          wxT("Please confirm"), wxYES_NO);
    if (answer == wxNO) return;
 
-   Gmat::ObjectType objType = GetObjectType(itemType);
+   UnsignedInt objType = GetObjectType(itemType);
    if (objType == Gmat::UNKNOWN_OBJECT)
       return;
    
@@ -2939,7 +2983,7 @@ void ResourceTree::OnAddBody(wxCommandEvent &event)
    wxTreeItemId item = GetSelection();
    wxString name, centralBody, prompt;
    
-   //Get name from the user first
+   // Get name from the user first
    if (GetNameFromUser(name, name, "Enter name: ", "Celestial Body") == 1)
    {
       if (!name.IsEmpty())
@@ -3690,8 +3734,15 @@ void ResourceTree::OnAddSubscriber(wxCommandEvent &event)
    std::string newName = theGuiInterpreter->GetNewName(selected, 1);
    GmatBase *obj = theGuiInterpreter->CreateSubscriber(selected, newName);
 
+   //MessageInterface::ShowMessage("Adding subscriber %p, a %s with name %s\n",
+   //      obj, obj->GetTypeName().c_str(), newName.c_str());
+
    if (obj != NULL)
    {
+      #ifdef DEBUG_ADD_SUBSCRIBER
+         MessageInterface::ShowMessage("   Adding Subscriber %s\n", obj->GetName().c_str());
+      #endif
+
       AddObjectToTree(obj);
       
       Expand(item);
@@ -3904,6 +3955,7 @@ void ResourceTree::OnAddCoordSystem(wxCommandEvent &event)
       Expand(item);
       SelectItem(GetLastChild(item));
       theGuiManager->UpdateCoordSystem();
+      PluginItemManager::Instance()->UpdateObjectList(Gmat::COORDINATE_SYSTEM);
    }
 }
 
@@ -5262,7 +5314,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    case GmatTree::PLUGIN_FOLDER:
       {
          // Get type from itemId
-         Gmat::ObjectType gmatType = nodeTypeMap[std::string(GetItemText(itemId).c_str())];
+         UnsignedInt gmatType = nodeTypeMap[std::string(GetItemText(itemId).c_str())];
          std::string subtype = nodeSubtypeMap[std::string(GetItemText(itemId).c_str())];
          menu.Append(POPUP_ADD_SPECIAL_POINT, _T("Add"),
                CreatePopupMenu(itemType, gmatType, subtype));
@@ -5355,15 +5407,302 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 }
 
 
+
+//------------------------------------------------------------------------------
+// void CreatePopupMenuMap()
+//------------------------------------------------------------------------------
+/**
+ *
+ *
+ * @param
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::CreatePopupMenuMap()
+{
+   std::vector<MenuData> creatables;
+   MenuData entry;
+
+   // Hardware
+   entry.guiID = POPUP_ADD_FUELTANK_CHEMICAL;
+   entry.menuText = "Chemical Tank";
+   creatables.push_back(entry);
+
+   entry.guiID = POPUP_ADD_FUELTANK_ELECTRIC;
+   entry.menuText = "Electric Tank";
+   creatables.push_back(entry);
+
+   entry.guiID = POPUP_ADD_THRUSTER_CHEMICAL;
+   entry.menuText = "Chemical Thruster";
+   creatables.push_back(entry);
+
+   entry.guiID = POPUP_ADD_THRUSTER_ELECTRIC;
+   entry.menuText = "Electric Thruster";
+   creatables.push_back(entry);
+
+   entry.guiID = POPUP_ADD_NUCLEAR_POWER_SYSTEM;
+   entry.menuText = "NuclearPowerSystem";
+   creatables.push_back(entry);
+
+   entry.guiID = POPUP_ADD_SOLAR_POWER_SYSTEM;
+   entry.menuText = "SolarPowerSystem";
+   creatables.push_back(entry);
+   #ifdef DEBUG_MENU_MAP
+      MessageInterface::ShowMessage("Hardware creatables has %d entries\n",
+            creatables.size());
+   #endif
+   popupMenuMap[GmatTree::HARDWARE_FOLDER] = creatables;
+
+   // Burns
+   creatables.clear();
+   entry.guiID = POPUP_ADD_IMPULSIVE_BURN;
+   entry.menuText = "ImpulsiveBurn";
+   creatables.push_back(entry);
+
+   entry.guiID = POPUP_ADD_FINITE_BURN;
+   entry.menuText = "FiniteBurn";
+   creatables.push_back(entry);
+
+   popupMenuMap[GmatTree::BURN_FOLDER] = creatables;
+
+//      case GmatTree::BOUNDARY_SOLVER_FOLDER:
+//         menu->Append(POPUP_ADD_DIFFERENTIAL_CORRECTOR, wxT("DifferentialCorrector"));
+//         //menu->Append(POPUP_ADD_BROYDEN, wxT("Broyden"));
+//         menu->Enable(POPUP_ADD_BROYDEN, false);
+//         break;
+//      case GmatTree::OPTIMIZER_FOLDER:
+//         //menu->Append(POPUP_ADD_QUASI_NEWTON, wxT("Quasi-Newton"));
+//         if (GmatGlobal::Instance()->IsMatlabAvailable())
+//            menu->Append(POPUP_ADD_SQP, wxT("SQP (fmincon)"));
+//         menu->Enable(POPUP_ADD_QUASI_NEWTON, false);
+//
+//         listOfObjects = theGuiInterpreter->GetCreatableList(Gmat::SOLVER,
+//               "Optimizer");
+//         newId = SOLVER_BEGIN;
+//         for (StringArray::iterator i = listOfObjects.begin();
+//              i != listOfObjects.end(); ++i, ++newId)
+//         {
+//            // Drop the ones that are already there for now
+//            std::string solverType = (*i);
+//            if (solverType != "FminconOptimizer")
+//            {
+//               // Save the ID and type name for event handling
+//               pluginMap[POPUP_ADD_SOLVER + newId] = solverType;
+//               menu->Append(POPUP_ADD_SOLVER + newId, wxString(solverType.c_str()));
+//            }
+//         }
+//         break;
+//      case GmatTree::EVENT_LOCATOR_FOLDER:
+//         listOfObjects = theGuiInterpreter->GetCreatableList(Gmat::EVENT_LOCATOR);
+//         newId = LOCATOR_BEGIN;
+//         for (StringArray::iterator i = listOfObjects.begin();
+//              i != listOfObjects.end(); ++i, ++newId)
+//         {
+//            // Drop the ones that are already there for now
+//            std::string locatorType = (*i);
+//            // Save the ID and type name for event handling
+//            pluginMap[POPUP_ADD_LOCATOR + newId] = locatorType;
+//            menu->Append(POPUP_ADD_LOCATOR + newId, wxString(locatorType.c_str()));
+//         }
+//         break;
+
+   // Subscribers
+   creatables.clear();
+   entry.guiID = POPUP_ADD_REPORT_FILE;
+   entry.menuText = "ReportFile";
+   creatables.push_back(entry);
+
+   entry.guiID = POPUP_ADD_XY_PLOT;
+   entry.menuText = "XYPlot";
+   creatables.push_back(entry);
+
+   entry.guiID = POPUP_ADD_ORBIT_VIEW;
+   entry.menuText = "OrbitView";
+   creatables.push_back(entry);
+
+   entry.guiID = POPUP_ADD_EPHEMERIS_FILE;
+   entry.menuText = "EphemerisFile";
+   creatables.push_back(entry);
+
+   popupMenuMap[GmatTree::SUBSCRIBER_FOLDER] = creatables;
+
+   //      case GmatTree::VARIABLE_FOLDER:
+//         menu->Append(POPUP_ADD_VARIABLE, wxT("Variable"));
+//         menu->Append(POPUP_ADD_ARRAY, wxT("Array"));
+//         menu->Append(POPUP_ADD_STRING, wxT("String"));
+//         break;
+//      case GmatTree::FUNCTION_FOLDER:
+//         {
+//            #ifdef DEBUG_FUNCTION
+//               MessageInterface::ShowMessage("Function types:\n");
+//               for (UnsignedInt i = 0; i < functionTypes.size(); ++i)
+//                  MessageInterface::ShowMessage("   %s\n", functionTypes[i].c_str());
+//            #endif
+//            if (find(functionTypes.begin(), functionTypes.end(), "MatlabFunction") !=
+//                  functionTypes.end())
+//            {
+//               menu->Append(POPUP_ADD_MATLAB_FUNCTION, wxT("MATLAB Function"));
+//            }
+//
+//            if (find(functionTypes.begin(), functionTypes.end(), "GmatFunction") !=
+//                  functionTypes.end())
+//            {
+//               wxMenu *gfMenu = new wxMenu;
+//               gfMenu->Append(POPUP_NEW_GMAT_FUNCTION, wxT("New"));
+//               gfMenu->Append(POPUP_OPEN_GMAT_FUNCTION, wxT("Open"));
+//               menu->Append(POPUP_ADD_GMAT_FUNCTION, wxT("GMAT Function"), gfMenu);
+//            }
+//            break;
+//         }
+//      case GmatTree::CELESTIAL_BODY:
+//      case GmatTree::CELESTIAL_BODY_STAR:
+//         menu->Append(POPUP_ADD_PLANET, wxT("Planet"));
+//         menu->Append(POPUP_ADD_COMET, wxT("Comet"));
+//         menu->Append(POPUP_ADD_ASTEROID, wxT("Asteroid"));
+//         break;
+//      case GmatTree::CELESTIAL_BODY_PLANET:
+//         menu->Append(POPUP_ADD_MOON, wxT("Moon"));
+//         break;
+//      case GmatTree::CELESTIAL_BODY_MOON:
+//         menu->Append(POPUP_ADD_MOON, wxT("Moon"));  // huh?
+//         break;
+//      case GmatTree::CELESTIAL_BODY_COMET:
+//         menu->Append(POPUP_ADD_COMET, wxT("Comet"));  // huh?
+//         break;
+//      case GmatTree::CELESTIAL_BODY_ASTEROID:
+//         menu->Append(POPUP_ADD_ASTEROID, wxT("Asteroid"));
+//         break;
+//      case GmatTree::SPECIAL_POINT_FOLDER:
+//         menu->Append(POPUP_ADD_BARYCENTER, wxT("Barycenter"));
+//         menu->Append(POPUP_ADD_LIBRATION, wxT("Libration Point"));
+//         break;
+//      case GmatTree::INTERFACE_FOLDER:
+//         {
+//            listOfObjects = theGuiInterpreter->GetCreatableList(Gmat::INTERFACE);
+//            if (listOfObjects.size() > 0)
+//            {
+//               newId = PLUGIN_BEGIN;
+//               for (StringArray::iterator i = listOfObjects.begin();
+//                    i != listOfObjects.end(); ++i, ++newId)
+//               {
+//                  // Ignore MatlabInterface
+//                  if (*i != "MatlabInterface")
+//                  {
+//                     // Drop the ones that are already there for now
+//                     std::string itemType = (*i);
+//                     // Save the ID and type name for event handling
+//                     pluginMap[POPUP_ADD_PLUGIN + newId] = itemType;
+//                     menu->Append(POPUP_ADD_PLUGIN + newId, wxString(itemType.c_str()));
+//                  }
+//               }
+//            }
+//            //else
+//            //{
+//            //   pluginMap[POPUP_ADD_PLUGIN + PLUGIN_BEGIN] =
+//            //         GmatBase::GetObjectTypeString(gmatType);
+//            //   menu->Append(POPUP_ADD_PLUGIN + PLUGIN_BEGIN,
+//            //         wxT(GmatBase::GetObjectTypeString(gmatType).c_str()));
+//            //}
+//         }
+//         break;
+//      case GmatTree::PLUGIN_FOLDER:
+//         {
+//            listOfObjects = theGuiInterpreter->GetCreatableList(gmatType, subtype);
+//
+//            if (listOfObjects.size() > 0)
+//            {
+//               newId = PLUGIN_BEGIN;
+//               for (StringArray::iterator i = listOfObjects.begin();
+//                    i != listOfObjects.end(); ++i, ++newId)
+//               {
+//                  // Drop the ones that are already there for now
+//                  std::string itemType = (*i);
+//                  // Save the ID and type name for event handling
+//                  pluginMap[POPUP_ADD_PLUGIN + newId] = itemType;
+//                  menu->Append(POPUP_ADD_PLUGIN + newId, wxString(itemType.c_str()));
+//               }
+//            }
+//            else
+//            {
+//               pluginMap[POPUP_ADD_PLUGIN + PLUGIN_BEGIN] =
+//                     GmatBase::GetObjectTypeString(gmatType);
+//               menu->Append(POPUP_ADD_PLUGIN + PLUGIN_BEGIN,
+//                     wxString(GmatBase::GetObjectTypeString(gmatType).c_str()));
+//            }
+//         }
+//         break;
+//      default:
+//         break;
+
+   #ifdef DEBUG_MENU_MAP
+      MessageInterface::ShowMessage("PopupMenuMap has %d entries\n",
+            popupMenuMap.size());
+      MessageInterface::ShowMessage("  PopupMenuMap[HARDWARE] has %d entries\n",
+            (popupMenuMap[GmatTree::HARDWARE_FOLDER]).size());
+      MessageInterface::ShowMessage("  PopupMenuMap[SUBSCRIBER] has %d entries\n",
+            (popupMenuMap[GmatTree::SUBSCRIBER_FOLDER]).size());
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// bool UpdatePopupMenuMap(const Integer itemType, const std::string &newItem)
+//------------------------------------------------------------------------------
+/**
+ *
+ *
+ * @param
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
+bool ResourceTree::UpdatePopupMenuMap(const Integer itemType,
+      const Integer itemID, const std::string &newItem)
+{
+   bool retval = false;
+
+   Integer treeItemType = itemType;    // May need a lookup here
+
+   // -1 indicates a new tree item
+   if (treeItemType >= 0)
+   {
+      if (popupMenuMap.find(treeItemType) != popupMenuMap.end())
+      {
+         std::vector<MenuData> *entries = &popupMenuMap[treeItemType];
+         bool alreadyThere = false;
+         for (UnsignedInt i = 0; i < entries->size(); ++i)
+            if ((*entries)[i].menuText == newItem)
+               alreadyThere = true;
+
+         // Add the entry if it is not in the map
+         if (!alreadyThere)
+         {
+            MenuData entry;
+            entry.guiID    = itemID;
+            entry.menuText = newItem;
+            entries->push_back(entry);
+            retval = true;
+            #ifdef DEBUG_MENU_MAP
+               MessageInterface::ShowMessage("   Adding %s\n", newItem.c_str());
+            #endif
+         }
+      }
+   }
+
+   return retval;
+}
+
+
 //------------------------------------------------------------------------------
 // wxMenu* CreatePopupMenu(GmatTree::ItemType itemType,
-//       const Gmat::ObjectType gmatType, const std::string &subtype)
+//       const UnsignedInt gmatType, const std::string &subtype)
 //------------------------------------------------------------------------------
 /**
  * Create the popup menu
  *
  * @param itemType Type of object to create and add to tree
- * @param gmatType Gmat::ObjectType of object being created (used for plugin
+ * @param gmatType UnsignedInt of object being created (used for plugin
  *                 objects)
  * @param subtype  Identifier for objects that are a subtype of a core type
  *                 (used for plugin objects)
@@ -5372,7 +5711,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
  */
 //------------------------------------------------------------------------------
 wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
-      const Gmat::ObjectType gmatType, const std::string &subtype)
+      const UnsignedInt gmatType, const std::string &subtype)
 {
    #ifdef DEBUG_POPUP_MENU
    MessageInterface::ShowMessage
@@ -5383,19 +5722,16 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
 
    StringArray listOfObjects;
    Integer newId;
+   std::vector<MenuData> entries;
 
    switch (itemType)
    {
    case GmatTree::HARDWARE_FOLDER:
-      menu->Append(POPUP_ADD_FUELTANK_CHEMICAL, wxT("Chemical Tank"));
-      menu->Append(POPUP_ADD_FUELTANK_ELECTRIC, wxT("Electric Tank"));
-      menu->Append(POPUP_ADD_THRUSTER_CHEMICAL, wxT("Chemical Thruster"));
-      menu->Append(POPUP_ADD_THRUSTER_ELECTRIC, wxT("Electric Thruster"));
-      menu->Append(POPUP_ADD_NUCLEAR_POWER_SYSTEM, wxT("NuclearPowerSystem"));
-      menu->Append(POPUP_ADD_SOLAR_POWER_SYSTEM, wxT("SolarPowerSystem"));
-      listOfObjects = theGuiInterpreter->GetCreatableList(Gmat::HARDWARE);
-      
+      entries = popupMenuMap[GmatTree::HARDWARE_FOLDER];
+      for (UnsignedInt i = 0; i < entries.size(); ++i)
+         menu->Append(entries[i].guiID, entries[i].menuText.c_str());
       #ifdef __ENABLE_NAV_GUI__
+      listOfObjects = theGuiInterpreter->GetCreatableList(Gmat::HARDWARE);
       newId = HARDWARE_BEGIN;
       for (StringArray::iterator i = listOfObjects.begin();
            i != listOfObjects.end(); ++i, ++newId)
@@ -5418,8 +5754,9 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
       #endif
       break;
    case GmatTree::BURN_FOLDER:
-      menu->Append(POPUP_ADD_IMPULSIVE_BURN, wxT("ImpulsiveBurn"));
-      menu->Append(POPUP_ADD_FINITE_BURN, wxT("FiniteBurn"));
+      entries = popupMenuMap[GmatTree::BURN_FOLDER];
+      for (UnsignedInt i = 0; i < entries.size(); ++i)
+         menu->Append(entries[i].guiID, entries[i].menuText.c_str());
       break;
    case GmatTree::BOUNDARY_SOLVER_FOLDER:
       menu->Append(POPUP_ADD_DIFFERENTIAL_CORRECTOR, wxT("DifferentialCorrector"));
@@ -5462,10 +5799,9 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
       }
       break;
    case GmatTree::SUBSCRIBER_FOLDER:
-      menu->Append(POPUP_ADD_REPORT_FILE, wxT("ReportFile"));
-      menu->Append(POPUP_ADD_XY_PLOT, wxT("XYPlot"));
-      menu->Append(POPUP_ADD_ORBIT_VIEW, wxT("OrbitView"));
-      menu->Append(POPUP_ADD_EPHEMERIS_FILE, wxT("EphemerisFile"));
+      entries = popupMenuMap[GmatTree::SUBSCRIBER_FOLDER];
+      for (UnsignedInt i = 0; i < entries.size(); ++i)
+         menu->Append(entries[i].guiID, entries[i].menuText.c_str());
       
       listOfObjects = theGuiInterpreter->GetListOfViewableSubtypesOf(Gmat::SUBSCRIBER);
       newId = SUBSCRIBER_BEGIN;
@@ -5483,9 +5819,26 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
              (subscriberType != "MatlabWS"))
          {
             // Save the ID and type name for event handling
-            pluginMap[POPUP_ADD_SUBSCRIBER + newId] = subscriberType;
-            menu->Append(POPUP_ADD_SUBSCRIBER + newId,
-                     wxString(subscriberType.c_str()));
+            if (menu->FindItem(subscriberType.c_str()) == wxNOT_FOUND)
+            {
+               pluginMap[POPUP_ADD_SUBSCRIBER + newId] = subscriberType;
+               menu->Append(POPUP_ADD_SUBSCRIBER + newId,
+                        wxString(subscriberType.c_str()));
+               #ifdef DEBUG_USER_OBJECT
+                  MessageInterface::ShowMessage("Added subscriber plugin compo"
+                        "nent; pluginMap[%d] = %s\n", POPUP_ADD_SUBSCRIBER + newId,
+                        subscriberType.c_str());
+               #endif
+            }
+            else
+            {
+               pluginMap[userIdMap[subscriberType]] = subscriberType;
+               #ifdef DEBUG_USER_OBJECT
+                  MessageInterface::ShowMessage("Found subscriber plugin compo"
+                        "nent; pluginMap[%d] = %s\n", userIdMap[subscriberType],
+                        subscriberType.c_str());
+               #endif
+            }
          }
       }
       
@@ -5608,11 +5961,11 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
 
 
 //------------------------------------------------------------------------------
-// Gmat::ObjectType GetObjectType(GmatTree::ItemType itemType)
+// UnsignedInt GetObjectType(GmatTree::ItemType itemType)
 //------------------------------------------------------------------------------
-Gmat::ObjectType ResourceTree::GetObjectType(GmatTree::ItemType itemType)
+UnsignedInt ResourceTree::GetObjectType(GmatTree::ItemType itemType)
 {
-   Gmat::ObjectType objType;
+   UnsignedInt objType;
 
    switch (itemType)
    {
@@ -5648,6 +6001,7 @@ Gmat::ObjectType ResourceTree::GetObjectType(GmatTree::ItemType itemType)
    case GmatTree::ORBIT_VIEW:
    case GmatTree::GROUND_TRACK_PLOT:      
    case GmatTree::EPHEMERIS_FILE:
+   case GmatTree::SUBSCRIBER:       // Added support for plugin Subscribers
       objType = Gmat::SUBSCRIBER;
       break;
    case GmatTree::VARIABLE:
@@ -5736,6 +6090,7 @@ wxTreeItemId ResourceTree::GetTreeItemId(GmatTree::ItemType itemType)
    case GmatTree::SQP:
       return mOptimizerItem;
       
+   case GmatTree::SUBSCRIBER:       // Added for GUI Plugin prototype
    case GmatTree::REPORT_FILE:
    case GmatTree::XY_PLOT:
    case GmatTree::ORBIT_VIEW:
@@ -6023,6 +6378,116 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
 // Code added to support plugins
 
 //------------------------------------------------------------------------------
+// void RegisterGuiPluginResources()
+//------------------------------------------------------------------------------
+/**
+ * Registers plugin GUI elements with the popup menus
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::RegisterGuiPluginResources()
+{
+   #ifdef DEBUG_USER_GUI
+      MessageInterface::ShowMessage("Entered ResourceTree::"
+            "RegisterGuiPluginResources()\n");
+   #endif
+
+   std::vector<Gmat::PluginResource*> *pr =
+         theGuiInterpreter->GetUserResources();
+   Integer treeID;
+
+   #ifdef DEBUG_USER_GUI
+      MessageInterface::ShowMessage("Updating with %d user resources\n",
+            pr->size());
+   #endif
+
+   for (UnsignedInt i = 0; i < pr->size(); ++i)
+   {
+      Gmat::PluginResource *rec = pr->at(i);
+
+      if (rec->handler)
+      {
+         #ifdef DEBUG_USER_GUI
+            MessageInterface::ShowMessage("   %d: %s, under %s\n", i,
+                  rec->subtype.c_str(), rec->parentNodeName.c_str());
+         #endif
+
+         if ((rec->nodeName != "") || (rec->parentNodeName != ""))
+         {
+            /// @todo: Add registration mechanism for GmatTree identifiers!  Like
+            /// this:  treeID = LookupTreeIdentifier(rec->parentNodeName);
+            // Find the matching popup identifier
+            if (rec->parentNodeName == "Hardware")
+               treeID = GmatTree::HARDWARE_FOLDER;
+            if (rec->parentNodeName == "Burn")
+               treeID = GmatTree::BURN_FOLDER;
+            if (rec->parentNodeName == "Output")
+               treeID = GmatTree::SUBSCRIBER_FOLDER;
+
+            rec->firstId = nextGuiPluginId;
+            UpdatePopupMenuMap(treeID, nextGuiPluginId, rec->subtype);
+            BindPluginGuiPanels(rec);
+            ++nextGuiPluginId;
+         }
+         else
+            MessageInterface::ShowMessage("New top level types are not yet "
+                  "supported; ignoring GUI entries for %s objects\n",
+                  rec->subtype.c_str());
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+// void BindPluginGuiPanels(Gmat::PluginResource *rec)
+//------------------------------------------------------------------------------
+/**
+ * Connects wx event system to plugin GUI panels
+ *
+ * @param rec The container that contains the plugin panel elements
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::BindPluginGuiPanels(Gmat::PluginResource *rec)
+{
+   Integer id = rec->firstId;
+   if (id < 0)
+      id = GetUserID(rec->subtype);
+
+   static Integer uid = 10001;
+   if (id == -1)
+   {
+      id = uid;
+      ++uid;
+   }
+
+   rec->handler->ConnectEvent(*rec, this, id);
+}
+
+//------------------------------------------------------------------------------
+// Integer GetUserID(std::string typeName)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves IDs for components
+ *
+ * @param typeName The type of the component
+ *
+ * @return The ID for that component type
+ */
+//------------------------------------------------------------------------------
+Integer ResourceTree::GetUserID(std::string typeName)
+{
+   Integer retval = GmatTree::USER_DEFINED_OBJECT;
+
+   if (userIdMap.find(typeName) != userIdMap.end())
+      retval = userIdMap[typeName];
+   else
+   {
+      retval += userIdMap.size();
+      userIdMap[typeName] = retval;
+   }
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
 // void AddUserResources(std::vector<Gmat::PluginResource*> *rcs,
 //       bool onlyChildNodes = false)
 //------------------------------------------------------------------------------
@@ -6051,38 +6516,42 @@ void ResourceTree::AddUserResources(std::vector<Gmat::PluginResource*> *rcs,
    {
       Gmat::PluginResource *r = (*rcs)[i];
 
-      wxTreeItemId id;
+      // Don't register unnamed nodes
+      if (r->nodeName != "")
+      {
+         wxTreeItemId id;
 
-      #ifdef DEBUG_USER_GUI
-         MessageInterface::ShowMessage("Tree resource node:\n"
-               "   Name: %s\n   Parent: %s\n   type: %d\n   subtype: %s\n",
-               r->nodeName.c_str(), r->parentNodeName.c_str(), r->type,
-               r->subtype.c_str());
-      #endif
+         #ifdef DEBUG_USER_GUI
+            MessageInterface::ShowMessage("Tree resource node:\n"
+                  "   Name: %s\n   Parent: %s\n   type: %d\n   subtype: %s\n",
+                  r->nodeName.c_str(), r->parentNodeName.c_str(), r->type,
+                  r->subtype.c_str());
+         #endif
 
-      #ifndef __ENABLE_NAV_GUI__
-      // Skip non-viewable resource (LOJ: 2016.06.22)
-      if (r->nodeName == "Simulators" || r->nodeName == "Estimators" ||
-          r->nodeName == "Measurements")
-         continue;
-      #endif
+         #ifndef __ENABLE_NAV_GUI__
+         // Skip non-viewable resource (LOJ: 2016.06.22)
+         if (r->nodeName == "Simulators" || r->nodeName == "Estimators" ||
+             r->nodeName == "Measurements")
+            continue;
+         #endif
+
+         if (onlyChildNodes && (r->parentNodeName == ""))
+            id = FindIdOfNode(r->nodeName.c_str(), GetRootItem());
+         else
+            id = AddUserTreeNode(r->nodeName, r->parentNodeName);
+
+         mPluginItems.push_back(id);
+         nodeTypeMap[std::string(GetItemText(id).c_str())] = ((*rcs)[i])->type;
+         nodeSubtypeMap[std::string(GetItemText(id).c_str())] = ((*rcs)[i])->subtype;
+      }
       
-      if (onlyChildNodes && (r->parentNodeName == ""))
-         id = FindIdOfNode(r->nodeName.c_str(), GetRootItem());
-      else
-         id = AddUserTreeNode(r->nodeName, r->parentNodeName);
-
-      mPluginItems.push_back(id);
-      nodeTypeMap[std::string(GetItemText(id).c_str())] = ((*rcs)[i])->type;
-      nodeSubtypeMap[std::string(GetItemText(id).c_str())] = ((*rcs)[i])->subtype;
-
       #ifdef DEBUG_USER_GUI
-         MessageInterface::ShowMessage("Node list:\n");
-         for (UnsignedInt k = 0; k < mPluginItems.size(); ++k)
-            MessageInterface::ShowMessage("   %d: %s %d %s\n", k,
-               GetItemText(mPluginItems[k]).WX_TO_C_STRING,
-               nodeTypeMap[GetItemText(mPluginItems[k]).WX_TO_STD_STRING],
-               nodeSubtypeMap[GetItemText(mPluginItems[k]).WX_TO_STD_STRING].c_str());
+         MessageInterface::ShowMessage("%d plugin modes registered\n",
+               mPluginItems.size());
+//            MessageInterface::ShowMessage("   %d: %s %d %s\n", k,
+//               GetItemText(mPluginItems[k]).WX_TO_C_STRING,
+//               nodeTypeMap[GetItemText(mPluginItems[k]).WX_TO_STD_STRING],
+//               nodeSubtypeMap[GetItemText(mPluginItems[k]).WX_TO_STD_STRING].c_str());
       #endif
    }
 }

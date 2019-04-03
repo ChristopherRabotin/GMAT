@@ -37,6 +37,9 @@ FormationFactory::FormationFactory() :
    {
       creatables.push_back("Formation");
    }
+
+   // Register supported types
+   GmatType::RegisterType(Gmat::FORMATION, "Formation");
 }
 
 

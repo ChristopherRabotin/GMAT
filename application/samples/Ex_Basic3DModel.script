@@ -39,6 +39,7 @@ Create OrbitView Enhanced3DView1;
 GMAT Enhanced3DView1.Add = {Sat, Earth};
 GMAT Enhanced3DView1.DrawObject = [ true true ];
 GMAT Enhanced3DView1.ViewPointVector = [ 30000 0 0 ];
+GMAT Enhanced3DView1.MaxPlotPoints = 200000;
 
 %----------------------------------------
 %---------- Mission Sequence

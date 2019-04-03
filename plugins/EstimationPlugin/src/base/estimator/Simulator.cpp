@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,6 +39,7 @@
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
 #include "StringUtil.hpp"
+#include "ODEModel.hpp"
 #include <sstream>
 
 //#define DEBUG_STATE_MACHINE
@@ -112,9 +113,11 @@ Simulator::Simulator(const std::string& name) :
    objectTypeNames.push_back("Simulator");
    parameterCount = SimulatorParamCount;
 
-   simulationStart = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::A1MJD, atof(initialEpoch.c_str()));
-   simulationEnd = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::A1MJD, atof(finalEpoch.c_str()));
-   currentEpoch = nextSimulationEpoch = simulationStart;
+   hasPrecisionTime = true;
+
+   simulationStartGT = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::A1MJD, atof(initialEpoch.c_str()));
+   simulationEndGT = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::A1MJD, atof(finalEpoch.c_str()));
+   currentEpochGT = nextSimulationEpochGT = simulationStartGT;
 
    // Turn off writting progress report for simulation    // fix bug GMT-5713 RunSimulator command creates an empty file
    showProgress = false;                                  // fix bug GMT-5713 RunSimulator command creates an empty file
@@ -135,11 +138,11 @@ Simulator::Simulator(const Simulator& sim) :
    Solver              (sim),
    propagatorName      (sim.propagatorName),
    simState            (NULL),   // should this be cloned?
-   simulationStart     (sim.simulationStart),
-   simulationEnd       (sim.simulationEnd),
-   nextSimulationEpoch (sim.nextSimulationEpoch),
+   simulationStartGT     (sim.simulationStartGT),
+   simulationEndGT       (sim.simulationEndGT),
+   nextSimulationEpochGT (sim.nextSimulationEpochGT),
    simEpochCounter     (0),
-   currentEpoch        (sim.currentEpoch),
+   currentEpochGT        (sim.currentEpochGT),
    epochFormat         (sim.epochFormat),
    initialEpoch        (sim.initialEpoch),
    finalEpoch          (sim.finalEpoch),
@@ -196,11 +199,11 @@ Simulator& Simulator::operator =(const Simulator& sim)
 
       propagatorName      = sim.propagatorName;
       simState            = NULL;   // or clone it here??
-      simulationStart     = sim.simulationStart;
-      simulationEnd       = sim.simulationEnd;
-      nextSimulationEpoch = sim.nextSimulationEpoch;
+      simulationStartGT     = sim.simulationStartGT;
+      simulationEndGT       = sim.simulationEndGT;
+      nextSimulationEpochGT = sim.nextSimulationEpochGT;
       simEpochCounter     = sim.simEpochCounter;
-      currentEpoch        = sim.currentEpoch;
+      currentEpochGT        = sim.currentEpochGT;
       epochFormat         = sim.epochFormat;
       initialEpoch        = sim.initialEpoch;
       finalEpoch          = sim.finalEpoch;
@@ -373,11 +376,10 @@ void Simulator::WriteToTextFile(SolverState stateToUse)
  * Returns the time step of the simulator.
  */
 //------------------------------------------------------------------------------
-Real Simulator::GetTimeStep(GmatEpoch fromEpoch)
+Real Simulator::GetTimeStep(GmatTime fromEpoch)
 {
    if (fromEpoch > 0.0)
-      timeStep = (nextSimulationEpoch - fromEpoch) *
-                             GmatTimeConstants::SECS_PER_DAY;
+      timeStep = (nextSimulationEpochGT - fromEpoch).GetTimeInSec();
 
    return timeStep;
 }
@@ -699,7 +701,7 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value)
 
       initialEpoch = value;
       // Convert to a.1 time for internal processing
-      simulationStart = ConvertToRealEpoch(initialEpoch, epochFormat);
+      simulationStartGT = ConvertToGmatTimeEpoch(initialEpoch, epochFormat);
       return true;
    }
    if (id == FINAL_EPOCH)
@@ -709,7 +711,7 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value)
 
       finalEpoch = value;
       // Convert to a.1 time for internal processing
-      simulationEnd = ConvertToRealEpoch(finalEpoch, epochFormat);
+      simulationEndGT = ConvertToGmatTimeEpoch(finalEpoch, epochFormat);
       return true;
    }
 
@@ -717,11 +719,11 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value)
 }
 
 //------------------------------------------------------------------------------
-// Real ConvertToRealEpoch(const std::string &theEpoch,
-//                         const std::string &theFormat)
+// GmatTime ConvertToGmatTimeEpoch(const std::string &theEpoch,
+//                                 const std::string &theFormat)
 //------------------------------------------------------------------------------
 /**
- * Converts an epoch string is a specified format into
+ * Converts an epoch string is a specified format into a GmatTime
  *
  * @param theEpoch The input epoch
  * @param theFormat The format of the input epoch
@@ -729,11 +731,11 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value)
  * @return
  */
 //------------------------------------------------------------------------------
-Real Simulator::ConvertToRealEpoch(const std::string &theEpoch,
-                                   const std::string &theFormat)
+GmatTime Simulator::ConvertToGmatTimeEpoch(const std::string &theEpoch,
+                                           const std::string &theFormat)
 {
-   Real fromMjd = -999.999;
-   Real retval = -999.999;
+   GmatTime fromMjd(-999.999);
+   GmatTime retval(-999.999);
    std::string outStr;
 
    TimeConverterUtil::Convert(theFormat, fromMjd, theEpoch, "A1ModJulian",
@@ -911,7 +913,7 @@ const StringArray& Simulator::GetPropertyEnumStrings(const Integer id) const
 
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Retrieves object type of parameter of given id.
@@ -921,7 +923,7 @@ const StringArray& Simulator::GetPropertyEnumStrings(const Integer id) const
  * @return parameter ObjectType
  */
 //---------------------------------------------------------------------------
-Gmat::ObjectType Simulator::GetPropertyObjectType(const Integer id) const
+UnsignedInt Simulator::GetPropertyObjectType(const Integer id) const
 {
    // The change below breaks sample missions, so I'm backing it out.  A
    // different change committed today fixes the issue.
@@ -940,7 +942,7 @@ Gmat::ObjectType Simulator::GetPropertyObjectType(const Integer id) const
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type,
+// bool RenameRefObject(const UnsignedInt type,
 //       const std::string & oldName, const std::string & newName)
 //------------------------------------------------------------------------------
 /**
@@ -953,7 +955,7 @@ Gmat::ObjectType Simulator::GetPropertyObjectType(const Integer id) const
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool Simulator::RenameRefObject(const Gmat::ObjectType type,
+bool Simulator::RenameRefObject(const UnsignedInt type,
       const std::string & oldName, const std::string & newName)
 {
    /// @todo Simulator rename code needs to be implemented
@@ -983,7 +985,7 @@ bool Simulator::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string & name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string & name)
 //------------------------------------------------------------------------------
 /**
  * Renames a reference object
@@ -994,7 +996,7 @@ bool Simulator::RenameRefObject(const Gmat::ObjectType type,
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool Simulator::SetRefObjectName(const Gmat::ObjectType type,
+bool Simulator::SetRefObjectName(const UnsignedInt type,
       const std::string & name)
 {
    if (type == Gmat::PROP_SETUP)
@@ -1030,7 +1032,7 @@ const ObjectTypeArray & Simulator::GetRefObjectTypeArray()
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Initialization method that identifies the reference objects needed
@@ -1040,7 +1042,7 @@ const ObjectTypeArray & Simulator::GetRefObjectTypeArray()
  * @return A StringArray with all of the object names.
  */
 //------------------------------------------------------------------------------
-const StringArray& Simulator::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Simulator::GetRefObjectNameArray(const UnsignedInt type)
 {
    #ifdef DEBUG_SIMULATOR_INITIALIZATION
       MessageInterface::ShowMessage(
@@ -1086,7 +1088,7 @@ const StringArray& Simulator::GetRefObjectNameArray(const Gmat::ObjectType type)
 
 
 //-----------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //-----------------------------------------------------------------------------
 /**
  * Retrieves the name of a reference object
@@ -1096,7 +1098,7 @@ const StringArray& Simulator::GetRefObjectNameArray(const Gmat::ObjectType type)
  * @return The object's name
  */
 //-----------------------------------------------------------------------------
-std::string Simulator::GetRefObjectName(const Gmat::ObjectType type) const
+std::string Simulator::GetRefObjectName(const UnsignedInt type) const
 {
    if (type == Gmat::PROP_SETUP)
       return propagator->GetName();
@@ -1108,7 +1110,7 @@ std::string Simulator::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //-----------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string & name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string & name)
 //-----------------------------------------------------------------------------
 /**
  * Retrieves a referenced object
@@ -1119,7 +1121,7 @@ std::string Simulator::GetRefObjectName(const Gmat::ObjectType type) const
  * @return The object
  */
 //-----------------------------------------------------------------------------
-GmatBase* Simulator::GetRefObject(const Gmat::ObjectType type,
+GmatBase* Simulator::GetRefObject(const UnsignedInt type,
       const std::string & name)
 {
    if (type == Gmat::PROP_SETUP)
@@ -1144,7 +1146,7 @@ GmatBase* Simulator::GetRefObject(const Gmat::ObjectType type,
 }
 
 //-----------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string & name,
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string & name,
 //       const Integer index)
 //-----------------------------------------------------------------------------
 /**
@@ -1157,7 +1159,7 @@ GmatBase* Simulator::GetRefObject(const Gmat::ObjectType type,
  * @return The object
  */
 //-----------------------------------------------------------------------------
-GmatBase* Simulator::GetRefObject(const Gmat::ObjectType type,
+GmatBase* Simulator::GetRefObject(const UnsignedInt type,
       const std::string & name, const Integer index)
 {
    return Solver::GetRefObject(type, name, index);
@@ -1165,7 +1167,7 @@ GmatBase* Simulator::GetRefObject(const Gmat::ObjectType type,
 
 
 //-----------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string & name)
 //-----------------------------------------------------------------------------
 /**
@@ -1178,7 +1180,7 @@ GmatBase* Simulator::GetRefObject(const Gmat::ObjectType type,
  * @return true on success, false on failure
  */
 //-----------------------------------------------------------------------------
-bool Simulator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool Simulator::SetRefObject(GmatBase *obj, const UnsignedInt type,
       const std::string & name)
 {
    #ifdef DEBUG_SIMULATOR_INITIALIZATION
@@ -1272,7 +1274,7 @@ ObjectArray& Simulator::GetRefObjectArray(const std::string & typeString)
 
 
 //-----------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string & name, const Integer index)
 //-----------------------------------------------------------------------------
 /**
@@ -1286,7 +1288,7 @@ ObjectArray& Simulator::GetRefObjectArray(const std::string & typeString)
  * @return true on success, false on failure
  */
 //-----------------------------------------------------------------------------
-bool Simulator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool Simulator::SetRefObject(GmatBase *obj, const UnsignedInt type,
       const std::string & name, const Integer index)
 {
    #ifdef DEBUG_SIMULATOR_INITIALIZATION
@@ -1299,7 +1301,7 @@ bool Simulator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 }
 
 //-----------------------------------------------------------------------------
-// ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+// ObjectArray& GetRefObjectArray(const UnsignedInt type)
 //-----------------------------------------------------------------------------
 /**
  * Retrieves an array of referenced objects
@@ -1309,7 +1311,7 @@ bool Simulator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return The array
  */
 //-----------------------------------------------------------------------------
-ObjectArray& Simulator::GetRefObjectArray(const Gmat::ObjectType type)
+ObjectArray& Simulator::GetRefObjectArray(const UnsignedInt type)
 {
    #ifdef DEBUG_SIMULATOR_INITIALIZATION
       MessageInterface::ShowMessage("GetRefObjectArray(type = %d)\n", type);
@@ -1373,7 +1375,7 @@ bool Simulator::Initialize()
 #endif
 
    // check the validity of the input start and end times
-   if (simulationEnd < simulationStart)
+   if (simulationEndGT < simulationStartGT)
       throw SolverException(
             "Simulator error - simulation end time is before simulation start time.\n");
 
@@ -1390,6 +1392,16 @@ bool Simulator::Initialize()
        throw SolverException(
             "Simulator error - " + GetName() + ".AddData was not defined in your script.\n");
 
+   ODEModel *ode = propagator->GetODEModel();
+   if (ode->GetStringParameter("ErrorControl") != "None")
+      throw EstimatorException("GMAT navigation requires use of fixed "
+            "stepped propagation. The ErrorControl parameter specified for "
+            "the ForceModel resource associated with the propagator, " +
+            propagatorName + ", used with the " + typeName + " named " +
+            instanceName + " must be 'None.' Of course, when using fixed step "
+            "control, the user must choose a step size, as given by the "
+            "Propagator InitialStepSize field, for the chosen orbit regime "
+            "and force profile, that yields the desired accuracy.");
 
    // Check the names of measurement models shown in sim.AddData have to be the names of created objects
    std::vector<MeasurementModel*> measModels = measManager.GetAllMeasurementModels();
@@ -1655,12 +1667,12 @@ void Simulator::CompleteInitialization()
    {
       Real timeMin, timeMax;
       eop->GetTimeRange(timeMin, timeMax);
-      if (simulationStart < timeMin)
+      if (simulationStartGT < timeMin)
       {
-         MessageInterface::ShowMessage("Warning: %s.InitialEpoch has value (%.12lf A1Mjd) outside EOP time range [%.12lf A1Mjd , %.12lf A1Mjd].\n", GetName().c_str(), simulationStart, timeMin, timeMax);
+         MessageInterface::ShowMessage("Warning: %s.InitialEpoch has value (%.12lf A1Mjd) outside EOP time range [%.12lf A1Mjd , %.12lf A1Mjd].\n", GetName().c_str(), simulationStartGT.GetMjd(), timeMin, timeMax);
       }
-      else if (simulationEnd > timeMax)
-         MessageInterface::ShowMessage("Warning: %s.FinalEpoch has value (%.12lf A1Mjd) outside EOP time range [%.12lf A1Mjd , %.12lf A1Mjd].\n", GetName().c_str(), simulationEnd, timeMin, timeMax);
+      else if (simulationEndGT > timeMax)
+         MessageInterface::ShowMessage("Warning: %s.FinalEpoch has value (%.12lf A1Mjd) outside EOP time range [%.12lf A1Mjd , %.12lf A1Mjd].\n", GetName().c_str(), simulationEndGT.GetMjd(), timeMin, timeMax);
    }
    else
       MessageInterface::ShowMessage("Warning: No EOP file was used for running this GMAT script.\n");
@@ -1673,13 +1685,18 @@ void Simulator::CompleteInitialization()
    // Load ramp table
    measManager.LoadRampTables();
 
-   nextSimulationEpoch = simulationStart;
+   nextSimulationEpochGT = simulationStartGT;
    simEpochCounter     = 0;
-   timeStep            = (nextSimulationEpoch - currentEpoch) *
-                          GmatTimeConstants::SECS_PER_DAY;
+   //timeStep            = (nextSimulationEpoch - currentEpoch) *
+   //                       GmatTimeConstants::SECS_PER_DAY;
+   timeStep = (nextSimulationEpochGT - currentEpochGT).GetTimeInSec();
 
-   if (GmatMathUtil::IsEqual(currentEpoch, nextSimulationEpoch,
-            SIMTIME_ROUNDOFF))
+   //if (GmatMathUtil::IsEqual(currentEpochGT, nextSimulationEpochGT,
+   //         SIMTIME_ROUNDOFF))
+   //if (currentEpochGT.IsNearlyEqual(nextSimulationEpochGT,
+   //            SIMTIME_ROUNDOFF))
+   if (fabs((currentEpochGT - nextSimulationEpochGT).GetTimeInSec())
+                 <= SIMTIME_ROUNDOFF)
       currentState = CALCULATING;
    else
       currentState = PROPAGATING;
@@ -1698,7 +1715,7 @@ void Simulator::CompleteInitialization()
 
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("Epoch is %.12lf, Start epoch is %.12lf\n",
-               currentEpoch, nextSimulationEpoch);
+               currentEpochGT.GetMjd(), nextSimulationEpochGT.GetMjd());
 
       MessageInterface::ShowMessage("State is %s\n",
                (currentState == CALCULATING ? "Calculating" : "Propagating"));
@@ -1718,12 +1735,16 @@ void Simulator::CompleteInitialization()
 //------------------------------------------------------------------------------
 void Simulator::FindTimeStep()
 {
-   if (GmatMathUtil::IsEqual(currentEpoch, nextSimulationEpoch,             // swap order of "if" statements in order to fix bug GMT-5606
-      SIMTIME_ROUNDOFF))
+   //if (GmatMathUtil::IsEqual(currentEpochGT, nextSimulationEpochGT,             // swap order of "if" statements in order to fix bug GMT-5606
+   //   SIMTIME_ROUNDOFF))
+   //if (currentEpochGT.IsNearlyEqual(nextSimulationEpochGT,             // swap order of "if" statements in order to fix bug GMT-5606
+   //      SIMTIME_ROUNDOFF))
+   if (fabs((currentEpochGT - nextSimulationEpochGT).GetTimeInSec())             // swap order of "if" statements in order to fix bug GMT-5606
+            <= SIMTIME_ROUNDOFF)
    {
       currentState = CALCULATING;
    }
-   else if (currentEpoch > simulationEnd)
+   else if (currentEpochGT > simulationEndGT)
    {
       if (!isTheFirstMeasurement)                                // fix bug GMT-4909
          currentState = FINISHED;
@@ -1735,13 +1756,14 @@ void Simulator::FindTimeStep()
 //      timeStep = ((Integer)((nextSimulationEpoch - currentEpoch) *
 //               GmatTimeConstants::SECS_PER_DAY * 1000000))/1000000.0;
 
-      timeStep = (nextSimulationEpoch - currentEpoch) *
-               GmatTimeConstants::SECS_PER_DAY;               // fixed Bug GMT-3700
+      //timeStep = (nextSimulationEpoch - currentEpoch) *
+      //         GmatTimeConstants::SECS_PER_DAY;               // fixed Bug GMT-3700
+      timeStep = (nextSimulationEpochGT - currentEpochGT).GetTimeInSec();    // fixed Bug GMT-3700
 
       #ifdef DEBUG_TIMESTEP
          MessageInterface::ShowMessage("Simulator time step = %.15lf based on "
-                  "current epoch = %.15lf and next epoch = %.15lf\n", timeStep,
-                  currentEpoch, nextSimulationEpoch);
+                  "current epoch = %s and next epoch = %s\n", timeStep,
+                  currentEpochGT.ToString().c_str(), nextSimulationEpochGT.ToString().c_str());
       #endif
 
       #ifdef DEBUG_SIMULATION
@@ -1769,9 +1791,11 @@ void Simulator::CalculateData()
 
       //if ((currentEpoch < simulationEnd) &&                                               // fix bug GMT-5606
       //    (nextSimulationEpoch < simulationEnd))                                          // fix bug GMT-5606
-      if ((nextSimulationEpoch < simulationEnd) ||                                          // fix bug GMT-5606
-          GmatMathUtil::IsEqual(nextSimulationEpoch, simulationEnd, SIMTIME_ROUNDOFF))      // fix bug GMT-5606
-             currentState = PROPAGATING;
+      //if ((nextSimulationEpochGT < simulationEndGT) ||                                      // fix bug GMT-5606
+      //    nextSimulationEpochGT.IsNearlyEqual(simulationEndGT, SIMTIME_ROUNDOFF))           // fix bug GMT-5606
+      if ((nextSimulationEpochGT < simulationEndGT) ||                                      // fix bug GMT-5606
+          (fabs((nextSimulationEpochGT - simulationEndGT).GetTimeInSec()) <= SIMTIME_ROUNDOFF))           // fix bug GMT-5606
+         currentState = PROPAGATING;
       else
          currentState = FINISHED;
    }
@@ -1866,9 +1890,11 @@ void Simulator::SimulateData()
    FindNextSimulationEpoch();
    
 //   if ((currentEpoch < simulationEnd) && (nextSimulationEpoch < simulationEnd))        // fix bug GMT-5606
-   if ((nextSimulationEpoch < simulationEnd) ||                                          // fix bug GMT-5606
-      GmatMathUtil::IsEqual(nextSimulationEpoch, simulationEnd, SIMTIME_ROUNDOFF))       // fix bug GMT-5606
-      currentState = PROPAGATING;
+   //if ((nextSimulationEpochGT < simulationEndGT) ||                                      // fix bug GMT-5606
+   //   nextSimulationEpochGT.IsNearlyEqual(simulationEndGT, SIMTIME_ROUNDOFF))            // fix bug GMT-5606
+   if ((nextSimulationEpochGT < simulationEndGT) ||                                      // fix bug GMT-5606
+       (fabs((nextSimulationEpochGT - simulationEndGT).GetTimeInSec()) <= SIMTIME_ROUNDOFF))            // fix bug GMT-5606
+         currentState = PROPAGATING;
    else
       currentState = FINISHED;
 }
@@ -1908,19 +1934,26 @@ void Simulator::FindNextSimulationEpoch()
    ++simEpochCounter;
 //   nextSimulationEpoch = simulationStart + simEpochCounter *
 //         simulationStep / GmatTimeConstants::SECS_PER_DAY;
-   nextSimulationEpoch = simulationStart + (simEpochCounter /
-         GmatTimeConstants::SECS_PER_DAY) * simulationStep;
+   //nextSimulationEpochGT = simulationStartGT + (simEpochCounter /
+   //      GmatTimeConstants::SECS_PER_DAY) * simulationStep;
+   GmatTime gt;
+   Real step = simEpochCounter * simulationStep;
+   //MessageInterface::ShowMessage("step = %.12lf sec   simEpochCounter = %d  simulationStep = %lf\n", step, simEpochCounter, simulationStep);
+   //MessageInterface::ShowMessage("gt.Days = %d  gt.Sec = %d  gt.fracSec = %.12lf\n", gt.GetDays(), gt.GetSec(), gt.GetFracSec());
+   gt.SetTimeInSec(step);
+   //MessageInterface::ShowMessage("gt.Days = %d  gt.Sec = %d  gt.fracSec = %.12lf\n", gt.GetDays(), gt.GetSec(), gt.GetFracSec());
+   nextSimulationEpochGT = simulationStartGT + gt;
 
    #ifdef DEBUG_TIMESTEP
-      MessageInterface::ShowMessage("%d: Start: %.12lf step: %.12lf "
-            "Next:%.12lf\n", simEpochCounter, simulationStart, simulationStep,
-            nextSimulationEpoch);
+      MessageInterface::ShowMessage("%d: Start: %s step: %.12lf "
+            "Next:%s\n", simEpochCounter, simulationStartGT.ToString().c_str(), simulationStep,
+            nextSimulationEpochGT.ToString().c_str());
    #endif
 
    #ifdef DEBUG_STATE_MACHINE
-      MessageInterface::ShowMessage("Current epoch = %.15lf; simulationStep = %.15lf;"
-            " next sim epoch = %.15lf, sim end = %.15lf\n", currentEpoch, simulationStep, 
-            nextSimulationEpoch, simulationEnd);
+      MessageInterface::ShowMessage("Current epoch = %s; simulationStep = %.15lf;"
+            " next sim epoch = %s, sim end = %s\n", currentEpochGT.ToString().c_str(), simulationStep, 
+            nextSimulationEpochGT.ToString().c_str(), simulationEndGT.ToString().c_str());
    #endif
 }
 
@@ -2019,7 +2052,7 @@ std::string Simulator::GetProgressString()
 
 
 //-----------------------------------------------------------------------------
-// void UpdateCurrentEpoch(GmatEpoch newEpoch)
+// void UpdateCurrentEpoch(GmatTime newEpoch)
 //-----------------------------------------------------------------------------
 /**
  * Sets the current epoch to a new value
@@ -2027,10 +2060,11 @@ std::string Simulator::GetProgressString()
  * @param newEpoch The new epoch
  */
 //-----------------------------------------------------------------------------
-void Simulator::UpdateCurrentEpoch(GmatEpoch newEpoch)
+void Simulator::UpdateCurrentEpoch(GmatTime newEpoch)
 {
-   currentEpoch = newEpoch;
+   currentEpochGT = newEpoch;
 }
+
 
 //------------------------------------------------------------------------------
 // unused methods

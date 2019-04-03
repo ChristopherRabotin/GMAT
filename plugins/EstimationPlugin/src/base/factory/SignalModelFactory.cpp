@@ -22,12 +22,10 @@
 
 SignalModelFactory::SignalModelFactory()
 {
-   // TODO Auto-generated constructor stub
-
+   GmatType::RegisterType("Signal");
 }
 
 SignalModelFactory::~SignalModelFactory()
 {
-   // TODO Auto-generated destructor stub
 }
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -220,7 +220,7 @@ bool BeginFiniteBurn::TakeAction(const std::string &action,
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Accesses names for referenced objects.
@@ -230,7 +230,7 @@ bool BeginFiniteBurn::TakeAction(const std::string &action,
  * @return the referenced object's name.
  */
 //------------------------------------------------------------------------------
-std::string BeginFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
+std::string BeginFiniteBurn::GetRefObjectName(const UnsignedInt type) const
 {
    switch (type)
    {
@@ -268,7 +268,7 @@ const ObjectTypeArray& BeginFiniteBurn::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Accesses arrays of names for referenced objects.
@@ -279,7 +279,7 @@ const ObjectTypeArray& BeginFiniteBurn::GetRefObjectTypeArray()
  */
 //------------------------------------------------------------------------------
 const StringArray& BeginFiniteBurn::GetRefObjectNameArray(
-      const Gmat::ObjectType type)
+      const UnsignedInt type)
 {
    
    refObjectNames.clear();
@@ -302,7 +302,7 @@ const StringArray& BeginFiniteBurn::GetRefObjectNameArray(
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Sets names for referenced objects.
@@ -313,7 +313,7 @@ const StringArray& BeginFiniteBurn::GetRefObjectNameArray(
  * @return true if the name was set, false if not.
  */
 //------------------------------------------------------------------------------
-bool BeginFiniteBurn::SetRefObjectName(const Gmat::ObjectType type, 
+bool BeginFiniteBurn::SetRefObjectName(const UnsignedInt type,
                                        const std::string &name)
 {
    switch (type)
@@ -362,7 +362,7 @@ bool BeginFiniteBurn::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetObject(const Gmat::ObjectType type, const std::string objName)
+// GmatBase* GetObject(const UnsignedInt type, const std::string objName)
 //------------------------------------------------------------------------------
 /**
  * Access an object used by this instance.
@@ -376,7 +376,7 @@ bool BeginFiniteBurn::SetRefObjectName(const Gmat::ObjectType type,
  * @return The object.
  */
 //------------------------------------------------------------------------------
-GmatBase* BeginFiniteBurn::GetGmatObject(const Gmat::ObjectType type, 
+GmatBase* BeginFiniteBurn::GetGmatObject(const UnsignedInt type,
                                    const std::string objName)
 {
    if (type == Gmat::TRANSIENT_FORCE)
@@ -420,7 +420,7 @@ GmatBase* BeginFiniteBurn::Clone() const
 
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -433,7 +433,7 @@ GmatBase* BeginFiniteBurn::Clone() const
  * @return true on success.
  */
 //------------------------------------------------------------------------------
-bool BeginFiniteBurn::RenameRefObject(const Gmat::ObjectType type,
+bool BeginFiniteBurn::RenameRefObject(const UnsignedInt type,
                                       const std::string &oldName,
                                       const std::string &newName)
 {
@@ -586,7 +586,7 @@ bool BeginFiniteBurn::Initialize()
       burnForce->SetRefObject(maneuver, maneuver->GetType(),
                               maneuver->GetName());
 
-      Gmat::ObjectType type = Gmat::SPACECRAFT;
+      UnsignedInt type = Gmat::SPACECRAFT;
       StringArray::iterator iter;
       
       // load up the spacecraft name list

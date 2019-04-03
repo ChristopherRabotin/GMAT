@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -226,6 +226,68 @@ const Rvector6 Barycenter::GetMJ2000State(const A1Mjd &atTime)
    return lastState;
 }
 
+
+const Rvector6 Barycenter::GetMJ2000State(const GmatTime &atTime)
+{
+   // if it's built-in, get the state from the SpacePoint
+   if (isBuiltIn)
+   {
+      lastStateTimeGT = atTime;
+      lastStateTime   = GmatTime(atTime).GetMjd();
+
+      lastState = builtInSP->GetMJ2000State(atTime);
+#ifdef DEBUG_BARYCENTER_STATE
+      MessageInterface::ShowMessage("Computing state for Barycenter %s, whose builtInSP is %s\n",
+         instanceName.c_str(), (builtInSP->GetName()).c_str());
+#endif
+      return lastState;
+   }
+   // otherwise, sum the masses and states
+   CheckBodies();
+#ifdef DEBUG_BARYCENTER
+   MessageInterface::ShowMessage("Entering BaryCenter::GetMJ2000EqState at time %12.10f\n",
+      GmatTime(atTime).GetMjd());
+#endif
+   Real     bodyMass = 0.0;
+   Rvector3 bodyPos(0.0, 0.0, 0.0);
+   Rvector3 bodyVel(0.0, 0.0, 0.0);
+
+   Real     weight = 0.0;
+   Rvector3 sumMassPos(0.0, 0.0, 0.0);
+   Rvector3 sumMassVel(0.0, 0.0, 0.0);
+   Rvector6 bodyState;
+   Real     sumMass = GetMass();
+
+   for (unsigned int i = 0; i < bodyList.size(); i++)
+   {
+      bodyMass = ((CelestialBody*)(bodyList.at(i)))->GetMass();
+      bodyState = (bodyList.at(i))->GetMJ2000State(atTime);
+      bodyPos = bodyState.GetR();
+      bodyVel = bodyState.GetV();
+      weight = bodyMass / sumMass;
+#ifdef DEBUG_BARYCENTER
+      MessageInterface::ShowMessage("Mass (and weight) of body %s = %12.10f (%12.10f)\n",
+         ((bodyList.at(i))->GetName()).c_str(), bodyMass, weight);
+      MessageInterface::ShowMessage("    pos = %s\n", (bodyPos.ToString()).c_str());
+      MessageInterface::ShowMessage("    vel = %s\n", (bodyVel.ToString()).c_str());
+#endif
+      sumMassPos += (weight * bodyPos);
+      sumMassVel += (weight * bodyVel);
+   }
+#ifdef DEBUG_BARYCENTER
+   MessageInterface::ShowMessage("sumMassPos = %s\n",
+      (sumMassPos.ToString()).c_str());
+#endif
+   lastState.Set(sumMassPos(0), sumMassPos(1), sumMassPos(2),
+      sumMassVel(0), sumMassVel(1), sumMassVel(2));
+   
+   lastStateTimeGT = atTime;
+   lastStateTime   = GmatTime(atTime).GetMjd();
+
+   return lastState;
+}
+
+
 //---------------------------------------------------------------------------
 //  const Rvector3 GetMJ2000Position(const A1Mjd &atTime)
 //---------------------------------------------------------------------------
@@ -242,6 +304,14 @@ const Rvector3 Barycenter::GetMJ2000Position(const A1Mjd &atTime)
    Rvector6 tmp = GetMJ2000State(atTime);
    return (tmp.GetR());
 }
+
+
+const Rvector3 Barycenter::GetMJ2000Position(const GmatTime &atTime)
+{
+   Rvector6 tmp = GetMJ2000State(atTime);
+   return (tmp.GetR());
+}
+
 
 //---------------------------------------------------------------------------
 //  const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime)
@@ -261,8 +331,15 @@ const Rvector3 Barycenter::GetMJ2000Velocity(const A1Mjd &atTime)
 }
 
 
+const Rvector3 Barycenter::GetMJ2000Velocity(const GmatTime &atTime)
+{
+   Rvector6 tmp = GetMJ2000State(atTime);
+   return (tmp.GetV());
+}
+
+
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -277,7 +354,7 @@ const Rvector3 Barycenter::GetMJ2000Velocity(const A1Mjd &atTime)
  */
 //------------------------------------------------------------------------------
 bool Barycenter::SetRefObject(GmatBase *obj,
-                              const Gmat::ObjectType type,
+                              const UnsignedInt type,
                               const std::string &name)
 {
    if ((obj->IsOfType(Gmat::SPACE_POINT)) && (!obj->IsOfType("CelestialBody")))

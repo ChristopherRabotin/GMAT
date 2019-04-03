@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -362,10 +362,10 @@ bool Variable::SetStringParameter(const std::string &label,
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool Variable::RenameRefObject(const Gmat::ObjectType type,
+bool Variable::RenameRefObject(const UnsignedInt type,
                                const std::string &oldName,
                                const std::string &newName)
 {
@@ -395,7 +395,7 @@ bool Variable::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
+// virtual std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Calls OrbitData to get reference object name for given type.
@@ -403,7 +403,7 @@ bool Variable::RenameRefObject(const Gmat::ObjectType type,
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-std::string Variable::GetRefObjectName(const Gmat::ObjectType type) const
+std::string Variable::GetRefObjectName(const UnsignedInt type) const
 {
    if (type != Gmat::PARAMETER)
    {
@@ -421,7 +421,7 @@ std::string Variable::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObjectName(const Gmat::ObjectType type,
+// virtual bool SetRefObjectName(const UnsignedInt type,
 //                               const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -432,7 +432,7 @@ std::string Variable::GetRefObjectName(const Gmat::ObjectType type) const
  *
  */
 //------------------------------------------------------------------------------
-bool Variable::SetRefObjectName(const Gmat::ObjectType type,
+bool Variable::SetRefObjectName(const UnsignedInt type,
                                 const std::string &name)
 {
    #ifdef DEBUG_VARIABLE_SET
@@ -462,7 +462,7 @@ bool Variable::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+// virtual GmatBase* GetRefObject(const UnsignedInt type,
 //                                const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -474,7 +474,7 @@ bool Variable::SetRefObjectName(const Gmat::ObjectType type,
  * @return reference object pointer for given object type and name
  */
 //------------------------------------------------------------------------------
-GmatBase* Variable::GetRefObject(const Gmat::ObjectType type,
+GmatBase* Variable::GetRefObject(const UnsignedInt type,
                                  const std::string &name)
 {
    if (type != Gmat::PARAMETER)
@@ -493,7 +493,7 @@ GmatBase* Variable::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -507,7 +507,7 @@ GmatBase* Variable::GetRefObject(const Gmat::ObjectType type,
  *
  */
 //------------------------------------------------------------------------------
-bool Variable::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool Variable::SetRefObject(GmatBase *obj, const UnsignedInt type,
                             const std::string &name)
 {
    if (type != Gmat::PARAMETER)
@@ -526,9 +526,9 @@ bool Variable::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& Variable::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Variable::GetRefObjectNameArray(const UnsignedInt type)
 {
    //=======================================================
    #ifdef __ALLOW_SIMPLE_VAR_EXP__

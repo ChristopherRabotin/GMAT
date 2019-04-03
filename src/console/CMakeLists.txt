@@ -43,6 +43,7 @@ SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTF
 
 # ====================================================================
 # Link libraries
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE GmatUtil)
 TARGET_LINK_LIBRARIES(${TargetName} PRIVATE GmatBase)
 
 # ====================================================================

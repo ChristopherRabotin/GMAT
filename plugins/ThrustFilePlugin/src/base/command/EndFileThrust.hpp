@@ -37,18 +37,18 @@ public:
    EndFileThrust&       operator=(const EndFileThrust& eft);
 
    virtual GmatBase*    Clone() const;
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
 
    virtual bool TakeAction(const std::string &action,
                            const std::string &actionData = "");
-   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual std::string GetRefObjectName(const UnsignedInt type) const;
    virtual const ObjectTypeArray&
                        GetRefObjectTypeArray();
    virtual const StringArray&
-                       GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool        SetRefObjectName(const Gmat::ObjectType type,
+                       GetRefObjectNameArray(const UnsignedInt type);
+   virtual bool        SetRefObjectName(const UnsignedInt type,
                                         const std::string &name);
 
    virtual const std::string&

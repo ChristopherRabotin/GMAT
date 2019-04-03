@@ -58,7 +58,7 @@ const Rvector3   SignalBase::zUnit      = Rvector3(0.0,0.0,1.0);
  */
 //------------------------------------------------------------------------------
 SignalBase::SignalBase(const std::string &typeStr, const std::string &name) :
-   GmatBase             (Gmat::GENERIC_OBJECT, typeStr, name),
+   GmatBase             (Gmat::USER_OBJECT_ID_NEEDED, typeStr, name),
    next                 (NULL),
    previous             (NULL),
    tcs                  (NULL),
@@ -66,13 +66,14 @@ SignalBase::SignalBase(const std::string &typeStr, const std::string &name) :
    ocs                  (NULL),
    j2k                  (NULL),
    satPrecEpoch         (21545.0),
-   satEpochID           (-1),
+   //satEpochID           (-1),
    signalIsFeasible     (false),       // Not feasible until calculated!
    includeLightTime     (true),
    solarSystem          (NULL),
    navLog               (NULL),
    logLevel             (1)
 {
+   type = GmatType::GetTypeId("Signal");
 }
 
 
@@ -121,7 +122,7 @@ SignalBase::SignalBase(const SignalBase& sb) :
    ocs                  (NULL),
    j2k                  (NULL),
    satPrecEpoch         (21545.0),
-   satEpochID           (-1),
+   //satEpochID           (-1),
    signalIsFeasible     (false),       // Never feasible until calculated!
    includeLightTime     (sb.includeLightTime),
    solarSystem          (sb.solarSystem),
@@ -167,7 +168,7 @@ SignalBase& SignalBase::operator=(const SignalBase& sb)
       j2k = NULL;
 
       satPrecEpoch        = 21545.0;
-      satEpochID          = -1;
+      //satEpochID          = -1;
       signalIsFeasible    = false;     // Never feasible until calculated!
       includeLightTime    = sb.includeLightTime;
       solarSystem         = sb.solarSystem;
@@ -269,7 +270,7 @@ bool SignalBase::SetReceiveParticipantName(std::string name)
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Returns the list of signal nodes
@@ -280,7 +281,7 @@ bool SignalBase::SetReceiveParticipantName(std::string name)
  */
 //------------------------------------------------------------------------------
 const StringArray& SignalBase::GetRefObjectNameArray(
-      const Gmat::ObjectType type)
+      const UnsignedInt type)
 {
    refObjectNames.clear();
    if (theData.transmitParticipant != "")
@@ -293,7 +294,7 @@ const StringArray& SignalBase::GetRefObjectNameArray(
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase* obj, const UnsignedInt type,
 //       const std::string& name)
 //------------------------------------------------------------------------------
 /**
@@ -306,7 +307,7 @@ const StringArray& SignalBase::GetRefObjectNameArray(
  * @return true if the object was set, false if not
  */
 //------------------------------------------------------------------------------
-bool SignalBase::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+bool SignalBase::SetRefObject(GmatBase* obj, const UnsignedInt type,
       const std::string& name)
 {
 #ifdef DEBUG_SET_PARAMETER
@@ -319,7 +320,7 @@ bool SignalBase::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
    {
       if (obj->IsOfType("SpacePoint"))
       {
-         satEpochID = obj->GetParameterID("A1Epoch");
+         //satEpochID = obj->GetParameterID("A1Epoch");
          if (theData.transmitParticipant == name)
          {
             theData.tNode = (SpacePoint*)obj;
@@ -341,7 +342,7 @@ bool SignalBase::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string& oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string& oldName,
 //       const std::string& newName)
 //------------------------------------------------------------------------------
 /**
@@ -354,7 +355,7 @@ bool SignalBase::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
  * @return true is a name was changed, false if not
  */
 //------------------------------------------------------------------------------
-bool SignalBase::RenameRefObject(const Gmat::ObjectType type,
+bool SignalBase::RenameRefObject(const UnsignedInt type,
       const std::string& oldName, const std::string& newName)
 {
 #ifdef DEBUG_SET_PARAMETER
@@ -964,13 +965,23 @@ void SignalBase::CalculateRangeVectorInertial()
    theData.rOStateSSB = origin2->GetMJ2000PrecState(theData.rPrecTime) - ssb->GetMJ2000PrecState(theData.rPrecTime);
    theData.j2kOriginSep = (theData.rOStateSSB.GetR() - theData.tOStateSSB.GetR());
    theData.j2kOriginVel = (theData.rOStateSSB.GetV() - theData.tOStateSSB.GetV());
-//   theData.j2kOriginSep        = origin2->GetMJ2000PrecPosition(theData.rPrecTime) -
-//                                 origin1->GetMJ2000PrecPosition(theData.tPrecTime);
    
-//   theData.rangeVecInertial = theData.rLoc - theData.j2kOriginSep -
-//         theData.tLoc;                                       // GMAT MathSpec Eq. 6.12
-   theData.rangeVecInertial = theData.rLoc + theData.j2kOriginSep -
-         theData.tLoc;                                       // GMAT MathSpec Eq. 6.12
+   // GMAT MathSpec Eq. 6.12
+   theData.rangeVecInertial = theData.rLoc + theData.j2kOriginSep - theData.tLoc;
+   
+   // GMAT MathSpec Eq. 6.10
+   CelestialBody* forceOrigin = NULL;
+   if (theData.tNode->IsOfType(Gmat::SPACECRAFT))
+      forceOrigin = theData.tPropagator->GetODEModel()->GetForceOrigin();
+   else
+      forceOrigin = theData.rPropagator->GetODEModel()->GetForceOrigin();
+   
+   Rvector6 tSSB2SunState = forceOrigin->GetMJ2000PrecState(theData.tPrecTime) 
+      - ssb->GetMJ2000PrecState(theData.tPrecTime);
+   Rvector6 rSSB2SunState = forceOrigin->GetMJ2000PrecState(theData.rPrecTime) 
+      - ssb->GetMJ2000PrecState(theData.rPrecTime);
+   Rvector3 disp = (rSSB2SunState - tSSB2SunState).GetR();
+   theData.rangeVecI = theData.rangeVecInertial - disp;
 
    #ifdef DEBUG_LIGHTTIME
       MessageInterface::ShowMessage("Origin Sep: %s\n tLoc: %s\n rLoc: %s\n",
@@ -1192,6 +1203,7 @@ void SignalBase::GetRangeDerivative(GmatBase *forObj, bool wrtR, bool wrtV,
    GetRangeVectorDerivative(forObj, wrtR, wrtV, derivMatrix);
    
    Rvector3 rangeVec = theData.rangeVecInertial;
+   
    Rvector3 temp;
    Rmatrix33 mPart;
    Rvector3 unitRange = rangeVec / rangeVec.GetMagnitude();
@@ -1447,6 +1459,26 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
          MessageInterface::ShowMessage("   dt = (%.12lf - %.12lf)*86400 => %.12le\n",
                t.GetMjd(), theData.rPrecTime.GetMjd(), dt);
       #endif
+
+   // Update model epoch
+   ODEModel *ode = NULL;
+      if (theData.tNode->IsOfType(Gmat::SPACEOBJECT))
+      {
+         if (theData.tPropagator != NULL)
+         {
+            ode = theData.tPropagator->GetODEModel();
+            ode->UpdateInitialData();
+         }
+      }
+      if (theData.rNode->IsOfType(Gmat::SPACEOBJECT))
+      {
+         if (theData.rPropagator != NULL)
+         {
+            ode = theData.rPropagator->GetODEModel();
+            ode->UpdateInitialData();
+         }
+      }
+
       if (dt != 0.0)
       {
          StepParticipant(dt, false);

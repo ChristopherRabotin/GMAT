@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -298,8 +298,8 @@ void SequentialEstimator::CompleteInitialization()
 //      else
 //         (*stateCovariance)(i,i) = DEFAULT_OTHER_COVARIANCE;
 
-   estimationEpoch   = gs->GetEpoch();
-   currentEpoch      = gs->GetEpoch();
+   estimationEpochGT   = gs->GetEpochGT();
+   currentEpochGT      = gs->GetEpochGT();
 
    // Tell the measManager to complete its initialization
    bool measOK = measManager.Initialize();
@@ -320,7 +320,7 @@ void SequentialEstimator::CompleteInitialization()
 
 
    // First measurement epoch is the epoch of the first measurement.  Duh.
-   nextMeasurementEpoch = measManager.GetEpoch();
+   nextMeasurementEpochGT = measManager.GetEpochGT();
 
    hAccum.clear();
    residuals.SetSize(stateSize);
@@ -333,12 +333,11 @@ void SequentialEstimator::CompleteInitialization()
    isInitialized = true;
    ReportProgress();
 
-   if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
+   if (GmatMathUtil::IsEqual(currentEpochGT, nextMeasurementEpochGT))
       currentState = CALCULATING;
    else
    {
-      timeStep = (nextMeasurementEpoch - currentEpoch) *
-            GmatTimeConstants::SECS_PER_DAY;
+      timeStep = (nextMeasurementEpochGT - currentEpochGT).GetTimeInSec();
       PrepareForStep();
       currentState = PROPAGATING;
    }
@@ -375,12 +374,12 @@ void SequentialEstimator::CompleteInitialization()
 void SequentialEstimator::FindTimeStep()
 {
 
-   if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
+   if (GmatMathUtil::IsEqual(currentEpochGT, nextMeasurementEpochGT))
    {
       // We're at the next measurement, so process it
       currentState = CALCULATING;
    }
-   else if (nextMeasurementEpoch == 0.0)
+   else if (nextMeasurementEpochGT == 0.0)
    {
       // Finished running through the data
       currentState = CHECKINGRUN;
@@ -389,8 +388,7 @@ void SequentialEstimator::FindTimeStep()
    {
       // Calculate the time step in seconds and stay in the PROPAGATING state;
       // timeStep could be positive or negative
-      timeStep = (nextMeasurementEpoch - currentEpoch) *
-            GmatTimeConstants::SECS_PER_DAY;
+      timeStep = (nextMeasurementEpochGT - currentEpochGT).GetTimeInSec();
       #ifdef DEBUG_EXECUTION
          MessageInterface::ShowMessage("   timestep = %.12lf; nextepoch = "
                "%.12lf; current = %.12lf\n", timeStep, nextMeasurementEpoch,
@@ -421,10 +419,10 @@ void SequentialEstimator::CalculateData()
    {
       // No measurements were possible
       measManager.AdvanceObservation();
-      nextMeasurementEpoch = measManager.GetEpoch();
+      nextMeasurementEpochGT = measManager.GetEpochGT();
       FindTimeStep();
 
-      if (currentEpoch < nextMeasurementEpoch)
+      if (currentEpochGT < nextMeasurementEpochGT)
       {
          currentState = PROPAGATING;
          PrepareForStep();
@@ -624,7 +622,7 @@ std::string SequentialEstimator::GetProgressString()
          case ESTIMATING:
             progress << "Current estimated state:\n";
             progress << "   Estimation Epoch: "
-                     << currentEpoch << "\n";
+                     << currentEpochGT.ToString() << "\n";
 
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
@@ -641,13 +639,13 @@ std::string SequentialEstimator::GetProgressString()
          case FINISHED:
             progress << "\n****************************"
                      << "****************************\n"
-                     << "*** Estimating Completed"
+                     << "*** Estimation Completed"
                      << "\n****************************"
                      << "****************************\n\n"
                      << "\n\nFinal Estimated State:\n\n";
 
             progress << "   Estimation Epoch (A.1 modified Julian): "
-                        << currentEpoch << "\n\n";
+                     << currentEpochGT.ToString() << "\n\n";
 
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
@@ -675,7 +673,7 @@ std::string SequentialEstimator::GetProgressString()
                for (UnsignedInt i = 0; i < measurementEpochs.size(); ++i)
                {
                   MessageInterface::ShowMessage("   %.12lf   %.12lf\n",
-                        measurementEpochs[i], measurementResiduals[i]);
+                        measurementEpochs[i].GetMjd(), measurementResiduals[i]);
                }
             #endif
 

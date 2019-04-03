@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -432,7 +432,7 @@ bool ManageObject::InsertIntoGOS(GmatBase *obj, const std::string &withName)
    GmatBase *mapObj;
    std::string ex;
    ////std::string objType = obj->GetTypeName();
-   Gmat::ObjectType objType = obj->GetType();
+   UnsignedInt objType = obj->GetType();
    // if it is already in the GOS, make sure the types match
    if (globalObjectMap->find(withName) != globalObjectMap->end())
    {

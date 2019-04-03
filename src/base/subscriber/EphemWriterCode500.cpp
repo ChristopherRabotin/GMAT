@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -295,22 +295,31 @@ void EphemWriterCode500::CreateCode500EphemerisFile()
    std::string sourceId    = "GTDS";
    //std::string centralBody = spacecraft->GetOriginName();
    std::string centralBody = outCoordSystem->GetOriginName();
+   
+   Integer coordSystem = 4;
+   if (outCoordSystem->AreAxesOfType("MJ2000EqAxes"))
+      coordSystem = 4;
+   else if (outCoordSystem->AreAxesOfType("BodyFixedAxes"))
+      coordSystem = 5;
+   else if (outCoordSystem->AreAxesOfType("TrueOfDateAxes"))
+      coordSystem = 3;
+
    int ephemOutputFormat = 1;
-   if (outputFormat == "UNIX")
+   if (outputFormat == "BigEndian")
       ephemOutputFormat = 2;
    
    #ifdef DEBUG_EPHEMFILE_CREATE
    MessageInterface::ShowMessage
       ("   Creating Code500EphemerisFile with satId=%f, timeSystem='%s', sourceId='%s', "
-       "centralBody='%s', ephemOutputFormat=%d\n", satId, timeSystem.c_str(), sourceId.c_str(),
-       centralBody.c_str(), ephemOutputFormat);
+       "centralBody='%s', coordSystem='%s', ephemOutputFormat=%d\n", satId, timeSystem.c_str(),
+       sourceId.c_str(), centralBody.c_str(), coordSystem.c_str(), ephemOutputFormat);
    #endif
    
    try
    {
       code500EphemFile =
          new Code500EphemerisFile(fullPathFileName, satId, timeSystem, sourceId,
-                                  centralBody, 2, ephemOutputFormat);
+                                  centralBody, coordSystem, 2, ephemOutputFormat);
       
       // Set origin mu to code500 ephem so that it can do conversion
       SpacePoint *origin = outCoordSystem->GetOrigin();
@@ -773,7 +782,7 @@ void EphemWriterCode500::FinalizeCode500Ephemeris()
          ("===> EphemWriterCode500::FinalizeCode500Ephemeris() calling code500EphemFile "
           "for debug output\n   fullPathFileName = '%s'\n", fullPathFileName.c_str());
       bool swapByteOrder = false;
-      if (outputFormat == "UNIX")
+      if (outputFormat == "BigEndian")
          swapByteOrder = true;
       code500EphemFile->OpenForRead(fullPathFileName, 1, 1);
       code500EphemFile->SetSwapEndian(swapByteOrder, 1);

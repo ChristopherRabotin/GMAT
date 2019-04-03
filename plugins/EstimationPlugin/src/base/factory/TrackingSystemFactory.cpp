@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -60,6 +60,7 @@ TrackingSystemFactory::TrackingSystemFactory() :
          creatables.push_back("TDRSSTrackingSystem");
       }
    }
+   GmatType::RegisterType(Gmat::TRACKING_SYSTEM, "TrackingSystem");
 }
 
 

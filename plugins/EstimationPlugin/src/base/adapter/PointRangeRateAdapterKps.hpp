@@ -50,13 +50,13 @@ public:
    virtual Real         SetRealParameter(const std::string &label,
                                          const Real value);
 
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name = "");
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index);
 
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
 
@@ -66,7 +66,8 @@ public:
    virtual const MeasurementData&
                         CalculateMeasurement(bool withEvents = false,
                               ObservationData* forObservation = NULL,
-                              std::vector<RampTableData>* rampTB = NULL);
+                              std::vector<RampTableData>* rampTB = NULL,
+                              bool forSimulation = false);
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
                               Integer id);

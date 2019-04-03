@@ -6,7 +6,7 @@ for additional information.
 
 Note that users building GMAT from source will need the GMAT data files package,
 
-   GMAT-datafiles-R2017a.zip
+   GMAT-datafiles-R2018a.zip
 
 from SourceForge in order to run GMAT.  The data folder in that package should 
 be placed, with all subfolders, into the GMAT application folder.

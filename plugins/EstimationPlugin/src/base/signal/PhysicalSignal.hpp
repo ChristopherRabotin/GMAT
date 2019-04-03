@@ -20,27 +20,18 @@
 
 #ifndef PhysicalSignal_hpp
 #define PhysicalSignal_hpp
-// Temporary removal of ionosphere from Mac and Linux
-#ifdef _WIN32
-#define __WIN32__
-#endif
 
-#ifdef __WIN32__
-#ifndef IONOSPHERE
-#define IONOSPHERE
-#endif
-#endif
-
-#ifdef IONOSPHERE
-   #include "Ionosphere.hpp"
-#endif
-
-
+#include "Ionosphere.hpp"
 #include "SignalBase.hpp"
 #include "Troposphere.hpp"
 
 
 class PropSetup;
+
+#define  SELECT_CENTRAL_BODY     1
+#define  SELECT_PRIMARY_BODY     2
+#define  SELECT_POINT_MASSES     4
+#define  SELECT_ALL_BODIES       7
 
 /**
  * Signal class used for instantaneous measurements
@@ -59,7 +50,7 @@ public:
 
    virtual void InitializeSignal(bool chainForwards = false);
 
-   virtual bool ModelSignal(const GmatTime atEpoch, bool EpochAtReceive = true);
+   virtual bool ModelSignal(const GmatTime atEpoch, bool forSimulation, bool EpochAtReceive = true);
    
    virtual const std::vector<RealArray>&
                 ModelSignalDerivative(GmatBase *obj, Integer forId);
@@ -79,12 +70,13 @@ public:
 protected:
    /// Flag indicating the initialization state of the new signal elements
    bool physicalSignalInitialized;
+
    /// Troposphere model object
    Troposphere* troposphere;
-#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
+
    /// Ionosphere model object
    Ionosphere* ionosphere;
-#endif
+
    /// Flag indicating to use relativity correction
    bool useRelativity;
    /// Correction (unit: km)
@@ -109,7 +101,7 @@ protected:
    /// These functions are used to compute midia correction
    virtual bool   MediaCorrectionCalculation(std::vector<RampTableData>* rampTB = NULL);
 //   virtual bool   MediaCorrectionCalculation1(std::vector<RampTableData>* rampTB = NULL);
-   RealArray      TroposphereCorrection(Real freq, Real distance, Real elevationAngle);
+   RealArray      TroposphereCorrection(Real freq, Real distance, Real elevationAngle, Real epoch);
    RealArray      IonosphereCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch1, Real epoch2);
    RealArray      MediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch1, Real epoch2, Real minElevationAngle);
 
@@ -123,7 +115,7 @@ private:
    UnsignedInt endIndex;
 
    void           SpecifyBeginEndIndexesOfRampTable();
-   bool           TestSignalBlockedBetweenTwoSpacecrafts();
+   bool           TestSignalBlockedBetweenTwoParticipants(Integer selection = SELECT_ALL_BODIES);
    bool           TestSignalBlockedByBody(CelestialBody* body, Rvector3 tRSSB, Rvector3 rRSSB, GmatTime tTime, GmatTime rTime);
 };
 

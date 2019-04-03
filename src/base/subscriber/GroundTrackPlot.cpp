@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -303,7 +303,12 @@ bool GroundTrackPlot::Initialize()
                ("      mObjectArray[%d]=<%p>'%s'\n", i, mObjectArray[i],
                 mObjectArray[i]->GetName().c_str());
          #endif
-         
+
+         //--------------------------------------------------------
+         // set max data points to plot
+         //--------------------------------------------------------
+         PlotInterface::SetMaxGlDataPoints(instanceName, mMaxData);
+
          // Set all object array and pointers
          PlotInterface::SetGlObject(instanceName, mObjectNameArray, mObjectArray);
          
@@ -448,10 +453,10 @@ bool GroundTrackPlot::TakeAction(const std::string &action,
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool GroundTrackPlot::RenameRefObject(const Gmat::ObjectType type,
+bool GroundTrackPlot::RenameRefObject(const UnsignedInt type,
                                       const std::string &oldName,
                                       const std::string &newName)
 {
@@ -846,9 +851,9 @@ const ObjectTypeArray&
 }
 
 //------------------------------------------------------------------------------
-// virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
+// virtual std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
-std::string GroundTrackPlot::GetRefObjectName(const Gmat::ObjectType type) const
+std::string GroundTrackPlot::GetRefObjectName(const UnsignedInt type) const
 {
    if (type == Gmat::CELESTIAL_BODY)
       return centralBodyName;
@@ -888,9 +893,9 @@ const ObjectTypeArray& GroundTrackPlot::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& GroundTrackPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& GroundTrackPlot::GetRefObjectNameArray(const UnsignedInt type)
 {
    #if DBGLVL_OBJ
    MessageInterface::ShowMessage
@@ -921,10 +926,10 @@ const StringArray& GroundTrackPlot::GetRefObjectNameArray(const Gmat::ObjectType
 
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+// virtual GmatBase* GetRefObject(const UnsignedInt type,
 //                                const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* GroundTrackPlot::GetRefObject(const Gmat::ObjectType type,
+GmatBase* GroundTrackPlot::GetRefObject(const UnsignedInt type,
                                         const std::string &name)
 {
    // Any ref orbjet declared in this class?
@@ -936,7 +941,7 @@ GmatBase* GroundTrackPlot::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -947,7 +952,7 @@ GmatBase* GroundTrackPlot::GetRefObject(const Gmat::ObjectType type,
  * @param <name> Reference object name
  */
 //------------------------------------------------------------------------------
-bool GroundTrackPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool GroundTrackPlot::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                    const std::string &name)
 {
    #if DBGLVL_OBJ
@@ -1171,9 +1176,9 @@ const std::string* GroundTrackPlot::GetFootPrintOptionList()
 
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
-Gmat::ObjectType GroundTrackPlot::GetPropertyObjectType(const Integer id) const
+UnsignedInt GroundTrackPlot::GetPropertyObjectType(const Integer id) const
 {
    if (id == CENTRAL_BODY)
       return Gmat::CELESTIAL_BODY;

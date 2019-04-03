@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -109,17 +109,17 @@ public:
                                       const std::string &ownerName = "",
                                       const std::string &depName = "");
    
-   const StringArray& GetListOfObjects(Gmat::ObjectType type);
+   const StringArray& GetListOfObjects(UnsignedInt type);
    const StringArray& GetListOfObjects(const char *typeName);
    const StringArray& GetListOfObjects(const std::string &typeName);
-   const StringArray& GetListOfViewableSubtypesOf(Gmat::ObjectType type);
+   const StringArray& GetListOfViewableSubtypesOf(UnsignedInt type);
    const StringArray& GetListOfViewableCommands();
    
    GmatBase* GetConfiguredObject(const char *name);
    GmatBase* GetConfiguredObject(const std::string &name);
    GmatBase* FindObject(const char *name, const std::string &ofType = "");
    GmatBase* FindObject(const std::string &name, const std::string &ofType = "");
-   GmatBase* CreateObject(const std::string &type, const std::string &name,
+   virtual GmatBase* CreateObject(const std::string &type, const std::string &name,
                           Integer manage = 1, bool createDefault = false,
                           bool includeLineOnError = true, bool showWarning = true);
    
@@ -147,7 +147,7 @@ public:
    bool IsCommandType(const char *type);
    bool IsCommandType(const std::string &type);
    
-   Gmat::ObjectType GetObjectType(const std::string &type);
+   UnsignedInt GetObjectType(const std::string &type);
    
    // to check commands
    bool ValidateCommand(GmatCommand *cmd);
@@ -173,7 +173,7 @@ public:
                        Integer &id, Gmat::ParameterType &type);
    
    void BuildCreatableObjectMaps(bool finalBuild = false);
-   StringArray GetCreatableList(Gmat::ObjectType type,
+   StringArray GetCreatableList(UnsignedInt type,
                                 const std::string subType = "");
    
    virtual void SetInputFocus();
@@ -186,6 +186,9 @@ public:
    Interface* GetMatlabInterface();
    bool OpenMatlabEngine();
    bool CloseMatlabEngine();   
+
+   virtual std::vector<Integer> GetErrorLines();
+   virtual std::vector<Integer> GetWarningLines();
    
 protected:
    
@@ -248,6 +251,10 @@ protected:
    std::string debugMsg;
    StringArray errorList;
    
+   // Temporarily made static for communications
+   std::vector<Integer> errorLines;
+   std::vector<Integer> warningLines;
+
    void Initialize();
    void RegisterAliases();
    

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -45,7 +45,7 @@
 //------------------------------------------------------------------------------
 // OdeReal(const std::string &name, const std::string &typeStr,
 //         GmatBase *obj, const std::string &desc,
-//         const std::string &unit, Gmat::ObjectType ownerType,
+//         const std::string &unit, UnsignedInt ownerType,
 //         GmatParam::DepObject depObj)
 //------------------------------------------------------------------------------
 /**
@@ -62,7 +62,7 @@
 //------------------------------------------------------------------------------
 OdeReal::OdeReal(const std::string &name, const std::string &typeStr,
                  GmatBase *obj, const std::string &desc,
-                 const std::string &unit, Gmat::ObjectType ownerType,
+                 const std::string &unit, UnsignedInt ownerType,
                  GmatParam::DepObject depObj)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit, depObj,
              ownerType, false, false)
@@ -230,10 +230,10 @@ bool OdeReal::Initialize()
 //-------------------------------------
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool OdeReal::RenameRefObject(const Gmat::ObjectType type,
+bool OdeReal::RenameRefObject(const UnsignedInt type,
                               const std::string &oldName,
                               const std::string &newName)
 {
@@ -250,7 +250,7 @@ bool OdeReal::RenameRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
+// virtual std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Calls OdeData to get reference object name for given type.
@@ -258,7 +258,7 @@ bool OdeReal::RenameRefObject(const Gmat::ObjectType type,
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-std::string OdeReal::GetRefObjectName(const Gmat::ObjectType type) const
+std::string OdeReal::GetRefObjectName(const UnsignedInt type) const
 {
    std::string objName = OdeData::GetRefObjectName(type);
    
@@ -274,7 +274,7 @@ std::string OdeReal::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves reference object name array for given type. It will return all
@@ -284,14 +284,14 @@ std::string OdeReal::GetRefObjectName(const Gmat::ObjectType type) const
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-const StringArray& OdeReal::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& OdeReal::GetRefObjectNameArray(const UnsignedInt type)
 {
    return OdeData::GetRefObjectNameArray(type);
 }
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObjectName(const Gmat::ObjectType type,
+// virtual bool SetRefObjectName(const UnsignedInt type,
 //                               const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -302,7 +302,7 @@ const StringArray& OdeReal::GetRefObjectNameArray(const Gmat::ObjectType type)
  *
  */
 //------------------------------------------------------------------------------
-bool OdeReal::SetRefObjectName(const Gmat::ObjectType type,
+bool OdeReal::SetRefObjectName(const UnsignedInt type,
                                const std::string &name)
 {
    if (type == Gmat::ODE_MODEL)
@@ -311,7 +311,7 @@ bool OdeReal::SetRefObjectName(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+// virtual GmatBase* GetRefObject(const UnsignedInt type,
 //                                const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -323,14 +323,14 @@ bool OdeReal::SetRefObjectName(const Gmat::ObjectType type,
  * @return reference object pointer for given object type and name
  */
 //------------------------------------------------------------------------------
-GmatBase* OdeReal::GetRefObject(const Gmat::ObjectType type,
+GmatBase* OdeReal::GetRefObject(const UnsignedInt type,
                                 const std::string &name)
 {
    return OdeData::GetRefObject(type, name);
 }
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -344,7 +344,7 @@ GmatBase* OdeReal::GetRefObject(const Gmat::ObjectType type,
  *
  */
 //------------------------------------------------------------------------------
-bool OdeReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool OdeReal::SetRefObject(GmatBase *obj, const UnsignedInt type,
                            const std::string &name)
 {
    return OdeData::SetRefObject(obj, type, name);

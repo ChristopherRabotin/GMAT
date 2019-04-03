@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -74,14 +74,26 @@ public:
    // /// method to return the BINARY file name
    // std::string      GetBinaryFileName() const;
    // /// method to return the type of De File
-   // Gmat::DeFileType GetDeFileType() const;
+    Gmat::DeFileType GetDeFileType() const;
    
    /// method to return the position and velocity of the specified body
    /// at the specified time
    Real*            GetPosVel(Integer forBody, A1Mjd atTime,
                               bool overrideTimeSystem = false);
+
+   Real*            GetPosVel(Integer forBody, GmatTime atTime, 
+                              bool overrideTimeSystem = false);
+
+   Real*            GetPosDelta(Integer forBody,
+                                const GmatTime &atTime1,
+                                const GmatTime &atTime2,
+                                bool overrideTimeSystem = false);
+
    /// method to return angles and rates (for Luna ONLY!!)                
    void             GetAnglesAndRates(A1Mjd atTime, Real* angles, Real* rates,
+                                      bool overrideTimeSystem = false);
+
+   void             GetAnglesAndRates(const GmatTime &atTime, Real* angles, Real* rates,
                                       bool overrideTimeSystem = false);
    /// method to return the day-of-year and year of the start time of the
    /// DE file.
@@ -347,6 +359,8 @@ private:
    /*-------------------------------------------------------------------------*/
    void Read_Coefficients( double Time );
 
+   void Read_Coefficients(GmatTime Time);
+
    /*-------------------------------------------------------------------------*/
    /*  Initialize_Ephemeris      - from JPL/JSC code (Hoffman)                */
    /*-------------------------------------------------------------------------*/
@@ -356,6 +370,9 @@ private:
    /*  Interpolate_Libration     - from JPL/JSC code (Hoffman)                */
    /*-------------------------------------------------------------------------*/
    void Interpolate_Libration( double Time, int Target, 
+                               double Libration[3], double rates[3] );
+   
+   void Interpolate_Libration( const GmatTime &Time, int Target, 
                                double Libration[3], double rates[3] );
 
    /*-------------------------------------------------------------------------*/
@@ -372,6 +389,11 @@ private:
    /*  Interpolate_State     - from JPL/JSC code (Hoffman)                    */
    /*-------------------------------------------------------------------------*/
    void Interpolate_State( double Time , int Target , stateType *p );
+
+   void Interpolate_State(GmatTime Time, int Target, stateType *p);
+
+   void Interpolate_State_Delta( const GmatTime &Time, const GmatTime &Time2,
+                                 int Target, stateType *p);
 
    /*-------------------------------------------------------------------------*/
    /*  Find_Value     - from JPL/JSC code (Hoffman)                           */

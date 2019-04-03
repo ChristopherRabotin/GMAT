@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -59,7 +59,7 @@ class GMAT_API SpacePoint : public GmatBase
 public:
 
    // default constructor
-   SpacePoint(Gmat::ObjectType ofType, const std::string &itsType,
+   SpacePoint(UnsignedInt ofType, const std::string &itsType,
               const std::string &itsName = "");
    // copy constructor
    SpacePoint(const SpacePoint &sp);
@@ -71,7 +71,11 @@ public:
    virtual void       SetSolarSystem(SolarSystem *ss);
    
    virtual Real       GetEpoch();
+   virtual GmatTime   GetEpochGT();
    virtual Real       SetEpoch(const Real ep);
+
+   virtual GmatTime   SetEpochGT(const GmatTime ep);
+
    virtual Rvector6   GetLastState();
 
    // methods for accessing the bodyName or body pointer
@@ -124,6 +128,8 @@ public:
     */
    //---------------------------------------------------------------------------
    virtual const Rvector6 GetMJ2000State(const A1Mjd &atTime)    = 0;
+   virtual const Rvector6 GetMJ2000State(const Real atTime){ return GetMJ2000State(A1Mjd(atTime));};
+   virtual const Rvector6 GetMJ2000State(const GmatTime &atTime) = 0;
 
    //---------------------------------------------------------------------------
    //  const Rvector3 GetMJ2000Position(const A1Mjd &atTime)
@@ -140,6 +146,8 @@ public:
     */
    //---------------------------------------------------------------------------
    virtual const Rvector3 GetMJ2000Position(const A1Mjd &atTime) = 0;
+   virtual const Rvector3 GetMJ2000Position(const Real atTime){ return GetMJ2000Position(A1Mjd(atTime));};
+   virtual const Rvector3 GetMJ2000Position(const GmatTime &atTime) = 0;
 
    //---------------------------------------------------------------------------
    //  const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime)
@@ -156,8 +164,12 @@ public:
     */
    //---------------------------------------------------------------------------
    virtual const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime) = 0;
+   virtual const Rvector3 GetMJ2000Velocity(const Real atTime){ return GetMJ2000Velocity(A1Mjd(atTime)); };
+   virtual const Rvector3 GetMJ2000Velocity(const GmatTime &atTime) = 0;
    
    virtual const Rvector3 GetMJ2000Acceleration(const A1Mjd &atTime);
+   virtual const Rvector3 GetMJ2000Acceleration(const Real atTime){ return GetMJ2000Acceleration(A1Mjd(atTime)); };
+   virtual const Rvector3 GetMJ2000Acceleration(const GmatTime &atTime);
 
    virtual const Rvector6 GetMJ2000PrecState(const GmatTime &atTime);
    virtual const Rvector3 GetMJ2000PrecPosition(const GmatTime &atTime);
@@ -194,9 +206,9 @@ public:
    virtual std::string     GetStringParameter(const std::string &label) const;
    virtual bool            SetStringParameter(const std::string &label, 
                                               const std::string &value);
-   virtual GmatBase*       GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*       GetRefObject(const UnsignedInt type,
                                         const std::string &name);
-   virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool            SetRefObject(GmatBase *obj, const UnsignedInt type,
                                         const std::string &name = "");
    
    // DJC Added, 12/16/04
@@ -213,13 +225,13 @@ public:
    const StringArray&      GetStringArrayParameter(const Integer id) const;
    virtual const StringArray&
                            GetStringArrayParameter(const std::string &label) const;
-   virtual GmatBase*       GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*       GetRefObject(const UnsignedInt type,
                                         const std::string &name, 
                                         const Integer index);
-   virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool            SetRefObject(GmatBase *obj, const UnsignedInt type,
                                         const std::string &name, 
                                         const Integer index);
-      
+
 protected:
 
    enum
@@ -244,7 +256,6 @@ protected:
    
    static const Integer UNDEFINED_NAIF_ID;
    static const Integer UNDEFINED_NAIF_ID_REF_FRAME;
-   
    
    /// the solar system to which this body belongs
    SolarSystem     *theSolarSystem;

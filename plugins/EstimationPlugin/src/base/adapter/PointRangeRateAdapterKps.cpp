@@ -276,7 +276,7 @@ Real PointRangeRateAdapterKps::SetRealParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string& oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string& oldName,
 //       const std::string& newName)
 //------------------------------------------------------------------------------
 /**
@@ -289,7 +289,7 @@ Real PointRangeRateAdapterKps::SetRealParameter(const std::string &label,
  * @return true if a rename happened, false if not
  */
 //------------------------------------------------------------------------------
-bool PointRangeRateAdapterKps::RenameRefObject(const Gmat::ObjectType type,
+bool PointRangeRateAdapterKps::RenameRefObject(const UnsignedInt type,
       const std::string& oldName, const std::string& newName)
 {
    bool retval = RangeAdapterKm::RenameRefObject(type, oldName, newName);
@@ -343,11 +343,12 @@ bool PointRangeRateAdapterKps::Initialize()
 //------------------------------------------------------------------------------
 const MeasurementData& PointRangeRateAdapterKps::CalculateMeasurement(
                               bool withEvents, ObservationData* forObservation,
-                              std::vector<RampTableData>* rampTB)
+                              std::vector<RampTableData>* rampTB,
+                              bool forSimulation)
 {
    // Compute range in km, at epoch and at epoch plus offset
    cMeasurement = RangeAdapterKm::CalculateMeasurement
-         (false, NULL, NULL);
+         (false, NULL, NULL, forSimulation);
 
    if (cMeasurement.isFeasible)
    {
@@ -695,7 +696,7 @@ void PointRangeRateAdapterKps::SetCorrection(const std::string& correctionName,
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase* obj, const UnsignedInt type,
 //       const std::string& name)
 //------------------------------------------------------------------------------
 /**
@@ -710,7 +711,7 @@ void PointRangeRateAdapterKps::SetCorrection(const std::string& correctionName,
  */
 //------------------------------------------------------------------------------
 bool PointRangeRateAdapterKps::SetRefObject(GmatBase* obj,
-      const Gmat::ObjectType type, const std::string& name)
+      const UnsignedInt type, const std::string& name)
 {
    if (obj->IsOfType(Gmat::SPACECRAFT))
       targetSat = (SpaceObject*) obj;
@@ -718,7 +719,7 @@ bool PointRangeRateAdapterKps::SetRefObject(GmatBase* obj,
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase* obj, const UnsignedInt type,
 //       const std::string& name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -734,7 +735,7 @@ bool PointRangeRateAdapterKps::SetRefObject(GmatBase* obj,
  */
 //------------------------------------------------------------------------------
 bool PointRangeRateAdapterKps::SetRefObject(GmatBase* obj,
-      const Gmat::ObjectType type, const std::string& name, const Integer index)
+      const UnsignedInt type, const std::string& name, const Integer index)
 {
    if (obj->IsOfType(Gmat::SPACECRAFT))
       targetSat = (SpaceObject*) obj;

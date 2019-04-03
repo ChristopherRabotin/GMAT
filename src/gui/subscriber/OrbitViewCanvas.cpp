@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -128,6 +128,7 @@ using namespace FloatAttUtil;
 //#define DEBUG_ROTATE_BODY 1
 //#define DEBUG_DATA_BUFFERRING
 //#define DEBUG_DRAW_3D_BODY
+//#define DEBUG_ON_PAINT 2
 
 #define MODE_CENTERED_VIEW 0
 #define MODE_FREE_FLYING 1
@@ -536,8 +537,8 @@ void OrbitViewCanvas::GotoObject(const wxString &objName)
    }
    else
    {
-      //int index = objId * MAX_DATA * 3 + (mNumData-1) * 3;
-      int index = objId * MAX_DATA * 3 + mLastIndex * 3;
+      //int index = objId * maxData * 3 + (mNumData-1) * 3;
+      int index = objId * maxData * 3 + mLastIndex * 3;
 
       // compute mCurrViewDistance
       Rvector3 pos(mObjectViewPos[index+0], mObjectViewPos[index+1],
@@ -886,8 +887,9 @@ void OrbitViewCanvas::OnPaint(wxPaintEvent& event)
 {
    #ifdef DEBUG_ON_PAINT
    MessageInterface::ShowMessage
-      ("OrbitViewCanvas::OnPaint() '%s' entered, theContext=<%p>, mFatalErrorFound=%d, mGlInitialized=%d, "
-       "mObjectCount=%d\n", mPlotName.WX_TO_C_STRING, theContext, mFatalErrorFound, mGlInitialized, mObjectCount);
+      ("OrbitViewCanvas::OnPaint() '%s' entered, theContext=<%p>, mFatalErrorFound=%s, mGlInitialized=%d, mObjectCount=%d\n",
+       mPlotName.WX_TO_C_STRING, theContext,
+       (mFatalErrorFound? "true" : "false"), mGlInitialized, mObjectCount);
    #endif
    
    // must always be here
@@ -1372,7 +1374,7 @@ void OrbitViewCanvas::InitializeViewPoint()
    {
       name = pViewPointRefObj->GetName().c_str();
       objId = GetObjectId(name);
-      index = objId * MAX_DATA * 3 + (mLastIndex*3);
+      index = objId * maxData * 3 + (mLastIndex*3);
       refVec = Rvector3(mObjectViewPos[index+0], mObjectViewPos[index+1], mObjectViewPos[index+2]);
    }
    
@@ -1384,7 +1386,7 @@ void OrbitViewCanvas::InitializeViewPoint()
    {
       name = pViewPointVectorObj->GetName().c_str();
       objId = GetObjectId(name);
-      index = objId * MAX_DATA * 3 + (mLastIndex*3);
+      index = objId * maxData * 3 + (mLastIndex*3);
       viewpoint = Rvector3(mObjectViewPos[index+0], mObjectViewPos[index+1], mObjectViewPos[index+2]);
    }
    viewpoint *= mViewScaleFactor;
@@ -1397,7 +1399,7 @@ void OrbitViewCanvas::InitializeViewPoint()
    {
       name = pViewDirectionObj->GetName().c_str();
       objId = GetObjectId(name);
-      index = objId * MAX_DATA * 3 + (mLastIndex*3);
+      index = objId * maxData * 3 + (mLastIndex*3);
       direction = Rvector3(mObjectViewPos[index+0], mObjectViewPos[index+1], mObjectViewPos[index+2]);
    }
    
@@ -1549,7 +1551,7 @@ void OrbitViewCanvas::SetupWorld()
    //camera moves opposite direction to center on object
    //this is the point of rotation
    
-   int index = mViewObjId * MAX_DATA * 3 + mLastIndex * 3;
+   int index = mViewObjId * maxData * 3 + mLastIndex * 3;
    glTranslatef(mObjectViewPos[index+0], mObjectViewPos[index+1],
                 -mObjectViewPos[index+2]);
    
@@ -1708,7 +1710,7 @@ void OrbitViewCanvas::HandleLightSource()
    }
    else
    {
-      int index = sunId * MAX_DATA * 3 + frame * 3;
+      int index = sunId * maxData * 3 + frame * 3;
       mLight.SetPosition(mObjectViewPos[index+0], mObjectViewPos[index+1], mObjectViewPos[index+2]);
       mLight.SetDirectional(false);
    }
@@ -1821,16 +1823,15 @@ void OrbitViewCanvas::DrawFrame()
 //------------------------------------------------------------------------------
 void OrbitViewCanvas::DrawPlot()
 {
+   #if DEBUG_DRAW
+   MessageInterface::ShowMessage
+      ("OrbitViewCanvas::DrawPlot() mTotalPoints=%d at beginning\n",
+       mTotalPoints);
+   #endif
+
    if (mTotalPoints == 0)
       return;
    
-   #if DEBUG_DRAW
-   MessageInterface::ShowMessage
-      ("===========================================================================\n");
-   MessageInterface::ShowMessage
-      ("OrbitViewCanvas::DrawPlot() mTotalPoints=%d, mNumData=%d, mTime[%d]=%f\n",
-       mTotalPoints, mNumData, mLastIndex, mTime[mLastIndex]);
-   #endif
    #if DEBUG_DRAW > 1
    MessageInterface::ShowMessage
       ("   mRedrawLastPointsOnly=%d, mNumPointsToRedraw=%d, mViewCsIsInternalCs=%d, "
@@ -1893,7 +1894,7 @@ void OrbitViewCanvas::DrawPlot()
       if (pMJ2000EcCoordSystem == NULL)
       {
          MessageInterface::ShowMessage
-            ("*** WARNING *** Cannot compute MJ2000Ec coordiante system, so drawing "
+            ("*** WARNING *** Cannot compute MJ2000Ec coordinate system, so drawing "
              "ecliptic plane is turned off\n");
          mDrawEclipticPlane = false;
       }
@@ -1949,7 +1950,7 @@ void OrbitViewCanvas::DrawObjectOrbit()
       objId = GetObjectId(objName);
       mObjLastFrame[objId] = 0;
       
-      int colorIndex = objId * MAX_DATA + mLastIndex;
+      int colorIndex = objId * maxData + mLastIndex;
       
       #if DEBUG_DRAW
       MessageInterface::ShowMessage
@@ -2000,7 +2001,7 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       return;
    
    int frame = mObjLastFrame[objId];
-   int index1 = objId * MAX_DATA * 3 + frame * 3;
+   int index1 = objId * maxData * 3 + frame * 3;
    bool drawingSpacecraft = false;
    
    #if DEBUG_DRAW
@@ -2050,7 +2051,7 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
                          mObjectViewPos[index1+2]);
             GlColorType *yellow = (GlColorType*)&GmatColor::YELLOW;
             //GlColorType *red = (GlColorType*)&GmatColor::RED;
-            *sIntColor = mObjectOrbitColor[objId * MAX_DATA + mObjLastFrame[objId]];
+            *sIntColor = mObjectOrbitColor[objId * maxData + mObjLastFrame[objId]];
             // We want to differenciate spacecraft by orbit color so pass sGlColor (LOJ: 2011.02.16)
             //DrawSpacecraft(mScRadius, yellow, red);
             
@@ -2100,7 +2101,7 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       glDisable(GL_LIGHT0);
       
       // Now colors for all other bodies are also saved (LOJ: 2013.11.25)
-      *sIntColor = mObjectOrbitColor[objId * MAX_DATA + frame];
+      *sIntColor = mObjectOrbitColor[objId * maxData + frame];
       
       glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
       DrawStringAt(objName, 0, 0, 0, 1);
@@ -2261,8 +2262,8 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
    // Draw object orbit line
    if (drawLine)
    {
-      index1 = objId * MAX_DATA * 3 + (i-1) * 3;
-      index2 = objId * MAX_DATA * 3 + i * 3;
+      index1 = objId * maxData * 3 + (i-1) * 3;
+      index2 = objId * maxData * 3 + i * 3;
       
       Rvector3 r1(mObjectViewPos[index1+0], mObjectViewPos[index1+1],
                   mObjectViewPos[index1+2]);
@@ -2309,7 +2310,7 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       #endif
       
       // If drawing orbit lines
-      int colorIndex = objId * MAX_DATA + i;
+      int colorIndex = objId * maxData + i;
       if (mDrawOrbitFlag[colorIndex])
       {
          // Now colors for all drawing objects are saved (LOJ: 2014.01.24)
@@ -2513,12 +2514,12 @@ void OrbitViewCanvas::DrawSunLine()
    
    // draw one line from origin to Sun
    // Dunn took out old minus signs to make attitude correct.
-   index = mOriginId * MAX_DATA * 3 + frame * 3;
+   index = mOriginId * maxData * 3 + frame * 3;
    originPos.Set(mObjectViewPos[index+0], 
                  mObjectViewPos[index+1], 
                  mObjectViewPos[index+2]);
    
-   index = sunId * MAX_DATA * 3 + frame * 3;
+   index = sunId * maxData * 3 + frame * 3;
    sunPos.Set(mObjectViewPos[index+0], 
               mObjectViewPos[index+1], 
               mObjectViewPos[index+2]);
@@ -2641,8 +2642,8 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    
    float RTD = (float)GmatMathConstants::DEG_PER_RAD;
    
-   int index1 = objId * MAX_DATA * 3 + frame * 3;
-   int attIndex = objId * MAX_DATA * 4 + mObjLastFrame[objId] * 4;
+   int index1 = objId * maxData * 3 + frame * 3;
+   int attIndex = objId * maxData * 4 + mObjLastFrame[objId] * 4;
    
    Rvector quat = Rvector(4, mObjectQuat[attIndex+0], mObjectQuat[attIndex+1],
                           mObjectQuat[attIndex+2], mObjectQuat[attIndex+3]);
@@ -2773,8 +2774,8 @@ void OrbitViewCanvas::DrawCelestialBody3dModel(CelestialBody *body, const wxStri
    // Comment out attitude for now. Add it later if needed (LOJ: 2015.01.30)
    float RTD = (float)GmatMathConstants::DEG_PER_RAD;
    
-   int index1 = objId * MAX_DATA * 3 + frame * 3;
-   // int attIndex = objId * MAX_DATA * 4 + mObjLastFrame[objId] * 4;
+   int index1 = objId * maxData * 3 + frame * 3;
+   // int attIndex = objId * maxData * 4 + mObjLastFrame[objId] * 4;
    
    // Rvector quat = Rvector(4, mObjectQuat[attIndex+0], mObjectQuat[attIndex+1],
    //                        mObjectQuat[attIndex+2], mObjectQuat[attIndex+3]);
@@ -3047,7 +3048,7 @@ bool OrbitViewCanvas::ConvertObjectData()
          // Draw first part from the ring buffer
          for (int i = mRealBeginIndex1 + 1; i <= mRealEndIndex1; i++)
          {
-            index = objId * MAX_DATA * 3 + i * 3;
+            index = objId * maxData * 3 + i * 3;
             CopyVector3(&mObjectViewPos[index], &mObjectGciPos[index]);
          }
          
@@ -3056,7 +3057,7 @@ bool OrbitViewCanvas::ConvertObjectData()
          {
             for (int i = mRealBeginIndex2 + 1; i <= mRealEndIndex2; i++)
             {
-               index = objId * MAX_DATA * 3 + i * 3;
+               index = objId * maxData * 3 + i * 3;
                CopyVector3(&mObjectViewPos[index], &mObjectGciPos[index]);
             }
          }
@@ -3097,7 +3098,7 @@ bool OrbitViewCanvas::ConvertObjectData()
 void OrbitViewCanvas::ConvertObject(int objId, int index)
 {
    Rvector6 inState, outState;
-   int start = objId*MAX_DATA*3+index*3;
+   int start = objId*maxData*3+index*3;
    inState.Set(mObjectGciPos[start+0], mObjectGciPos[start+1],
                mObjectGciPos[start+2], 0.0, 0.0, 0.0);
    

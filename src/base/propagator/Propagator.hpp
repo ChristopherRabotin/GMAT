@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -95,7 +95,7 @@ public:
    Propagator(const Propagator&);
    Propagator& operator=(const Propagator&);
 
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
+   virtual bool RenameRefObject(const UnsignedInt type,
                                 const std::string &oldName,
                                 const std::string &newName);
 
@@ -151,6 +151,8 @@ public:
    virtual Real* GetState();
    virtual Real* GetJ2KState();
    virtual void UpdateSpaceObject(Real newEpoch = -1.0);
+   virtual void UpdateSpaceObjectGT(GmatTime newEpoch = -1.0);
+
    virtual void UpdateFromSpaceObject();
    virtual void RevertSpaceObject();
    virtual void BufferState();
@@ -160,8 +162,11 @@ public:
 
    virtual bool PropagatesForward();
    virtual void SetForwardPropagation(bool tf);
+   virtual Real GetStepSize();
 
    virtual void TurnDebug(bool debugFlag);
+
+   virtual bool UsesErrorControl();
 
    // Abstract methods
 
@@ -248,6 +253,8 @@ protected:
 
    virtual void MoveToOrigin(Real newEpoch = -1.0);
    virtual void ReturnFromOrigin(Real newEpoch = -1.0);
+   virtual void MoveToOriginGT(GmatTime newEpoch = -1.0);
+   virtual void ReturnFromOriginGT(GmatTime newEpoch = -1.0);
 
    bool debug;
 };

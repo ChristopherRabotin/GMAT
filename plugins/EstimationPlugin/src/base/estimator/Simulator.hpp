@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -41,7 +41,7 @@
 
 
 // todo: Make this a propagator parameter
-#define SIMTIME_ROUNDOFF 1e-6
+#define SIMTIME_ROUNDOFF 1e-10  //1e-6
 
 class ESTIMATION_API Simulator : public Solver
 {
@@ -63,7 +63,8 @@ public:
    virtual SolverState  AdvanceState();
    virtual bool         Finalize();
 
-   Real                 GetTimeStep(GmatEpoch fromEpoch);
+   Real                 GetTimeStep(GmatTime fromEpoch);
+
    PropSetup*           GetPropagator();
    MeasurementManager*  GetMeasurementManager();
 
@@ -98,38 +99,38 @@ public:
                         GetStringArrayParameter(const Integer id) const;
    virtual const StringArray&
                        GetPropertyEnumStrings(const Integer id) const;
-   virtual Gmat::ObjectType
+   virtual UnsignedInt
                         GetPropertyObjectType(const Integer id) const;
 
    // Access methods for the reference objects
-   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual std::string  GetRefObjectName(const UnsignedInt type) const;
    virtual const ObjectTypeArray&
                         GetRefObjectTypeArray();
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+                        GetRefObjectNameArray(const UnsignedInt type);
+   virtual bool         SetRefObjectName(const UnsignedInt type,
                                          const std::string &name);
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string &name);
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name = "");
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index);
-   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+   virtual ObjectArray& GetRefObjectArray(const UnsignedInt type);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
 
    virtual bool         TakeAction(const std::string &action,
                                    const std::string &actionData = "");
 
-   virtual void         UpdateCurrentEpoch(GmatEpoch newEpoch);
+   virtual void         UpdateCurrentEpoch(GmatTime newEpoch);
 
    virtual bool         HasLocalClones();
    virtual void         UpdateClonedObject(GmatBase *obj);
@@ -165,15 +166,19 @@ protected:
    GmatState           *simState;   // (This piece is still in flux -- do we do
                                     // it like this, or differently?)
    /// The initial epoch for the simulation
-   GmatEpoch           simulationStart;
+   //GmatEpoch           simulationStart;
+   GmatTime            simulationStartGT;
    /// The target epoch for the end of the simulation
-   GmatEpoch           simulationEnd;
+   //GmatEpoch           simulationEnd;
+   GmatTime            simulationEndGT;
    /// The epoch of the next measurement calculation
-   GmatEpoch           nextSimulationEpoch;
+   //GmatEpoch           nextSimulationEpoch;
+   GmatTime            nextSimulationEpochGT;
    /// Counter used to advance the simulation epoch
    UnsignedInt         simEpochCounter;
    /// The current epoch (typically as determined via propagation)
-   GmatEpoch           currentEpoch;
+   //GmatEpoch           currentEpoch;
+   GmatTime            currentEpochGT;
 
    /// Format of the scripted simulation start time and end time
    std::string         epochFormat;
@@ -225,8 +230,8 @@ protected:
    void                   RunComplete();
 
    // Helper methods
-   Real                   ConvertToRealEpoch(const std::string &theEpoch,
-                                              const std::string &theFormat);
+   GmatTime               ConvertToGmatTimeEpoch(const std::string &theEpoch,
+                                                 const std::string &theFormat);
    void                   FindNextSimulationEpoch();
    // progress string for reporting
    virtual std::string    GetProgressString();

@@ -50,6 +50,7 @@ PLUGIN                   = ./plugins/libGmatFunctiond
 PLUGIN                   = ./plugins/libNewParametersd
 PLUGIN                   = ./plugins/libProductionPropagatorsd
 PLUGIN                   = ./plugins/libPythonInterfaced
+PLUGIN                   = ./plugins/libScriptToolsd
 PLUGIN                   = ./plugins/libStationd
 PLUGIN                   = ./plugins/libMatlabInterfaced
 PLUGIN                   = ./plugins/libFminconOptimizerd
@@ -62,14 +63,17 @@ PLUGIN                  = ./plugins/libExtraPropagatorsd
 PLUGIN                  = ./plugins/libGeometricMeasurementsd
 PLUGIN                  = ./plugins/libPolyhedronGravityd
 PLUGIN                  = ./plugins/libSaveCommandd
+PLUGIN                  = ./plugins/libScriptToolsd
 PLUGIN                  = ./plugins/libEKFd
 
 # Internal-only plugins
+PLUGIN                   = ./plugins/proprietary/libCsaltInterfaced
 PLUGIN                   = ./plugins/proprietary/libMarsGRAMd
 PLUGIN                   = ./plugins/proprietary/libMsise86d
 PLUGIN                   = ./plugins/proprietary/libNRLMsise00d
 PLUGIN                   = ./plugins/proprietary/libSNOptimizerd
 PLUGIN                   = ./plugins/proprietary/libVF13Optimizerd
+PLUGIN			 = ./plugins/libYukonOptimizerd
 
 #-----------------------------------------------------------
 # Directory/file paths
@@ -176,6 +180,7 @@ SPAD_SRP_FILE            = SPAD_PATH/SphericalModel.spo
 ATMOSPHERE_PATH          = DATA_PATH/atmosphere/earth
 CSSI_FLUX_FILE           = ATMOSPHERE_PATH/SpaceWeather-All-v1.2.txt
 SCHATTEN_FILE            = ATMOSPHERE_PATH/SchattenPredict.txt
+MARINI_TROPO_FILE        = ATMOSPHERE_PATH/marini.dat
 #-----------------------------------------------------------
 HELP_FILE                = ROOT_PATH/docs/help/help.chm
 #-----------------------------------------------------------

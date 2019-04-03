@@ -45,7 +45,7 @@ public:
    
    // inherited from GmatBase
    virtual GmatBase*    Clone() const;
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
    

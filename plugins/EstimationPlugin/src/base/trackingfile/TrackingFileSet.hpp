@@ -114,32 +114,32 @@ public:
                                             const bool value,
                                             const Integer index);
 
-   virtual Gmat::ObjectType
+   virtual UnsignedInt
                         GetPropertyObjectType(const Integer id) const;
 
    DEFAULT_TO_NO_CLONES
 
-   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual std::string  GetRefObjectName(const UnsignedInt type) const;
    virtual const ObjectTypeArray&
                         GetRefObjectTypeArray();
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+                        GetRefObjectNameArray(const UnsignedInt type);
+   virtual bool         SetRefObjectName(const UnsignedInt type,
                                          const std::string &name);
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string &name);
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name = "");
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index);
-   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+   virtual ObjectArray& GetRefObjectArray(const UnsignedInt type);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
    virtual void         SetSolarSystem(SolarSystem *ss);

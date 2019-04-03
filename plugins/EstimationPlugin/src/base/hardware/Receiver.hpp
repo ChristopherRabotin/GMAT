@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -103,21 +103,21 @@ public:
    //virtual Integer      GetIntegerParameter(const std::string &label) const;
    //virtual Integer      SetIntegerParameter(const std::string &label, const Integer value);
 
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type, const std::string &name);
-//   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type, const std::string &name, const Integer index);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type, const std::string &name = "");
-//   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type, const std::string &name, const Integer index);
+   virtual GmatBase*    GetRefObject(const UnsignedInt type, const std::string &name);
+//   virtual GmatBase*    GetRefObject(const UnsignedInt type, const std::string &name, const Integer index);
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type, const std::string &name = "");
+//   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type, const std::string &name, const Integer index);
    
-   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+   virtual ObjectArray& GetRefObjectArray(const UnsignedInt type);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
+                        GetRefObjectNameArray(const UnsignedInt type);
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
    virtual const StringArray&
                         GetStringArrayParameter(const std::string &label) const;
-   virtual bool         RenameRefObject(const Gmat::ObjectType type, const std::string &oldName,
+   virtual bool         RenameRefObject(const UnsignedInt type, const std::string &oldName,
                                         const std::string &newName);
    virtual const ObjectTypeArray& GetRefObjectTypeArray();
    virtual bool         HasRefObjectTypeArray(){return true;}

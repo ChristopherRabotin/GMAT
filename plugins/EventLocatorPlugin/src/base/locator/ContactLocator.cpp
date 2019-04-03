@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -636,7 +636,7 @@ const StringArray & ContactLocator::GetStringArrayParameter(
 }
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Retrieves object type of parameter of given id.
@@ -646,7 +646,7 @@ const StringArray & ContactLocator::GetStringArrayParameter(
  * @return parameter ObjectType
  */
 //---------------------------------------------------------------------------
-Gmat::ObjectType ContactLocator::GetPropertyObjectType(const Integer id) const
+UnsignedInt ContactLocator::GetPropertyObjectType(const Integer id) const
 {
    switch (id)
    {
@@ -727,7 +727,7 @@ const ObjectTypeArray& ContactLocator::GetTypesForList(const std::string &label)
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name,
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name,
 //                        const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -741,7 +741,7 @@ const ObjectTypeArray& ContactLocator::GetTypesForList(const std::string &label)
  * @return pointer to the reference object requested.
  */
 //------------------------------------------------------------------------------
-GmatBase* ContactLocator::GetRefObject(const Gmat::ObjectType type,
+GmatBase* ContactLocator::GetRefObject(const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index)
 {
@@ -764,7 +764,7 @@ GmatBase* ContactLocator::GetRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -778,7 +778,7 @@ GmatBase* ContactLocator::GetRefObject(const Gmat::ObjectType type,
  * @return true if successful; otherwise, false.
  */
 //------------------------------------------------------------------------------
-bool ContactLocator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool ContactLocator::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                   const std::string &name)
 {
    #ifdef DEBUG_SETREF
@@ -843,7 +843,7 @@ bool ContactLocator::HasRefObjectTypeArray()
 /**
  */
 //------------------------------------------------------------------------------
-const StringArray& ContactLocator::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& ContactLocator::GetRefObjectNameArray(const UnsignedInt type)
 {
    #ifdef DEBUG_BF_REF
       MessageInterface::ShowMessage("In BFP::GetRefObjectNameArray, requesting type %d (%s)\n",
@@ -879,7 +879,7 @@ const ObjectTypeArray& ContactLocator::GetRefObjectTypeArray()
 }
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, 
+// bool RenameRefObject(const UnsignedInt type,
 //       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -892,7 +892,7 @@ const ObjectTypeArray& ContactLocator::GetRefObjectTypeArray()
  * @return true if object name changed, false if not.
  */
 //------------------------------------------------------------------------------
-bool ContactLocator::RenameRefObject(const Gmat::ObjectType type, 
+bool ContactLocator::RenameRefObject(const UnsignedInt type,
    const std::string &oldName, const std::string &newName)
 {
    bool retval = false;

@@ -37,13 +37,16 @@ MediaCorrectionInterface::MediaCorrectionInterface(const std::string &typeStr,
    pressure         (1013.5),     // 1013.5 kPa
    humidityFraction (0.55),       // 55%
    waveLength       (0.0),
-   range            (1.0)
+   range            (1.0),
+   latitude         (0.0),
+   longitude        (0.0)
 {
    objectTypes.push_back(Gmat::MEDIA_CORRECTION);
 //   objectTypeNames.push_back("MediaCorrection");
 
-   modelName   = typeStr;
-   model       = 0;
+   modelName     = typeStr;
+   model         = 0;
+   modelTypeName = "";
 }
 
 //------------------------------------------------------------------------------
@@ -71,11 +74,14 @@ MediaCorrectionInterface::MediaCorrectionInterface(const MediaCorrectionInterfac
    temperature        (mdc.temperature),
    humidityFraction   (mdc.humidityFraction),
    waveLength         (mdc.waveLength),
-   range              (mdc.range)
+   range              (mdc.range),
+   latitude           (mdc.latitude),
+   longitude          (mdc.longitude)
 {
-   model       = mdc.model;
-   modelName   = mdc.modelName;
-   solarSystem = mdc.solarSystem;
+   model         = mdc.model;
+   modelName     = mdc.modelName;
+   modelTypeName = mdc.modelTypeName;
+   solarSystem   = mdc.solarSystem;
 }
 
 
@@ -98,6 +104,7 @@ MediaCorrectionInterface& MediaCorrectionInterface::operator=(const MediaCorrect
 
       model             = mc.model;
       modelName         = mc.modelName;
+      modelTypeName     = mc.modelTypeName;
       solarSystem       = mc.solarSystem;
 
       dataPath          = mc.dataPath;
@@ -110,19 +117,6 @@ MediaCorrectionInterface& MediaCorrectionInterface::operator=(const MediaCorrect
    }
 
    return *this;
-}
-
-
-//------------------------------------------------------------------------------
-// GmatBase* Clone() const
-//------------------------------------------------------------------------------
-/**
- * Clone
- */
-//------------------------------------------------------------------------------
-GmatBase* MediaCorrectionInterface::Clone() const
-{
-   return new MediaCorrectionInterface(*this);
 }
 
 
@@ -178,6 +172,20 @@ bool MediaCorrectionInterface::SetModelName(std::string modName)
 {
    modelName = modName;
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetModelTypeName(Real T)
+//------------------------------------------------------------------------------
+/**
+ * Set the name of the type of media correction model used
+ */
+//------------------------------------------------------------------------------
+bool MediaCorrectionInterface::SetModelTypeName(std::string type)
+{
+	modelTypeName = type;
+	return true;
 }
 
 //------------------------------------------------------------------------------
@@ -273,17 +281,28 @@ bool MediaCorrectionInterface::SetWaveLength(Real lambda)
    return true;
 }
 
-
 //------------------------------------------------------------------------------
-// RealArray Correction()
+// bool SetLatitude(Real lat)
 //------------------------------------------------------------------------------
 /**
- * Make a media correction
+ * Set latitude
  */
 //------------------------------------------------------------------------------
-RealArray MediaCorrectionInterface::Correction()
+bool MediaCorrectionInterface::SetLatitude(Real lat)
 {
-   RealArray result;
+	latitude = lat;
+	return true;
+}
 
-   return result;
+//------------------------------------------------------------------------------
+// bool SetLongitude(Real lat)
+//------------------------------------------------------------------------------
+/**
+ * Set longitude
+ */
+//------------------------------------------------------------------------------
+bool MediaCorrectionInterface::SetLongitude(Real lon)
+{
+	longitude = lon;
+	return true;
 }

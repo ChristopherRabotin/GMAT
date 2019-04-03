@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -58,7 +58,7 @@
 TimeReal::TimeReal(const std::string &name, const std::string &typeStr, 
                    GmatBase *obj, const std::string &desc,
                    const std::string &unit, bool isSettable,
-                   Gmat::ObjectType paramOwnerType)
+                   UnsignedInt paramOwnerType)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
          GmatParam::NO_DEP, paramOwnerType, true, isSettable),
      TimeData(name, typeStr, paramOwnerType)
@@ -255,10 +255,10 @@ bool TimeReal::Initialize()
 //-------------------------------------
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool TimeReal::RenameRefObject(const Gmat::ObjectType type,
+bool TimeReal::RenameRefObject(const UnsignedInt type,
                                const std::string &oldName,
                                const std::string &newName)
 {
@@ -267,7 +267,7 @@ bool TimeReal::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
+// virtual std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Calls TimeData to get reference object name for given type.
@@ -275,14 +275,14 @@ bool TimeReal::RenameRefObject(const Gmat::ObjectType type,
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-std::string TimeReal::GetRefObjectName(const Gmat::ObjectType type) const
+std::string TimeReal::GetRefObjectName(const UnsignedInt type) const
 {
    return TimeData::GetRefObjectName(type);
 }
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves reference object name array for given type. It will return all
@@ -292,14 +292,14 @@ std::string TimeReal::GetRefObjectName(const Gmat::ObjectType type) const
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-const StringArray& TimeReal::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& TimeReal::GetRefObjectNameArray(const UnsignedInt type)
 {
    return TimeData::GetRefObjectNameArray(type);
 }
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObjectName(const Gmat::ObjectType type,
+// virtual bool SetRefObjectName(const UnsignedInt type,
 //                               const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -310,7 +310,7 @@ const StringArray& TimeReal::GetRefObjectNameArray(const Gmat::ObjectType type)
  *
  */
 //------------------------------------------------------------------------------
-bool TimeReal::SetRefObjectName(const Gmat::ObjectType type,
+bool TimeReal::SetRefObjectName(const UnsignedInt type,
                                  const std::string &name)
 {
    return TimeData::SetRefObjectName(type, name);
@@ -318,7 +318,7 @@ bool TimeReal::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+// virtual GmatBase* GetRefObject(const UnsignedInt type,
 //                                const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -330,7 +330,7 @@ bool TimeReal::SetRefObjectName(const Gmat::ObjectType type,
  * @return reference object pointer for given object type and name
  */
 //------------------------------------------------------------------------------
-GmatBase* TimeReal::GetRefObject(const Gmat::ObjectType type,
+GmatBase* TimeReal::GetRefObject(const UnsignedInt type,
                                   const std::string &name)
 {
    return TimeData::GetRefObject(type, name);
@@ -338,7 +338,7 @@ GmatBase* TimeReal::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -352,7 +352,7 @@ GmatBase* TimeReal::GetRefObject(const Gmat::ObjectType type,
  *
  */
 //------------------------------------------------------------------------------
-bool TimeReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool TimeReal::SetRefObject(GmatBase *obj, const UnsignedInt type,
                              const std::string &name)
 {
    #if DEBUG_REF_OBJECT

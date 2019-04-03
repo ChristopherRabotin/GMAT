@@ -20,7 +20,8 @@
             routines. As of release R2017a, the version is naif0012.tls. This
             can change and the file checks for new versions.</td></tr><tr><td>CSSI_FLUX_FILE</td><td>ftp://ftp.agi.com/pub/DynamicEarthData/SpaceWeather-All-v1.2.txt</td><td>The CSSI Space Weather File used for flux and geomagnetic
             indeces in drag modelling when a propgator is configured to use
-            the CSSI file as the source for space weather modelling.</td></tr><tr><td>SCHATTEN_FILE</td><td>https://fdf.gsfc.nasa.gov/forms</td><td>Requires an account. Cannot be downloaded automatically.</td></tr><tr><td>IRI2007_APDATA</td><td>Constructed from CSSI_FLUX_FILE using
+            the CSSI file as the source for space weather modelling.</td></tr><tr><td>SCHATTEN_FILE</td><td>https://fdf.gsfc.nasa.gov/forms</td><td>Requires an account. Cannot be downloaded
+            automatically.</td></tr><tr><td>IRI2007_APDATA</td><td>Constructed from CSSI_FLUX_FILE using
             GMATDataManager.py</td><td>Geomagnetic indices used in the IRI2007 model.</td></tr><tr><td>EARTH_PCK _PREDICTED_FILE</td><td>https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/</td><td>The SPICE kernel containing predicted, precession, nutation
             ,nutation corrections, UT1-TAI , and polar motion for the Earth.
             Used in SPICE's astrodynamic routines.</td></tr><tr><td>EARTH_PCK _CURRENT_FILE</td><td>https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/</td><td>The SPICE kernel containing historical, precession,
@@ -29,14 +30,14 @@
             reference frame. Used in SPICE's astrodynamic routines.</td></tr><tr><td>LUNA_FRAME _KERNEL_FILE</td><td>https://naif.jpl.nasa.gov/pub/naif/generic_kernels/fk/satellites/</td><td>This frame kernel contains the latest specifications of
             lunar reference frames realizing the Lunar Principal Axis (PA) and
             Mean Earth/Polar Axis (ME) reference systems. Used in SPICE's
-            astrodynamic routines.</td></tr></tbody></table></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10D5C"></a>Loading Custom Plugins</h3></div></div></div><p>Custom plugins are loaded by adding a line to the startup file
+            astrodynamic routines.</td></tr></tbody></table></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10D78"></a>Loading Custom Plugins</h3></div></div></div><p>Custom plugins are loaded by adding a line to the startup file
       (<code class="filename">bin/gmat_startup_file.txt</code>) specifying the name and
       location of the plugin file. In order for a plugin to work with GMAT,
       the plugin library must be placed in the folder referenced in the
       startup file. For all details, see the <a class="xref" href="StartupFile.html" title="Startup File"><span class="refentrytitle">Startup File</span></a>
-      reference.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10D67"></a>Configuring the MATLAB Inteface</h3></div></div></div><p>GMAT contains an interface to MATLAB. See the <a class="xref" href="MatlabInterface.html" title="MATLAB Interface"><span class="refentrytitle">MATLAB Interface</span></a> reference to configure the MATLAB
-      interface.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10D6F"></a>Configuring the Python Inteface</h3></div></div></div><p>GMAT contains an interface to Python. See the <a class="xref" href="PythonInterface.html" title="Python Interface"><span class="refentrytitle">Python Interface</span></a> reference to configure the MATLAB
-      interface.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10D77"></a>User-defined Function Paths</h3></div></div></div><p>If you create custom MATLAB functions, you can provide the path to
+      reference.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10D83"></a>Configuring the MATLAB Inteface</h3></div></div></div><p>GMAT contains an interface to MATLAB. See the <a class="xref" href="MatlabInterface.html" title="MATLAB Interface"><span class="refentrytitle">MATLAB Interface</span></a> reference to configure the MATLAB
+      interface.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10D8B"></a>Configuring the Python Inteface</h3></div></div></div><p>GMAT contains an interface to Python. See the <a class="xref" href="PythonInterface.html" title="Python Interface"><span class="refentrytitle">Python Interface</span></a> reference to configure the Python
+      interface.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N10D93"></a>User-defined Function Paths</h3></div></div></div><p>If you create custom MATLAB functions, you can provide the path to
       those files and GMAT will locate them at run time. The default startup
       file is configured so you can place MATLAB functions (with a
       <code class="filename">.m</code> extension) in the

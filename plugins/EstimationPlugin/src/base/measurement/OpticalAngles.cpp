@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -108,7 +108,7 @@ OpticalAngles & OpticalAngles::operator=(const OpticalAngles & oa)
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -121,7 +121,7 @@ OpticalAngles & OpticalAngles::operator=(const OpticalAngles & oa)
  * @return true if the object was processed
  */
 //------------------------------------------------------------------------------
-bool OpticalAngles::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool OpticalAngles::SetRefObject(GmatBase *obj, const UnsignedInt type,
       const std::string & name)
 {
    if (obj->IsOfType(Gmat::SPACE_POINT))
@@ -140,7 +140,7 @@ bool OpticalAngles::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool TwoWayRange::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool TwoWayRange::SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string &name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -154,7 +154,7 @@ bool OpticalAngles::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return true if the object was processed
  */
 //------------------------------------------------------------------------------
-bool OpticalAngles::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool OpticalAngles::SetRefObject(GmatBase *obj, const UnsignedInt type,
       const std::string & name, const Integer index)
 {
    return PhysicalMeasurement::SetRefObject(obj, type, name, index);

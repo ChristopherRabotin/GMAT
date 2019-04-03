@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -41,22 +41,29 @@ public:
     Troposphere& operator=(const Troposphere& tps);
     virtual GmatBase*    Clone() const;
 
-	bool SetTemperature(Real T);
-	bool SetPressure(Real P);
-	bool SetHumidityFraction(Real humFr);
-	bool SetWaveLength(Real lambda);
-	bool SetElevationAngle(Real elevation);
-	bool SetRange(Real r);
+	bool SetTime(GmatEpoch ep);
 
 	virtual RealArray Correction();		// specify the changes of range, angle, and time
 
 private:
-	Real temperature;					// unit: K
-	Real pressure;						// unit: hPa
-	Real humidityFraction;				// unit: no unit. It's range is from 0 to 1
-	Real waveLength;					// unit: m
-	Real elevationAngle;				// unit: radian
-	Real range;							// unit: m
+
+   RealArray CalculateHS(); // HopfieldSaastamoinen model
+   RealArray CalculateMarini(); // Marini model
+
+   void TROGET(Real FLATD, Real FLOND, Integer MON, Integer &NS, Real &HT);
+   Real BendingIntegral(Real ALPHA, Real FF1, Real FF2, Real FO, Real F1, Real P);
+
+   void LoadMariniDataFile();
+
+   struct GMAT_API MariniDataStruct
+   {
+      Real      latitude;
+      Real      longitude;
+      Integer   refractivity[12];
+   };
+   
+	Integer month;						// unit: no unit. January = 1
+	std::vector<MariniDataStruct> mariniData;
 
    static const Real term2;
 

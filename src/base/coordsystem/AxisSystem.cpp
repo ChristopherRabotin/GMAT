@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -166,7 +166,7 @@ DpVals           (NULL)
    epoch        = GmatTimeConstants::A1MJD_OF_J2000;
    lastPRECEpoch       = A1Mjd(0.0);
    lastNUTEpoch        = A1Mjd(0.0);
-   lastSTDerivEpoch    = A1Mjd(0.0);
+   lastSTDerivEpoch    = GmatTime(0.0);
    lastPMEpoch         = A1Mjd(0.0);
 }
 
@@ -220,7 +220,7 @@ DpVals           (NULL)
 {
    lastPRECEpoch    = A1Mjd(0.0);
    lastNUTEpoch     = A1Mjd(0.0);
-   lastSTDerivEpoch = A1Mjd(0.0);
+   lastSTDerivEpoch = GmatTime(0.0);
    lastPMEpoch      = A1Mjd(0.0);
 }
 
@@ -1058,11 +1058,436 @@ bool AxisSystem::RotateToBaseSystem(const A1Mjd &epoch, const Rvector &inState,
                                   Rvector &outState, 
                                   bool forceComputation)
 {
+   CalculateRotationMatrix(epoch, forceComputation);
+   bool retval = CompleteRotateToBase(inState, outState);
+
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
+      {
+         MessageInterface::ShowMessage(
+            "AxisSystem::RotateToBaseSystem check for %s\n", typeName.c_str());
+         MessageInterface::ShowMessage(
+            "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n",
+            rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2),
+            rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2),
+            rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
+         MessageInterface::ShowMessage(
+            "   Epoch: %.12lf\n", epoch.Get());
+         MessageInterface::ShowMessage(
+            "   AxisSystem::input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], 
+            inState[5]);
+         MessageInterface::ShowMessage(
+            "   AxisSystem::output State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            outState[0], outState[1], outState[2], outState[4], outState[4], 
+            outState[5]);
+      }
+   #endif
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+//  bool RotateToBaseSystem(const GmatTime &epoch, const Rvector &inState,
+//                        Rvector &outState, bool forceComputation)
+//------------------------------------------------------------------------------
+/**
+ * This method will rotate the input inState into the BaseSystem frame.
+ *
+ * @param epoch            the epoch at which to perform the rotation.
+ * @param inState          the input state (in this AxisSystem) to be rotated.
+ * @param outState         the output state, in the BaseSystem AxisSystem, the result
+ *                         of rotating the input inState.
+ * @param forceComputation flag to force the computation
+ *
+ * @return success or failure of the operation.
+ */
+//------------------------------------------------------------------------------
+bool AxisSystem::RotateToBaseSystem(const GmatTime &epoch, const Rvector &inState,
+                                  Rvector &outState, 
+                                  bool forceComputation)
+{
+   CalculateRotationMatrix(epoch, forceComputation);
+   bool retval = CompleteRotateToBase(inState, outState);
+
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == false) || (epoch == GmatTimeConstants::MJD_OF_J2000))
+      {
+         MessageInterface::ShowMessage(
+            "AxisSystem::RotateToBaseSystem check for %s\n", typeName.c_str());
+         MessageInterface::ShowMessage(
+            "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n",
+            rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2),
+            rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2),
+            rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
+         MessageInterface::ShowMessage(
+            "   Epoch: %.12lf\n", epoch.GetMjd());
+         MessageInterface::ShowMessage(
+            "   AxisSystem::input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], 
+            inState[5]);
+         MessageInterface::ShowMessage(
+            "   AxisSystem::output State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            outState[0], outState[1], outState[2], outState[4], outState[4], 
+            outState[5]);
+      }
+   #endif
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+//  bool RotateToBaseSystem(const A1Mjd &epoch, const Rvector &inState,
+//                        Rvector &outState, bool forceComputation)
+//------------------------------------------------------------------------------
+/**
+ * This method will rotate the input inState into the BaseSystem frame.
+ *
+ * @param epoch            the epoch at which to perform the rotation.
+ * @param inState          the input state (in this AxisSystem) to be rotated.
+ * @param outState         the output state, in the BaseSystem AxisSystem, the result
+ *                         of rotating the input inState.
+ * @param forceComputation flag to force the computation
+ *
+ * @return success or failure of the operation.
+ */
+//------------------------------------------------------------------------------
+bool AxisSystem::RotateToBaseSystem(const A1Mjd &epoch, const Real *inState,
+                                  Real *outState,
+                                  bool forceComputation)
+{
+   CalculateRotationMatrix(epoch, forceComputation);
+   bool retval = CompleteRotateToBase(inState, outState);
+
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
+      {
+         MessageInterface::ShowMessage(
+            "RotateToBaseSystem check for %s\n", typeName.c_str());
+         MessageInterface::ShowMessage(
+            "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n",
+            rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2),
+            rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2),
+            rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
+         MessageInterface::ShowMessage(
+            "   Epoch: %.12lf\n", epoch.Get());
+         MessageInterface::ShowMessage(
+            "   input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], 
+            inState[5]);
+      }
+   #endif
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+//  bool RotateToBaseSystem(const GmatTime &epoch, const Rvector &inState,
+//                        Rvector &outState, bool forceComputation)
+//------------------------------------------------------------------------------
+/**
+ * This method will rotate the input inState into the BaseSystem frame.
+ *
+ * @param epoch            the epoch at which to perform the rotation.
+ * @param inState          the input state (in this AxisSystem) to be rotated.
+ * @param outState         the output state, in the BaseSystem AxisSystem, the result
+ *                         of rotating the input inState.
+ * @param forceComputation flag to force the computation
+ *
+ * @return success or failure of the operation.
+ */
+//------------------------------------------------------------------------------
+bool AxisSystem::RotateToBaseSystem(const GmatTime &epoch, const Real *inState,
+                                  Real *outState,
+                                  bool forceComputation)
+{
+   CalculateRotationMatrix(epoch, forceComputation);
+   bool retval = CompleteRotateToBase(inState, outState);
+
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == false) || (epoch == GmatTimeConstants::MJD_OF_J2000))
+      {
+         MessageInterface::ShowMessage(
+            "RotateToBaseSystem check for %s\n", typeName.c_str());
+         MessageInterface::ShowMessage(
+            "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n",
+            rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2),
+            rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2),
+            rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
+         MessageInterface::ShowMessage(
+            "   Epoch: %.12lf\n", epoch.GetMjd());
+         MessageInterface::ShowMessage(
+            "   input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], 
+            inState[5]);
+      }
+   #endif
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+//  bool RotateFromBaseSystem(const A1Mjd &epoch, const Rvector &inState,
+//                          Rvector &outState, bool forceComputation)
+//------------------------------------------------------------------------------
+/**
+ * This method will rotate the input inState from the BaseSystem frame into
+ * this AxisSystem.
+ *
+ * @param epoch            the epoch at which to perform the rotation.
+ * @param inState          the input state (in BaseSystem AxisSystem) to be rotated.
+ * @param outState         the output state, in this AxisSystem, the result
+ *                         of rotating the input inState.
+ * @param forceComputation flag to force the computation
+ *
+ * @return success or failure of the operation.
+ */
+//------------------------------------------------------------------------------
+bool AxisSystem::RotateFromBaseSystem(const A1Mjd &epoch,
+                                    const Rvector &inState,
+                                    Rvector &outState,
+                                    bool forceComputation)
+{
+   #ifdef DEBUG_ROT_MATRIX
+      MessageInterface::ShowMessage("Entering AxisSystem::RotateFromBaseSystem on object of type %s\n",
+            (GetTypeName()).c_str());
+   #endif
+   CalculateRotationMatrix(epoch, forceComputation);
+   #ifdef DEBUG_ROT_MATRIX
+      MessageInterface::ShowMessage("In AxisSystem::rotateFromBaseSystem, DONE computing rotation matrix\n");
+   #endif
+   
+   bool retval = CompleteRotateFromBase(inState, outState);
+
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
+      {
+         MessageInterface::ShowMessage(
+            "AxisSystem::RotateFromBaseSystem check for %s\n", typeName.c_str());
+         MessageInterface::ShowMessage(
+            "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n",
+            rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2),
+            rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2),
+            rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
+         MessageInterface::ShowMessage(
+            "   Epoch: %.12lf\n", epoch.Get());
+         MessageInterface::ShowMessage(
+            "   AxisSystem::input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], 
+            inState[5]);
+         MessageInterface::ShowMessage(
+            "   AxisSystem::output State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            outState[0], outState[1], outState[2], outState[3], outState[4], 
+            outState[5]);
+         firstCallFired = true;
+      }
+   #endif
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+//  bool RotateFromBaseSystem(const GmatTime &epoch, const Rvector &inState,
+//                          Rvector &outState, bool forceComputation)
+//------------------------------------------------------------------------------
+/**
+ * This method will rotate the input inState from the BaseSystem frame into
+ * this AxisSystem.
+ *
+ * @param epoch            the epoch at which to perform the rotation.
+ * @param inState          the input state (in BaseSystem AxisSystem) to be rotated.
+ * @param outState         the output state, in this AxisSystem, the result
+ *                         of rotating the input inState.
+ * @param forceComputation flag to force the computation
+ *
+ * @return success or failure of the operation.
+ */
+//------------------------------------------------------------------------------
+bool AxisSystem::RotateFromBaseSystem(const GmatTime &epoch,
+                                    const Rvector &inState,
+                                    Rvector &outState,
+                                    bool forceComputation)
+{
+   #ifdef DEBUG_ROT_MATRIX
+      MessageInterface::ShowMessage("Entering AxisSystem::RotateFromBaseSystem on object of type %s\n",
+            (GetTypeName()).c_str());
+   #endif
+
+   CalculateRotationMatrix(epoch, forceComputation);
+   #ifdef DEBUG_ROT_MATRIX
+      MessageInterface::ShowMessage("In AxisSystem::rotateFromBaseSystem, DONE computing rotation matrix\n");
+   #endif
+   
+   bool retval = CompleteRotateFromBase(inState, outState);
+
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == false) || (epoch == GmatTimeConstants::MJD_OF_J2000))
+      {
+         MessageInterface::ShowMessage(
+            "AxisSystem::RotateFromBaseSystem check for %s\n", typeName.c_str());
+         MessageInterface::ShowMessage(
+            "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n",
+            rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2),
+            rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2),
+            rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
+         MessageInterface::ShowMessage(
+            "   Epoch: %.12lf\n", epoch.GetMjd());
+         MessageInterface::ShowMessage(
+            "   AxisSystem::input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], 
+            inState[5]);
+         MessageInterface::ShowMessage(
+            "   AxisSystem::output State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            outState[0], outState[1], outState[2], outState[3], outState[4], 
+            outState[5]);
+         firstCallFired = true;
+      }
+   #endif
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+//  bool RotateFromBaseSystem(const A1Mjd &epoch, const Rvector &inState,
+//                          Rvector &outState, bool forceComputation)
+//------------------------------------------------------------------------------
+/**
+ * This method will rotate the input inState from the BaseSystem frame into
+ * this AxisSystem.
+ *
+ * @param epoch            the epoch at which to perform the rotation.
+ * @param inState          the input state (in BaseSystem AxisSystem) to be rotated.
+ * @param outState         the output state, in this AxisSystem, the result
+ *                         of rotating the input inState.
+ * @param forceComputation flag to force the computation
+ *
+ * @return success or failure of the operation.
+ */
+//------------------------------------------------------------------------------
+bool AxisSystem::RotateFromBaseSystem(const A1Mjd &epoch,
+                                      const Real *inState,
+                                      Real *outState,
+                                      bool forceComputation)
+{
+   #ifdef DEBUG_ROT_MATRIX
+      MessageInterface::ShowMessage("Entering AxisSystem::RotateFromBaseSystem (*) on object of type %s\n",
+            (GetTypeName()).c_str());
+   #endif
+
+   CalculateRotationMatrix(epoch, forceComputation);
+   bool retval = CompleteRotateFromBase(inState, outState);
+
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
+      {
+         MessageInterface::ShowMessage(
+            "AxisSystem::RotateFromBaseSystem check for %s\n", typeName.c_str());
+         MessageInterface::ShowMessage(
+            "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n",
+            rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2),
+            rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2),
+            rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
+         MessageInterface::ShowMessage(
+            "   Epoch: %.12lf\n", epoch.Get());
+         MessageInterface::ShowMessage(
+            "   input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], 
+            inState[5]);
+         firstCallFired = true;
+      }
+   #endif
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+//  bool RotateFromBaseSystem(const A1Mjd &GmatTime, const Rvector &inState,
+//                          Rvector &outState, bool forceComputation)
+//------------------------------------------------------------------------------
+/**
+ * This method will rotate the input inState from the BaseSystem frame into
+ * this AxisSystem.
+ *
+ * @param epoch            the epoch at which to perform the rotation.
+ * @param inState          the input state (in BaseSystem AxisSystem) to be rotated.
+ * @param outState         the output state, in this AxisSystem, the result
+ *                         of rotating the input inState.
+ * @param forceComputation flag to force the computation
+ *
+ * @return success or failure of the operation.
+ */
+//------------------------------------------------------------------------------
+bool AxisSystem::RotateFromBaseSystem(const GmatTime &epoch,
+                                      const Real *inState,
+                                      Real *outState,
+                                      bool forceComputation)
+{
+   #ifdef DEBUG_ROT_MATRIX
+      MessageInterface::ShowMessage("Entering AxisSystem::RotateFromBaseSystem (*) on object of type %s\n",
+            (GetTypeName()).c_str());
+   #endif
+
+   CalculateRotationMatrix(epoch, forceComputation);
+   bool retval = CompleteRotateFromBase(inState, outState);
+
+   #ifdef DEBUG_FIRST_CALL
+      if ((firstCallFired == false) || (epoch == GmatTimeConstants::MJD_OF_J2000))
+      {
+         MessageInterface::ShowMessage(
+            "AxisSystem::RotateFromBaseSystem check for %s\n", typeName.c_str());
+         MessageInterface::ShowMessage(
+            "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n"
+            "                     |%20.10lf %20.10lf %20.10lf|\n",
+            rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2),
+            rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2),
+            rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
+         MessageInterface::ShowMessage(
+            "   Epoch: %.12lf\n", epoch.GetMjd());
+         MessageInterface::ShowMessage(
+            "   input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], 
+            inState[5]);
+         firstCallFired = true;
+      }
+   #endif
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+//  bool CompleteRotateToBase(const Rvector &inState, Rvector &outState)
+//------------------------------------------------------------------------------
+/**
+ * This method applies the rotation for RotateToBaseSystem.
+ *
+ * @param inState          the input state (in this AxisSystem) to be rotated.
+ * @param outState         the output state, in the BaseSystem AxisSystem, the result
+ *                         of rotating the input inState.
+ *
+ * @return success or failure of the operation.
+ */
+//------------------------------------------------------------------------------
+bool AxisSystem::CompleteRotateToBase(const Rvector &inState, Rvector &outState)
+{
    static Rvector3 tmpPosVecTo;
    static Rvector3 tmpVelVecTo;
    static const Real  *tmpPosTo = tmpPosVecTo.GetDataVector();
    static const Real  *tmpVelTo = tmpVelVecTo.GetDataVector();
-   CalculateRotationMatrix(epoch, forceComputation);
    
    // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
    tmpPosVecTo.Set(inState[0],inState[1], inState[2]);
@@ -1112,56 +1537,23 @@ bool AxisSystem::RotateToBaseSystem(const A1Mjd &epoch, const Rvector &inState,
          outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);
    #endif
 
-   #ifdef DEBUG_FIRST_CALL
-      if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
-      {
-         MessageInterface::ShowMessage(
-            "AxisSystem::RotateToBaseSystem check for %s\n", typeName.c_str());
-         MessageInterface::ShowMessage(
-            "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
-            "                     |%20.10lf %20.10lf %20.10lf|\n"
-            "                     |%20.10lf %20.10lf %20.10lf|\n",
-            rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2),
-            rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2),
-            rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
-         MessageInterface::ShowMessage(
-            "   Epoch: %.12lf\n", epoch.Get());
-         MessageInterface::ShowMessage(
-            "   AxisSystem::input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
-            inState[0], inState[1], inState[2], inState[3], inState[4], 
-            inState[5]);
-         MessageInterface::ShowMessage(
-            "   AxisSystem::output State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
-            outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], 
-            outVel[2]);
-      }
-   #endif
-
    return true;
 }
-
 //------------------------------------------------------------------------------
-//  bool RotateToBaseSystem(const A1Mjd &epoch, const Rvector &inState,
-//                        Rvector &outState, bool forceComputation)
+//  bool CompleteRotateToBase(const Rvector &inState, Rvector &outState)
 //------------------------------------------------------------------------------
 /**
- * This method will rotate the input inState into the BaseSystem frame.
+ * This method applies the rotation for RotateToBaseSystem.
  *
- * @param epoch            the epoch at which to perform the rotation.
  * @param inState          the input state (in this AxisSystem) to be rotated.
  * @param outState         the output state, in the BaseSystem AxisSystem, the result
  *                         of rotating the input inState.
- * @param forceComputation flag to force the computation
  *
  * @return success or failure of the operation.
  */
 //------------------------------------------------------------------------------
-bool AxisSystem::RotateToBaseSystem(const A1Mjd &epoch, const Real *inState,
-                                  Real *outState,
-                                  bool forceComputation)
+bool AxisSystem::CompleteRotateToBase(const Real *inState, Real *outState)
 {
-   CalculateRotationMatrix(epoch, forceComputation);
-   
    Real pos[3] = {inState[0], inState[1], inState[2]};   
    Real vel[3] = {inState[3], inState[4], inState[5]};   
    #ifdef DEBUG_CALCS
@@ -1203,63 +1595,28 @@ bool AxisSystem::RotateToBaseSystem(const A1Mjd &epoch, const Real *inState,
          outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);
    #endif
 
-   #ifdef DEBUG_FIRST_CALL
-      if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
-      {
-         MessageInterface::ShowMessage(
-            "RotateToBaseSystem check for %s\n", typeName.c_str());
-         MessageInterface::ShowMessage(
-            "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
-            "                     |%20.10lf %20.10lf %20.10lf|\n"
-            "                     |%20.10lf %20.10lf %20.10lf|\n",
-            rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2),
-            rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2),
-            rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
-         MessageInterface::ShowMessage(
-            "   Epoch: %.12lf\n", epoch.Get());
-         MessageInterface::ShowMessage(
-            "   input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
-            inState[0], inState[1], inState[2], inState[3], inState[4], 
-            inState[5]);
-      }
-   #endif
-
    return true;
 }
+
 //------------------------------------------------------------------------------
-//  bool RotateFromBaseSystem(const A1Mjd &epoch, const Rvector &inState,
-//                          Rvector &outState, bool forceComputation)
+//  bool CompleteRotateFromBase(const Rvector &inState, Rvector &outState)
 //------------------------------------------------------------------------------
 /**
- * This method will rotate the input inState from the BaseSystem frame into
- * this AxisSystem.
+ * This method applies the rotation for RotateFromBaseSystem.
  *
- * @param epoch            the epoch at which to perform the rotation.
  * @param inState          the input state (in BaseSystem AxisSystem) to be rotated.
  * @param outState         the output state, in this AxisSystem, the result
  *                         of rotating the input inState.
- * @param forceComputation flag to force the computation
  *
  * @return success or failure of the operation.
  */
 //------------------------------------------------------------------------------
-bool AxisSystem::RotateFromBaseSystem(const A1Mjd &epoch,
-                                    const Rvector &inState,
-                                    Rvector &outState,
-                                    bool forceComputation)
+bool AxisSystem::CompleteRotateFromBase(const Rvector &inState, Rvector &outState)
 {
-   #ifdef DEBUG_ROT_MATRIX
-      MessageInterface::ShowMessage("Entering AxisSystem::RotateFromBaseSystem on object of type %s\n",
-            (GetTypeName()).c_str());
-   #endif
    static Rvector3 tmpPosVec;
    static Rvector3 tmpVelVec;
    static const Real  *tmpPos = tmpPosVec.GetDataVector();
    static const Real  *tmpVel = tmpVelVec.GetDataVector();
-   CalculateRotationMatrix(epoch, forceComputation);
-   #ifdef DEBUG_ROT_MATRIX
-      MessageInterface::ShowMessage("In AxisSystem::rotateFromBaseSystem, DONE computing rotation matrix\n");
-   #endif
    
    // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
    tmpPosVec.Set(inState[0],inState[1], inState[2]);
@@ -1309,64 +1666,25 @@ bool AxisSystem::RotateFromBaseSystem(const A1Mjd &epoch,
          "Output vector from FromBaseSystem = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);
    #endif
-   #ifdef DEBUG_FIRST_CALL
-      if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
-      {
-         MessageInterface::ShowMessage(
-            "AxisSystem::RotateFromBaseSystem check for %s\n", typeName.c_str());
-         MessageInterface::ShowMessage(
-            "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
-            "                     |%20.10lf %20.10lf %20.10lf|\n"
-            "                     |%20.10lf %20.10lf %20.10lf|\n",
-            rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2),
-            rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2),
-            rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
-         MessageInterface::ShowMessage(
-            "   Epoch: %.12lf\n", epoch.Get());
-         MessageInterface::ShowMessage(
-            "   AxisSystem::input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
-            inState[0], inState[1], inState[2], inState[3], inState[4], 
-            inState[5]);
-         MessageInterface::ShowMessage(
-            "   AxisSystem::output State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
-            outPos[0], outPos[1], outPos[2], outVel[0], outVel[1], 
-            outVel[2]);
-         firstCallFired = true;
-      }
-   #endif
 
    return true;
 }
 
 //------------------------------------------------------------------------------
-//  bool RotateFromBaseSystem(const A1Mjd &epoch, const Rvector &inState,
-//                          Rvector &outState, bool forceComputation)
+//  bool CompleteRotateFromBase(const Rvector &inState, Rvector &outState)
 //------------------------------------------------------------------------------
 /**
- * This method will rotate the input inState from the BaseSystem frame into
- * this AxisSystem.
+ * This method applies the rotation for RotateFromBaseSystem.
  *
- * @param epoch            the epoch at which to perform the rotation.
  * @param inState          the input state (in BaseSystem AxisSystem) to be rotated.
  * @param outState         the output state, in this AxisSystem, the result
  *                         of rotating the input inState.
- * @param forceComputation flag to force the computation
  *
  * @return success or failure of the operation.
  */
 //------------------------------------------------------------------------------
-bool AxisSystem::RotateFromBaseSystem(const A1Mjd &epoch,
-                                      const Real *inState,
-                                      Real *outState,
-                                      bool forceComputation)
+bool AxisSystem::CompleteRotateFromBase(const Real *inState, Real *outState)
 {
-   #ifdef DEBUG_ROT_MATRIX
-      MessageInterface::ShowMessage("Entering AxisSystem::RotateFromBaseSystem (*) on object of type %s\n",
-            (GetTypeName()).c_str());
-   #endif
-
-   CalculateRotationMatrix(epoch, forceComputation);
-   
    Real pos[3] = {inState[0], inState[1], inState[2]};   
    Real vel[3] = {inState[3], inState[4], inState[5]};   
    #ifdef DEBUG_CALCS
@@ -1409,29 +1727,14 @@ bool AxisSystem::RotateFromBaseSystem(const A1Mjd &epoch,
          "Output vector from AxisSystem::FromBaseSystem = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
          outState[0], outState[1], outState[2], outState[3], outState[4], outState[5]);
    #endif
-   #ifdef DEBUG_FIRST_CALL
-      if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
-      {
-         MessageInterface::ShowMessage(
-            "AxisSystem::RotateFromBaseSystem check for %s\n", typeName.c_str());
-         MessageInterface::ShowMessage(
-            "   Rotation matrix = |%20.10lf %20.10lf %20.10lf|\n"
-            "                     |%20.10lf %20.10lf %20.10lf|\n"
-            "                     |%20.10lf %20.10lf %20.10lf|\n",
-            rotMatrix(0,0), rotMatrix(0,1), rotMatrix(0,2),
-            rotMatrix(1,0), rotMatrix(1,1), rotMatrix(1,2),
-            rotMatrix(2,0), rotMatrix(2,1), rotMatrix(2,2));
-         MessageInterface::ShowMessage(
-            "   Epoch: %.12lf\n", epoch.Get());
-         MessageInterface::ShowMessage(
-            "   input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
-            inState[0], inState[1], inState[2], inState[3], inState[4], 
-            inState[5]);
-         firstCallFired = true;
-      }
-   #endif
 
    return true;   
+}
+
+void AxisSystem::CalculateRotationMatrix(const GmatTime &atEpoch,
+                                         bool forceComputation)
+{
+   CalculateRotationMatrix(A1Mjd(atEpoch.GetMjd()), forceComputation);
 }
 
 //------------------------------------------------------------------------------
@@ -2003,9 +2306,9 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
       MessageInterface::ShowMessage("  const297 = %12.10f\n", const297);
    #endif
 
-   register Real tTDB2   = tTDB  * tTDB;
-   register Real tTDB3   = tTDB2 * tTDB;
-   register Real tTDB4   = tTDB3 * tTDB;
+   Real tTDB2   = tTDB  * tTDB;
+   Real tTDB3   = tTDB2 * tTDB;
+   Real tTDB4   = tTDB3 * tTDB;
    // Compute nutation - NOTE: this algorithm is based on the IERS 1996
    // Theory of Precession and Nutation. This can also be used with the 
    // 1980 Theory - the E and F terms are zero, and will fall out on the 
@@ -2082,7 +2385,7 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    // the values in degrees (from Vallado Eq. 3-54) to arcsec before
    // performing these computations
 
-   register Real meanAnomalyMoon, meanAnomalySun, argLatitudeMoon, meanElongationSun;
+   Real meanAnomalyMoon, meanAnomalySun, argLatitudeMoon, meanElongationSun;
    if (nutationSrc == GmatItrf::NUTATION_1980)
    {
       meanAnomalyMoon   = const134 + (1717915922.6330*tTDB 
@@ -2293,17 +2596,17 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
    if (nutationSrc == GmatItrf::NUTATION_1996)
    {   
    
-      register Real longVenus   = (181.979800853  + 58517.8156748  * tTDB)* RAD_PER_DEG;
-      register Real longEarth   = (100.466448494  + 35999.3728521  * tTDB)* RAD_PER_DEG;
-      register Real longMars    = (355.433274605  + 19140.299314   * tTDB)* RAD_PER_DEG;
-      register Real longJupiter = ( 34.351483900  +  3034.90567464 * tTDB)* RAD_PER_DEG;
-      register Real longSaturn  = ( 50.0774713998 +  1222.11379404 * tTDB)* RAD_PER_DEG;
-      register Real genPrec     = (1.39697137214 * tTDB + 0.0003086 * tTDB2)
+      Real longVenus   = (181.979800853  + 58517.8156748  * tTDB)* RAD_PER_DEG;
+      Real longEarth   = (100.466448494  + 35999.3728521  * tTDB)* RAD_PER_DEG;
+      Real longMars    = (355.433274605  + 19140.299314   * tTDB)* RAD_PER_DEG;
+      Real longJupiter = ( 34.351483900  +  3034.90567464 * tTDB)* RAD_PER_DEG;
+      Real longSaturn  = ( 50.0774713998 +  1222.11379404 * tTDB)* RAD_PER_DEG;
+      Real genPrec     = (1.39697137214 * tTDB + 0.0003086 * tTDB2)
                                  * RAD_PER_DEG;
-      register Real apPlan = 0.0;
-      register Real cosApP = 0.0;
-      register Real sinApP = 0.0;
-      register Integer nutpl = itrf->GetNumberOfPlanetaryTerms();
+      Real apPlan = 0.0;
+      Real cosApP = 0.0;
+      Real sinApP = 0.0;
+      Integer nutpl = itrf->GetNumberOfPlanetaryTerms();
     
       #ifdef DEBUG_FIRST_CALL
          if (!firstCallFired)
@@ -2399,7 +2702,7 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
 
 //------------------------------------------------------------------------------
 //  void ComputeSiderealTimeRotation(const Real jdTT,
-//                                   const Real tUT1,
+//                                   const GmatTime &mjdUT1,
 //                                   Real dPsi,
 //                                   Real longAscNodeLunar,
 //                                   Real cosEpsbar,
@@ -2410,7 +2713,7 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
  * This method will compute the Sidereal time rotation matrix.
  *
  * @param jdTT              TT Julian Date
- * @param tUT1              UT1 time
+ * @param mjdUT1            UT1 time
  * @param dPsi              delta Psi
  * @param longAscNodeLunar  lunar longitude of the ascending node
  * @param cosEpsbar         computed quantity
@@ -2420,7 +2723,7 @@ void AxisSystem::ComputeNutationMatrix(const Real tTDB, A1Mjd atEpoch,
  */
 //------------------------------------------------------------------------------
 void AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
-                                             const Real tUT1,
+                                             const GmatTime &mjdUT1,
                                              Real dPsi,
                                              Real longAscNodeLunar,
                                              Real cosEpsbar,
@@ -2434,10 +2737,14 @@ void AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
          "for object of type %s\n", typeName.c_str());
          MessageInterface::ShowMessage(
             "   AxisSystem::ComputeSiderealTimeRotation(%.12lf, %.12lf, %.12lf,"
-            " %.12lf, %.12lf, %.12lf, %.12lf)\n", jdTT, tUT1, dPsi, 
+            " %.12lf, %.12lf, %.12lf, %.12lf)\n", jdTT, mjdUT1.GetMjd(), dPsi, 
             longAscNodeLunar, cosEpsbar, cosAst, sinAst);
       }
    #endif
+   
+   // Compute elapsed Julian centuries (UT1)
+   Real tDiff = JD_JAN_5_1941 - JD_OF_J2000;
+   Real tUT1 = (mjdUT1 + tDiff).GetMjd() / DAYS_PER_JULIAN_CENTURY;
 
    Real tUT12    = tUT1  * tUT1;
    Real tUT13    = tUT12 * tUT1;
@@ -2460,7 +2767,8 @@ void AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
    Real hour2deg = 15.0;
    Real sec2deg = hour2deg / GmatTimeConstants::SECS_PER_HOUR;
    Real ThetaGmst = ((67310.54841 * sec2deg) + 
-                     ((876600 * hour2deg) + (8640184.812866 * sec2deg))*tUT1 +
+                     (mjdUT1.GetSec() + mjdUT1.GetFracSec())/SECS_PER_DAY*TWO_PI_DEG + 
+                     (8640184.812866 * sec2deg)*tUT1 +
                      (0.093104 * sec2deg)*tUT12 - (6.2e-06 * sec2deg)*tUT13 )
                      * RAD_PER_DEG;
    ThetaGmst = AngleUtil::PutAngleInRadRange(ThetaGmst,0.0,GmatMathConstants::TWO_PI);
@@ -2493,8 +2801,8 @@ void AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
 }
 
 //------------------------------------------------------------------------------
-//  void ComputeSiderealTimeDotRotation(const Real mjdUTC,
-//                                      A1Mjd atEpoch,
+//  void ComputeSiderealTimeDotRotation(const GmatTime &mjdUTC,
+//                                      const GmatTime &atEpoch,
 //                                      Real &cosAst,
 //                                      Real &sinAst,
 //                                      bool forceComputation)
@@ -2509,8 +2817,8 @@ void AxisSystem::ComputeSiderealTimeRotation(const Real jdTT,
  * @param forceComputation  force matrix computation?
  */
 //------------------------------------------------------------------------------
-void AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC, 
-                                                     A1Mjd atEpoch,
+void AxisSystem::ComputeSiderealTimeDotRotation(const GmatTime &mjdUTC, 
+                                                const GmatTime &atEpoch,
                                                      Real cosAst, Real sinAst,
                                                      bool forceComputation)
 {
@@ -2518,13 +2826,13 @@ void AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC,
       if (!firstCallFired)
          MessageInterface::ShowMessage(
             "   AxisSystem::ComputeSiderealTimeDotRotation(%.12lf, %.12lf,"
-            " %.12lf, %.12lf)\n", mjdUTC, atEpoch.Get(),
+            " %.12lf, %.12lf)\n", mjdUTC.GetMjd(), atEpoch.GetMjd(),
             cosAst, sinAst);
    #endif
 
    #ifdef DEBUG_UPDATE
       MessageInterface::ShowMessage("----> Computing NEW STderiv matrix at time %12.10f\n",
-         atEpoch.Get());
+         atEpoch.GetMjd());
    #endif
    // Convert to MJD UTC to use for polar motion  and LOD 
    // interpolations
@@ -2533,8 +2841,8 @@ void AxisSystem::ComputeSiderealTimeDotRotation(const Real mjdUTC,
    Real x, y;
    eop->GetPolarMotionAndLod(mjdUTC,x,y,lod);
    #ifdef DEBUG_AXIS_SYSTEM_EOP
-      MessageInterface::ShowMessage("in STderiv calc, mjdUtc     = %12.10f\n", mjdUTC);
-      MessageInterface::ShowMessage("                 atEpoch    = %12.10f\n", atEpoch.Get());
+      MessageInterface::ShowMessage("in STderiv calc, mjdUtc     = %12.10f\n", mjdUTC.GetMjd());
+      MessageInterface::ShowMessage("                 atEpoch    = %12.10f\n", atEpoch.GetMjd());
       MessageInterface::ShowMessage("                 lod        = %12.10f\n", lod);
       MessageInterface::ShowMessage("                 x          = %12.10f\n", x);
       MessageInterface::ShowMessage("                 y          = %12.10f\n", y);

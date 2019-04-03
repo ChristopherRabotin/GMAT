@@ -38,6 +38,7 @@ ErrorModelFactory::ErrorModelFactory() :
    {
       creatables.push_back("ErrorModel");
    }
+   GmatType::RegisterType(Gmat::ERROR_MODEL, "ErrorModel");
 }
 
 

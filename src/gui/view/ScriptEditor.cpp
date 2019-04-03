@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -559,6 +559,11 @@ void ScriptEditor::OnFindNext(wxCommandEvent &WXUNUSED(event))
    #ifdef DEBUG_EDITOR_FIND
    MessageInterface::ShowMessage("mLastSelectPos=%d\n", mLastSelectPos);
    #endif
+
+   MarkerDefine(1, wxSTC_MARK_BACKGROUND, _T("YELLOW"), _T("YELLOW"));
+   //MarkerDefine(2, wxSTC_MARK_CIRCLE, _T("RED"), _T("RED"));
+   MarkerAdd(3, 1);
+   //MarkerAdd(3, 2);
 }
 
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -191,7 +191,7 @@ GmatBase* Minimize::Clone() const
 
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -204,7 +204,7 @@ GmatBase* Minimize::Clone() const
  * @return true on success.
  */
 //------------------------------------------------------------------------------
-bool Minimize::RenameRefObject(const Gmat::ObjectType type,
+bool Minimize::RenameRefObject(const UnsignedInt type,
                                const std::string &oldName,
                                const std::string &newName)
 {
@@ -262,7 +262,7 @@ const ObjectTypeArray& Minimize::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves the list of ref objects used by the Vary.
@@ -274,7 +274,7 @@ const ObjectTypeArray& Minimize::GetRefObjectTypeArray()
  * 
  */
 //------------------------------------------------------------------------------
-const StringArray& Minimize::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Minimize::GetRefObjectNameArray(const UnsignedInt type)
 {
    refObjectNames.clear();
    
@@ -483,7 +483,7 @@ bool Minimize::SetStringParameter(const Integer id, const std::string &value)
 }
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                                   const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -496,7 +496,7 @@ bool Minimize::SetStringParameter(const Integer id, const std::string &value)
  * @return success of the operation.
  */
 //------------------------------------------------------------------------------
-bool Minimize::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool Minimize::SetRefObject(GmatBase *obj, const UnsignedInt type,
                             const std::string &name)
 {   
    #ifdef DEBUG_MINIMIZE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~

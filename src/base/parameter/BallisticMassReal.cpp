@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -153,10 +153,10 @@ bool BallisticMassReal::Initialize()
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string &oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string &oldName,
 //                      const std::string &newName)
 //------------------------------------------------------------------------------
-bool BallisticMassReal::RenameRefObject(const Gmat::ObjectType type,
+bool BallisticMassReal::RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName)
 {
@@ -165,9 +165,9 @@ bool BallisticMassReal::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
-std::string BallisticMassReal::GetRefObjectName(const Gmat::ObjectType type) const
+std::string BallisticMassReal::GetRefObjectName(const UnsignedInt type) const
 {
    std::string objName = SpacecraftData::GetRefObjectName(type);
    
@@ -183,18 +183,18 @@ std::string BallisticMassReal::GetRefObjectName(const Gmat::ObjectType type) con
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& BallisticMassReal::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& BallisticMassReal::GetRefObjectNameArray(const UnsignedInt type)
 {
    return SpacecraftData::GetRefObjectNameArray(type);
 }
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
-bool BallisticMassReal::SetRefObjectName(const Gmat::ObjectType type,
+bool BallisticMassReal::SetRefObjectName(const UnsignedInt type,
                                          const std::string &name)
 {
    bool ret = SpacecraftData::SetRefObjectName(type, name);
@@ -210,9 +210,9 @@ bool BallisticMassReal::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* BallisticMassReal::GetRefObject(const Gmat::ObjectType type,
+GmatBase* BallisticMassReal::GetRefObject(const UnsignedInt type,
                                           const std::string &name)
 {
    GmatBase *obj = SpacecraftData::GetRefObject(type, name);
@@ -230,10 +230,10 @@ GmatBase* BallisticMassReal::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name)
 //------------------------------------------------------------------------------
-bool BallisticMassReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool BallisticMassReal::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name)
 {
    #if DEBUG_ATTITUDEREAL

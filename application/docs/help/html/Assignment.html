@@ -1,5 +1,5 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Assignment (=)</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="Achieve.html" title="Achieve"><link rel="next" href="BeginFiniteBurn.html" title="BeginFiniteBurn"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Assignment (<code class="literal">=</code>)</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Achieve.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="BeginFiniteBurn.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Assignment"></a><div class="titlepage"></div><a name="N226DB" class="indexterm"></a><a name="N226DE" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Assignment (<code class="literal">=</code>)</span></h2><p>Assignment (<code class="literal">=</code>) &mdash; Set a variable or resource field to a value, possibly using
-    mathematical expressions</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><em class="replaceable"><code>settable_item = expression</code></em></pre></div><div class="refsection"><a name="N226FB"></a><h2>Description</h2><p>The assignment command (in the GUI, the
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Assignment (=)</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="Achieve.html" title="Achieve"><link rel="next" href="BeginFiniteBurn.html" title="BeginFiniteBurn"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Assignment (<code class="literal">=</code>)</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Achieve.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="BeginFiniteBurn.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Assignment"></a><div class="titlepage"></div><a name="N22DB8" class="indexterm"></a><a name="N22DBB" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Assignment (<code class="literal">=</code>)</span></h2><p>Assignment (<code class="literal">=</code>) &mdash; Set a variable or resource field to a value, possibly using
+    mathematical expressions</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><em class="replaceable"><code>settable_item = expression</code></em></pre></div><div class="refsection"><a name="N22DD8"></a><h2>Description</h2><p>The assignment command (in the GUI, the
     <span class="guilabel">Equation</span> command) allows you to set a resource field
     or parameter to a value, possibly using mathematical expressions. GMAT
     uses the assignment operator ('=') to indicate an assignment command. The
@@ -10,7 +10,7 @@
     the right-hand side (<code class="code"><em class="replaceable"><code>RHS</code></em></code>). The
     syntax of the <code class="code"><em class="replaceable"><code>LHS</code></em></code> and
     <code class="code"><em class="replaceable"><code>RHS</code></em></code> expressions vary, but both
-    must evaluate to compatible data types for the command to succeed.</p><div class="refsection"><a name="N2271C"></a><h3>Left-hand side</h3><p>The left-hand side of the assignment command must be a single item
+    must evaluate to compatible data types for the command to succeed.</p><div class="refsection"><a name="N22DF9"></a><h3>Left-hand side</h3><p>The left-hand side of the assignment command must be a single item
       of any of the following types:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>allowed resource (e.g. <span class="guilabel">Spacecraft</span>,
           <span class="guilabel">Variable</span>, <span class="guilabel">Array</span>)</p></li><li class="listitem"><p>resource field for allowed resources (e.g.
           <span class="guilabel">Spacecraft</span>.<span class="guilabel">Epoch</span>,
@@ -18,7 +18,7 @@
           <span class="guilabel">Spacecraft</span>.<span class="guilabel">X</span>,
           <span class="guilabel">ReportFile</span>.<span class="guilabel">Precision</span>)</p></li><li class="listitem"><p><span class="guilabel">Array</span> or <span class="guilabel">Array</span>
           element</p></li></ul></div><p>See the documentation for a particular resource to determine which
-      fields and parameters can be set.</p></div><div class="refsection"><a name="N22756"></a><h3>Right-hand side</h3><p>The right-hand side of the assignment command can consist of any
+      fields and parameters can be set.</p></div><div class="refsection"><a name="N22E33"></a><h3>Right-hand side</h3><p>The right-hand side of the assignment command can consist of any
       of the following: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>literal value</p></li><li class="listitem"><p>resource (e.g. <span class="guilabel">Spacecraft</span>,
             <span class="guilabel">Variable</span>, <span class="guilabel">Array</span>)</p></li><li class="listitem"><p>resource field (e.g.
             <span class="guilabel">Spacecraft</span>.<span class="guilabel">Epoch</span>,
@@ -26,7 +26,7 @@
             <span class="guilabel">Spacecraft</span>.<span class="guilabel">X</span>,
             <span class="guilabel">ChemicalThruster</span>.<span class="guilabel">K1</span>)</p></li><li class="listitem"><p><span class="guilabel">Array</span> or <span class="guilabel">Array</span>
             element</p></li><li class="listitem"><p>mathematical expression (see below)</p></li></ul></div><p>MATLAB function calls are considered distinct from the
-      assignment command. See the reference pages for more information.</p></div></div><div class="refsection"><a name="N22795"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Assignment_GUI.png" align="middle" height="152"></td></tr></table></div></div><p>The assignment command in the script language corresponds to the
+      assignment command. See the reference pages for more information.</p></div></div><div class="refsection"><a name="N22E72"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Assignment_GUI.png" align="middle" height="152"></td></tr></table></div></div><p>The assignment command in the script language corresponds to the
     <span class="guilabel">Equation</span> command in the GUI. The
     <span class="guilabel">Equation</span> properties box allows you to input both
     sides of the expression into free-form text boxes. The default values on
@@ -35,7 +35,7 @@
     same syntax described above for the script language. When you click
     <span class="guilabel">OK</span> or <span class="guilabel">Apply</span>, GMAT validates each
     side of the expression and provides feedback for any warnings or
-    errors.</p></div><div class="refsection"><a name="N227B2"></a><h2>Remarks</h2><div class="refsection"><a name="N227B5"></a><h3>Data type compatibility</h3><p>In general, the data types of the left-hand side and the
+    errors.</p></div><div class="refsection"><a name="N22E8F"></a><h2>Remarks</h2><div class="refsection"><a name="N22E92"></a><h3>Data type compatibility</h3><p>In general, the data types of the left-hand side and the
       right-hand side must match after all expressions are evaluated. This
       means that a <span class="guilabel">Spacecraft</span> resource can only be set to
       another <span class="guilabel">Spacecraft</span> resource, numeric parameters can
@@ -43,7 +43,7 @@
       can only be set to string values. Additionally, the dimension of
       <span class="guilabel">Array</span> instances must match for the command to
       succeed. For numeric quantities, the assignment command does not
-      distinguish between integers and floating-point values.</p></div><div class="refsection"><a name="N227C6"></a><h3>Parameters</h3><p>Parameters can be used on either side of an assignment command,
+      distinguish between integers and floating-point values.</p></div><div class="refsection"><a name="N22EA3"></a><h3>Parameters</h3><p>Parameters can be used on either side of an assignment command,
       but there may be certain restrictions.</p><p>On the right-hand side of the command, any parameter can be used.
       If a parameter accepts a dependency (such as
       <span class="guilabel">Spacecraft</span>.<span class="guilabel"><em class="replaceable"><code>CoordinateSystem</code></em></span>.<span class="guilabel">X</span>)
@@ -82,20 +82,20 @@ aSat2.X = aSat1.EarthMJ2000Eq.X
 
 % DANGEROUS! RHS default is EarthMJ2000Eq, LHS default is current setting on
 % aSat2 (EarthFixed in this case).
-aSat2.X = aSat1.X</code>        </pre></div></div><div class="refsection"><a name="N227EC"></a><h3>Mathematical Expressions</h3><p>The assignment command supports the use of inline mathematical
+aSat2.X = aSat1.X</code>        </pre></div></div><div class="refsection"><a name="N22EC9"></a><h3>Mathematical Expressions</h3><p>The assignment command supports the use of inline mathematical
       expressions on the right-hand side of the command. These expressions
       follow the general syntax rules of MATLAB expressions, and can use a
-      variety of operators and built-in functions.</p><div class="refsection"><a name="N227F1"></a><h4>Parsing</h4><p>Mathematical expressions are recognized by the presence of any
+      variety of operators and built-in functions.</p><div class="refsection"><a name="N22ECE"></a><h4>Parsing</h4><p>Mathematical expressions are recognized by the presence of any
         of the operators or built-in functions described below. Before
         execution, all white space (e.g. spaces and tabs) is removed from the
-        expression.</p></div><div class="refsection"><a name="N227F6"></a><h4>Data Types</h4><p>Mathematical expressions operate on numeric values (integers or
+        expression.</p></div><div class="refsection"><a name="N22ED3"></a><h4>Data Types</h4><p>Mathematical expressions operate on numeric values (integers or
         floating-point numbers). This includes the following: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>literal values</p></li><li class="listitem"><p>numeric resources (<span class="guilabel">Variable</span>,
               <span class="guilabel">Array</span>)</p></li><li class="listitem"><p>gettable resource parameters (e.g.
               <span class="guilabel">Spacecraft</span>.<span class="guilabel">X</span>,
               <span class="guilabel">ChemicalThruster</span>.<span class="guilabel">K1</span>)</p></li><li class="listitem"><p><span class="guilabel">Array</span> elements</p></li><li class="listitem"><p>calculation parameters (e.g.
               <span class="guilabel">Spacecraft</span>.<span class="guilabel">OrbitPeriod</span>)</p></li><li class="listitem"><p>nested mathematical expressions</p></li></ul></div><p> Several of GMAT&rsquo;s operators and functions are
         vectorized, so they operate on full <span class="guilabel">Array</span>
-        resources as well as scalar numeric values.</p></div><div class="refsection"><a name="N2282C"></a><h4>Operators</h4><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><tbody><tr><td><span class="guilabel">Vectorized operators</span></td><td><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term"><code class="literal">+</code></span></p></td><td><p>Addition or unary plus. <code class="literal">X+Y</code>
+        resources as well as scalar numeric values.</p></div><div class="refsection"><a name="N22F09"></a><h4>Operators</h4><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><tbody><tr><td><span class="guilabel">Vectorized operators</span></td><td><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term"><code class="literal">+</code></span></p></td><td><p>Addition or unary plus. <code class="literal">X+Y</code>
                         adds <code class="literal">X</code> and <code class="literal">Y</code>.
                         <code class="literal">X</code> and <code class="literal">Y</code> must
                         have the same dimensions unless either is a
@@ -142,7 +142,7 @@ aSat2.X = aSat1.X</code>        </pre></div></div><div class="refsection"><a nam
               (<code class="literal">^</code>)</p></li><li class="listitem"><p>unary plus (<code class="literal">+</code>), unary minus
               (<code class="literal">-</code>)</p></li><li class="listitem"><p>multiplication (<code class="literal">*</code>), division
               (<code class="literal">/</code>)</p></li><li class="listitem"><p>addition (<code class="literal">+</code>), subtraction
-              (<code class="literal">-</code>)</p></li></ol></div></div><div class="refsection"><a name="N2292D"></a><h4>Built-in Functions</h4><p>GMAT supports the following built-in functions in mathematical
+              (<code class="literal">-</code>)</p></li></ol></div></div><div class="refsection"><a name="N2300A"></a><h4>Built-in Functions</h4><p>GMAT supports the following built-in functions in mathematical
         expressions. Supported functions include common scalar functions,
         meaning they accept a single value only, such as sin and cos, matrix
         functions that operate on an entire matrix or vector, and string
@@ -309,7 +309,7 @@ aSat2.X = aSat1.X</code>        </pre></div></div><div class="refsection"><a nam
                           encountered. If the period is specified without an
                           explicit value for precision, 0 is assumed.</p><p>Integer specifiers are not supported as GMAT
                           does not have an integer data type in the script
-                          language.</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div></div></div><div class="refsection"><a name="N22C9E"></a><h2>Examples</h2><div class="informalexample"><p>Evaluate a basic algebraic equation:</p><pre class="programlisting"><code class="code">Create Variable A B C x y
+                          language.</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div></div></div><div class="refsection"><a name="N2337B"></a><h2>Examples</h2><div class="informalexample"><p>Evaluate a basic algebraic equation:</p><pre class="programlisting"><code class="code">Create Variable A B C x y
 x = 1
 Create ReportFile aReport
 

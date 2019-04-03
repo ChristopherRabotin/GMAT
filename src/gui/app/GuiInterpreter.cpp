@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -41,6 +41,7 @@
 #include "Moderator.hpp"
 
 //#define DEBUG_SYNC_STATUS
+//#define DEBUG_GUI_PLUGIN_CREATE
 
 GuiInterpreter* GuiInterpreter::instance = NULL;
 
@@ -80,6 +81,48 @@ bool GuiInterpreter::Interpret(GmatCommand *inCmd, std::istringstream *ss)
    return retval;
 }
 
+
+//------------------------------------------------------------------------------
+// std::vector<Integer> GetErrorLines()
+//------------------------------------------------------------------------------
+/**
+ * Accessor for the error line numbers found during interpreting
+ *
+ * If the interpreting was performed in this interpreter, the local data member
+ * is returned.  If a different (script) interpreter was used, it is accessed
+ * using the Moderator.
+ *
+ * @return A vector of line numbers
+ */
+//------------------------------------------------------------------------------
+std::vector<Integer> GuiInterpreter::GetErrorLines()
+{
+   Interpreter *interp = theModerator->GetScriptInterpreter();
+   if ((interp != this) && (interp != NULL))
+      return interp->GetErrorLines();
+   return errorLines;
+}
+
+//------------------------------------------------------------------------------
+// std::vector<Integer> GetWarningLines()
+//------------------------------------------------------------------------------
+/**
+ * Accessor for the warning line numbers found during interpreting
+ *
+ * If the interpreting was performed in this interpreter, the local data member
+ * is returned.  If a different (script) interpreter was used, it is accessed
+ * using the Moderator.
+ *
+ * @return A vector of line numbers
+ */
+//------------------------------------------------------------------------------
+std::vector<Integer> GuiInterpreter::GetWarningLines()
+{
+   Interpreter *interp = theModerator->GetScriptInterpreter();
+   if ((interp != this) && (interp != NULL))
+      return interp->GetWarningLines();
+   return warningLines;
+}
 
 //------------------------------------------------------------------------------
 // void Finalize()
@@ -123,7 +166,7 @@ const StringArray& GuiInterpreter::GetListOfAllFactoryItems()
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfFactoryItems(Gmat::ObjectType type, const char *qualifier)
+// const StringArray& GetListOfFactoryItems(UnsignedInt type, const char *qualifier)
 //------------------------------------------------------------------------------
 /**
  * Returns names of all creatable items of object type.
@@ -133,7 +176,7 @@ const StringArray& GuiInterpreter::GetListOfAllFactoryItems()
  * @return array of item names; return empty array if none
  */
 //------------------------------------------------------------------------------
-const StringArray& GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type,
+const StringArray& GuiInterpreter::GetListOfFactoryItems(UnsignedInt type,
                                                          const char *qualifier)
 {
    return theModerator->GetListOfFactoryItems(type, std::string(qualifier));
@@ -141,7 +184,7 @@ const StringArray& GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfFactoryItems(Gmat::ObjectType type,
+// const StringArray& GetListOfFactoryItems(UnsignedInt type,
 //                                          const std::string &qualifier = "")
 //------------------------------------------------------------------------------
 /**
@@ -152,7 +195,7 @@ const StringArray& GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type,
  * @return array of item names; return empty array if none
  */
 //------------------------------------------------------------------------------
-const StringArray& GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type,
+const StringArray& GuiInterpreter::GetListOfFactoryItems(UnsignedInt type,
                                                          const std::string &qualifier)
 {
    return theModerator->GetListOfFactoryItems(type, qualifier);
@@ -177,7 +220,7 @@ const StringArray& GuiInterpreter::GetListOfAllFactoryItemsExcept(const ObjectTy
 
 
 //------------------------------------------------------------------------------
-// std::string GetStringOfAllFactoryItem(Gmat::ObjectType type)
+// std::string GetStringOfAllFactoryItem(UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Return a std::string of all items that can be created of input object types
@@ -187,7 +230,7 @@ const StringArray& GuiInterpreter::GetListOfAllFactoryItemsExcept(const ObjectTy
  * @return list of all creatable items in string.
  */
 //------------------------------------------------------------------------------
-std::string GuiInterpreter::GetStringOfAllFactoryItems(Gmat::ObjectType type)
+std::string GuiInterpreter::GetStringOfAllFactoryItems(UnsignedInt type)
 {
    StringArray creatables = theModerator->GetListOfFactoryItems(type);
    std::string str;
@@ -260,7 +303,7 @@ GmatBase* GuiInterpreter::AddClone(const std::string &name, std::string &cloneNa
 
 
 //------------------------------------------------------------------------------
-// bool RenameObject(Gmat::ObjectType type, const char *oldName
+// bool RenameObject(UnsignedInt type, const char *oldName
 //                   const char *newName)
 //------------------------------------------------------------------------------
 /**
@@ -273,7 +316,7 @@ GmatBase* GuiInterpreter::AddClone(const std::string &name, std::string &cloneNa
  * @return true if the item has been removed; false otherwise
  */
 //------------------------------------------------------------------------------
-bool GuiInterpreter::RenameObject(Gmat::ObjectType type, const char *oldName,
+bool GuiInterpreter::RenameObject(UnsignedInt type, const char *oldName,
                                   const char *newName)
 {
    return theModerator->RenameObject(type, std::string(oldName), std::string(newName));
@@ -281,7 +324,7 @@ bool GuiInterpreter::RenameObject(Gmat::ObjectType type, const char *oldName,
 
 
 //------------------------------------------------------------------------------
-// bool RenameObject(Gmat::ObjectType type, const std::string &oldName
+// bool RenameObject(UnsignedInt type, const std::string &oldName
 //                   const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -294,7 +337,7 @@ bool GuiInterpreter::RenameObject(Gmat::ObjectType type, const char *oldName,
  * @return true if the item has been removed; false otherwise
  */
 //------------------------------------------------------------------------------
-bool GuiInterpreter::RenameObject(Gmat::ObjectType type,
+bool GuiInterpreter::RenameObject(UnsignedInt type,
                                   const std::string &oldName,
                                   const std::string &newName)
 {
@@ -303,7 +346,7 @@ bool GuiInterpreter::RenameObject(Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool RemoveObject(Gmat::ObjectType type, const std::string &name)
+// bool RemoveObject(UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Removes item from the configured list.
@@ -314,14 +357,14 @@ bool GuiInterpreter::RenameObject(Gmat::ObjectType type,
  * @return true if the item has been removed; false otherwise
  */
 //------------------------------------------------------------------------------
-bool GuiInterpreter::RemoveObject(Gmat::ObjectType type,
+bool GuiInterpreter::RemoveObject(UnsignedInt type,
                                   const std::string &name)
 {
    return theModerator->RemoveObject(type, name, false);
 }
 
 //------------------------------------------------------------------------------
-// bool RemoveItemIfNotUsed(Gmat::ObjectType type, const char *name)
+// bool RemoveItemIfNotUsed(UnsignedInt type, const char *name)
 //------------------------------------------------------------------------------
 /**
  * Removes item from the configured list if it is not used in the mission
@@ -333,13 +376,13 @@ bool GuiInterpreter::RemoveObject(Gmat::ObjectType type,
  * @return true if the item has been removed; false otherwise
  */
 //------------------------------------------------------------------------------
-bool GuiInterpreter::RemoveObjectIfNotUsed(Gmat::ObjectType type, const char *name)
+bool GuiInterpreter::RemoveObjectIfNotUsed(UnsignedInt type, const char *name)
 {
    return theModerator->RemoveObject(type, std::string(name), true);
 }
 
 //------------------------------------------------------------------------------
-// bool RemoveItemIfNotUsed(Gmat::ObjectType type, const std::string &name)
+// bool RemoveItemIfNotUsed(UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Removes item from the configured list if it is not used in the mission
@@ -351,7 +394,7 @@ bool GuiInterpreter::RemoveObjectIfNotUsed(Gmat::ObjectType type, const char *na
  * @return true if the item has been removed; false otherwise
  */
 //------------------------------------------------------------------------------
-bool GuiInterpreter::RemoveObjectIfNotUsed(Gmat::ObjectType type,
+bool GuiInterpreter::RemoveObjectIfNotUsed(UnsignedInt type,
                                           const std::string &name)
 {
    return theModerator->RemoveObject(type, name, true);
@@ -446,13 +489,15 @@ GmatBase* GuiInterpreter::CreateObject(const char *type,
 //------------------------------------------------------------------------------
 GmatBase* GuiInterpreter::CreateObject(const std::string &type,
                                        const std::string &name,
-                                       Integer manage, bool createDefault)
+                                       Integer manage, bool createDefault,
+                                       bool includeLineOnError, bool showWarning)
 {
    #if !defined __CONSOLE_APP__
    
    GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
    continueOnError = false;
-   GmatBase *obj = Interpreter::CreateObject(type, name, manage, createDefault, false, false);
+   GmatBase *obj = Interpreter::CreateObject(type, name, manage, createDefault,
+         includeLineOnError, showWarning);
    
    if (obj == NULL)
    {
@@ -1025,6 +1070,7 @@ void GuiInterpreter::ClearAllSandboxes()
 //------------------------------------------------------------------------------
 Integer GuiInterpreter::RunMission(Integer sandboxNum)
 {
+   theModerator->SetWidgetCreator(&GuiInterpreter::CreateWidget);
    return theModerator->RunMission(sandboxNum);
 }
 
@@ -1314,4 +1360,49 @@ GuiInterpreter& GuiInterpreter::operator=(const GuiInterpreter &guiInterpreter)
 std::vector<Gmat::PluginResource*> *GuiInterpreter::GetUserResources()
 {
    return theModerator->GetPluginResourceList();
+}
+
+//------------------------------------------------------------------------------
+// std::vector <GuiFactory*> GuiInterpreter::RetrieveGuiFactories()
+//------------------------------------------------------------------------------
+/**
+ * Accesses the GUI factories so that plugin GUI elements can be built
+ *
+ * @return The GuiFactory pointer vector
+ */
+//------------------------------------------------------------------------------
+std::vector <GuiFactory*> GuiInterpreter::RetrieveGuiFactories()
+{
+   return theModerator->RetrieveGuiFactories();
+}
+
+//------------------------------------------------------------------------------
+// GmatWidget* CreateWidget(const std::string ofType, GmatBase *forObject,
+//       void *withParent)
+//------------------------------------------------------------------------------
+/**
+ * Creates a widget and returns it to the calling function
+ *
+ * Note that this static method is the "pass through base code" callback
+ * function, so some type casting will be required on the ends of the calls.
+ *
+ * @param ofType The string describing the desired widget
+ * @param forObject The object that uses the widget
+ * @paran withParent The parent pointer for the widget
+ *
+ * @return A GmatWidget package that has the widget in it
+ */
+//------------------------------------------------------------------------------
+GmatWidget* GuiInterpreter::CreateWidget(const std::string &ofType,
+      GmatBase *forObject, void *withParent)
+{
+   GmatWidget *theWidget = NULL;
+
+   GmatMainFrame *mainframe = GmatAppData::Instance()->GetMainFrame();
+
+   std::string oName = forObject->GetName();
+   mainframe->CreatePluginChild(oName, oName, ofType,
+         GmatTree::USER_DEFINED_OBJECT, forObject, &theWidget);
+
+   return theWidget;
 }

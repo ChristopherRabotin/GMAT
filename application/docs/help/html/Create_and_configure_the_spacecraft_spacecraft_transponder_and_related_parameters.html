@@ -2,7 +2,7 @@
     related parameters</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Tut_Simulate_DSN_Range_and_Doppler_Data.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;13.&nbsp;Simulate DSN Range and Doppler Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Create_and_configure_the_Ground_Station_and_related_parameters.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="Create_and_configure_the_spacecraft_spacecraft_transponder_and_related_parameters"></a>Create and configure the spacecraft, spacecraft transponder, and
     related parameters</h2></div></div></div><p>For this tutorial, you&rsquo;ll need GMAT open, with a new empty script
     open. To create a new script, click <span class="guibutton">New Script</span>,
-    (<span class="inlinemediaobject"><img src="../files/images/icons/NewScript.png" align="middle" height="11"></span>)</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N13FEF"></a>Create a satellite and set its epoch and Cartesian
+    (<span class="inlinemediaobject"><img src="../files/images/icons/NewScript.png" align="middle" height="11"></span>)</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N1400B"></a>Create a satellite and set its epoch and Cartesian
       coordinates</h3></div></div></div><p>Since this is a Sun-orbiting spacecraft, we choose to represent
       the orbit in a Sun-centered coordinate frame which we define using the
       scripting below.</p><pre class="programlisting">%  Create the Sun-centered J2000 frame.
@@ -24,7 +24,7 @@ Sat.VZ               = -10.662
 Sat.Id               = 11111;</pre><p>Note that, in addition to setting <span class="guilabel">Sat&rsquo;s</span>
       coordinates, we also assigned it an ID number. This is the number that
       will be written to the GMAT Measurement Data (GMD) file that we will
-      discuss later.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N14002"></a>Create a Transponder object and attach it to our
+      discuss later.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N1401E"></a>Create a Transponder object and attach it to our
       spacecraft</h3></div></div></div><p>To simulate navigation measurements for a given spacecraft, GMAT
       requires that a <span class="guilabel">Transponder</span> object, which receives
       the ground station uplink signal and re-transmits it, typically, to a

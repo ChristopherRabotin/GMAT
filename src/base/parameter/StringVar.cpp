@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -60,7 +60,7 @@ StringVar::PARAMETER_TYPE[StringVarParamCount - ParameterParamCount] =
 //------------------------------------------------------------------------------
 // StringVar(const std::string &name, const std::string &typeStr, 
 //         GmatParam::ParameterKey key, GmatBase *obj, const std::string &desc,
-//         const std::string &unit, GmatParam::DepObject depObj, Gmat::ObjectType,
+//         const std::string &unit, GmatParam::DepObject depObj, UnsignedInt,
 //         bool isTimeParam, bool isSettable)
 //------------------------------------------------------------------------------
 /**
@@ -82,8 +82,8 @@ StringVar::PARAMETER_TYPE[StringVarParamCount - ParameterParamCount] =
 StringVar::StringVar(const std::string &name, const std::string &typeStr, 
                      GmatParam::ParameterKey key, GmatBase *obj, const std::string &desc,
                      const std::string &unit, GmatParam::DepObject depObj,
-                     Gmat::ObjectType ownerType, bool isTimeParam, bool isSettable,
-                     Gmat::ObjectType ownedObjType)
+                     UnsignedInt ownerType, bool isTimeParam, bool isSettable,
+                     UnsignedInt ownedObjType)
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam,
                isSettable, false, true, ownedObjType)
 {  
@@ -250,6 +250,7 @@ void StringVar::SetString(const std::string &val)
 //------------------------------------------------------------------------------
 const std::string& StringVar::EvaluateString()
 {
+   Evaluate(); // WCS 2018.01.09 add to get latest & correct value to report(s)
    return mStringValue;
 }
 

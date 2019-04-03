@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -310,7 +310,7 @@ void BplaneData::InitializeRefObjects()
 
 
 //------------------------------------------------------------------------------
-// virtual bool IsValidObjectType(Gmat::ObjectType type)
+// virtual bool IsValidObjectType(UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Checks reference object type.
@@ -318,7 +318,7 @@ void BplaneData::InitializeRefObjects()
  * @return return true if object is valid object, false otherwise
  */
 //------------------------------------------------------------------------------
-bool BplaneData::IsValidObjectType(Gmat::ObjectType type)
+bool BplaneData::IsValidObjectType(UnsignedInt type)
 {
    for (int i=0; i<BplaneDataObjectCount; i++)
    {

@@ -166,7 +166,7 @@ fm.CentralBody  = Earth;
 fm.PointMasses  = {Earth};
 fm.Drag         = None;
 fm.SRP          = Off;
-fm.ErrorControl = RSSStep;
+fm.ErrorControl = None;
 
 Create Propagator ODProp;
 

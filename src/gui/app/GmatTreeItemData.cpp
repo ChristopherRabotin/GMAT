@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -48,12 +48,14 @@
  */
 //------------------------------------------------------------------------------
 GmatTreeItemData::GmatTreeItemData(const wxString &name, GmatTree::ItemType type,
-                                   const wxString &title, bool isClonable)
+                                   const wxString &title, bool isClonable,
+                                   bool pluginGui)
 {
    mItemName = name;
    mItemType = type;
    mItemTitle = title;
    mIsClonable = isClonable;
+   mHasPluginGui = pluginGui;
 }
 
 
@@ -130,6 +132,21 @@ void GmatTreeItemData::SetClonable(bool clonable)
 
 
 //------------------------------------------------------------------------------
+// void SetPluginGui(bool pluginGui)
+//------------------------------------------------------------------------------
+/**
+ * Sets the flag indicating is there is an associated PluginGui panel
+ *
+ * @param pluginGui The new setting
+ */
+//------------------------------------------------------------------------------
+void GmatTreeItemData::SetPluginGui(bool pluginGui)
+{
+   mHasPluginGui = pluginGui;
+}
+
+
+//------------------------------------------------------------------------------
 // firtual Command* GetCommand()
 //------------------------------------------------------------------------------
 /**
@@ -148,4 +165,18 @@ GmatCommand* GmatTreeItemData::GetCommand()
 wxTreeItemId GmatTreeItemData::GetNodeId()
 {
    return wxTreeItemId();
+}
+
+//------------------------------------------------------------------------------
+// bool HasPluginGui()
+//------------------------------------------------------------------------------
+/**
+ * Method used to check for plugin GUI code
+ *
+ * @return true if there is plugin GUI code, false if not
+ */
+//------------------------------------------------------------------------------
+bool GmatTreeItemData::HasPluginGui()
+{
+   return mHasPluginGui;
 }

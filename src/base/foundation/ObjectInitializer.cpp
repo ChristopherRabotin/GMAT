@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -78,14 +78,15 @@
 ObjectInitializer::ObjectInitializer(SolarSystem *solSys, ObjectMap *objMap,
                                      ObjectMap *globalObjMap, CoordinateSystem *intCS, 
                                      bool useGOS, bool fromFunction) :
-   ss         (solSys),
-   LOS        (objMap),
-   GOS        (globalObjMap),
-   mod        (NULL),
-   internalCS (intCS),
-   includeGOS (useGOS),
-   registerSubscribers (false),
-   inFunction (fromFunction)
+   ss                   (solSys),
+   LOS                  (objMap),
+   GOS                  (globalObjMap),
+   mod                  (NULL),
+   internalCS           (intCS),
+   includeGOS           (useGOS),
+   registerSubscribers  (false),
+   inFunction           (fromFunction),
+   pCreateWidget        (NULL)
 {
    mod = Moderator::Instance();
    publisher = Publisher::Instance();
@@ -95,14 +96,15 @@ ObjectInitializer::ObjectInitializer(SolarSystem *solSys, ObjectMap *objMap,
 // ObjectInitializer(const ObjectInitializer &objInit)
 //------------------------------------------------------------------------------
 ObjectInitializer::ObjectInitializer(const ObjectInitializer &objInit) :
-   ss          (objInit.ss),
-   LOS         (objInit.LOS),
-   GOS         (objInit.GOS),
-   mod         (NULL),
-   internalCS  (objInit.internalCS),
-   includeGOS  (objInit.includeGOS),
-   registerSubscribers (objInit.registerSubscribers),
-   inFunction  (objInit.inFunction)
+   ss                   (objInit.ss),
+   LOS                  (objInit.LOS),
+   GOS                  (objInit.GOS),
+   mod                  (NULL),
+   internalCS           (objInit.internalCS),
+   includeGOS           (objInit.includeGOS),
+   registerSubscribers  (objInit.registerSubscribers),
+   inFunction           (objInit.inFunction),
+   pCreateWidget        (NULL)
 {
    mod = Moderator::Instance();
    publisher = Publisher::Instance();
@@ -115,15 +117,16 @@ ObjectInitializer& ObjectInitializer::operator= (const ObjectInitializer &objIni
 {
    if (&objInit != this)
    {
-      ss          = objInit.ss;
-      LOS         = objInit.LOS;
-      GOS         = objInit.GOS;
-      mod         = objInit.mod;
-      internalCS  = objInit.internalCS;
-      publisher   = objInit.publisher;
-      includeGOS  = objInit.includeGOS;
+      ss                  = objInit.ss;
+      LOS                 = objInit.LOS;
+      GOS                 = objInit.GOS;
+      mod                 = objInit.mod;
+      internalCS          = objInit.internalCS;
+      publisher           = objInit.publisher;
+      includeGOS          = objInit.includeGOS;
       registerSubscribers = objInit.registerSubscribers;
-      inFunction  = objInit.inFunction;
+      inFunction          = objInit.inFunction;
+      pCreateWidget       = NULL;
    }
    
    return *this;
@@ -167,7 +170,7 @@ void ObjectInitializer::SetInternalCoordinateSystem(CoordinateSystem* intCS)
 }
 
 //------------------------------------------------------------------------------
-// bool InitializeObjects(bool registerSubs, Gmat::ObjectType objType,
+// bool InitializeObjects(bool registerSubs, UnsignedInt objType,
 //                        StringArray *unusedGOL)
 //------------------------------------------------------------------------------
 /*
@@ -181,7 +184,7 @@ void ObjectInitializer::SetInternalCoordinateSystem(CoordinateSystem* intCS)
  */
 //------------------------------------------------------------------------------
 bool ObjectInitializer::InitializeObjects(bool registerSubs,
-                                          Gmat::ObjectType objType,
+                                          UnsignedInt objType,
                                           StringArray *unusedGOL)
 {
    #ifdef DEBUG_TRACE
@@ -574,7 +577,7 @@ void ObjectInitializer::SetObjectJ2000Body(ObjectMap *objMap)
 
 
 //------------------------------------------------------------------------------
-// void InitializeObjectsInTheMap(ObjectMap *objMap, Gmat::ObjectType objType, ...)
+// void InitializeObjectsInTheMap(ObjectMap *objMap, UnsignedInt objType, ...)
 //------------------------------------------------------------------------------
 /*
  * Initializes specific types of objects in the map. If objType is UNDEFINED_OBJECT,
@@ -585,7 +588,7 @@ void ObjectInitializer::SetObjectJ2000Body(ObjectMap *objMap)
  */
 //------------------------------------------------------------------------------
 void ObjectInitializer::InitializeObjectsInTheMap(ObjectMap *objMap,
-                                                  Gmat::ObjectType objType,
+                                                  UnsignedInt objType,
                                                   bool usingGOS,
                                                   StringArray *unusedGOL)
 {
@@ -933,7 +936,8 @@ void ObjectInitializer::InitializeAllOtherObjects(ObjectMap *objMap)
                 obj->IsOfType("Estimator")             ||
                 obj->IsOfType("Simulator")             ||
                 obj->IsOfType(Gmat::EVENT_LOCATOR)     ||
-                obj->IsOfType(Gmat::INTERFACE))
+                obj->IsOfType(Gmat::INTERFACE)         ||
+                obj->GetType() >= Gmat::USER_DEFINED_OBJECT)
             {
                BuildReferencesAndInitialize(obj);
             }
@@ -1118,6 +1122,17 @@ void ObjectInitializer::BuildReferencesAndInitialize(GmatBase *obj)
 	
    BuildReferences(obj);
    
+   // If this object has a run time GUI component, set it up now
+   if (obj->HasGuiPlugin() && pCreateWidget)
+   {
+      StringArray panels = obj->GetGuiPanelNames("Execution");
+      if (panels.size() > 0)
+      {
+         GmatWidget *widget = pCreateWidget("Execution", obj, NULL);
+         obj->SetWidget(widget);
+      }
+   }
+
    #ifdef DEBUG_INITIALIZE_OBJ
    MessageInterface::ShowMessage("--- Calling '%s'->Initialize()\n", obj->GetName().c_str());
 	#endif
@@ -1476,6 +1491,20 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
    #endif
 }
 
+
+//------------------------------------------------------------------------------
+// void SetWidgetCreator(GuiWidgetCreatorCallback creatorFun)
+//------------------------------------------------------------------------------
+/**
+ * Sets the callback function used to create plugin GUI widgets
+ *
+ * @param creatorFun The function pointer that is called to create the widgets
+ */
+//------------------------------------------------------------------------------
+void ObjectInitializer::SetWidgetCreator(GuiWidgetCreatorCallback creatorFun)
+{
+   pCreateWidget = creatorFun;
+}
 
 
 //------------------------------------------------------------------------------

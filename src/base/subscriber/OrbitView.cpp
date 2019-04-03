@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -165,7 +165,7 @@ OrbitView::OrbitView(const std::string &name)
    
    mViewUpCoordSysName = "EarthMJ2000Eq";
    mViewUpAxisName = "Z";
-   
+
    // viewpoint
    mViewPointRefName = "Earth";
    mViewPointRefType = "Object";
@@ -507,6 +507,11 @@ bool OrbitView::Initialize()
                 mObjectArray[i]->GetName().c_str());
          #endif
          
+         //--------------------------------------------------------
+         // set max data points to plot
+         //--------------------------------------------------------
+         PlotInterface::SetMaxGlDataPoints(instanceName, mMaxData);
+
          // Set all object array and pointers
          PlotInterface::SetGlObject(instanceName, mObjectNameArray, mObjectArray);
          
@@ -593,7 +598,7 @@ bool OrbitView::Initialize()
             ("   Calling PlotInterface::SetGlShowObjectFlag()\n");
          #endif
          PlotInterface::SetGlShowObjectFlag(instanceName, mDrawObjectArray);
-         
+
          //--------------------------------------------------------
          // initialize GL
          //--------------------------------------------------------
@@ -687,10 +692,10 @@ bool OrbitView::TakeAction(const std::string &action,
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool OrbitView::RenameRefObject(const Gmat::ObjectType type,
+bool OrbitView::RenameRefObject(const UnsignedInt type,
                                 const std::string &oldName,
                                 const std::string &newName)
 {
@@ -1523,9 +1528,9 @@ bool OrbitView::SetBooleanParameter(const std::string &label, const bool value)
 
 
 //------------------------------------------------------------------------------
-// virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
+// virtual std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
-std::string OrbitView::GetRefObjectName(const Gmat::ObjectType type) const
+std::string OrbitView::GetRefObjectName(const UnsignedInt type) const
 {
    #if DBGLVL_OBJ
    std::string msg = "type: " + GmatBase::GetObjectTypeString(type) +
@@ -1572,9 +1577,9 @@ const ObjectTypeArray& OrbitView::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& OrbitView::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& OrbitView::GetRefObjectNameArray(const UnsignedInt type)
 {
    #if DBGLVL_OBJ
    MessageInterface::ShowMessage
@@ -1676,10 +1681,10 @@ const StringArray& OrbitView::GetRefObjectNameArray(const Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+// virtual GmatBase* GetRefObject(const UnsignedInt type,
 //                                const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* OrbitView::GetRefObject(const Gmat::ObjectType type,
+GmatBase* OrbitView::GetRefObject(const UnsignedInt type,
                                   const std::string &name)
 {
    if (type == Gmat::COORDINATE_SYSTEM)
@@ -1702,7 +1707,7 @@ GmatBase* OrbitView::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -1713,7 +1718,7 @@ GmatBase* OrbitView::GetRefObject(const Gmat::ObjectType type,
  * @param <name> Reference object name
  */
 //------------------------------------------------------------------------------
-bool OrbitView::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool OrbitView::SetRefObject(GmatBase *obj, const UnsignedInt type,
                              const std::string &name)
 {
    #if DBGLVL_OBJ

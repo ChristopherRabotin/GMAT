@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -65,11 +65,6 @@
 //                             Original delivery.  Happy St. Patrick's Day!
 // **************************************************************************
 
-//#include <iostream>   // JPD removed these
-//#include <fstream>
-////#include <strstream>
-//#include <sstream>
-//#include <iomanip>
 #include "GravityField.hpp"
 #include "ODEModelException.hpp"
 #include "CelestialBody.hpp"
@@ -81,12 +76,9 @@
 #include "StringUtil.hpp"
 #include "GmatConstants.hpp"
 #include "GmatDefaults.hpp"
-#include "GravityFileUtil.hpp"
+#include "UtilityException.hpp"
 #include "FileManager.hpp"
-#include "HarmonicGravityCof.hpp"
-#include "HarmonicGravityGrv.hpp"
 #include <sstream>                 // for <<
-
 
 //#define DEBUG_GRAVITY_FIELD
 //#define DEBUG_GRAVITY_FIELD_DETAILS
@@ -119,7 +111,9 @@ GravityField::PARAMETER_TEXT[GravityFieldParamCount - HarmonicFieldParamCount] =
 {
    "Mu",
    "A",
-   "EarthTideModel",
+   "TideFile",
+   "TideFileFullPath",
+   "TideModel",
 };
 
 const Gmat::ParameterType
@@ -127,9 +121,26 @@ GravityField::PARAMETER_TYPE[GravityFieldParamCount - HarmonicFieldParamCount] =
 {
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
+   Gmat::FILENAME_TYPE,  // "TideFile",
+   Gmat::FILENAME_TYPE,  // "TideFileFullPath",
    Gmat::STRING_TYPE,
 };
-
+//------------------------------------------------------------------------------
+const std::string GravityField::GRAVITY_MODEL_NAMES[NumGravityModels] =
+   {
+      // Earth Model names
+      "EGM-96",
+      "JGM-2",
+      "JGM-3",
+      // Luna Model Names
+      "LP-165",
+      // Mars Model Names
+      "Mars-50C",
+      // Venus Model Names
+      "MGNP-180U",
+      "Other",
+      "None"
+   };
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
@@ -151,13 +162,16 @@ GravityField::GravityField(const std::string &name, const std::string &forBodyNa
    HarmonicField          (name, "GravityField", maxDeg, maxOrd),
    mu                     (GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH]),
    a                      (GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH]),
-   earthTideModel         ("None"),
+   tideFilename           (""),
+   tideFilenameFullPath   (""),
+   TideModel              ("None"),
    defaultMu              (GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH]),
    defaultA               (GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH]),
    gfInitialized          (false),
    orderTruncateReported  (false),
    degreeTruncateReported (false),
-   gravityModel           (NULL)
+   gravityModel           (NULL),
+   j2k                    (NULL)
 {
    objectTypeNames.push_back("GravityField");
    bodyName = forBodyName;
@@ -181,6 +195,8 @@ GravityField::GravityField(const std::string &name, const std::string &forBodyNa
 GravityField::~GravityField()
 {
    gravityModel = NULL;
+   
+   delete j2k;
 }
 
 
@@ -199,16 +215,20 @@ GravityField::GravityField(const GravityField &gf) :
     HarmonicField          (gf),
     mu                     (gf.mu),
     a                      (gf.a),
-    earthTideModel         (gf.earthTideModel),
+    tideFilename           (gf.tideFilename),
+    tideFilenameFullPath   (gf.tideFilenameFullPath),
+    TideModel              (gf.TideModel),
     defaultMu              (gf.defaultMu),
     defaultA               (gf.defaultA),
     gfInitialized          (false),
     orderTruncateReported  (gf.orderTruncateReported),
     degreeTruncateReported (gf.degreeTruncateReported),
     gravityModel           (NULL),
+    j2k                    (gf.j2k),
     frv                    (gf.frv),
     trv                    (gf.trv),
-    now                    (gf.now)
+    now                    (gf.now),
+    nowGT                  (gf.nowGT)
 {
    objectTypeNames.push_back("GravityField");
    bodyName = gf.bodyName;
@@ -240,7 +260,9 @@ GravityField& GravityField::operator=(const GravityField &gf)
    HarmonicField::operator=(gf);
    mu                     = gf.mu;
    a                      = gf.a;
-   earthTideModel         = gf.earthTideModel;
+   tideFilename           = gf.tideFilename;
+   tideFilenameFullPath   = gf.tideFilenameFullPath;
+   TideModel              = gf.TideModel;
    defaultMu              = gf.defaultMu;
    defaultA               = gf.defaultA;
    bodyName               = gf.bodyName;
@@ -250,10 +272,11 @@ GravityField& GravityField::operator=(const GravityField &gf)
 //   if ((gravityModel) && (gravityModel->GetFilename() == "")) delete gravityModel;  // delete only Body ones
    gravityModel           = gf.gravityModel;
 //   gravityModel           = NULL;
+   j2k                    = gf.j2k;
    frv                    = gf.frv;
    trv                    = gf.trv;
    now                    = gf.now;
-
+   nowGT                  = gf.nowGT;
    return *this;
 }
 
@@ -290,6 +313,14 @@ bool GravityField::Initialize()
       if (!body) throw ODEModelException("Body \"" + bodyName + "\" undefined for Gravity Field.");
    }
    
+   if (!j2k)
+   {
+      CelestialBody* earth = solarSystem->GetBody("Earth");
+      if (!earth) throw ODEModelException("Earth undefined for Gravity Field.");
+      j2k = CoordinateSystem::CreateLocalCoordinateSystem("EarthMJ2000Eq", "MJ2000Eq",
+                              earth, NULL, NULL, earth, solarSystem);
+   }
+   
 //   // The required distance from the origin to avoid numerical instability, this
 //   // value is compared to the L1 distance norm in GetDerivatives to make sure
 //   // that the offset is acceptable.  This piece is currently disabled
@@ -319,7 +350,7 @@ bool GravityField::Initialize()
 
          // Changed to open filenameFullPath (LOJ: 2014.06.26)
          //gravityModel = GetGravityFile(filename,a,mu);
-         gravityModel = GetGravityFile(filenameFullPath,a,mu);
+         gravityModel = GetHarmonicGravity(filenameFullPath,tideFilenameFullPath,a,mu,body->GetName(), true);
          if (!gravityModel)
          {
             std::string errmsg = "Gravity file ";
@@ -335,7 +366,7 @@ bool GravityField::Initialize()
             fileDegree =   gravityModel->GetNN();
             fileOrder  =   gravityModel->GetMM();
             mu         = - gravityModel->GetFactor();
-            a          =   gravityModel->GetRadius();
+            a          =   gravityModel->GetFieldRadius();
          }
       }
       // truncate the degree and/or order, if necessary
@@ -387,10 +418,6 @@ bool GravityField::Initialize()
    gfInitialized = true;
    return true;
 }
-
-
-
-
 //------------------------------------------------------------------------------
 //  bool GetDerivatives(Real * state, Real dt, int dvorder)
 //------------------------------------------------------------------------------
@@ -450,7 +477,12 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
    Real satState[6];
    Integer nOffset;
 
-   now = epoch + dt/GmatTimeConstants::SECS_PER_DAY;
+   if (hasPrecisionTime)
+   {
+      nowGT = epochGT; nowGT.AddSeconds(dt);
+   }
+   else
+      now = epoch + dt/GmatTimeConstants::SECS_PER_DAY;
 
    #ifdef DEBUG_GRAV_COORD_SYSTEM
        MessageInterface::ShowMessage(
@@ -690,9 +722,16 @@ Rvector6 GravityField::GetDerivativesForSpacecraft(Spacecraft *sc)
    Real satState[6];
 
    Real theEpoch = epoch;
+   GmatTime theEpochGT = epochGT;
+
    Real *j2kState = sc->GetState().GetState();
    epoch = sc->GetEpoch();
-   BuildModelState(epoch, satState, j2kState);
+   epochGT = sc->GetEpochGT();
+
+   if (hasPrecisionTime)
+      BuildModelStateGT(epochGT, satState, j2kState);
+   else
+      BuildModelState(epoch, satState, j2kState);
 
    Real originacc[3] = {0.0, 0.0, 0.0};  // JPD code
    Rmatrix33 origingrad (0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
@@ -739,6 +778,8 @@ Rvector6 GravityField::GetDerivativesForSpacecraft(Spacecraft *sc)
    #endif
 
    epoch = theEpoch;
+   epochGT = theEpochGT;
+
    return dv;
 }
 
@@ -800,6 +841,22 @@ std::string GravityField::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer     GravityField::GetParameterID(const std::string &str) const
 {
+   // Write deprecated message once per GMAT session
+   static bool tideModelFirstWarning = true;
+
+   if (str == "EarthTideModel")
+   {
+      if (tideModelFirstWarning)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"EarthTideModel\" field of GravityField is "
+             "deprecated and will be removed from a future build; "
+             "please use \"TideModel\" instead.\n");
+         tideModelFirstWarning = false;
+      }
+      return TIDE_MODEL;
+   }
+
    for (Integer i = HarmonicFieldParamCount; i < GravityFieldParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - HarmonicFieldParamCount])
@@ -844,10 +901,63 @@ bool GravityField::IsParameterReadOnly(const Integer id) const
    // All read only for now except degree and order
    if (id < HarmonicFieldParamCount)
       return HarmonicField::IsParameterReadOnly(id);
+   
+   if (id == TIDE_FILENAME)
+      return false;
 
-   if ((id == EARTH_TIDE_MODEL) && (bodyName == GmatSolarSystemDefaults::EARTH_NAME)) return false;
+   if ((id == TIDE_MODEL) && (bodyName == GmatSolarSystemDefaults::EARTH_NAME)) return false;
+   if ((id == TIDE_MODEL) && (bodyName == GmatSolarSystemDefaults::MOON_NAME)) return false;
+   if ((id == TIDE_MODEL) && (bodyName == GmatSolarSystemDefaults::MERCURY_NAME)) return false;
+   if ((id == TIDE_MODEL) && (bodyName == GmatSolarSystemDefaults::VENUS_NAME)) return false;
+   if ((id == TIDE_MODEL) && (bodyName == GmatSolarSystemDefaults::MARS_NAME)) return false;
 
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsParameterValid(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool GravityField::IsParameterValid(const Integer id,
+                                     const std::string &value)
+{
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("GravityField::IsParameterValid() entered, id=%d, value='%s'\n", id, value.c_str());
+   #endif
+   
+   bool retval = true;
+   if (id == TIDE_FILENAME)
+   {
+      #ifdef DEBUG_VALIDATION
+      MessageInterface::ShowMessage("   Validating TIDE_FILENAME\n");
+      #endif
+      if (!SetTideFilename(value, true))
+         retval = false;
+}
+   
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("GravityField::IsParameterValid() returning %d\n", retval);
+   #endif
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool IsParameterValid(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+* @see GmatBase
+*/
+//------------------------------------------------------------------------------
+bool GravityField::IsParameterValid(const std::string &label,
+    const std::string &value)
+{
+    return IsParameterValid(GetParameterID(label), value);
 }
 
 
@@ -931,7 +1041,9 @@ Real GravityField::SetRealParameter(const std::string &label,
 //------------------------------------------------------------------------------
 std::string GravityField::GetStringParameter(const Integer id) const
 {
-   if (id == EARTH_TIDE_MODEL) return earthTideModel;
+   if (id == TIDE_MODEL) return TideModel;
+   else if (id == TIDE_FILENAME) return tideFilename;
+   else if (id == TIDE_FILE_FULLPATH) return tideFilenameFullPath;
    return HarmonicField::GetStringParameter(id);
 }
 
@@ -948,27 +1060,73 @@ std::string GravityField::GetStringParameter(const Integer id) const
 bool GravityField::SetStringParameter(const Integer id,
                                       const std::string &value)
 {
-   if (id == EARTH_TIDE_MODEL)
+   if (id == TIDE_FILENAME)
    {
-      if (bodyName == GmatSolarSystemDefaults::EARTH_NAME)
+      #ifdef DEBUG_HARMONIC_FIELD_FILENAME
+      MessageInterface::ShowMessage
+         ("HarmonicField::SetStringParameter() new TideFile = '%s'\n", value.c_str());
+      #endif
+
+      if (GmatStringUtil::IsBlank(value))
       {
-         if ((GmatStringUtil::ToUpper(value) != "NONE") &&      // Currently, these are the only valid strings ...
-             (GmatStringUtil::ToUpper(value) != "SOLIDANDPOLE"))
-         {
-            ODEModelException ome;
-            ome.SetDetails(errorMessageFormat.c_str(),
-                           value.c_str(), "EarthTideModel", "\'None\' or \'SolidAndPole\'");
-            throw ome;
-         }
-         earthTideModel = value;
+         return SetTideFilename(value);
       }
-      else
-      {
-         MessageInterface::ShowMessage
-            ("*** WARNING *** \"EarthTideModel\" is deprecated for non-Earth primary bodies and will be "
-             "removed from a future build.\n");
-      }
-      return true;
+
+      std::string newValue = value;
+
+      // if value has no file extension, add .tide as default (loj: 2008.10.14)
+      if (value.find(".") == value.npos)
+         newValue = value + ".tide";
+
+      return SetTideFilename(newValue);
+   }
+   if (id == TIDE_MODEL)
+   {
+       HarmonicGravity *gm = GetHarmonicGravity(filenameFullPath, tideFilenameFullPath, a, mu, bodyName, true);
+
+       if (gm != NULL)
+       {
+           for (int i = 0; i <= HarmonicGravity::ETideCount - 1; ++i)
+           {
+               if (HarmonicGravity::ETideString[i] == value)
+               {
+                   if (gm->HaveTideModel(i))
+                   {
+                       if (HarmonicGravity::ETideString[i] != "None" && gm->IsZeroTide() && !gm->IsTideFree())
+                       {
+                           MessageInterface::ShowMessage
+                              ("*** WARNING *** It appears tide modeling is being used with a zero-tide potential model. "
+                               "This may cause an undesired double-counting of the permanent tide effect. "
+                               "Please see the GMAT User's Guide for more information.\n");
+                       }
+                       TideModel = value;
+                       return true;
+                   }
+                   else
+                   {
+                      if (value == "SolidAndPole")
+                      {
+                         throw ODEModelException(
+                            "The selected PrimaryBody does not support the \"" +
+                            value + "\" tide option.");
+                      }
+                      else
+                      {
+                         throw ODEModelException(
+                            "The selected PrimaryBody or loaded tide model "
+                            "does not support the \"" +value + "\" tide option.");
+                      }
+                   }
+               }
+           }
+           throw ODEModelException("The selected tide option \"" +
+               value + "\" is invalid.");
+       }
+       else
+       {
+           throw ODEModelException("Unable to select tide option to use "
+               "until tide model is loaded.");
+       }
    }
    return HarmonicField::SetStringParameter(id, value);
 }
@@ -1139,7 +1297,7 @@ bool GravityField::IsBlank(char* aLine)
    }
    return true;
 }
-
+//--------------------------------------------------------------------
 bool GravityField::IsBlank(const std::string &aLine)
 {
    Integer i;
@@ -1149,10 +1307,6 @@ bool GravityField::IsBlank(const std::string &aLine)
    }
    return true;
 }
-
-
-
-// ********** JPD added these ***********
 //--------------------------------------------------------------------
 void GravityField::InverseRotate (Rmatrix33& rot, const Real in[3], Real out[3])
 {
@@ -1170,6 +1324,48 @@ void GravityField::InverseRotate (Rmatrix33& rot, const Real in[3], Real out[3])
    
 }
 //------------------------------------------------------------------------------
+void GravityField::GetTideData (Real dt, const std::string bodyname, 
+   Real pos[3], Real& mukm)
+{
+   Real ep;
+   GmatTime epGT;
+   if (hasPrecisionTime)
+   {
+      epGT = epochGT; epGT.AddSeconds(dt);
+   }
+   else
+      ep = epoch + dt / GmatTimeConstants::SECS_PER_DAY;  // isn't this the same as now?
+
+   
+   CelestialBody* body  = solarSystem->GetBody(bodyname);
+   if (!body)
+      throw ODEModelException("Solar system does not contain the " + bodyname + 
+         " Sun for Tide model.");
+
+
+   Rvector6 stateinertial;
+   if (hasPrecisionTime)
+      stateinertial = body->GetMJ2000State(epGT);
+   else
+      stateinertial = body->GetMJ2000State(ep);
+
+   Rvector6 state;
+   if (!j2k)
+   {
+      throw ODEModelException("Inertial coordinate system was not initialized.");
+   }
+
+   if (hasPrecisionTime)
+      cc.Convert(nowGT, stateinertial, j2k, state, fixedCS);
+   else
+      cc.Convert(now, stateinertial, j2k, state, fixedCS);
+
+   state.GetR(pos);
+   mukm   = body->GetGravitationalConstant();
+}
+
+
+//------------------------------------------------------------------------------
 void GravityField::Calculate (Real dt, Real state[6], 
                               Real acc[3], Rmatrix33& grad)
 {
@@ -1179,71 +1375,106 @@ void GravityField::Calculate (Real dt, Real state[6],
             dt, state[0], state[1], state[2], state[3], state[4], state[5]);
       MessageInterface::ShowMessage("   acc = %12.10f  %12.10f  %12.10f\n", acc[0], acc[1], acc[2]);
    #endif
-   Real jday = epoch + GmatTimeConstants::JD_JAN_5_1941 +
-               dt/GmatTimeConstants::SECS_PER_DAY;
+   
+   Real jday, now;
+   GmatTime jdayGT, nowGT;
+   if (hasPrecisionTime)
+   {
+      jdayGT = epochGT + GmatTimeConstants::JD_JAN_5_1941;
+      jdayGT.AddSeconds(dt);
+      nowGT = epochGT; nowGT.AddSeconds(dt);
+   }
+   else
+   {
+      jday = epoch + GmatTimeConstants::JD_JAN_5_1941 +
+         dt / GmatTimeConstants::SECS_PER_DAY;
+      now = epoch + dt / GmatTimeConstants::SECS_PER_DAY;
+      jdayGT = jday;
+      nowGT = now;
+   }
+
    // convert to body fixed coordinate system
-   Real now = epoch + dt/GmatTimeConstants::SECS_PER_DAY;
    Real tmpState[6];
 //   CoordinateConverter cc; - move back to class, for performance
-   cc.Convert(now, state, inputCS, tmpState, fixedCS);  // which CSs to use here???
+   if (hasPrecisionTime)
+      cc.Convert(nowGT, state, inputCS, tmpState, fixedCS);  // which CSs to use here???
+   else
+      cc.Convert(now, state, inputCS, tmpState, fixedCS);  // which CSs to use here???
+
    #ifdef DEBUG_CALCULATE
       MessageInterface::ShowMessage(
-            "After Convert, jday = %12.10f, now = %12.10f, and tmpState = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
-            jday, now, tmpState[0], tmpState[1], tmpState[2], tmpState[3], tmpState[4], tmpState[5]);
+            "After Convert, jday = %s, now = %s, and tmpState = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
+            jdayGT.ToString().c_str(), nowGT.ToString().c_str(), tmpState[0], tmpState[1], tmpState[2], tmpState[3], tmpState[4], tmpState[5]);
    #endif
    Rmatrix33 rotMatrix = cc.GetLastRotationMatrix();
-#ifdef DEBUG_DERIVATIVES
-   MessageInterface::ShowMessage("---->>>> rotMatrix = %s\n", rotMatrix.ToString().c_str());
-#endif
-   // calculate sun and moon pos
+   #ifdef DEBUG_DERIVATIVES
+      MessageInterface::ShowMessage("---->>>> rotMatrix = %s\n", rotMatrix.ToString().c_str());
+   #endif
+   // tide body pos and mu
    Real sunpos[3]   = {0.0,0.0,0.0};
-   Real moonpos[3]  = {0.0,0.0,0.0};
-   Real sunMass     = 0.0;
-   Real moonMass    = 0.0;
+   Real otherpos[3] = {0.0,0.0,0.0};
+   Real sunmukm     = 0.0;
+   Real othermukm   = 0.0; 
    // Acceleration
    Real      rotacc[3];
    Rmatrix33 rotgrad;
-   bool      useTides;
-   // for now, "None" and "SolidAndPole" are the only valid EarthTideModel values
-   if ((bodyName == GmatSolarSystemDefaults::EARTH_NAME) && (GmatStringUtil::ToUpper(earthTideModel) == "SOLIDANDPOLE"))
-   {
-      Real ep = epoch + dt / GmatTimeConstants::SECS_PER_DAY;  // isn't this the same as now?
-      CelestialBody* theSun  = solarSystem->GetBody(SolarSystem::SUN_NAME);
-      CelestialBody* theMoon = solarSystem->GetBody(SolarSystem::MOON_NAME);
-      if (!theSun || !theMoon)
-         throw ODEModelException("Solar system does not contain the Sun or Moon for Tide model.");
-      Rvector6 sunstateinertial  = theSun->GetState(ep);
-      Rvector6 moonstateinertial = theMoon->GetState(ep);
-      
-      Rvector6 sunstate;
-      Rvector6 moonstate;
-      cc.Convert(now, sunstateinertial, inputCS, sunstate, fixedCS);
-      cc.Convert(now, moonstateinertial, inputCS, moonstate, fixedCS);
-      sunstate.GetR(sunpos);
-      moonstate.GetR(moonpos);
-
-      sunMass     = theSun->GetMass();
-      moonMass    = theMoon->GetMass();
-      useTides = true;
-   }
+   Integer   tideLevel = -1;
+   if (gravityModel != NULL)
+      {
+      for (int i=0;  i<=HarmonicGravity::ETideCount-1;  ++i)
+         if (HarmonicGravity::ETideString[i] == TideModel)
+            if (gravityModel->HaveTideModel(i))
+               tideLevel = i;
+      }
    else
-      useTides = false;
-   #ifdef DEBUG_GRAVITY_EARTH_TIDE
-      MessageInterface::ShowMessage("Calling gravityModel->CalculateFullField with useTides = %s\n",
-            (useTides? "true" : "false"));
-   #endif
+      tideLevel = 0;
+
+   if (tideLevel > 0)
+      {
+      // Always do Sun
+      GetTideData (dt,SolarSystem::SUN_NAME,sunpos,sunmukm);
+      // Other is central body for any moon, or Moon for Earth
+      std::string cb = body->GetCentralBody();
+      if (bodyName == GmatSolarSystemDefaults::EARTH_NAME) // We are Earth, do moon
+         GetTideData (dt,GmatSolarSystemDefaults::MOON_NAME,otherpos,othermukm);
+      else if (cb == GmatSolarSystemDefaults::SUN_NAME) 
+         ;   // We are other planet, no big moon
+      else
+         {
+         GetTideData (dt,cb,otherpos,othermukm);  // We are a moon, do planet(cb)
+         }
+      }
    // Get xp and yp from the EOP file
    Real xp, yp, lod;
-   Real utcmjd  = TimeConverterUtil::Convert(now, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
-                 GmatTimeConstants::JD_JAN_5_1941);
-   eop->GetPolarMotionAndLod(utcmjd, xp, yp, lod);
+   Real utcmjd;
+   GmatTime utcmjdGT;
+   if (hasPrecisionTime)
+   {
+      utcmjdGT = TimeConverterUtil::Convert(nowGT, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD, 
+         GmatTimeConstants::JD_JAN_5_1941);
+      eop->GetPolarMotionAndLod(utcmjdGT, xp, yp, lod);
+   }
+   else
+   {
+      utcmjd = TimeConverterUtil::Convert(now, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
+         GmatTimeConstants::JD_JAN_5_1941);
+      eop->GetPolarMotionAndLod(utcmjd, xp, yp, lod);
+   }
+
    bool computeMatrix = fillAMatrix || fillSTM;
 
-   gravityModel->CalculateFullField(jday, tmpState, degree, order, useTides, sunpos, moonpos, sunMass, moonMass,
-                                    xp, yp, computeMatrix, rotacc, rotgrad);
-#ifdef DEBUG_DERIVATIVES
-   MessageInterface::ShowMessage("after CalculateFullField, rotgrad = %s\n", rotgrad.ToString().c_str());
-#endif
+   if (hasPrecisionTime)
+      gravityModel->CalculateFullField(jdayGT.GetMjd(), tmpState, degree, order, tideLevel,
+         sunpos, sunmukm, otherpos, othermukm,
+         xp, yp, computeMatrix, stmLimit, rotacc, rotgrad);
+   else
+      gravityModel->CalculateFullField (jday, tmpState, degree, order, tideLevel, 
+         sunpos, sunmukm, otherpos, othermukm,
+         xp, yp, computeMatrix, stmLimit, rotacc, rotgrad);
+
+   #ifdef DEBUG_DERIVATIVES
+      MessageInterface::ShowMessage("after CalculateFullField, rotgrad = %s\n", rotgrad.ToString().c_str());
+   #endif
    /*
     MessageInterface::ShowMessage
     ("HarmonicField::Calculate pos= %20.14f %20.14f %20.14f\n",
@@ -1262,57 +1493,221 @@ void GravityField::Calculate (Real dt, Real state[6],
    // Convert back to target CS
    InverseRotate (rotMatrix,rotacc,acc);
    grad = rotMatrix.Transpose() * rotgrad * rotMatrix;
-#ifdef DEBUG_DERIVATIVES
-   MessageInterface::ShowMessage("at end of Calculate, after rotation, grad = %s\n", grad.ToString().c_str());
-#endif
-}
-
-//------------------------------------------------------------------------------
-// HarmonicGravity* GetGravityFile(const std::string &filename,
-//                                 const Real &radius, const Real &mukm)
-//------------------------------------------------------------------------------
-HarmonicGravity* GravityField::GetGravityFile(const std::string &filename,
-                                              const Real &radius, const Real &mukm)
-{
-   for (std::vector<HarmonicGravity*>::iterator objptPos = cache.begin();
-        objptPos != cache.end(); ++objptPos)
-   {
-      if ((*objptPos)->GetFilename() == filename)
-      {
-         return (*objptPos);
-      }
-   }
-   HarmonicGravity         *newOne  = NULL;
-   GmatGrav::GravityFileType fileType = GravityFileUtil::GetFileType(filename);
-   switch (fileType)
-   {
-      case GmatGrav::GFT_COF:
-         newOne = new HarmonicGravityCof(filename,radius,mukm);
-         break;
-      case GmatGrav::GFT_GRV:
-         newOne = new HarmonicGravityGrv(filename,radius,mukm);
-         break;
-      case GmatGrav::GFT_UNKNOWN:
-         throw ODEModelException
-            ("GravityField::Create file not found or incorrect type\n");
-      default:
-         return NULL;
-   }
-
-   if (newOne)
-   {
-      cache.push_back(newOne);
-   }
-   #ifdef DEBUG_CREATE_DELETE
-      MessageInterface::ShowMessage(">>>> Just created a HarmonicGravity file object <%p> for filename %s\n",
-            newOne, filename.c_str());
-      MessageInterface::ShowMessage("cache pointers and filenames are: \n");
-      for (unsigned int ii = 0; ii < cache.size(); ii++)
-      {
-         MessageInterface::ShowMessage("    <%p>     %s\n", cache.at(ii), ((cache.at(ii))->GetFilename()).c_str());
-      }
+   #ifdef DEBUG_DERIVATIVES
+      MessageInterface::ShowMessage("at end of Calculate, after rotation, grad = %s\n", grad.ToString().c_str());
    #endif
-   return newOne;
+}
+//------------------------------------------------------------------------------
+// GmatGrav::GravityModelType GetModelType(const char *filename, const char *forBody)
+//------------------------------------------------------------------------------
+GravityField::GravityModelType GravityField::GetModelType
+   (const char *filename, const char *forBody)
+{
+   return GetModelType(std::string(filename), std::string(forBody));
 }
 
+//------------------------------------------------------------------------------
+// GmatGrav::GravityModelType GetModelType(const std::string &filename, const std::string &forBody)
+//------------------------------------------------------------------------------
+/*
+ * Returns recognized gravity model type for input body name, by reading
+ * comment line(s).  NOTE - this will only work for COF format files.  Inputting
+ * the name of a file with another format (e.g. GRV) will result in a return value
+ * of GFM_OTHER.
+ *
+ * Assumptions:
+ *    GFM_EGM96       contains "egm96"
+ *    GFM_JGM2        contains "JGM-02"
+ *    GFM_JGM3        contains "JGM-03"
+ *    GFM_LP165P      contains "lp165p"
+ *    GFM_GMM1        contains "GMM-1"        [future?]
+ *    GFM_GMM2B       contains "GMM-2B"       [future?]
+ *    GFM_MARS50C     contains "Mars-50c"
+ *    GFM_MGN75HSAAP  contains "MGN75HSAAP"   [future?]
+ *    GFM_MGNP180U    contains "MGNP180U"
+ *
+ *
+ * @param   filename  Input file name
+ * @param   forBody   Body Name
+ * @return  Gravity model type
+ *
+ */
+//------------------------------------------------------------------------------
+GravityField::GravityModelType GravityField::GetModelType 
+   (const std::string &filename, const std::string &forBody)
+{
+   #ifdef DEBUG_GRAVITY_FILE
+      MessageInterface::ShowMessage("Entering GetModelType, filename = %s, forBody = %s\n",
+            filename.c_str(), forBody.c_str());
+   #endif
+   if (GmatStringUtil::IsBlank(filename, true))
+     return GFM_NONE;
 
+   if (filename.find(".cof") == std::string::npos) return GFM_OTHER;
+
+   std::ifstream inStream (filename.c_str());
+   if (!inStream)
+      throw GravityFileException("Cannot open gravity file \"" + filename + "\"");
+
+   std::string line;
+   GravityModelType gfm = GFM_OTHER;
+
+   while (!inStream.eof())
+   {
+      getline(inStream, line);
+
+      // Make upper case, so we can check for certain keyword
+      line = GmatStringUtil::ToUpper(line);
+
+      #ifdef DEBUG_GRAVITY_FILE
+      MessageInterface::ShowMessage("   => line=<%s>\n", line.c_str());
+      #endif
+
+      // Read comment lines
+      if (line[0] == 'C' || line[0] == '#') // do we need
+      {
+         if (forBody == GmatSolarSystemDefaults::EARTH_NAME)
+         {
+            if (line.find("EGM96") != line.npos)
+            {
+               gfm = GFM_EGM96;
+               break;
+            }
+            else if (line.find("JGM-02") != line.npos)
+            {
+               gfm = GFM_JGM2;
+               break;
+            }
+            else if (line.find("JGM-03") != line.npos)
+            {
+               gfm = GFM_JGM3;
+               break;
+            }
+         }
+         else if (forBody == GmatSolarSystemDefaults::MOON_NAME)
+         {
+            if (line.find("LP165P") != line.npos)
+            {
+               gfm = GFM_LP165P;
+               break;
+            }
+         }
+         else if (forBody == GmatSolarSystemDefaults::MARS_NAME)
+         {
+            if (line.find("MARS-50C") != line.npos)
+            {
+               gfm = GFM_MARS50C;
+               break;
+            }
+         }
+         else if (forBody == GmatSolarSystemDefaults::VENUS_NAME)
+         {
+            if (line.find("MGNP180U") != line.npos)
+            {
+               gfm = GFM_MGNP180U;
+               break;
+            }
+         }
+      }
+   }
+
+   inStream.close();
+
+   #ifdef DEBUG_GRAVITY_FILE
+   MessageInterface::ShowMessage("GravityFileUtil::GetModelType() returning %d (%s)\n", gfm, GRAVITY_MODEL_NAMES[gfm].c_str());
+   #endif
+
+
+   return gfm;
+}
+//------------------------------------------------------------------------------
+HarmonicGravity* GravityField::GetHarmonicGravity 
+  (const std::string& filename, const std::string& tideFilename,
+   const Real &radius, const Real &mukm, const std::string& bodyname,
+   const bool& loadCoefficients)
+   {
+   HarmonicGravity* hg = new HarmonicGravity (filename,tideFilename,radius,mukm,bodyname,loadCoefficients);
+   if (hg->GetNN() == 0) return NULL;
+   return hg;
+   }
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+//  bool SetTideFilename(const std::string &fn, bool validateOnly = false)
+//------------------------------------------------------------------------------
+/**
+* This method sets the tide filename for this GravityField object.
+*
+* @param <fn> file name to use to get tide coefficients, etc.
+*
+* @return flag indicating success of the operation.
+*/
+//------------------------------------------------------------------------------
+bool GravityField::SetTideFilename(const std::string &fn, bool validateOnly)
+{
+#ifdef DEBUG_HARMONIC_FIELD_FILENAME
+    MessageInterface::ShowMessage
+        ("GravityField::SetTideFilename() entered for %s\n   tideFilenameFullPath = %s\n   "
+        "tideFilename = %s\n   newname  = %s\n   validateOnly = %s\n", bodyName.c_str(),
+        tideFilenameFullPath.c_str(), tideFilename.c_str(), fn.c_str(), validateOnly ? "true" : "false");
+    MessageInterface::ShowMessage("   potPath  = %s\n", potPath.c_str());
+#endif
+
+    bool hasDefaultIndicator = false;
+    std::string newfn;
+    if (fn.substr(0, 6) == "DFLT__")  // Must match Interpreter static const std::string defaultIndicator
+    {
+        newfn = fn.substr(6, fn.npos - 6);
+        hasDefaultIndicator = true;
+    }
+    else
+    {
+        newfn = fn;
+        hasDefaultIndicator = false;
+    }
+    if (tideFilename != newfn)
+    {
+#ifdef DEBUG_HARMONIC_FIELD_FILENAME
+        MessageInterface::ShowMessage
+            ("GravityField::SetTideFilename(): hasDefaultIndicator = %s, newfn = %s\n",
+            (hasDefaultIndicator ? "true" : "false"), newfn.c_str());
+        MessageInterface::ShowMessage("   potPath  = %s\n", potPath.c_str());
+#endif
+
+        std::string newFile = newfn;
+        std::string fullPath;
+        std::string tideFileType = GmatStringUtil::ToUpper(GetBodyName()) + "_POT_PATH";
+
+        // Do not write informational file location message if default file (LOJ: 2014.06.25)
+        fullPath =
+            GmatBase::GetFullPathFileName(newFile, GetName(), newfn, tideFileType,
+            true, "", false, !hasDefaultIndicator);
+
+        // std::ifstream potfile(filename.c_str());
+        //std::ifstream potfile(filenameFullPath.c_str());
+        //if (!potfile) 
+        if (fullPath == "" && newFile != "")
+        {
+            lastErrorMessage = "The file name \"" + newFile + "\" does not exist";
+            if (!validateOnly)
+                throw ODEModelException(lastErrorMessage);
+        }
+
+        if (!validateOnly)
+        {
+            tideFilename = newfn;
+            tideFilenameFullPath = fullPath;
+        }
+    }
+
+#ifdef DEBUG_HARMONIC_FIELD_FILENAME
+    MessageInterface::ShowMessage
+        ("GravityField::SetTideFilename() returning true, tideFilename = %s\n   "
+        "tideFilenameFullPath = '%s'\n", tideFilename.c_str(), tideFilenameFullPath.c_str());
+#endif
+
+    fileRead = false;
+    usingDefaultFile = hasDefaultIndicator;
+    return true;
+}

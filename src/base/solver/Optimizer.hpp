@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -105,6 +105,7 @@ public:
                        GetStringArrayParameter(const Integer id) const;
    virtual bool        TakeAction(const std::string &action,
                                   const std::string &actionData = "");
+   std::string GetJacobianString();
 
 
 //------------------------------------------------------------------------------
@@ -168,6 +169,7 @@ protected:
    std::vector<Integer> ineqConstraintOp;
    /// most recently calculated gradient of the objective function
    std::vector<Real> gradient;   // ********* future ***********
+   std::vector<Real> jacobian;
    /// most recently calculated Jacobian of the equality constraints
    Rmatrix           eqConstraintJacobian;  // size of this?
    /// most recently calculated Jacobian of the inequality constraints

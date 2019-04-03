@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -171,6 +171,7 @@ Real OdeData::GetOdeReal(const std::string &str)
          if (df != NULL)
          {
             Real epoch  = mSpacecraft->GetEpoch();
+            GmatTime epochgt = mSpacecraft->GetEpochGT();
 
             // It converts spacecraft j2kbodyMJ2000Eq to bodyMJ2000Eq where body is the planet containing the amtmosphere
             // (for example: body of MarsGRAM atmosphere model is Mars)   
@@ -178,7 +179,10 @@ Real OdeData::GetOdeReal(const std::string &str)
             Real *j2kState = mSpacecraft->GetState().GetState();
             Real state[6];
 
-            df->BuildModelState(epoch, state, j2kState);
+            if (mSpacecraft->HasPrecisionTime())
+               df->BuildModelStateGT(epochgt, state, j2kState);
+            else
+               df->BuildModelState(epoch, state, j2kState);
 
             #ifdef DEBUG_ODEDATA_RUN
                MessageInterface::ShowMessage("Getting density for epoch %.12lf and state [%.8lf %.8lf %.8lf %.12lf %.12lf %.12lf]; ",
@@ -186,7 +190,10 @@ Real OdeData::GetOdeReal(const std::string &str)
             #endif
 
             // Return density in kg/km^3; the force uses kg/m^3, so scale by 1e9
-            density = df->GetDensity(state, epoch, 1) * 1.0e9;
+            if (df->HasPrecisionTime())
+               density = df->GetDensity(state, epochgt.GetMjd(), 1) * 1.0e9;
+            else
+               density = df->GetDensity(state, epoch, 1) * 1.0e9;
 
             #ifdef DEBUG_ODEDATA_RUN
                MessageInterface::ShowMessage("Density = %.12le\n", density);
@@ -357,7 +364,7 @@ void OdeData::InitializeRefObjects()
 
 
 //------------------------------------------------------------------------------
-// virtual bool IsValidObjectType(Gmat::ObjectType type)
+// virtual bool IsValidObjectType(UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Checks reference object type.
@@ -365,7 +372,7 @@ void OdeData::InitializeRefObjects()
  * @return return true if object is valid object, false otherwise
  */
 //------------------------------------------------------------------------------
-bool OdeData::IsValidObjectType(Gmat::ObjectType type)
+bool OdeData::IsValidObjectType(UnsignedInt type)
 {
    for (int i=0; i<OdeDataObjectCount; i++)
    {

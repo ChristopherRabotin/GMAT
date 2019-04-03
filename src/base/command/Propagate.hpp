@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -73,28 +73,28 @@ public:
    Propagate&           operator=(const Propagate &prp);
    
    // Methods used for configuration
-   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
-   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+   virtual std::string  GetRefObjectName(const UnsignedInt type) const;
+   virtual bool         SetRefObjectName(const UnsignedInt type,
                                          const std::string &name);
    
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
    
    virtual const ObjectTypeArray&
                         GetRefObjectTypeArray();
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
+                        GetRefObjectNameArray(const UnsignedInt type);
    
    virtual bool         SetObject(const std::string &name,
-                                  const Gmat::ObjectType type,
+                                  const UnsignedInt type,
                                   const std::string &associate = "",
-                                  const Gmat::ObjectType associateType =
+                                  const UnsignedInt associateType =
                                   Gmat::UNKNOWN_OBJECT);
-   virtual bool         SetObject(GmatBase *obj, const Gmat::ObjectType type);
-   virtual GmatBase*    GetGmatObject(const Gmat::ObjectType type, 
+   virtual bool         SetObject(GmatBase *obj, const UnsignedInt type);
+   virtual GmatBase*    GetGmatObject(const UnsignedInt type,
                                   const std::string objName = "");
-   virtual void         ClearObject(const Gmat::ObjectType type);
+   virtual void         ClearObject(const UnsignedInt type);
    
    // inherited from GmatBase
    virtual GmatBase*    Clone(void) const;
@@ -106,13 +106,13 @@ public:
                                             const std::string &useName = "");
    
    // Reference object accessor methods
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index);
-   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+   virtual ObjectArray& GetRefObjectArray(const UnsignedInt type);
    
    // Parameter accessor methods
    virtual std::string  GetParameterText(const Integer id) const;
@@ -149,6 +149,8 @@ public:
    virtual Real         GetRealParameter(const std::string &label) const;
    virtual Real         SetRealParameter(const std::string &label,
                                          const Real value);
+
+   virtual bool         GetPropStatus();
    
    virtual bool         TakeAction(const std::string &action,  
                                    const std::string &actionData = "");
@@ -156,7 +158,7 @@ public:
    // Methods used for interpreting the command
    virtual bool         InterpretAction();
 //   virtual bool         Validate();
-   virtual bool         AcceptsObjectType(Gmat::ObjectType theType);
+   virtual bool         AcceptsObjectType(UnsignedInt theType);
    
    // Methods used for setting ElementWrapper
    virtual const StringArray& 
@@ -226,6 +228,8 @@ protected:
    RealArray                    elapsedTime;
    /// Start epoch for the step
    RealArray                    currEpoch;
+   std::vector<GmatTime>        currEpochGT;
+
    /// The Propagation State Managers
    std::vector<PropagationStateManager*>  psm;
    
@@ -255,8 +259,6 @@ protected:
    Real                    *state;
    /// The J2000 body state that is propagated
    Real                    *j2kState;
-   /// Data sent to the Publisher
-   Real                    *pubdata;
    /// Flag for stopping
    bool                    stopCondMet;
    /// Epoch used for stop

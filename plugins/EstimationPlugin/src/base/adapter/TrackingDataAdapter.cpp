@@ -970,7 +970,7 @@ const StringArray& TrackingDataAdapter::GetStringArrayParameter(
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string& oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string& oldName,
 //       const std::string& newName)
 //------------------------------------------------------------------------------
 /**
@@ -983,7 +983,7 @@ const StringArray& TrackingDataAdapter::GetStringArrayParameter(
  * @return true if a reference name was changed, false if not
  */
 //------------------------------------------------------------------------------
-bool TrackingDataAdapter::RenameRefObject(const Gmat::ObjectType type,
+bool TrackingDataAdapter::RenameRefObject(const UnsignedInt type,
       const std::string& oldName, const std::string& newName)
 {
    bool retval = false;
@@ -999,7 +999,7 @@ bool TrackingDataAdapter::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a list of the reference objects used in the model
@@ -1010,7 +1010,7 @@ bool TrackingDataAdapter::RenameRefObject(const Gmat::ObjectType type,
  */
 //------------------------------------------------------------------------------
 const StringArray& TrackingDataAdapter::GetRefObjectNameArray(
-      const Gmat::ObjectType type)
+      const UnsignedInt type)
 {
    refObjectNames.clear();
 
@@ -1025,7 +1025,7 @@ const StringArray& TrackingDataAdapter::GetRefObjectNameArray(
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase* obj, const UnsignedInt type,
 //       const std::string& name)
 //------------------------------------------------------------------------------
 /**
@@ -1039,7 +1039,7 @@ const StringArray& TrackingDataAdapter::GetRefObjectNameArray(
  */
 //------------------------------------------------------------------------------
 bool TrackingDataAdapter::SetRefObject(GmatBase* obj,
-      const Gmat::ObjectType type, const std::string& name)
+      const UnsignedInt type, const std::string& name)
 {
    bool retval = false;
 
@@ -1059,7 +1059,7 @@ bool TrackingDataAdapter::SetRefObject(GmatBase* obj,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase* obj, const UnsignedInt type,
 //       const std::string& name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -1074,7 +1074,7 @@ bool TrackingDataAdapter::SetRefObject(GmatBase* obj,
  */
 //------------------------------------------------------------------------------
 bool TrackingDataAdapter::SetRefObject(GmatBase* obj,
-      const Gmat::ObjectType type, const std::string& name, const Integer index)
+      const UnsignedInt type, const std::string& name, const Integer index)
 {
    bool retval = false;
 
@@ -1853,7 +1853,158 @@ void TrackingDataAdapter::BeginEndIndexesOfRampTable(Integer & err)
 * Assumptions: ramp table had been sorted by epoch
 */
 //------------------------------------------------------------------------------
-Real TrackingDataAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err)
+//Real TrackingDataAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err)
+//{
+//#ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
+//   MessageInterface::ShowMessage("Enter PhysicalMeasurement::IntegralRampedFrequency()\n");
+//#endif
+//
+//   // Verify ramp table and elpase time
+//   err = 0;
+//   if (delta_t < 0)
+//   {
+//      err = 1;
+//      errMsg = "Error: Elapse time has to be a non negative number\n";
+//      throw MeasurementException("Error: Elapse time has to be a non negative number\n");
+//   }
+//
+//   if (rampTB == NULL)
+//   {
+//      err = 2;
+//      errMsg = "Error: No ramp table available for measurement calculation\n";
+//      throw MeasurementException("Error: No ramp table available for measurement calculation\n");
+//   }
+//   
+//   if ((*rampTB).size() == 0)
+//   {
+//      err = 3;
+//      std::stringstream ss;
+//      ss << "Error: Ramp table has no data record. It needs at least 1 record.\n";
+//      errMsg = ss.str();
+//      throw MeasurementException(ss.str());
+//   }
+//   
+//   // Get the beginning index and the ending index for frequency data records for this measurement model 
+//   BeginEndIndexesOfRampTable(err);
+//
+//   Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
+//   Real time_min = (*rampTB)[beginIndex].epoch;
+//
+//   // Verify t0 and t1 are not out of range of ramp table
+//   if (t1 < time_min)
+//   {
+//      // Convert t1 and time_min from A1Mjd to TAIMjd
+//      Real t1TAI, tminTAI;
+//      std::string tais;
+//      Real a1Time = t1;
+//      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", t1TAI, tais);
+//      a1Time = time_min;
+//      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
+//
+//      // Generate error message
+//      char s[200];
+//      sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , +%c) of ramp table\n", t1TAI, tminTAI);
+//      std::string st(&s[0]);
+//      err = 4;
+//      errMsg = st;
+//      throw MeasurementException(st);
+//   }
+//
+//   if (t0 < time_min)
+//   {
+//      // Convert t0 and time_min from A1Mjd to TAIMjd
+//      Real t0TAI, tminTAI;
+//      std::string tais;
+//      Real a1Time = t0;
+//      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", t0TAI, tais);
+//      a1Time = time_min;
+//      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
+//
+//      // Generate error message
+//      char s[200];
+//      sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , +Inf) of ramp table\n", t0TAI, tminTAI);
+//      std::string st(&s[0]);
+//      err = 5;
+//      errMsg = st;
+//      throw MeasurementException(st);
+//   }
+//
+//#ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
+//   MessageInterface::ShowMessage(" Start epoch t1 = %.15lf A1Mjd\n", t0);
+//   MessageInterface::ShowMessage(" End epoch t3   = %.15lf A1Mjd\n", t1);
+//   MessageInterface::ShowMessage(" elapse time   = %.15lf s\n", delta_t);
+//#endif
+//
+//   // Search for start index of the interval containing t1
+//   UnsignedInt end_interval = beginIndex;
+//   for (UnsignedInt i = beginIndex; i < endIndex; ++i)
+//   {
+//      if (t1 >= (*rampTB)[i].epoch)
+//         end_interval = i;
+//      else
+//         break;
+//   }
+//
+//   Real basedFreq = (*rampTB)[end_interval].rampFrequency; 
+//
+//#ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
+//   MessageInterface::ShowMessage("\n End interval: i = %d    epoch = %.12lf A1Mjd    frequency = %.12lf    ramp rate = %.12lf\n", end_interval, (*rampTB)[end_interval].epoch, (*rampTB)[end_interval].rampFrequency, (*rampTB)[end_interval].rampRate);
+//   MessageInterface::ShowMessage("               i = %d    epoch = %.12lf A1Mjd    frequency = %.12lf    ramp rate = %.12lf\n\n", end_interval+1, (*rampTB)[end_interval+1].epoch, (*rampTB)[end_interval+1].rampFrequency, (*rampTB)[end_interval+1].rampRate);
+//   MessageInterface::ShowMessage(" Based frequency = %.15le\n", basedFreq);
+//#endif
+//
+//   // Integration of the frequency from t0 to t1:
+//   Real f0, f1, f_dot;
+//   Real value1;
+//   Real interval_len;
+//
+//   Real value = 0.0;
+//   Real dt = delta_t;
+//   for (Integer i = end_interval; dt > 0.0; --i)
+//   {
+//      // Specify lenght of the "current" interval, f0, and f_dot
+//      if (i == end_interval)
+//         interval_len = (t1 - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
+//      else
+//         interval_len = ((*rampTB)[i+1].epoch - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
+//
+//      f0    = (*rampTB)[i].rampFrequency;
+//      f_dot = (*rampTB)[i].rampRate;
+//      if (dt < interval_len)
+//      {
+//         f0 = f0 + f_dot*(interval_len - dt);
+//         interval_len = dt;
+//      }
+//
+//      // Specify f1
+//      f1 = f0 + f_dot*interval_len;
+//
+//      // Take integral for the current interval
+//      value1 = ((f0 + f1)/2 - basedFreq) * interval_len;
+//      value  = value + value1;
+//
+//#ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
+//      MessageInterface::ShowMessage("interval i = %d:    value1 = %.12lf    f0 = %.12lf   f1 = %.12lf     f_ave = %.12lfHz   width = %.12lfs \n", i, value1, f0, f1, (f0+f1)/2, interval_len);
+//      MessageInterface::ShowMessage("interval i = %d: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n", i,
+//      (*rampTB)[i].epoch,  (*rampTB)[i].uplinkBand, (*rampTB)[i].rampType, (*rampTB)[i].rampFrequency, (*rampTB)[i].rampRate);
+//#endif
+//
+//      // Specify dt 
+//      dt = dt - interval_len;
+//   }
+//   Real rel_val = value;
+//   value = value + basedFreq*delta_t;
+//
+//#ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
+//   MessageInterface::ShowMessage(" value = %.15lf     relative value = %.15lf    based value = %.15lf\n", value, rel_val, basedFreq*delta_t);
+//   MessageInterface::ShowMessage("Exit PhysicalMeasurement::IntegralRampedFrequency()\n");
+//#endif
+//
+//   return value;
+//}
+
+
+Real TrackingDataAdapter::IntegralRampedFrequency(GmatTime t1, Real delta_t, Integer& err)
 {
 #ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
    MessageInterface::ShowMessage("Enter PhysicalMeasurement::IntegralRampedFrequency()\n");
@@ -1874,7 +2025,7 @@ Real TrackingDataAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer
       errMsg = "Error: No ramp table available for measurement calculation\n";
       throw MeasurementException("Error: No ramp table available for measurement calculation\n");
    }
-   
+
    if ((*rampTB).size() == 0)
    {
       err = 3;
@@ -1883,27 +2034,29 @@ Real TrackingDataAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer
       errMsg = ss.str();
       throw MeasurementException(ss.str());
    }
-   
+
    // Get the beginning index and the ending index for frequency data records for this measurement model 
    BeginEndIndexesOfRampTable(err);
 
-   Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
-   Real time_min = (*rampTB)[beginIndex].epoch;
+   GmatTime t0 = t1;
+   t0.SubtractSeconds(delta_t);
+
+   GmatTime time_min = (*rampTB)[beginIndex].epoch;
 
    // Verify t0 and t1 are not out of range of ramp table
    if (t1 < time_min)
    {
       // Convert t1 and time_min from A1Mjd to TAIMjd
-      Real t1TAI, tminTAI;
+      GmatTime t1TAI, tminTAI;
       std::string tais;
-      Real a1Time = t1;
+      GmatTime a1Time = t1;
       TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", t1TAI, tais);
       a1Time = time_min;
       TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
 
       // Generate error message
       char s[200];
-      sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , +%c) of ramp table\n", t1TAI, tminTAI);
+      sprintf(&s[0], "Error: End epoch t3R = %s is out of range [%s , +Inf) of ramp table\n", t1TAI.ToString().c_str(), tminTAI.ToString().c_str());
       std::string st(&s[0]);
       err = 4;
       errMsg = st;
@@ -1913,16 +2066,16 @@ Real TrackingDataAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer
    if (t0 < time_min)
    {
       // Convert t0 and time_min from A1Mjd to TAIMjd
-      Real t0TAI, tminTAI;
+      GmatTime t0TAI, tminTAI;
       std::string tais;
-      Real a1Time = t0;
+      GmatTime a1Time = t0;
       TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", t0TAI, tais);
       a1Time = time_min;
       TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
 
       // Generate error message
       char s[200];
-      sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , +Inf) of ramp table\n", t0TAI, tminTAI);
+      sprintf(&s[0], "Error: Start epoch t1T = %s is out of range [%s , +Inf) of ramp table\n", t0TAI.ToString().c_str(), tminTAI.ToString().c_str());
       std::string st(&s[0]);
       err = 5;
       errMsg = st;
@@ -1930,8 +2083,8 @@ Real TrackingDataAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer
    }
 
 #ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
-   MessageInterface::ShowMessage(" Start epoch t1 = %.15lf A1Mjd\n", t0);
-   MessageInterface::ShowMessage(" End epoch t3   = %.15lf A1Mjd\n", t1);
+   MessageInterface::ShowMessage(" Start epoch t1 = %s A1Mjd\n", t0.ToString().c_str());
+   MessageInterface::ShowMessage(" End epoch t3   = %s A1Mjd\n", t1.ToString().c_str());
    MessageInterface::ShowMessage(" elapse time   = %.15lf s\n", delta_t);
 #endif
 
@@ -1939,17 +2092,17 @@ Real TrackingDataAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer
    UnsignedInt end_interval = beginIndex;
    for (UnsignedInt i = beginIndex; i < endIndex; ++i)
    {
-      if (t1 >= (*rampTB)[i].epoch)
+      if (t1 >= (*rampTB)[i].epochGT)
          end_interval = i;
       else
          break;
    }
 
-   Real basedFreq = (*rampTB)[end_interval].rampFrequency; 
+   Real basedFreq = (*rampTB)[end_interval].rampFrequency;
 
 #ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
-   MessageInterface::ShowMessage("\n End interval: i = %d    epoch = %.12lf A1Mjd    frequency = %.12lf    ramp rate = %.12lf\n", end_interval, (*rampTB)[end_interval].epoch, (*rampTB)[end_interval].rampFrequency, (*rampTB)[end_interval].rampRate);
-   MessageInterface::ShowMessage("               i = %d    epoch = %.12lf A1Mjd    frequency = %.12lf    ramp rate = %.12lf\n\n", end_interval+1, (*rampTB)[end_interval+1].epoch, (*rampTB)[end_interval+1].rampFrequency, (*rampTB)[end_interval+1].rampRate);
+   MessageInterface::ShowMessage("\n End interval: i = %d    epoch = %s A1Mjd    frequency = %.12lf    ramp rate = %.12lf\n", end_interval, (*rampTB)[end_interval].epochGT.ToString().c_str(), (*rampTB)[end_interval].rampFrequency, (*rampTB)[end_interval].rampRate);
+   MessageInterface::ShowMessage("               i = %d    epoch = %s A1Mjd    frequency = %.12lf    ramp rate = %.12lf\n\n", end_interval + 1, (*rampTB)[end_interval + 1].epochGT.ToString().c_str(), (*rampTB)[end_interval + 1].rampFrequency, (*rampTB)[end_interval + 1].rampRate);
    MessageInterface::ShowMessage(" Based frequency = %.15le\n", basedFreq);
 #endif
 
@@ -1964,11 +2117,11 @@ Real TrackingDataAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer
    {
       // Specify lenght of the "current" interval, f0, and f_dot
       if (i == end_interval)
-         interval_len = (t1 - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
+         interval_len = (t1 - (*rampTB)[i].epochGT).GetTimeInSec();
       else
-         interval_len = ((*rampTB)[i+1].epoch - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
+         interval_len = ((*rampTB)[i + 1].epochGT - (*rampTB)[i].epochGT).GetTimeInSec();
 
-      f0    = (*rampTB)[i].rampFrequency;
+      f0 = (*rampTB)[i].rampFrequency;
       f_dot = (*rampTB)[i].rampRate;
       if (dt < interval_len)
       {
@@ -1980,13 +2133,13 @@ Real TrackingDataAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer
       f1 = f0 + f_dot*interval_len;
 
       // Take integral for the current interval
-      value1 = ((f0 + f1)/2 - basedFreq) * interval_len;
-      value  = value + value1;
+      value1 = ((f0 + f1) / 2 - basedFreq) * interval_len;
+      value = value + value1;
 
 #ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
-      MessageInterface::ShowMessage("interval i = %d:    value1 = %.12lf    f0 = %.12lf   f1 = %.12lf     f_ave = %.12lfHz   width = %.12lfs \n", i, value1, f0, f1, (f0+f1)/2, interval_len);
-      MessageInterface::ShowMessage("interval i = %d: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n", i,
-      (*rampTB)[i].epoch,  (*rampTB)[i].uplinkBand, (*rampTB)[i].rampType, (*rampTB)[i].rampFrequency, (*rampTB)[i].rampRate);
+      MessageInterface::ShowMessage("interval i = %d:    value1 = %.12lf    f0 = %.12lf   f1 = %.12lf     f_ave = %.12lfHz   width = %.12lfs \n", i, value1, f0, f1, (f0 + f1) / 2, interval_len);
+      MessageInterface::ShowMessage("interval i = %d: epoch = %s     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n", i,
+         (*rampTB)[i].epochGT.ToString().c_str(), (*rampTB)[i].uplinkBand, (*rampTB)[i].rampType, (*rampTB)[i].rampFrequency, (*rampTB)[i].rampRate);
 #endif
 
       // Specify dt 

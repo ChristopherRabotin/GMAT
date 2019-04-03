@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1562,7 +1562,7 @@ const Rvector& MeasurementModel::SetRvectorParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type,
+// bool RenameRefObject(const UnsignedInt type,
 //------------------------------------------------------------------------------
 /**
  * Renames references objects
@@ -1574,7 +1574,7 @@ const Rvector& MeasurementModel::SetRvectorParameter(const std::string &label,
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool MeasurementModel::RenameRefObject(const Gmat::ObjectType type,
+bool MeasurementModel::RenameRefObject(const UnsignedInt type,
       const std::string & oldName, const std::string & newName)
 {
    /// @todo MeasurementModel rename code needs to be implemented
@@ -1583,7 +1583,7 @@ bool MeasurementModel::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string & name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string & name)
 //------------------------------------------------------------------------------
 /**
  * identifies reference objects needed by name
@@ -1594,7 +1594,7 @@ bool MeasurementModel::RenameRefObject(const Gmat::ObjectType type,
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool MeasurementModel::SetRefObjectName(const Gmat::ObjectType type,
+bool MeasurementModel::SetRefObjectName(const UnsignedInt type,
       const std::string & name)
 {
    return MeasurementModelBase::SetRefObjectName(type, name);
@@ -1617,7 +1617,7 @@ const ObjectTypeArray & MeasurementModel::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Initialization method that identifies the reference objects needed
@@ -1628,7 +1628,7 @@ const ObjectTypeArray & MeasurementModel::GetRefObjectTypeArray()
  */
 //------------------------------------------------------------------------------
 const StringArray& MeasurementModel::GetRefObjectNameArray(
-      const Gmat::ObjectType type)
+      const UnsignedInt type)
 {
    #ifdef DEBUG_MEASUREMENT_INITIALIZATION
       MessageInterface::ShowMessage(
@@ -1660,7 +1660,7 @@ const StringArray& MeasurementModel::GetRefObjectNameArray(
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Retrieves the name of a referenced object
@@ -1671,14 +1671,14 @@ const StringArray& MeasurementModel::GetRefObjectNameArray(
  */
 //------------------------------------------------------------------------------
 std::string MeasurementModel::GetRefObjectName(
-      const Gmat::ObjectType type) const
+      const UnsignedInt type) const
 {
    return MeasurementModelBase::GetRefObjectName(type);
 }
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string & name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string & name)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a reference object
@@ -1689,7 +1689,7 @@ std::string MeasurementModel::GetRefObjectName(
  * @return A pointer to the object, or NULL if the object is not set
  */
 //------------------------------------------------------------------------------
-GmatBase* MeasurementModel::GetRefObject(const Gmat::ObjectType type,
+GmatBase* MeasurementModel::GetRefObject(const UnsignedInt type,
       const std::string & name)
 {
    if (type == Gmat::CORE_MEASUREMENT)
@@ -1699,7 +1699,7 @@ GmatBase* MeasurementModel::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string & name,
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string & name,
 //       const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -1712,7 +1712,7 @@ GmatBase* MeasurementModel::GetRefObject(const Gmat::ObjectType type,
  * @return A pointer to the object, or NULL if the object is not set
  */
 //------------------------------------------------------------------------------
-GmatBase* MeasurementModel::GetRefObject(const Gmat::ObjectType type,
+GmatBase* MeasurementModel::GetRefObject(const UnsignedInt type,
       const std::string & name, const Integer index)
 {
    return MeasurementModelBase::GetRefObject(type, name, index);
@@ -1737,7 +1737,7 @@ GmatBase* MeasurementModel::GetOwnedObject(Integer whichOne)
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string & name)
 //------------------------------------------------------------------------------
 /**
@@ -1750,7 +1750,7 @@ GmatBase* MeasurementModel::GetOwnedObject(Integer whichOne)
  * @return true if the object was set, false if not
  */
 //------------------------------------------------------------------------------
-bool MeasurementModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool MeasurementModel::SetRefObject(GmatBase *obj, const UnsignedInt type,
       const std::string & name)
 {
    #ifdef DEBUG_MEASUREMENT_INITIALIZATION
@@ -1842,7 +1842,7 @@ ObjectArray& MeasurementModel::GetRefObjectArray(const std::string & typeString)
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string & name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -1856,7 +1856,7 @@ ObjectArray& MeasurementModel::GetRefObjectArray(const std::string & typeString)
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool MeasurementModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool MeasurementModel::SetRefObject(GmatBase *obj, const UnsignedInt type,
       const std::string & name, const Integer index)
 {
    #ifdef DEBUG_MEASUREMENT_INITIALIZATION
@@ -1889,7 +1889,7 @@ bool MeasurementModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+// ObjectArray& GetRefObjectArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves an array of reference objects
@@ -1899,7 +1899,7 @@ bool MeasurementModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return The array of objects
  */
 //------------------------------------------------------------------------------
-ObjectArray& MeasurementModel::GetRefObjectArray(const Gmat::ObjectType type)
+ObjectArray& MeasurementModel::GetRefObjectArray(const UnsignedInt type)
 {
    if (Gmat::SPACEOBJECT)                         // fix Bug 12 in ticket GMT-4314
       return participants;

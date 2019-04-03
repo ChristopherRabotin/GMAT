@@ -61,10 +61,10 @@ public:
 
    virtual void         SetSolarSystem(SolarSystem *ss);
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                        GetRefObjectNameArray(const UnsignedInt type);
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name = "");
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
 
@@ -78,7 +78,7 @@ public:
    virtual bool         Initialize();
    virtual void         InitializeSignal(bool chainForwards = false);
 
-   virtual bool         ModelSignal(const GmatTime atEpoch,
+   virtual bool         ModelSignal(const GmatTime atEpoch, bool forSimulation, 
                                     bool EpochAtReceive = true) = 0;
 
    virtual const std::vector<RealArray>&
@@ -140,8 +140,8 @@ protected:
 
    /// Epoch of most recent calculation
    GmatTime                   satPrecEpoch;
-   /// Parameter ID used to retrieve internal epoch data
-   Integer                    satEpochID;
+   ///// Parameter ID used to retrieve internal epoch data
+   //Integer                    satEpochID;                            // unused variable
    /// Rotation matrix from receiver to J2K (Identity by default)
    Rmatrix33                  R_j2k_Receiver;
    /// Rotation matrix from transmitter to J2K (Identity by default)

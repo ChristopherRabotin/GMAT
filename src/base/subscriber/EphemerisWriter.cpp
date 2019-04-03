@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -94,7 +94,7 @@ EphemerisWriter::EphemerisWriter(const std::string &name, const std::string &typ
    interpolatorName     ("Lagrange"),
    stateType            ("Cartesian"),
    outCoordSystemName   ("EarthMJ2000Eq"),
-   outputFormat         ("PC"),
+   outputFormat         ("LittleEndian"),
    currComments         (""),
    interpolationOrder   (7),
    interpolatorStatus   (-1),
@@ -618,7 +618,7 @@ bool EphemerisWriter::Initialize()
       writeAttitude = true;
    
    // Determine output coordinate system, set to boolean to avoid string comparison.
-   if (dataCoordSystem->GetName() != outCoordSystemName)
+   if (dataCoordSystem && (dataCoordSystem->GetName() != outCoordSystemName))
       writeDataInDataCS = false;
    
    // Set initial interpolation flag for first and final state
@@ -1419,7 +1419,7 @@ void EphemerisWriter::WriteOrbitData(Real reqEpochInSecs, const Real state[6])
    DebugWriteTime
       ("EphemerisWriter::WriteOrbitData() entered, reqEpochInSecs = ", reqEpochInSecs);
    MessageInterface::ShowMessage
-      ("state[0:2]=%.15f, %.15f, %.15f\n", reqEpochInSecs, state[0], state[1], state[2]);
+      ("state[0:2]=%.15f, %.15f, %.15f\n", state[0], state[1], state[2]);
    #endif
    
    Real outState[6];

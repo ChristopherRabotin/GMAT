@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -102,9 +102,9 @@ Parameter::PARAMETER_TYPE[ParameterParamCount - GmatBaseParamCount] =
 Parameter::Parameter(const std::string &name, const std::string &typeStr,
                      GmatParam::ParameterKey key, GmatBase *owner,
                      const std::string &desc, const std::string &unit,
-                     GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
+                     GmatParam::DepObject depObj, UnsignedInt ownerType,
                      bool isTimeParam, bool isSettable, bool isPlottable,
-                     bool isReportable, Gmat::ObjectType ownedObjType)
+                     bool isReportable, UnsignedInt ownedObjType)
    : GmatBase(Gmat::PARAMETER, typeStr, name)
 {  
    objectTypes.push_back(Gmat::PARAMETER);
@@ -315,13 +315,13 @@ GmatBase* Parameter::GetOwner() const
 }
 
 //------------------------------------------------------------------------------
-// Gmat::ObjectType GetOwnerType() const
+// UnsignedInt GetOwnerType() const
 //------------------------------------------------------------------------------
 /**
  * @return enumeration value of object type.
  */
 //------------------------------------------------------------------------------
-Gmat::ObjectType Parameter::GetOwnerType() const
+UnsignedInt Parameter::GetOwnerType() const
 {
    return mOwnerType;
 }
@@ -1174,10 +1174,10 @@ void Parameter::Copy(const GmatBase* orig)
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool Parameter::RenameRefObject(const Gmat::ObjectType type,
+bool Parameter::RenameRefObject(const UnsignedInt type,
                                 const std::string &oldName,
                                 const std::string &newName)
 {

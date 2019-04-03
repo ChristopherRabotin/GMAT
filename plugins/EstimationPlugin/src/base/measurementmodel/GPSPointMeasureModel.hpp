@@ -70,6 +70,7 @@ public:
                            bool withMediaCorrection = true,
                            ObservationData* forObservation = NULL,
                            std::vector<RampTableData>* rampTB = NULL,
+                           bool forSimulation = false, 
                            Real atTimeOffset = 0.0, 
                            Integer forStrand = -1);
 

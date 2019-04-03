@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -43,7 +43,7 @@
 OrbitRmat33::OrbitRmat33(const std::string &name, const std::string &typeStr, 
                          GmatBase *obj, const std::string &desc,
                          const std::string &unit, GmatParam::DepObject depObj,
-                         bool isSettable, Gmat::ObjectType paramOwnerType)
+                         bool isSettable, UnsignedInt paramOwnerType)
    : Rmat33Var(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
                depObj, paramOwnerType, isSettable),
      OrbitData(name, typeStr, paramOwnerType)
@@ -208,10 +208,10 @@ bool OrbitRmat33::Initialize()
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string &oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string &oldName,
 //                      const std::string &newName)
 //------------------------------------------------------------------------------
-bool OrbitRmat33::RenameRefObject(const Gmat::ObjectType type,
+bool OrbitRmat33::RenameRefObject(const UnsignedInt type,
                                   const std::string &oldName,
                                   const std::string &newName)
 {
@@ -220,9 +220,9 @@ bool OrbitRmat33::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
-std::string OrbitRmat33::GetRefObjectName(const Gmat::ObjectType type) const
+std::string OrbitRmat33::GetRefObjectName(const UnsignedInt type) const
 {
    std::string objName = OrbitData::GetRefObjectName(type);
    
@@ -238,18 +238,18 @@ std::string OrbitRmat33::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& OrbitRmat33::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& OrbitRmat33::GetRefObjectNameArray(const UnsignedInt type)
 {
    return OrbitData::GetRefObjectNameArray(type);
 }
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
-bool OrbitRmat33::SetRefObjectName(const Gmat::ObjectType type,
+bool OrbitRmat33::SetRefObjectName(const UnsignedInt type,
                                    const std::string &name)
 {
    bool ret = OrbitData::SetRefObjectName(type, name);
@@ -265,9 +265,9 @@ bool OrbitRmat33::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* OrbitRmat33::GetRefObject(const Gmat::ObjectType type,
+GmatBase* OrbitRmat33::GetRefObject(const UnsignedInt type,
                                     const std::string &name)
 {
    GmatBase *obj = OrbitData::GetRefObject(type, name);
@@ -285,10 +285,10 @@ GmatBase* OrbitRmat33::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name)
 //------------------------------------------------------------------------------
-bool OrbitRmat33::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool OrbitRmat33::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                const std::string &name)
 {
    #ifdef DEBUG_ORBITRMAT33_REFOBJ

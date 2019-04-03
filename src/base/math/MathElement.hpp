@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -65,19 +65,19 @@ public:
    virtual Rmatrix      MatrixEvaluate();
    
    // Inherited (GmatBase) methods
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);   
    virtual GmatBase*    Clone(void) const; 
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string &name);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name = "");
-   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
-   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+   virtual std::string  GetRefObjectName(const UnsignedInt type) const;
+   virtual bool         SetRefObjectName(const UnsignedInt type,
                                          const std::string &name);
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
+                        GetRefObjectNameArray(const UnsignedInt type);
    
 protected:
    

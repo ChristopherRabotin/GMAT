@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -64,6 +64,39 @@ public:
                 CoordinateSystem *inCoord, Real *outState,
                 CoordinateSystem *outCoord, 
                 bool forceNutationComputation = false, bool omitTranslation = false);
+
+   
+   bool Convert(const Real epoch, const Rvector &inState,
+      CoordinateSystem *inCoord, Rvector &outState,
+      CoordinateSystem *outCoord,
+      bool forceNutationComputation = false, bool omitTranslation = false)
+   {
+      return Convert(A1Mjd(epoch), inState, inCoord, outState, outCoord,
+         forceNutationComputation, omitTranslation);
+   };
+
+   
+   bool Convert(const Real epoch, const Real *inState,
+      CoordinateSystem *inCoord, Real *outState,
+      CoordinateSystem *outCoord,
+      bool forceNutationComputation = false, bool omitTranslation = false)
+   {
+      return Convert(A1Mjd(epoch), inState, inCoord, outState, outCoord,
+         forceNutationComputation, omitTranslation);
+   };
+
+   
+   bool Convert(const GmatTime &epoch, const Rvector &inState,
+      CoordinateSystem *inCoord, Rvector &outState,
+      CoordinateSystem *outCoord,
+      bool forceNutationComputation = false, bool omitTranslation = false);
+
+   
+   bool Convert(const GmatTime &epoch, const Real *inState,
+      CoordinateSystem *inCoord, Real *outState,
+      CoordinateSystem *outCoord,
+      bool forceNutationComputation = false, bool omitTranslation = false);
+
    // method to return the rotation matrix used to do the last conversion
    Rmatrix33    GetLastRotationMatrix() const;
    Rmatrix33    GetLastRotationDotMatrix() const;
@@ -80,6 +113,14 @@ protected:
                                       const std::string &inBase,  const std::string &outBase,
                                       const Real *inBaseState,    Real *outBaseState);
    
+   
+   bool         ConvertFromBaseToBase(const GmatTime &epoch, SolarSystem *solarSystem,
+                                      const std::string &inBase, const std::string &outBase,
+                                      const Rvector &inBaseState, Rvector &outBaseState);
+   
+   bool         ConvertFromBaseToBase(const GmatTime &epoch, SolarSystem *solarSystem,
+                                      const std::string &inBase, const std::string &outBase,
+                                      const Real *inBaseState, Real *outBaseState);
 private:
    void         RotationMatrixFromICRFToFK5(const A1Mjd &atEpoch);
    Rmatrix33 icrfToFK5;

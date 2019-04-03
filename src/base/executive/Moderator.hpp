@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -71,6 +71,8 @@
 // plug-in code
 #include "DynamicLibrary.hpp"
 #include "TriggerManager.hpp"
+#include "GuiFactory.hpp"
+#include "GmatWidget.hpp"
 
 class DataFile;
 class ObType;
@@ -82,6 +84,13 @@ namespace Gmat
    const Integer MAX_SANDBOX = 4;
 };
 
+
+/**
+ * The GMAT Moderator
+ *
+ * The Moderator singleton is the central communications manager for a running
+ * GMAT application.
+ */
 class GMAT_API Moderator
 {
 public:
@@ -93,6 +102,7 @@ public:
    void Finalize();
    void SetRunReady(bool flag = true);
    void SetShowFinalState(bool flag = true);
+   Integer GetExitCode();
    
    //----- Matlab engine
    Interface* GetMatlabInterface();
@@ -106,9 +116,10 @@ public:
    bool IsLibraryLoaded(const std::string &libName);
    void (*GetDynamicFunction(const std::string &funName, 
                              const std::string &libraryName))();
+   std::vector<GuiFactory*> RetrieveGuiFactories();
    
    //----- ObjectType
-   std::string GetObjectTypeString(Gmat::ObjectType type);  
+   std::string GetObjectTypeString(UnsignedInt type);
    
    //----- interpreter
    static ScriptInterpreter* GetUiInterpreter();
@@ -126,24 +137,24 @@ public:
                            const std::string &name);
    
    //----- factory
-   const StringArray& GetListOfFactoryItems(Gmat::ObjectType type,
+   const StringArray& GetListOfFactoryItems(UnsignedInt type,
                          const std::string &qualifier = "");
    const StringArray& GetListOfAllFactoryItems();
    const StringArray& GetListOfAllFactoryItemsExcept(const ObjectTypeArray &types);
-   const StringArray& GetListOfViewableItems(Gmat::ObjectType type);
+   const StringArray& GetListOfViewableItems(UnsignedInt type);
    const StringArray& GetListOfViewableItems(const std::string &typeName);
-   const StringArray& GetListOfUnviewableItems(Gmat::ObjectType type);
+   const StringArray& GetListOfUnviewableItems(UnsignedInt type);
    const StringArray& GetListOfUnviewableItems(const std::string &typeName);
    const ObjectTypeArrayMap& GetAllObjectTypeArrayMap();
    
    bool               DoesObjectTypeMatchSubtype(
-                            const Gmat::ObjectType coreType,
+                            const UnsignedInt coreType,
                             const std::string &theType,
                             const std::string &theSubtype);
    
    //----- configuration
    ObjectMap* GetConfiguredObjectMap();
-   const StringArray& GetListOfObjects(Gmat::ObjectType type,
+   const StringArray& GetListOfObjects(UnsignedInt type,
                                        bool excludeDefaultObjects = false);
    const StringArray& GetListOfObjects(const std::string &typeName,
                                        bool excludeDefaultObjects = false);
@@ -151,9 +162,9 @@ public:
    GmatBase* AddClone(const std::string &name, std::string &newName);
    bool ReconfigureItem(GmatBase *newobj, const std::string &name);
    std::string GetNewName(const std::string &name, Integer startCount);
-   bool RenameObject(Gmat::ObjectType type, const std::string &oldName,
+   bool RenameObject(UnsignedInt type, const std::string &oldName,
                      const std::string &newName);
-   bool RemoveObject(Gmat::ObjectType type, const std::string &name,
+   bool RemoveObject(UnsignedInt type, const std::string &name,
                      bool delOnlyIfNotUsed);
    bool HasConfigurationChanged(Integer sandboxNum = 1);
    void ConfigurationChanged(GmatBase *obj, bool tf);
@@ -324,9 +335,9 @@ public:
    Function* GetFunction(const std::string &name);
    
    // Create object
-   GmatBase* CreateObject(Gmat::ObjectType objTypeId, const std::string &type,
+   GmatBase* CreateObject(UnsignedInt objTypeId, const std::string &type,
                           const std::string &name, bool createDefault = false);
-   GmatBase* CreateOtherObject(Gmat::ObjectType objTypeId, const std::string &type,
+   GmatBase* CreateOtherObject(UnsignedInt objTypeId, const std::string &type,
                                const std::string &name, bool createDefault = false);
    
    //----- Non-Configurable Items
@@ -429,6 +440,7 @@ public:
    
    // Plugin GUI data
    std::vector<Gmat::PluginResource*> *GetPluginResourceList();
+   void SetWidgetCreator(GuiWidgetCreatorCallback creatorFun);
 
    bool IsSequenceStarter(const std::string &commandType);
    const std::string& GetStarterStringList();
@@ -460,7 +472,7 @@ private:
    // Object map
    GmatBase* FindObject(const std::string &name);
    void AddObjectToObjectMapInUse(const std::string &name, GmatBase *obj,
-                                  Gmat::ObjectType objTypeId = Gmat::UNKNOWN_OBJECT);
+                                  UnsignedInt objTypeId = Gmat::UNKNOWN_OBJECT);
    bool AddObject(GmatBase *obj);
    void SetSolarSystemAndObjectMap(SolarSystem *ss, ObjectMap *objMap,
                                    bool forFunction,
@@ -517,6 +529,7 @@ private:
    bool loadSandboxAndPause;
    Integer objectManageOption;
    Integer currentSandboxNumber;
+   Integer exitCode;
    std::string mainScriptFileName;
    std::vector<Sandbox*> sandboxes;
    std::vector<TriggerManager*> triggerManagers;
@@ -551,6 +564,10 @@ private:
    // Dynamic library data table
    std::map<std::string, DynamicLibrary*>   userLibraries;
    std::vector<Gmat::PluginResource*>  userResources;
+   std::vector<GuiFactory*> pluginGuiFactories;
+
+   // Plugin creator callback method
+   GuiWidgetCreatorCallback pCreateWidget;
 
    // Thruster related
    static bool thrusterDeprecateMsgWritten;

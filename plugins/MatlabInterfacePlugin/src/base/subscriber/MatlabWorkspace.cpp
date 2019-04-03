@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -447,10 +447,10 @@ const StringArray& MatlabWorkspace::GetStringArrayParameter(const std::string &l
 
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+// virtual GmatBase* GetRefObject(const UnsignedInt type,
 //                                const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* MatlabWorkspace::GetRefObject(const Gmat::ObjectType type,
+GmatBase* MatlabWorkspace::GetRefObject(const UnsignedInt type,
                                  const std::string &name)
 {
    for (int i=0; i<mNumParams; i++)
@@ -465,10 +465,10 @@ GmatBase* MatlabWorkspace::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
-bool MatlabWorkspace::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool MatlabWorkspace::SetRefObject(GmatBase *obj, const UnsignedInt type,
                           const std::string &name)
 {
    #ifdef DEBUG_MATLABWS_SET
@@ -496,9 +496,9 @@ bool MatlabWorkspace::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& MatlabWorkspace::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& MatlabWorkspace::GetRefObjectNameArray(const UnsignedInt type)
 {
    mAllRefObjectNames.clear();
    

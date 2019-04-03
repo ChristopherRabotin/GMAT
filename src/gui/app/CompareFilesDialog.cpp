@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -260,7 +260,15 @@ void CompareFilesDialog::Create()
    numFilesGridSizer->Add(toleranceLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    numFilesGridSizer->Add(mToleranceTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
    
-   if (!mCompareOption == 1)
+   // Inner parentheses were added below to turn off warnings
+   // need to verify intent was not "if (!(mCompareOption == 1)"
+   // the concern is that since mCompareOption isn't Bool the # of possible
+   // options is unknown. As written, this is true only if mCompareOption is 0,
+   // because if mCompareOption !=0 then !nCompareOption == 0.
+   //if (!(mCompareOption) == 1)
+   //warnings persisted even with parentheses around mCompareOption, so rewrote
+   //  using "!="
+   if (mCompareOption != 1)
    {
       numFilesGridSizer->Hide(toleranceLabel);
       numFilesGridSizer->Hide(mToleranceTextCtrl);

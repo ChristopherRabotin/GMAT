@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -527,7 +527,7 @@ void AtmosphereModel::UpdateAngularVelocity(const GmatEpoch when)
             throw AtmosphereException("The body-fixed coordinate system is "
                   "not set");
          Real in[3], out[3];
-         cbFixed->ToBaseSystem(when, in, out, true, true);  // @todo - do we need ToMJ2000Eq here?
+         cbFixed->ToBaseSystem(A1Mjd(when), in, out, true, true);  // @todo - do we need ToMJ2000Eq here?
          BuildAngularVelocity(when);
       }
    }

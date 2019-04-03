@@ -62,7 +62,7 @@ GMAT DefaultProp_ForceModel.ErrorControl = RSSStep;
 GMAT DefaultProp_ForceModel.GravityField.Earth.Degree = 4;
 GMAT DefaultProp_ForceModel.GravityField.Earth.Order = 4;
 GMAT DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
-GMAT DefaultProp_ForceModel.GravityField.Earth.EarthTideModel = 'None';
+GMAT DefaultProp_ForceModel.GravityField.Earth.TideModel = 'None';
 
 %----------------------------------------
 %---------- Propagators

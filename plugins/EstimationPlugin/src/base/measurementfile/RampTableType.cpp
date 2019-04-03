@@ -300,6 +300,8 @@ RampTableData* RampTableType::ReadRampTableData()
 
    std::string s1;
    std::stringstream theLine;
+   std::stringstream theLine1;
+
    Integer participantSize;
 
    // Do nothing when it is at the end of file
@@ -323,6 +325,7 @@ RampTableData* RampTableType::ReadRampTableData()
 
    // Processing data in the line
    theLine << s1;
+   theLine1 << s1;
    currentRecord.Clear();
    currentRecord.dataFormat = "GMAT_RampTable";
 
@@ -330,6 +333,17 @@ RampTableData* RampTableType::ReadRampTableData()
    // Epoch   StationID   SpacecraftID    Uplink Band       Ramp Type     Ramp Frequency     Ramp Rate
    // Real    string      string          Integer           Integer      Real               Real
    Real value; 
+
+   std::string taiEpochStr;
+   theLine1 >> taiEpochStr;
+
+   GmatTime taiEpochGT;
+   taiEpochGT.SetMjdString(taiEpochStr);
+   currentRecord.epochGT = (currentRecord.epochSystem == TimeConverterUtil::TAIMJD ?
+              taiEpochGT :
+              TimeConverterUtil::ConvertFromTaiMjd(currentRecord.epochSystem, taiEpochGT,
+              GmatTimeConstants::JD_NOV_17_1858));
+
 
    GmatEpoch taiEpoch;
    theLine >> taiEpoch;

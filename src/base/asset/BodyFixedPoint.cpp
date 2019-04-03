@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -126,7 +126,7 @@ Integer BodyFixedPoint::gsNaifId = 999;
  */
 //---------------------------------------------------------------------------
 BodyFixedPoint::BodyFixedPoint(const std::string &itsType, const std::string &itsName,
-      const Gmat::ObjectType objType) :
+      const UnsignedInt objType) :
    SpacePoint           (objType, itsType, itsName),
    cBodyName            ("Earth"),
    theBody              (NULL),
@@ -611,7 +611,7 @@ bool BodyFixedPoint::IsParameterReadOnly(const std::string &label) const
 }
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Retrieves object type of parameter of given id.
@@ -621,7 +621,7 @@ bool BodyFixedPoint::IsParameterReadOnly(const std::string &label) const
  * @return parameter ObjectType
  */
 //---------------------------------------------------------------------------
-Gmat::ObjectType BodyFixedPoint::GetPropertyObjectType(const Integer id) const
+UnsignedInt BodyFixedPoint::GetPropertyObjectType(const Integer id) const
 {
    switch (id)
    {
@@ -866,7 +866,7 @@ bool BodyFixedPoint::SetStringParameter(const std::string &label,
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//  GmatBase* GetRefObject(const UnsignedInt type,
 //                         const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -878,7 +878,7 @@ bool BodyFixedPoint::SetStringParameter(const std::string &label,
  * @return pointer to the reference object requested.
  */
 //------------------------------------------------------------------------------
-GmatBase* BodyFixedPoint::GetRefObject(const Gmat::ObjectType type,
+GmatBase* BodyFixedPoint::GetRefObject(const UnsignedInt type,
                                        const std::string &name)
 {
    #ifdef TEST_BODYFIXED_POINT
@@ -897,7 +897,7 @@ GmatBase* BodyFixedPoint::GetRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -910,7 +910,7 @@ GmatBase* BodyFixedPoint::GetRefObject(const Gmat::ObjectType type,
  * @return true if successful; otherwise, false.
  */
 //------------------------------------------------------------------------------
-bool BodyFixedPoint::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool BodyFixedPoint::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                  const std::string &name)
 {
    if (obj == NULL)
@@ -1117,7 +1117,7 @@ bool BodyFixedPoint::SetStringParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name,
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name,
 //                        const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -1131,7 +1131,7 @@ bool BodyFixedPoint::SetStringParameter(const std::string &label,
  * @return pointer to the reference object requested.
  */
 //------------------------------------------------------------------------------
-GmatBase* BodyFixedPoint::GetRefObject(const Gmat::ObjectType type,
+GmatBase* BodyFixedPoint::GetRefObject(const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index)
 {
@@ -1139,7 +1139,7 @@ GmatBase* BodyFixedPoint::GetRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -1154,7 +1154,7 @@ GmatBase* BodyFixedPoint::GetRefObject(const Gmat::ObjectType type,
  * @return true if successful; otherwise, false.
  */
 //------------------------------------------------------------------------------
-bool BodyFixedPoint::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool BodyFixedPoint::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                   const std::string &name,
                                   const Integer index)
 {
@@ -1182,12 +1182,12 @@ bool BodyFixedPoint::HasRefObjectTypeArray()
 /**
  */
 //------------------------------------------------------------------------------
-std::string BodyFixedPoint::GetRefObjectName(const Gmat::ObjectType type) const
+std::string BodyFixedPoint::GetRefObjectName(const UnsignedInt type) const
 {
    return cBodyName;
 }
 
-const StringArray& BodyFixedPoint::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& BodyFixedPoint::GetRefObjectNameArray(const UnsignedInt type)
 {
    #ifdef DEBUG_BF_REF
       MessageInterface::ShowMessage("In BFP::GetRefObjectNameArray, requesting type %d (%s)\n",
@@ -1272,6 +1272,49 @@ const Rvector6 BodyFixedPoint::GetMJ2000State(const A1Mjd &atTime)
    return j2000PosVel;
 }
 
+
+const Rvector6 BodyFixedPoint::GetMJ2000State(const GmatTime &atTime)
+{
+#ifdef DEBUG_BODYFIXED_STATE
+   MessageInterface::ShowMessage("In GetMJ2000State for BodyFixedPoint %s\n",
+      instanceName.c_str());
+#endif
+
+   UpdateBodyFixedLocation();
+   GmatTime epoch = atTime;
+   Rvector6 bfState;
+
+   // For now I'm ignoring velocity; this assumes bfLocation is kept up-to-date
+   bfState.Set(bfLocation[0], bfLocation[1], bfLocation[2], 0.0, 0.0, 0.0);
+
+   // Convert from the body-fixed location to a J2000 location,
+   // assuming you have pointer to coordinate systems mj2k and bfcs,
+   // where mj2k is a J2000 system and bfcs is BodyFixed
+#ifdef DEBUG_BODYFIXED_STATE
+   MessageInterface::ShowMessage("... before call to Convert, epoch = %12.10f\n",
+      epoch.GetMjd());
+   MessageInterface::ShowMessage(" ... bfcs (%s) = %s  and mj2kcs (%s) = %s\n",
+      bfcsName.c_str(), (bfcs ? "NOT NULL" : "NULL"),
+      mj2kcsName.c_str(), (mj2kcs ? "NOT NULL" : "NULL"));
+   MessageInterface::ShowMessage("bf state (in bfcs, cartesian) = %s\n",
+      (bfState.ToString()).c_str());
+   MessageInterface::ShowMessage("SolarSystem is%s NULL\n", (solarSystem ? " NOT " : ""));
+   MessageInterface::ShowMessage("before, J2000PosVel = %s\n",
+      (j2000PosVel.ToString()).c_str());
+#endif
+   ccvtr.Convert(epoch, bfState, bfcs, j2000PosVel, mj2kcs);
+#ifdef DEBUG_BODYFIXED_STATE
+   MessageInterface::ShowMessage("bf state (in mj2kcs, cartesian) = %s\n",
+      (j2000PosVel.ToString()).c_str());
+#endif
+
+   lastStateTimeGT = atTime;
+   lastStateTime   = GmatTime(atTime).GetMjd();
+   lastState = j2000PosVel;
+   return j2000PosVel;
+}
+
+
 //------------------------------------------------------------------------------
 //  const Rvector3 GetMJ2000Position(const A1Mjd &atTime)
 //------------------------------------------------------------------------------
@@ -1293,6 +1336,15 @@ const Rvector3 BodyFixedPoint::GetMJ2000Position(const A1Mjd &atTime)
    return j2000Pos;
 }
 
+
+const Rvector3 BodyFixedPoint::GetMJ2000Position(const GmatTime &atTime)
+{
+   Rvector6 rv = GetMJ2000State(atTime);
+   j2000Pos = rv.GetR();
+   return j2000Pos;
+}
+
+
 //------------------------------------------------------------------------------
 //  const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime)
 //------------------------------------------------------------------------------
@@ -1313,6 +1365,15 @@ const Rvector3 BodyFixedPoint::GetMJ2000Velocity(const A1Mjd &atTime)
    j2000Vel = rv.GetV();
    return j2000Vel;
 }
+
+
+const Rvector3 BodyFixedPoint::GetMJ2000Velocity(const GmatTime &atTime)
+{
+   Rvector6 rv = GetMJ2000State(atTime);
+   j2000Vel = rv.GetV();
+   return j2000Vel;
+}
+
 
 //------------------------------------------------------------------------------
 //  bool GetBodyFixedLocation(const A1Mjd &atTime)

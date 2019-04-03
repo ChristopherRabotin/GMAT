@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,6 +39,7 @@
 #include "Covariance.hpp"
 #include "TimeSystemConverter.hpp"
 #include "GmatTime.hpp"
+#include "SpacePoint.hpp"
 
 /**
  *  The measurement data structure
@@ -75,13 +76,32 @@ public:
                      epochSystem;
    /// The epoch of the measurement
    GmatEpoch         epoch;
+   GmatTime          epochGT;
+
    /// Who is involved in the measurement.  First one is the "anchor" node
    StringArray       participantIDs;
    /// The id of sensor attached to participant in order to send or receive signal (use for GPS Point Solution)
    StringArray       sensorIDs;
    /// The measured value.  Array to handle more than one value, like AZ_EL
    RealArray         value;
+   /// Corrections included in the measured value.  Array to handle more than one value, like AZ_EL
+   RealArray         correction;
+   /// The range vectors for each signal segment
+   std::vector<Rvector3*> rangeVecs;
    
+   /// The central body for each transmit signal segment
+   std::vector<SpacePoint*> tBodies;
+   /// The central body for each receive signal segment
+   std::vector<SpacePoint*> rBodies;
+   /// The transmit time for each signal segment
+   std::vector<GmatTime> tPrecTimes;
+   /// The receive time for each signal segment
+   std::vector<GmatTime> rPrecTimes;
+   /// The transmit location for each signal segment
+   std::vector<Rvector3*> tLocs;
+   /// The receive location for each signal segment
+   std::vector<Rvector3*> rLocs;
+
    // This is use for DSN_TCP measurement only 
    /// The measured value present in travel time without noise and bias
    std::vector<GmatTime>  valueInTime;

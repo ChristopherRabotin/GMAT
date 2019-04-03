@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -95,6 +95,7 @@
 //#define DEBUG_SC_NAIF_ID
 //#define DEBUG_ESTIMATION
 //#define DEBUG_ATTRIB_COMMENT
+//#define DEBUG_CHANGE_EPOCH_PRECISION
 
 #ifdef DEBUG_SPACECRAFT
 #include <iostream>
@@ -369,7 +370,6 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    srpArea              (1.0),
    reflectCoeff         (1.8),
    reflectCoeffSigma    (1.0e70),                 // set a large number to parameter's covariance
-   estimationStateType  ("Cartesian"),
    orbitErrorCovariance (6,6),                    // 6x6 matrix
    epochSystem          ("TAI"),
    epochFormat          ("ModJulian"),
@@ -457,6 +457,8 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
 
    //state.SetEpoch(GmatTimeConstants::MJD_OF_J2000);
    state.SetEpoch(a1mjd);
+   state.SetEpochGT(GmatTime(a1mjd));
+   state.SetPrecisionTimeFlag(hasPrecisionTime);
 
    for (Integer ii = 0; ii < state.GetSize(); ii++)
       state[ii] = UNSET_ELEMENT_VALUE;
@@ -507,6 +509,9 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    // Create a default unnamed attitude
    attitude = new CSFixed("");
    attitude->SetEpoch(state.GetEpoch());
+   attitude->SetEpochGT(state.GetEpochGT());
+   attitude->SetPrecisionTimeFlag(hasPrecisionTime);
+
    attitude->SetOwningSpacecraft(this);
    ownedObjectCount++;
 
@@ -645,9 +650,8 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    srpArea              (a.srpArea),
    reflectCoeff         (a.reflectCoeff),
    reflectCoeffSigma    (a.reflectCoeffSigma),
-   estimationStateType  (a.estimationStateType),
    orbitErrorCovariance (a.orbitErrorCovariance),
-   epochSystem(a.epochSystem),
+   epochSystem          (a.epochSystem),
    epochFormat          (a.epochFormat),
    epochType            (a.epochType),
    stateType            (a.stateType),
@@ -707,13 +711,14 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    parameterCount = a.parameterCount;
    ownedObjectCount = 0;
 
-   state.SetEpoch(a.state.GetEpoch());
-   state[0] = a.state[0];
-   state[1] = a.state[1];
-   state[2] = a.state[2];
-   state[3] = a.state[3];
-   state[4] = a.state[4];
-   state[5] = a.state[5];
+   //state[0] = a.state[0];
+   //state[1] = a.state[1];
+   //state[2] = a.state[2];
+   //state[3] = a.state[3];
+   //state[4] = a.state[4];
+   //state[5] = a.state[5];
+   state = a.state;
+
    trueAnomaly = a.trueAnomaly;
 
    stateElementLabel = a.stateElementLabel;
@@ -859,13 +864,13 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 //       a.trueAnomaly.GetTypeString().c_str());
    #endif
 
-   state.SetEpoch(a.state.GetEpoch());
-   state[0] = a.state[0];
-   state[1] = a.state[1];
-   state[2] = a.state[2];
-   state[3] = a.state[3];
-   state[4] = a.state[4];
-   state[5] = a.state[5];
+   //state[0] = a.state[0];
+   //state[1] = a.state[1];
+   //state[2] = a.state[2];
+   //state[3] = a.state[3];
+   //state[4] = a.state[4];
+   //state[5] = a.state[5];
+   state = a.state;
 
    stateElementLabel = a.stateElementLabel;
    stateElementUnits = a.stateElementUnits;
@@ -954,7 +959,6 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    constrainCr        = a.constrainCr;
 
 
-   estimationStateType      = a.estimationStateType;
    orbitErrorCovariance     = a.orbitErrorCovariance;
 
    // Set value to covariance matrix
@@ -1539,10 +1543,10 @@ void Spacecraft::Copy(const GmatBase* orig)
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool Spacecraft::RenameRefObject(const Gmat::ObjectType type,
+bool Spacecraft::RenameRefObject(const UnsignedInt type,
                                  const std::string &oldName,
                                  const std::string &newName)
 {
@@ -1805,7 +1809,7 @@ void Spacecraft::SetInlineAttributeComment(Integer index,
 }
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * This method returns the name of the referenced objects.
@@ -1813,7 +1817,7 @@ void Spacecraft::SetInlineAttributeComment(Integer index,
  * @return name of the reference object of the requested type.
  */
 //------------------------------------------------------------------------------
-std::string Spacecraft::GetRefObjectName(const Gmat::ObjectType type) const
+std::string Spacecraft::GetRefObjectName(const UnsignedInt type) const
 {
    if (type == Gmat::COORDINATE_SYSTEM)
    {
@@ -1869,7 +1873,7 @@ const ObjectTypeArray& Spacecraft::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//  const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * This method returns an array with the names of the referenced objects.
@@ -1878,7 +1882,7 @@ const ObjectTypeArray& Spacecraft::GetRefObjectTypeArray()
  */
 //------------------------------------------------------------------------------
 const StringArray&
-Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
+Spacecraft::GetRefObjectNameArray(const UnsignedInt type)
 {
    #ifdef DEBUG_SC_REF_OBJECT
    MessageInterface::ShowMessage
@@ -2062,18 +2066,18 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const char *name)
+// bool SetRefObjectName(const UnsignedInt type, const char *name)
 //------------------------------------------------------------------------------
-bool Spacecraft::SetRefObjectName(const Gmat::ObjectType type, const char *name)
+bool Spacecraft::SetRefObjectName(const UnsignedInt type, const char *name)
 {
    return SetRefObjectName(type, std::string(name));
 }
 
 // DJC: Not sure if we need this yet...
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
-bool Spacecraft::SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+bool Spacecraft::SetRefObjectName(const UnsignedInt type, const std::string &name)
 {
    #ifdef DEBUG_SC_REF_OBJECT
    MessageInterface::ShowMessage
@@ -2106,7 +2110,7 @@ bool Spacecraft::SetRefObjectName(const Gmat::ObjectType type, const std::string
 
 
 //---------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name)
 //---------------------------------------------------------------------------
 /**
  * Returns the reference object pointer.
@@ -2117,7 +2121,7 @@ bool Spacecraft::SetRefObjectName(const Gmat::ObjectType type, const std::string
  * @return reference object pointer.
  */
 //---------------------------------------------------------------------------
-GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
+GmatBase* Spacecraft::GetRefObject(const UnsignedInt type,
                                    const std::string &name)
 {
    #ifdef DEBUG_GET_REF_OBJECT
@@ -2195,10 +2199,10 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name)
 //------------------------------------------------------------------------------
-bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool Spacecraft::SetRefObject(GmatBase *obj, const UnsignedInt type,
                               const std::string &name)
 {
    #ifdef DEBUG_SC_REF_OBJECT
@@ -2504,6 +2508,9 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          instanceName.c_str());
       #endif
       attitude->SetEpoch(state.GetEpoch());
+      attitude->SetEpochGT(state.GetEpochGT());
+      attitude->SetPrecisionTimeFlag(hasPrecisionTime);
+
       attitude->SetOwningSpacecraft(this);
       #ifdef __USE_SPICE__
          if (attitude->IsOfType("SpiceAttitude"))
@@ -2558,7 +2565,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //---------------------------------------------------------------------------
-//  ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+//  ObjectArray& GetRefObjectArray(const UnsignedInt type)
 //---------------------------------------------------------------------------
 /**
  * Obtains an array of GmatBase pointers by type.
@@ -2568,7 +2575,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return Reference to the array.
  */
 //---------------------------------------------------------------------------
-ObjectArray& Spacecraft::GetRefObjectArray(const Gmat::ObjectType type)
+ObjectArray& Spacecraft::GetRefObjectArray(const UnsignedInt type)
 {
    if (type == Gmat::HARDWARE)
       return hardwareList;
@@ -2587,7 +2594,7 @@ ObjectArray& Spacecraft::GetRefObjectArray(const Gmat::ObjectType type)
 
 
 //---------------------------------------------------------------------------
-//  ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+//  ObjectArray& GetRefObjectArray(const UnsignedInt type)
 //---------------------------------------------------------------------------
 /**
  * Obtains an array of GmatBase pointers based on a string (e.g. the typename).
@@ -2656,7 +2663,6 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
          }
       }
 
-
       // Check for element label
       for (Integer i = SpaceObjectParamCount; i < SpacecraftParamCount; ++i)
       {
@@ -2689,7 +2695,41 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
       if (str == "CartesianVY")  return CARTESIAN_VY;
       if (str == "CartesianVZ")  return CARTESIAN_VZ;
 
+      if (str == "KeplerianState") return CARTESIAN_X;
+
+      // check for hardware object
+      if (hardwareNames.size() != 0)
+      {
+         for (Integer ii = 0; ii < hardwareNames.size(); ii++)
+         {
+            if (str == hardwareNames[ii])
+               return ADD_HARDWARE;
+         }
+      }
+
+      if (tankNames.size() != 0)
+      {
+         for (Integer ii = 0; ii < tankNames.size(); ii++)
+         {
+            if (str == tankNames[ii])
+               return FUEL_TANK_ID;
+         }
+      }
+
+      if (thrusterNames.size() != 0)
+      {
+         for (Integer ii = 0; ii < thrusterNames.size(); ii++)
+         {
+            if (str == thrusterNames[ii])
+               return THRUSTER_ID;
+         }
+      }
+
+      if (str == powerSystemName)
+         return POWER_SYSTEM_ID;
+
       return SpaceObject::GetParameterID(str);
+
    }
    catch (BaseException&)
    {
@@ -2805,6 +2845,8 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
       return (ephemerisName == "");
 
    // if (id == STATE_TYPE) return true;   when deprecated stuff goes away
+
+   if (id == ESTIMATION_STATE_TYPE_ID) return true;
 
    return SpaceObject::IsParameterReadOnly(id);
 }
@@ -3044,6 +3086,40 @@ std::string Spacecraft::GetParameterTypeString(const Integer id) const
     return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
+
+GmatTime Spacecraft::GetGmatTimeParameter(const Integer id) const
+{
+   return SpaceObject::GetGmatTimeParameter(id);
+}
+
+
+GmatTime Spacecraft::SetGmatTimeParameter(const Integer id, const GmatTime value)
+{
+   return SpaceObject::SetGmatTimeParameter(id, value);
+}
+
+
+GmatTime Spacecraft::GetGmatTimeParameter(const std::string &label) const
+{
+   if (label == "A1Epoch")
+      return state.GetEpochGT();
+
+   return GetGmatTimeParameter(GetParameterID(label));
+}
+
+
+GmatTime Spacecraft::SetGmatTimeParameter(const std::string &label, GmatTime value)
+{
+   if (label == "A1Epoch")
+   {
+      state.SetEpoch(value.GetMjd());
+      return state.SetEpochGT(value);
+   }
+
+   return SetGmatTimeParameter(GetParameterID(label), value);
+}
+
+
 //---------------------------------------------------------------------------
 //  Real GetRealParameter(const Integer id) const
 //---------------------------------------------------------------------------
@@ -3259,7 +3335,13 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
          //'Real' : forcing value to bool 'true' or 'false' (performance warning)
          //attOK = attitude->SetRealParameter(id - ATTITUDE_ID_OFFSET,value);
          attOK = (attitude->SetRealParameter(id - ATTITUDE_ID_OFFSET,value) == value);
-         if (attOK)  attitude->SetEpoch(state.GetEpoch());
+
+         if (attOK)
+         {
+            attitude->SetEpoch(state.GetEpoch());
+            attitude->SetEpochGT(state.GetEpochGT());
+            attitude->SetPrecisionTimeFlag(hasPrecisionTime);
+         }
          //return attOK; //LOJ: To return real value
          return value;
       }
@@ -3429,6 +3511,7 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
       ("In SC::SetRealParameter(label)(%s), label = %s and value = %.12f\n",
        instanceName.c_str(), label.c_str(), value);
    #endif
+   
    // first (really) see if it's a parameter for an owned object (i.e. attitude)
    if (GetParameterID(label) >= ATTITUDE_ID_OFFSET)
       if (attitude)
@@ -3440,7 +3523,12 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
          //'Real' : forcing value to bool 'true' or 'false' (performance warning)
          //attOK = attitude->SetRealParameter(label, value);
          attOK = (attitude->SetRealParameter(label, value) == value);
-         if (attOK)  attitude->SetEpoch(state.GetEpoch());
+         if (attOK)
+         {
+            attitude->SetEpoch(state.GetEpoch());
+            attitude->SetEpochGT(state.GetEpochGT());
+            attitude->SetPrecisionTimeFlag(hasPrecisionTime);
+         }
          //return attOK; //LOJ: To return real value
          return value;
       }
@@ -3451,14 +3539,16 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
       throw SpaceObjectException
          ("ERROR - setting of anomaly of type other than True Anomaly not "
           "currently allowed.");
-
+   
    // First try to set as a state element
    if (SetElement(label, value))
       return value;
-
+   
    if (label == "A1Epoch")
    {
       state.SetEpoch(value);
+      state.SetEpochGT(GmatTime(value));
+
       if (epochSet && !csSet)
       {
          std::string warnmsg = "*** WARNING *** You have set the epoch for Spacecraft ";
@@ -3809,8 +3899,8 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
     if (id == COORD_SYS_ID)
        return coordSysName;
 
-    if (id == ESTIMATION_STATE_TYPE_ID)
-       return estimationStateType;
+    //if (id == ESTIMATION_STATE_TYPE_ID)
+    //   return estimationStateType;
 
     if ((id >= ELEMENT1UNIT_ID) && (id <= ELEMENT6UNIT_ID))
        return stateElementUnits[id - ELEMENT1UNIT_ID];
@@ -4138,11 +4228,24 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
             return false;
          }
 
-         //if (id == SOLVEFORS)
-         // Only add the solvefor parameter if it is not in the list already
-         if (find(solveforNames.begin(), solveforNames.end(), value) ==
-            solveforNames.end())
+         if ((value == "CartesianState") || (value == "KeplerianState"))
+         {
+            // Remove CartesianState or KeplerianState from the list
+            for (Integer i = 0; i < solveforNames.size(); ++i)
+            {
+               if ((solveforNames[i] == "CartesianState") || (solveforNames[i] == "KeplerianState"))
+               {
+                  solveforNames[i] = solveforNames[solveforNames.size() - 1];
+                  solveforNames.pop_back();
+               }
+            }
+         }
+
+         if (find(solveforNames.begin(), solveforNames.end(), value) == solveforNames.end())
+         {
+            // Only add the solvefor parameter if it is not in the list already
             solveforNames.push_back(value);
+         }
       }
 
       // Make sure the solve-for list is in the STM
@@ -4175,7 +4278,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       for (UnsignedInt i = 0; i < stmElementNames.size(); ++i)
       {
          // Cartesian state handled above
-         if (stmElementNames[i] != "CartesianState")
+         if ((stmElementNames[i] != "CartesianState") && (stmElementNames[i] != "KeplerianState"))
          {
             length += GetEstimationParameterSize(GetParameterID(stmElementNames[i]));
             for (Integer j = 0; j < GetEstimationParameterSize(
@@ -4381,9 +4484,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
    }
    else if (id == ESTIMATION_STATE_TYPE_ID)
    {
-      if (value != "Cartesian")             //((value != "Cartesian") && (value != "Keplerian"))                                  // code changed for request in ticket GMT-5701
-         throw GmatBaseException("Error: Estimation state type '" + value + "' was not implemented in current GMAT version.\n");
-      estimationStateType = value;
+      MessageInterface::ShowMessage("*** WARNING *** EstimationStateType is no longer used and will be removed in a future build.\n");
    }
    else
       return SpaceObject::SetStringParameter(id, value);
@@ -4510,7 +4611,9 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
          else
             // Only add the solvefor parameter if it is not in the list already
             if (find(solveforNames.begin(), solveforNames.end(), value) == solveforNames.end())
+            {
                solveforNames.push_back(value);
+            }
 
          return true;
       }
@@ -4521,7 +4624,9 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
          stmElementNames[index] = value;
       else
          if (find(stmElementNames.begin(), stmElementNames.end(), value) == stmElementNames.end())
+         {
             stmElementNames.push_back(value);
+         }
       return true;
       break;
 
@@ -4532,7 +4637,9 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
          else
             // Only add the tank if it is not in the list already
             if (find(tankNames.begin(), tankNames.end(), value) == tankNames.end())
+            {
                tankNames.push_back(value);
+            }
 
          return true;
       }
@@ -4545,9 +4652,10 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
          else
             // Only add the tank if it is not in the list already
             if (find(thrusterNames.begin(), thrusterNames.end(), value) ==
-                thrusterNames.end())
+            thrusterNames.end())
+            {
                thrusterNames.push_back(value);
-
+            }
          return true;
       }
       break;
@@ -4891,7 +4999,12 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value,
             //'Real' : forcing value to bool 'true' or 'false' (performance warning)
             //attOK = attitude->SetRealParameter(id - ATTITUDE_ID_OFFSET, value, index);
             attOK = (attitude->SetRealParameter(id - ATTITUDE_ID_OFFSET, value, index) == value);
-            if (attOK)  attitude->SetEpoch(state.GetEpoch());
+            if (attOK)
+            {
+               attitude->SetEpoch(state.GetEpoch());
+               attitude->SetEpochGT(state.GetEpochGT());
+               attitude->SetPrecisionTimeFlag(hasPrecisionTime);
+            }
             //return attOK; //LOJ: To return real value
             return value;
          }
@@ -5129,6 +5242,9 @@ bool Spacecraft::TakeAction(const std::string &action,
    if (action == "UpdateEpoch")
    {
       Real currEpoch = state.GetEpoch();
+      GmatTime currEpochGT = currEpoch;
+      if (state.HasPrecisionTime())
+         currEpochGT = state.GetEpochGT();
       
       bool isInLeapSecond = false;
       bool isUTC          = false;
@@ -5138,10 +5254,21 @@ bool Spacecraft::TakeAction(const std::string &action,
          if (epochSystem != "A1")
          {
             Integer epochSystemID = TimeConverterUtil::GetTimeTypeID(epochSystem);
-            currEpoch = TimeConverterUtil::Convert(currEpoch,
-                          TimeConverterUtil::A1,
-                          epochSystemID,
-                          GmatTimeConstants::JD_JAN_5_1941);
+            if (state.HasPrecisionTime())
+            {
+               currEpochGT = TimeConverterUtil::Convert(currEpochGT, 
+                  TimeConverterUtil::A1, 
+                  epochSystemID, 
+                  GmatTimeConstants::JD_JAN_5_1941);
+            }
+            else
+            {
+               currEpoch = TimeConverterUtil::Convert(currEpoch,
+                  TimeConverterUtil::A1,
+                  epochSystemID,
+                  GmatTimeConstants::JD_JAN_5_1941);
+            }
+
             isInLeapSecond = TimeConverterUtil::HandleLeapSecond();
             if ((epochSystemID == TimeConverterUtil::UTCMJD) ||
                 (epochSystemID == TimeConverterUtil::UTC))
@@ -5154,13 +5281,20 @@ bool Spacecraft::TakeAction(const std::string &action,
          if (epochFormat == "Gregorian")
          {
             bool handleLeapSecond = isInLeapSecond && isUTC;
-            scEpochStr = TimeConverterUtil::ConvertMjdToGregorian(currEpoch, handleLeapSecond);
+            if (state.HasPrecisionTime())
+               scEpochStr = TimeConverterUtil::ConvertMjdToGregorian(currEpochGT.GetMjd(), handleLeapSecond);
+            else
+               scEpochStr = TimeConverterUtil::ConvertMjdToGregorian(currEpoch, handleLeapSecond);
          }
          else
          {
             std::stringstream timestream;
             timestream.precision(GetTimePrecision());
-            timestream << currEpoch;
+            if (state.HasPrecisionTime())
+               timestream << currEpochGT.ToString();
+            else
+               timestream << currEpoch;
+
             scEpochStr = timestream.str();
          }
       }
@@ -5239,7 +5373,7 @@ GmatBase* Spacecraft::GetOwnedObject(Integer whichOne)
 }
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Retrieves object type of parameter of given id.
@@ -5249,7 +5383,7 @@ GmatBase* Spacecraft::GetOwnedObject(Integer whichOne)
  * @return parameter ObjectType
  */
 //---------------------------------------------------------------------------
-Gmat::ObjectType Spacecraft::GetPropertyObjectType(const Integer id) const
+UnsignedInt Spacecraft::GetPropertyObjectType(const Integer id) const
 {
    if (id >= ATTITUDE_ID_OFFSET)
    {
@@ -5603,6 +5737,9 @@ void Spacecraft::SetEpoch(const std::string &ep)
 
    Real fromMjd = -999.999;
    Real outMjd = -999.999;
+   GmatTime fromMjdGT = GmatTime(-999.999);
+   GmatTime outMjdGT = GmatTime(-999.999);
+
    std::string outStr;
 
    #ifdef DEBUG_DATE_FORMAT
@@ -5612,33 +5749,78 @@ void Spacecraft::SetEpoch(const std::string &ep)
 
    // remove enclosing quotes for the conversion
    std::string epNoQuote = GmatStringUtil::RemoveEnclosingString(ep, "'");
-   TimeConverterUtil::Convert(epochType, fromMjd, epNoQuote, "A1ModJulian", outMjd,
-                              outStr);
-   #ifdef DEBUG_DATE_FORMAT
-      MessageInterface::ShowMessage
-         ("Spacecraft::SetEpoch() Done converting from %s to A1ModJulian\n", epochType.c_str());
-   #endif
+   TimeConverterUtil::Convert(epochType, fromMjdGT, epNoQuote, "A1ModJulian", outMjdGT, outStr);
+   TimeConverterUtil::Convert(epochType, fromMjd, epNoQuote, "A1ModJulian", outMjd, outStr);
 
-   if (outMjd != -999.999)
+   if (hasPrecisionTime)
    {
-      RecomputeStateAtEpoch(outMjd);
-      state.SetEpoch(outMjd);
-      if (epochSet && !csSet)
+      #ifdef DEBUG_DATE_FORMAT
+         MessageInterface::ShowMessage
+            ("Spacecraft::SetEpoch() Done converting from %s to A1ModJulian\n", epochType.c_str());
+         MessageInterface::ShowMessage("    outMjdGT = %s\n", outMjdGT.ToString().c_str());
+      #endif
+
+      if (outMjdGT != GmatTime(-999.999))
       {
-         std::string warnmsg = "*** WARNING *** You have set the epoch for Spacecraft ";
-         warnmsg += instanceName + " more than once in assignment mode (i.e. before the BeginMissionSequence command).  ";
-         warnmsg += "This may have unintended consequences and you should perform these ";
-         warnmsg += "operations in command mode (i.e. after the BeginMissionSequence command).\n";
-         MessageInterface::PopupMessage(Gmat::WARNING_,warnmsg);
+         RecomputeStateAtEpochGT(outMjdGT);
+         state.SetEpoch(outMjd);
+         state.SetEpochGT(outMjdGT);
+         if (epochSet && !csSet)
+         {
+            std::string warnmsg = "*** WARNING *** You have set the epoch for Spacecraft ";
+            warnmsg += instanceName + " more than once in assignment mode (i.e. before the BeginMissionSequence command).  ";
+            warnmsg += "This may have unintended consequences and you should perform these ";
+            warnmsg += "operations in command mode (i.e. after the BeginMissionSequence command).\n";
+            MessageInterface::PopupMessage(Gmat::WARNING_, warnmsg);
+         }
+         epochSet = true;
+         if (attitude)
+         {
+            attitude->SetEpochGT(outMjd);
+            attitude->SetEpochGT(outMjdGT);
+         }
       }
-      epochSet  = true;
-      if (attitude) attitude->SetEpoch(outMjd);
+      else
+      {
+         #ifdef DEBUG_DATE_FORMAT
+            MessageInterface::ShowMessage("Spacecraft::SetEpoch() oops!  outMjdGT = -999.999!!\n");
+         #endif
+      }
+
    }
    else
    {
       #ifdef DEBUG_DATE_FORMAT
-      MessageInterface::ShowMessage("Spacecraft::SetEpoch() oops!  outMjd = -999.999!!\n");
+         MessageInterface::ShowMessage
+            ("Spacecraft::SetEpoch() Done converting from %s to A1ModJulian\n", epochType.c_str());
       #endif
+
+      if (outMjd != -999.999)
+      {
+         RecomputeStateAtEpoch(outMjd);
+         state.SetEpoch(outMjd);
+         state.SetEpochGT(outMjdGT);
+         if (epochSet && !csSet)
+         {
+            std::string warnmsg = "*** WARNING *** You have set the epoch for Spacecraft ";
+            warnmsg += instanceName + " more than once in assignment mode (i.e. before the BeginMissionSequence command).  ";
+            warnmsg += "This may have unintended consequences and you should perform these ";
+            warnmsg += "operations in command mode (i.e. after the BeginMissionSequence command).\n";
+            MessageInterface::PopupMessage(Gmat::WARNING_, warnmsg);
+         }
+         epochSet = true;
+         if (attitude)
+         {
+            attitude->SetEpoch(outMjd);
+            attitude->SetEpochGT(outMjdGT);
+         }
+      }
+      else
+      {
+         #ifdef DEBUG_DATE_FORMAT
+         MessageInterface::ShowMessage("Spacecraft::SetEpoch() oops!  outMjd = -999.999!!\n");
+         #endif
+      }
    }
 
 }
@@ -5664,8 +5846,19 @@ void Spacecraft::SetEpoch(const std::string &type, const std::string &ep, Real a
    TimeConverterUtil::GetTimeSystemAndFormat(type, epochSystem, epochFormat);
    epochType = type;
    scEpochStr = ep;
-   RecomputeStateAtEpoch(a1mjd);
-   state.SetEpoch(a1mjd);
+   if (hasPrecisionTime)
+   {
+      GmatTime a1mjdGT = GmatTime(a1mjd);
+      RecomputeStateAtEpochGT(a1mjdGT);
+      state.SetEpochGT(a1mjdGT);
+      state.SetEpochGT(a1mjd);
+   }
+   else
+   {
+      RecomputeStateAtEpoch(a1mjd);
+      state.SetEpoch(a1mjd);
+      state.SetEpochGT(GmatTime(a1mjd));
+   }
    if (epochSet && !csSet)
    {
       std::string warnmsg = "*** WARNING *** You have set the epoch for Spacecraft ";
@@ -6090,7 +6283,7 @@ void Spacecraft::UpdateClonedObject(GmatBase *obj)
 
    if (obj->IsOfType(Gmat::HARDWARE))
    {
-      Gmat::ObjectType objType = obj->GetType();
+      UnsignedInt objType = obj->GetType();
 
       // updates for PowerSystem
       if (objType == Gmat::POWER_SYSTEM)
@@ -6192,7 +6385,7 @@ void Spacecraft::UpdateClonedObjectParameter(GmatBase *obj,
 
    if (obj->IsOfType(Gmat::HARDWARE))
    {
-      Gmat::ObjectType objType = obj->GetType();
+      UnsignedInt objType = obj->GetType();
 
       // updates for fueltank
       if (objType == Gmat::FUEL_TANK)
@@ -7421,8 +7614,13 @@ Rvector6 Spacecraft::GetStateInRepresentation(const std::string &rep, bool useDe
                coordinateSystem->GetName().c_str());
       #endif
 
-      coordConverter.Convert(GetEpoch(), inState, internalCoordSystem, csState,
-         coordinateSystem);
+      if (hasPrecisionTime)
+         coordConverter.Convert(GetEpochGT(), inState, internalCoordSystem, csState, 
+            coordinateSystem);
+      else
+         coordConverter.Convert(GetEpoch(), inState, internalCoordSystem, csState,
+            coordinateSystem);
+
       #ifdef DEBUG_STATE_INTERFACE
       MessageInterface::ShowMessage("inState successfully converted from %s to %s\n", internalCoordSystem->GetName().c_str(),
             coordinateSystem->GetName().c_str());
@@ -7553,12 +7751,21 @@ void Spacecraft::SetStateFromRepresentation(const std::string &rep, Rvector6 &st
    if (internalCoordSystem != coordinateSystem)
    {
       #ifdef DEBUG_STATE_INTERFACE
+      if (hasPrecisionTime)
       MessageInterface::ShowMessage
-         ("   cs is not InternalCS, so calling coordConverter.Convert() at epoch %f\n",
+            ("   cs is not InternalCS, so calling coordConverter.Convert() at epochGT %s\n",
+            GetEpochGT().ToString().c_str());
+      else
+         MessageInterface::ShowMessage
+         ("   cs is not InternalCS, so calling coordConverter.Convert() at epoch %.12lf\n",
           GetEpoch());
       #endif
-      coordConverter.Convert(GetEpoch(), csState, coordinateSystem, finalState,
-         internalCoordSystem);
+      if (hasPrecisionTime)
+         coordConverter.Convert(GetEpochGT(), csState, coordinateSystem, finalState, 
+            internalCoordSystem);
+      else
+         coordConverter.Convert(GetEpoch(), csState, coordinateSystem, finalState,
+            internalCoordSystem);
    }
    else
       finalState = csState;
@@ -8081,6 +8288,32 @@ void Spacecraft::RecomputeStateAtEpoch(const GmatEpoch &toEpoch)
 }
 
 
+void Spacecraft::RecomputeStateAtEpochGT(const GmatTime &toEpoch)
+{
+   if (internalCoordSystem != coordinateSystem)
+   {
+      // First convert from the internal CS to the spacecraft's CS at the old epoch
+      Rvector6 inState(state.GetState());
+      Rvector6 csState;
+      Rvector6 finalState;
+      coordConverter.Convert(GetEpochGT(), inState, internalCoordSystem, csState,
+         coordinateSystem);
+      // Then convert back at the new epoch
+      GmatTime newEpoch = toEpoch;
+      coordConverter.Convert(newEpoch, csState, coordinateSystem, finalState,
+         internalCoordSystem);
+
+      state[0] = finalState[0];
+      state[1] = finalState[1];
+      state[2] = finalState[2];
+      state[3] = finalState[3];
+      state[4] = finalState[4];
+      state[5] = finalState[5];
+   }
+   // otherwise, state stays the same
+}
+
+
 //-------------------------------------------------------------------------
 // bool VerifyAddHardware()
 //-------------------------------------------------------------------------
@@ -8090,7 +8323,7 @@ void Spacecraft::RecomputeStateAtEpoch(const GmatEpoch &toEpoch)
 //-------------------------------------------------------------------------
 bool Spacecraft::VerifyAddHardware()
 {
-   Gmat::ObjectType type;
+   UnsignedInt type;
    std::string subTypeName;
    GmatBase* obj;
    
@@ -8523,6 +8756,9 @@ bool Spacecraft::SetAttitudeAndCopyData(Attitude *oldAtt, Attitude *newAtt,
       }
    }
    newAtt->SetEpoch(state.GetEpoch());
+   newAtt->SetEpochGT(state.GetEpochGT());
+   newAtt->SetPrecisionTimeFlag(hasPrecisionTime);
+
    newAtt->SetOwningSpacecraft(this);
    newAtt->NeedsReinitialization();
 
@@ -8987,8 +9223,12 @@ Rmatrix66 Spacecraft::GetCoordinateSystemTransformMatrix()
       {
          Rvector inputState(6, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
          Rvector outputState(6);
-         coordConverter.Convert(GetEpoch(), inputState, coordinateSystem, outputState,
-            internalCoordSystem);
+         if (hasPrecisionTime)
+            coordConverter.Convert(GetEpochGT(), inputState, coordinateSystem, outputState, 
+               internalCoordSystem);
+         else
+            coordConverter.Convert(GetEpoch(), inputState, coordinateSystem, outputState,
+               internalCoordSystem);
          Rmatrix33 r = coordConverter.GetLastRotationMatrix();
          Rmatrix33 rdot = coordConverter.GetLastRotationDotMatrix();
 
@@ -9030,5 +9270,76 @@ Rmatrix66 Spacecraft::GetCoordinateSystemTransformMatrix()
    }
 
    return csTransformMatrix;
+}
+
+
+bool Spacecraft::SetPrecisionTimeFlag(bool onOff)
+{
+   // When epoch precision is not changed, state will be the same
+   // When precision of epoch changes from low to high or from high to low, it needs to recompute the state
+   if ((onOff == true) && (hasPrecisionTime == false))
+      RecomputeStateDueToChangeOfEpochPrecision(true);
+   else if ((onOff == false) && (hasPrecisionTime == true))
+      RecomputeStateDueToChangeOfEpochPrecision(false);
+
+   return SpaceObject::SetPrecisionTimeFlag(onOff);
+}
+
+
+void Spacecraft::RecomputeStateDueToChangeOfEpochPrecision(bool fromLowToHi)
+{
+#ifdef DEBUG_CHANGE_EPOCH_PRECISION
+   MessageInterface::ShowMessage("Enter Spacecraft::RecomputeStateDueToChangeOfEpochPrecision(%s)\n", (fromLowToHi?"true":"false"));
+   if (fromLowToHi)
+      MessageInterface::ShowMessage("Epoch precision changes from low to high\n");
+   else
+      MessageInterface::ShowMessage("Epoch precision changes from high to low\n");
+#endif
+
+   Rvector6 csState;
+   Rvector6 finalState(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
+   // 1. Get internal state
+   Rvector6 inState(state.GetState());
+
+#ifdef DEBUG_CHANGE_EPOCH_PRECISION
+   MessageInterface::ShowMessage("   internal CS = <%s,%p>  spacecraft's CS = <%s,%p>\n", internalCoordSystem->GetName().c_str(), internalCoordSystem, coordinateSystem->GetName().c_str(), coordinateSystem);
+   MessageInterface::ShowMessage("   at epoch = %.12lf   epochGT = %s\n", GetEpoch(), GetEpochGT().ToString().c_str());
+   MessageInterface::ShowMessage("   internal state = [%.12lf   %.12lf   %.12lf   %.12lf   %.12lf   %.12lf]\n", inState[0], inState[1], inState[2], inState[3], inState[4], inState[5]);
+#endif
+
+   // 2. Correction state due to the change of epoch precision
+   if (fromLowToHi)
+   {
+      // Case 1: precision changes from low to high:
+      // Convert state from internal coordinate system to object coordinate system in low precision epoch
+      coordConverter.Convert(GetEpoch(), inState, internalCoordSystem, csState, coordinateSystem);
+      
+      // Convert state from object coordinate system to internal coordinate system in high precision epoch
+      coordConverter.Convert(GetEpochGT(), csState, coordinateSystem, finalState, internalCoordSystem);
+   }
+   else
+   {
+      // Case 2: precision changes from high to low:
+      // Convert state from internal coordinate system to object coordinate system in high precision epoch
+      coordConverter.Convert(GetEpochGT(), inState, internalCoordSystem, csState, coordinateSystem);
+
+      // Convert state from object coordinate system to internal coordinate system in low precision epoch
+      coordConverter.Convert(GetEpoch(), csState, coordinateSystem, finalState, internalCoordSystem);
+   }
+
+   // 3. Update state in the internal coordinate system
+   state[0] = finalState[0];
+   state[1] = finalState[1];
+   state[2] = finalState[2];
+   state[3] = finalState[3];
+   state[4] = finalState[4];
+   state[5] = finalState[5];
+
+#ifdef DEBUG_CHANGE_EPOCH_PRECISION
+   MessageInterface::ShowMessage("   final state = [%.12lf   %.12lf   %.12lf   %.12lf   %.12lf   %.12lf]\n", state[0], state[1], state[2], state[3], state[4], state[5]);
+   MessageInterface::ShowMessage("Exit Spacecraft::RecomputeStateDueToChangeOfEpochPrecision(%s)\n", (fromLowToHi ? "true" : "false"));
+#endif
+
 }
 

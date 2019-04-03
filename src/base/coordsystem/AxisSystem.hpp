@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -124,6 +124,19 @@ public:
                                      Real *outState,
                                      bool forceComputation = false);
    
+   virtual bool RotateToBaseSystem(const GmatTime &epoch, const Rvector &inState,
+                                   Rvector &outState,
+                                   bool forceComputation = false); 
+   virtual bool RotateToBaseSystem(const GmatTime &epoch, const Real *inState,
+                                   Real *outState,
+                                   bool forceComputation = false); 
+   virtual bool RotateFromBaseSystem(const GmatTime &epoch, const Rvector &inState,
+                                     Rvector &outState,
+                                     bool forceComputation = false);
+   virtual bool RotateFromBaseSystem(const GmatTime &epoch, const Real *inState,
+                                     Real *outState,
+                                     bool forceComputation = false);
+   
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
@@ -186,6 +199,14 @@ protected:
                                         bool forceComputation = false)  
                                         = 0;
    
+   virtual void CalculateRotationMatrix(const GmatTime &atEpoch,
+                                        bool forceComputation = false);
+
+   virtual bool CompleteRotateToBase(const Rvector &inState, Rvector &outState);
+   virtual bool CompleteRotateToBase(const Real *inState, Real *outState);
+   virtual bool CompleteRotateFromBase(const Rvector &inState, Rvector &outState);
+   virtual bool CompleteRotateFromBase(const Real *inState, Real *outState);
+   
    /// rotation matrix - 
    /// default constructor creates a 3x3 zero-matrix
    Rmatrix33   rotMatrix;
@@ -231,7 +252,7 @@ protected:
    bool                      overrideOriginInterval;
    A1Mjd                     lastPRECEpoch;
    A1Mjd                     lastNUTEpoch;
-   A1Mjd                     lastSTDerivEpoch;
+   GmatTime                  lastSTDerivEpoch;
    A1Mjd                     lastPMEpoch;
    Rmatrix33                 lastPREC;
    Rmatrix33                 lastNUT;
@@ -286,13 +307,14 @@ protected:
                                            Real &cosEpsbar,
                                            bool forceComputation = false);
    virtual void ComputeSiderealTimeRotation(const Real jdTT,
-                                                 const Real tUT1,
+                                                 const GmatTime &mjdUT1,
                                                  Real dPsi,
                                                  Real longAscNodeLunar,
                                                  Real cosEpsbar,
                                                  Real &cosAst,
                                                  Real &sinAst);
-   virtual void ComputeSiderealTimeDotRotation(const Real mjdUTC, A1Mjd atEpoch,
+   virtual void ComputeSiderealTimeDotRotation(const GmatTime &mjdUTC,
+                                                    const GmatTime &atEpoch,
                                                     Real cosAst, Real sinAst,
                                                     bool forceComputation = false);
    virtual void ComputePolarMotionRotation(const Real mjdUTC, A1Mjd atEpoch,

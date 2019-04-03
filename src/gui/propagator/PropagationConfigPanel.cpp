@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -37,16 +37,17 @@
 #include "StringUtil.hpp"               // for GmatStringUtil::ToUpper()
 #include "MessageInterface.hpp"
 #include "bitmaps/OpenFolder.xpm"
+#include "bitmaps/saveobject.xpm"
 #include "TimeSystemConverter.hpp"
 #include "DateUtil.hpp"
 #include "GmatDefaults.hpp"
 #include "GmatGlobal.hpp"
-#include "GravityFileUtil.hpp"
 #include "FileManager.hpp"
 #include "EopFile.hpp"
 
 #include "wx/platform.h"
 #include <wx/config.h>
+#include <wx/filename.h>
 
 
 //#define DEBUG_PROP_PANEL_SETUP
@@ -74,17 +75,22 @@ BEGIN_EVENT_TABLE(PropagationConfigPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
    EVT_BUTTON(ID_BUTTON_ADD_BODY, PropagationConfigPanel::OnAddBodyButton)
    EVT_BUTTON(ID_BUTTON_GRAV_SEARCH, PropagationConfigPanel::OnGravSearchButton)
+   EVT_BUTTON(ID_BUTTON_GRAV_SAVE, PropagationConfigPanel::OnGravSaveButton)
+   EVT_BUTTON(ID_BUTTON_TIDE_SEARCH, PropagationConfigPanel::OnTideSearchButton)
    EVT_BUTTON(ID_BUTTON_SETUP, PropagationConfigPanel::OnSetupButton)
    EVT_BUTTON(ID_BUTTON_MAG_SEARCH, PropagationConfigPanel::OnMagSearchButton)
    EVT_BUTTON(ID_BUTTON_PM_EDIT, PropagationConfigPanel::OnPMEditButton)
    EVT_BUTTON(ID_BUTTON_SRP_EDIT, PropagationConfigPanel::OnSRPEditButton)
    EVT_TEXT(ID_TEXTCTRL_PROP, PropagationConfigPanel::OnIntegratorTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_GRAV, PropagationConfigPanel::OnGravityTextUpdate)
+   EVT_TEXT(ID_TEXTCTRL_TIDE, PropagationConfigPanel::OnTideTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_MAGF, PropagationConfigPanel::OnMagneticTextUpdate)
    EVT_COMBOBOX(ID_CB_INTGR, PropagationConfigPanel::OnIntegratorComboBox)
    EVT_COMBOBOX(ID_CB_BODY, PropagationConfigPanel::OnPrimaryBodyComboBox)
    EVT_COMBOBOX(ID_CB_ORIGIN, PropagationConfigPanel::OnOriginComboBox)
    EVT_COMBOBOX(ID_CB_GRAV, PropagationConfigPanel::OnGravityModelComboBox)
+   EVT_COMBOBOX(ID_CB_TIDE_DATA, PropagationConfigPanel::OnTideDataComboBox)
+   EVT_COMBOBOX(ID_CB_TIDE, PropagationConfigPanel::OnTideModelComboBox)
    EVT_COMBOBOX(ID_CB_ATMOS, PropagationConfigPanel::OnAtmosphereModelComboBox)
    EVT_COMBOBOX(ID_CB_SRP_MODEL, PropagationConfigPanel::OnSRPModelComboBox)
    EVT_CHECKBOX(ID_SRP_CHECKBOX, PropagationConfigPanel::OnSRPCheckBoxChange)
@@ -192,6 +198,7 @@ void PropagationConfigPanel::Create()
 
    Integer bsize = 2; // border size
    wxBitmap openBitmap = wxBitmap(OpenFolder_xpm);
+   wxBitmap saveBitmap = wxBitmap(saveobject_xpm);
 
    // get the config object
    wxConfigBase *pConfig = wxConfigBase::Get();
@@ -480,6 +487,7 @@ void PropagationConfigPanel::Create()
 //   bodySizer->Add( primaryBodySelectButton, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
 
    // Gravity
+   //----------- Gravity Line 1
    wxStaticText *type1StaticText =
       new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Model",
                         wxDefaultPosition, wxDefaultSize, 0 );
@@ -487,53 +495,154 @@ void PropagationConfigPanel::Create()
    wxArrayString gravArray;
    theGravModelComboBox =
       new wxComboBox( this, ID_CB_GRAV, wxT(""),
-                      wxDefaultPosition, wxSize(150,-1), // 0,
+                      wxDefaultPosition, wxSize(70,-1), // 0,
                       gravArray, wxCB_DROPDOWN|wxCB_READONLY );
    theGravModelComboBox->SetToolTip(pConfig->Read(_T("ForceModelGravityModelHint")));
-   wxStaticText *degree1StaticText =
+
+   wxBoxSizer *gravModelSizer = new wxBoxSizer( wxHORIZONTAL );
+   gravModelSizer->Add( type1StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   gravModelSizer->Add( theGravModelComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   //----------- Gravity Line 2
+   wxStaticText *degreeStaticText =
       new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Degree",
                         wxDefaultPosition, wxDefaultSize, 0 );
    gravityDegreeTextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_GRAV, wxT(""), wxDefaultPosition,
-                      wxSize(30,-1), 0 );
+                      wxSize(40,-1), 0 );
    gravityDegreeTextCtrl->SetToolTip(pConfig->Read(_T("ForceModelGravityDegreeHint")));
-   wxStaticText *order1StaticText =
+
+   wxStaticText *gravityDegreeSlashStaticText =
+      new wxStaticText( this, ID_TEXT, "/",
+                        wxDefaultPosition, wxDefaultSize, 0 );
+
+   gravityMaxDegreeTextCtrl =
+      new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition,
+                      wxSize(40,-1), wxTE_READONLY );
+   gravityMaxDegreeTextCtrl->SetToolTip(pConfig->Read(_T("ForceModelGravityMaxDegreeHint")));
+
+   wxStaticText *orderStaticText =
       new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Order",
                         wxDefaultPosition, wxDefaultSize, 0 );
    gravityOrderTextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_GRAV, wxT(""), wxDefaultPosition,
-                      wxSize(30,-1), 0 );
+                      wxSize(40,-1), 0 );
    gravityOrderTextCtrl->SetToolTip(pConfig->Read(_T("ForceModelGravityOrderHint")));
+
+   wxStaticText *gravityOrderSlashStaticText =
+      new wxStaticText( this, ID_TEXT, "/",
+                        wxDefaultPosition, wxDefaultSize, 0 );
+
+   gravityMaxOrderTextCtrl =
+      new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition,
+                      wxSize(40,-1), wxTE_READONLY );
+   gravityMaxOrderTextCtrl->SetToolTip(pConfig->Read(_T("ForceModelGravityMaxOrderHint")));
+
+   wxStaticText *stmlimitStaticText =
+      new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"STM Limit",
+                        wxDefaultPosition, wxDefaultSize, 0 );
+   gravityStmLimitTextCtrl =
+      new wxTextCtrl( this, ID_TEXTCTRL_GRAV, wxT(""), wxDefaultPosition,
+                      wxSize(40,-1), 0 );
+   gravityStmLimitTextCtrl->SetToolTip(pConfig->Read(_T("ForceModelGravityStmLimitHint")));
+
+   wxBoxSizer *degOrdSizer = new wxBoxSizer( wxHORIZONTAL );
+   degOrdSizer->Add( degreeStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   degOrdSizer->Add( gravityDegreeTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   degOrdSizer->Add( gravityDegreeSlashStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   degOrdSizer->Add( gravityMaxDegreeTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   degOrdSizer->Add( orderStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   degOrdSizer->Add( gravityOrderTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   degOrdSizer->Add( gravityOrderSlashStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   degOrdSizer->Add( gravityMaxOrderTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   degOrdSizer->Add( stmlimitStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   degOrdSizer->Add( gravityStmLimitTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   //----------- Gravity Line 3
+   potFileStaticText =
+      new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Gravity File",
+                        wxDefaultPosition, wxDefaultSize, 0 );
+   potFileTextCtrl =
+      new wxTextCtrl( this, ID_TEXTCTRL_GRAV, wxT(""), wxDefaultPosition,
+                      wxSize(272,-1), 0 );
+   potFileTextCtrl->SetToolTip(pConfig->Read(_T("ForceModelGravityPotentialFileHint")));
+
    theGravModelSearchButton =
       new wxBitmapButton(this, ID_BUTTON_GRAV_SEARCH, openBitmap, wxDefaultPosition,
                          wxSize(buttonWidth, -1));
    theGravModelSearchButton->SetToolTip(pConfig->Read(_T("ForceModelGravitySearchHint")));
 
-   wxBoxSizer *degOrdSizer = new wxBoxSizer( wxHORIZONTAL );
-   degOrdSizer->Add( type1StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   degOrdSizer->Add( theGravModelComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   degOrdSizer->Add( degree1StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   degOrdSizer->Add( gravityDegreeTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
-   degOrdSizer->Add( order1StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   degOrdSizer->Add( gravityOrderTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
-   degOrdSizer->Add( theGravModelSearchButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-
-   potFileStaticText =
-      new wxStaticText( this, ID_TEXT, "Potential " GUI_ACCEL_KEY "File",
-                        wxDefaultPosition, wxDefaultSize, 0 );
-   potFileTextCtrl =
-      new wxTextCtrl( this, ID_TEXTCTRL_GRAV, wxT(""), wxDefaultPosition,
-                      wxSize(290,-1), 0 );
-   potFileTextCtrl->SetToolTip(pConfig->Read(_T("ForceModelGravityPotentialFileHint")));
+   theGravModelSaveButton =
+      new wxBitmapButton(this, ID_BUTTON_GRAV_SAVE, saveBitmap, wxDefaultPosition,
+                         wxSize(buttonWidth, -1));
+   theGravModelSaveButton->SetToolTip(pConfig->Read(_T("ForceModelGravitySaveHint")));
 
    wxBoxSizer *potFileSizer = new wxBoxSizer( wxHORIZONTAL );
    potFileSizer->Add( potFileStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    potFileSizer->Add( potFileTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   potFileSizer->Add( theGravModelSearchButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   potFileSizer->Add( theGravModelSaveButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   //----------- Tide Box
+   GmatStaticBoxSizer *tideStaticSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "Tide");
+   //----------- Tide Line 1
+   tideDataStaticText =
+       new wxStaticText(this, ID_TEXT, GUI_ACCEL_KEY"Data Source",
+       wxDefaultPosition, wxDefaultSize, 0);
+   wxArrayString tideDataArray;
+   theTideDataComboBox =
+      new wxComboBox( this, ID_CB_TIDE_DATA, wxT(""),
+                      wxDefaultPosition, wxSize(70,-1), // 0,
+                      tideDataArray, wxCB_DROPDOWN|wxCB_READONLY );
+   theTideDataComboBox->SetToolTip(pConfig->Read(_T("ForceModelGravityTideDataSourceHint")));
 
+   tideModelStaticText =
+      new wxStaticText( this, ID_TEXT,"Model",
+                        wxDefaultPosition, wxDefaultSize, 0 );
+   wxArrayString tideArray;
+   theTideModelComboBox =
+      new wxComboBox( this, ID_CB_TIDE, wxT(""),
+                      wxDefaultPosition, wxSize(80,-1), // 0,
+                      tideArray, wxCB_DROPDOWN|wxCB_READONLY );
+   theTideModelComboBox->SetToolTip(pConfig->Read(_T("ForceModelTideModelHint")));
+
+   tideTextCtrl =
+      new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition,
+                      wxSize(120,-1), wxTE_READONLY );
+   tideTextCtrl->SetToolTip(pConfig->Read(_T("ForceModelTideHint")));
+
+   tideFileStaticText =
+       new wxStaticText(this, ID_TEXT, GUI_ACCEL_KEY"Tide File",
+       wxDefaultPosition, wxDefaultSize, 0);
+   tideFileTextCtrl =
+       new wxTextCtrl(this, ID_TEXTCTRL_TIDE, wxT(""), wxDefaultPosition,
+       wxSize(286, -1), 0);
+   tideFileTextCtrl->SetToolTip(pConfig->Read(_T("ForceModelGravityTideFileHint")));
+
+   theTideModelSearchButton =
+       new wxBitmapButton(this, ID_BUTTON_TIDE_SEARCH, openBitmap, wxDefaultPosition,
+       wxSize(buttonWidth, -1));
+   theTideModelSearchButton->SetToolTip(pConfig->Read(_T("ForceModelTideSearchHint")));
+
+   wxBoxSizer *tideDataSizer = new wxBoxSizer(wxHORIZONTAL);
+   tideDataSizer->Add (tideDataStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   tideDataSizer->Add (theTideDataComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   tideDataSizer->Add (tideModelStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   tideDataSizer->Add (theTideModelComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   tideDataSizer->Add (tideTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   //----------- Tide Line 2
+   wxBoxSizer *tideFileSizer = new wxBoxSizer(wxHORIZONTAL);
+   tideFileSizer->Add (tideFileStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   tideFileSizer->Add (tideFileTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   tideFileSizer->Add (theTideModelSearchButton, 0, wxALIGN_CENTRE | wxALL, bsize);
+   //----------- Gravity Box
    GmatStaticBoxSizer *gravStaticSizer =
       new GmatStaticBoxSizer(wxVERTICAL, this, "Gravity");
-   gravStaticSizer->Add( degOrdSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   gravStaticSizer->Add( potFileSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   gravStaticSizer->Add (gravModelSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   gravStaticSizer->Add (degOrdSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   gravStaticSizer->Add (potFileSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   tideStaticSizer->Add (tideDataSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   tideStaticSizer->Add (tideFileSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   gravStaticSizer->Add (tideStaticSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   //-----------
 
    // Drag
    wxStaticText *type2StaticText =
@@ -926,7 +1035,7 @@ void PropagationConfigPanel::PopulateForces()
             {
                thePMF = (PointMassForce *)force;
                secondaryBodiesArray.Add(wxBodyName);
-               pointMassBodyList.push_back(new ForceType(wxBodyName, "None",
+               pointMassBodyList.push_back(new ForceType(wxBodyName, "None","None","None",
                                                          dragModelArray[NONE_DM],
                                                          magfModelArray[NONE_MM],
                                                          thePMF));
@@ -954,9 +1063,12 @@ void PropagationConfigPanel::PopulateForces()
                theGravForce = (GravityField*)force;
                wxString potFilename =
                   theGravForce->GetStringParameter("PotentialFile").c_str();
+               wxString tideFilename =
+                  theGravForce->GetStringParameter("TideFile").c_str();
                
                #ifdef DEBUG_PROP_PANEL_GRAV
                MessageInterface::ShowMessage("   potFilename = '%s'\n", potFilename.WX_TO_C_STRING);
+               MessageInterface::ShowMessage("   tideFilename = '%s'\n", tideFilename.WX_TO_C_STRING);
                #endif
                
 //               currentBodyId = FindPrimaryBody(wxBodyName);
@@ -977,11 +1089,14 @@ void PropagationConfigPanel::PopulateForces()
                primaryBodyData->potFile = potFilename;
                primaryBodyData->potFileFullPath =
                   theGravForce->GetStringParameter("PotentialFileFullPath").c_str();
+               primaryBodyData->tideFile = tideFilename;
+               primaryBodyData->tideFileFullPath =
+                  theGravForce->GetStringParameter("TideFileFullPath").c_str();
                
                #ifdef DEBUG_PROP_PANEL_GRAV
                MessageInterface::ShowMessage
-                  ("   Getting gravity model type for %s, potFilename=%s\n",
-                   wxBodyName.WX_TO_C_STRING, potFilename.WX_TO_C_STRING);
+                  ("   Getting gravity model type for %s, potFilename=%s\n   tideFilename=%s\n",
+                   wxBodyName.WX_TO_C_STRING, potFilename.WX_TO_C_STRING, tideFilename.WX_TO_C_STRING);
                #endif
                
                // Use full path potential file from the base as per new file path design (LOJ: 2014.06.30)
@@ -1015,14 +1130,14 @@ void PropagationConfigPanel::PopulateForces()
                #endif
                //==========================================================
                
-               GmatGrav::GravityModelType bodyGravModelType =
+               GravityField::GravityModelType bodyGravModelType =
 //               GravityFileUtil::GetModelType((primaryBodyList[currentBodyId]->potFile).c_str(), wxBodyName.c_str());
                   // GravityFileUtil::GetModelType((primaryBodyData->potFile).c_str(), wxBodyName.c_str());
-                  GravityFileUtil::GetModelType((primaryBodyData->potFileFullPath).c_str(), wxBodyName.c_str());
+                  GravityField::GetModelType((primaryBodyData->potFileFullPath).c_str(), wxBodyName.c_str());
                #ifdef DEBUG_PROP_PANEL_GRAV
                MessageInterface::ShowMessage("   bodyGravModelType = %d\n", bodyGravModelType);
                #endif
-               primaryBodyData->gravType = wxString((GravityFileUtil::GRAVITY_MODEL_NAMES[bodyGravModelType]).c_str());
+               primaryBodyData->gravType = wxString((GravityField::GRAVITY_MODEL_NAMES[bodyGravModelType]).c_str());
                
                #ifdef DEBUG_PROP_PANEL_GRAV
                MessageInterface::ShowMessage("   Getting the gravity force\n");
@@ -1067,7 +1182,33 @@ void PropagationConfigPanel::PopulateForces()
                tempStr = "";
                tempStr << theGravForce->GetIntegerParameter("Order");
 //               primaryBodyList[currentBodyId]->gravOrder = tempStr;
-               primaryBodyData->gravOrder = tempStr;
+               primaryBodyData->gravOrrder = tempStr;
+
+               tempStr = "";
+               tempStr << theGravForce->GetIntegerParameter("StmLimit");
+//               primaryBodyList[currentBodyId]->gravOrder = tempStr;
+               primaryBodyData->gravStmLimit = tempStr;
+
+               tempStr = "";
+               tempStr << theGravForce->GetStringParameter("TideModel");
+//               primaryBodyList[currentBodyId]->gravOrder = tempStr;
+               primaryBodyData->tideModel = tempStr;
+
+               bool haveTideModel = primaryBodyData->tideModel != HarmonicGravity::ETideString[0];
+               bool haveTideFile = primaryBodyData->tideFile != "";
+               bool haveGrvFile = GmatStringUtil::ToLower(wxFileName(primaryBodyData->potFile).GetExt().WX_TO_STD_STRING) == "grv";
+
+               if (haveTideFile)
+               {
+                  primaryBodyData->tideData = "Tide File";
+               }
+               else
+               {
+                  if (haveTideModel && (primaryBody == "Earth" || haveGrvFile))
+                     primaryBodyData->tideData = "Inherited";
+                  else
+                     primaryBodyData->tideData = "None";
+               }
 
 //               bool found = false;
 //               for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
@@ -1179,6 +1320,7 @@ void PropagationConfigPanel::SaveData()
    MessageInterface::ShowMessage("   isForceModelChanged=%d\n", isForceModelChanged);
    MessageInterface::ShowMessage("   isDegOrderChanged=%d\n", isDegOrderChanged);
    MessageInterface::ShowMessage("   isPotFileChanged=%d\n", isPotFileChanged);
+   MessageInterface::ShowMessage("   isTideFileChanged=%d\n", isTideFileChanged);
    MessageInterface::ShowMessage("   isAtmosChanged=%d\n", isAtmosChanged);
    MessageInterface::ShowMessage("   isOriginChanged=%d\n", isOriginChanged);
    MessageInterface::ShowMessage("   isErrControlChanged=%d\n", isErrControlChanged);
@@ -1260,9 +1402,28 @@ void PropagationConfigPanel::SaveData()
 
          isIntegratorChanged = false;
 
+         // Check if integrator data or the force model degree and order
+         // values have changed.  If they are invalid entries, return to
+         // avoid saving other sections of the propagator's settings
          if (isIntegratorDataChanged)
+         {
             if (SaveIntegratorData())
                isIntegratorDataChanged = false;
+            else
+            {
+               isIntegratorChanged = true;
+               return;
+            }
+         }
+
+         if (isDegOrderChanged)
+            SaveDegOrder();
+
+         if (!canClose)
+         {
+            isIntegratorChanged = true;
+            return;
+         }
 
          thePropSetup->SetPropagator(thePropagator, true);
          // Since the propagator is cloned in the base code, get new pointer
@@ -1286,6 +1447,15 @@ void PropagationConfigPanel::SaveData()
          #ifdef DEBUG_PROP_PANEL_SAVE
          ShowForceList("SaveData() BEFORE saving ForceModel");
          #endif
+
+         if (isDegOrderChanged)
+            SaveDegOrder();
+
+         // If the force model's degree and/or order values are invalid
+         // entries, return to avoid saving other sections of the
+         // propagator's settings
+         if (!canClose)
+            return;
 
          // save force model name for later use
          std::string fmName = theForceModel->GetName();
@@ -1344,6 +1514,8 @@ void PropagationConfigPanel::SaveData()
                theGravForce->SetStringParameter("PotentialFile",
 //                     primaryBodyList[i]->potFile.c_str());
                     primaryBodyData->potFile.c_str());
+               theGravForce->SetStringParameter("TideFile",
+                    primaryBodyData->tideFile.c_str());
 
                if (deg != -999)
                {
@@ -1361,11 +1533,20 @@ void PropagationConfigPanel::SaveData()
             MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
          }
 
+         if (isPotFileChanged || isTideFileChanged)
+            DisplayGravityFieldData(primaryBodyData->bodyName);
+
          if (isDegOrderChanged)
             SaveDegOrder();
 
          if (isPotFileChanged)
             SavePotFile();
+
+         if (isTideFileChanged)
+            SaveTideFile();
+
+         if (isTideModelChanged)
+            SaveTideModel();
 
          //----------------------------------------------------
          // save drag force model
@@ -1634,6 +1815,15 @@ void PropagationConfigPanel::SaveData()
          //----------------------------------------------------
          if (theForceModel != NULL)
          {
+            if (isDegOrderChanged)
+               SaveDegOrder();
+
+            // If the force model's degree and/or order values are invalid
+            // entries, return to avoid saving other sections of the
+            // propagator's settings
+            if (!canClose)
+               return;
+
             try
             {
                if (isErrControlChanged)
@@ -1654,12 +1844,21 @@ void PropagationConfigPanel::SaveData()
                MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
             }
 
+            // Save only GravComboBox or PotFileText is changed
+            if (isPotFileChanged || isTideFileChanged)
+               DisplayGravityFieldData(primaryBodyData->bodyName);
+
             if (isDegOrderChanged)
                SaveDegOrder();
 
-            // Save only GravComboBox or PotFileText is changed
             if (isPotFileChanged)
                SavePotFile();
+            
+            if (isTideFileChanged)
+               SaveTideFile();
+
+            if (isTideModelChanged)
+               SaveTideModel();
 
             if (isAtmosChanged)
                SaveAtmosModel();
@@ -1749,7 +1948,7 @@ Integer PropagationConfigPanel::FindPrimaryBody(const wxString &bodyName,
       return -1;
 
 //   primaryBodyList.push_back(new ForceType(bodyName, gravType, dragType, magfType));
-   primaryBodyData = new ForceType(bodyName, gravType, dragType, magfType);
+   primaryBodyData = new ForceType(bodyName, gravType, "None", "None", dragType, magfType);
 
    // Set gravity model file
    if (theFileMap.find(gravType) != theFileMap.end())
@@ -1833,6 +2032,8 @@ void PropagationConfigPanel::Initialize()
    isAtmosChanged = false;
    isDegOrderChanged = false;
    isPotFileChanged = false;
+   isTideFileChanged = false;
+   isTideModelChanged = false;
    isMagfTextChanged = false;
    isIntegratorChanged = false;
    isIntegratorDataChanged = false;
@@ -1854,31 +2055,6 @@ void PropagationConfigPanel::Initialize()
       integratorTypeArray.Add(propTypes[i].c_str());
    }
 
-   // initialize gravity model type arrays
-   earthGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_NONE].c_str());
-   earthGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_JGM2].c_str());
-   earthGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_JGM3].c_str());
-   earthGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_EGM96].c_str());
-   earthGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_OTHER].c_str());
-   
-   lunaGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_NONE].c_str());
-   lunaGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_LP165P].c_str());
-   lunaGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_OTHER].c_str());
-   
-   venusGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_NONE].c_str());
-   venusGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_MGNP180U].c_str());
-   //   venusGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_MGN75HSAAP].c_str()); // add this yet?
-   venusGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_OTHER].c_str());
-   
-   marsGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_NONE].c_str());
-   marsGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_MARS50C].c_str());
-   //   marsGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_GMM1].c_str()); // add this yet?
-   //   marsGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_GMM2B].c_str()); // add this yet?
-   marsGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_OTHER].c_str());
-   
-   othersGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_NONE].c_str());
-   othersGravModelArray.Add(GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::GFM_OTHER].c_str());
-   
    // initialize drag model type array
    dragModelArray.Clear();
    dragModelArray.Add("None");
@@ -2195,8 +2371,6 @@ void PropagationConfigPanel::DisplayForceData()
    MessageInterface::ShowMessage("DisplayForceData() leaving\n");
    #endif
 }
-
-
 //------------------------------------------------------------------------------
 // void DisplayPrimaryBodyData()
 //------------------------------------------------------------------------------
@@ -2223,12 +2397,14 @@ void PropagationConfigPanel::DisplayPrimaryBodyData()
 // void DisplayGravityFieldData(const wxString& bodyName, bool textValueChanged = false)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::DisplayGravityFieldData(const wxString& bodyName,
-                                                     bool textValueChanged)
+                                                     bool potValueChanged,
+                                                     bool tideValueChanged)
 {
    #ifdef DEBUG_PROP_PANEL_GRAV
    MessageInterface::ShowMessage
-      ("DisplayGravityFieldData() entered, bodyName='%s', textValueChanged=%d\n"
-       "   currentBodyName=%s gravType=%s\n", bodyName.WX_TO_C_STRING, textValueChanged,
+      ("DisplayGravityFieldData() entered, bodyName='%s', potValueChanged=%d\n"
+       "   potValueChanged=%d, currentBodyName=%s gravType=%s\n", bodyName.WX_TO_C_STRING,
+       potValueChanged, tideValueChanged,
 //       currentBodyName.c_str(), primaryBodyList[currentBodyId]->gravType.c_str());
        currentBodyName.WX_TO_C_STRING, primaryBodyData->gravType.WX_TO_C_STRING);
    ShowForceList("DisplayGravityFieldData() entered");
@@ -2236,82 +2412,144 @@ void PropagationConfigPanel::DisplayGravityFieldData(const wxString& bodyName,
 
    theGravModelComboBox->Clear();
 
-//   wxString gravType = primaryBodyList[currentBodyId]->gravType;
    wxString gravType = primaryBodyData->gravType;
+   wxString tideData = primaryBodyData->tideData;
+   wxString tideModel = primaryBodyData->tideModel;
 
    // for gravity model ComboBox
+   theGravModelComboBox->Append
+      (GravityField::GRAVITY_MODEL_NAMES[GravityField::GFM_NONE].c_str());
    if (bodyName == "Earth")
-   {
-      #ifdef DEBUG_PROP_PANEL_GRAV
-      MessageInterface::ShowMessage
-         ("DisplayGravityFieldData() Displaying Earth gravity model\n");
-      #endif
-
-      for (Integer i = 0; i < (Integer)(GravityFileUtil::NUM_EARTH_MODELS + 2); i++)
-         theGravModelComboBox->Append(earthGravModelArray[i]);
-
-   }
+      {
+      theGravModelComboBox->Append
+         (GravityField::GRAVITY_MODEL_NAMES[GravityField::GFM_JGM2].c_str());
+      theGravModelComboBox->Append
+         (GravityField::GRAVITY_MODEL_NAMES[GravityField::GFM_JGM3].c_str());
+      theGravModelComboBox->Append
+         (GravityField::GRAVITY_MODEL_NAMES[GravityField::GFM_EGM96].c_str());
+      }
    else if (bodyName == "Luna")
-   {
-      #ifdef DEBUG_PROP_PANEL_GRAV
-      MessageInterface::ShowMessage
-         ("DisplayGravityFieldData() Displaying Luna gravity model\n");
-      #endif
-
-      for (Integer i = 0; i < (Integer)(GravityFileUtil::NUM_LUNA_MODELS + 2); i++)
-         theGravModelComboBox->Append(lunaGravModelArray[i]);
-   }
+      {
+      theGravModelComboBox->Append
+         (GravityField::GRAVITY_MODEL_NAMES[GravityField::GFM_LP165P].c_str());
+      }
    else if (bodyName == "Venus")
-   {
-      #ifdef DEBUG_PROP_PANEL_GRAV
-      MessageInterface::ShowMessage
-         ("DisplayGravityFieldData() Displaying Venus gravity model\n");
-      #endif
-
-      for (Integer i = 0; i < (Integer)(GravityFileUtil::NUM_VENUS_MODELS + 2); i++)
-         theGravModelComboBox->Append(venusGravModelArray[i]);
-
-   }
+      {
+      theGravModelComboBox->Append
+         (GravityField::GRAVITY_MODEL_NAMES[GravityField::GFM_MGNP180U].c_str());
+      }
    else if (bodyName == "Mars")
-   {
-      #ifdef DEBUG_PROP_PANEL_GRAV
-      MessageInterface::ShowMessage
-         ("DisplayGravityFieldData() Displaying Mars gravity model\n");
-      #endif
+      {
+      theGravModelComboBox->Append
+         (GravityField::GRAVITY_MODEL_NAMES[GravityField::GFM_MARS50C].c_str());
+      }
+   theGravModelComboBox->Append
+      (GravityField::GRAVITY_MODEL_NAMES[GravityField::GFM_OTHER].c_str());
 
-      for (Integer i = 0; i < (Integer)(GravityFileUtil::NUM_MARS_MODELS + 2); i++)
-         theGravModelComboBox->Append(marsGravModelArray[i]);
+   theTideDataComboBox->Clear();
+   theTideModelComboBox->Clear();
+   theTideModelComboBox->Append(HarmonicGravity::ETideString[0]);
+   std::string filename = primaryBodyData->potFileFullPath.WX_TO_STD_STRING;
+   std::string tideFilename = primaryBodyData->tideFileFullPath.WX_TO_STD_STRING;
+   gravityMaxDegreeTextCtrl->SetValue("UNK");
+   gravityMaxOrderTextCtrl->SetValue("UNK");
+   tideTextCtrl->SetValue("UNK");
 
-   }
-   else // other bodies
-   {
-      #ifdef DEBUG_PROP_PANEL_GRAV
-      MessageInterface::ShowMessage
-         ("DisplayGravityFieldData() Displaying other gravity model\n");
-      #endif
+   if (filename != "")
+      {
+      try
+         {
+         theCelestialBody = theSolarSystem->GetBody(primaryBodyData->bodyName);
+         HarmonicGravity* hg = GravityField::GetHarmonicGravity
+              (std::string(filename.c_str()),
+               std::string(tideFilename.c_str()),
+               theCelestialBody->GetGravitationalConstant(),
+               theCelestialBody->GetEquatorialRadius(),
+               std::string(primaryBodyData->bodyName),false);
+         if (hg == NULL)
+            {
+            MessageInterface::PopupMessage
+               (Gmat::WARNING_, "Gravity file \"" + filename + "\" is of unknown format.");
+            return;
+            }
 
-      for (Integer i = 0; i < (Integer)(GravityFileUtil::NUM_OTHER_MODELS + 2); i++)
-         theGravModelComboBox->Append(othersGravModelArray[i]);
+         gravityMaxDegreeTextCtrl->SetValue(GmatStringUtil::ToString(hg->GetNN()));
+         gravityMaxOrderTextCtrl->SetValue(GmatStringUtil::ToString(hg->GetMM()));
 
-   }
+         theTideModelComboBox->Clear();
+         for (int i = 0; i <= HarmonicGravity::ETideCount - 1; ++i)
+         {
+            if (hg->HaveTideModel(i))
+               theTideModelComboBox->Append(HarmonicGravity::ETideString[i]);
+            else
+            {
+               if (tideModel == HarmonicGravity::ETideString[i])
+               {
+                  // Set to None if previous tide setting is not in new tide model
+                  tideModel = HarmonicGravity::ETideString[0];
+                  primaryBodyData->tideModel = tideModel;
+                  isTideModelChanged = true;
+               }
+            }
+         }
+         tideTextCtrl->SetValue(hg->TideString());
+
+         delete hg;
+         }
+      catch (BaseException &be)
+         {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "File \"" + filename + "\" is not a valid gravity file.");
+         return;
+         }
+      }
 
    theGravModelSearchButton->Enable(false);
+   theTideModelSearchButton->Enable(false);
    ////potFileStaticText->Enable(false);
    potFileTextCtrl->Enable(false);
+   theTideDataComboBox->Enable(false);
+   theTideModelComboBox->Enable(false);
+   tideTextCtrl->Enable(false);
    gravityDegreeTextCtrl->Enable(true);
+   gravityMaxDegreeTextCtrl->Enable(true);
    gravityOrderTextCtrl->Enable(true);
+   gravityMaxOrderTextCtrl->Enable(true);
+   gravityStmLimitTextCtrl->Enable(true);
 //   potFileTextCtrl->SetValue(primaryBodyList[currentBodyId]->potFile);
    // If text value not changed, use ChangeValue() so that
    // wxEVT_COMMAND_TEXT_UPDATED event will not be generated (LOJ: 2014.08.11)
-   if (textValueChanged)
+   if (potValueChanged)
       potFileTextCtrl->SetValue(primaryBodyData->potFile);
    else
       potFileTextCtrl->ChangeValue(primaryBodyData->potFile);
-   
+
+   if (tideValueChanged)
+      tideFileTextCtrl->SetValue(primaryBodyData->tideFile);
+   else
+      tideFileTextCtrl->ChangeValue(primaryBodyData->tideFile);
+
+   bool isGravFile = GmatStringUtil::ToLower(wxFileName(filename).GetExt().WX_TO_STD_STRING) == "grv";
+
+   theTideDataComboBox->Append("None");
+   if (bodyName == "Earth" || isGravFile)
+      theTideDataComboBox->Append("Inherited");
+   theTideDataComboBox->Append("Tide File");
+
+   if (potValueChanged && isGravFile && tideData.WX_TO_STD_STRING != "Tide File")
+   {
+      tideData = "Inherited";
+      primaryBodyData->tideData = tideData;
+   }
+
    if (gravType == "None")
    {
       gravityDegreeTextCtrl->Enable(false);
+      gravityMaxDegreeTextCtrl->Enable(false);
       gravityOrderTextCtrl->Enable(false);
+      gravityMaxOrderTextCtrl->Enable(false);
+      gravityStmLimitTextCtrl->Enable(false);
+      tideFileTextCtrl->Enable(false);
    }
    else
    {
@@ -2319,22 +2557,35 @@ void PropagationConfigPanel::DisplayGravityFieldData(const wxString& bodyName,
          theGravModelSearchButton->Enable(true);
          potFileStaticText->Enable(true);
          potFileTextCtrl->Enable(true);
+         theTideDataComboBox->Enable(true);
+
+         bool hasTideData = tideData != "None";
+
+         theTideModelComboBox->Enable(hasTideData);
+         tideTextCtrl->Enable(hasTideData);
+         tideFileTextCtrl->Enable(hasTideData);
+         theTideModelSearchButton->Enable(hasTideData);
    }
 
    theGravModelComboBox->SetValue(gravType);
+   theTideDataComboBox->SetValue(tideData);
+   theTideModelComboBox->SetValue(tideModel);
+
 //   gravityDegreeTextCtrl->SetValue(primaryBodyList[currentBodyId]->gravDegree);
 //   gravityOrderTextCtrl->SetValue(primaryBodyList[currentBodyId]->gravOrder);
    // If text value not changed, use ChangeValue() so that
    // wxEVT_COMMAND_TEXT_UPDATED event will not be generated (LOJ: 2014.08.11)
-   if (textValueChanged)
+   if (potValueChanged)
    {
       gravityDegreeTextCtrl->SetValue(primaryBodyData->gravDegree);
-      gravityOrderTextCtrl->SetValue(primaryBodyData->gravOrder);
+      gravityOrderTextCtrl->SetValue(primaryBodyData->gravOrrder);
+      gravityStmLimitTextCtrl->SetValue(primaryBodyData->gravStmLimit);
    }
    else
    {
       gravityDegreeTextCtrl->ChangeValue(primaryBodyData->gravDegree);
-      gravityOrderTextCtrl->ChangeValue(primaryBodyData->gravOrder);
+      gravityOrderTextCtrl->ChangeValue(primaryBodyData->gravOrrder);
+      gravityStmLimitTextCtrl->ChangeValue(primaryBodyData->gravStmLimit);
    }
    
    #ifdef DEBUG_PROP_PANEL_GRAV
@@ -2487,17 +2738,41 @@ void PropagationConfigPanel::EnablePrimaryBodyItems(bool enable, bool clear)
    {
       theGravModelComboBox->Enable(true);
       gravityDegreeTextCtrl->Enable(true);
+      gravityMaxDegreeTextCtrl->Enable(true);
       gravityOrderTextCtrl->Enable(true);
+      gravityMaxOrderTextCtrl->Enable(true);
+      gravityStmLimitTextCtrl->Enable(true);
 
       if (theGravModelComboBox->GetStringSelection() == "None")
       {
          theGravModelSearchButton->Enable(false);
          potFileTextCtrl->Enable(false);
+         theTideDataComboBox->Enable(false);
+         theTideModelComboBox->Enable(false);
+         tideTextCtrl->Enable(false);
+         tideFileTextCtrl->Enable(false);
+         theTideModelSearchButton->Enable(false);
       }
       else
       {
          theGravModelSearchButton->Enable(true);
          potFileTextCtrl->Enable(true);
+         theTideDataComboBox->Enable(true);
+
+         if (theTideDataComboBox->GetStringSelection() != "None")
+         {
+            theTideModelComboBox->Enable(true);
+            tideTextCtrl->Enable(true);
+            tideFileTextCtrl->Enable(true);
+            theTideModelSearchButton->Enable(true);
+         }
+         else
+         {
+            theTideModelComboBox->Enable(false);
+            tideTextCtrl->Enable(false);
+            tideFileTextCtrl->Enable(false);
+            theTideModelSearchButton->Enable(false);
+         }
       }
 
       StringArray models = theGuiInterpreter->GetListOfFactoryItems(
@@ -2545,9 +2820,17 @@ void PropagationConfigPanel::EnablePrimaryBodyItems(bool enable, bool clear)
 
       theGravModelComboBox->Enable(false);
       gravityDegreeTextCtrl->Enable(false);
+      gravityMaxDegreeTextCtrl->Enable(false);
       gravityOrderTextCtrl->Enable(false);
+      gravityMaxOrderTextCtrl->Enable(false);
+      gravityStmLimitTextCtrl->Enable(false);
       potFileTextCtrl->Enable(false);
+      theTideDataComboBox->Enable(false);
+      theTideModelComboBox->Enable(false);
+      tideTextCtrl->Enable(false);
+      tideFileTextCtrl->Enable(false);
       theGravModelSearchButton->Enable(false);
+      theTideModelSearchButton->Enable(false);
       theAtmosModelComboBox->Enable(false);
       theDragSetupButton->Enable(false);
       //theMagfModelComboBox->Enable(false);
@@ -2623,8 +2906,6 @@ void PropagationConfigPanel::UpdatePrimaryBodyItems()
 //      DisplaySRPData();
 //   }
 }
-
-
 //------------------------------------------------------------------------------
 // void PropagationConfigPanel::UpdatePrimaryBodyComboBoxList()
 //------------------------------------------------------------------------------
@@ -2950,19 +3231,24 @@ bool PropagationConfigPanel::SaveDegOrder()
       ("PropagationConfigPanel::SaveDegOrder() entered\n");
    #endif
 
-   Integer degree, order;
+   Integer degree, order, stmlimit;
    std::string str;
 
    //-----------------------------------------------------------------
    // check values from text field
    //-----------------------------------------------------------------
+   
    str = gravityDegreeTextCtrl->GetValue();
-   CheckInteger(degree, str, "Degree", "Integer Number >= 0"
+   CheckInteger(degree, str, "Degree", "Integer Number >= 0 "
             "and < the maximum specified by the model, Order <= Degree].");
 
    str = gravityOrderTextCtrl->GetValue();
    CheckInteger(order, str, "Order", "Integer Number >= 0"
-            "and < the maximum specified by the model, Order <= Degree].");
+            " and < the maximum specified by the model, Order <= Degree].");
+
+   str = gravityStmLimitTextCtrl->GetValue();
+   CheckInteger(stmlimit, str, "StmLimit", "Integer Number >= 0 "
+            "and < Infinity");
 
    if (!canClose)
       return false;
@@ -3007,14 +3293,28 @@ bool PropagationConfigPanel::SaveDegOrder()
 //            if (theGravForce != NULL && primaryBodyList[i]->bodyName == bodyName)
             if (theGravForce != NULL && primaryBodyData->bodyName == bodyName)
             {
+               theCelestialBody = theSolarSystem->GetBody(primaryBodyData->bodyName);
+               HarmonicGravity* hg = GravityField::GetHarmonicGravity
+                  (std::string(primaryBodyData->potFileFullPath.c_str()),
+                  std::string(primaryBodyData->tideFileFullPath.c_str()),
+                  theCelestialBody->GetGravitationalConstant(),
+                  theCelestialBody->GetEquatorialRadius(),
+                  std::string(primaryBodyData->bodyName),false);
+               if (hg != NULL)
+                  {
+                  theGravForce->SetIntegerParameter("MaxDegree", hg->GetNN());
+                  theGravForce->SetIntegerParameter("MaxOrder", hg->GetMM());
+                  }
                theGravForce->SetIntegerParameter("Degree", degree);
                theGravForce->SetIntegerParameter("Order", order);
+               theGravForce->SetIntegerParameter("StmLimit", stmlimit);
+
+               isDegOrderChanged = false;
+               retval = true;
+               delete hg;
             }
          }
       }
-
-      isDegOrderChanged = false;
-      retval = true;
    }
    catch (BaseException &e)
    {
@@ -3025,8 +3325,6 @@ bool PropagationConfigPanel::SaveDegOrder()
 
    return retval;
 }
-
-
 //------------------------------------------------------------------------------
 // bool SavePotFile()
 //------------------------------------------------------------------------------
@@ -3120,6 +3418,129 @@ bool PropagationConfigPanel::SavePotFile()
 }
 
 
+//------------------------------------------------------------------------------
+// bool SaveTideFile()
+//------------------------------------------------------------------------------
+bool PropagationConfigPanel::SaveTideFile()
+{
+   bool retval = false;
+
+   #ifdef DEBUG_PROP_PANEL_SAVE
+   MessageInterface::ShowMessage
+      ("PropagationConfigPanel::SaveTideFile() entered\n");
+   #endif
+
+   // save data to core engine
+   try
+   {
+      std::string inputString;
+      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
+                         thePropSetup->GetName() + "\" is not an allowed value.  "
+                        "\nThe allowed values are: [ %s ].";
+
+      //      for (Integer i=0; i < (Integer)primaryBodyList.size(); i++)
+      if (primaryBodyData != NULL)
+      {
+//         if (primaryBodyList[i]->gravType != "None")
+         if (primaryBodyData->gravType != "None")
+         {
+//            theGravForce = primaryBodyList[i]->gravf;
+            theGravForce = primaryBodyData->gravf;
+            if (theGravForce != NULL)
+            {
+               #ifdef DEBUG_PROP_PANEL_SAVE
+                  MessageInterface::ShowMessage
+                    ("SaveTideFile() Saving Body:%s, tideFile=%s\n   tideFileFullPath=%s\n",
+                     primaryBodyData->bodyName.WX_TO_C_STRING,
+                     primaryBodyData->tideFile.WX_TO_C_STRING, primaryBodyData->tideFileFullPath.WX_TO_C_STRING);
+               #endif
+
+               inputString = primaryBodyData->tideFileFullPath.WX_TO_C_STRING;
+               #ifdef DEBUG_PROP_PANEL_SAVE
+               MessageInterface::ShowMessage
+                  ("   primaryBodyData->tideFileFullPath = '%s'\n", inputString.c_str());
+               #endif
+               
+               bool update = theGravForce->IsParameterValid("TideFile",
+                   primaryBodyData->tideFile.WX_TO_STD_STRING);
+               
+               if (update)
+               {
+                  #ifdef DEBUG_PROP_PANEL_SAVE
+                  MessageInterface::ShowMessage
+                     ("   Calling theGravForce->SetStringParameter('TideFile')\n");
+                  #endif
+                  theGravForce->SetStringParameter("TideFile",
+//                        primaryBodyList[i]->tideFile.WX_TO_C_STRING);
+                        primaryBodyData->tideFile.WX_TO_C_STRING);
+                  retval = true;
+                  isTideFileChanged = false;
+
+                  if (primaryBodyData->tideFile != "")
+                  {
+                     primaryBodyData->tideData = "Tide File";
+                     theTideDataComboBox->SetValue(primaryBodyData->tideData);
+                  }
+               }
+            }
+         }
+      }
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      canClose = false;
+      retval = false;
+   }
+   
+   #ifdef DEBUG_PROP_PANEL_SAVE
+   MessageInterface::ShowMessage
+      ("PropagationConfigPanel::SaveTideFile() returning %d\n", retval);
+   #endif
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SaveTideModel()
+//------------------------------------------------------------------------------
+bool PropagationConfigPanel::SaveTideModel()
+   {
+   bool retval = false;
+
+   try
+      {
+      std::string inputString;
+      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
+                         thePropSetup->GetName() + "\" is not an allowed value.  "
+                        "\nThe allowed values are: [ %s ].";
+
+      //      for (Integer i=0; i < (Integer)primaryBodyList.size(); i++)
+      if (primaryBodyData != NULL)
+         {
+         inputString = primaryBodyData->potFileFullPath.WX_TO_C_STRING;
+         bool update = theGravForce->IsParameterValid("TideModel",
+                          primaryBodyData->tideModel.WX_TO_STD_STRING);
+              
+               
+         if (update)
+            {
+            theGravForce->SetStringParameter("TideModel",
+               primaryBodyData->tideModel.WX_TO_C_STRING);
+            retval = true;
+            isTideModelChanged = false;
+            }
+         }
+      }
+   catch (BaseException &e)
+      {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      canClose = false;
+      retval = false;
+      }
+   
+   return retval;
+   }
 //------------------------------------------------------------------------------
 // bool SaveAtmosModel()
 //------------------------------------------------------------------------------
@@ -3359,9 +3780,15 @@ void PropagationConfigPanel::OnGravityModelComboBox(wxCommandEvent &event)
       else if (gravTypeName == "Other")
       {
 //         primaryBodyList[currentBodyId]->potFile = potFileTextCtrl->GetValue();
+         std::string potFile = potFileTextCtrl->GetValue().WX_TO_STD_STRING;
+         std::string potFileFullPath = potFile;
+         std::string potFileType = GmatStringUtil::ToUpper(primaryBodyData->bodyName.WX_TO_C_STRING) + "_POT_PATH";
+
          primaryBodyData->potFile = potFileTextCtrl->GetValue();
          // Added to fix GMT-4651 (LOJ: 2014.07.31)
-         primaryBodyData->potFileFullPath = potFileTextCtrl->GetValue(); 
+         primaryBodyData->potFileFullPath =
+             GmatBase::GetFullPathFileName(potFileFullPath, primaryBodyData->bodyName.WX_TO_C_STRING,
+             potFile, potFileType, true, "", false, true);
       }
 
       #ifdef DEBUG_PROP_PANEL_GRAV
@@ -3386,6 +3813,74 @@ void PropagationConfigPanel::OnGravityModelComboBox(wxCommandEvent &event)
 }
 
 
+//------------------------------------------------------------------------------
+// void OnTideDataComboBox(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::OnTideDataComboBox(wxCommandEvent &event)
+{
+   #ifdef DEBUG_PROP_PANEL_GRAV
+   MessageInterface::ShowMessage("OnTideDataComboBox() entered\n");
+   #endif
+
+   if (primaryBody == "None")
+      return;
+
+   tideDataName = theTideDataComboBox->GetStringSelection();
+
+   if (primaryBodyData->tideData != tideDataName)
+   {
+      #ifdef DEBUG_PROP_PANEL_GRAV
+      MessageInterface::ShowMessage
+         ("OnTideDataComboBox() tideData changed from=%s to=%s for body=%s\n",
+            primaryBodyData->tideData.WX_TO_C_STRING, tideDataName.WX_TO_C_STRING,
+            primaryBodyData->bodyName.WX_TO_C_STRING);
+      #endif
+
+      primaryBodyData->tideData = tideDataName;
+
+      if (tideDataName == "None")
+      {
+         primaryBodyData->tideModel = "None";
+         primaryBodyData->tideFile = "";
+         primaryBodyData->tideFileFullPath = "";
+
+         isTideModelChanged = true;
+         isTideFileChanged = true;
+      }
+      else if (tideDataName != "Tide File")
+      {
+         primaryBodyData->tideFile = "";
+         primaryBodyData->tideFileFullPath = "";
+
+         isTideFileChanged = true;
+      }
+
+      DisplayGravityFieldData(primaryBodyData->bodyName);
+      EnableUpdate(true);
+   }
+   #ifdef DEBUG_PROP_PANEL_GRAV
+   MessageInterface::ShowMessage("OnTideDataComboBox() leaving\n");
+   #endif
+}
+//------------------------------------------------------------------------------
+// void OnTideModelComboBox(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::OnTideModelComboBox(wxCommandEvent &event)
+   {
+   if (primaryBody == "None")
+      return;
+
+   tideModelName = theTideModelComboBox->GetStringSelection();
+
+   if (primaryBodyData->tideModel != tideModelName)
+      {
+
+      primaryBodyData->tideModel = tideModelName;
+
+      isTideModelChanged = true;
+      EnableUpdate(true);
+      }
+   }
 //------------------------------------------------------------------------------
 // void OnAtmosphereModelComboBox(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -3750,43 +4245,44 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
 {
-   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
+   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
+      _T("Gravity files (*.cof;*.grv;*.gfc;*.tab)|*.cof;*.grv;*.gfc;*.tab|All files (*.*)|*.*"));
 
    if (dialog.ShowModal() == wxID_OK)
-   {
-      wxString filename;
-
-      filename = dialog.GetPath();
+      {
+      wxString filename = dialog.GetPath();
+      std::string tideFilename = primaryBodyData->tideFileFullPath.WX_TO_STD_STRING;
 
       try
-      {
-         GmatGrav::GravityFileType gft = GravityFileUtil::GetFileType(filename.c_str());
-         switch (gft)
          {
-            case GmatGrav::GFT_COF:
-               ParseCOFGravityFile(filename);
-               break;
-            case GmatGrav::GFT_GRV:
-               ParseGRVGravityFile(filename);
-               break;
-            case GmatGrav::GFT_DAT:
-               ParseDATGravityFile(filename);
-               break;
-            default:
-               MessageInterface::PopupMessage
+         theCelestialBody = theSolarSystem->GetBody(primaryBodyData->bodyName);
+         HarmonicGravity* hg = GravityField::GetHarmonicGravity
+           (std::string(filename.c_str()),
+            std::string(tideFilename.c_str()),
+            theCelestialBody->GetGravitationalConstant(),
+            theCelestialBody->GetEquatorialRadius(),
+            std::string(primaryBodyData->bodyName),false);
+         if (hg == NULL)
+            {
+            MessageInterface::PopupMessage
                (Gmat::WARNING_, "Gravity file \"" + filename + "\" is of unknown format.");
-               return;
+            return;
+            }
+//         primaryBodyData->gravDegree = GmatStringUtil::ToString(hg->GetNN(),4);
+//         primaryBodyData->gravOrder = GmatStringUtil::ToString(hg->GetMM(),4);
+//         gravityDegreeTextCtrl->SetValue(primaryBodyData->gravDegree);
+//         gravityOrderTextCtrl->SetValue(primaryBodyData->gravOrder);
+         delete hg;
          }
-      }
       catch (BaseException &be)
-      {
+         {
          MessageInterface::PopupMessage
          (Gmat::WARNING_, "File \"" + filename + "\" is not a valid gravity file.");
          return;
-      }
-      GmatGrav::GravityModelType bodyGravModelType =
-         GravityFileUtil::GetModelType(filename.c_str(), (primaryBodyData->bodyName).c_str());
-      primaryBodyData->gravType = (GravityFileUtil::GRAVITY_MODEL_NAMES[bodyGravModelType]).c_str();
+         }
+      GravityField::GravityModelType bodyGravModelType =
+         GravityField::GetModelType(filename.c_str(), (primaryBodyData->bodyName).c_str());
+      primaryBodyData->gravType = (GravityField::GRAVITY_MODEL_NAMES[bodyGravModelType]).c_str();
       
 //      primaryBodyList[currentBodyId]->potFile = filename;
       primaryBodyData->potFile = filename;
@@ -3814,13 +4310,115 @@ void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
       //loj: Do we need to show? body name didn't change
       //waw: Yes, we need to update the degree & order displays (10/17/06)
 //      DisplayGravityFieldData(primaryBodyList[currentBodyId]->bodyName);
-      DisplayGravityFieldData(primaryBodyData->bodyName, true);
+      DisplayGravityFieldData(primaryBodyData->bodyName, true, false);
       isDegOrderChanged = true;
       EnableUpdate(true);
+      }
+   }
+//------------------------------------------------------------------------------
+// void OnGravSaveButton(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::OnGravSaveButton(wxCommandEvent &event)
+{
+   std::string filename = primaryBodyData->potFileFullPath.WX_TO_STD_STRING;
+
+   wxFileDialog dialog(this, _T("Select save file name"), _T(""), filename + ".cof",
+      _T(".cof file (*.cof)|*.cof|All files (*.*)|*.*"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+   if (dialog.ShowModal() == wxID_OK)
+   {
+      std::string tideFilename = primaryBodyData->tideFileFullPath.WX_TO_STD_STRING;
+      try
+      {
+         theCelestialBody = theSolarSystem->GetBody(primaryBodyData->bodyName);
+         HarmonicGravity* hg = GravityField::GetHarmonicGravity
+            (std::string(filename.c_str()),
+            std::string(tideFilename.c_str()),
+            theCelestialBody->GetGravitationalConstant(),
+            theCelestialBody->GetEquatorialRadius(),
+            std::string(primaryBodyData->bodyName), true);
+         if (hg == NULL)
+         {
+            MessageInterface::PopupMessage
+               (Gmat::WARNING_, "Gravity file \"" + filename + "\" is of unknown format.");
+            return;
+         }
+
+         std::string outputFile = dialog.GetPath().WX_TO_STD_STRING;
+         hg->WriteCofFile(outputFile);
+         delete hg;
+      }
+      catch (BaseException &be)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "File \"" + filename +
+            "\" is not a valid gravity file because " + be.GetFullMessage());
+         return;
+      }
    }
 }
+//------------------------------------------------------------------------------
+// void OnTideSearchButton(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::OnTideSearchButton(wxCommandEvent &event)
+{
+    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
+        _T("Tide file (*.tide)|*.tide|All files (*.*)|*.*"));
 
+    if (dialog.ShowModal() == wxID_OK)
+    {
+        std::string filename = primaryBodyData->potFileFullPath.WX_TO_STD_STRING;
+        wxString tideFilename = dialog.GetPath();
 
+        try
+        {
+            theCelestialBody = theSolarSystem->GetBody(primaryBodyData->bodyName);
+            HarmonicGravity* hg = GravityField::GetHarmonicGravity
+                (std::string(filename.c_str()),
+                std::string(tideFilename.c_str()),
+                theCelestialBody->GetGravitationalConstant(),
+                theCelestialBody->GetEquatorialRadius(),
+                std::string(primaryBodyData->bodyName), false);
+            if (hg == NULL)
+            {
+                MessageInterface::PopupMessage
+                    (Gmat::WARNING_, "Gravity file \"" + filename + "\" is of unknown format."
+                                     "Fix before loading a tide file");
+                return;
+            }
+
+            if (!hg->HaveTideModel(HarmonicGravity::ETide::Solid))
+            {
+                MessageInterface::PopupMessage
+                    (Gmat::WARNING_, "Unable to load tide data from \"" + tideFilename + "\"");
+                return;
+            }
+
+            delete hg;
+        }
+        catch (BaseException &be)
+        {
+            MessageInterface::PopupMessage
+                (Gmat::WARNING_, "Encountered following error while loading gravity model:\n" +
+                                 be.GetFullMessage());
+            return;
+        }
+        GravityField::GravityModelType bodyGravModelType =
+            GravityField::GetModelType(filename.c_str(), (primaryBodyData->bodyName).c_str());
+        primaryBodyData->gravType = (GravityField::GRAVITY_MODEL_NAMES[bodyGravModelType]).c_str();
+
+        primaryBodyData->tideData = "Tide File";
+        primaryBodyData->tideFile = tideFilename;
+        primaryBodyData->tideFileFullPath = tideFilename;
+
+        //loj: Do we need to show? body name didn't change
+        //waw: Yes, we need to update the degree & order displays (10/17/06)
+        //      DisplayGravityFieldData(primaryBodyList[currentBodyId]->bodyName);
+        DisplayGravityFieldData(primaryBodyData->bodyName, false, true);
+        isTideModelChanged = true;
+        EnableUpdate(true);
+    }
+}
 //------------------------------------------------------------------------------
 // void OnSetupButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -4015,23 +4613,55 @@ void PropagationConfigPanel::OnGravityTextUpdate(wxCommandEvent& event)
    else if (event.GetEventObject() == gravityOrderTextCtrl)
    {
 //      primaryBodyList[currentBodyId]->gravOrder = gravityOrderTextCtrl->GetValue();
-      primaryBodyData->gravOrder = gravityOrderTextCtrl->GetValue();
+      primaryBodyData->gravOrrder = gravityOrderTextCtrl->GetValue();
+      isDegOrderChanged = true;
+      // Do not set to true if only text changed
+      //isForceModelChanged = true;
+   }
+   else if (event.GetEventObject() == gravityStmLimitTextCtrl)
+   {
+//      primaryBodyList[currentBodyId]->gravOrder = gravityOrderTextCtrl->GetValue();
+      primaryBodyData->gravStmLimit = gravityStmLimitTextCtrl->GetValue();
       isDegOrderChanged = true;
       // Do not set to true if only text changed
       //isForceModelChanged = true;
    }
    else if (event.GetEventObject() == potFileTextCtrl)
    {
+      std::string potFile = potFileTextCtrl->GetValue().WX_TO_STD_STRING;
+      std::string potFileType = GmatStringUtil::ToUpper(primaryBodyData->bodyName.WX_TO_C_STRING) + "_POT_PATH";
 //      primaryBodyList[currentBodyId]->potFile = potFileTextCtrl->GetValue();
-      primaryBodyData->potFile = potFileTextCtrl->GetValue();
-      // Added to fix GMT-4651 (LOJ: 2014.07.31)
-      primaryBodyData->potFileFullPath = potFileTextCtrl->GetValue(); 
+      primaryBodyData->potFile = potFile;
+      // Added to fix GMT-4651 (LOJ: 2014.07.31) 
+      primaryBodyData->potFileFullPath =
+            GmatBase::GetFullPathFileName(potFile, primaryBodyData->bodyName.WX_TO_C_STRING,
+            potFile, potFileType, true, "", false, true);
       isPotFileChanged = true;
       // Do not set to true if only text changed
       //isForceModelChanged = true;
    }
    #ifdef DEBUG_GRAVITY_TEXT
    MessageInterface::ShowMessage("OnGravityTextUpdate() leaving\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void OnTideTextUpdate(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::OnTideTextUpdate(wxCommandEvent& event)
+{
+   #ifdef DEBUG_TIDE_TEXT
+   MessageInterface::ShowMessage("OnTideTextUpdate() entered\n");
+   #endif
+   EnableUpdate(true);
+
+   primaryBodyData->tideFile = tideFileTextCtrl->GetValue();
+   primaryBodyData->tideFileFullPath = tideFileTextCtrl->GetValue(); 
+   isTideFileChanged = true;
+
+   #ifdef DEBUG_TIDE_TEXT
+   MessageInterface::ShowMessage("OnTideTextUpdate() leaving\n");
    #endif
 }
 
@@ -4043,8 +4673,6 @@ void PropagationConfigPanel::OnMagneticTextUpdate(wxCommandEvent& event)
    EnableUpdate(true);
    isMagfTextChanged = true;
 }
-
-
 //------------------------------------------------------------------------------
 // void OnSRPCheckBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -4059,7 +4687,6 @@ void PropagationConfigPanel::OnSRPCheckBoxChange(wxCommandEvent &event)
       theSRPModelComboBox->Enable(false);
    EnableUpdate(true);
 }
-
 //------------------------------------------------------------------------------
 // void OnRelativisticCorrectionCheckBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -4069,8 +4696,6 @@ void PropagationConfigPanel::OnRelativisticCorrectionCheckBoxChange(wxCommandEve
    isForceModelChanged       = true;
    EnableUpdate(true);
 }
-
-
 //------------------------------------------------------------------------------
 // void OnStopCheckBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -4080,8 +4705,6 @@ void PropagationConfigPanel::OnStopCheckBoxChange(wxCommandEvent &event)
    isIntegratorDataChanged = true;
    EnableUpdate(true);
 }
-
-
 //------------------------------------------------------------------------------
 // void ShowPropData()
 //------------------------------------------------------------------------------
@@ -4117,8 +4740,6 @@ void PropagationConfigPanel::ShowPropData(const std::string& header)
    }
    MessageInterface::ShowMessage("============================================\n");
 }
-
-
 //------------------------------------------------------------------------------
 // void ShowForceList()
 //------------------------------------------------------------------------------
@@ -4151,11 +4772,14 @@ void PropagationConfigPanel::ShowForceList(const std::string &header)
 //             primaryBodyList[i]->srpf);
          MessageInterface::ShowMessage
             ("   id=%d, body=%s, gravType=%s, dragType=%s, magfType=%s\n   potFile=%s\n"
-             "   potFileFullPath=%s\n   gravf=%p, dragf=%p, srpf=%p\n", 0,
+             "   potFileFullPath=%s\n   tideFile=%s\n   tideFileFullPath=%s\n"
+             "   gravf=%p, dragf=%p, srpf=%p\n", 0,
              primaryBodyData->bodyName.WX_TO_C_STRING,
              primaryBodyData->gravType.WX_TO_C_STRING, primaryBodyData->dragType.WX_TO_C_STRING,
              primaryBodyData->magfType.WX_TO_C_STRING, primaryBodyData->potFile.WX_TO_C_STRING,
              primaryBodyData->potFileFullPath.WX_TO_C_STRING,
+             primaryBodyData->tideFile.WX_TO_C_STRING,
+             primaryBodyData->tideFileFullPath.WX_TO_C_STRING,
              primaryBodyData->gravf, primaryBodyData->dragf,
              primaryBodyData->srpf);
       }
@@ -4171,8 +4795,6 @@ void PropagationConfigPanel::ShowForceList(const std::string &header)
    }
    MessageInterface::ShowMessage("============================================\n");
 }
-
-
 //------------------------------------------------------------------------------
 // void ShowForceModel()
 //------------------------------------------------------------------------------
@@ -4196,248 +4818,6 @@ void PropagationConfigPanel::ShowForceModel(const std::string &header)
       MessageInterface::ShowMessage("============================================\n");
    }
 }
-
-
-//------------------------------------------------------------------------------
-// bool ParseDATGravityFile(const wxString& fname)
-//------------------------------------------------------------------------------
-void PropagationConfigPanel::ParseDATGravityFile(const wxString& fname)
-{
-   Integer      cc, dd, sz=0;
-   Integer      iscomment, rtn;
-   Integer      n=0, m=0;
-   Integer      fileDegree, fileOrder;
-   Real         Cnm=0.0, Snm=0.0, dCnm=0.0, dSnm=0.0;
-   // @to do should mu & radius be constant?? - waw
-   Real         mu=GmatSolarSystemDefaults::PLANET_MU[GmatSolarSystemDefaults::EARTH]; // gravity parameter of central body
-   Real         a=GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH];  // radius of central body ( mean equatorial )
-   char         buf[CelestialBody::BUFSIZE];
-   FILE        *fp;
-
-   for (cc = 2;cc <= HarmonicField::HF_MAX_DEGREE; ++cc)
-   {
-      for (dd = 0; dd <= cc; ++dd)
-      {
-         sz++;
-      }
-   }
-
-   /* read coefficients from file */
-   fp = fopen( fname.c_str(), "r");
-   if (!fp)
-   {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "Error reading gravity model file.");
-         return;
-   }
-
-   PrepareGravityArrays();
-   iscomment = 1;
-
-   while ( iscomment )
-   {
-      rtn = fgetc( fp );
-
-      if ( (char)rtn == '#' )
-      {
-         fgets( buf, CelestialBody::BUFSIZE, fp );
-      }
-      else
-      {
-         ungetc( rtn, fp );
-         iscomment = 0;
-      }
-   }
-
-   fscanf(fp, "%lg\n", &mu ); mu = (Real)mu / 1.0e09;      // -> Km^3/sec^2
-   fscanf(fp, "%lg\n", &a ); a = (Real)a / 1000.0;         // -> Km
-   fgets( buf, CelestialBody::BUFSIZE, fp );
-
-   while ( ( (char)(rtn=fgetc(fp)) != '#' ) && (rtn != EOF) )
-   {
-      ungetc( rtn, fp );
-      fscanf( fp, "%i %i %le %le\n", &n, &m, &dCnm, &dSnm );
-      if ( n <= GRAV_MAX_DRIFT_DEGREE  && m <= n )
-      {
-         dCbar[n][m] = (Real)dCnm;
-         dSbar[n][m] = (Real)dSnm;
-      }
-   }
-
-   fgets( buf, CelestialBody::BUFSIZE, fp );
-
-   fileDegree = 0;
-   fileOrder  = 0;
-   cc=0;n=0;m=0;
-
-   do
-   {
-      if ( n <= HarmonicField::HF_MAX_DEGREE && m <= HarmonicField::HF_MAX_ORDER )
-      {
-         Cbar[n][m] = (Real)Cnm;
-         Sbar[n][m] = (Real)Snm;
-      }
-      if (n > fileDegree) fileDegree = n;
-      if (n > fileOrder)  fileOrder  = n;
-
-      cc++;
-   } while ( ( cc<=sz ) && ( fscanf( fp, "%i %i %le %le\n", &n, &m, &Cnm, &Snm ) > 0 ));
-
-   // Save as string
-//   primaryBodyList[currentBodyId]->gravDegree.Printf("%d", fileDegree);
-//   primaryBodyList[currentBodyId]->gravOrder.Printf("%d", fileOrder);
-   primaryBodyData->gravDegree.Printf("%d", fileDegree);
-   primaryBodyData->gravOrder.Printf("%d", fileOrder);
-}
-
-
-//------------------------------------------------------------------------------
-// bool ParseGRVGravityFile(const wxString& fname)
-//------------------------------------------------------------------------------
-void PropagationConfigPanel::ParseGRVGravityFile(const wxString& fname)
-{
-   Integer       fileOrder, fileDegree;
-
-   std::ifstream inFile;
-   
-   inFile.open(fname.WX_TO_C_STRING);
-   
-   if (!inFile)
-   {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "Error reading gravity model file.");
-         return;
-   }
-
-   std::string s;
-   std::string firstStr;
-
-   while (!inFile.eof())
-   {
-      getline(inFile,s);
-      std::istringstream lineStr;
-      lineStr.str(s);
-
-      // ignore comment lines
-      if (s[0] != '#')
-      {
-         lineStr >> firstStr;
-         std::string upperString = GmatStringUtil::ToUpper(firstStr);
-         //VC++ error C3861: 'strcasecmp': identifier not found
-         // since using std::string, use GmatStringUtil and ==
-         //if (strcmpi(firstStr.c_str(),"Degree") == 0)
-         if (upperString == "DEGREE")
-            lineStr >> fileDegree;
-         //else if (strcmpi(firstStr.c_str(),"Order") == 0)
-         else if (upperString == "ORDER")
-            lineStr >> fileOrder;
-      }
-   }
-
-   // Save as string
-//   primaryBodyList[currentBodyId]->gravDegree.Printf("%d", fileDegree);
-//   primaryBodyList[currentBodyId]->gravOrder.Printf("%d", fileOrder);
-   primaryBodyData->gravDegree.Printf("%d", fileDegree);
-   primaryBodyData->gravOrder.Printf("%d", fileOrder);
-}
-
-//------------------------------------------------------------------------------
-// bool ParseCOFGravityFile(const wxString& fname)
-//------------------------------------------------------------------------------
-void PropagationConfigPanel::ParseCOFGravityFile(const wxString& fname)
-{
-   Integer       fileOrder = 70, fileDegree = 70;
-
-   std::ifstream inFile;
-   inFile.open(fname.WX_TO_C_STRING);
-
-   bool done = false;
-
-   if (!inFile)
-   {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "Error reading gravity model file.");
-      return;
-   }
-
-   std::string s;
-   std::string firstStr;
-   std::string degStr, ordStr;
-
-   Integer counter = 0;
-   while (!done && (counter < 129650))
-   {
-      getline(inFile,s);
-
-      std::istringstream lineStr;
-
-//      lineStr.str(s);
-
-      // ignore comment lines
-      if (s[0] != 'C')
-      {
-         lineStr >> firstStr;
-
-         firstStr = s.substr(0, 8);
-         firstStr = GmatStringUtil::Trim(firstStr);
-
-         if (counter > 10)
-            break;
-
-         if (firstStr == "POTFIELD")
-         {
-            // This line DOES NOT WORK for fields 100x100 or larger
-//            lineStr >> fileDegree >> fileOrder >> int1 >> real1 >> real2 >> real3;
-            degStr = s.substr(8, 3);
-            ordStr = s.substr(11, 3);
-
-            if ((GmatStringUtil::ToInteger(degStr, fileDegree) == false) ||
-                (GmatStringUtil::ToInteger(ordStr, fileOrder) == false))
-            {
-               MessageInterface::PopupMessage
-                  (Gmat::WARNING_, "Error reading degree and/or order from "
-                        "gravity model file.");
-            }
-            done = true;
-         }
-
-         // Count non-comment lines to be sure we're not in an infinite loop
-         ++counter;
-      }
-   }
-
-   // Save as string
-//   primaryBodyList[currentBodyId]->gravDegree.Printf("%d", fileDegree);
-//   primaryBodyList[currentBodyId]->gravOrder.Printf("%d", fileOrder);
-   primaryBodyData->gravDegree.Printf("%d", fileDegree);
-   primaryBodyData->gravOrder.Printf("%d", fileOrder);
-}
-
-//------------------------------------------------------------------------------
-// void PrepareGravityArrays()
-//------------------------------------------------------------------------------
-void PropagationConfigPanel::PrepareGravityArrays()
-{
-   Integer m, n;
-
-   for (n=0; n <= HarmonicField::HF_MAX_DEGREE; ++n)
-      for ( m=0; m <= HarmonicField::HF_MAX_ORDER; ++m)
-      {
-         Cbar[n][m] = 0.0;
-         Sbar[n][m] = 0.0;
-      }
-
-   for (n = 0; n <= GRAV_MAX_DRIFT_DEGREE; ++n)
-   {
-      for (m = 0; m <= GRAV_MAX_DRIFT_DEGREE; ++m)
-      {
-         dCbar[n][m] = 0.0;
-         dSbar[n][m] = 0.0;
-      }
-   }
-}
-
-
 //-----------------------------------------------------------------------------
 // void PropagationConfigPanel::ShowIntegratorLayout(bool isIntegrator,
 //-----------------------------------------------------------------------------
@@ -4445,10 +4825,15 @@ void PropagationConfigPanel::ShowIntegratorLayout(bool isIntegrator,
       bool isEphem)
 {
    bool isPredictorCorrector = false;
+   bool isCode500 = false;
 
    if (thePropagator != NULL)
+   {
       if (thePropagator->IsOfType("PredictorCorrector"))
          isPredictorCorrector = true;
+      if (thePropagator->IsOfType("Code500Propagator"))
+         isCode500 = true;
+   }
 
    if (isIntegrator)
    {
@@ -4525,6 +4910,27 @@ void PropagationConfigPanel::ShowIntegratorLayout(bool isIntegrator,
          propagatorEpochFormatComboBox->Show(true);
          startEpochStaticText->Show(true);
          startEpochCombobox->Show(true);
+
+         propCentralBodyComboBox->Enable(!isCode500);
+
+         if (isCode500)
+         {
+            propCentralBodyComboBox->Clear();
+            propCentralBodyComboBox->Append("Provided by file");
+            propCentralBodyComboBox->SetValue("Provided by file");
+         }
+         else
+         {
+            if (propCentralBodyComboBox->FindString("Provided by file") != -1)
+            {
+               propCentralBodyComboBox->Clear();
+               wxArrayString theCelestialBodyList = theGuiManager->GetConfigBodyList();
+               for (int i = 0; i < theCelestialBodyList.size(); i++)
+                  propCentralBodyComboBox->Append(theCelestialBodyList[i]);
+               
+               propCentralBodyComboBox->SetValue("Earth");
+            }
+         }
       }
       else
       {
@@ -4532,6 +4938,11 @@ void PropagationConfigPanel::ShowIntegratorLayout(bool isIntegrator,
       }
    }
 
+   // Hide some items if not in testing mode
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+   theGravModelSaveButton->Show(runmode == GmatGlobal::TESTING || runmode == GmatGlobal::TESTING_NO_PLOTS);
+
    theMiddleSizer->Layout();
    Refresh();
 }
+

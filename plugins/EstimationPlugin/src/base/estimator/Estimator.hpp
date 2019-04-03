@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -41,6 +41,10 @@
 /**
  * The base class used for GMAT's estimators
  */
+
+//#define ESTTIME_ROUNDOFF 1e-10
+#define ESTTIME_ROUNDOFF 1e-9      //1e-10 causes infinitive loop in propagation steps
+
 class ESTIMATION_API Estimator : public Solver
 {
 public:
@@ -95,31 +99,31 @@ public:
    virtual bool         SetBooleanParameter(const Integer id,
                                             const bool value);
 
-   virtual Gmat::ObjectType
+   virtual UnsignedInt
                         GetPropertyObjectType(const Integer id) const;
 
    // Access methods for the reference objects
-   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual std::string  GetRefObjectName(const UnsignedInt type) const;
    virtual const ObjectTypeArray&
                         GetRefObjectTypeArray();
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+                        GetRefObjectNameArray(const UnsignedInt type);
+   virtual bool         SetRefObjectName(const UnsignedInt type,
                                          const std::string &name);
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string &name);
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name = "");
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index);
-   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+   virtual ObjectArray& GetRefObjectArray(const UnsignedInt type);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
    Real                 GetTimeStep();
@@ -127,8 +131,8 @@ public:
    virtual bool         TakeAction(const std::string &action,
                                    const std::string &actionData = "");
 
-   virtual void         UpdateCurrentEpoch(GmatEpoch newEpoch);
-   virtual GmatEpoch    GetCurrentEpoch();
+   virtual void         UpdateCurrentEpoch(GmatTime newEpoch);
+   virtual GmatTime     GetCurrentEpoch();
 
    PropSetup*           GetPropagator();
    MeasurementManager*  GetMeasurementManager();
@@ -188,11 +192,11 @@ protected:
    PropSetup               *propagator;
 
    /// Epoch of the current estimation state
-   GmatEpoch               estimationEpoch;
+   GmatTime                estimationEpochGT;
    /// Currrrent simulation epoch
-   GmatEpoch               currentEpoch;
+   GmatTime                currentEpochGT;
    /// The next epoch desired from propagation
-   GmatEpoch               nextMeasurementEpoch;
+   GmatTime                nextMeasurementEpochGT;
 
    /// The measurement derivatives at the measurement epoch, \tilde H
    std::vector<RealArray>  hTilde;
@@ -201,9 +205,9 @@ protected:
 
    /// Weight, Observation data, calculated data
    RealArray Weight;
-   RealArray OData;        // correction value of observation data
-   RealArray CData;
-
+   //RealArray OData;        // correction value of observation data
+   //RealArray CData;
+   
    /// The indices for the MeasurementModels with observations at current epoch
    IntegerArray            modelsToAccess;
 
@@ -211,23 +215,44 @@ protected:
    Rmatrix                 *stm;
    /// The estimation state covariance matrix
    Covariance              *stateCovariance;
-   /// The estimated state in GMAT internal coordinate system
+   /// The estimated state in GMAT internal coordinate system (in Cartesian coordinate system)
    GmatState               *estimationState;
-   /// The previous estimated state    in GMAT internal coordinate system
+   /// The estimated state in solve-for state type (solve-for state could be CartesianState or KeplerianState)
+   GmatState               estimationStateS;
+
+
+   /// The previous estimated state in GMAT internal coordinate system (in Cartesian coordinate system)
    GmatState               oldEstimationState;
-   
-   /// Apriori state (solve-for) presenting in participants' cooridnate systems
+   /// The previous estimated state in solve-for state type (solve-for could be CartesianState or KeplerianState)
+   GmatState               oldEstimationStateS;
+
+   /// Apriori estimation state presenting in MJ2000Eq cooridnate system and solve-for state type
+   GmatState aprioriMJ2000EqSolveForState;
+
+   /// Apriori estimation state presenting in participants' cooridnate systems and state type specified by spacecraft's DisplayStateType
    GmatState aprioriSolveForState;
-   /// The previous state (solve-for) presenting in participants' coordinate systems
+   /// Previous estimation state presenting in participants' coordinate systems and state type specified by spacecraft's DisplayStateType
    GmatState previousSolveForState;
-   /// The current state (solve-for) presenting in participants' coordinate systems
+   /// Current estimation state presenting in participants' coordinate systems and state type specified by spacecraft's DisplayStateType
    GmatState currentSolveForState;
+   /// Apriori estimation state presenting in participants' cooridnate systems and state type specified by spacecraft's DisplayStateType
+   /// Its anomaly is in form of MA 
+   GmatState aprioriSolveForStateMA;
+
+   /// Apriori estimation state presenting in participants' Cartesian coordinate system
+   GmatState aprioriSolveForStateC;
+   /// Previous estimation state presenting in participants' Cartesian coordinate system
+   GmatState previousSolveForStateC;
+   /// Current estimation state presenting in participants' coordinate systems
+   GmatState currentSolveForStateC;
 
 
    /// Size of the estimation state vector
    UnsignedInt             stateSize;
-   /// The estimated state
+   /// The estimated state in Cartesian coordinate system
    GmatState               initialEstimationState;
+   /// The estimated state in solve-for state type (solve-for state could be CartesianState or KeplerianState)
+   GmatState               initialEstimationStateS;
 
    /// Estimation status
    Integer                 estimationStatus;
@@ -235,6 +260,7 @@ protected:
 
    /// The information matrix, $\Lambda$
    Rmatrix                 information;
+
    /// The residual vector, N in Tapley, Schutz and Born
    Rvector                 residuals;
    /// The a priori state, \bar x_0 in Tapley, Schutz and Born
@@ -242,11 +268,16 @@ protected:
    /// The O-C value for each observation
    RealArray               measurementResiduals;
    /// The observation epochs
-   RealArray               measurementEpochs;
+   std::vector<GmatTime>   measurementEpochs;
    /// The observation ID for the residual
    IntegerArray            measurementResidualID;
 
-   RealArray               measurementTimes;
+   std::vector<GmatTime>   measurementTimes;
+   // Index of an element in BatchEstimator::stationAndType array. 
+   // It is used to specified ground station and data type associated with measurementResiduals. 
+   IntegerArray            KeyIndex;
+
+
    IntegerArray            observationID;
    /// List of residual vector (each element is a residual vector = O_vector - C_vector)
    std::vector<RealArray>  measurementResVectors;
@@ -276,6 +307,8 @@ protected:
    Real maxResidualMult;
    Real constMult;
    Real additiveConst;
+   /// Flag to indicate to use weightedRMS or predictedRMS for OLSE
+   bool chooseRMSP;
 
    /// Flag indicating to reset best RMS when estimation is diverged
    bool resetBestRMSFlag;
@@ -318,6 +351,7 @@ protected:
       MAX_RESIDUAL_MULTIPLIER,
       CONSTANT_MULTIPLIER,
       ADDITIVE_CONSTANT,
+      USE_RMSP,
       RESET_BEST_RMS,
       DATA_FILTERS,
       CONVERGENT_STATUS,
@@ -334,8 +368,8 @@ protected:
 
    virtual Integer         TestForConvergence(std::string &reason);
 
-   Real                    ConvertToRealEpoch(const std::string &theEpoch,
-                                              const std::string &theFormat);
+   GmatTime                ConvertToGmatTimeEpoch(const std::string &theEpoch, 
+                                                  const std::string &theFormat);
 
    virtual void            BuildResidualPlot(const std::string &plotName,
                               const StringArray &measurementNames);
@@ -350,10 +384,10 @@ protected:
    virtual ObservationData*
                            FilteringData(ObservationData* obsData, Integer obDataId, Integer& filterIndex);
 
-
-///// TBD: Do simulators need this too?  If so, move to base class
-   virtual bool            ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Rvector &inputStateElement, Rvector &outputStateElement);
-   virtual void            GetEstimationStateForReport(GmatState& outputState);
+   virtual Integer         SumAcceptedRecords(Integer key); 
+   virtual Real            SumAllResidual(Integer key);
+   virtual Real            SumAllResidualDeviationSqr(Integer key, Real ave);
+   virtual Real            SumAllWeightedResidualSqr(Integer key);
 
    /// Estimation status contains all status of an estimation
    enum EstimationStatus

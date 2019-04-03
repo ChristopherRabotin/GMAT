@@ -612,7 +612,7 @@ const StringArray& MeasureModel::GetStringArrayParameter(
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a list of the reference objects used in the model
@@ -623,7 +623,7 @@ const StringArray& MeasureModel::GetStringArrayParameter(
  */
 //------------------------------------------------------------------------------
 const StringArray& MeasureModel::GetRefObjectNameArray(
-      const Gmat::ObjectType type)
+      const UnsignedInt type)
 {
    refObjectNames.clear();
    
@@ -644,7 +644,7 @@ const StringArray& MeasureModel::GetRefObjectNameArray(
 }
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string &oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string &oldName,
 //       const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -657,7 +657,7 @@ const StringArray& MeasureModel::GetRefObjectNameArray(
  * @return true if an object reference name was changed, false if not
  */
 //------------------------------------------------------------------------------
-bool MeasureModel::RenameRefObject(const Gmat::ObjectType type,
+bool MeasureModel::RenameRefObject(const UnsignedInt type,
       const std::string &oldName, const std::string &newName)
 {
 #ifdef DEBUG_SET_PARAMETER
@@ -684,7 +684,7 @@ bool MeasureModel::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase* obj, const UnsignedInt type,
 //       const std::string& name)
 //------------------------------------------------------------------------------
 /**
@@ -697,7 +697,7 @@ bool MeasureModel::RenameRefObject(const Gmat::ObjectType type,
  * @return true if the pointer was set, false if not
  */
 //------------------------------------------------------------------------------
-bool MeasureModel::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+bool MeasureModel::SetRefObject(GmatBase* obj, const UnsignedInt type,
       const std::string& name)
 {
 #ifdef DEBUG_SET_PARAMETER
@@ -724,7 +724,7 @@ bool MeasureModel::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase* obj, const UnsignedInt type,
 //       const std::string& name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -739,7 +739,7 @@ bool MeasureModel::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
  * @return true is the object pointer was set anywhere; false if not
  */
 //------------------------------------------------------------------------------
-bool MeasureModel::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+bool MeasureModel::SetRefObject(GmatBase* obj, const UnsignedInt type,
       const std::string& name, const Integer index)
 {
 #ifdef DEBUG_SET_PARAMETER
@@ -805,6 +805,9 @@ void MeasureModel::SetPropagator(PropSetup* ps)
          PropSetup *propagator = (PropSetup*)ps->Clone();
          if (propagator)
          {
+            // Set flag to tell propagator using precision time
+            propagator->SetPrecisionTimeFlag(true);
+
             propMap[obj] = propagator;
             propsNeedInit = true;
             for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
@@ -881,7 +884,11 @@ bool MeasureModel::Initialize()
                   if (candidates[k]->GetName() == pname)
                      obj = candidates[k];
                if (obj != NULL)
+               {
+                  // Set flag to tell participant using precision time
+                  obj->SetPrecisionTimeFlag(true);
                   participants[i]->push_back(obj);
+               }
                else
                {
                   if (theMissing != "")
@@ -1149,7 +1156,7 @@ bool MeasureModel::SetProgressReporter(ProgressReporter* reporter)
  */
 //------------------------------------------------------------------------------
 bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrection,
-      ObservationData* forObservation, std::vector<RampTableData>* rampTB,
+      ObservationData* forObservation, std::vector<RampTableData>* rampTB, bool forSimulation, 
       Real atTimeOffset, Integer forStrand)
 {
    #ifdef DEBUG_EXECUTION
@@ -1181,7 +1188,9 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
 
    GmatTime forEpoch;
    if (forObservation)
-      forEpoch = forObservation->epoch;
+   {
+      forEpoch = forObservation->epochGT;
+   }
    else // Grab epoch from the first SpaceObject in the participant data
    {
       for (UnsignedInt i = 0; i < candidates.size(); ++i)
@@ -1189,27 +1198,31 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
          if (candidates[i]->IsOfType(Gmat::SPACEOBJECT))
          {
             forEpoch = ((SpaceObject*)candidates[i])->GetEpoch();
+            forEpoch = ((SpaceObject*)candidates[i])->GetEpochGT();
             break;
          }
       }
    }
    
    #ifdef DEBUG_OFFSET
-      MessageInterface::ShowMessage("Base epoch: %.12lf, timeOffset %lf sec, New epoch ",
-            forEpoch.GetMjd(), atTimeOffset);
+      MessageInterface::ShowMessage("Base epoch: %s, timeOffset %lf sec, New epoch ",
+            forEpoch.ToString().c_str(), atTimeOffset);
    #endif
 
    if (atTimeOffset != 0.0)
-      forEpoch += atTimeOffset * GmatTimeConstants::DAYS_PER_SEC;
+   {
+      //forEpoch += atTimeOffset * GmatTimeConstants::DAYS_PER_SEC;
+      forEpoch.AddSeconds(atTimeOffset);
+   }
 
    #ifdef DEBUG_OFFSET
-      MessageInterface::ShowMessage("%.12lf\n", forEpoch.GetMjd());
+      MessageInterface::ShowMessage("%s\n", forEpoch.ToString().c_str());
    #endif
 
    // 3. Synchronize the propagators to the measurement epoch by propagating each
    // spacecraft that is off epoch to that epoch
    #ifdef DEBUG_TIMING
-      MessageInterface::ShowMessage("3. Synchronizing in MeasureModel at time = %.12lf\n", forEpoch.GetMjd());
+      MessageInterface::ShowMessage("3. Synchronizing in MeasureModel at time = %s\n", forEpoch.ToString().c_str());
    #endif
 
    for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
@@ -1217,12 +1230,12 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
    {
       if (i->first->IsOfType(Gmat::SPACEOBJECT) && (i->second != NULL))
       {
-         GmatEpoch satTime = ((SpaceObject*)i->first)->GetEpoch();
+         GmatTime satTime = ((SpaceObject*)i->first)->GetEpochGT();
          Real dt = (forEpoch - satTime).GetTimeInSec();
 
          #ifdef DEBUG_EXECUTION
-            MessageInterface::ShowMessage("forEpoch: %.12lf, satTime = %.12lf, "
-                  "dt = %le\n", forEpoch.GetMjd(), satTime, dt);
+            MessageInterface::ShowMessage("forEpoch: %s, satTime = %s, "
+               "dt = %le\n", forEpoch.ToString().c_str(), satTime.ToString().c_str(), dt);
          #endif
 
          // Make sure the propagators are set to the spacecraft data
@@ -1242,7 +1255,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
    #ifdef DEBUG_CALCULATE_MEASUREMENT
       MessageInterface::ShowMessage("*************************************************************\n");
 
-      MessageInterface::ShowMessage("*          Calculate Measurement Data %s at Epoch (%.12lf) \n", (withEvents?"with Event":"w/o Event"), forEpoch.GetMjd());
+      MessageInterface::ShowMessage("*          Calculate Measurement Data %s at Epoch (%s) \n", (withEvents?"with Event":"w/o Event"), forEpoch.ToString().c_str());
      
       MessageInterface::ShowMessage("*************************************************************\n");
    #endif
@@ -1262,7 +1275,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
          while (s != NULL)
          {
             // Display leg shown in SignalBase s:
-            sdata = &(s->GetSignalData());
+            sdata = s->GetSignalDataObject();
             MessageInterface::ShowMessage("<%s -> %s>  ", sdata->tNode->GetName().c_str(), sdata->rNode->GetName().c_str());
             s = s->GetNext();
          }
@@ -1421,7 +1434,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
       //else
       //   forEpoch1 = forEpoch + firstleg->GetSignalData().tDelay/GmatTimeConstants::SECS_PER_DAY;
 
-      if (startSignal->ModelSignal(forEpoch, epochIsAtEnd) == false)
+      if (startSignal->ModelSignal(forEpoch, forSimulation, epochIsAtEnd) == false)
       {
          throw MeasurementException("Signal modeling failed in model " +
                instanceName);

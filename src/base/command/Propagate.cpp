@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -159,7 +159,6 @@ Propagate::Propagate() :
    checkFirstStep              (true),
    state                       (NULL),
    j2kState                    (NULL),
-   pubdata                     (NULL),
    stopCondMet                 (false),
    stopEpoch                   (0.0),
    stopAccuracy                (DEFAULT_STOP_TOLERANCE),
@@ -209,16 +208,6 @@ Propagate::~Propagate()
           "deleting stop condition");
       #endif
       delete stopWhen[i];
-   }
-
-   if (pubdata)
-   {
-      #ifdef DEBUG_MEMORY
-      MemoryTracker::Instance()->Remove
-         (pubdata, "pubdata", "Propagate::~Propagate()",
-          "deleting pub data");
-      #endif
-      delete [] pubdata;
    }
 
    for (std::vector<PropSetup*>::iterator ps = propagators.begin(); ps != propagators.end();
@@ -278,13 +267,13 @@ Propagate::Propagate(const Propagate &prp) :
    objectArray                 (prp.objectArray),
    elapsedTime                 (prp.elapsedTime),
    currEpoch                   (prp.currEpoch),
+   currEpochGT                 (prp.currEpochGT),
    propAllSTMs                 (prp.propAllSTMs),
    calcAllAmatrices            (prp.calcAllAmatrices),
    resetLoopDataFlag           (prp.resetLoopDataFlag),
    checkFirstStep              (true),
    state                       (NULL),
    j2kState                    (NULL),
-   pubdata                     (NULL),
    stopCondMet                 (false),
    stopEpoch                   (prp.stopEpoch),
    stopAccuracy                (prp.stopAccuracy),
@@ -303,6 +292,7 @@ Propagate::Propagate(const Propagate &prp) :
    parameterCount = prp.parameterCount;
    isInitialized = false;
    baseEpoch.clear();
+   baseEpochGT.clear();
    propagators.clear();
    stopWhen.clear();
    stopSats.clear();
@@ -346,6 +336,7 @@ Propagate& Propagate::operator=(const Propagate &prp)
    objectArray             = prp.objectArray;
    elapsedTime             = prp.elapsedTime;
    currEpoch               = prp.currEpoch;
+   currEpochGT             = prp.currEpochGT;
    checkFirstStep          = prp.checkFirstStep;
    state                   = NULL;
    j2kState                = NULL;
@@ -371,6 +362,7 @@ Propagate& Propagate::operator=(const Propagate &prp)
    isInitialized             = false;
 
    baseEpoch.clear();
+   baseEpochGT.clear();
 
    for (std::vector<PropSetup*>::iterator ps = propagators.begin(); ps != propagators.end();
         ++ps)
@@ -400,8 +392,8 @@ Propagate& Propagate::operator=(const Propagate &prp)
 
 
 //------------------------------------------------------------------------------
-// bool SetObject(const std::string &name, const Gmat::ObjectType type,
-//         const std::string &associate, const Gmat::ObjectType associateType)
+// bool SetObject(const std::string &name, const UnsignedInt type,
+//         const std::string &associate, const UnsignedInt associateType)
 //------------------------------------------------------------------------------
 /**
  * Sets objects referenced by the Propagate command
@@ -414,9 +406,9 @@ Propagate& Propagate::operator=(const Propagate &prp)
  * @return true if the reference was set, false if not.
  */
 //------------------------------------------------------------------------------
-bool Propagate::SetObject(const std::string &name, const Gmat::ObjectType type,
+bool Propagate::SetObject(const std::string &name, const UnsignedInt type,
                           const std::string &associate,
-                          const Gmat::ObjectType associateType)
+                          const UnsignedInt associateType)
 {
    #ifdef DEBUG_PROPAGATE_OBJ
    MessageInterface::ShowMessage
@@ -462,7 +454,7 @@ bool Propagate::SetObject(const std::string &name, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetObject(GmatBase *obj, const Gmat::ObjectType type)
+// bool SetObject(GmatBase *obj, const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Sets objects referenced by the Propagate command
@@ -473,7 +465,7 @@ bool Propagate::SetObject(const std::string &name, const Gmat::ObjectType type,
  * @return true if the reference was set, false if not.
  */
 //------------------------------------------------------------------------------
-bool Propagate::SetObject(GmatBase *obj, const Gmat::ObjectType type)
+bool Propagate::SetObject(GmatBase *obj, const UnsignedInt type)
 {
    switch (type)
    {
@@ -498,7 +490,7 @@ bool Propagate::SetObject(GmatBase *obj, const Gmat::ObjectType type)
 }
 
 //------------------------------------------------------------------------------
-// void ClearObject(const Gmat::ObjectType type)
+// void ClearObject(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Clears the lists of objects referenced by the Propagate command.
@@ -506,7 +498,7 @@ bool Propagate::SetObject(GmatBase *obj, const Gmat::ObjectType type)
  * @param <type> Type of the objects to clear.
  */
 //------------------------------------------------------------------------------
-void Propagate::ClearObject(const Gmat::ObjectType type)
+void Propagate::ClearObject(const UnsignedInt type)
 {
    switch (type)
    {
@@ -525,7 +517,7 @@ void Propagate::ClearObject(const Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetObject(const Gmat::ObjectType type, const std::string objName)
+// GmatBase* GetObject(const UnsignedInt type, const std::string objName)
 //------------------------------------------------------------------------------
 /**
  * Accesses objects referenced by the Propagate command.
@@ -536,7 +528,7 @@ void Propagate::ClearObject(const Gmat::ObjectType type)
  * @return true if the reference was set, false if not.
  */
 //------------------------------------------------------------------------------
-GmatBase* Propagate::GetGmatObject(const Gmat::ObjectType type,
+GmatBase* Propagate::GetGmatObject(const UnsignedInt type,
                                const std::string objName)
 {
    if (type == Gmat::STOP_CONDITION)
@@ -689,7 +681,7 @@ GmatBase* Propagate::Clone() const
 
 
 //------------------------------------------------------------------------------
-//  std::string GetRefObjectName(const Gmat::ObjectType type) const
+//  std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Accessor used to find the names of referenced objects.
@@ -699,7 +691,7 @@ GmatBase* Propagate::Clone() const
  * @return The name of the reference object.
  */
 //------------------------------------------------------------------------------
-std::string Propagate::GetRefObjectName(const Gmat::ObjectType type) const
+std::string Propagate::GetRefObjectName(const UnsignedInt type) const
 {
    switch (type) {
       // Propagator setups
@@ -722,7 +714,7 @@ std::string Propagate::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-//  bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+//  bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Accessor used to set the names of referenced objects.
@@ -733,7 +725,7 @@ std::string Propagate::GetRefObjectName(const Gmat::ObjectType type) const
  * @return success of the operation.
  */
 //------------------------------------------------------------------------------
-bool Propagate::SetRefObjectName(const Gmat::ObjectType type,
+bool Propagate::SetRefObjectName(const UnsignedInt type,
                                  const std::string &name)
 {
    switch (type) {
@@ -771,7 +763,7 @@ bool Propagate::SetRefObjectName(const Gmat::ObjectType type,
 
 // Reference object accessor methods
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name,
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name,
 //                        const Integer index
 //------------------------------------------------------------------------------
 /**
@@ -784,7 +776,7 @@ bool Propagate::SetRefObjectName(const Gmat::ObjectType type,
  * @return reference object pointer.
  */
 //------------------------------------------------------------------------------
-GmatBase* Propagate::GetRefObject(const Gmat::ObjectType type,
+GmatBase* Propagate::GetRefObject(const UnsignedInt type,
                                   const std::string &name, const Integer index)
 {
    switch (type)
@@ -816,7 +808,7 @@ GmatBase* Propagate::GetRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type, ...
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type, ...
 //------------------------------------------------------------------------------
 /**
  * Sets reference object pointer.
@@ -829,7 +821,7 @@ GmatBase* Propagate::GetRefObject(const Gmat::ObjectType type,
  * @return true if object successfully set, false otherwise
  */
 //------------------------------------------------------------------------------
-bool Propagate::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool Propagate::SetRefObject(GmatBase *obj, const UnsignedInt type,
                              const std::string &name, const Integer index)
 {
    #if DEBUG_PROPAGATE_OBJ
@@ -922,7 +914,7 @@ bool Propagate::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+// virtual ObjectArray& GetRefObjectArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Obtains an array of GmatBase pointers by type.
@@ -932,7 +924,7 @@ bool Propagate::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return Reference to the array.
  */
 //------------------------------------------------------------------------------
-ObjectArray& Propagate::GetRefObjectArray(const Gmat::ObjectType type)
+ObjectArray& Propagate::GetRefObjectArray(const UnsignedInt type)
 {
    objectArray.clear();
 
@@ -1502,6 +1494,21 @@ Real Propagate::SetRealParameter(const std::string &label, const Real value)
    return SetRealParameter(GetParameterID(label), value);
 }
 
+//------------------------------------------------------------------------------
+// bool GetPropStatus()
+//------------------------------------------------------------------------------
+/**
+* Method used to check whether propagation command is just starting or
+* continuing a run based off inProgress parameter.
+*
+* @return inProgress Boolean parameter showing whether a propagation run is 
+* starting or continuing.
+*/
+//------------------------------------------------------------------------------
+bool Propagate::GetPropStatus()
+{
+   return inProgress;
+}
 
 //------------------------------------------------------------------------------
 // bool TakeAction(const std::string &action, const std::string &actionData)
@@ -1597,7 +1604,7 @@ bool Propagate::TakeAction(const std::string &action,
 
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -1610,7 +1617,7 @@ bool Propagate::TakeAction(const std::string &action,
  * @return true on success.
  */
 //------------------------------------------------------------------------------
-bool Propagate::RenameRefObject(const Gmat::ObjectType type,
+bool Propagate::RenameRefObject(const UnsignedInt type,
                                 const std::string &oldName,
                                 const std::string &newName)
 {
@@ -1749,7 +1756,7 @@ const ObjectTypeArray& Propagate::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves the list of ref objects used by the Propagate.
@@ -1761,7 +1768,7 @@ const ObjectTypeArray& Propagate::GetRefObjectTypeArray()
  *
  */
 //------------------------------------------------------------------------------
-const StringArray& Propagate::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Propagate::GetRefObjectNameArray(const UnsignedInt type)
 {
    #ifdef DEBUG_PROPAGATE_OBJ
    MessageInterface::ShowMessage
@@ -2064,7 +2071,7 @@ bool Propagate::InterpretAction()
 }
 
 //------------------------------------------------------------------------------
-// bool AcceptsObjectType(Gmat::ObjectType theType)
+// bool AcceptsObjectType(UnsignedInt theType)
 //------------------------------------------------------------------------------
 /**
  * Checks to see if a specific type is supported by the command instance
@@ -2074,7 +2081,7 @@ bool Propagate::InterpretAction()
  * @return true if the type is accepted, false if not
  */
 //------------------------------------------------------------------------------
-bool Propagate::AcceptsObjectType(Gmat::ObjectType theType)
+bool Propagate::AcceptsObjectType(UnsignedInt theType)
 {
    bool retval = true;
 
@@ -3784,6 +3791,8 @@ void Propagate::PrepareToPropagate()
       {
          elapsedTime[n] = 0.0;
          currEpoch[n]   = 0.0;
+         currEpochGT[n] = 0.0;
+
          if (propagators[n]->GetPropagator()->UsesODEModel())
          {
             fm[n]->SetTime(0.0);
@@ -3794,7 +3803,7 @@ void Propagate::PrepareToPropagate()
          else
          {
             p[n]->SetPropStateManager(propagators[n]->GetPropStateManager());
-            dim = p[n]->GetDimension();
+            dim += p[n]->GetDimension();
          }
 
          if (resetLoopDataFlag)
@@ -3806,6 +3815,7 @@ void Propagate::PrepareToPropagate()
 
       resetLoopDataFlag = false;
       baseEpoch.clear();
+      baseEpochGT.clear();
 
       for (Integer n = 0; n < (Integer)propagators.size(); ++n)
       {
@@ -3845,6 +3855,7 @@ void Propagate::PrepareToPropagate()
 
          GmatBase* sat1 = FindObject(*satName[n]->begin());
          baseEpoch.push_back(sat1->GetRealParameter(epochID));
+         baseEpochGT.push_back(sat1->GetGmatTimeParameter(epochID));
 
          if (propagators[n]->GetPropagator()->UsesODEModel())
          {
@@ -3854,9 +3865,13 @@ void Propagate::PrepareToPropagate()
          {
             elapsedTime[n] = p[n]->GetTime();
             baseEpoch[n] -= elapsedTime[n] / GmatTimeConstants::SECS_PER_DAY;
+            baseEpochGT[n].SubtractSeconds(elapsedTime[n]);
          }
          currEpoch[n] = baseEpoch[n] + elapsedTime[n] /
             GmatTimeConstants::SECS_PER_DAY;
+         currEpochGT[n] = baseEpochGT[n];
+         currEpochGT[n].AddSeconds(elapsedTime[n]);
+
          #if DEBUG_PROPAGATE_DIRECTION
             MessageInterface::ShowMessage(
                "Propagate::PrepareToPropagate() running %s %s.\n",
@@ -3919,6 +3934,8 @@ void Propagate::PrepareToPropagate()
       psm.clear();
       baseEpoch.clear();
       currEpoch.clear();
+      baseEpochGT.clear();
+      currEpochGT.clear();
 
       #ifdef DEBUG_PROPAGATE_INIT
          MessageInterface::ShowMessage("Loading p and fm vectors\n");
@@ -3947,6 +3964,7 @@ void Propagate::PrepareToPropagate()
          p[n]->Initialize();
          psm[n]->MapObjectsToVector();
          currEpoch.push_back(psm[n]->GetState()->GetEpoch());
+         currEpochGT.push_back(psm[n]->GetState()->GetEpochGT());
 
          p[n]->Update(direction > 0.0);
          if (propagators[n]->GetPropagator()->UsesODEModel())
@@ -3960,6 +3978,7 @@ void Propagate::PrepareToPropagate()
             j2kState = p[n]->GetJ2KState();
          }
          baseEpoch.push_back(psm[n]->GetState()->GetEpoch());
+         baseEpochGT.push_back(psm[n]->GetState()->GetEpochGT());
 
          #ifdef DEBUG_PROPAGATE_INIT
             GmatState *dstate = psm[n]->GetState();
@@ -4030,8 +4049,11 @@ void Propagate::PrepareToPropagate()
    #endif
 
    // Publish the data
-   pubdata[0] = currEpoch[0];
-
+   if (hasPrecisionTime)
+      pubdata[0] = currEpochGT[0].GetMjd();
+   else
+      pubdata[0] = currEpoch[0];
+   
    // Walk the PropSetups to load the pubdata array
    Integer index = 1, size;
    Real *js;
@@ -4330,12 +4352,14 @@ bool Propagate::Execute()
                elapsedTime[i] = fm[i]->GetTime();
                currEpoch[i] = baseEpoch[i] + elapsedTime[i] /
                   GmatTimeConstants::SECS_PER_DAY;
+               currEpochGT[i] = baseEpochGT[i]; currEpochGT[i].AddSeconds(elapsedTime[i]);
             }
             else
             {
                elapsedTime[i] = p[i]->GetTime();
                currEpoch[i] = baseEpoch[i] + elapsedTime[i] /
                   GmatTimeConstants::SECS_PER_DAY;
+               currEpochGT[i] = baseEpochGT[i]; currEpochGT[i].AddSeconds(elapsedTime[i]);
             }
             #ifdef DEBUG_PROPAGATE_EXE
                MessageInterface::ShowMessage
@@ -4352,9 +4376,20 @@ bool Propagate::Execute()
                    "element = %.12lf\n", (psm[i]->GetState()->GetState())[0]);
             #endif
             if (fm[i])
-               fm[i]->UpdateSpaceObject(currEpoch[i]);
+            {
+               if (fm[i]->HasPrecisionTime())
+                  fm[i]->UpdateSpaceObjectGT(currEpochGT[i]);
+               else
+                  fm[i]->UpdateSpaceObject(currEpoch[i]);
+            }
             else
-               p[i]->UpdateSpaceObject(currEpoch[i]);
+            {
+               if (p[i]->HasPrecisionTime())
+                  p[i]->UpdateSpaceObjectGT(currEpochGT[i]);
+               else
+                  p[i]->UpdateSpaceObject(currEpoch[i]);
+               
+            }
          }
 
          // In single step mode, we're done!
@@ -4377,7 +4412,10 @@ bool Propagate::Execute()
              * The Publisher handles the repeated point issue by only sending step
              * mode data to EphemerisFile subscribers.
              */
-            pubdata[0] = currEpoch[0];
+            if (hasPrecisionTime)
+               pubdata[0] = currEpochGT[0].GetMjd();
+            else
+               pubdata[0] = currEpoch[0];
 
             // For each PropSetup, fill the appropriate array elements
             Integer index = 1;
@@ -4424,7 +4462,11 @@ bool Propagate::Execute()
             checkFirstStep = false;
 
             // Publish the data here
-            pubdata[0] = currEpoch[0];
+            if (hasPrecisionTime)
+               pubdata[0] = currEpochGT[0].GetMjd();
+            else
+               pubdata[0] = currEpoch[0];
+
             // For each PropSetup, fill the appropriate array elements
             Integer index = 1;
             Integer size = 0;
@@ -4487,6 +4529,7 @@ bool Propagate::Execute()
 
                currEpoch[i] = baseEpoch[i] +
                   elapsedTime[i] / GmatTimeConstants::SECS_PER_DAY;
+               currEpochGT[i] = baseEpochGT[i]; currEpochGT[i].AddSeconds(elapsedTime[i]);
             }
 
             #ifdef DEBUG_STOPPING_CONDITIONS
@@ -4610,7 +4653,7 @@ bool Propagate::Execute()
 /**
  * Advances each of the contained PropSetups by one step.
  *
- * @param <propStep> The requested size of the step.
+ * @param propStep The requested size of the step.
  *
  * @return true if the step succeeded.
  */
@@ -4623,10 +4666,6 @@ bool Propagate::TakeAStep(Real propStep)
    #ifdef DEBUG_FIXED_STEP
       std::vector<ODEModel *>::iterator fmod = fm.begin();
    #endif
-
-//   for (std::vector<ODEModel *>::iterator f = fm.begin(); f != fm.end(); ++f)
-//      (*f)->BufferState();
-
 
    std::vector<Propagator*>::iterator current = p.begin();
 
@@ -5008,11 +5047,27 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
       #endif
 
       if (fm[i])
-         fm[i]->UpdateSpaceObject(  // currEpoch[i]);
+      {
+         if (fm[i]->HasPrecisionTime())
+         {
+            GmatTime gt = baseEpochGT[i]; gt.SetTimeInSec(fm[i]->GetTime());
+            fm[i]->UpdateSpaceObjectGT(gt);
+         }
+         else
+            fm[i]->UpdateSpaceObject(  // currEpoch[i]);
                baseEpoch[i] + fm[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+      }
       else
-         p[i]->UpdateSpaceObject(  // currEpoch[i]);
+      {
+         if (p[i]->HasPrecisionTime())
+         {
+            GmatTime gt = baseEpochGT[i]; gt.SetTimeInSec(p[i]->GetTime());
+            p[i]->UpdateSpaceObjectGT(gt);
+         }
+         else
+            p[i]->UpdateSpaceObject(  // currEpoch[i]);
                baseEpoch[i] + p[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+      }
    }
    BufferSatelliteStates(true);
    #ifdef DEBUG_FINAL_STEP
@@ -5148,11 +5203,27 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
       for (UnsignedInt i = 0; i < fm.size(); ++i)
       {
          if (fm[i])
-            fm[i]->UpdateSpaceObject(
-               baseEpoch[i] + fm[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+         {
+            if (fm[i]->HasPrecisionTime())
+            {
+               GmatTime gt = baseEpochGT[i]; gt.AddSeconds(fm[i]->GetTime());
+               fm[i]->UpdateSpaceObjectGT(gt);
+            }
+            else
+               fm[i]->UpdateSpaceObject(
+                  baseEpoch[i] + fm[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+         }
          else
-            p[i]->UpdateSpaceObject(
-                           baseEpoch[i] + p[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+         {
+            if (p[i]->HasPrecisionTime())
+            {
+               GmatTime gt = baseEpochGT[i]; gt.AddSeconds(p[i]->GetTime());
+               p[i]->UpdateSpaceObjectGT(gt);
+            }
+            else
+               p[i]->UpdateSpaceObject(
+                  baseEpoch[i] + p[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+         }
       }
 
       stopper->Evaluate();
@@ -5227,13 +5298,30 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
             for (UnsignedInt i = 0; i < psm.size(); ++i)
             {
                if (fm[i])
-                  fm[i]->UpdateSpaceObject(
-                     baseEpoch[i] + fm[i]->GetTime() / 
-                     GmatTimeConstants::SECS_PER_DAY);
+               {
+                  if (fm[i]->HasPrecisionTime())
+                  {
+                     GmatTime gt = baseEpochGT[i]; gt.AddSeconds(fm[i]->GetTime());
+                     fm[i]->UpdateSpaceObjectGT(gt);
+                  }
+                  else
+                     fm[i]->UpdateSpaceObject(
+                        baseEpoch[i] + fm[i]->GetTime() /
+                        GmatTimeConstants::SECS_PER_DAY);
+               }
                else
-                  p[i]->UpdateSpaceObject(
-                     baseEpoch[i] + p[i]->GetTime() / 
-                     GmatTimeConstants::SECS_PER_DAY);
+               {
+                  if (p[i]->HasPrecisionTime())
+                  {
+                     GmatTime gt = baseEpochGT[i]; gt.AddSeconds(p[i]->GetTime());
+                     p[i]->UpdateSpaceObjectGT(gt);
+                  }
+                  else
+                     p[i]->UpdateSpaceObject(
+                        baseEpoch[i] + p[i]->GetTime() /
+                        GmatTimeConstants::SECS_PER_DAY);
+
+               }
             }
             #ifdef DEBUG_STOPPING_CONDITIONS
                MessageInterface::ShowMessage(
@@ -5252,9 +5340,28 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
 
       // Publish the final data point here
       if (fm[0])
-         pubdata[0] = baseEpoch[0]+fm[0]->GetTime()/GmatTimeConstants::SECS_PER_DAY;
+      {
+         if (hasPrecisionTime)
+         {
+            GmatTime gt = baseEpochGT[0];
+            gt.AddSeconds(fm[0]->GetTime());
+            pubdata[0] = gt.GetMjd();
+         }
+         else
+            pubdata[0] = baseEpoch[0] + fm[0]->GetTime() / GmatTimeConstants::SECS_PER_DAY;
+      }
       else
-         pubdata[0] = baseEpoch[0] + p[0]->GetTime()/GmatTimeConstants::SECS_PER_DAY;
+      {
+         if (hasPrecisionTime)
+         {
+            GmatTime gt = baseEpochGT[0];
+            gt.AddSeconds(p[0]->GetTime());
+            pubdata[0] = gt.GetMjd();
+         }
+         else
+            pubdata[0] = baseEpoch[0] + p[0]->GetTime() / GmatTimeConstants::SECS_PER_DAY;
+      }
+
       memcpy(&pubdata[1], j2kState, dim*sizeof(Real));
       #ifdef DEBUG_PUBLISH_DATA
          MessageInterface::ShowMessage
@@ -5405,11 +5512,27 @@ Real Propagate::InterpolateToStop(StopCondition *sc)
       for (UnsignedInt i = 0; i < fm.size(); ++i)
       {
          if (fm[i])
-            fm[i]->UpdateSpaceObject(
-               baseEpoch[i] + fm[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+         {
+            if (fm[i]->HasPrecisionTime())
+            {
+               GmatTime gt = baseEpochGT[i]; gt.AddSeconds(fm[i]->GetTime());
+               fm[i]->UpdateSpaceObjectGT(gt);
+            }
+            else
+               fm[i]->UpdateSpaceObject(
+                  baseEpoch[i] + fm[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+         }
          else
-            p[i]->UpdateSpaceObject(
-               baseEpoch[i] + p[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+         {
+            if (p[i]->HasPrecisionTime())
+            {
+               GmatTime gt = baseEpochGT[i]; gt.AddSeconds(p[i]->GetTime());
+               p[i]->UpdateSpaceObjectGT(gt);
+            }
+            else
+               p[i]->UpdateSpaceObject(
+                  baseEpoch[i] + p[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+         }
       }
 
       // Update the data in the stop condition
@@ -5539,12 +5662,27 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
          for (UnsignedInt i = 0; i < fm.size(); ++i)
          {
             if (fm[i])
-               fm[i]->UpdateSpaceObject(
-                  baseEpoch[i] + fm[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+            {
+               if (fm[i]->HasPrecisionTime())
+               {
+                  GmatTime gt = baseEpochGT[i]; gt.AddSeconds(fm[i]->GetTime());
+                  fm[i]->UpdateSpaceObjectGT(gt);
+               }
+               else
+                  fm[i]->UpdateSpaceObject(
+                     baseEpoch[i] + fm[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+            }
             else
-               p[i]->UpdateSpaceObject(
+            {
+               if (p[i]->HasPrecisionTime())
+               {
+                  GmatTime gt = baseEpochGT[i]; gt.AddSeconds(p[i]->GetTime());
+                  p[i]->UpdateSpaceObjectGT(gt);
+               }
+               else
+                  p[i]->UpdateSpaceObject(
                      baseEpoch[i] + p[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
-
+            }
          }
 
          if (targParam != NULL)
@@ -5762,11 +5900,27 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
          for (UnsignedInt i = 0; i < fm.size(); ++i)
          {
             if (fm[i])
-               fm[i]->UpdateSpaceObject(
-                  baseEpoch[i] + fm[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+            {
+               if (fm[i]->HasPrecisionTime())
+               {
+                  GmatTime gt = baseEpochGT[i]; gt.AddSeconds(fm[i]->GetTime());
+                  fm[i]->UpdateSpaceObjectGT(gt);
+               }
+               else
+                  fm[i]->UpdateSpaceObject(
+                     baseEpoch[i] + fm[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+            }
             else
-               p[i]->UpdateSpaceObject(
-                  baseEpoch[i] + p[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+            {
+               if (p[i]->HasPrecisionTime())
+               {
+                  GmatTime gt = baseEpochGT[i]; gt.AddSeconds(p[i]->GetTime());
+                  p[i]->UpdateSpaceObjectGT(gt);
+               }
+               else
+                  p[i]->UpdateSpaceObject(
+                     baseEpoch[i] + p[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+            }
          }
 
          #ifdef DEBUG_SECANT_DETAILS
@@ -5952,12 +6106,24 @@ Real Propagate::BisectToStop(StopCondition *stopper)
       {
          if (fm[i])
          {
-            fm[i]->UpdateSpaceObject(baseEpoch[i] + fm[i]->GetTime() /
+            if (fm[i]->HasPrecisionTime())
+            {
+               GmatTime gt = baseEpochGT[i]; gt.AddSeconds(fm[i]->GetTime());
+               fm[i]->UpdateSpaceObjectGT(gt);
+            }
+            else
+               fm[i]->UpdateSpaceObject(baseEpoch[i] + fm[i]->GetTime() /
                   GmatTimeConstants::SECS_PER_DAY);
          }
          else
          {
-            p[i]->UpdateSpaceObject(baseEpoch[i] + p[i]->GetTime() /
+            if (p[i]->HasPrecisionTime())
+            {
+               GmatTime gt = baseEpochGT[i]; gt.AddSeconds(p[i]->GetTime());
+               p[i]->UpdateSpaceObjectGT(gt);
+            }
+            else
+               p[i]->UpdateSpaceObject(baseEpoch[i] + p[i]->GetTime() /
                   GmatTimeConstants::SECS_PER_DAY);
          }
       }

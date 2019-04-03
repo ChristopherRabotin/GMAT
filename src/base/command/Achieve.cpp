@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -191,7 +191,7 @@ GmatBase* Achieve::Clone() const
 
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -204,7 +204,7 @@ GmatBase* Achieve::Clone() const
  * @return true on success.
  */
 //------------------------------------------------------------------------------
-bool Achieve::RenameRefObject(const Gmat::ObjectType type,
+bool Achieve::RenameRefObject(const UnsignedInt type,
                               const std::string &oldName,
                               const std::string &newName)
 {
@@ -253,7 +253,7 @@ const ObjectTypeArray& Achieve::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves the list of ref objects used by the Achieve.
@@ -265,7 +265,7 @@ const ObjectTypeArray& Achieve::GetRefObjectTypeArray()
  * 
  */
 //------------------------------------------------------------------------------
-const StringArray& Achieve::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Achieve::GetRefObjectNameArray(const UnsignedInt type)
 {
    refObjectNames.clear();
    
@@ -532,7 +532,7 @@ bool Achieve::SetStringParameter(const Integer id, const std::string &value)
 
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                                     const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -545,7 +545,7 @@ bool Achieve::SetStringParameter(const Integer id, const std::string &value)
  * @return success of the operation.
  */
 //------------------------------------------------------------------------------
-bool Achieve::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool Achieve::SetRefObject(GmatBase *obj, const UnsignedInt type,
                            const std::string &name)
 {   
    if (type == Gmat::SOLVER) 

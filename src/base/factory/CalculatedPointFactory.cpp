@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -105,6 +105,9 @@ Factory(Gmat::CALCULATED_POINT)
       creatables.push_back("LibrationPoint");
       creatables.push_back("Barycenter");
    }
+   GmatType::RegisterType(Gmat::CALCULATED_POINT, "CalculatedPoint");
+   GmatType::RegisterType(Gmat::LIBRATION_POINT, "LibrationPoint");
+   GmatType::RegisterType(Gmat::BARYCENTER, "Barycenter");
 }
 
 //------------------------------------------------------------------------------

@@ -50,6 +50,7 @@ EstimationDataFilterFactory::EstimationDataFilterFactory() :
       creatables.push_back("AcceptFilter");
       creatables.push_back("RejectFilter");
    }
+   GmatType::RegisterType(Gmat::DATA_FILTER, "DataFilter");
 }
 
 

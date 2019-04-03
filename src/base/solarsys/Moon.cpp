@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -81,7 +81,7 @@ Moon::Moon(std::string name) :
    bodyType            = Gmat::MOON;
    bodyNumber          = 2;
    referenceBodyNumber = 3;
-   if (name == SolarSystem::MOON_NAME) rotationSrc         = Gmat::DE_405_FILE;
+   if (name == SolarSystem::MOON_NAME) rotationSrc         = Gmat::DE_FILE;
    else                                rotationSrc         = Gmat::IAU_SIMPLIFIED;
    
 
@@ -123,7 +123,7 @@ Moon::Moon(std::string name, const std::string &cBody) :
    bodyType            = Gmat::MOON;
    bodyNumber          = 2;
    referenceBodyNumber = 3;
-   if (name == SolarSystem::MOON_NAME) rotationSrc         = Gmat::DE_405_FILE;
+   if (name == SolarSystem::MOON_NAME) rotationSrc         = Gmat::DE_FILE;
    else                                rotationSrc         = Gmat::IAU_SIMPLIFIED;
 
    if (name == SolarSystem::MOON_NAME)  
@@ -259,7 +259,7 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
                 -  0.0015  * Cos(p8)  +  0.0049  * Cos(p9) -  0.00083 * Cos(p10)
                 +  0.00001 * Cos(p11) +  0.00031 * Cos(p12) - 0.057 * Cos(p13);
 //      }
-//      else if (rotationSrc == Gmat::DE_405_FILE)
+//      else if (rotationSrc == Gmat::DE_FILE)
 //      {
 //         DeFile *deFile = (DeFile*) theSourceFile;
 //         if (!deFile) // assuming no SLP any more here, only DE405
@@ -271,7 +271,7 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
 //         deFile->GetAnglesAndRates(forTime, librationAngles, andRates, overrideTime);
 //          // TBD ****************** how to use librationAngles & andRates
 //         std::string errmsg = "Unable to compute cartographic coordinates for ";
-//         errmsg += instanceName + " - DE_405_FILE not implemented in Moon class.\n";
+//         errmsg += instanceName + " - DE_FILE not implemented in Moon class.\n";
 //         throw SolarSystemException(errmsg);
 //      }
    }

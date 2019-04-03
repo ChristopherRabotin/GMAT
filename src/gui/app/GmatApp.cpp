@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,6 +38,7 @@
 #include "gmatwxdefs.hpp"
 #include "GmatApp.hpp"
 #include "GmatMainFrame.hpp"
+#include "GmatGlobal.hpp"
 #include "ViewTextFrame.hpp"
 #include "GmatAppData.hpp"
 #include "Moderator.hpp"
@@ -46,6 +47,11 @@
 #include <wx/image.h>
 #include <wx/config.h>
 #include <wx/log.h>
+
+#ifdef __linux
+   #include <X11/Xlib.h>
+#endif
+
 
 #include "MessageInterface.hpp"
 #include "PlotInterface.hpp"
@@ -81,7 +87,7 @@ IMPLEMENT_APP(GmatApp)
 // GmatApp()
 //------------------------------------------------------------------------------
 GmatApp::GmatApp()
-: theMainFrame( NULL )   
+: theMainFrame( NULL )
 {
    GuiMessageReceiver *theMessageReceiver = GuiMessageReceiver::Instance();
    MessageInterface::SetMessageReceiver(theMessageReceiver);
@@ -99,6 +105,12 @@ GmatApp::GmatApp()
    runScript         = false;
    runBatch          = false;
    startMatlabServer = false;
+   skipSplash        = false;
+
+   #ifdef __linux
+      if (XInitThreads() == 0)      // non-zero return on success
+         MessageInterface::ShowMessage("Warning: XInitThreads() failed\n");
+   #endif
 }
 
 
@@ -323,7 +335,7 @@ bool GmatApp::OnInit()
          wxLog::SetLogLevel(0);
          #endif
          
-         if (GmatGlobal::Instance()->GetGuiMode() != GmatGlobal::MINIMIZED_GUI)
+         if (GmatGlobal::Instance()->GetGuiMode() != GmatGlobal::MINIMIZED_GUI && skipSplash == false && GmatGlobal::Instance()->SkipSplashMode() != true)
          {            
             // Initializes all available image handlers.
             ::wxInitAllImageHandlers();
@@ -383,6 +395,8 @@ bool GmatApp::OnInit()
             }
          }
          
+         theModerator->LoadDefaultMission();
+
          wxYield();
 
          #ifdef DEBUG_GMATAPP
@@ -503,6 +517,21 @@ bool GmatApp::OnInit()
 //------------------------------------------------------------------------------
 // OnExit()
 //------------------------------------------------------------------------------
+/**
+* Actions to complete on exit from GMAT
+*
+* Possible exit codes are the following:
+*          0 if successful run
+*         -1 if sandbox number is invalid
+*         -2 if exception thrown during sandbox initialization
+*         -3 if unknown error occurred during sandbox initialization
+*         -4 if execution interrupted by user
+*         -5 if exception thrown during the sandbox execution
+*         -6 if unknown error occurred during sandbox execution
+*         -7 if no mission sequence was defined
+*         -8 if there was a script error
+*/
+//------------------------------------------------------------------------------
 int GmatApp::OnExit()
 {
    wxSafeYield();
@@ -518,6 +547,11 @@ int GmatApp::OnExit()
 #endif // wxUSE_PRINTING_ARCHITECTURE
    
    WriteMessage("GMAT GUI exiting.\n", "");
+   
+   Integer exitCode = theModerator->GetExitCode();
+   if (exitCode != 1)
+      exit(exitCode);
+
    return 0;
 }
 
@@ -717,7 +751,8 @@ bool GmatApp::ProcessCommandLineOptions()
          "    \t                         \t\t\t[has no effect if no script is specified]\n"
          "-v, \t--version                \t\tDisplay version information in the Message Window\n"
          "-x, \t--exit                   \t\t\tExit GMAT after running the specified script\n"
-         "    \t                         \t\t\t[if specified with only a script name (i.e. NO --run option), GMAT simply opens and closes]\n";
+         "    \t                         \t\t\t[if specified with only a script name (i.e. NO --run option), GMAT simply opens and closes]\n"
+         "-ns, \t--no_splash             \t\t\tSkip showing the GMAT splash screen upon startup\n";
    
    
    //wxString commandLineOptions = wxT(gmatHelp.c_str());
@@ -874,6 +909,8 @@ bool GmatApp::ProcessCommandLineOptions()
          {
             ; // ignore this argument for the GUI GMAT
          }
+         else if (arg == "--no_splash" || arg == "-ns")
+            skipSplash = true; //Skips showing the splash screen on startup
          else
          {
             #ifdef DEBUG_CMD_LINE

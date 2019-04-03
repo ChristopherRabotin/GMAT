@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -92,8 +92,8 @@ MdiChildViewFrame::~MdiChildViewFrame()
       ("~MdiChildViewFrame() mChildName=%s\n", mChildName.c_str());
    #endif
    
-   MdiGlPlot::mdiChildren.DeleteObject(this);
-   MdiGlPlot::numChildren--;
+   //MdiGlPlot::mdiChildren.DeleteObject(this);
+   //MdiGlPlot::numChildren--;
    
    #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
    MessageInterface::ShowMessage
@@ -734,6 +734,9 @@ void MdiChildViewFrame::OnClose(wxCloseEvent &event)
    
    GmatMdiChildFrame::OnClose(event);
    event.Skip();
+
+   MdiGlPlot::mdiChildren.DeleteObject(this);
+   MdiGlPlot::numChildren--;
    
    #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
    MessageInterface::ShowMessage
@@ -1005,4 +1008,19 @@ void MdiChildViewFrame::CheckFrame()
    #endif
 }
 
-
+//------------------------------------------------------------------------------
+// void MdiChildViewFrame::SetMaxDataPoints(Integer maxData)
+//------------------------------------------------------------------------------
+/**
+* Sets custom max amount of data points to plot
+*
+* @param maxData The maximum number of data points to plot
+*/
+//------------------------------------------------------------------------------
+void MdiChildViewFrame::SetMaxDataPoints(Integer maxData)
+{
+   if (mCanvas)
+   {
+      mCanvas->SetMaxDataPoints(maxData);
+   }
+}

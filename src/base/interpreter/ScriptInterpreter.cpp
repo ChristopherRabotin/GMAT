@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -2054,6 +2054,21 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       WriteObjects(objs, "Solvers", mode);
       
    //-----------------------------------
+   // Generic Objects
+   // MCR Emergent Space Technologies (9/22/17)
+   // For OpenFramesInterface Plugin
+   //
+   // In the future, this should use plugin registration instead, but plugin
+   // registration is not available on GMAT master at the time of this mod.
+   //-----------------------------------
+   objs = theModerator->GetListOfObjects(Gmat::GENERIC_OBJECT);
+   #ifdef DEBUG_SCRIPT_WRITING
+      MessageInterface::ShowMessage("   Found %d Subscribers\n", objs.size());
+   #endif
+   if (objs.size() > 0)
+      WriteObjects(objs, "Generic Objects", mode);
+
+   //-----------------------------------
    // Subscriber
    //-----------------------------------
    objs = theModerator->GetListOfObjects(Gmat::SUBSCRIBER);
@@ -2127,6 +2142,17 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
 
    if (foundOtherParameter)
       WriteOtherParameters(objs, mode);
+
+   //-----------------------------------
+   // User objects
+   //-----------------------------------
+/// @todo  DJC: Evaluate this change vs lines for Generic Objects above
+   objs = theModerator->GetListOfObjects(Gmat::USER_DEFINED_OBJECT);
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("   Found %d User Objects\n", objs.size());
+   #endif
+   if (objs.size() > 0)
+      WriteUserObjects(objs, mode);
 
    //-----------------------------------
    // Command sequence
@@ -3920,6 +3946,42 @@ void ScriptInterpreter::WriteOtherParameters(StringArray &objs,
       }
    }
 }
+
+
+//------------------------------------------------------------------------------
+// void WriteUserObjects(StringArray &objs, Gmat::WriteMode mode)
+//------------------------------------------------------------------------------
+/*
+ * This method writes objects with user defined types.
+ */
+//------------------------------------------------------------------------------
+void ScriptInterpreter::WriteUserObjects(StringArray &objs, Gmat::WriteMode mode)
+{
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("ScriptInterpreter::WriteSpacecrafts() entered\n");
+   #endif
+
+   StringArray::iterator current;
+   GmatBase *object =  NULL;
+
+   WriteSectionDelimiter(objs[0], "User Objects");
+
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      object = FindObject(*current);
+      if (object != NULL)
+      {
+         std::string commentLine = object->GetCommentLine();
+         // If object is created from the main script and comment line blank
+         if (object->IsCreatedFromMainScript() && object->GetCommentLine() == "")
+            theReadWriter->WriteText("\n");
+
+         theReadWriter->WriteText(object->GetGeneratingString(mode));
+      }
+   }
+}
+
+
 
 
 //------------------------------------------------------------------------------

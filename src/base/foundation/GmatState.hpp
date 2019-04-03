@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -34,6 +34,7 @@
 #define GmatState_hpp
 
 #include "gmatdefs.hpp"
+#include "GmatTime.hpp"
 
 
 /**
@@ -63,7 +64,10 @@ public:
    bool              SetState(const Real *data, const Integer size, 
                               const Integer start = 0);
    GmatEpoch         GetEpoch() const;
+   GmatTime          GetEpochGT() const;
    GmatEpoch         SetEpoch(const GmatEpoch ep);
+   GmatTime          SetEpochGT(const GmatTime ep);
+   bool              SetPrecisionTimeFlag(bool onOff = true);
    
    bool              SetElementProperties(const Integer index, const Integer id, 
                            const std::string &textId, const Integer associate);
@@ -71,9 +75,14 @@ public:
                      GetElementDescriptions();
    Integer           GetAssociateIndex(const Integer id);
 
+   bool              HasPrecisionTime();
+
 protected:
    /// The epoch of the state data
    GmatEpoch         theEpoch;
+   GmatTime          theEpochGT;
+   bool              hasPrecisionTime;
+
    /// The state data
    Real              *theData;
    Integer           *dataIDs;
@@ -85,6 +94,7 @@ protected:
    
    void              Resize(Integer newSize, bool withCopy = true);
    void              Zero(Integer begin = 0, UnsignedInt length = 0);
+
 };
 
 #endif /*GmatState_hpp*/

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -67,14 +67,14 @@ CoordinateBase::PARAMETER_TYPE[CoordinateBaseParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  CoordinateBase(Gmat::ObjectType ofType, const std::string &itsType,
+//  CoordinateBase(UnsignedInt ofType, const std::string &itsType,
 //             const std::string &itsName);
 //---------------------------------------------------------------------------
 /**
  * Constructs base CoordinateBase structures used in derived classes
  * (default constructor).
  *
- * @param ofType   Gmat::ObjectTypes enumeration for the object.
+ * @param ofType   UnsignedInts enumeration for the object.
  * @param itsType  GMAT script string associated with this type of object.
  * @param itsName  Optional name for the object.  Defaults to "".
  *
@@ -82,7 +82,7 @@ CoordinateBase::PARAMETER_TYPE[CoordinateBaseParamCount - GmatBaseParamCount] =
  *       classes must pass in the typeId and typeStr parameters.
  */
 //---------------------------------------------------------------------------
-CoordinateBase::CoordinateBase(Gmat::ObjectType ofType, 
+CoordinateBase::CoordinateBase(UnsignedInt ofType,
                                const std::string &itsType,
                                const std::string &itsName) :
    GmatBase(ofType,itsType,itsName),
@@ -761,7 +761,7 @@ bool CoordinateBase::SetStringParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//  GmatBase* GetRefObject(const UnsignedInt type,
 //                         const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -774,7 +774,7 @@ bool CoordinateBase::SetStringParameter(const std::string &label,
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* CoordinateBase::GetRefObject(const Gmat::ObjectType type,
+GmatBase* CoordinateBase::GetRefObject(const UnsignedInt type,
                                        const std::string &name)
 {
    switch (type)
@@ -792,7 +792,7 @@ GmatBase* CoordinateBase::GetRefObject(const Gmat::ObjectType type,
 
 // DJC added 5/9/05 to facilitate Sandbox initialization
 //------------------------------------------------------------------------------
-//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//  const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Returns the name(s) of the reference object(s). (Derived classes should implement
@@ -804,7 +804,7 @@ GmatBase* CoordinateBase::GetRefObject(const Gmat::ObjectType type,
  * @return The name(s) of the reference object(s).
  */
 //------------------------------------------------------------------------------
-const StringArray& CoordinateBase::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& CoordinateBase::GetRefObjectNameArray(const UnsignedInt type)
 {
    if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
    {
@@ -824,7 +824,7 @@ const StringArray& CoordinateBase::GetRefObjectNameArray(const Gmat::ObjectType 
 
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -838,7 +838,7 @@ const StringArray& CoordinateBase::GetRefObjectNameArray(const Gmat::ObjectType 
  *
  */
 //------------------------------------------------------------------------------
-bool CoordinateBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool CoordinateBase::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                   const std::string &name)
 {
    #ifdef DEBUG_SET_REF
@@ -944,7 +944,7 @@ bool CoordinateBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 }
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 /**
@@ -959,7 +959,7 @@ bool CoordinateBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  *         false otherwise
  */
 //---------------------------------------------------------------------------
-bool CoordinateBase::RenameRefObject(const Gmat::ObjectType type,
+bool CoordinateBase::RenameRefObject(const UnsignedInt type,
                                      const std::string &oldName,
                                      const std::string &newName)
 {

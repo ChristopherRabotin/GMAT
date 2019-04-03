@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -60,18 +60,18 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr,
+// SpaceObject(UnsignedInt typeId, const std::string &typeStr,
 //             const std::string &instName)
 //------------------------------------------------------------------------------
 /**
  * Default constructor.
  *
- * @param <typeId>   Gmat::ObjectType of the constructed object.
+ * @param <typeId>   UnsignedInt of the constructed object.
  * @param <typeStr>  String describing the type of object created.
  * @param <instName> Name of the constructed instance.
  */
 //------------------------------------------------------------------------------
-SpaceObject::SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr,
+SpaceObject::SpaceObject(UnsignedInt typeId, const std::string &typeStr,
                          const std::string &instName) :
    SpacePoint        (typeId, typeStr, instName),
    state             (6),
@@ -178,7 +178,6 @@ Rvector6 SpaceObject::GetLastState()
    return result;
 }
 
-
 //------------------------------------------------------------------------------
 // Real GetEpoch()
 //------------------------------------------------------------------------------
@@ -193,6 +192,11 @@ Rvector6 SpaceObject::GetLastState()
 Real SpaceObject::GetEpoch()
 {
    return state.GetEpoch();
+}
+
+GmatTime SpaceObject::GetEpochGT()
+{
+   return state.GetEpochGT();
 }
 
 
@@ -214,6 +218,17 @@ Real SpaceObject::SetEpoch(const Real ep)
    return state.SetEpoch(ep);
 }
 
+
+//Real SpaceObject::SetEpoch(const GmatTime ep)
+//{
+//   return state.SetEpoch(GmatTime(ep).GetMjd());
+//}
+
+GmatTime SpaceObject::SetEpochGT(const GmatTime ep)
+{
+   state.SetEpoch(GmatTime(ep).GetMjd());
+   return state.SetEpochGT(ep);
+}
 
 //------------------------------------------------------------------------------
 // bool IsManeuvering()
@@ -393,6 +408,59 @@ const Rvector6 SpaceObject::GetMJ2000State(const A1Mjd &atTime)
 }
 
 
+const Rvector6 SpaceObject::GetMJ2000State(const GmatTime &atTime)
+{
+#ifdef DEBUG_J2000_STATE
+   MessageInterface::ShowMessage(
+      "SpaceObject::GetMJ2000State entered; epoch is %lf\n", GmatTime(atTime).GetMjd());
+#endif
+   if (j2000Body == NULL)
+   {
+      std::string errmsg = "SpaceObject::GetMJ2000State J2000 body ";
+      errmsg += j2000BodyName + " not yet set for ";
+      errmsg += instanceName;
+      errmsg += ".  Possible circular dependency in Spacecraft and ";
+      errmsg += "Coordinate System configuration.\n";
+      throw SpaceObjectException(errmsg);
+   }
+
+   Real *st = state.GetState(); //ps.GetState();
+
+#ifdef DEBUG_J2000_STATE
+   MessageInterface::ShowMessage("   %s Object state: [%lf %lf %lf %lf %lf "
+      "%lf]\n", instanceName.c_str(), st[0], st[1], st[2], st[3], st[4],
+      st[5]);
+   MessageInterface::ShowMessage("   Accessing J2000 body state for %s\n",
+      j2000Body->GetName().c_str());
+#endif
+   Rvector6 bodyState = j2000Body->GetMJ2000State(atTime);
+
+#ifdef DEBUG_J2000_STATE
+   MessageInterface::ShowMessage("   MJ2000: [%lf %lf %lf %lf %lf %lf]\n",
+      bodyState[0], bodyState[1], bodyState[2], bodyState[3], bodyState[4],
+      bodyState[5]);
+#endif
+
+   Rvector6 j2kState;
+
+   j2kState[0] = st[0] - bodyState[0];
+   j2kState[1] = st[1] - bodyState[1];
+   j2kState[2] = st[2] - bodyState[2];
+
+   j2kState[3] = st[3] - bodyState[3];
+   j2kState[4] = st[4] - bodyState[4];
+   j2kState[5] = st[5] - bodyState[5];
+
+#ifdef DEBUG_J2000_STATE
+   MessageInterface::ShowMessage("   J2K state: [%lf %lf %lf %lf %lf %lf]\n",
+      j2kState[0], j2kState[1], j2kState[2], j2kState[3], j2kState[4],
+      j2kState[5]);
+#endif
+
+   return j2kState;
+}
+
+
 //------------------------------------------------------------------------------
 // const Rvector3 GetMJ2000Position(const A1Mjd &atTime)
 //------------------------------------------------------------------------------
@@ -414,6 +482,13 @@ const Rvector3 SpaceObject::GetMJ2000Position(const A1Mjd &atTime)
 }
 
 
+const Rvector3 SpaceObject::GetMJ2000Position(const GmatTime &atTime)
+{
+   const Rvector6 rv6 = GetMJ2000State(atTime);
+   return (rv6.GetR());
+}
+
+
 //------------------------------------------------------------------------------
 // const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime)
 //------------------------------------------------------------------------------
@@ -429,6 +504,13 @@ const Rvector3 SpaceObject::GetMJ2000Position(const A1Mjd &atTime)
  */
 //------------------------------------------------------------------------------
 const Rvector3 SpaceObject::GetMJ2000Velocity(const A1Mjd &atTime)
+{
+   const Rvector6 rv6 = GetMJ2000State(atTime);
+   return (rv6.GetV());
+}
+
+
+const Rvector3 SpaceObject::GetMJ2000Velocity(const GmatTime &atTime)
 {
    const Rvector6 rv6 = GetMJ2000State(atTime);
    return (rv6.GetV());
@@ -533,6 +615,14 @@ Real SpaceObject::GetRealParameter(const Integer id) const
 }
 
 
+GmatTime SpaceObject::GetGmatTimeParameter(const Integer id) const
+{
+   if (id == EPOCH_PARAM)
+      return state.GetEpochGT();
+   return SpacePoint::GetGmatTimeParameter(id);
+}
+
+
 //------------------------------------------------------------------------------
 //  Real  GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
@@ -551,6 +641,12 @@ Real SpaceObject::GetRealParameter(const std::string &label) const
    return GetRealParameter(GetParameterID(label));
 }
 
+GmatTime SpaceObject::GetGmatTimeParameter(const std::string &label) const
+{
+   if (label == "A1Epoch")
+      return state.GetEpochGT();
+   return GetGmatTimeParameter(GetParameterID(label));
+}
 
 //------------------------------------------------------------------------------
 //  Real  SetRealParameter(const Integer id, const Real value)
@@ -572,6 +668,18 @@ Real SpaceObject::SetRealParameter(const Integer id, const Real value)
 }
 
 
+GmatTime SpaceObject::SetGmatTimeParameter(const Integer id, const GmatTime value)
+{
+   if (id == EPOCH_PARAM)
+   {
+      state.SetEpoch(GmatTime(value).GetMjd());
+      return state.SetEpochGT(value);
+   }
+
+   return SpacePoint::SetGmatTimeParameter(id, value);
+}
+
+
 //------------------------------------------------------------------------------
 //  Real  SetRealParameter(const std::string &label, const Real value)
 //------------------------------------------------------------------------------
@@ -588,6 +696,13 @@ Real SpaceObject::SetRealParameter(const std::string &label, const Real value)
 {
    return SetRealParameter(GetParameterID(label), value);
 }
+
+
+GmatTime SpaceObject::SetGmatTimeParameter(const std::string &label, const GmatTime value)
+{
+   return SetGmatTimeParameter(GetParameterID(label), value);
+}
+
 
 Real SpaceObject::GetRealParameter(const Integer id, const Integer row,
                                    const Integer col) const
@@ -764,4 +879,11 @@ void SpaceObject::HasPublished(bool tf)
 bool SpaceObject::HasPublished()
 {
    return hasPublished;
+}
+
+
+bool SpaceObject::SetPrecisionTimeFlag(bool onOff)
+{
+   state.SetPrecisionTimeFlag(onOff);
+   return SpacePoint::SetPrecisionTimeFlag(onOff);
 }

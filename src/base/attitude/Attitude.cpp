@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool.
 //
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -358,6 +358,7 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    isInitialized           (false),
    needsReinit             (false),
    epoch                   (0.0),
+   epochGT                 (0.0),
    owningSC                (NULL),
    refCSName               ("EarthMJ2000Eq"),
    refCS                   (NULL),
@@ -365,6 +366,7 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    RBi                     (Rmatrix33(true)),
    dcm                     (Rmatrix33(true)),
    attitudeTime            (0.0),
+   attitudeTimeGT          (0.0),
    quaternion              (Rvector(4,0.0,0.0,0.0,1.0)),
    attitudeModelName       (""),
    modifyCoordSysAllowed   (true),
@@ -436,10 +438,11 @@ Attitude::Attitude(const Attitude& att) :
    inputAttitudeRateType   (att.inputAttitudeRateType),
    attitudeDisplayType     (att.attitudeDisplayType),
    attitudeRateDisplayType (att.attitudeRateDisplayType),
-   isInitialized           (att.isInitialized),         //  false),
-   needsReinit             (att.needsReinit),           //  false),
+   isInitialized           (att.isInitialized),
+   needsReinit             (att.needsReinit),
    eulerSequenceList       (att.eulerSequenceList),
    epoch                   (att.epoch),
+   epochGT                 (att.epochGT),
    owningSC                (NULL),
    refCSName               (att.refCSName),
    refCS                   (att.refCS),   // shouldn't this be NULL?
@@ -450,6 +453,7 @@ Attitude::Attitude(const Attitude& att) :
    dcm                     (att.dcm),
    angVel                  (att.angVel),
    attitudeTime            (att.attitudeTime),
+   attitudeTimeGT          (att.attitudeTimeGT),
    quaternion              (att.quaternion),
    mrps                    (att.mrps),		   // Dunn Added
    eulerAngles             (att.eulerAngles),
@@ -516,6 +520,7 @@ Attitude& Attitude::operator=(const Attitude& att)
    needsReinit             = false;
    eulerSequenceList       = att.eulerSequenceList;
    epoch                   = att.epoch;
+   epochGT                 = att.epochGT;
    owningSC                = att.owningSC;
    refCSName               = att.refCSName;
    refCS                   = att.refCS;
@@ -526,6 +531,7 @@ Attitude& Attitude::operator=(const Attitude& att)
    dcm                     = att.dcm;
    angVel                  = att.angVel;
    attitudeTime            = att.attitudeTime;
+   attitudeTimeGT          = att.attitudeTimeGT;
    quaternion              = att.quaternion;
    mrps                    = att.mrps;			// Dunn Added
    eulerAngles             = att.eulerAngles;
@@ -721,6 +727,7 @@ bool Attitude::Initialize()
    RBi          = dcm;
    wIBi         = angVel;
    attitudeTime = epoch;
+   attitudeTimeGT = epochGT;
 
    // Set flags and values to indicate that the initialization has taken place, and that the
    // DCM and angVel are the current representations (the ones kept up-to-date)
@@ -751,6 +758,12 @@ Real Attitude::GetEpoch() const
    return epoch;
 }
 
+
+GmatTime Attitude::GetEpochGT() const
+{
+   return epochGT;
+}
+
 //---------------------------------------------------------------------------
 //  void SetEpoch(Real toEpoch)
 //---------------------------------------------------------------------------
@@ -765,6 +778,13 @@ void Attitude::SetEpoch(Real toEpoch)
 {
    epoch         = toEpoch; // need to reinitialize
    needsReinit   = true;
+}
+
+
+void Attitude::SetEpochGT(GmatTime toEpoch)
+{
+   epochGT = toEpoch; // need to reinitialize
+   needsReinit = true;
 }
 
 //---------------------------------------------------------------------------
@@ -1116,7 +1136,7 @@ bool Attitude::ModelComputesRates() const
 }
 
 //------------------------------------------------------------------------------
-//   std::string GetRefObjectName(const Gmat::ObjectType type) const
+//   std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Returns the name of the reference object. (Derived classes should implement
@@ -1127,7 +1147,7 @@ bool Attitude::ModelComputesRates() const
  * @return The name of the reference object.
  */
 //------------------------------------------------------------------------------
-std::string Attitude::GetRefObjectName(const Gmat::ObjectType type) const
+std::string Attitude::GetRefObjectName(const UnsignedInt type) const
 {
    #ifdef DEBUG_REF_SETTING
       MessageInterface::ShowMessage("Attitude::GetRefObjectName with type = %d\n",
@@ -1149,7 +1169,7 @@ std::string Attitude::GetRefObjectName(const Gmat::ObjectType type) const
    return GmatBase::GetRefObjectName(type);
 }
 
-const StringArray& Attitude::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Attitude::GetRefObjectNameArray(const UnsignedInt type)
 {
    refObjectNames.clear();
 
@@ -1172,7 +1192,7 @@ const StringArray& Attitude::GetRefObjectNameArray(const Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-//   bool SetRefObjectName(const Gmat::ObjectType type,
+//   bool SetRefObjectName(const UnsignedInt type,
 //                         const std::string &name) 
 //------------------------------------------------------------------------------
 /**
@@ -1185,7 +1205,7 @@ const StringArray& Attitude::GetRefObjectNameArray(const Gmat::ObjectType type)
  * @return Success flag.
  */
 //------------------------------------------------------------------------------
-bool Attitude::SetRefObjectName(const Gmat::ObjectType type,
+bool Attitude::SetRefObjectName(const UnsignedInt type,
                                 const std::string &name)
 {
    if (type == Gmat::CELESTIAL_BODY)
@@ -1215,7 +1235,7 @@ bool Attitude::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName,
 //                       const std::string &newName)
 //------------------------------------------------------------------------------
@@ -1229,7 +1249,7 @@ bool Attitude::SetRefObjectName(const Gmat::ObjectType type,
  * @return success flag
  */
 //------------------------------------------------------------------------------
-bool Attitude::RenameRefObject(const Gmat::ObjectType type,
+bool Attitude::RenameRefObject(const UnsignedInt type,
                                const std::string &oldName,
                                const std::string &newName)
 {
@@ -1250,7 +1270,7 @@ bool Attitude::RenameRefObject(const Gmat::ObjectType type,
 }
                                
 //------------------------------------------------------------------------------
-//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//  GmatBase* GetRefObject(const UnsignedInt type,
 //                         const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -1262,7 +1282,7 @@ bool Attitude::RenameRefObject(const Gmat::ObjectType type,
  * @return Pointer to the object specified.
  */
 //------------------------------------------------------------------------------
-GmatBase* Attitude::GetRefObject(const Gmat::ObjectType type,
+GmatBase* Attitude::GetRefObject(const UnsignedInt type,
                                  const std::string      &name)
 {
    switch (type)
@@ -1282,7 +1302,7 @@ GmatBase* Attitude::GetRefObject(const Gmat::ObjectType type,
 }
                                     
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -1296,7 +1316,7 @@ GmatBase* Attitude::GetRefObject(const Gmat::ObjectType type,
  */
 //------------------------------------------------------------------------------
 bool Attitude::SetRefObject(GmatBase *obj,
-                            const Gmat::ObjectType type,
+                            const UnsignedInt type,
                             const std::string &name)
 {
    #ifdef DEBUG_REF_SETTING
@@ -1499,7 +1519,7 @@ std::string Attitude::GetParameterTypeString(const Integer id) const
 }
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Retrieves object type of parameter of given id.
@@ -1509,7 +1529,7 @@ std::string Attitude::GetParameterTypeString(const Integer id) const
  * @return parameter ObjectType
  */
 //---------------------------------------------------------------------------
-Gmat::ObjectType Attitude::GetPropertyObjectType(const Integer id) const
+UnsignedInt Attitude::GetPropertyObjectType(const Integer id) const
 {
    switch (id)
    {
@@ -1696,7 +1716,46 @@ bool Attitude::IsParameterReadOnly(const std::string &label) const
    return IsParameterReadOnly(GetParameterID(label));
 }
 
-   
+
+GmatTime Attitude::GetGmatTimeParameter(const Integer id) const
+{
+   // re-initialize, if some input has changed
+   if (!isInitialized || needsReinit) (const_cast<Attitude*>(this))->Initialize();
+
+   if (id == EPOCH)
+      return epochGT;
+
+   return GmatBase::GetGmatTimeParameter(id);
+}
+
+
+GmatTime Attitude::SetGmatTimeParameter(const Integer id, const GmatTime value)
+{
+   if (id == EPOCH)  // this should be an A1Mjd time
+   {
+      if (epochGT != value)
+      {
+         if (isInitialized) needsReinit = true;
+         epochGT = value;
+      }
+      return epochGT;
+   }
+
+   return GmatBase::SetGmatTimeParameter(id, value);
+}
+
+
+GmatTime Attitude::GetGmatTimeParameter(const std::string &label) const
+{
+   return GetGmatTimeParameter(GetParameterID(label));
+}
+
+
+GmatTime Attitude::SetGmatTimeParameter(const std::string &label, const GmatTime value)
+{
+   return SetGmatTimeParameter(GetParameterID(label), value);
+}
+
 //------------------------------------------------------------------------------
 //  Real  GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -77,18 +77,18 @@ Formation::PARAMETER_TYPE[FormationParamCount - SpaceObjectParamCount] =
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// Formation(Gmat::ObjectType typeId, const std::string &typeStr,
+// Formation(UnsignedInt typeId, const std::string &typeStr,
 //           const std::string &instName)
 //------------------------------------------------------------------------------
 /**
  * Default constructor.
  *
- * @param <typeId>   Gmat::ObjectType of the constructed object.
+ * @param <typeId>   UnsignedInt of the constructed object.
  * @param <typeStr>  String describing the type of object created.
  * @param <instName> Name of the constructed instance.
  */
 //------------------------------------------------------------------------------
-Formation::Formation(Gmat::ObjectType typeId, const std::string &typeStr,
+Formation::Formation(UnsignedInt typeId, const std::string &typeStr,
                      const std::string &instName) :
    FormationInterface(typeId, typeStr, instName),
    dimension         (0),
@@ -239,7 +239,7 @@ const Rvector6 Formation::GetMJ2000State(const A1Mjd &atTime)
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -252,7 +252,7 @@ const Rvector6 Formation::GetMJ2000State(const A1Mjd &atTime)
  * @return true on success.
  */
 //------------------------------------------------------------------------------
-bool Formation::RenameRefObject(const Gmat::ObjectType type,
+bool Formation::RenameRefObject(const UnsignedInt type,
                                 const std::string &oldName,
                                 const std::string &newName)
 {
@@ -823,14 +823,14 @@ const ObjectTypeArray& Formation::GetRefObjectTypeArray()
  * @return a vector with the names of objects of the requested type.
  */
 //------------------------------------------------------------------------------
-const StringArray& Formation::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Formation::GetRefObjectNameArray(const UnsignedInt type)
 {
    return componentNames;
 }
 
 
 //------------------------------------------------------------------------------
-// GmatBase* Formation::GetRefObject(const Gmat::ObjectType type,
+// GmatBase* Formation::GetRefObject(const UnsignedInt type,
 //                                   const std::string &name,
 //                                   const Integer index)
 //------------------------------------------------------------------------------
@@ -847,7 +847,7 @@ const StringArray& Formation::GetRefObjectNameArray(const Gmat::ObjectType type)
  *       some compilers.
  */
 //------------------------------------------------------------------------------
-GmatBase* Formation::GetRefObject(const Gmat::ObjectType type,
+GmatBase* Formation::GetRefObject(const UnsignedInt type,
                                   const std::string &name,
                                   const Integer index)
 {
@@ -856,7 +856,7 @@ GmatBase* Formation::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool Formation::SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                              const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -869,7 +869,7 @@ GmatBase* Formation::GetRefObject(const Gmat::ObjectType type,
  * @return true on success.
  */
 //------------------------------------------------------------------------------
-bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool Formation::SetRefObject(GmatBase *obj, const UnsignedInt type,
                              const std::string &name)
 {
    #ifdef DEBUG_REF_OBJ
@@ -889,8 +889,13 @@ bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          Integer size = ps->GetSize();
          dimension += size;
          Real newepoch = so->GetEpoch();
+         GmatTime newepochGT = so->GetEpochGT();
          if (components.size() == 0)
+         {
             state.SetEpoch(newepoch);
+            state.SetEpochGT(newepochGT);
+            state.SetPrecisionTimeFlag(so->HasPrecisionTime());
+         }
          else
             if (state.GetEpoch() != newepoch)
             {
@@ -922,7 +927,7 @@ bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool Formation::SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                              const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -939,7 +944,7 @@ bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  *       some compilers.
  */
 //------------------------------------------------------------------------------
-bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool Formation::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                     const std::string &name,
                                     const Integer index)
 {
@@ -948,7 +953,7 @@ bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-//  ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+//  ObjectArray& GetRefObjectArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Obtains an array of GmatBase pointers by type.
@@ -958,7 +963,7 @@ bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return Reference to the array.
  */
 //------------------------------------------------------------------------------
-ObjectArray& Formation::GetRefObjectArray(const Gmat::ObjectType type)
+ObjectArray& Formation::GetRefObjectArray(const UnsignedInt type)
 {
    static ObjectArray oa;
    oa.clear();
@@ -996,7 +1001,7 @@ ObjectArray& Formation::GetRefObjectArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 ObjectArray& Formation::GetRefObjectArray(const std::string& typeString)
 {
-   Gmat::ObjectType id = Gmat::UNKNOWN_OBJECT;
+   UnsignedInt id = Gmat::UNKNOWN_OBJECT;
    if (typeString == "Spacecraft") 
       id = Gmat::SPACECRAFT;
    if (typeString == "Formation") 

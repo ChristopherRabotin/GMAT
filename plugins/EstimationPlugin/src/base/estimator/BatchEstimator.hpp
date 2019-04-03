@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -34,12 +34,12 @@
 #define BatchEstimator_hpp
 
 #include "Estimator.hpp"
-#include "PropSetup.hpp"
-#include "MeasurementManager.hpp"
+//#include "PropSetup.hpp"
+//#include "MeasurementManager.hpp"
 
-#include "OwnedPlot.hpp"
+//#include "OwnedPlot.hpp"
 #include "DataWriter.hpp"
-#include "WriterData.hpp"
+//#include "WriterData.hpp"
 #include "DataBucket.hpp"
 
 /**
@@ -128,8 +128,11 @@ protected:
    Real predictedRMS;
    /// Number consecutive iterations diverging
    Integer numDivIterations;
-   /// Flag to indicate weightedRMS or predictedRMS
-   bool chooseRMSP;
+
+   /// Cartesian to Solve-for state conversion derivative matrix [dX/dS]
+   Rmatrix                 cart2SolvMatrix;
+   /// Solve-for state to Keplerian conversion derivative matrix [dS/dK]
+   Rmatrix                 solv2KeplMatrix;
 
    /// Flag set when an a priori estimate is available
    bool                    useApriori;
@@ -176,21 +179,23 @@ protected:
    Integer                 matFreqBandIndex;
    Integer                 matDoppCountIndex;
 
-//   /// Estimation status
-//   Integer                 estimationStatus;         // This variable is moved to Estimator class
+   /// String to show reason of convergence
+   std::string             convergenceReason;
 
-   // String to show reason of convergence
-   std::string convergenceReason;
    /// Buffer of the participants for the outer batch loop
    ObjectArray             outerLoopBuffer;
    /// Inversion algorithm used 
    std::string             inversionType;
 
    /// Maximum consecutive divergences
-   Integer               maxConsDivergences;
+   Integer                 maxConsDivergences;
+
+   /// Freeze measurement editing option
+   bool                    freezeEditing;
+   Integer                 freezeIteration;
 
    /// particicpants column lenght. It is used for writing report file
-   Integer                pcolumnLen;
+   Integer                 pcolumnLen;
 
    /// Variables used for statistics calculation
    std::map<std::string, std::map<std::string, Real> > statisticsTable;       // this table is for groundstation and measurement type
@@ -202,15 +207,20 @@ protected:
    StringArray  measTypesList;           // measurement type
    IntegerArray sumAllRecords;           // total number of records
    IntegerArray sumAcceptRecords;        // total all accepted records
-   RealArray    sumResidual;             // sum of all O-C of accepted records
-   RealArray    sumResidualSquare;       // sum of all (O-C)^2 of accepted records
+   //RealArray    sumResidual;             // sum of all O-C of accepted records
+   RealArray    aveResidual;             // average of all O-C of accepted records
+   //RealArray    sumResidualSquare;       // sum of all (O-C)^2 of accepted records
+   RealArray    stdResidual2;            // sum of all (O-C)^2 of accepted records by station and data type
+   RealArray    stdResidual2ByStation;   // sum of all (O-C)^2 of accepted records by station
    RealArray    sumWeightResidualSquare; // sum of all [W*(O-C)]^2 of accepted records
 
-   // Statistics information for sigma edited records
-   IntegerArray sumSERecords;               // total all sigma edited records
-   RealArray    sumSEResidual;              // sum of all O-C of all sigma edited records
-   RealArray    sumSEResidualSquare;        // sum of all (O-C)^2 of  all sigma edited records
-   RealArray    sumSEWeightResidualSquare;  // sum of all [W*(O-C)]^2 of all sigma edited records
+   bool StatisticsCalculation(); 
+
+   //// Statistics information for sigma edited records
+   //IntegerArray sumSERecords;               // total all sigma edited records
+   //RealArray    sumSEResidual;              // sum of all O-C of all sigma edited records
+   //RealArray    sumSEResidualSquare;        // sum of all (O-C)^2 of  all sigma edited records
+   //RealArray    sumSEWeightResidualSquare;  // sum of all [W*(O-C)]^2 of all sigma edited records
 
    std::stringstream textFile0;
    std::stringstream textFile1;
@@ -224,11 +234,12 @@ protected:
    {
       ESTIMATION_EPOCH_FORMAT = EstimatorParamCount,
       ESTIMATION_EPOCH,
-//      USE_PRIORI_ESTIMATE,
       USE_INITIAL_COVARIANCE,
       INVERSION_ALGORITHM,
       MAX_CONSECUTIVE_DIVERGENCES,
       MATLAB_OUTPUT_FILENAME,
+      FREEZE_MEASUREMENT_EDITING,
+      FREEZE_ITERATION,
       BatchEstimatorParamCount,
    };
 
@@ -273,14 +284,18 @@ private:
    void                   WriteReportFileHeaderPart1();
    void                   WriteReportFileHeaderPart2();
    void                   WriteReportFileHeaderPart2b();
+   void                   WriteReportFileHeaderPart2c();
    void                   WriteReportFileHeaderPart3();
    void                   WriteReportFileHeaderPart4_1();
    void                   WriteReportFileHeaderPart4_2();
    void                   WriteReportFileHeaderPart4_3();
+   void                   WriteReportFileHeaderPart4_4();
    void                   WriteReportFileHeaderPart4();
    void                   WriteReportFileHeaderPart5();
    void                   WriteReportFileHeaderPart6();
    void                   WriteReportFileHeader();
+
+   StringArray            ColumnBreak(std::string content, Integer colLenMax, StringArray seperators);
 
    void                   WriteIterationHeader();
    void                   WritePageHeader();
@@ -291,17 +306,17 @@ private:
    void                   WriteIterationSummaryPart4(Solver::SolverState sState);
    void                   WriteReportFileSummary(Solver::SolverState sState);
    
-   std::string            GetElementFullName(ListItem* infor, bool isInternalCS) const;
-   std::string            GetElementUnit(ListItem* infor) const;
+   std::string            GetElementFullName(ListItem* infor, bool isInternalCS, 
+                                             std::string stateType = "", std::string anomalyType = "TA") const;
+
+   std::string            GetElementUnit(ListItem* infor, std::string stateType) const;
    std::string            GetUnit(std::string type);
    Integer                GetElementPrecision(std::string unit) const;
-   Rmatrix                CovarianceConvertionMatrix(std::map<GmatBase*, Rvector6> stateMap);
 
    std::map<GmatBase*, Rvector6> 
                           CalculateCartesianStateMap(const std::vector<ListItem*> *map, GmatState state);
    std::map<GmatBase*, Rvector6> 
                           CalculateKeplerianStateMap(const std::vector<ListItem*> *map, GmatState state);
-   Rmatrix66              CartesianToKeplerianCoverianceConvertionMatrix(GmatBase* obj, const Rvector6 state);
    std::map<GmatBase*, RealArray>
                           CalculateAncillaryElements(const std::vector<ListItem*> *map, GmatState state);
 

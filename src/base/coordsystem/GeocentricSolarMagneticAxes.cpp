@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -336,10 +336,6 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Real mjdUT1 = TimeConverterUtil::Convert(atEpoch.Get(),
                   TimeConverterUtil::A1MJD, TimeConverterUtil::UT1MJD,
                   JD_JAN_5_1941);
-
-   // Compute elapsed Julian centuries (UT1)
-   offset =  JD_JAN_5_1941 - JD_OF_J2000;
-   Real tUT1     = (mjdUT1 + offset) / DAYS_PER_JULIAN_CENTURY;
    
 
    // convert input A1 MJD to TT MJD (for most calculations)
@@ -350,6 +346,7 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 
    // Compute Julian centuries of TDB from the base epoch (J2000)
    // NOTE - this is really TT, an approximation of TDB *********
+   offset =  JD_JAN_5_1941 - JD_OF_J2000;
    Real tTDB    = (mjdTT + offset) / DAYS_PER_JULIAN_CENTURY;
 
    if (overrideOriginInterval) updateIntervalToUse = 
@@ -359,9 +356,9 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    ComputePrecessionMatrix(tTDB, atEpoch);
    ComputeNutationMatrix(tTDB, atEpoch, dPsi, longAscNodeLunar, cosEpsbar,
                          forceComputation);
-   ComputeSiderealTimeRotation(jdTT, tUT1, dPsi, longAscNodeLunar, cosEpsbar,
+   ComputeSiderealTimeRotation(jdTT, mjdUT1, dPsi, longAscNodeLunar, cosEpsbar,
                                cosAst, sinAst);
-   ComputeSiderealTimeDotRotation(mjdUTC, atEpoch, cosAst, sinAst,
+   ComputeSiderealTimeDotRotation(mjdUTC, atEpoch.Get(), cosAst, sinAst,
                                   forceComputation);
    ComputePolarMotionRotation(mjdUTC, atEpoch, forceComputation);
 

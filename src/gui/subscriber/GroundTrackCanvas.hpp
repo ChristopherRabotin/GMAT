@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -71,6 +71,10 @@ public:
    
    // user actions
    void TakeAction(const std::string &action);
+
+   //Max data point option
+   virtual int GetMaxDataPoints();
+   virtual void SetMaxDataPoints(int);
    
 protected:
    
@@ -144,7 +148,7 @@ private:
    
    // view objects
    void SetupWorld();
-   
+
    // drawing objects
    void DrawFrame();
    void DrawPlot();

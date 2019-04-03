@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -214,7 +214,25 @@ std::string ObjectPropertyWrapper::ToString()
    }
    case Gmat::OBJECT_TYPE:
    {
-      retval = EvaluateString();
+      Integer hardwareType = object->GetParameterID(propIDNames.at(0));
+      if (hardwareType == object->GetParameterID("PowerSystem"))
+         retval = object->GetRefObject(Gmat::HARDWARE, propIDNames.at(0))->GetGeneratingString(Gmat::MATLAB_STRUCT);
+      else
+         retval = EvaluateString();
+      break;
+   }
+   case Gmat::OBJECTARRAY_TYPE:
+   {
+      StringArray hardwareInfo = object->GetStringArrayParameter(propID);
+      for (Integer i = 0; i < hardwareInfo.size(); i++)
+      {
+         if (propIDNames[0] == hardwareInfo[i])
+         {
+            Integer hardwareNum = i;
+            retval = object->GetRefObject(Gmat::HARDWARE, hardwareInfo.at(hardwareNum))->GetGeneratingString(Gmat::MATLAB_STRUCT);
+            break;
+         }
+      }
       break;
    }
    default:
@@ -615,25 +633,61 @@ const Rmatrix& ObjectPropertyWrapper::EvaluateArray() const
 {
    if (object == NULL)
       throw ParameterException(
-      "Cannot set value of ObjectProperty - object pointer is NULL\n");
+                               "Cannot set value of ObjectProperty - object pointer is NULL\n");
    
    try
    {
-      #ifdef DEBUG_OPW
+#ifdef DEBUG_OPW
       MessageInterface::ShowMessage
-         ("In ObjPropWrapper::EvaluateArray, about to get value of %s\n", GetDescription().ToString().c_str());
+      ("In ObjPropWrapper::EvaluateArray, about to get value of %s\n", GetDescription().c_str());
       const Rmatrix rmat = object->GetRmatrixParameter(propID);
       MessageInterface::ShowMessage
-         ("In ObjPropWrapper::EvaluateArray, value retrieve is %s\n", rmat.ToString(16).c_str());
-      #endif
+      ("In ObjPropWrapper::EvaluateArray, value retrieve is %s\n", rmat.ToString(16).c_str());
+#endif
       return object->GetRmatrixParameter(propID);
    }
    catch (BaseException &be)
    {
-      #ifdef DEBUG_OPW
+#ifdef DEBUG_OPW
       MessageInterface::ShowMessage
-         ("   exception thrown!  msg = %s\n", (be.GetFullMessage()).c_str());
-      #endif
+      ("   exception thrown!  msg = %s\n", (be.GetFullMessage()).c_str());
+#endif
+      
+      throw;
+   }
+}
+//---------------------------------------------------------------------------
+// const Rmatrix& EvaluateRvector() const
+//---------------------------------------------------------------------------
+/**
+ * Method to retrieve the Rmatrix value of the wrapped object.
+ *
+ * @return true if successful; false otherwise.
+ */
+//---------------------------------------------------------------------------
+const Rvector& ObjectPropertyWrapper::EvaluateRvector() const
+{
+   if (object == NULL)
+      throw ParameterException(
+           "Cannot set value of ObjectProperty - object pointer is NULL\n");
+   
+   try
+   {
+#ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+      ("In ObjPropWrapper::EvaluateRvector, about to get value of %s\n", GetDescription().c_str());
+      const Rvector rvec = object->GetRvectorParameter(propID);
+      MessageInterface::ShowMessage
+      ("In ObjPropWrapper::EvaluateRvector, value retrieve is %s\n", rvec.ToString(16).c_str());
+#endif
+      return object->GetRvectorParameter(propID);
+   }
+   catch (BaseException &be)
+   {
+#ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+      ("   exception thrown!  msg = %s\n", (be.GetFullMessage()).c_str());
+#endif
       
       throw;
    }
@@ -877,7 +931,8 @@ bool ObjectPropertyWrapper::SetObject(GmatBase *obj)
  * @return The ID
  */
 //------------------------------------------------------------------------------
-Integer ObjectPropertyWrapper::GetPropertyId(){
+Integer ObjectPropertyWrapper::GetPropertyId()
+{
    return propID;
 }
 

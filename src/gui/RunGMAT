@@ -1,7 +1,7 @@
 #!/bin/bash
 # Sets up the environment for GMAT, then runs the executable.
 #
-#  Copyright (c) 2002-2017 United States Government as represented by the
+#  Copyright (c) 2002-2018 United States Government as represented by the
 #  Administrator of The National Aeronautics and Space Administration.
 #  All Other Rights Reserved.
 #
@@ -10,7 +10,7 @@
 # bin folder where the GMAT.app bundle resides.
 # MATLAB_APP_PATH should point to the MATLAB app in the directory where MATLAB
 # has been installed, e.g.
-#     /Applications/MATLAB_R2017a.app
+#     /Applications/MATLAB_R2017b.app
 # NOTE that currently, we are running 64-bit GUI versions of GMAT and therefore,
 # we need to use 64-bit version(s) of MATLAB here.
 #
@@ -19,19 +19,15 @@
 # run.  This may be changed to write to a different file by setting debugfile
 # (see below).
 #
-# First, we want to find out exactly where this script is, relative
-# to where it was invoked (when running the app bundle from the Finder,
-# this should be the absolute path).
-hereTwo="${0%/*}"
 
-# but maybe we need the absolute path every time
+# we need the absolute path to this script
 here="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Set debug file and flag here ......................
 debugfile="$here/debugrungmat.txt"
 # uncomment the next line for debug output
 # debugit='yesdoit'
-if [ $debugit = 'yesdoit' ]
+if [ "$debugit" = 'yesdoit' ]
 then
    echo "The value of debugfile is "$debugfile"" > "$debugfile"
 fi
@@ -55,11 +51,10 @@ fi
 FILE="$here/../../../MATLABConfigure.txt"
 
 # begin debugging
-if [ $debugit = 'yesdoit' ]
+if [ "$debugit" = 'yesdoit' ]
 then
    echo "DEBUG " >> "$debugfile"
    echo "The meaning of here is "$here"" >> "$debugfile"
-   echo "The meaning of hereTwo is "$hereTwo"" >> "$debugfile"
    echo "The meaning of cmd is "$cmd"" >> "$debugfile"
    pwd >> "$debugfile"
    if [ -f "$FILE" ]
@@ -95,7 +90,7 @@ while read line
    done < "$FILE"
 
 # begin debugging
-if [ $debugit = 'yesdoit' ]
+if [ "$debugit" = 'yesdoit' ]
 then
    echo "value is |$value|"  >> "$debugfile"
    echo "setting matlab location to |$matlabloc|"  >> "$debugfile"
@@ -119,7 +114,7 @@ shopt -u extglob
 ulimit -s 61440
 
 # begin debugging
-if [ $debugit = 'yesdoit' ]
+if [ "$debugit" = 'yesdoit' ]
 then
    echo "NOW running GMAT at location |$here/$cmd|"  >> "$debugfile"
 fi

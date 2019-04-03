@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -280,7 +280,7 @@ void SolverData::InitializeRefObjects()
 }
 
 //------------------------------------------------------------------------------
-// bool SolverData::IsValidObjectType(Gmat::ObjectType type)
+// bool SolverData::IsValidObjectType(UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Checks reference object type.
@@ -288,7 +288,7 @@ void SolverData::InitializeRefObjects()
  * @return return true if object is valid object, false otherwise
  */
 //------------------------------------------------------------------------------
-bool SolverData::IsValidObjectType(Gmat::ObjectType type)
+bool SolverData::IsValidObjectType(UnsignedInt type)
 {
    bool retval = false;
 
@@ -303,7 +303,7 @@ bool SolverData::IsValidObjectType(Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-// bool AddRefObject(const Gmat::ObjectType type, const std::string &name,
+// bool AddRefObject(const UnsignedInt type, const std::string &name,
 //                   GmatBase *obj = NULL, bool replaceName = false)
 //------------------------------------------------------------------------------
 /**
@@ -317,7 +317,7 @@ bool SolverData::IsValidObjectType(Gmat::ObjectType type)
  * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
-bool SolverData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
+bool SolverData::AddRefObject(const UnsignedInt type, const std::string &name,
                            GmatBase *obj, bool replaceName)
 {
    if (type == Gmat::SOLVER)

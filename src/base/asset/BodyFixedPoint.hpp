@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -52,7 +52,7 @@ class GMAT_API BodyFixedPoint : public SpacePoint
 {
 public:
    BodyFixedPoint(const std::string &itsType, const std::string &itsName,
-         Gmat::ObjectType objType = Gmat::BODY_FIXED_POINT);
+         UnsignedInt objType = Gmat::BODY_FIXED_POINT);
    virtual ~BodyFixedPoint();
    BodyFixedPoint(const BodyFixedPoint& bfp);
    BodyFixedPoint& operator=(const BodyFixedPoint& bfp);
@@ -73,7 +73,7 @@ public:
    virtual bool            IsParameterReadOnly(const Integer id) const;
    virtual bool            IsParameterReadOnly(const std::string &label) const;
 
-   virtual Gmat::ObjectType
+   virtual UnsignedInt
                            GetPropertyObjectType(const Integer id) const;
    virtual const StringArray&
                            GetPropertyEnumStrings(const Integer id) const;
@@ -103,27 +103,31 @@ public:
    virtual Real            SetRealParameter(const std::string &label,
                                          const Real value);
 
-   virtual GmatBase*       GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*       GetRefObject(const UnsignedInt type,
                                         const std::string &name);
-   virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool            SetRefObject(GmatBase *obj, const UnsignedInt type,
                                         const std::string &name = "");
-   virtual GmatBase*       GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*       GetRefObject(const UnsignedInt type,
                                         const std::string &name,
                                         const Integer index);
-   virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool            SetRefObject(GmatBase *obj, const UnsignedInt type,
                                         const std::string &name,
                                         const Integer index);
 
    virtual bool            HasRefObjectTypeArray();
-   virtual std::string     GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual std::string     GetRefObjectName(const UnsignedInt type) const;
    virtual const StringArray&
-                           GetRefObjectNameArray(const Gmat::ObjectType type);
+                           GetRefObjectNameArray(const UnsignedInt type);
    virtual const ObjectTypeArray&
                            GetRefObjectTypeArray();
 
    virtual const Rvector6  GetMJ2000State(const A1Mjd &atTime);
    virtual const Rvector3  GetMJ2000Position(const A1Mjd &atTime);
    virtual const Rvector3  GetMJ2000Velocity(const A1Mjd &atTime);
+
+   virtual const Rvector6  GetMJ2000State(const GmatTime &atTime);
+   virtual const Rvector3  GetMJ2000Position(const GmatTime &atTime);
+   virtual const Rvector3  GetMJ2000Velocity(const GmatTime &atTime);
 
    virtual const Rvector3  GetBodyFixedLocation(const A1Mjd &atTime);
    virtual CoordinateSystem*
@@ -167,6 +171,8 @@ protected:
    CoordinateSystem  *mj2kcs;
 
    A1Mjd             lastStateTime;
+   GmatTime          lastStateTimeGT;
+
    Rvector6          lastState;
 
    /// Base filename for the SPK and FK kernels

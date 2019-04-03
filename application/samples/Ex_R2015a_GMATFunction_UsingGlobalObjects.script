@@ -310,7 +310,7 @@ GMAT EphemerisFile1.StepSize = IntegratorSteps;
 GMAT EphemerisFile1.Interpolator = Lagrange;
 GMAT EphemerisFile1.InterpolationOrder = 7;
 GMAT EphemerisFile1.CoordinateSystem = EarthMJ2000Eq;
-GMAT EphemerisFile1.OutputFormat = PC;
+GMAT EphemerisFile1.OutputFormat = LittleEndian;
 GMAT EphemerisFile1.WriteEphemeris = true;
 
 %----------------------------------------

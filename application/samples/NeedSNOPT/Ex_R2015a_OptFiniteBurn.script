@@ -48,7 +48,7 @@ GMAT DefaultSC.EulerAngleSequence = '321';
 %---------- Hardware Components
 %----------------------------------------
 
-Create FuelTank FuelTank1;
+Create ChemicalTank FuelTank1;
 GMAT FuelTank1.AllowNegativeFuelMass = false;
 GMAT FuelTank1.FuelMass = 400;
 GMAT FuelTank1.Pressure = 1500;
@@ -58,7 +58,7 @@ GMAT FuelTank1.Volume = 0.75;
 GMAT FuelTank1.FuelDensity = 1260;
 GMAT FuelTank1.PressureModel = PressureRegulated;
 
-Create Thruster Thruster1;
+Create ChemicalThruster Thruster1;
 GMAT Thruster1.CoordinateSystem = Local;
 GMAT Thruster1.Origin = Earth;
 GMAT Thruster1.Axes = VNB;
@@ -102,7 +102,7 @@ GMAT Thruster1.K13 = 0;
 GMAT Thruster1.K14 = 0;
 GMAT Thruster1.K15 = 0;
 GMAT Thruster1.K16 = 0;
-
+GMAT Thruster1.MixRatio = [ 1 ];
 
 
 

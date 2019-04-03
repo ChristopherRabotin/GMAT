@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -88,6 +88,8 @@ EphemerisPropagator::EphemerisPropagator(const std::string & typeStr,
    epochFormat          ("A1ModJulian"),
    initialEpoch         (-987654321.0),
    currentEpoch         (-987654321.0),
+   initialEpochGT       (-987654321.0),
+   currentEpochGT       (-987654321.0),
    timeFromEpoch        (0.0),
    ephemStart           (-987654321.0),
    ephemEnd             (987654321.0),
@@ -143,6 +145,8 @@ EphemerisPropagator::EphemerisPropagator(const EphemerisPropagator & ep) :
    startEpoch              (ep.startEpoch),
    initialEpoch            (ep.initialEpoch),
    currentEpoch            (ep.currentEpoch),
+   initialEpochGT          (ep.initialEpochGT),
+   currentEpochGT          (ep.currentEpochGT),
    timeFromEpoch           (ep.timeFromEpoch),
    ephemStart              (ep.ephemStart),
    ephemEnd                (ep.ephemEnd),
@@ -181,6 +185,9 @@ EphemerisPropagator& EphemerisPropagator::operator=(
       startEpoch    = ep.startEpoch;
       initialEpoch  = ep.initialEpoch;
       currentEpoch  = ep.currentEpoch;
+      initialEpochGT = ep.initialEpochGT;
+      currentEpochGT = ep.currentEpochGT;
+
       timeFromEpoch = ep.timeFromEpoch;
       ephemStart    = ep.ephemStart;
       ephemEnd      = ep.ephemEnd;
@@ -340,6 +347,27 @@ bool EphemerisPropagator::IsParameterReadOnly(const Integer id) const
 bool EphemerisPropagator::IsParameterReadOnly(const std::string &label) const
 {
    return IsParameterReadOnly(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool EphemerisPropagator::IsParameterCommandModeSettable(const Integer id) const
+{
+   // Override this one from the parent class
+   if (id == EPHEM_STEP_SIZE)
+      return true;
+   
+   // And let the parent class handle its own
+   return Propagator::IsParameterCommandModeSettable(id);
 }
 
 
@@ -945,7 +973,7 @@ void EphemerisPropagator::SetSolarSystem(SolarSystem *ss)
 
 
 //------------------------------------------------------------------------------
-// std::string  GetRefObjectName(const Gmat::ObjectType type) const
+// std::string  GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Retrieves the name of a reference object of the specified type
@@ -956,14 +984,14 @@ void EphemerisPropagator::SetSolarSystem(SolarSystem *ss)
  */
 //------------------------------------------------------------------------------
 std::string  EphemerisPropagator::GetRefObjectName(
-      const Gmat::ObjectType type) const
+      const UnsignedInt type) const
 {
       return Propagator::GetRefObjectName(type);
 }
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a list of reference objects of the specified type
@@ -974,7 +1002,7 @@ std::string  EphemerisPropagator::GetRefObjectName(
  */
 //------------------------------------------------------------------------------
 const StringArray& EphemerisPropagator::GetRefObjectNameArray(
-      const Gmat::ObjectType type)
+      const UnsignedInt type)
 {
    #ifdef DEBUG_REF_OBJ
       MessageInterface::ShowMessage("EphemerisPropagator::"
@@ -990,7 +1018,7 @@ const StringArray& EphemerisPropagator::GetRefObjectNameArray(
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Passes in the name of a reference object for use during initialization
@@ -1001,7 +1029,7 @@ const StringArray& EphemerisPropagator::GetRefObjectNameArray(
  * @return true if the name was set, false if not
  */
 //------------------------------------------------------------------------------
-bool EphemerisPropagator::SetRefObjectName(const Gmat::ObjectType type,
+bool EphemerisPropagator::SetRefObjectName(const UnsignedInt type,
       const std::string &name)
 {
    bool retval = false;
@@ -1021,7 +1049,7 @@ bool EphemerisPropagator::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string &oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string &oldName,
 //       const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -1038,7 +1066,7 @@ bool EphemerisPropagator::SetRefObjectName(const Gmat::ObjectType type,
  * @return true if a object name was changed, false if not
  */
 //------------------------------------------------------------------------------
-bool EphemerisPropagator::RenameRefObject(const Gmat::ObjectType type,
+bool EphemerisPropagator::RenameRefObject(const UnsignedInt type,
       const std::string &oldName, const std::string &newName)
 {
    bool retval = false;
@@ -1057,7 +1085,7 @@ bool EphemerisPropagator::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -1071,7 +1099,7 @@ bool EphemerisPropagator::RenameRefObject(const Gmat::ObjectType type,
  */
 //------------------------------------------------------------------------------
 bool EphemerisPropagator::SetRefObject(GmatBase *obj,
-      const Gmat::ObjectType type, const std::string &name)
+      const UnsignedInt type, const std::string &name)
 {
    #ifdef DEBUG_REF_OBJ
          MessageInterface::ShowMessage
@@ -1104,7 +1132,7 @@ bool EphemerisPropagator::SetRefObject(GmatBase *obj,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string &name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -1119,7 +1147,7 @@ bool EphemerisPropagator::SetRefObject(GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 bool EphemerisPropagator::SetRefObject(GmatBase *obj,
-      const Gmat::ObjectType type, const std::string &name, const Integer index)
+      const UnsignedInt type, const std::string &name, const Integer index)
 {
    bool retval = false;
 
@@ -1432,6 +1460,56 @@ void EphemerisPropagator::UpdateSpaceObject(Real newEpoch)
    }
 }
 
+
+void EphemerisPropagator::UpdateSpaceObjectGT(GmatTime newEpoch)
+{
+#ifdef DEBUG_EXECUTION
+   MessageInterface::ShowMessage(
+      "EphemerisPropagator::UpdateSpaceObjectGT(%s) called\n", newEpoch.ToString().c_str());
+#endif
+
+   if (psm)
+   {
+      Integer stateSize;
+      Integer vectorSize;
+      GmatState *newState;
+      ReturnFromOriginGT(newEpoch);
+
+      newState = psm->GetState();
+      stateSize = newState->GetSize();
+      vectorSize = stateSize * sizeof(Real);
+
+      currentEpochGT = initialEpochGT;
+      currentEpochGT.AddSeconds(timeFromEpoch);
+
+      // Update the epoch if it was passed in
+      if (newEpoch != -1.0)
+      {
+         currentEpochGT = newEpoch;
+         timeFromEpoch = (currentEpochGT - initialEpochGT).GetTimeInSec();
+      }
+      UpdateState();
+
+      memcpy(newState->GetState(), j2kState, vectorSize);
+      newState->SetEpochGT(currentEpochGT);
+      psm->MapVectorToObjects();
+
+      //      // Formation code: Not part of initial release
+      //      // Update elements for each Formation
+      //      for (UnsignedInt i = 0; i < stateObjects.size(); ++i)
+      //         if (stateObjects[i]->IsOfType(Gmat::FORMATION))
+      //            ((Formation*)stateObjects[i])->UpdateElements();
+
+#ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage
+         ("EphemerisPropagator::UpdateSpaceObjectGT() on \"%s\" "
+         "currentEpoch = %s, passed in epoch = %s\n", GetName().c_str(),
+         currentEpochGT.ToString().c_str(), newEpoch.ToString().c_str());
+#endif
+   }
+}
+
+
 //------------------------------------------------------------------------------
 // void UpdateFromSpaceObject()
 //------------------------------------------------------------------------------
@@ -1449,10 +1527,13 @@ void EphemerisPropagator::UpdateFromSpaceObject()
 
    psm->MapObjectsToVector();
    GmatState *newState = psm->GetState();
-   memcpy(state, newState->GetState(), newState->GetSize() * sizeof(Real));
+   memcpy(j2kState, newState->GetState(), newState->GetSize() * sizeof(Real));
 
     // Transform to the force model origin
-    MoveToOrigin();
+   if (HasPrecisionTime())
+      MoveToOriginGT();
+   else
+      MoveToOrigin();
 }
 
 
@@ -1470,12 +1551,25 @@ void EphemerisPropagator::RevertSpaceObject()
          ("ODEModel::RevertSpacecraft() prevElapsedTime=%f elapsedTime=%f\n",
           prevElapsedTime, elapsedTime);
    #endif
+   
+   if (HasPrecisionTime())
+   {
+      timeFromEpoch = (previousState.GetEpochGT() - initialEpochGT).GetTimeInSec();
+      currentEpochGT = initialEpochGT; currentEpochGT.AddSeconds(timeFromEpoch);
+      UpdateState();
 
-   timeFromEpoch = (previousState.GetEpoch() - initialEpoch) * GmatTimeConstants::SECS_PER_DAY;
-   currentEpoch = initialEpoch + timeFromEpoch / GmatTimeConstants::SECS_PER_DAY;
-   UpdateState();
+      //MoveToOriginGT();
+      ReturnFromOriginGT(); // J.McGreevy's version upload by Darrel on 10/12/2017
+   }
+   else
+   {                 
+      timeFromEpoch = (previousState.GetEpoch() - initialEpoch) * GmatTimeConstants::SECS_PER_DAY;
+      currentEpoch = initialEpoch + timeFromEpoch / GmatTimeConstants::SECS_PER_DAY;
+      UpdateState();
 
-   MoveToOrigin();
+      // MoveToOrigin();
+      ReturnFromOrigin();   // J.McGreevy's version upload by Darrel on 10/12/2017
+   }
 }
 
 
@@ -1521,6 +1615,12 @@ void EphemerisPropagator::SetTime(Real t)
 {
    timeFromEpoch = t;
    currentEpoch = initialEpoch + timeFromEpoch / GmatTimeConstants::SECS_PER_DAY;
+   if (HasPrecisionTime())
+   {
+      currentEpochGT = initialEpochGT;
+      currentEpochGT.AddSeconds(timeFromEpoch);
+   }
+
    UpdateState();
 }
 
@@ -1711,6 +1811,89 @@ void EphemerisPropagator::MoveToOrigin(Real newEpoch)
 }
 
 
+void EphemerisPropagator::MoveToOriginGT(GmatTime newEpoch)
+{
+#ifdef DEBUG_REORIGIN
+   MessageInterface::ShowMessage("ODEModel::MoveToOriginGT entered\n");
+#endif
+
+#ifdef DEBUG_REORIGIN
+   MessageInterface::ShowMessage(
+      "SatCount = %d, dimension = %d, stateSize = %d\n", cartObjCount,
+      dimension, stateSize);
+   MessageInterface::ShowMessage(
+      "StatePointers: rawState = %p, modelState = %p\n", rawState,
+      modelState);
+   MessageInterface::ShowMessage(
+      "ODEModel::MoveToOriginGT()\n   Input state: [ ");
+   for (Integer i = 0; i < dimension; ++i)
+      MessageInterface::ShowMessage("%lf ", rawState[i]);
+   MessageInterface::ShowMessage("]\n   model state: [ ");
+   for (Integer i = 0; i < dimension; ++i)
+      MessageInterface::ShowMessage("%lf ", modelState[i]);
+   MessageInterface::ShowMessage("]\n\n");
+#endif
+
+   memcpy(state, j2kState, dimension*sizeof(Real));
+
+   if (centralBody != j2kBodyName)
+   {
+      Rvector6 cbState, mj2kState, delta;
+      GmatTime now = ((newEpoch < 0.0) ? currentEpoch : newEpoch);
+      cbState = propOrigin->GetMJ2000State(now);
+      mj2kState = j2kBody->GetState(now);
+
+      delta = cbState - mj2kState;
+
+      /**
+      *  @todo When multiple spacecraft are supported, these items will need
+      *  to be set to match the PSM's state vector
+      */
+      Integer cartObjCount = 1;
+      Integer cartStateStart = 0;
+
+      for (Integer i = 0; i < cartObjCount; ++i)
+      {
+         Integer i6 = cartStateStart + i * 6;
+         for (int j = 0; j < 6; ++j)
+            state[i6 + j] -= delta[j];
+
+#ifdef DEBUG_REORIGIN
+         MessageInterface::ShowMessage(
+            "ODEModel::MoveToOriginGT()\n"
+            "   Input state: [%lf %lf %lf %lf %lf %lf]\n"
+            "   j2k state:   [%lf %lf %lf %lf %lf %lf]\n"
+            "   cb state:    [%lf %lf %lf %lf %lf %lf]\n"
+            "   delta:       [%lf %lf %lf %lf %lf %lf]\n"
+            "   model state: [%lf %lf %lf %lf %lf %lf]\n\n",
+            rawState[i6], rawState[i6 + 1], rawState[i6 + 2], rawState[i6 + 3],
+            rawState[i6 + 4], rawState[i6 + 5],
+            mj2kState[0], mj2kState[1], mj2kState[2], mj2kState[3],
+            mj2kState[4], mj2kState[5],
+            cbState[0], cbState[1], cbState[2], cbState[3], cbState[4],
+            cbState[5],
+            delta[0], delta[1], delta[2], delta[3], delta[4], delta[5],
+            modelState[i6], modelState[i6 + 1], modelState[i6 + 2],
+            modelState[i6 + 3], modelState[i6 + 4], modelState[i6 + 5]);
+#endif
+      }
+   }
+
+#ifdef DEBUG_REORIGIN
+   MessageInterface::ShowMessage(
+      "   Move Complete\n   Input state: [ ");
+   for (Integer i = 0; i < dimension; ++i)
+      MessageInterface::ShowMessage("%lf ", rawState[i]);
+   MessageInterface::ShowMessage("]\n   model state: [ ");
+   for (Integer i = 0; i < dimension; ++i)
+      MessageInterface::ShowMessage("%lf ", modelState[i]);
+   MessageInterface::ShowMessage("]\n\n");
+
+   MessageInterface::ShowMessage("ODEModel::MoveToOriginGT Finished\n");
+#endif
+}
+
+
 //------------------------------------------------------------------------------
 // void ReturnFromOrigin(Real newEpoch)
 //------------------------------------------------------------------------------
@@ -1772,6 +1955,62 @@ void EphemerisPropagator::ReturnFromOrigin(Real newEpoch)
                    rawState[0], rawState[1], rawState[2], rawState[3],
                    rawState[4], rawState[5]);
          #endif
+      }
+   }
+}
+
+
+void EphemerisPropagator::ReturnFromOriginGT(GmatTime newEpoch)
+{
+   if ((j2kBody == NULL) || (propOrigin == NULL))
+   {
+      MessageInterface::ShowMessage("Cannot reorigin; j2kBody = %p, "
+         "propOrigin = %p\n", j2kBody, propOrigin);
+      return;
+   }
+#ifdef DEBUG_REORIGIN
+   MessageInterface::ShowMessage("ODEModel::ReturnFromOriginGT entered\n");
+#endif
+
+   memcpy(j2kState, state, dimension*sizeof(Real));
+   if (centralBody != j2kBodyName)
+   {
+      Rvector6 cbState, jkState, delta;
+      GmatTime now = ((newEpoch < 0.0) ? currentEpoch : newEpoch);
+      cbState = propOrigin->GetMJ2000State(now);
+      jkState = j2kBody->GetState(now);
+
+      delta = jkState - cbState;
+
+      /**
+      *  @todo When multiple spacecraft are supported, these items will need
+      *  to be set to match the PSM's state vector
+      */
+      Integer cartObjCount = 1;
+      Integer cartStateStart = 0;
+
+      for (Integer i = 0; i < cartObjCount; ++i)
+      {
+         Integer i6 = cartStateStart + i * 6;
+         for (int j = 0; j < 6; ++j)
+            j2kState[i6 + j] -= delta[j];
+#ifdef DEBUG_REORIGIN
+         MessageInterface::ShowMessage(
+            "ODEModel::ReturnFromOriginGT()\n   Input (model) state: [%lf %lf %lf %lf %lf"
+            " %lf]\n   j2k state:   [%lf %lf %lf %lf %lf %lf]\n"
+            "   cb state:    [%lf %lf %lf %lf %lf %lf]\n"
+            "   delta:       [%lf %lf %lf %lf %lf %lf]\n"
+            "   raw state: [%lf %lf %lf %lf %lf %lf]\n\n",
+            modelState[0], modelState[1], modelState[2], modelState[3], modelState[4],
+            modelState[5],
+            j2kState[0], j2kState[1], j2kState[2], j2kState[3], j2kState[4],
+            j2kState[5],
+            cbState[0], cbState[1], cbState[2], cbState[3], cbState[4],
+            cbState[5],
+            delta[0], delta[1], delta[2], delta[3], delta[4], delta[5],
+            rawState[0], rawState[1], rawState[2], rawState[3],
+            rawState[4], rawState[5]);
+#endif
       }
    }
 }

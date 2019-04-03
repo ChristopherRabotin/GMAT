@@ -30,7 +30,7 @@ ENDIF()
 
 # Set Cmake project
 PROJECT(GMAT C CXX)
-SET(GMAT_RELEASE_NAME "R2017a" CACHE STRING "GMAT version name")
+SET(GMAT_RELEASE_NAME "R2018a" CACHE STRING "GMAT version name")
 SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
 
 # Enforce C++11
@@ -80,6 +80,16 @@ if(APPLE)
     SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT-${GMAT_RELEASE_NAME}_Beta.app/Contents")
   endif()
 endif()
+
+# Additional Linux compile/link flags
+IF(UNIX AND NOT APPLE)
+  # Tell CMake Find* commands to search for lib64 paths on Linux
+  SET_PROPERTY(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS ON)
+
+  # Generate link errors for undefined symbols 
+  # This is enabled by default on OSX but not Linux
+  SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
+ENDIF()
 
 # ====================================================================
 # Find wxWidgets
@@ -197,6 +207,8 @@ SET(MATLAB_ADDITIONAL_VERSIONS
   # Additional Matlab versions should be included here
   "R2016a=9.0"
   "R2016b=9.1"
+  "R2017a=9.2"
+  "R2017b=9.3"
   CACHE STRING "Additional searched MATLAB versions. Format as semicolon-separated Release=Version pairs, e.g. R20YYx=V.v"
   )
 FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY MAT_LIBRARY)

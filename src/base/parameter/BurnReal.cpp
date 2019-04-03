@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -57,7 +57,7 @@
  */
 //------------------------------------------------------------------------------
 BurnReal::BurnReal(const std::string &name, const std::string &typeStr,
-                   Gmat::ObjectType ownerType, GmatBase *obj,
+                   UnsignedInt ownerType, GmatBase *obj,
                    const std::string &desc, const std::string &unit,
                    GmatParam::DepObject depObj, bool isSettable)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
@@ -285,10 +285,10 @@ bool BurnReal::Initialize()
 //-------------------------------------
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool BurnReal::RenameRefObject(const Gmat::ObjectType type,
+bool BurnReal::RenameRefObject(const UnsignedInt type,
                                const std::string &oldName,
                                const std::string &newName)
 {
@@ -297,7 +297,7 @@ bool BurnReal::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
+// virtual std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Calls BurnData to get reference object name for given type.
@@ -305,7 +305,7 @@ bool BurnReal::RenameRefObject(const Gmat::ObjectType type,
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-std::string BurnReal::GetRefObjectName(const Gmat::ObjectType type) const
+std::string BurnReal::GetRefObjectName(const UnsignedInt type) const
 {
    std::string objName = BurnData::GetRefObjectName(type);
    
@@ -321,7 +321,7 @@ std::string BurnReal::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves reference object name array for given type. It will return all
@@ -331,14 +331,14 @@ std::string BurnReal::GetRefObjectName(const Gmat::ObjectType type) const
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-const StringArray& BurnReal::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& BurnReal::GetRefObjectNameArray(const UnsignedInt type)
 {
    return BurnData::GetRefObjectNameArray(type);
 }
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObjectName(const Gmat::ObjectType type,
+// virtual bool SetRefObjectName(const UnsignedInt type,
 //                               const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -349,7 +349,7 @@ const StringArray& BurnReal::GetRefObjectNameArray(const Gmat::ObjectType type)
  *
  */
 //------------------------------------------------------------------------------
-bool BurnReal::SetRefObjectName(const Gmat::ObjectType type,
+bool BurnReal::SetRefObjectName(const UnsignedInt type,
                                 const std::string &name)
 {
    bool ret = BurnData::SetRefObjectName(type, name);
@@ -365,7 +365,7 @@ bool BurnReal::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+// virtual GmatBase* GetRefObject(const UnsignedInt type,
 //                                const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -377,7 +377,7 @@ bool BurnReal::SetRefObjectName(const Gmat::ObjectType type,
  * @return reference object pointer for given object type and name
  */
 //------------------------------------------------------------------------------
-GmatBase* BurnReal::GetRefObject(const Gmat::ObjectType type,
+GmatBase* BurnReal::GetRefObject(const UnsignedInt type,
                                  const std::string &name)
 {
    GmatBase *obj = BurnData::GetRefObject(type, name);
@@ -395,7 +395,7 @@ GmatBase* BurnReal::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -409,7 +409,7 @@ GmatBase* BurnReal::GetRefObject(const Gmat::ObjectType type,
  *
  */
 //------------------------------------------------------------------------------
-bool BurnReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool BurnReal::SetRefObject(GmatBase *obj, const UnsignedInt type,
                             const std::string &name)
 {
    #if DEBUG_BURNREAL

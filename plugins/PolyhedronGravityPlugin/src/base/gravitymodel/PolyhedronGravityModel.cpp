@@ -239,7 +239,7 @@ bool PolyhedronGravityModel::IsUserForce()
 	return true;
 }
 
-bool PolyhedronGravityModel::RenameRefObject(const Gmat::ObjectType type,
+bool PolyhedronGravityModel::RenameRefObject(const UnsignedInt type,
                                      const std::string &oldName,
                                      const std::string &newName)
 {
@@ -933,7 +933,11 @@ bool PolyhedronGravityModel::GetDerivatives(Real * state, Real dt, Integer order
          return false;
 
 	   // Get current location and orientation of the body generating gravity field: 
-      epoch = theState->GetEpoch();
+      if (theState->HasPrecisionTime())
+         epoch = theState->GetEpochGT().GetMjd();
+      else
+         epoch = theState->GetEpoch();
+
       now = epoch + dt/GmatTimeConstants::SECS_PER_DAY;
 	   bodyState = createForceBody->GetState(now);
 	   bodyOrientation = createForceBody->GetOrientationParameters();

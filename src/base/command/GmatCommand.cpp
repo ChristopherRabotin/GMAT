@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General MiHeaderssion Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -428,6 +428,13 @@ void GmatCommand::SetGeneratingString(const std::string &gs)
       ++start;
    generatingString = gs.substr(start);
    
+   if (gs == "")
+   {
+      throw CommandException(
+         "An opening token is required in the line.  The \"" + typeName + 
+         "\" keyword is the required opening token for this command.\n");
+   }
+
    end = gs.length()-1;
    while ((end > 0) && (gs[end] == ' '))
       --end;
@@ -737,9 +744,9 @@ void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
 
 
 //------------------------------------------------------------------------------
-//  bool SetObject(const std::string &name, const Gmat::ObjectType type,
+//  bool SetObject(const std::string &name, const UnsignedInt type,
 //                 const std::string &associate, 
-//                 const Gmat::ObjectType associateType)
+//                 const UnsignedInt associateType)
 //------------------------------------------------------------------------------
 /**
  * Stores the object names and types required for the GmatCommand.
@@ -767,9 +774,9 @@ void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
  */
 //------------------------------------------------------------------------------
 bool GmatCommand::SetObject(const std::string &name,
-                        const Gmat::ObjectType type,
+                        const UnsignedInt type,
                         const std::string &associate,
-                        const Gmat::ObjectType associateType)
+                        const UnsignedInt associateType)
 {
    // Check to see if it is already in the object list
    StringArray::iterator item = std::find(objects.begin(), objects.end(), name);
@@ -790,7 +797,7 @@ bool GmatCommand::SetObject(const std::string &name,
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* GetObject(const Gmat::ObjectType type, const std::string objName)
+//  GmatBase* GetObject(const UnsignedInt type, const std::string objName)
 //------------------------------------------------------------------------------
 /**
  * Retrieves the objects used by the GmatCommand.
@@ -808,7 +815,7 @@ bool GmatCommand::SetObject(const std::string &name,
  *         is an internal object.
  */
 //------------------------------------------------------------------------------
-GmatBase* GmatCommand::GetGmatObject(const Gmat::ObjectType type, 
+GmatBase* GmatCommand::GetGmatObject(const UnsignedInt type,
                                   const std::string objName)
 {
    return NULL;
@@ -816,7 +823,7 @@ GmatBase* GmatCommand::GetGmatObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-//  bool SetObject(GmatBase *obj, const Gmat::ObjectType type)
+//  bool SetObject(GmatBase *obj, const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Stores pointers to objects required exclusively for the current GmatCommand.
@@ -832,7 +839,7 @@ GmatBase* GmatCommand::GetGmatObject(const Gmat::ObjectType type,
  * @return true when object is stored successfully, false otherwise.
  */
 //------------------------------------------------------------------------------
-bool GmatCommand::SetObject(GmatBase *obj, const Gmat::ObjectType type)
+bool GmatCommand::SetObject(GmatBase *obj, const UnsignedInt type)
 {
    return false;
 }
@@ -1081,6 +1088,21 @@ Publisher* GmatCommand::GetPublisher()
    return publisher;
 }
 
+//------------------------------------------------------------------------------
+// bool GetPropStatus()
+//------------------------------------------------------------------------------
+/**
+* Method used to check whether propagation command is just starting or
+* continuing a run.  If this method is called when the current command is not
+* a propagation, false is returned.
+*
+* @return retval False for call when current command is not a propagation
+*/
+//------------------------------------------------------------------------------
+bool GmatCommand::GetPropStatus()
+{
+   return false;
+}
 
 //------------------------------------------------------------------------------
 // const StringArray& GetObjectList()
@@ -1117,7 +1139,7 @@ const StringArray& GmatCommand::GetObjectList()
  * @return true if the type is accepted, false if not
  */
 //------------------------------------------------------------------------------
-bool GmatCommand::AcceptsObjectType(Gmat::ObjectType theType)
+bool GmatCommand::AcceptsObjectType(UnsignedInt theType)
 {
    return true;
 }
@@ -2093,6 +2115,22 @@ bool GmatCommand::ClearObjects()
 bool GmatCommand::InterpretAction()
 {
    return false;
+}
+
+//------------------------------------------------------------------------------
+//  bool VerifyObjects()
+//------------------------------------------------------------------------------
+/**
+ * Checks the elements to make sure they are valid (default is TRUE)
+ *
+ * The Write command has the following syntax:
+ *
+ *     Write elementName
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::VerifyObjects()
+{
+   return true;
 }
 
 

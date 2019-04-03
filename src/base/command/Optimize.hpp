@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -66,7 +66,7 @@ public:
                                            const std::string &prefix,
                                            const std::string &useName);
 
-   virtual bool        RenameRefObject(const Gmat::ObjectType type,
+   virtual bool        RenameRefObject(const UnsignedInt type,
                                        const std::string &oldName,
                                        const std::string &newName);
 
@@ -81,8 +81,8 @@ public:
    virtual bool        SetStringParameter(const Integer id, 
                                           const std::string &value);
    virtual bool        GetBooleanParameter(const Integer id) const;
-   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
-   virtual bool        SetRefObjectName(const Gmat::ObjectType type,
+   virtual std::string GetRefObjectName(const UnsignedInt type) const;
+   virtual bool        SetRefObjectName(const UnsignedInt type,
                                         const std::string &name);
     
 

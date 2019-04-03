@@ -26,7 +26,7 @@
             <Keywords name="Folders in comment, close"></Keywords>
             <Keywords name="Keywords1">Array Barycenter CoordinateSystem DifferentialCorrector EphemerisFile FileInterface FiniteBurn FminconOptimizer ForceModel Formation FuelTank GroundStation GroundTrackPlot ImpulsiveBurn LibrationPoint MatlabFunction OrbitView Propagator ReportFile SolarSystem Spacecraft String Thruster Variable VF13ad XYPlot Asteroid Comet Planet Moon</Keywords>
             <Keywords name="Keywords2">Achieve BeginMissionSequence BeginFiniteBurn BeginScript CallMatlabFunction ClearPlot Create EndFiniteBurn For If GMAT Maneuver MarkPoint NonlinearConstraint Optimize PenDown PenUp Propagate Report Set Stop Target Toggle Vary While</Keywords>
-            <Keywords name="Keywords3">Include Write BatchEstimatorInv Simulator ErrorModel AcceptFilter RejectFilter TrackingDataSet RunEstimator RunSimulator</Keywords>
+            <Keywords name="Keywords3">Yukon CommandEcho Include Write BatchEstimatorInv Simulator ErrorModel AcceptFilter RejectFilter TrackingDataSet RunEstimator RunSimulator</Keywords>
             <Keywords name="Keywords4"></Keywords>
             <Keywords name="Keywords5"></Keywords>
             <Keywords name="Keywords6"></Keywords>

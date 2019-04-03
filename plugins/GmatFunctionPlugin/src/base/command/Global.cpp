@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -230,7 +230,7 @@ bool Global::Execute()
 
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -243,7 +243,7 @@ bool Global::Execute()
  * @return true on success.
  */
 //------------------------------------------------------------------------------
-bool Global::RenameRefObject(const Gmat::ObjectType type,
+bool Global::RenameRefObject(const UnsignedInt type,
                              const std::string &oldName,
                              const std::string &newName)
 {
@@ -290,13 +290,13 @@ bool Global::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-const StringArray& Global::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Global::GetRefObjectNameArray(const UnsignedInt type)
 {
    return objectNames;
 }

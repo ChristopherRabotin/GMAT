@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -302,7 +302,7 @@ void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       
    }
    else if ((originName == SolarSystem::MOON_NAME) && 
-           (((CelestialBody*)origin)->GetRotationDataSource() == Gmat::DE_405_FILE))
+           (((CelestialBody*)origin)->GetRotationDataSource() == Gmat::DE_FILE))
    {
       #ifdef DEBUG_EQ_LUNA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
          MessageInterface::ShowMessage(
@@ -404,7 +404,7 @@ void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    else  // use IAU data for all other bodies, and Luna (if DE file not selected)
    {
       #ifdef DEBUG_EQ_LUNA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
-         MessageInterface::ShowMessage("Equator for body %s with NO DE_405_FILE source ...\n",
+         MessageInterface::ShowMessage("Equator for body %s with NO DE_FILE source ...\n",
          originName.c_str());
       #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       // this method will return alpha (deg), delta (deg), 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -378,6 +378,218 @@ const Rvector6 LibrationPoint::GetMJ2000State(const A1Mjd &atTime)
    return rvResult;
 }
 
+
+const Rvector6 LibrationPoint::GetMJ2000State(const GmatTime &atTime)
+{
+#ifdef DEBUG_GET_STATE
+   MessageInterface::ShowMessage
+      ("LibrationPoint::GetMJ2000State() '%s' entered, atTime=%f, "
+      "primaryBody=<%p> '%s', secondaryBody=<%p> '%s'\n", GetName().c_str(),
+      GmatTime(atTime).GetMjd(), primaryBody, primaryBody->GetName().c_str(),
+      secondaryBody, secondaryBody->GetName().c_str());
+#endif
+
+   CheckBodies();
+   // Compute position and velocity from primary to secondary
+   Rvector6 primaryState = primaryBody->GetMJ2000State(atTime);
+   Rvector6 secondaryState = secondaryBody->GetMJ2000State(atTime);
+
+#ifdef DEBUG_GET_STATE
+   MessageInterface::ShowMessage
+      ("   primaryState   =\n   %s\n", primaryState.ToString().c_str());
+   MessageInterface::ShowMessage
+      ("   secondaryState =\n   %s\n", secondaryState.ToString().c_str());
+#endif
+
+   Rvector6 pToS = secondaryState - primaryState;
+   Rvector3 r = pToS.GetR();
+   Rvector3 v = pToS.GetV();
+   Rvector3 a = (secondaryBody->GetMJ2000Acceleration(atTime)) -
+      (primaryBody->GetMJ2000Acceleration(atTime));
+
+   Real     massPrimary, massSecondary;
+   if (primaryBody->IsOfType("CelestialBody"))
+      massPrimary = ((CelestialBody*)primaryBody)->GetMass();
+   else  // Barycenter
+      massPrimary = ((Barycenter*)primaryBody)->GetMass();
+   if (secondaryBody->IsOfType("CelestialBody"))
+      massSecondary = ((CelestialBody*)secondaryBody)->GetMass();
+   else  // Barycenter
+      massSecondary = ((Barycenter*)secondaryBody)->GetMass();
+
+   // Test that masses are not too small
+   if (massPrimary <= LibrationPoint::ZERO_MASS_TOL)
+      throw SolarSystemException(
+      "The mass of the Primary on LibrationPoint \""
+      + GetName() + "\" is near zero or negative.\n");
+   if (massSecondary <= LibrationPoint::ZERO_MASS_TOL)
+      throw SolarSystemException(
+      "The mass of the Secondary on LibrationPoint \""
+      + GetName() + "\" is near zero or negative.\n");
+   // Divide by zero is avoided by previous mass tests
+   Real muStar = massSecondary / (massPrimary + massSecondary);
+
+#ifdef DEBUG_GET_STATE
+   MessageInterface::ShowMessage
+      ("   Mass of the primary is %f\n", massPrimary);
+   MessageInterface::ShowMessage
+      ("   Mass of the secondary is %f\n", massSecondary);
+#endif
+
+   Real gamma = 0.0;
+   Real gamma2 = 0.0, gamma3 = 0.0, gamma4 = 0.0, gamma5 = 0.0, gammaPrev = 0.0;
+   Real F = 0.0, Fdot = 0.0;
+   if ((whichPoint == "L1") || (whichPoint == "L2") ||
+      (whichPoint == "L3"))
+   {
+      // Determine initial gamma
+      if (whichPoint == "L3")  gamma = 1.0;
+      else  gamma = GmatMathUtil::Pow((muStar / (3.0 * (1.0 - muStar))),
+         (1.0 / 3.0));
+
+
+      Integer counter = 0;
+      Real diff = 999.99;
+      while (diff > CONVERGENCE_TOLERANCE)
+      {
+         if (counter > MAX_ITERATIONS)
+            throw SolarSystemException(
+            "Libration point \"" + GetName() + "\" gamma not converging.");
+         gamma2 = gamma  * gamma;
+         gamma3 = gamma2 * gamma;
+         gamma4 = gamma3 * gamma;
+         gamma5 = gamma4 * gamma;
+         if (whichPoint == "L1")
+         {
+            F = gamma5 - ((3.0 - muStar) * gamma4) +
+               ((3.0 - 2.0 * muStar) * gamma3) -
+               (muStar * gamma2) + (2.0 * muStar * gamma) - muStar;
+            Fdot = (5.0 * gamma4) - (4.0 * (3.0 - muStar) * gamma3) +
+               (3.0 * (3.0 - 2.0 * muStar) * gamma2) -
+               (2.0 * muStar * gamma) + (2.0 * muStar);
+         }
+         else if (whichPoint == "L2")
+         {
+            F = gamma5 + ((3.0 - muStar) * gamma4) +
+               ((3.0 - 2.0 * muStar) * gamma3) -
+               (muStar * gamma2) - (2.0 * muStar * gamma) - muStar;
+            Fdot = (5.0 * gamma4) + (4.0 * (3.0 - muStar) * gamma3) +
+               (3.0 * (3.0 - 2.0 * muStar) * gamma2) - (2.0 * muStar * gamma) -
+               (2.0 * muStar);
+         }
+         else  // whichPoint == "L3"
+         {
+            F = gamma5 + ((2.0 + muStar) * gamma4) +
+               ((1.0 + 2.0 * muStar) * gamma3) -
+               ((1.0 - muStar) * gamma2) - (2.0 * (1.0 - muStar) * gamma) -
+               (1.0 - muStar);
+            Fdot = (5.0 * gamma4) + (4.0 * (2.0 + muStar) * gamma3) +
+               (3.0 * (1.0 + 2.0 * muStar) * gamma2) -
+               (2.0 * (1.0 - muStar) * gamma) - (2.0 * (1.0 - muStar));
+         }
+         counter++;
+         gammaPrev = gamma;
+         gamma = gammaPrev - (F / Fdot);
+         diff = GmatMathUtil::Abs(gamma - gammaPrev);
+      }
+   }
+   Real x = 0.0;
+   Real y = 0.0;
+   if (whichPoint == "L1")
+   {
+      x = 1.0 - gamma;
+      y = 0.0;
+   }
+   else if (whichPoint == "L2")
+   {
+      x = 1.0 + gamma;
+      y = 0.0;
+   }
+   else if (whichPoint == "L3")
+   {
+      x = -gamma;
+      y = 0.0;
+   }
+   else if (whichPoint == "L4")
+   {
+      x = 0.5;
+      y = GmatMathUtil::Sqrt(3.0) / 2.0;
+   }
+   else if (whichPoint == "L5")
+   {
+      x = 0.5;
+      y = -GmatMathUtil::Sqrt(3.0) / 2.0;
+   }
+   else // ERROR
+      throw SolarSystemException
+      ("\"" + whichPoint + "\" is illegal value for libration point.");
+
+   // Express position and velocity of the libration point in the rotating
+   // system with the origin centered on the primary body
+   Rvector3 ri(x, y, 0.0);
+   Rvector3 vi(x, y, 0.0);
+   Real rMag = r.GetMagnitude();
+
+   if (rMag <= LibrationPoint::ZERO_MAG_TOL)
+      throw SolarSystemException(
+      "The LibrationPoint \""
+      + GetName() + "\" is undefined because the Primary and Secondary are too close together.\n");
+
+   ri = rMag * ri;
+   Real vMult = (v * r) / rMag;
+   vi = vMult * vi;
+   // Determine the rotation matrix and its derivative
+   Rvector3 xHat = r / r.GetMagnitude();  // unit vector
+   Rvector3 zHat = (Cross(r, v)).GetUnitVector();
+   Rvector3 yHat = Cross(zHat, xHat);
+   Rvector3 xDotHat = (v / rMag) - (xHat / rMag) * (xHat * v);
+   Rvector3 ra = Cross(r, a);
+   Rvector3 rv = Cross(r, v);
+   Real     rvMag = rv.GetMagnitude();
+   Rvector3 zDotHat = ra / rvMag - (zHat / rvMag) * ((ra * zHat));
+   Rvector3 yDotHat = Cross(zDotHat, xHat) + Cross(zHat, xDotHat);
+   Rmatrix33 R;
+   R(0, 0) = xHat(0);
+   R(0, 1) = yHat(0);
+   R(0, 2) = zHat(0);
+   R(1, 0) = xHat(1);
+   R(1, 1) = yHat(1);
+   R(1, 2) = zHat(1);
+   R(2, 0) = xHat(2);
+   R(2, 1) = yHat(2);
+   R(2, 2) = zHat(2);
+
+   Rmatrix33 RDot;
+   RDot(0, 0) = xDotHat(0);
+   RDot(0, 1) = yDotHat(0);
+   RDot(0, 2) = zDotHat(0);
+   RDot(1, 0) = xDotHat(1);
+   RDot(1, 1) = yDotHat(1);
+   RDot(1, 2) = zDotHat(1);
+   RDot(2, 0) = xDotHat(2);
+   RDot(2, 1) = yDotHat(2);
+   RDot(2, 2) = zDotHat(2);
+
+   Rvector3 rLi = R * ri;
+   Rvector3 vLi = RDot * ri + R * vi;
+
+   Rvector6 rvFK5(rLi(0), rLi(1), rLi(2), vLi(0), vLi(1), vLi(2));
+
+   // Translate so that the origin is at the j2000Body
+   Rvector6 rvResult = rvFK5 + primaryState;
+   lastState = rvResult;
+   lastStateTimeGT = atTime;
+   lastStateTime   = GmatTime(atTime).GetMjd();
+
+#ifdef DEBUG_GET_STATE
+   MessageInterface::ShowMessage
+      ("LibrationPoint::GetMJ2000State() returning\n   %s\n",
+      rvResult.ToString().c_str());
+#endif
+   return rvResult;
+}
+
+
 //---------------------------------------------------------------------------
 //  const Rvector3 GetMJ2000Position(const A1Mjd &atTime)
 //---------------------------------------------------------------------------
@@ -395,6 +607,14 @@ const Rvector3 LibrationPoint::GetMJ2000Position(const A1Mjd &atTime)
    return (tmp.GetR());
 }
 
+
+const Rvector3 LibrationPoint::GetMJ2000Position(const GmatTime &atTime)
+{
+   Rvector6 tmp = GetMJ2000State(atTime);
+   return (tmp.GetR());
+}
+
+
 //---------------------------------------------------------------------------
 //  const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime)
 //---------------------------------------------------------------------------
@@ -411,6 +631,14 @@ const Rvector3 LibrationPoint::GetMJ2000Velocity(const A1Mjd &atTime)
    Rvector6 tmp = GetMJ2000State(atTime);
    return (tmp.GetV());
 }
+
+
+const Rvector3 LibrationPoint::GetMJ2000Velocity(const GmatTime &atTime)
+{
+   Rvector6 tmp = GetMJ2000State(atTime);
+   return (tmp.GetV());
+}
+
 
 //---------------------------------------------------------------------------
 //  StringArray GetBuiltInNames()
@@ -729,7 +957,7 @@ const ObjectTypeArray& LibrationPoint::GetRefObjectTypeArray()
 }
 
 //------------------------------------------------------------------------------
-//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//  const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Returns the names of the reference object. 
@@ -740,7 +968,7 @@ const ObjectTypeArray& LibrationPoint::GetRefObjectTypeArray()
  * @return The names of the reference object.
  */
 //------------------------------------------------------------------------------
-const StringArray& LibrationPoint::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& LibrationPoint::GetRefObjectNameArray(const UnsignedInt type)
 {
    if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
    {
@@ -757,7 +985,7 @@ const StringArray& LibrationPoint::GetRefObjectNameArray(const Gmat::ObjectType 
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -771,7 +999,7 @@ const StringArray& LibrationPoint::GetRefObjectNameArray(const Gmat::ObjectType 
  */
 //------------------------------------------------------------------------------
 bool LibrationPoint::SetRefObject(GmatBase *obj, 
-                                  const Gmat::ObjectType type,
+                                  const UnsignedInt type,
                                   const std::string &name)
 {
    if (obj == NULL)
@@ -819,7 +1047,7 @@ bool LibrationPoint::SetRefObject(GmatBase *obj,
 
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -832,7 +1060,7 @@ bool LibrationPoint::SetRefObject(GmatBase *obj,
  * @return true if object name changed, false if not.
  */
 //------------------------------------------------------------------------------
-bool LibrationPoint::RenameRefObject(const Gmat::ObjectType type,
+bool LibrationPoint::RenameRefObject(const UnsignedInt type,
                                       const std::string &oldName,
                                       const std::string &newName)
 {

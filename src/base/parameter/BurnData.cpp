@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -68,14 +68,14 @@ const Real BurnData::BURN_TOL            = 1.0e-10;
 
 //------------------------------------------------------------------------------
 // BurnData(const std::string &name = "",
-//          const Gmat::ObjectType paramOwnerType = Gmat::IMPULSIVE_BURN)
+//          const UnsignedInt paramOwnerType = Gmat::IMPULSIVE_BURN)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  */
 //------------------------------------------------------------------------------
 BurnData::BurnData(const std::string &name, const std::string &typeName,
-                   const Gmat::ObjectType paramOwnerType)
+                   const UnsignedInt paramOwnerType)
    : RefData(name, typeName, paramOwnerType)
 {
    mBurn                      = NULL;
@@ -560,7 +560,7 @@ void BurnData::InitializeRefObjects()
 
 
 //------------------------------------------------------------------------------
-// virtual bool IsValidObjectType(Gmat::ObjectType type)
+// virtual bool IsValidObjectType(UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Checks reference object type.
@@ -568,7 +568,7 @@ void BurnData::InitializeRefObjects()
  * @return return true if object is valid object, false otherwise
  */
 //------------------------------------------------------------------------------
-bool BurnData::IsValidObjectType(Gmat::ObjectType type)
+bool BurnData::IsValidObjectType(UnsignedInt type)
 {
    for (int i=0; i<BurnDataObjectCount; i++)
    {

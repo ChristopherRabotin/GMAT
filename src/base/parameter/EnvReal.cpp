@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -43,7 +43,7 @@
 //------------------------------------------------------------------------------
 // EnvReal(const std::string &name, const std::string &typeStr, 
 //         GmatBase *obj, const std::string &desc,
-//         const std::string &unit, Gmat::ObjectType ownerType,
+//         const std::string &unit, UnsignedInt ownerType,
 //         GmatParam::DepObject depObj)
 //------------------------------------------------------------------------------
 /**
@@ -60,7 +60,7 @@
 //------------------------------------------------------------------------------
 EnvReal::EnvReal(const std::string &name, const std::string &typeStr, 
                  GmatBase *obj, const std::string &desc,
-                 const std::string &unit, Gmat::ObjectType ownerType,
+                 const std::string &unit, UnsignedInt ownerType,
                  GmatParam::DepObject depObj)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit, depObj,
              ownerType, false, false)
@@ -226,10 +226,10 @@ bool EnvReal::Initialize()
 //-------------------------------------
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool EnvReal::RenameRefObject(const Gmat::ObjectType type,
+bool EnvReal::RenameRefObject(const UnsignedInt type,
                               const std::string &oldName,
                               const std::string &newName)
 {
@@ -237,7 +237,7 @@ bool EnvReal::RenameRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
+// virtual std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Calls EnvData to get reference object name for given type.
@@ -245,7 +245,7 @@ bool EnvReal::RenameRefObject(const Gmat::ObjectType type,
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-std::string EnvReal::GetRefObjectName(const Gmat::ObjectType type) const
+std::string EnvReal::GetRefObjectName(const UnsignedInt type) const
 {
    std::string objName = EnvData::GetRefObjectName(type);
    
@@ -261,7 +261,7 @@ std::string EnvReal::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves reference object name array for given type. It will return all
@@ -271,14 +271,14 @@ std::string EnvReal::GetRefObjectName(const Gmat::ObjectType type) const
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-const StringArray& EnvReal::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& EnvReal::GetRefObjectNameArray(const UnsignedInt type)
 {
    return EnvData::GetRefObjectNameArray(type);
 }
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObjectName(const Gmat::ObjectType type,
+// virtual bool SetRefObjectName(const UnsignedInt type,
 //                               const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -289,14 +289,14 @@ const StringArray& EnvReal::GetRefObjectNameArray(const Gmat::ObjectType type)
  *
  */
 //------------------------------------------------------------------------------
-bool EnvReal::SetRefObjectName(const Gmat::ObjectType type,
+bool EnvReal::SetRefObjectName(const UnsignedInt type,
                                const std::string &name)
 {
    return EnvData::SetRefObjectName(type, name);
 }
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+// virtual GmatBase* GetRefObject(const UnsignedInt type,
 //                                const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -308,14 +308,14 @@ bool EnvReal::SetRefObjectName(const Gmat::ObjectType type,
  * @return reference object pointer for given object type and name
  */
 //------------------------------------------------------------------------------
-GmatBase* EnvReal::GetRefObject(const Gmat::ObjectType type,
+GmatBase* EnvReal::GetRefObject(const UnsignedInt type,
                                 const std::string &name)
 {
    return EnvData::GetRefObject(type, name);
 }
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -329,7 +329,7 @@ GmatBase* EnvReal::GetRefObject(const Gmat::ObjectType type,
  *
  */
 //------------------------------------------------------------------------------
-bool EnvReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool EnvReal::SetRefObject(GmatBase *obj, const UnsignedInt type,
                            const std::string &name)
 {
    return EnvData::SetRefObject(obj, type, name);

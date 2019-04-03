@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -416,7 +416,10 @@ bool EphemWriterWithInterpolator::IsTimeToWrite(Real epochInSecs, const Real sta
             ("EphemWriterWithInterpolator::IsTimeToWrite() returning false, "
              "not writing orbit or attitude data\n");
          #endif
-         retval;
+         //retval;
+         // may need to ask original intent, not clear that every branch in the
+         // code reached below sets retval rather than using the original
+         // default value of true;
       }
       
       #ifdef DEBUG_EPHEMFILE_TIME

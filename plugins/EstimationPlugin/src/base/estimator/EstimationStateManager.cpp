@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,6 +35,8 @@
 #include "EstimatorException.hpp"
 #include "Spacecraft.hpp"
 #include "GroundstationInterface.hpp"
+#include "StateConversionUtil.hpp"
+#include "Planet.hpp"
 #include <sstream>                  // for stringstream
 
 
@@ -63,6 +65,8 @@ EstimationStateManager::EstimationStateManager(Integer size) :
    propagationState     (NULL),
    measMan              (NULL)
 {
+   // Estimation always use precision time for calculation
+   state.SetPrecisionTimeFlag(true);
 }
 
 
@@ -258,6 +262,9 @@ bool EstimationStateManager::SetObject(GmatBase *obj)
    // Be sure object is not already in the list
    if (find(objects.begin(), objects.end(), obj) == objects.end())   // It accepts clone objects in objects list
    {
+      // Set flag to tell participant using precision time
+      obj->SetPrecisionTimeFlag(true);
+
       objects.push_back(obj);
       current = obj;
       StringArray *objectProps = new StringArray;
@@ -689,7 +696,7 @@ StringArray EstimationStateManager::GetSolveForList(GmatBase* obj)
    }
 
    #ifdef DEBUG_STATE_CONSTRUCTION
-      MessageInterface::ShowMessage("Solve for parameters:\n");
+      MessageInterface::ShowMessage("Solve for parameters for <%s>:\n", obj->GetName().c_str());
       for (UnsignedInt i = 0; i < solveforList.size(); ++i)
          MessageInterface::ShowMessage("   %s\n", solveforList[i].c_str());
    #endif
@@ -968,7 +975,7 @@ bool EstimationStateManager::MapVectorToObjects()
 {
    #ifdef DEBUG_OBJECT_UPDATES
       MessageInterface::ShowMessage("Mapping vector to objects\n"
-            "   Epoch = %.12lf\n", state.GetEpoch());
+            "   Epoch = %s\n", state.GetEpochGT().ToString().c_str());
    #endif
 
    for (Integer index = 0; index < stateSize; ++index)
@@ -1022,9 +1029,18 @@ bool EstimationStateManager::MapVectorToObjects()
    #endif
 
    GmatEpoch theEpoch = state.GetEpoch();
+   GmatTime theEpochGT = state.GetEpochGT();
    for (UnsignedInt i = 0; i < objects.size(); ++i)
+   {
       if (epochIDs[i] >= 0)
+      {
          objects[i]->SetRealParameter(epochIDs[i], theEpoch);
+         if (state.HasPrecisionTime())
+            objects[i]->SetGmatTimeParameter(epochIDs[i], theEpochGT);
+         else
+            objects[i]->SetGmatTimeParameter(epochIDs[i], GmatTime(theEpoch));
+      }
+   }
 
    return true;
 }
@@ -1058,15 +1074,19 @@ bool EstimationStateManager::MapObjectsToVector()
       }
       #ifdef DEBUG_OBJECT_MAPPING
          else
+         {
             MessageInterface::ShowMessage("Object pointer for %s is %p\n",
                   stateMap[index]->objectName.c_str(), stateMap[index]->object);
+            MessageInterface::ShowMessage("  parameter type = %d   parameterID = %d\n",
+               stateMap[index]->parameterType, stateMap[index]->parameterID);
+         }
       #endif
 
       switch (stateMap[index]->parameterType)
       {
          case Gmat::REAL_TYPE:
             state[index] = stateMap[index]->object->GetRealParameter(
-                     stateMap[index]->parameterID);
+               stateMap[index]->parameterID);
             break;
 
          case Gmat::RVECTOR_TYPE:
@@ -1114,11 +1134,32 @@ bool EstimationStateManager::MapObjectsToVector()
       }
    }
    state.SetEpoch(theEpoch);
+   
+   if (state.HasPrecisionTime())
+   {
+      GmatTime theEpochGT = 0.0;
+      for (UnsignedInt i = 0; i < objects.size(); ++i)
+      {
+         // Objects without epoch have a -1 set as their epochID
+         if (epochIDs[i] >= 0)
+         {
+            if (theEpochGT == 0.0)
+               theEpochGT = objects[i]->GetGmatTimeParameter(epochIDs[i]);
+            else
+            {
+               if (theEpochGT != objects[i]->GetGmatTimeParameter(epochIDs[i]))
+                  // should throw here
+                  MessageInterface::ShowMessage("Epoch mismatch\n");
+            }
+         }
+      } 
+      state.SetEpochGT(theEpochGT);
+   }
 
    #ifdef DEBUG_OBJECT_UPDATES
       MessageInterface::ShowMessage(
             "After mapping objects to vector, contents are\n"
-            "   Epoch = %.12lf\n", state.GetEpoch());
+            "   Epoch = %s\n", state.GetEpochGT().ToString().c_str());
       for (Integer index = 0; index < stateSize; ++index)
       {
          std::stringstream msg("");
@@ -1537,3 +1578,1210 @@ Integer EstimationStateManager::SortVector()
 
    return stateSize;
 }
+
+
+GmatTime EstimationStateManager::GetEstimationEpochGT()
+{
+   GmatTime estEpoch;
+   if (state.HasPrecisionTime())
+      estEpoch = state.GetEpochGT();
+   else
+      estEpoch = GmatTime(state.GetEpoch());
+
+   return estEpoch;
+}
+
+
+//------------------------------------------------------------------------------
+// Rvector& GetParticipantState(GmatBase* spaceObj, std::string inStateType)
+//------------------------------------------------------------------------------
+/**
+* This method used to get state of a spacecraft in its own coordinate system and in
+* a given state type. For Keplerian state, anomaly is in form of MA (instead of TA)
+*
+* @param spaceObj      spacecraft from which we need to get state
+* @param inStateType   state type used in the state. Its value can be
+*                       "Cartesian", "Keplerian", or ""
+* @param anomalyType   spacefify anomaly type to be "MA" or "TA" for Keplerian anomaly element.
+*
+* @return            spacecraft's state in its coordinate system and
+*                    If inStateType is "Cartesian", state will be in Cartesian state
+*                    If inStateType is "Keplerian", state will be in Keplerian state
+*                    If inStateType is "", state will be in state type specified in 
+*                       spacecraft's DisplayStateType parameter set in script
+*
+*/
+//------------------------------------------------------------------------------
+Rvector6 EstimationStateManager::GetParticipantState(GmatBase* spaceObj, std::string inStateType, std::string anomalyType)
+{
+   Rvector6 outState;
+
+   if (spaceObj->IsOfType(Gmat::SPACEOBJECT))
+   {
+      // 1.Get state of spacecraft in its internal coordinate system
+      Integer i = 0;
+      for (; i < stateMap.size(); ++i)
+      {
+         if (stateMap[i]->object == spaceObj)
+            break;
+      }
+      
+      Rvector6 inState(state[i], state[i + 1], state[i + 2], state[i + 3], state[i + 4], state[i + 5]);
+      
+      // Convert internal state to spacecraft's Cartesian coordinate system
+      outState = inState;
+      GmatTime epoch = GetEstimationEpochGT();
+
+      Spacecraft* obj = (Spacecraft*)spaceObj;
+      std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+      CoordinateSystem* cs = (CoordinateSystem*)obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+      CoordinateSystem* internalcs = obj->GetInternalCoordSystem();
+
+      if (cs == NULL)
+         throw EstimatorException("Coordinate system for " + obj->GetName() + " is not set\n");
+      if (internalcs == NULL)
+         throw EstimatorException("Internal coordinate system for " + obj->GetName() + " is not set\n");
+
+      CoordinateConverter* cv = new CoordinateConverter();
+      Rvector6 outStateCart;
+      cv->Convert(epoch, inState, internalcs, outStateCart, cs);
+      delete cv;
+      
+      // Convert Cartesian to Keplerian if it needs
+      if (inStateType == "")
+      {
+         std::string stateType = obj->GetStringParameter("DisplayStateType");
+         if (stateType == "Keplerian")
+         {
+            SolarSystem* ss = cs->GetSolarSystem();
+            SpacePoint* origin = cs->GetOrigin();
+            Planet* pn = (Planet*)origin;
+            if (origin->IsOfType(Gmat::GROUND_STATION))
+            {
+               // for case CS is GDSTropocentric, the origin is ground station GDS
+               std::string cbName = ((GroundstationInterface*)origin)->GetStringParameter("CentralBody");
+               pn = (Planet*)(ss->GetBody(cbName));
+            }
+
+            Real mu = pn->GetRealParameter("Mu");
+            outState = StateConversionUtil::CartesianToKeplerian(mu, outStateCart, anomalyType);     // Keplerian anomaly element is in form of MA (instead of TA)
+         }
+         else
+            outState = outStateCart;
+      }
+      else if (inStateType == "Keplerian")
+      {
+         SolarSystem* ss = cs->GetSolarSystem();
+         SpacePoint* origin = cs->GetOrigin();
+         Planet* pn = (Planet*)origin;
+         if (origin->IsOfType(Gmat::GROUND_STATION))
+         {
+            // for case CS is GDSTropocentric, the origin is ground station GDS
+            std::string cbName = ((GroundstationInterface*)origin)->GetStringParameter("CentralBody");
+            pn = (Planet*)(ss->GetBody(cbName));
+         }
+
+         Real mu = pn->GetRealParameter("Mu");
+         outState = StateConversionUtil::CartesianToKeplerian(mu, outStateCart, anomalyType);        // Keplerian anomaly emement is in form of MA (instaed of TA)
+      }
+      else if (inStateType == "Cartesian")
+         outState = outStateCart;
+      else
+         throw EstimatorException("Error: Input state type '" + inStateType + "' is invalid. It would be Cartesian, Keplerian, or an empty string.\n");
+   }
+
+   return outState;
+}
+
+
+//------------------------------------------------------------------------------
+// Rvector& GetParticipantMJ2000EqState(GmatBase* spaceObj, std::string inStateType)
+//------------------------------------------------------------------------------
+/**
+* This method used to get state of a spacecraft in MJ2000Eq axis and in
+* a given state type. For Keplerian state, anomaly is in form of MA (instead of TA)
+*
+* @param spaceObj      spacecraft from which we need to get state
+* @param inStateType   state type used in the state. Its value can be
+*                       "Cartesian", "Keplerian", or ""
+* @param anomalyType   spacefify anomaly type to be "MA" or "TA" for Keplerian anomaly element.
+*
+* @return            spacecraft's state in MJ2000Eq and
+*                    If inStateType is "Cartesian", state will be in Cartesian state
+*                    If inStateType is "Keplerian", state will be in Keplerian state
+*                    If inStateType is "", state will be in state type specified in
+*                       spacecraft's DisplayStateType parameter set in script
+*
+*/
+//------------------------------------------------------------------------------
+Rvector6 EstimationStateManager::GetParticipantMJ2000EqState(GmatBase* spaceObj, std::string inStateType, std::string anomalyType)
+{
+   Rvector6 outState;
+
+   if (spaceObj->IsOfType(Gmat::SPACEOBJECT))
+   {
+      // 1.Get state of spacecraft in its internal coordinate system
+      Integer i = 0;
+      for (; i < stateMap.size(); ++i)
+      {
+         if (stateMap[i]->object == spaceObj)
+            break;
+      }
+
+      Rvector6 inState(state[i], state[i + 1], state[i + 2], state[i + 3], state[i + 4], state[i + 5]);
+
+      // Convert internal state to spacecraft's Cartesian coordinate system
+      outState = inState;
+      GmatTime epoch = GetEstimationEpochGT();
+
+      // Get spacecraft's internal coordinate system
+      Spacecraft* obj = (Spacecraft*)spaceObj;
+      CoordinateSystem* internalcs = obj->GetInternalCoordSystem();
+      if (internalcs == NULL)
+         throw EstimatorException("Internal coordinate system for " + obj->GetName() + " is not set\n");
+
+      // Create spacecraft's MJ2000Eq Cartesian coordinate system
+      std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+      CoordinateSystem* cs = (CoordinateSystem*)obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+      if (cs == NULL)
+         throw EstimatorException("Coordinate system for " + obj->GetName() + " is not set\n");
+
+      SolarSystem* ss = cs->GetSolarSystem();
+      SpacePoint* origin = cs->GetOrigin();
+      if (origin->IsOfType(Gmat::GROUND_STATION))
+      {
+         std::string cbName = ((GroundstationInterface*)origin)->GetStringParameter("CentralBody");
+         origin = ss->GetBody(cbName);
+      }
+      CoordinateSystem* mj2kCS = CoordinateSystem::CreateLocalCoordinateSystem("mj2kCS", "MJ2000Eq", origin, NULL, NULL, cs->GetJ2000Body(), ss);
+      
+      // Get spacecraft's state in MJ2000Eq Cartesian coordinate system 
+      CoordinateConverter* cv = new CoordinateConverter();
+      Rvector6 outStateCart;
+      cv->Convert(epoch, inState, internalcs, outStateCart, mj2kCS);
+      delete cv;
+      delete mj2kCS;
+
+      // Convert Cartesian to Keplerian if it needs
+      if (inStateType == "")
+      {
+         std::string stateType = obj->GetStringParameter("DisplayStateType");
+         if (stateType == "Keplerian")
+         {
+            Planet* pn = (Planet*)origin;
+            Real mu = pn->GetRealParameter("Mu");
+            outState = StateConversionUtil::CartesianToKeplerian(mu, outStateCart, anomalyType);     // Keplerian anomaly element is in form of MA (instead of TA)
+         }
+         else
+            outState = outStateCart;
+      }
+      else if (inStateType == "Keplerian")
+      {
+         Planet* pn = (Planet*)origin;
+         Real mu = pn->GetRealParameter("Mu");
+         outState = StateConversionUtil::CartesianToKeplerian(mu, outStateCart, anomalyType);        // Keplerian anomaly emement is in form of MA (instaed of TA)
+      }
+      else if (inStateType == "Cartesian")
+         outState = outStateCart;
+      else
+         throw EstimatorException("Error: Input state type '" + inStateType + "' is invalid. It would be Cartesian, Keplerian, or an empty string.\n");
+   }
+   
+   return outState;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetParticipantState(GmatBase* spaceObj, Rvector6& inputState,
+//                          std::string inStateType)
+//------------------------------------------------------------------------------
+/**
+* Method used to set state of a spacecraft. For Keplerian state, anomaly element 
+* is in form of MA (instead of TA).
+*
+* @param spaceObj      spacecraft from which we need to get state
+* @param inputState    state of spacecraft in its own coordinate system. For 
+*                       Keplerian, anomaly element in the input state is in form of "MA"
+* @param inStateType   state type used in the state. Its value can be 
+*                       "Cartesian", "Keplerian", or ""
+*
+* @return            spacecraft's state in its coordinate system and
+*                    If inStateType is "Cartesian", state will be in Cartesian state
+*                    If inStateType is "Keplerian", state will be in Keplerian state
+*                    If inStateType is "", state will be in state type specified in
+*                       spacecraft's DisplayStateType parameter set in script
+*
+*/
+//------------------------------------------------------------------------------
+bool EstimationStateManager::SetParticipantState(GmatBase* spaceObj, 
+    Rvector6& inputState, std::string inStateType)
+{
+   if (spaceObj->IsOfType(Gmat::SPACEOBJECT))
+   {
+      // 1.Get state of spacecraft in its internal coordinate system
+      Integer i = 0;
+      for (; i < stateMap.size(); ++i)
+      {
+         if (stateMap[i]->object == spaceObj)
+            break;
+      }
+
+      //Rvector6 inState(state[i], state[i + 1], state[i + 2], state[i + 3], state[i + 4], state[i + 5]);
+      GmatTime epoch = GetEstimationEpochGT();
+
+      Spacecraft* obj = (Spacecraft*)spaceObj;
+      std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+      CoordinateSystem* cs = (CoordinateSystem*)obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+      CoordinateSystem* internalcs = obj->GetInternalCoordSystem();
+
+      if (cs == NULL)
+         throw EstimatorException("Coordinate system for " + obj->GetName() + " is not set\n");
+      if (internalcs == NULL)
+         throw EstimatorException("Internal coordinate system for " + obj->GetName() + " is not set\n");
+
+      // Convert Keplerian to Cartesian if it needs
+      Rvector6 tempState;
+      if (inStateType == "")
+      {
+         std::string stateType = obj->GetStringParameter("DisplayStateType");
+         if (stateType == "Keplerian")
+         {
+            SolarSystem* ss = cs->GetSolarSystem();
+            SpacePoint* origin = cs->GetOrigin();
+            Planet* pn = (Planet*)origin;
+            if (origin->IsOfType(Gmat::GROUND_STATION))
+            {
+               // for case CS is GDSTropocentric, the origin is ground station GDS
+               std::string cbName = ((GroundstationInterface*)origin)->GetStringParameter("CentralBody");
+               pn = (Planet*)(ss->GetBody(cbName));
+            }
+
+            Real mu = pn->GetRealParameter("Mu");
+            tempState = StateConversionUtil::KeplerianToCartesian(mu, inputState, "MA");
+         }
+         else
+            tempState = inputState;
+      }
+      else if (inStateType == "Keplerian")
+      {
+         SolarSystem* ss = cs->GetSolarSystem();
+         SpacePoint* origin = cs->GetOrigin();
+         Planet* pn = (Planet*)origin;
+         if (origin->IsOfType(Gmat::GROUND_STATION))
+         {
+            // for case CS is GDSTropocentric, the origin is ground station GDS
+            std::string cbName = ((GroundstationInterface*)origin)->GetStringParameter("CentralBody");
+            pn = (Planet*)(ss->GetBody(cbName));
+         }
+
+         Real mu = pn->GetRealParameter("Mu");
+         tempState = StateConversionUtil::KeplerianToCartesian(mu, inputState, "MA");
+      }
+      else if (inStateType == "Cartesian")
+         tempState = inputState;
+      else
+         throw EstimatorException("Error: Input state type '" + inStateType + "' is invalid. It would be Cartesian, Keplerian, or an empty string.\n");
+      
+      // Convert from spacecraft coordiante system to internal coordinate system
+      CoordinateConverter* cv = new CoordinateConverter();
+      Rvector6 outState;
+      cv->Convert(epoch, tempState, cs, outState, internalcs);
+
+      // Set state
+      for (Integer j = 0; j < 6; ++j)
+         state[i+j] = outState[j];
+
+      delete cv;
+   }
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetParticipantMJ2000EqState(GmatBase* spaceObj, Rvector6& inputState,
+//                          std::string inStateType)
+//------------------------------------------------------------------------------
+/**
+* Method used to set MJ2000Eq state of a spacecraft. For Keplerian state, anomaly element
+* is in form of MA (instead of TA).
+*
+* @param spaceObj      spacecraft from which we need to get state
+* @param inputState    state of spacecraft in MJ2000Eq coordinate system. For
+*                       Keplerian, anomaly element in the input state is in form of "MA"
+* @param inStateType   state type used in the state. Its value can be
+*                       "Cartesian", "Keplerian", or ""
+*
+* @return            spacecraft's state in its coordinate system and
+*                    If inStateType is "Cartesian", state will be in Cartesian state
+*                    If inStateType is "Keplerian", state will be in Keplerian state
+*                    If inStateType is "", state will be in state type specified in
+*                       spacecraft's DisplayStateType parameter set in script
+*
+*/
+//------------------------------------------------------------------------------
+bool EstimationStateManager::SetParticipantMJ2000EqState(GmatBase* spaceObj,
+   Rvector6& inputState, std::string inStateType)
+{
+   if (spaceObj->IsOfType(Gmat::SPACEOBJECT))
+   {
+      // Get state of spacecraft object
+      Integer i = 0;
+      for (; i < stateMap.size(); ++i)
+      {
+         if (stateMap[i]->object == spaceObj)
+            break;
+      }
+      Spacecraft* obj = (Spacecraft*)spaceObj;
+
+      // Create spaceraft's coordinate system
+      std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+      CoordinateSystem* cs = (CoordinateSystem*)obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+      if (cs == NULL)
+         throw EstimatorException("Coordinate system for " + obj->GetName() + " is not set\n");
+
+      SolarSystem* ss = cs->GetSolarSystem();
+      SpacePoint* origin = cs->GetOrigin();
+      if (origin->IsOfType(Gmat::GROUND_STATION))
+      {
+         std::string cbName = ((GroundstationInterface*)origin)->GetStringParameter("CentralBody");
+         origin = ss->GetBody(cbName);
+      }
+
+      // Convert Keplerian to Cartesian if it needs
+      Rvector6 tempState;
+      if (inStateType == "")
+      {
+         std::string stateType = obj->GetStringParameter("DisplayStateType");
+         if (stateType == "Keplerian")
+         {
+            Planet* pn = (Planet*)origin;
+
+            Real mu = pn->GetRealParameter("Mu");
+            tempState = StateConversionUtil::KeplerianToCartesian(mu, inputState, "MA");
+         }
+         else
+            tempState = inputState;
+      }
+      else if (inStateType == "Keplerian")
+      {
+         Planet* pn = (Planet*)origin;
+         Real mu = pn->GetRealParameter("Mu");
+         tempState = StateConversionUtil::KeplerianToCartesian(mu, inputState, "MA");
+      }
+      else if (inStateType == "Cartesian")
+         tempState = inputState;
+      else
+         throw EstimatorException("Error: Input state type '" + inStateType + "' is invalid. It would be Cartesian, Keplerian, or an empty string.\n");
+
+
+      // Get internal coordinate system
+      CoordinateSystem* internalcs = obj->GetInternalCoordSystem();
+      if (internalcs == NULL)
+         throw EstimatorException("Internal coordinate system for " + obj->GetName() + " is not set\n");
+
+      // Create spacecraft's MJ2000Eq Cartesian coordinate system
+      CoordinateSystem* mj2kCS = CoordinateSystem::CreateLocalCoordinateSystem("mj2kCS", "MJ2000Eq", origin, NULL, NULL, cs->GetJ2000Body(), ss);
+
+      // Convert from spacecraft coordiante system to internal coordinate system
+      CoordinateConverter* cv = new CoordinateConverter();
+      Rvector6 outState;
+      GmatTime epoch = GetEstimationEpochGT();
+      cv->Convert(epoch, tempState, mj2kCS, outState, internalcs);
+      delete cv;
+      delete mj2kCS;
+
+      // Set state
+      for (Integer j = 0; j < 6; ++j)
+         state[i + j] = outState[j];
+   }
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// Rvector& GetParticipantCartesianState(GmatBase* spaceObj)
+//------------------------------------------------------------------------------
+/**
+* Method used to convert state of a spacecraft from internal coordinate
+* system to the coordinate system specified in script
+*
+* @param spaceObj    spacecraft from which we need to get state
+*
+* @return            spacecraft's state in its apparent coordinate system and 
+*                    Cartesian state type
+*
+*/
+//------------------------------------------------------------------------------
+Rvector EstimationStateManager::GetParticipantCartesianState(GmatBase* spaceObj)
+{
+   Rvector outState;
+
+   if (spaceObj->IsOfType(Gmat::SPACEOBJECT))
+   {
+      // 1.Get state of spacecraft in its internal coordinate system
+      Integer i = 0;
+      for (; i < stateMap.size(); ++i)
+      {
+         if (stateMap[i]->object == spaceObj)
+            break;
+      }
+
+      Rvector6 inState(state[i], state[i + 1], state[i + 2], state[i + 3], state[i + 4], state[i + 5]);
+      outState = inState;
+      GmatTime epoch = GetEstimationEpochGT();
+
+      Spacecraft* obj = (Spacecraft*)spaceObj;
+      //std::string stateType = obj->GetStringParameter("DisplayStateType");
+
+      std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+      CoordinateSystem* cs = (CoordinateSystem*)obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+      CoordinateSystem* internalcs = obj->GetInternalCoordSystem();
+
+      if (cs == NULL)
+         throw EstimatorException("Coordinate system for " + obj->GetName() + " is not set\n");
+      if (internalcs == NULL)
+         throw EstimatorException("Internal coordinate system for " + obj->GetName() + " is not set\n");
+
+      CoordinateConverter* cv = new CoordinateConverter();
+      Rvector6 outStateCart;
+      cv->Convert(epoch, inState, internalcs, outStateCart, cs);
+      delete cv;
+
+      outState = outStateCart;
+   }
+
+   return outState;
+}
+
+
+//------------------------------------------------------------------------------
+// Rvector& GetParticipantMJ2000EqCartesianState(GmatBase* spaceObj)
+//------------------------------------------------------------------------------
+/**
+* Method used to convert state of a spacecraft from internal coordinate
+* system to MJ2000Eq Cartesian coordinate system
+*
+* @param spaceObj    spacecraft from which we need to get state
+*
+* @return            spacecraft's state in MJ2000Eq Cartesian coordinate system
+* example: spacecraft's coordinate system is EarthFixed, This function gets
+*          spacecraft state in EarthMJ2000Eq coordinate system.
+*
+*/
+//------------------------------------------------------------------------------
+Rvector EstimationStateManager::GetParticipantMJ2000EqCartesianState(GmatBase* spaceObj)
+{
+   Rvector outState;
+
+   if (spaceObj->IsOfType(Gmat::SPACEOBJECT))
+   {
+      // Get spacecraft object
+      Integer i = 0;
+      for (; i < stateMap.size(); ++i)
+      {
+         if (stateMap[i]->object == spaceObj)
+            break;
+      }
+      Spacecraft* obj = (Spacecraft*)spaceObj;
+
+      // Get internal coordinate system
+      CoordinateSystem* internalcs = obj->GetInternalCoordSystem();
+      if (internalcs == NULL)
+         throw EstimatorException("Internal coordinate system for " + obj->GetName() + " is not set\n");
+
+      // Create MJ2000Eq Cartesian coordinate system
+      std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+      CoordinateSystem* cs = (CoordinateSystem*)obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+      if (cs == NULL)
+         throw EstimatorException("Coordinate system for " + obj->GetName() + " is not set\n");
+
+      SolarSystem* ss = cs->GetSolarSystem();
+      SpacePoint* origin = cs->GetOrigin();
+      if (origin->IsOfType(Gmat::GROUND_STATION))
+      {
+         std::string cbName = ((GroundstationInterface*)origin)->GetStringParameter("CentralBody");
+         origin = ss->GetBody(cbName);
+      }
+      CoordinateSystem* mj2kCS = CoordinateSystem::CreateLocalCoordinateSystem(origin->GetName() + "mj2kCS", "MJ2000Eq", origin, NULL, NULL, cs->GetJ2000Body(), ss);
+
+      // Convert state from internal coordinate system to MJ2000Eq Cartesian coordinate system
+      Rvector6 inState(state[i], state[i + 1], state[i + 2], state[i + 3], state[i + 4], state[i + 5]);
+      outState = inState;
+      GmatTime epoch = GetEstimationEpochGT();
+      CoordinateConverter* cv = new CoordinateConverter();
+      Rvector6 outStateCart;
+      cv->Convert(epoch, inState, internalcs, outStateCart, mj2kCS);
+
+      delete cv;
+      delete mj2kCS;
+
+      outState = outStateCart;
+   }
+
+   return outState;
+}
+
+
+//-------------------------------------------------------------------------
+// GmatState& GetEstimationState()
+//-------------------------------------------------------------------------
+/**
+* This Method used to get estimation state in Cartesian or Keplerian as
+* specified by solve-for variable. Cr_Epsilon and Cd_Epsilon will be use
+* instead of Cr and Cd.
+*
+* @return     estimation state in participants' coordinate systems and 
+*             state type, Cr_Epsilon, Cd_Epsilon and bias
+*
+*/
+//-------------------------------------------------------------------------
+GmatState EstimationStateManager::GetEstimationState()
+{
+   GmatState outputState;
+   const std::vector<ListItem*> *map = GetStateMap();
+
+   Real outputStateElement;
+   outputState.SetSize(map->size());
+
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+      if (((*map)[i]->elementName == "Cr_Epsilon") ||
+         ((*map)[i]->elementName == "Cd_Epsilon") ||
+         ((*map)[i]->elementName == "Bias"))
+      {
+         outputState[i] = state[i];
+      }
+      else if (((*map)[i]->elementName == "CartesianState") ||
+         ((*map)[i]->elementName == "KeplerianState") ||
+         ((*map)[i]->elementName == "Position"))
+      {
+         if ((*map)[i]->subelement == 1)
+         {
+            std::string stateType = "Cartesian";
+            if ((*map)[i]->elementName == "KeplerianState")
+               stateType = "Keplerian";
+
+            // get a solve-for state. Note that: solve-for state in normal equation has Keplerian anomaly element in form of "MA"
+            //Rvector outState = GetParticipantState((*map)[i]->object, stateType, "MA");
+            Rvector outState = GetParticipantMJ2000EqState((*map)[i]->object, stateType, "MA");
+            for (Integer j = 0; j < 6; ++j)
+               outputState[i + j] = outState[j];
+
+            i = i + 5;
+         }
+      }
+   }
+
+   return outputState;
+}
+
+
+GmatState* EstimationStateManager::SetEstimationState(GmatState& inputState)
+{
+   const std::vector<ListItem*> *map = GetStateMap();
+
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+      if (((*map)[i]->elementName == "Cr_Epsilon") ||
+         ((*map)[i]->elementName == "Cd_Epsilon") ||
+         ((*map)[i]->elementName == "Bias"))
+      {
+         state[i] = inputState[i];
+      }
+      else if (((*map)[i]->elementName == "CartesianState") ||
+         ((*map)[i]->elementName == "KeplerianState") ||
+         ((*map)[i]->elementName == "Position"))
+      {
+         if ((*map)[i]->subelement == 1)
+         {
+            Rvector6 setVal;
+            for (Integer j = 0; j < 6; ++j)
+               setVal[j] = inputState[i+j];
+
+            std::string stateType = "Cartesian";
+            if ((*map)[i]->elementName == "KeplerianState")
+               stateType = "Keplerian";
+            //SetParticipantState((*map)[i]->object, setVal, stateType);
+            SetParticipantMJ2000EqState((*map)[i]->object, setVal, stateType);
+
+            i = i + 5;
+         }
+      }
+   }
+
+   return &state;
+}
+
+
+//-------------------------------------------------------------------------
+// GmatState& GetEstimationCartesianState()
+//-------------------------------------------------------------------------
+/**
+* This Method used to convert result of estimation state to participants'
+* coordinate system and state type. For report, it reports Cr_Epsilon and
+* Cd_Epsilon.
+*
+* @return     estimation state in participants' coordinate systems and
+*             state type, Cr_Epsilon, Cd_Epsilon and bias
+*
+*/
+//-------------------------------------------------------------------------
+GmatState EstimationStateManager::GetEstimationCartesianState()
+{
+   GmatState outputState;
+   const std::vector<ListItem*> *map = GetStateMap();
+
+   Real outputStateElement;
+   outputState.SetSize(map->size());
+
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+      if (((*map)[i]->elementName == "Cr_Epsilon") ||
+         ((*map)[i]->elementName == "Cd_Epsilon") ||
+         ((*map)[i]->elementName == "Bias"))
+      {
+         outputState[i] = state[i];
+      }
+      else if (((*map)[i]->elementName == "CartesianState") ||
+         ((*map)[i]->elementName == "KeplerianState") ||
+         ((*map)[i]->elementName == "Position"))
+      {
+         if ((*map)[i]->subelement == 1)
+         {
+            Rvector outState = GetParticipantCartesianState((*map)[i]->object);
+            for (Integer j = 0; j < 6; ++j)
+               outputState[i + j] = outState[j];
+
+            i = i + 5;
+         }
+      }
+   }
+
+   return outputState;
+}
+
+
+//-------------------------------------------------------------------------
+// GmatState& GetEstimationMJ2000EqCartesianState()
+//-------------------------------------------------------------------------
+/**
+* This Method used to convert result of estimation state to MJ2000Eq
+* Cartesian coordinate system. For report, it reports Cr_Epsilon and
+* Cd_Epsilon.
+*
+* @return     estimation state in MJ2000Eq Cartesian coordinate systems,
+*             Cr_Epsilon, Cd_Epsilon and bias
+* example: spacecraft's coordinate system is EarthFixed, This function gets
+*          spacecraft state in EarthMJ2000Eq coordinate system.
+*/
+//-------------------------------------------------------------------------
+GmatState EstimationStateManager::GetEstimationMJ2000EqCartesianState()
+{
+   GmatState outputState;
+   const std::vector<ListItem*> *map = GetStateMap();
+
+   Real outputStateElement;
+   outputState.SetSize(map->size());
+
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+      if (((*map)[i]->elementName == "Cr_Epsilon") ||
+         ((*map)[i]->elementName == "Cd_Epsilon") ||
+         ((*map)[i]->elementName == "Bias"))
+      {
+         outputState[i] = state[i];
+      }
+      else if (((*map)[i]->elementName == "CartesianState") ||
+         ((*map)[i]->elementName == "KeplerianState") ||
+         ((*map)[i]->elementName == "Position"))
+      {
+         if ((*map)[i]->subelement == 1)
+         {
+            Rvector outState = GetParticipantMJ2000EqCartesianState((*map)[i]->object);
+            for (Integer j = 0; j < 6; ++j)
+               outputState[i + j] = outState[j];
+
+            i = i + 5;
+         }
+      }
+   }
+
+   return outputState;
+}
+
+
+//-------------------------------------------------------------------------
+// GmatState& GetEstimationCartesianStateForReport()
+//-------------------------------------------------------------------------
+/**
+* This Method used to convert result of estimation state to participants'
+* coordinate system and state type. For report, it reports Cr and Cd.
+*
+* @return     estimation state in participants' coordinate systems and
+*             state type, Cr, Cd, and bias
+*
+*/
+//-------------------------------------------------------------------------
+GmatState EstimationStateManager::GetEstimationCartesianStateForReport()
+{
+   GmatState outputState;
+   const std::vector<ListItem*> *map = GetStateMap();
+
+   Real outputStateElement;
+   outputState.SetSize(map->size());
+
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+      if ((*map)[i]->elementName == "Cr_Epsilon")
+         outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("Cr");
+      else if ((*map)[i]->elementName == "Cd_Epsilon")
+         outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("Cd");
+      else if((*map)[i]->elementName == "Bias")
+         outputState[i] = state[i];
+      else if (((*map)[i]->elementName == "CartesianState") ||
+         ((*map)[i]->elementName == "KeplerianState") ||
+         ((*map)[i]->elementName == "Position"))
+      {
+         if ((*map)[i]->subelement == 1)
+         {
+            Rvector outState = GetParticipantCartesianState((*map)[i]->object);
+            for (Integer j = 0; j < 6; ++j)
+               outputState[i + j] = outState[j];
+
+            i = i + 5;
+         }
+      }
+   }
+
+   return outputState;
+}
+
+
+//-------------------------------------------------------------------------
+// GmatState& GetEstimationStateForReport()
+//-------------------------------------------------------------------------
+/**
+* This Method used to convert result of estimation state to participants'
+* coordinate system and state type. For report, it reports Cr and Cd 
+* instead of Cr_Epsilon and Cd_Epsilon.
+*
+* @param anomalyType    form of anomaly is used. It would be "TA" or "MA". 
+*                       Default value is "TA".
+*
+* @return     estimation state in participants' coordinate systems and
+*             state type, Cr, Cd, and bias
+*
+*/
+//-------------------------------------------------------------------------
+GmatState EstimationStateManager::GetEstimationStateForReport(std::string anomalyType)
+{
+   GmatState outputState;
+   const std::vector<ListItem*> *map = GetStateMap();
+
+   Real outputStateElement;
+   outputState.SetSize(map->size());
+
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+      if ((*map)[i]->elementName == "Cr_Epsilon")
+         outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("Cr");
+      else if ((*map)[i]->elementName == "Cd_Epsilon")
+         outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("Cd");
+      else if (((*map)[i]->elementName == "CartesianState") ||
+         ((*map)[i]->elementName == "KeplerianState") ||
+         ((*map)[i]->elementName == "Position"))
+      {
+         if ((*map)[i]->subelement == 1)
+         {
+            // In estimation report file or GmatLog.txt anomaly is always in "TA" form
+            Rvector outState = GetParticipantState((*map)[i]->object, "", anomalyType);     // inStateType = "" that means get participant state in its own DisplayStateType
+            for (Integer j = 0; j < 6; ++j)
+               outputState[i + j] = outState[j];
+
+            i = i + 5;
+         }
+      }
+      else if ((*map)[i]->elementName == "Bias")
+      {
+         outputState[i] = state[i];
+      }
+   }
+
+   return outputState;
+}
+
+
+
+//--------------------------------------------------------------------------------------------
+// Rmatrix66 CartesianToKeplerianCoverianceConvertionMatrix(GmatBase* obj, const Rvector6 state)
+//--------------------------------------------------------------------------------------------
+/**
+* This function is use to calculate derivative state conversion matrix for a spacecraft state.
+* It converts from Cartesian to Keplerian (with mean anomaly) coordiate system.
+*
+* @param obj      it is a spacecraft object
+* @param state    Cartesian state of the spacecraft
+*
+* return          6x6 derivative state conversion matrix [dX/dK]
+*/
+//--------------------------------------------------------------------------------------------
+Rmatrix66 EstimationStateManager::CartesianToKeplerianCoverianceConvertionMatrix(GmatBase* obj, const Rvector6 state)
+{
+   // 1. Get mu value 
+   Spacecraft* spacecraft = (Spacecraft*)obj;
+   CoordinateSystem* cs = (CoordinateSystem*)(spacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, ""));
+   SolarSystem* ss = cs->GetSolarSystem();
+   SpacePoint* origin = cs->GetOrigin();
+   Planet* pn = (Planet*)origin;
+   if (origin->IsOfType(Gmat::GROUND_STATION))
+   {
+      // for case CS is GDSTropocentric, the origin is ground station GDS
+      std::string cbName = ((GroundstationInterface*)origin)->GetStringParameter("CentralBody");
+      pn = (Planet*)(ss->GetBody(cbName));
+   }
+
+   Real mu = pn->GetRealParameter("Mu");
+
+   // 2. Specify conversion matrix
+   Rmatrix66 convMatrix = StateConversionUtil::CartesianToKeplerianDerivativeConversion(mu, state);
+
+   return convMatrix;
+}
+
+
+
+//--------------------------------------------------------------------
+//Rmatrix CartToSolveForStateConversionDerivativeMatrix()
+//--------------------------------------------------------------------
+/**
+* This function is used to get matrix [dX/dS] which converts derivative
+* in Cartesian state to Solve-for state. For Keplerian anomaly element,
+* it is in form of MA.
+*
+* @return        matrix [dX/dS]
+*/
+//--------------------------------------------------------------------
+Rmatrix EstimationStateManager::CartToSolveForStateConversionDerivativeMatrix()
+{
+   // 1.Get list of solve-for elements
+   const std::vector<ListItem*>* items = GetStateMap();
+
+   // 2. Get current estimation MJ2000Eq Cartesian state
+   GmatState estCartState = GetEstimationMJ2000EqCartesianState();
+
+   // 3.Calculate conversion matrix
+   Integer size = items->size();
+   Rmatrix conversion;
+   conversion.SetSize(size, size);
+   for (Integer i = 0; i < items->size();)
+   {
+      ListItem* item = items->at(i);
+      if (item->elementName == "KeplerianState")
+      {
+         // 3.1.1. Get spacecraft object
+         GmatBase* obj = item->object;
+
+         // 3.1.2. Specify Cartesian state of the spacecraft
+         Rvector6 inState(estCartState[i], estCartState[i + 1], estCartState[i + 2], estCartState[i + 3], estCartState[i + 4], estCartState[i + 5]);
+         //MessageInterface::ShowMessage("   Use cartesian state of spacecraft <%s> to calculate [dX/dS]: [%.12lf   %.12lf   %.12lf   %.12lf   %.12lf   %.12lf\n", obj->GetName().c_str(), inState[0], inState[1], inState[2], inState[3], inState[4], inState[5]);
+
+         // 3.1.3. Get conversion matrix [dX/dK] for the spacecraft
+         Rmatrix66 coversion66 = CartesianToKeplerianCoverianceConvertionMatrix(obj, inState);
+
+         // 3.1.4. Set value to the submatrix
+         for (Integer row = 0; row < 6; ++row)
+         {
+            for (Integer col = 0; col < 6; ++col)
+               conversion(i + row, i + col) = coversion66(row, col);
+         }
+
+         // 3.1.5. Move index to the next element
+         i = i + 6;
+      }
+      else if (item->elementName == "CartesianState")
+      {
+         // 3.1.4. Set 6x6 identity matrix to the submatrix
+         for (Integer row = 0; row < 6; ++row)
+         {
+            for (Integer col = 0; col < 6; ++col)
+            {
+               if (row == col)
+                  conversion(i + row, i + col) = 1.0;
+            }
+         }
+
+         // 3.1.5. Move index to the next element
+         i = i + 6;
+      }
+      else
+      {
+         conversion(i, i) = 1.0;
+         ++i;
+      }
+   }
+
+   return conversion;
+}
+
+
+////--------------------------------------------------------------------
+////Rmatrix CartToKeplConversionDerivativeMatrix()
+////--------------------------------------------------------------------
+///**
+//* This function is used to get matrix [dX/dK] which converts derivative
+//* in Cartesian state to Keplerian state. For other variable such as
+//* bias, Cr_Epsilon, and Cd_Epsilon, their submatrix is identity matrix.
+//* Keplerian anomaly element is MA.
+//*
+//* @return        matrix [dX/dK]
+//*/
+////--------------------------------------------------------------------
+//Rmatrix EstimationStateManager::CartToKeplConversionDerivativeMatrix()
+//{
+//   // 1.Get list of solve-for elements
+//   const std::vector<ListItem*>* items = GetStateMap();
+//
+//   // 2. Get current estimation MJ2000Eq Cartesian state
+//   GmatState estCartState = GetEstimationMJ2000EqCartesianState();
+//
+//   // 3.Calculate conversion matrix
+//   Integer size = items->size();
+//   Rmatrix conversion;
+//   conversion.SetSize(size, size);
+//   for (Integer i = 0; i < items->size();)
+//   {
+//      ListItem* item = items->at(i);
+//      if ((item->elementName == "KeplerianState") || (item->elementName == "CartesianState"))     // if solve-for is a spacecraft state
+//      {
+//         // 3.2.1. Get spacecraft object
+//         GmatBase* obj = item->object;
+//
+//         // 3.1.2. Specify Cartesian state of the spacecraft
+//         Rvector6 inState(estCartState[i], estCartState[i + 1], estCartState[i + 2], estCartState[i + 3], estCartState[i + 4], estCartState[i + 5]);
+//
+//         // 3.1.3. Get conversion matrix [dX/dK] for the spacecraft. Keplerian anomaly element is MA.
+//         Rmatrix66 coversion66 = CartesianToKeplerianCoverianceConvertionMatrix(obj, inState);
+//
+//         // 3.1.4. Set value to the submatrix
+//         for (Integer row = 0; row < 6; ++row)
+//         {
+//            for (Integer col = 0; col < 6; ++col)
+//               conversion(i + row, i + col) = coversion66(row, col);
+//         }
+//
+//         // 3.1.5. Move index to the next element
+//         i = i + 6;
+//      }
+//      else
+//      {
+//         conversion(i, i) = 1.0;
+//         ++i;
+//      }
+//   }
+//
+//   return conversion;
+//}
+
+
+//--------------------------------------------------------------------
+//Rmatrix SolveForStateToKeplConversionDerivativeMatrix()
+//--------------------------------------------------------------------
+/**
+* This function is used to get matrix [dS/dK] which converts derivative
+* in solve-for state to Keplerian state. For other variable such as
+* bias, Cr_Epsilon, and Cd_Epsilon, their submatrix is identity matrix
+*
+* @return        matrix [dS/dK]
+*/
+//--------------------------------------------------------------------
+Rmatrix EstimationStateManager::SolveForStateToKeplConversionDerivativeMatrix()
+{
+   // 1.Get list of solve-for elements
+   const std::vector<ListItem*>* items = GetStateMap();
+
+   // 2. Get current estimation MJ2000Eq Cartesian state
+   GmatState estCartState = GetEstimationMJ2000EqCartesianState();
+
+   // 3.Calculate conversion matrix
+   Integer size = items->size();
+   Rmatrix conversion;
+   conversion.SetSize(size, size);
+   for (Integer i = 0; i < items->size();)
+   {
+      ListItem* item = items->at(i);
+      if (item->elementName == "KeplerianState")
+      {
+         // 3.1.1. Set value to the submatrix
+         for (Integer row = 0; row < 6; ++row)
+         {
+            for (Integer col = 0; col < 6; ++col)
+            {
+               if (row == col)
+                  conversion(i + row, i + col) = 1.0;
+            }
+         }
+
+         // 3.1.5. Move index to the next element
+         i = i + 6;
+      }
+      else if (item->elementName == "CartesianState")
+      {
+         // 3.1.1. Get spacecraft object
+         GmatBase* obj = item->object;
+
+         // 3.1.2. Specify Cartesian state of the spacecraft
+         Rvector6 inState(estCartState[i], estCartState[i + 1], estCartState[i + 2], estCartState[i + 3], estCartState[i + 4], estCartState[i + 5]);
+
+         // 3.1.3. Get conversion matrix for the spacecraft
+         Rmatrix66 coversion66 = CartesianToKeplerianCoverianceConvertionMatrix(obj, inState);
+
+         // 3.1.4. Set value to the submatrix
+         for (Integer row = 0; row < 6; ++row)
+         {
+            for (Integer col = 0; col < 6; ++col)
+               conversion(i + row, i + col) = coversion66(row, col);
+         }
+
+         // 3.1.5. Move index to the next element
+         i = i + 6;
+      }
+      else
+      {
+         conversion(i, i) = 1.0;
+         ++i;
+      }
+   }
+
+   return conversion;
+}
+
+
+////--------------------------------------------------------------------
+////Rmatrix SolveForStateToDisplStateTypeConversionDerivativeMatrix()
+////--------------------------------------------------------------------
+///**
+//* This function is used to get matrix [dS/dD] which converts derivative
+//* in solve-for state to the state specified in spacecraft's
+//* DisplayStateType. For other variable such as bias, Cr_Epsilon, and
+//* Cd_Epsilon, their submatrix is identity matrix.
+//*
+//* @return        matrix [dS/dD]
+//*/
+////--------------------------------------------------------------------
+//Rmatrix EstimationStateManager::SolveForStateToDisplStateTypeConversionDerivativeMatrix()
+//{
+//   // 1.Get list of solve-for elements
+//   const std::vector<ListItem*>* items = GetStateMap();
+//
+//   // 2. Get current estimation state in MJ2000Eq Cartesian coordinate system
+//   GmatState estCartState = GetEstimationMJ2000EqCartesianState();
+//
+//   // 3.Calculate conversion matrix
+//   Integer size = items->size();
+//   Rmatrix conversion;
+//   conversion.SetSize(size, size);
+//   for (Integer i = 0; i < items->size();)
+//   {
+//      ListItem* item = items->at(i);
+//      if (item->elementName == "KeplerianState")
+//      {
+//         // Case 1: solve-for state is Keplerian
+//         if (((Spacecraft*)(item->object))->GetStringParameter("DisplayStateType") == "Keplerian")
+//         {
+//            // if solve-for state and display state type are the same, coversion submatrix will be identity matrix
+//            // 3.1.1.1 Set 6x6 identity matrix to the submatrix
+//            for (Integer row = 0; row < 6; ++row)
+//            {
+//               for (Integer col = 0; col < 6; ++col)
+//               {
+//                  if (row == col)
+//                     conversion(i + row, i + col) = 1.0;
+//               }
+//            }
+//
+//            // 3.1.1.2. Move index to the next element
+//            i = i + 6;
+//         }
+//         else if (((Spacecraft*)(item->object))->GetStringParameter("DisplayStateType") == "Cartesian")
+//         {
+//            // if they are not the same, specify [dK/dX] matrix
+//            // 3.1.2.1. Get spacecraft object
+//            GmatBase* obj = item->object;
+//
+//            // 3.1.2.2. Specify Cartesian state of the spacecraft
+//            Rvector6 inState(estCartState[i], estCartState[i + 1], estCartState[i + 2], estCartState[i + 3], estCartState[i + 4], estCartState[i + 5]);
+//
+//            // 3.1.2.3. Get conversion matrix [dK/dX] for the spacecraft
+//            Rmatrix66 coversion66 = CartesianToKeplerianCoverianceConvertionMatrix(obj, inState).Inverse();
+//
+//            // 3.1.2.4. Set value to the submatrix
+//            for (Integer row = 0; row < 6; ++row)
+//            {
+//               for (Integer col = 0; col < 6; ++col)
+//                  conversion(i + row, i + col) = coversion66(row, col);
+//            }
+//
+//            // 3.1.2.5. Move index to the next element
+//            i = i + 6;
+//         }
+//      }
+//      else if (item->elementName == "CartesianState")
+//      {
+//         // Case 2: solve-for state is Cartesian
+//         if (((Spacecraft*)(item->object))->GetStringParameter("DisplayStateType") == "Cartesian")
+//         {
+//            // if solve-for state and display state type are the same, coversion submatrix will be identity matrix
+//            // 3.2.1.1 Set 6x6 identity matrix to the submatrix
+//            for (Integer row = 0; row < 6; ++row)
+//            {
+//               for (Integer col = 0; col < 6; ++col)
+//               {
+//                  if (row == col)
+//                     conversion(i + row, i + col) = 1.0;
+//               }
+//            }
+//
+//            // 3.2.1.2. Move index to the next element
+//            i = i + 6;
+//         }
+//         else if (((Spacecraft*)(item->object))->GetStringParameter("DisplayStateType") == "Keplerian")
+//         {
+//            // 3.2.2.1. Get spacecraft object
+//            GmatBase* obj = item->object;
+//
+//            // 3.2.2.2. Specify Cartesian state of the spacecraft
+//            Rvector6 inState(estCartState[i], estCartState[i + 1], estCartState[i + 2], estCartState[i + 3], estCartState[i + 4], estCartState[i + 5]);
+//
+//            // 3.2.2.3. Get conversion matrix [dX/dK] for the spacecraft
+//            Rmatrix66 coversion66 = CartesianToKeplerianCoverianceConvertionMatrix(obj, inState);
+//
+//            // 3.2.2.4. Set value to the submatrix
+//            for (Integer row = 0; row < 6; ++row)
+//            {
+//               for (Integer col = 0; col < 6; ++col)
+//                  conversion(i + row, i + col) = coversion66(row, col);
+//            }
+//
+//            // 3.2.2.5. Move index to the next element
+//            i = i + 6;
+//         }
+//      }
+//      else
+//      {
+//         conversion(i, i) = 1.0;
+//         ++i;
+//      }
+//   }
+//
+//   return conversion;
+//}
+
+

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -379,6 +379,25 @@ bool PlotInterface::TakeGlAction(const std::string &plotName,
       return thePlotReceiver->TakeGlAction(plotName, action);
    
    return false;
+}
+
+
+//------------------------------------------------------------------------------
+// void PlotInterface::SetMaxGlDataPoints(const std::string &plotName,
+//                                        Integer maxDataPoints)
+//------------------------------------------------------------------------------
+/**
+* Passes a custom amount of data points to plot
+*
+* @param PlotName Name of the plot receiving the action
+* @param maxDataPoints The custom max setting of data points
+*/
+//------------------------------------------------------------------------------
+void PlotInterface::SetMaxGlDataPoints(const std::string &plotName,
+                                       Integer maxDataPoints)
+{
+   if (thePlotReceiver != NULL)
+      thePlotReceiver->SetMaxGlDataPoints(plotName, maxDataPoints);
 }
 
 

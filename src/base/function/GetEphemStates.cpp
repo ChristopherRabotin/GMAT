@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -723,7 +723,7 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
       #endif
       
       ephemInitialState =
-          sokr->GetTargetState(scName, satNaifId, ephemInitialA1Mjd,
+          sokr->GetTargetState(scName, satNaifId, A1Mjd(ephemInitialA1Mjd), 
                                spkCentralBody, spkCentralBodyNaifId);
       
       #ifdef DEBUG_READ_EPHEM
@@ -734,7 +734,7 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
       // Get final state
       ephemFinalA1Mjd = fileEnd - daysDiff;
       ephemFinalState =
-          sokr->GetTargetState(scName, satNaifId, ephemFinalA1Mjd,
+          sokr->GetTargetState(scName, satNaifId, A1Mjd(ephemFinalA1Mjd), 
                                spkCentralBody, spkCentralBodyNaifId);
       
       #ifdef DEBUG_READ_EPHEM
@@ -835,9 +835,8 @@ bool GetEphemStates::ReadCode500EphemerisFile()
    Integer coordSysIndicator;
    
    Code500EphemerisFile *code500EphemFile = new Code500EphemerisFile();
-   bool swapByteOrder = false; // Assumes PC format
    
-   if (!code500EphemFile->OpenForRead(fullpathFileName, 1))
+   if (!code500EphemFile->OpenForRead(fullpathFileName, 0))
    {
       MessageInterface::ShowMessage
          ("*** ERROR *** Failed to open Code500 ephemeris file: '%s'\n",
@@ -847,7 +846,6 @@ bool GetEphemStates::ReadCode500EphemerisFile()
    
    bool retval = false;
    
-   code500EphemFile->SetSwapEndian(swapByteOrder, 1);
    if (code500EphemFile->
        GetInitialAndFinalStates(initialEpoch, finalEpoch, initialState, finalState,
                                 centralBodyOnFile, coordSystemOnFile, coordSysIndicator))
@@ -873,15 +871,13 @@ bool GetEphemStates::ReadCode500EphemerisFile()
       
       retval = true;
       
-      // Check for coordinate system (only J2000 is supported)
-      // coordSystem: "2000" for J2000, "INER" for true of Reference, "MEAN" for B1950
-      if (coordSystemOnFile != "2000")
+      // Check for coordinate system (only J2000, EFI, and TOD are supported)
+      // coordSystem: 3 = True of date, 4 = J2000, 5 = Earth-fixed/Body-fixed
+      if (coordSysIndicator != 3 && coordSysIndicator != 4 && coordSysIndicator != 5)
       {
          std::string csIndicator;
          if (coordSystemOnFile == "MEAN")
             csIndicator = "Mean of 1950";
-         else if (coordSystemOnFile == "INER")
-            csIndicator = "True of Reference";
          MessageInterface::ShowMessage
             ("*** ERROR *** Unsupported coordinate system: '%s' on Code500 ephemeris file: '%s' \n",
              csIndicator.c_str(), fileName.c_str());
@@ -891,7 +887,14 @@ bool GetEphemStates::ReadCode500EphemerisFile()
       // Convert states to desired coordiniate system
       if (retval)
       {
-         std::string axisSystemOnFile = "MJ2000Eq";
+         std::string axisSystemOnFile;
+         if (coordSysIndicator == 3)
+            axisSystemOnFile = "TODEq";
+         else if (coordSysIndicator == 4)
+            axisSystemOnFile = "MJ2000Eq";
+         else if (coordSysIndicator == 5)
+            axisSystemOnFile = "BodyFixed";
+
          bool needsConversion = false;
          // Delete old local coordSysOnFile pointer
          if (coordSysOnFile != NULL)

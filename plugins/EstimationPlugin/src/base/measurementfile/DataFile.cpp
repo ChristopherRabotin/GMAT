@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -261,7 +261,8 @@ bool DataFile::Initialize()
    }
 
    // Initialize privated variables
-   od_old.epoch = -1.0;
+   od_old.epochGT = -1.0;
+   od_old.epoch   = -1.0;
    acc = 1.0;
    epoch1 = 0.0;
    epoch2 = 0.0;
@@ -740,7 +741,7 @@ bool DataFile::SetStream(ObType *thisStream)
 
 
 ///// TBD: This method needs to be documented
-bool DataFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool DataFile::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                   const std::string &name)
 {
    #ifdef DEBUG_FILE_ACCESS
@@ -966,7 +967,7 @@ ObservationData* DataFile::FilteringDataForOldSyntax(ObservationData* dataObject
       if (acc < 1.0)
       {
          #ifdef DEBUG_FILTER
-         MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to data thinning\n", obsType.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+         MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %s   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to data thinning\n", obsType.c_str(), od->epochGT.ToString().c_str(), od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
          #endif
          rejectedReason = 1;             // rejected due to Thinning Ratio
       }
@@ -974,10 +975,10 @@ ObservationData* DataFile::FilteringDataForOldSyntax(ObservationData* dataObject
          acc = acc -1.0;
       
       // Time span filter
-      if ((od->epoch < (epoch1 - TIME_EPSILON))||(od->epoch > (epoch2 + TIME_EPSILON)))
+      if ((od->epochGT < GmatTime(epoch1 - TIME_EPSILON))||(od->epochGT > GmatTime(epoch2 + TIME_EPSILON)))
       {
          #ifdef DEBUG_FILTER
-            MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to time span filter\n", obsType.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+            MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %s   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to time span filter\n", obsType.c_str(), od->epochGT.ToString().c_str(), od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
          #endif
          rejectedReason = 2;            // rejected due to Time Span
       }
@@ -988,18 +989,20 @@ ObservationData* DataFile::FilteringDataForOldSyntax(ObservationData* dataObject
          if (od->value[0] == -1.0)      // throw away this observation data if it is invalid
          {
             #ifdef DEBUG_FILTER
-               MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to invalid observation data\n", obsType.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+               MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %s   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to invalid observation data\n", obsType.c_str(), od->epochGT.ToString().c_str(), od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
             #endif
             rejectedReason = 3;         // rejected due to invalid measurement value
          }
       }
       
       // Duplication or time order filter
-      if (od_old.epoch >= (od->epoch + 2.0e-12))
+      if (od_old.epochGT >= (od->epochGT + TIME_EPSILON))
       {
-         #ifdef DEBUG_FILTER
-            MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to duplication or time order\n", obsType.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-         #endif
+         //#ifdef DEBUG_FILTER
+            MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %s   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to duplication or time order\n", obsType.c_str(), od->epochGT.ToString().c_str(), od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+            MessageInterface::ShowMessage("  old epoch = %s\n", od_old.epochGT.ToString().c_str());
+
+         //#endif
          rejectedReason = 4;           // filter due to duplication or time order filter
       }
       
@@ -1021,7 +1024,7 @@ ObservationData* DataFile::FilteringDataForOldSyntax(ObservationData* dataObject
       if (choose == false)
       {
          #ifdef DEBUG_FILTER
-            MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to station is not in SelectedStationID\n", obsType.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+            MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %s   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to station is not in SelectedStationID\n", obsType.c_str(), od->epochGT.ToString().c_str(), od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
          #endif
          rejectedReason = 5;          // rejected due to Selected Stations
       }

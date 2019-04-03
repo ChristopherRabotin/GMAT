@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -124,7 +124,11 @@ private:
    Real earthRadius;
 
    static const Real NUM_OF_INTERVALS;
-   static const Real IONOSPHERE_MAX_ATTITUDE;
+   static const Real IONOSPHERE_MAX_ALTITUDE;
+   
+   //// These arrays are used for Guassian Quadrature algorithm
+   //static const Real QUAD_WEIGHTS[20];
+   //static const Real QUAD_POINTS[20];
 };
 
 

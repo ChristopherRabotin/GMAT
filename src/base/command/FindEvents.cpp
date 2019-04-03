@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -297,7 +297,7 @@ bool FindEvents::SetBooleanParameter(const std::string &label, const bool value)
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Accesses names for referenced objects.
@@ -307,7 +307,7 @@ bool FindEvents::SetBooleanParameter(const std::string &label, const bool value)
  * @return the referenced object's name.
  */
 //------------------------------------------------------------------------------
-std::string FindEvents::GetRefObjectName(const Gmat::ObjectType type) const
+std::string FindEvents::GetRefObjectName(const UnsignedInt type) const
 {
    switch (type)
    {
@@ -340,7 +340,7 @@ const ObjectTypeArray& FindEvents::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Accesses arrays of names for referenced objects.
@@ -351,7 +351,7 @@ const ObjectTypeArray& FindEvents::GetRefObjectTypeArray()
  */
 //------------------------------------------------------------------------------
 const StringArray& FindEvents::GetRefObjectNameArray(
-      const Gmat::ObjectType type)
+      const UnsignedInt type)
 {
 
    refObjectNames.clear();
@@ -366,7 +366,7 @@ const StringArray& FindEvents::GetRefObjectNameArray(
 }
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -379,7 +379,7 @@ const StringArray& FindEvents::GetRefObjectNameArray(
  * @return success of the operation.
  */
 //------------------------------------------------------------------------------
-bool FindEvents::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool FindEvents::SetRefObject(GmatBase *obj, const UnsignedInt type,
                               const std::string &name)
 {
    if (type == Gmat::EVENT_LOCATOR)
@@ -397,7 +397,7 @@ bool FindEvents::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Sets names for referenced objects.
@@ -408,7 +408,7 @@ bool FindEvents::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return true if the name was set, false if not.
  */
 //------------------------------------------------------------------------------
-bool FindEvents::SetRefObjectName(const Gmat::ObjectType type,
+bool FindEvents::SetRefObjectName(const UnsignedInt type,
                                   const std::string &name)
 {
    switch (type)
@@ -442,7 +442,7 @@ GmatBase* FindEvents::Clone() const
 
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -455,7 +455,7 @@ GmatBase* FindEvents::Clone() const
  * @return true on success.
  */
 //------------------------------------------------------------------------------
-bool FindEvents::RenameRefObject(const Gmat::ObjectType type,
+bool FindEvents::RenameRefObject(const UnsignedInt type,
                                       const std::string &oldName,
                                       const std::string &newName)
 {

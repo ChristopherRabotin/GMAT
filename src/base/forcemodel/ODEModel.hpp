@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -144,6 +144,7 @@ public:
    const PhysicalModel* GetForce(std::string forcetype,
                                  Integer whichOne = 0) const;
    void UpdateSpaceObject(Real newEpoch = -1.0);
+   void UpdateSpaceObjectGT(GmatTime newEpoch = -1.0);
    void UpdateFromSpaceObject();
    void RevertSpaceObject();
    void BufferState();
@@ -165,14 +166,14 @@ public:
    
    // Parameter definition and accessor methods inherited from GmatBase
    virtual Integer      GetParameterCount() const;
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
    virtual bool         HasRefObjectTypeArray();
    virtual const        ObjectTypeArray& GetRefObjectTypeArray();
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                        GetRefObjectNameArray(const UnsignedInt type);
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name = "");
    
    
@@ -239,9 +240,9 @@ public:
                                             const Integer value);
    virtual Integer      SetIntegerParameter(const std::string &label,
                                             const Integer value);
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string &name);
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
@@ -374,7 +375,9 @@ protected:
    
    void                      MoveToOrigin(Real newEpoch = -1.0);
    void                      ReturnFromOrigin(Real newEpoch = -1.0);
-   
+   void                      MoveToOriginGT(GmatTime newEpoch = -1.0);
+   void                      ReturnFromOriginGT(GmatTime newEpoch = -1.0);
+
    
    // Elements from the redesign
    struct StateStructure

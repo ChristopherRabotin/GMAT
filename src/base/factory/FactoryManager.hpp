@@ -5,7 +5,7 @@
 
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -89,7 +89,7 @@ public:
    bool                   RegisterFactory(Factory* fact);
 
    // Generic method to create an object
-   GmatBase*              CreateObject(const Gmat::ObjectType generalType,
+   GmatBase*              CreateObject(const UnsignedInt generalType,
                                        const std::string &ofType,
                                        const std::string &withName = "");
    
@@ -167,20 +167,20 @@ public:
 
    // method to return a list of strings representing the objects of the input
    // type that may be created in the system
-   const StringArray&     GetListOfItems(Gmat::ObjectType byType, 
+   const StringArray&     GetListOfItems(UnsignedInt byType,
                                 const std::string &withQualifier = "");
    const StringArray&     GetListOfAllItems();
    const StringArray&     GetListOfAllItemsExcept(const ObjectTypeArray &types);
-   const StringArray&     GetListOfViewableItems(Gmat::ObjectType byType);
-   const StringArray&     GetListOfUnviewableItems(Gmat::ObjectType byType);
+   const StringArray&     GetListOfViewableItems(UnsignedInt byType);
+   const StringArray&     GetListOfUnviewableItems(UnsignedInt byType);
    const ObjectTypeArrayMap& GetAllObjectTypeArrayMap();
    bool                   DoesObjectTypeMatchSubtype(
-                                const Gmat::ObjectType coreType,
+                                const UnsignedInt coreType,
                                 const std::string &theType,
                                 const std::string &theSubtype);
 
    // method to return the base type for the input string
-   Gmat::ObjectType       GetBaseTypeOf(const std::string &typeName);
+   UnsignedInt       GetBaseTypeOf(const std::string &typeName);
    
 protected:
    StringArray            entireList;
@@ -192,17 +192,17 @@ private:
    /// to create objects
    std::list<Factory*> factoryList;
    /// the list of object types that factory can create
-   std::list<Gmat::ObjectType> factoryTypeList;
+   std::list<UnsignedInt> factoryTypeList;
    /// the map of object types that factory can create
    ObjectTypeArrayMap objectTypeArrayMap;
    /// pointer to the only instance allowed for this singleton class
    static FactoryManager* onlyInstance;
    
    // private methods 
-   Factory*               FindFactory(Gmat::ObjectType ofType, const std::string &forType);
-   const StringArray&     GetList(Gmat::ObjectType ofType, const std::string &withQualifier);
-   const StringArray&     GetListOfViewables(Gmat::ObjectType ofType);
-   const StringArray&     GetListOfUnviewables(Gmat::ObjectType ofType);
+   Factory*               FindFactory(UnsignedInt ofType, const std::string &forType);
+   const StringArray&     GetList(UnsignedInt ofType, const std::string &withQualifier);
+   const StringArray&     GetListOfViewables(UnsignedInt ofType);
+   const StringArray&     GetListOfUnviewables(UnsignedInt ofType);
    
    // Hide the default constructor and destructor to preserve singleton status
    // default constructor

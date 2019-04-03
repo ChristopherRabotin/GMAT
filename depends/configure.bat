@@ -130,7 +130,7 @@ IF NOT EXIST %cspice_path%\%cspice_dir% (
 	
 	REM Download and extract CSPICE
 	echo -- Downloading CSPICE
-	"%run_curl%" https://naif.jpl.nasa.gov/pub/naif/toolkit/C/PC_Windows_VisualC_%cspice_type%/packages/cspice.zip > cspice.zip
+	"%run_curl%" ftp://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0065/C/PC_Windows_VisualC_%cspice_type%/packages/cspice.zip > cspice.zip
 	
 	"%run_7za%" x cspice.zip > nul
 	REN cspice %cspice_dir%

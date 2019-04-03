@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -392,7 +392,7 @@ void SpacecraftPanel::OnPageChange(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
-// bool RefreshObjects(Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT)
+// bool RefreshObjects(UnsignedInt type = Gmat::UNKNOWN_OBJECT)
 //------------------------------------------------------------------------------
 /**
  * Refreshes the tabs on the panel.  This is called when the coordinate system
@@ -401,7 +401,7 @@ void SpacecraftPanel::OnPageChange(wxCommandEvent &event)
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
-bool SpacecraftPanel::RefreshObjects(Gmat::ObjectType type)
+bool SpacecraftPanel::RefreshObjects(UnsignedInt type)
 {
    if (type == Gmat::COORDINATE_SYSTEM)
    {

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -86,11 +86,11 @@ public:
    // Inherited (GmatBase) methods
    virtual GmatBase*    Clone(void) const;
    
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
+                        GetRefObjectNameArray(const UnsignedInt type);
    virtual const StringArray& 
                         GetWrapperObjectNameArray(bool completeSet = false);
    
@@ -128,7 +128,7 @@ protected:
    void SetInternalCoordSystemToRunner(MathNode *node, CoordinateSystem *cs);
    void SetTransientForcesToRunner(MathNode *node, std::vector<PhysicalModel*> *tf);
    void SetPublisherToRunner(MathNode *node, Publisher *pub);
-   bool RenameParameter(MathNode *node, const Gmat::ObjectType type,
+   bool RenameParameter(MathNode *node, const UnsignedInt type,
                         const std::string &oldName, const std::string &newName);
    void CreateParameterNameArray(MathNode *node);
    void DeleteNode(MathNode *node);

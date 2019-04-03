@@ -284,7 +284,7 @@ GMAT EarthFull_ForceModel.ErrorControl = RSSStep;
 GMAT EarthFull_ForceModel.GravityField.Earth.Degree = 4;
 GMAT EarthFull_ForceModel.GravityField.Earth.Order = 0;
 GMAT EarthFull_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
-GMAT EarthFull_ForceModel.GravityField.Earth.EarthTideModel = 'None';
+GMAT EarthFull_ForceModel.GravityField.Earth.TideModel = 'None';
 GMAT EarthFull_ForceModel.SRP.Flux = 1367;
 GMAT EarthFull_ForceModel.SRP.Nominal_Sun = 149597870.691;
 

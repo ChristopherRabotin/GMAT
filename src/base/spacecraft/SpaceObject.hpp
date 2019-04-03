@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -41,7 +41,7 @@
 class GMAT_API SpaceObject : public SpacePoint
 {
 public:
-   SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr,
+   SpaceObject(UnsignedInt typeId, const std::string &typeStr,
                const std::string &instName);
    virtual ~SpaceObject();
    SpaceObject(const SpaceObject& so);
@@ -50,7 +50,11 @@ public:
    virtual Rvector6     GetLastState();
    virtual GmatState&   GetState();
    virtual Real         GetEpoch();
+   virtual GmatTime     GetEpochGT();
+
    virtual Real         SetEpoch(const Real ep);
+   virtual GmatTime     SetEpochGT(const GmatTime ep);
+
    virtual bool         IsManeuvering();
    virtual void         IsManeuvering(bool mnvrFlag);
    virtual const StringArray&
@@ -59,6 +63,13 @@ public:
    virtual void         ParametersHaveChanged(bool flag);
    
 //   virtual Integer GetParameterID(const std::string &str) const;
+   virtual GmatTime     GetGmatTimeParameter(const Integer id) const;
+   virtual GmatTime     SetGmatTimeParameter(const Integer id, 
+                                             const GmatTime value);
+   virtual GmatTime     GetGmatTimeParameter(const std::string &label) const;
+   virtual GmatTime     SetGmatTimeParameter(const std::string &label, 
+                                             const GmatTime value);
+
    virtual Real GetRealParameter(const Integer id) const;
    virtual Real GetRealParameter(const std::string &label) const;
    virtual Real SetRealParameter(const Integer id, const Real value);
@@ -87,8 +98,16 @@ public:
    virtual const Rvector6 GetMJ2000State(const A1Mjd &atTime);
    virtual const Rvector3 GetMJ2000Position(const A1Mjd &atTime);
    virtual const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime);
-   
-//   virtual std::string GetParameterText(const Integer id) const;
+
+   virtual const Rvector6 GetMJ2000State(const Real atTime) { return GetMJ2000State(A1Mjd(atTime)); };
+   virtual const Rvector3 GetMJ2000Position(const Real atTime) { return GetMJ2000Position(A1Mjd(atTime)); };
+   virtual const Rvector3 GetMJ2000Velocity(const Real atTime) { return GetMJ2000Velocity(A1Mjd(atTime)); };
+
+   virtual const Rvector6 GetMJ2000State(const GmatTime &atTime);
+   virtual const Rvector3 GetMJ2000Position(const GmatTime &atTime);
+   virtual const Rvector3 GetMJ2000Velocity(const GmatTime &atTime);
+
+   //   virtual std::string GetParameterText(const Integer id) const;
 //   virtual Gmat::ParameterType
 //                       GetParameterType(const Integer id) const;
 //   virtual std::string GetParameterTypeString(const Integer id) const;
@@ -98,6 +117,8 @@ public:
    virtual const std::string GetLastStopTriggered();
    virtual bool WasLastStopTriggered(const std::string &stopCondName);
    
+   virtual bool SetPrecisionTimeFlag(bool onOff);
+
    bool HasEphemPropagated();
    void HasEphemPropagated(bool tf);
    

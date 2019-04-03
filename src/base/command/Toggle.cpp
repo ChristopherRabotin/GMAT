@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -318,7 +318,7 @@ const ObjectTypeArray& Toggle::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Accesses arrays of names for referenced objects.
@@ -328,7 +328,7 @@ const ObjectTypeArray& Toggle::GetRefObjectTypeArray()
  * @return the StringArray containing the referenced object names.
  */
 //------------------------------------------------------------------------------
-const StringArray& Toggle::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Toggle::GetRefObjectNameArray(const UnsignedInt type)
 {
    // There are only subscribers, so ignore object type
    return subNames;
@@ -388,10 +388,10 @@ const std::string& Toggle::GetGeneratingString(Gmat::WriteMode mode,
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool Toggle::RenameRefObject(const Gmat::ObjectType type,
+bool Toggle::RenameRefObject(const UnsignedInt type,
                              const std::string &oldName,
                              const std::string &newName)
 {

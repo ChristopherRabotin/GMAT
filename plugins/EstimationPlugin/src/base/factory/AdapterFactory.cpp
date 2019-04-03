@@ -48,7 +48,7 @@ GmatBase* AdapterFactory::CreateObject(
 {
    return CreateMeasurementModel(ofType, withName);
 }
-/*
+
 //------------------------------------------------------------------------------
 // MeasurementModel *CreateMeasurementModel(const std::string & ofType,
 //      const std::string & withName)

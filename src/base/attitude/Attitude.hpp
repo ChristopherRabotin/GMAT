@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -107,8 +107,13 @@ public:
    virtual bool       Initialize();
 
    /// Methods to get/set the epoch and the reference coordinate system name
+//private:
    Real               GetEpoch() const;
    void               SetEpoch(Real toEpoch); // A1Mjd time
+//public:
+   GmatTime           GetEpochGT() const;
+   void               SetEpochGT(GmatTime toEpoch); // A1Mjd time
+
    void               NeedsReinitialization();
 
    virtual void       SetOwningSpacecraft(GmatBase *theSC);
@@ -150,17 +155,17 @@ public:
                        { return isInitialized; };
 
    /// methods to access object parameters
-   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual std::string GetRefObjectName(const UnsignedInt type) const;
    virtual const StringArray&
-                       GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool        SetRefObjectName(const Gmat::ObjectType type,
+                       GetRefObjectNameArray(const UnsignedInt type);
+   virtual bool        SetRefObjectName(const UnsignedInt type,
                                         const std::string &name);
-   virtual bool        RenameRefObject(const Gmat::ObjectType type,
+   virtual bool        RenameRefObject(const UnsignedInt type,
                                        const std::string &oldName,
                                        const std::string &newName);
-   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*   GetRefObject(const UnsignedInt type,
                                     const std::string &name);
-   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool        SetRefObject(GmatBase *obj, const UnsignedInt type,
                                     const std::string &name = "");
    virtual bool        HasRefObjectTypeArray();
    virtual const ObjectTypeArray&
@@ -172,12 +177,19 @@ public:
    virtual Gmat::ParameterType
                        GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
-   virtual Gmat::ObjectType
+   virtual UnsignedInt
                         GetPropertyObjectType(const Integer id) const;
    virtual bool         CanAssignStringToObjectProperty(const Integer id) const;
 
    virtual bool        IsParameterReadOnly(const Integer id) const;
    virtual bool        IsParameterReadOnly(const std::string &label) const;
+
+   virtual GmatTime     GetGmatTimeParameter(const Integer id) const;
+   virtual GmatTime     SetGmatTimeParameter(const Integer id, 
+                                             const GmatTime value);
+   virtual GmatTime     GetGmatTimeParameter(const std::string &label) const;
+   virtual GmatTime     SetGmatTimeParameter(const std::string &label, 
+                                             const GmatTime value);
    
    virtual Real        GetRealParameter(const Integer id) const;
    virtual Real        GetRealParameter(const std::string &label) const;
@@ -345,6 +357,7 @@ protected:
    
    /// initial user-supplied epoch as an A1Mjd time (as Real)
    Real                  epoch;
+   GmatTime              epochGT;
 
    // pointer to the owning spacecraft
    GmatBase              *owningSC;
@@ -373,6 +386,8 @@ protected:
    /// last time that the CosineMatrix and angular velocity
    /// were computed                     
    Real                  attitudeTime;
+   GmatTime              attitudeTimeGT;
+
    /// the last computed quaternion
    Rvector               quaternion;
    /// the last computed MRPs - Dunn Added

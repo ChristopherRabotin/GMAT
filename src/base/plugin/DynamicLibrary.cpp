@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -457,4 +457,105 @@ Gmat::PluginResource *DynamicLibrary::GetMenuEntry(Integer index)
    }
 
    return NULL;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetGuiToolkitName()
+//------------------------------------------------------------------------------
+/**
+ * Method used to identify the toolkit needed for GUI plugin elements
+ *
+ * @return The name of the required toolkit (wxWidgets, for example).
+ */
+//------------------------------------------------------------------------------
+std::string DynamicLibrary::GetGuiToolkitName()
+{
+   if (libHandle == NULL)
+      throw GmatBaseException("Library " + libName + " has not been opened "
+            "successfully; cannot check the supported GUI toolkit\n");
+
+   std::string retval = "";
+
+   // Test to see if there is a TriggerManager count function
+   try
+   {
+      std::string (*ToolkitName)() = NULL;
+
+      ToolkitName = (std::string(*)())GetFunction("GetGuiToolkitName");
+      retval = ToolkitName();
+   }
+   catch (GmatBaseException &)
+   {
+      // Ignored -- Just indicates that there are no menu entries
+   }
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetGuiFactoryCount()
+//------------------------------------------------------------------------------
+/**
+ * Returns the number of GUI factory components supplied by a plugin
+ *
+ * @return The factory count
+ */
+//------------------------------------------------------------------------------
+Integer DynamicLibrary::GetGuiFactoryCount()
+{
+   if (libHandle == NULL)
+      throw GmatBaseException("Library " + libName + " has not been opened "
+            "successfully; cannot check the factory count\n");
+
+   Integer retval = 0;
+
+   // Test to see if there is a GUI factory count function
+   try
+   {
+      Integer (*FactoryCount)() = NULL;
+
+      FactoryCount = (Integer(*)())GetFunction("GetGuiFactoryCount");
+      retval = FactoryCount();
+   }
+   catch (GmatBaseException &)
+   {
+      // Ignored -- Just indicates that there are no GUI factories
+   }
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// GuiFactory* GetGuiFactory(const Integer whichOne)
+//------------------------------------------------------------------------------
+/**
+ * Returns a GUI factory that matches the toolkit used for the GUI.
+ *
+ * Implementors of GMAT GUIs need to implement the toolkit specific interfaces
+ * needed to support plugin widgets for the toolkit.  The GMAT base code
+ * interface only supplies the top level connection needed to start the process.
+ *
+ * @param whichOne The index for the GUI factory
+ *
+ * @return The corresponding factory
+ */
+//------------------------------------------------------------------------------
+GuiFactory* DynamicLibrary::GetGuiFactory(const Integer whichOne)
+{
+   GuiFactory *theFactory = NULL;
+
+   if (libHandle == NULL)
+      throw GmatBaseException("Library " + libName + " has not been opened "
+            "successfully; cannot search for factories\n");
+
+   GuiFactory* (*GetFactory)(Integer) = NULL;
+   GetFactory = (GuiFactory*(*)(Integer))GetFunction("GetGuiFactory");
+
+   theFactory = GetFactory(whichOne);
+   if (theFactory == NULL)
+      MessageInterface::ShowMessage(
+            "Cannot access GUI factory #%d in the \"%s\" library\n", whichOne,
+            libName.c_str());
+
+   return theFactory;
 }

@@ -110,7 +110,7 @@ GNDopplerAdapter::~GNDopplerAdapter()
 //------------------------------------------------------------------------------
 GNDopplerAdapter::GNDopplerAdapter(const GNDopplerAdapter& da) :
    RangeAdapterKm         (da),
-   adapterS               (NULL),
+   //adapterS               (NULL),
    turnaround             (da.turnaround),
    uplinkFreqE            (da.uplinkFreqE),
    freqBandE              (da.freqBandE),
@@ -121,6 +121,13 @@ GNDopplerAdapter::GNDopplerAdapter(const GNDopplerAdapter& da) :
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("GNDopplerAdapter copy constructor   from <%p> to <%p>\n", &da, this);
 #endif
+   if (adapterS)
+   {
+      delete adapterS;
+      adapterS = NULL;
+   }
+   if (da.adapterS)
+      adapterS = (RangeAdapterKm*)da.adapterS->Clone();
 }
 
 
@@ -516,7 +523,7 @@ bool GNDopplerAdapter::SetBooleanParameter(const std::string &label, const bool 
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string& oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string& oldName,
 //       const std::string& newName)
 //------------------------------------------------------------------------------
 /**
@@ -529,7 +536,7 @@ bool GNDopplerAdapter::SetBooleanParameter(const std::string &label, const bool 
  * @return true if a rename happened, false if not
  */
 //------------------------------------------------------------------------------
-bool GNDopplerAdapter::RenameRefObject(const Gmat::ObjectType type,
+bool GNDopplerAdapter::RenameRefObject(const UnsignedInt type,
       const std::string& oldName, const std::string& newName)
 {
    // Handle additional renames specific to this adapter
@@ -541,7 +548,7 @@ bool GNDopplerAdapter::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase* obj, const UnsignedInt type,
 //       const std::string& name)
 //------------------------------------------------------------------------------
 /**
@@ -555,7 +562,7 @@ bool GNDopplerAdapter::RenameRefObject(const Gmat::ObjectType type,
  */
 //------------------------------------------------------------------------------
 bool GNDopplerAdapter::SetRefObject(GmatBase* obj,
-      const Gmat::ObjectType type, const std::string& name)
+      const UnsignedInt type, const std::string& name)
 {
    bool retval = adapterS->SetRefObject(obj, type, name);
    retval = RangeAdapterKm::SetRefObject(obj, type, name) && retval;
@@ -564,7 +571,7 @@ bool GNDopplerAdapter::SetRefObject(GmatBase* obj,
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase* obj, const UnsignedInt type,
 //       const std::string& name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -579,7 +586,7 @@ bool GNDopplerAdapter::SetRefObject(GmatBase* obj,
  */
 //------------------------------------------------------------------------------
 bool GNDopplerAdapter::SetRefObject(GmatBase* obj,
-      const Gmat::ObjectType type, const std::string& name, const Integer index)
+      const UnsignedInt type, const std::string& name, const Integer index)
 {
    bool retval = adapterS->SetRefObject(obj, type, name, index);
    retval = RangeAdapterKm::SetRefObject(obj, type, name, index) && retval;
@@ -681,7 +688,8 @@ bool GNDopplerAdapter::Initialize()
  */
 //------------------------------------------------------------------------------
 const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
-      ObservationData* forObservation, std::vector<RampTableData>* rampTable)
+      ObservationData* forObservation, std::vector<RampTableData>* rampTable,
+      bool forSimulation)
 {
    #ifdef DEBUG_DOPPLER_CALCULATION
       MessageInterface::ShowMessage("GNDopplerAdapter::CalculateMeasurement(%s, "
@@ -717,9 +725,10 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
    addNoise = false;
    addBias = false;
    rangeOnly = true;
-   RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
+   RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB, forSimulation);
    measDataE = cMeasurement;
    measDataE.value[0] = (measDataE.value[0] - 2 * GetIonoCorrection());
+   measDataE.correction[0] = (measDataE.correction[0] - 2 * GetIonoCorrection());
    
    addNoise = addNoiseOption;
    addBias = addBiasOption;
@@ -737,13 +746,14 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
       MessageInterface::ShowMessage("Compute range for S-Path...\n");
    #endif
    // 3.1. Measurement time is the same as the one for End-path
-   GmatTime tm = cMeasurement.epoch;         // Get measurement time
+   GmatTime tm = cMeasurement.epochGT;       // Get measurement time
    ObservationData* obData = NULL;
    if (forObservation)
       obData = new ObservationData(*forObservation);
    else
       obData = new ObservationData();
-   obData->epoch = tm.GetMjd();
+   obData->epochGT = tm;
+   obData->epoch   = tm.GetMjd();
    
    // Set doppler count interval to MeasureModel object due to the Start-path
    // is measured earlier by number of seconds shown in doppler count interval
@@ -753,15 +763,16 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
    adapterS->AddBias(false);
    adapterS->AddNoise(false);
    adapterS->SetRangeOnly(true);
-
-   adapterS->CalculateMeasurement(withEvents, obData, rampTB);
+   
+   adapterS->CalculateMeasurement(withEvents, obData, rampTB, forSimulation);
+   
    if (obData)
       delete obData;
-
+   
    measDataS = adapterS->GetMeasurement();
    // measDataS.value[0] = measDataS.value[0] / adapterS->GetMultiplierFactor();                                         // convert to full range in km
    measDataS.value[0] = (measDataS.value[0] - 2 * adapterS->GetIonoCorrection()) / adapterS->GetMultiplierFactor();      // convert to full range in km
-
+   measDataS.correction[0] = (measDataS.correction[0] - 2 * adapterS->GetIonoCorrection()) / adapterS->GetMultiplierFactor();      // convert to full range in km
 
    // Set value for isFeasible, feasibilityValue, and unfeasibleReason for measurement
    if ((measDataE.unfeasibleReason.at(0) == 'B') || (measDataS.unfeasibleReason.at(0) == 'B'))
@@ -775,7 +786,6 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
          cMeasurement.feasibilityValue = measDataS.feasibilityValue;
       }
    }
-
 
    // 3.2. Specify uplink frequency and band for Start path
    // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
@@ -823,14 +833,74 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
       // 4.1. Calculate GN Doppler w/o noise and bias
       dtS  = measDataS.value[0];              // real travel length for S-path   (unit: Km)
       dtE  = measDataE.value[0];              // real travel length for S-path   (unit: Km)
-      dtdt = dtE - dtS;                       // real travel difference          (unit: Km)
+      
+      if (USE_TAYLOR_SERIES || USE_CHEBYSHEV_DIFFERENCE)
+      {
+         dtdt = 0;
+         for (UnsignedInt j = 0; j < measDataS.rangeVecs.size() && j < measDataE.rangeVecs.size(); j++)
+         {
+            Rvector3 signalVecS = *measDataS.rangeVecs[j] / adapterS->GetMultiplierFactor();
+            Rvector3 signalVecE = *measDataE.rangeVecs[j];
+            Rvector3 delta;
+
+            if (USE_CHEBYSHEV_DIFFERENCE)
+            {
+               Rvector3 bodyDelta;
+               Rvector3 chebyDelta;
+
+               SpacePoint *tBody = measDataS.tBodies[j];
+               SpacePoint *rBody = measDataS.rBodies[j];
+
+               Rvector3 deltaR = *measDataE.rLocs[j] - *measDataS.rLocs[j];
+               Rvector3 deltaT = *measDataE.tLocs[j] - *measDataS.tLocs[j];
+
+               if (tBody->IsOfType(Gmat::CELESTIAL_BODY))
+               {
+                  bodyDelta = ((CelestialBody*) tBody)->GetPositionDeltaSSB(measDataS.tPrecTimes[j], measDataE.tPrecTimes[j]);
+                  chebyDelta += -bodyDelta;
+               }
+               else
+               {
+                  throw MeasurementException("Unable to calculate Chebyshev difference for \"" +
+                         tBody->GetName() + "\", the central body of each signal participant "
+                         "must be a CelestialBody for Chebyshev differencing.");
+               }
+
+               if (rBody->IsOfType(Gmat::CELESTIAL_BODY))
+               {
+                  bodyDelta = ((CelestialBody*) rBody)->GetPositionDeltaSSB(measDataS.rPrecTimes[j], measDataE.rPrecTimes[j]);
+                  chebyDelta += bodyDelta;
+               }
+               else
+               {
+                  throw MeasurementException("Unable to calculate Chebyshev difference for \"" +
+                         rBody->GetName() + "\", the central body of each signal participant "
+                         "must be a CelestialBody for Chebyshev differencing.");
+               }
+
+               delta = chebyDelta + deltaR - deltaT;
+            }
+            else
+            {
+               delta = signalVecE - signalVecS;
+            }
+
+            dtdt += PathMagnitudeDelta(signalVecS, delta);
+         }
+         dtdt += measDataE.correction[0] - measDataS.correction[0];
+      }
+      else
+      {
+         dtdt = dtE - dtS;                       // real travel difference          (unit: Km)
+      }
+
       cMeasurement.value[i] = dtdt/dopplerCountInterval;  // GN doppler                      (unit: km/s)
 
       cMeasurement.uplinkFreq = uplinkFreq*1.0e6;                       // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
       cMeasurement.uplinkFreqAtRecei = uplinkFreqAtRecei*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreqAtRecei's unit is Hz
       cMeasurement.uplinkBand = freqBand;
       cMeasurement.dopplerCountInterval = dopplerCountInterval;
-
+      
       // 4.2. Add noise and bias if possible
       Real C_idealVal = cMeasurement.value[i];
       
@@ -877,6 +947,7 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("===================================================================\n");
          MessageInterface::ShowMessage("====  GNDopplerAdapter: Range Calculation for Measurement Data %dth\n", i);
          MessageInterface::ShowMessage("===================================================================\n");
+         MessageInterface::ShowMessage("      . Measurement epoch             : %.12lf\n", cMeasurement.epochGT.GetMjd());
          MessageInterface::ShowMessage("      . Measurement type              : <%s>\n", measurementType.c_str());
          MessageInterface::ShowMessage("      . Noise adding option           : %s\n", (addNoise?"true":"false"));
          MessageInterface::ShowMessage("      . Doppler count interval        : %.12lf seconds\n", dopplerCountInterval);

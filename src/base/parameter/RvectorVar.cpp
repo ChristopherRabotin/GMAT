@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -75,8 +75,8 @@ RvectorVar::PARAMETER_TYPE[RvectorVarParamCount - ParameterParamCount] =
 RvectorVar::RvectorVar(const std::string &name, const std::string &typeStr,
                        GmatParam::ParameterKey key, GmatBase *obj,
                        const std::string &desc, const std::string &unit,
-                       GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
-                       bool isTimeParam, bool isSettable, Gmat::ObjectType ownedObjType,
+                       GmatParam::DepObject depObj, UnsignedInt ownerType,
+                       bool isTimeParam, bool isSettable, UnsignedInt ownedObjType,
                        Integer size)
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, false, isSettable, 
                false, true, ownedObjType)
@@ -172,6 +172,7 @@ bool RvectorVar::operator!=(const RvectorVar &param) const
 //------------------------------------------------------------------------------
 std::string RvectorVar::ToString()
 {
+   Evaluate(); // WCS 2018.01.09 add to get latest & correct value to report(s)
    return mRvectorValue.ToString();
 }
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -88,6 +88,31 @@ public:
 //   void                       SolveFor(std::string whichOne = "");
 //   void                       Consider(std::string whichOne = "");
 
+   /// Get estimation epoch
+   GmatTime                   GetEstimationEpochGT();
+
+   /// Get estimation state in form of participant's state type. State in form of Cr_Epsilon and Cd_Epsilon
+   GmatState                  GetEstimationState();
+   GmatState*                 SetEstimationState(GmatState& inputState);
+
+
+   /// Get estimation state in MJ2000Eq Cartesian coordinate system. State in form of Cr_Epsilon and Cd_Epsilon
+   GmatState                  GetEstimationMJ2000EqCartesianState();
+
+   /// Get estimation state in participant's Cartesian coordinate system. State in form of Cr_Epsilon and Cd_Epsilon
+   GmatState                  GetEstimationCartesianState();
+   
+   /// Get estimation state in form of participant's state type. State in form of Cr and Cd
+   GmatState                  GetEstimationStateForReport(std::string anomalyType = "TA");
+
+   /// Get estimation state in form of participant's Cartesian state type. State in form of Cr and Cd
+   GmatState                  GetEstimationCartesianStateForReport();
+
+   
+   Rmatrix66                  CartesianToKeplerianCoverianceConvertionMatrix(GmatBase* obj, const Rvector6 state);
+   Rmatrix                    CartToSolveForStateConversionDerivativeMatrix();
+   Rmatrix                    SolveForStateToKeplConversionDerivativeMatrix();
+
 protected:
    // Attributes
 
@@ -160,6 +185,20 @@ protected:
 
 private:
    StringArray                GetSolveForList(GmatBase* obj);
+
+   /// Get participant's state in its own coordinate system and in a specify state type
+   Rvector6                   GetParticipantState(GmatBase* spaceObj, std::string inStateType, std::string anomalyType = "MA");
+   bool                       SetParticipantState(GmatBase* spaceObj, Rvector6& inputState, std::string inStateType);
+
+   /// Get participant's state in MJ2000Eq coordinate system and in a specify state type
+   Rvector6                   GetParticipantMJ2000EqState(GmatBase* spaceObj, std::string inStateType, std::string anomalyType = "MA");
+   bool                       SetParticipantMJ2000EqState(GmatBase* spaceObj, Rvector6& inputState, std::string inStateType);
+
+   /// Get participant's state in its own coordinate system and Cartesian state type
+   Rvector                    GetParticipantCartesianState(GmatBase* spaceObj);
+
+   /// Get participant's state in MJ2000Eq Cartesian coordinate system
+   Rvector                    GetParticipantMJ2000EqCartesianState(GmatBase* spaceObj);
 
 };
 

@@ -494,27 +494,8 @@ bool GPSPointMeasureModel::InitializePointModel()
  * @return true if the the calculation succeeded, false if not
  */
 //------------------------------------------------------------------------------
-//bool GPSPointMeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrection,
-//   ObservationData* forObservation, std::vector<RampTableData>* rampTB,
-//   Real atTimeOffset, Integer forStrand)
-//{
-//#ifdef DEBUG_EXECUTION
-//   MessageInterface::ShowMessage(" Enter GPSPointMeasureModel::CalculateMeasurement(%s, <%p>, <%p>)\n", (withEvents?"true":"false"), forObservation, rampTB); 
-//#endif
-//
-//   bool retval = false;   
-//   retval = CalculatePointMeasurement(withEvents, withMediaCorrection, forObservation, rampTB, atTimeOffset, forStrand);
-//
-//#ifdef DEBUG_EXECUTION
-//   MessageInterface::ShowMessage(" Exit GPSPointMeasureModel::CalculateMeasurement(%s, <%p>, <%p>)\n", (withEvents ? "true" : "false"), forObservation, rampTB);
-//#endif
-//
-//   return retval;
-//}
-//
-
 bool GPSPointMeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrection,
-   ObservationData* forObservation, std::vector<RampTableData>* rampTB,
+   ObservationData* forObservation, std::vector<RampTableData>* rampTB, bool forSImulation, 
    Real atTimeOffset, Integer forStrand)
 {
 #ifdef DEBUG_EXECUTION
@@ -543,7 +524,9 @@ bool GPSPointMeasureModel::CalculateMeasurement(bool withEvents, bool withMediaC
 
    GmatTime forEpoch;
    if (forObservation)
-      forEpoch = forObservation->epoch;
+   {
+      forEpoch = forObservation->epochGT;
+   }
    else // Grab epoch from the first SpaceObject in the participant data
    {
       for (UnsignedInt i = 0; i < candidates.size(); ++i)

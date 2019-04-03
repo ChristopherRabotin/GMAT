@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -44,7 +44,7 @@
 //------------------------------------------------------------------------------
 // SolverReal(const std::string &name, const std::string &typeStr,
 //         GmatBase *obj, const std::string &desc,
-//         const std::string &unit, Gmat::ObjectType ownerType,
+//         const std::string &unit, UnsignedInt ownerType,
 //         GmatParam::DepObject depObj)
 //------------------------------------------------------------------------------
 /**
@@ -61,7 +61,7 @@
 //------------------------------------------------------------------------------
 SolverReal::SolverReal(const std::string &name, const std::string &typeStr,
                  GmatBase *obj, const std::string &desc,
-                 const std::string &unit, Gmat::ObjectType ownerType,
+                 const std::string &unit, UnsignedInt ownerType,
                  GmatParam::DepObject depObj)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit, depObj,
              ownerType, false, false)
@@ -212,10 +212,10 @@ bool SolverReal::Initialize()
 //-------------------------------------
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool SolverReal::RenameRefObject(const Gmat::ObjectType type,
+bool SolverReal::RenameRefObject(const UnsignedInt type,
                               const std::string &oldName,
                               const std::string &newName)
 {
@@ -223,7 +223,7 @@ bool SolverReal::RenameRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
+// virtual std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Calls SolverData to get reference object name for given type.
@@ -231,7 +231,7 @@ bool SolverReal::RenameRefObject(const Gmat::ObjectType type,
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-std::string SolverReal::GetRefObjectName(const Gmat::ObjectType type) const
+std::string SolverReal::GetRefObjectName(const UnsignedInt type) const
 {
    std::string objName = SolverData::GetRefObjectName(type);
    
@@ -247,7 +247,7 @@ std::string SolverReal::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves reference object name array for given type. It will return all
@@ -257,14 +257,14 @@ std::string SolverReal::GetRefObjectName(const Gmat::ObjectType type) const
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-const StringArray& SolverReal::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& SolverReal::GetRefObjectNameArray(const UnsignedInt type)
 {
    return SolverData::GetRefObjectNameArray(type);
 }
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObjectName(const Gmat::ObjectType type,
+// virtual bool SetRefObjectName(const UnsignedInt type,
 //                               const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -275,14 +275,14 @@ const StringArray& SolverReal::GetRefObjectNameArray(const Gmat::ObjectType type
  *
  */
 //------------------------------------------------------------------------------
-bool SolverReal::SetRefObjectName(const Gmat::ObjectType type,
+bool SolverReal::SetRefObjectName(const UnsignedInt type,
                                const std::string &name)
 {
    return SolverData::SetRefObjectName(type, name);
 }
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+// virtual GmatBase* GetRefObject(const UnsignedInt type,
 //                                const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -294,14 +294,14 @@ bool SolverReal::SetRefObjectName(const Gmat::ObjectType type,
  * @return reference object pointer for given object type and name
  */
 //------------------------------------------------------------------------------
-GmatBase* SolverReal::GetRefObject(const Gmat::ObjectType type,
+GmatBase* SolverReal::GetRefObject(const UnsignedInt type,
                                 const std::string &name)
 {
    return SolverData::GetRefObject(type, name);
 }
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -315,7 +315,7 @@ GmatBase* SolverReal::GetRefObject(const Gmat::ObjectType type,
  *
  */
 //------------------------------------------------------------------------------
-bool SolverReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool SolverReal::SetRefObject(GmatBase *obj, const UnsignedInt type,
                            const std::string &name)
 {
    return SolverData::SetRefObject(obj, type, name);

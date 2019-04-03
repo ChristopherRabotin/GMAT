@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -108,13 +108,13 @@ GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
    "Integer",     "UnsignedInt", "UnsignedIntArray", "IntegerArray", "Real",
    "RealElement", "String",      "StringArray",      "Boolean",      "BooleanArray",
    "Rvector",     "Rmatrix",     "Time",             "Object",       "ObjectArray",
-   "OnOff",       "Enumeration", "Filename",         "Color"
+   "OnOff",       "Enumeration", "Filename",         "Color",        "GmatTime"
 };
 
 /**
  * Build the list of object type names
  *
- * This list needs to be synchronized with the Gmat::ObjectType list found in
+ * This list needs to be synchronized with the UnsignedInt list found in
  * base/include/gmatdefs.hpp
  */
 const std::string
@@ -138,7 +138,7 @@ GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
 /**
  * Build the list of automatic global settings
  *
- * This list needs to be synchronized with the Gmat::ObjectType list found in
+ * This list needs to be synchronized with the UnsignedInt list found in
  * base/include/gmatdefs.hpp
  *
  * Current automatic global objects: Propagator, CoordinateSystem, Function, PropSetup
@@ -172,12 +172,12 @@ Integer GmatBase::instanceCount = 0;
 //-------------------------------------
 
 //---------------------------------------------------------------------------
-//  GmatBase(Gmat::ObjectTypes typeId, std::string &typeStr, std::string &nomme)
+//  GmatBase(UnsignedInts typeId, std::string &typeStr, std::string &nomme)
 //---------------------------------------------------------------------------
 /**
  * Constructs base GmatBase structures used in GMAT extensible classes.
  *
- * @param <typeId> Gmat::ObjectTypes enumeration for the object.
+ * @param <typeId> UnsignedInts enumeration for the object.
  * @param <typeStr> GMAT script string associated with this type of object.
  * @param <nomme> Optional name for the object.  Defaults to "".
  *
@@ -185,7 +185,7 @@ Integer GmatBase::instanceCount = 0;
  *       must pass in the typeId and typeStr parameters.
  */
 //------------------------------------------------------------------------------
-GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
+GmatBase::GmatBase(const UnsignedInt typeId, const std::string &typeStr,
                    const std::string &nomme) :
    parameterCount             (GmatBaseParamCount),
    typeName                   (typeStr),
@@ -204,7 +204,8 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    showInlineComment          (true),
    cloaking                   (false),
    blockCommandModeAssignment (true),
-   writeEmptyStringArray      (false)
+   writeEmptyStringArray      (false),
+   hasPrecisionTime           (false)
 {
    attributeCommentLines.clear();
    attributeInlineComments.clear();
@@ -306,7 +307,8 @@ GmatBase::GmatBase(const GmatBase &a) :
     covarianceIds             (a.covarianceIds),
     covarianceSizes           (a.covarianceSizes),
     covariance                (a.covariance),
-    writeEmptyStringArray     (a.writeEmptyStringArray)
+    writeEmptyStringArray     (a.writeEmptyStringArray),
+    hasPrecisionTime          (a.hasPrecisionTime)
 {
    // one more instance - add to the instanceCount
    ++instanceCount;
@@ -365,13 +367,14 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    covarianceSizes           = a.covarianceSizes;
    covariance                = a.covariance;
    writeEmptyStringArray     = a.writeEmptyStringArray;
+   hasPrecisionTime          = a.hasPrecisionTime;
 
    return *this;
 }
 
 
 //---------------------------------------------------------------------------
-//  Gmat::ObjectTypes GetType() const
+//  UnsignedInts GetType() const
 //---------------------------------------------------------------------------
 /**
  * Retrieve the enumerated base type for the object
@@ -379,7 +382,7 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
  * @return Enumeration value for this object
  */
 //------------------------------------------------------------------------------
-Gmat::ObjectType GmatBase::GetType() const
+UnsignedInt GmatBase::GetType() const
 {
    return type;
 }
@@ -431,7 +434,7 @@ Integer GmatBase::GetParameterCount() const
 
 
 //---------------------------------------------------------------------------
-//  bool IsOfType(Gmat::ObjectType ofType)
+//  bool IsOfType(UnsignedInt ofType)
 //---------------------------------------------------------------------------
 /**
 * Detects if the object is a specified type.
@@ -441,7 +444,7 @@ Integer GmatBase::GetParameterCount() const
  * @return true is the class was derived from the type, false if not.
  */
 //---------------------------------------------------------------------------
-bool GmatBase::IsOfType(Gmat::ObjectType ofType) const
+bool GmatBase::IsOfType(UnsignedInt ofType) const
 {
    #ifdef DEBUG_OBJECT_TYPE_CHECKING
    MessageInterface::ShowMessage
@@ -594,7 +597,7 @@ bool GmatBase::GetShowInlineComment()
 
 
 //---------------------------------------------------------------------------
-//  std::string GetRefObjectName(const Gmat::ObjectType type) const
+//  std::string GetRefObjectName(const UnsignedInt type) const
 //---------------------------------------------------------------------------
 /**
  * Returns the name of the reference object. (Derived classes should implement
@@ -605,7 +608,7 @@ bool GmatBase::GetShowInlineComment()
  * @return The name of the reference object.
  */
 //------------------------------------------------------------------------------
-std::string GmatBase::GetRefObjectName(const Gmat::ObjectType type) const
+std::string GmatBase::GetRefObjectName(const UnsignedInt type) const
 {
    throw GmatBaseException("Reference Object not defined for " + typeName +
                            " named \"" + instanceName + "\"\n");
@@ -648,7 +651,7 @@ const ObjectTypeArray& GmatBase::GetRefObjectTypeArray()
 
 
 //---------------------------------------------------------------------------
-//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//  const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //---------------------------------------------------------------------------
 /**
  * Returns the names of the reference object. (Derived classes should implement
@@ -659,7 +662,7 @@ const ObjectTypeArray& GmatBase::GetRefObjectTypeArray()
  * @return The names of the reference object.
  */
 //------------------------------------------------------------------------------
-const StringArray& GmatBase::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& GmatBase::GetRefObjectNameArray(const UnsignedInt type)
 {
    // Changed to return empty array (LOJ: 2010.05.13)
    refObjectNames.clear();
@@ -667,7 +670,7 @@ const StringArray& GmatBase::GetRefObjectNameArray(const Gmat::ObjectType type)
 }
 
 //---------------------------------------------------------------------------
-//  bool SetRefObjectName(const Gmat::ObjectType type, const char *name)
+//  bool SetRefObjectName(const UnsignedInt type, const char *name)
 //---------------------------------------------------------------------------
 /**
  * Sets the name of the reference object.  (Derived classes should implement
@@ -679,14 +682,14 @@ const StringArray& GmatBase::GetRefObjectNameArray(const Gmat::ObjectType type)
  * @return success of the operation.
  */
 //------------------------------------------------------------------------------
-bool GmatBase::SetRefObjectName(const Gmat::ObjectType type,
+bool GmatBase::SetRefObjectName(const UnsignedInt type,
                                 const char *name)
 {
    return SetRefObjectName(type, std::string(name));
 }
 
 //---------------------------------------------------------------------------
-//  bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+//  bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //---------------------------------------------------------------------------
 /**
  * Sets the name of the reference object.  (Derived classes should implement
@@ -698,7 +701,7 @@ bool GmatBase::SetRefObjectName(const Gmat::ObjectType type,
  * @return success of the operation.
  */
 //------------------------------------------------------------------------------
-bool GmatBase::SetRefObjectName(const Gmat::ObjectType type,
+bool GmatBase::SetRefObjectName(const UnsignedInt type,
                                 const std::string &name)
 {
    std::string objName = typeName;
@@ -710,7 +713,7 @@ bool GmatBase::SetRefObjectName(const Gmat::ObjectType type,
 }
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 /**
@@ -723,7 +726,7 @@ bool GmatBase::SetRefObjectName(const Gmat::ObjectType type,
  * @return true if object name changed, false if not.
  */
 //------------------------------------------------------------------------------
-bool GmatBase::RenameRefObject(const Gmat::ObjectType type,
+bool GmatBase::RenameRefObject(const UnsignedInt type,
                                const std::string &oldName,
                                const std::string &newName)
 {
@@ -735,7 +738,7 @@ bool GmatBase::RenameRefObject(const Gmat::ObjectType type,
 }
 
 //---------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name)
 //---------------------------------------------------------------------------
 /**
  * Returns the reference object pointer.  (Derived classes should implement
@@ -747,7 +750,7 @@ bool GmatBase::RenameRefObject(const Gmat::ObjectType type,
  * @return reference object pointer.
  */
 //------------------------------------------------------------------------------
-GmatBase* GmatBase::GetRefObject(const Gmat::ObjectType type,
+GmatBase* GmatBase::GetRefObject(const UnsignedInt type,
                                  const std::string &name)
 {
    std::string objName = typeName;
@@ -760,7 +763,7 @@ GmatBase* GmatBase::GetRefObject(const Gmat::ObjectType type,
 
 
 //---------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name,
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name,
 //                        const Integer index)
 //---------------------------------------------------------------------------
 /**
@@ -774,7 +777,7 @@ GmatBase* GmatBase::GetRefObject(const Gmat::ObjectType type,
  * @return reference object pointer.
  */
 //------------------------------------------------------------------------------
-GmatBase* GmatBase::GetRefObject(const Gmat::ObjectType type,
+GmatBase* GmatBase::GetRefObject(const UnsignedInt type,
                                  const std::string &name, const Integer index)
 {
    std::stringstream indexString;
@@ -789,7 +792,7 @@ GmatBase* GmatBase::GetRefObject(const Gmat::ObjectType type,
 }
 
 //---------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name)
 //---------------------------------------------------------------------------
 /**
@@ -803,7 +806,7 @@ GmatBase* GmatBase::GetRefObject(const Gmat::ObjectType type,
  * @return success of the operation.
  */
 //------------------------------------------------------------------------------
-bool GmatBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool GmatBase::SetRefObject(GmatBase *obj, const UnsignedInt type,
                             const std::string &name)
 {
    std::string objName = typeName;
@@ -816,7 +819,7 @@ bool GmatBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //---------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name, const Integer index)
 //---------------------------------------------------------------------------
 /**
@@ -831,7 +834,7 @@ bool GmatBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return success of the operation.
  */
 //------------------------------------------------------------------------------
-bool GmatBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool GmatBase::SetRefObject(GmatBase *obj, const UnsignedInt type,
                             const std::string &name, const Integer index)
 {
    std::stringstream indexString;
@@ -847,7 +850,7 @@ bool GmatBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //---------------------------------------------------------------------------
-//  ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+//  ObjectArray& GetRefObjectArray(const UnsignedInt type)
 //---------------------------------------------------------------------------
 /**
  * Obtains an array of GmatBase pointers by type.
@@ -857,7 +860,7 @@ bool GmatBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return Reference to the array.  This default method returns an empty vector.
  */
 //------------------------------------------------------------------------------
-ObjectArray& GmatBase::GetRefObjectArray(const Gmat::ObjectType type)
+ObjectArray& GmatBase::GetRefObjectArray(const UnsignedInt type)
 {
    static ObjectArray oa;
    oa.clear();
@@ -866,7 +869,7 @@ ObjectArray& GmatBase::GetRefObjectArray(const Gmat::ObjectType type)
 
 
 //---------------------------------------------------------------------------
-//  ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+//  ObjectArray& GetRefObjectArray(const UnsignedInt type)
 //---------------------------------------------------------------------------
 /**
  * Obtains an array of GmatBase pointers based on a string (e.g. the typename).
@@ -1704,7 +1707,7 @@ bool GmatBase::ParameterUpdatesAfterSuperposition(const Integer id) const
 
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Retrieves object type of parameter of given id.
@@ -1714,7 +1717,7 @@ bool GmatBase::ParameterUpdatesAfterSuperposition(const Integer id) const
  * @return parameter ObjectType
  */
 //---------------------------------------------------------------------------
-Gmat::ObjectType GmatBase::GetPropertyObjectType(const Integer id) const
+UnsignedInt GmatBase::GetPropertyObjectType(const Integer id) const
 {
    return Gmat::UNKNOWN_OBJECT;
 }
@@ -1798,6 +1801,50 @@ bool GmatBase::IsSquareBracketAllowedInSetting(const Integer id) const
       return false;
 }
 
+
+GmatTime GmatBase::GetGmatTimeParameter(const Integer id) const
+{
+   std::stringstream indexString;
+   indexString << id << ": \"" << GetParameterText(id) << "\"";
+   throw GmatBaseException("Cannot get GmatTime parameter with ID " +
+      indexString.str() + " on " + typeName + " named \"" +
+      instanceName + "\"");
+}
+
+
+GmatTime GmatBase::SetGmatTimeParameter(const Integer id, const GmatTime value)
+{
+   std::stringstream indexString;
+   indexString << id << ": \"" << GetParameterText(id) << "\"";
+   throw GmatBaseException("Cannot set GmatTime parameter with ID " +
+      indexString.str() + " on " + typeName + " named \"" +
+      instanceName + "\"");
+}
+
+
+GmatTime GmatBase::GetGmatTimeParameter(const std::string &label) const
+{
+   return GetGmatTimeParameter(GetParameterID(label));
+}
+
+
+GmatTime GmatBase::SetGmatTimeParameter(const std::string &label, const GmatTime value)
+{
+   return SetGmatTimeParameter(GetParameterID(label), value);
+}
+
+
+bool GmatBase::HasPrecisionTime()
+{
+   return hasPrecisionTime;
+}
+
+
+bool GmatBase::SetPrecisionTimeFlag(bool onOff)
+{
+   hasPrecisionTime = onOff;
+   return hasPrecisionTime;
+}
 
 //---------------------------------------------------------------------------
 //  Real GetRealParameter(const Integer id) const
@@ -3633,7 +3680,7 @@ bool GmatBase::TakeRequiredAction(const std::string &label)
 
 
 //------------------------------------------------------------------------------
-// const std::vector<Gmat::ObjectType>& GetTypesForList(const Integer id)
+// const std::vector<UnsignedInt>& GetTypesForList(const Integer id)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a list of types that need to be shown on a GUI for a parameter
@@ -3650,7 +3697,7 @@ const ObjectTypeArray& GmatBase::GetTypesForList(const Integer id)
 }
 
 //------------------------------------------------------------------------------
-// const std::vector<Gmat::ObjectType>&
+// const std::vector<UnsignedInt>&
 //       GetTypesForList(const std::string &label)
 //------------------------------------------------------------------------------
 /**
@@ -4026,7 +4073,7 @@ Integer GmatBase::GetInstanceCount()
 }
 
 //---------------------------------------------------------------------------
-// static Gmat::ObjectType GetObjectType(const std::string &typeString)
+// static UnsignedInt GetObjectType(const std::string &typeString)
 //---------------------------------------------------------------------------
 /**
  * @param <typeString> object type string
@@ -4035,17 +4082,17 @@ Integer GmatBase::GetInstanceCount()
  *
  */
 //---------------------------------------------------------------------------
-Gmat::ObjectType GmatBase::GetObjectType(const std::string &typeString)
+UnsignedInt GmatBase::GetObjectType(const std::string &typeString)
 {
    for (int i=0; i<Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT; i++)
       if (OBJECT_TYPE_STRING[i] == typeString)
-         return (Gmat::ObjectType)(i + Gmat::SPACECRAFT);
+         return (UnsignedInt)(i + Gmat::SPACECRAFT);
 
    return Gmat::UNKNOWN_OBJECT;
 }
 
 //---------------------------------------------------------------------------
-// static std::string GetObjectTypeString(Gmat::ObjectType type)
+// static std::string GetObjectTypeString(UnsignedInt type)
 //---------------------------------------------------------------------------
 /**
  * @param <type> object type
@@ -4054,7 +4101,7 @@ Gmat::ObjectType GmatBase::GetObjectType(const std::string &typeString)
  *
  */
 //---------------------------------------------------------------------------
-std::string GmatBase::GetObjectTypeString(Gmat::ObjectType type)
+std::string GmatBase::GetObjectTypeString(UnsignedInt type)
 {
    return OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT];
 }
@@ -5090,7 +5137,16 @@ bool GmatBase::SetFullName(const std::string name)
 
 ObjectMap GmatBase::GetConfiguredObjectMap()
 {
-   return Moderator::Instance()->GetSandbox()->GetObjectMap();
+   // Get local onject map
+   ObjectMap om = Moderator::Instance()->GetSandbox()->GetObjectMap();
+
+   // Add global object map
+   ObjectMap gom = Moderator::Instance()->GetSandbox()->GetGlobalObjectMap();
+   for (ObjectMap::iterator i = gom.begin(); i != gom.end(); ++i)
+      om[(*i).first] = (*i).second;
+
+   //return Moderator::Instance()->GetSandbox()->GetObjectMap();
+   return om;
 }
 
 
@@ -5100,7 +5156,7 @@ GmatBase* GmatBase::GetConfiguredObject(const std::string &name)
 }
 
 
-const StringArray GmatBase::GetListOfObjects(Gmat::ObjectType type)
+const StringArray GmatBase::GetListOfObjects(UnsignedInt type)
 {
    ObjectMap objMap = GetConfiguredObjectMap();
    StringArray nameList;
@@ -5127,3 +5183,105 @@ const StringArray GmatBase::GetListOfObjects(const std::string &typeName)
    return nameList;
 }
 
+
+//------------------------------------------------------------------------------
+// bool HasGuiPlugin()
+//------------------------------------------------------------------------------
+/**
+ * Checks an object to see if there is a matching GUI element in plugin code
+ *
+ * @return true if there is a GUI factory and plugin, false (the default) if not
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::HasGuiPlugin()
+{
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray GetGuiPanelNames(const std::string &type)
+//------------------------------------------------------------------------------
+/**
+ * Returns the name(s) of GUI plugin objects this object uses
+ *
+ * @param type The type of panel/element requested.  An empty string returns all
+ *             of the panels needed.  "ResourceTree" returns the resource tree
+ *             entries.  "MissionTree" returns command references, and is not
+ *             used because commands are picked up automatically.
+ *
+ * @return The names of the GUI elements, used in calls to the factories and in
+ *         populating GUI trees
+ */
+//------------------------------------------------------------------------------
+StringArray GmatBase::GetGuiPanelNames(const std::string &type)
+{
+   StringArray retval;
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// void SetWidget(void *widget)
+//------------------------------------------------------------------------------
+/**
+ * Call used to set the widget used by a plugin component with a plugin GUI
+ *
+ * @param widget The widget that connects the GUI to the object
+ */
+//------------------------------------------------------------------------------
+void GmatBase::SetWidget(GmatWidget *widget)
+{
+   // Default behavior: do nothing
+}
+
+//------------------------------------------------------------------------------
+// const char** GetIcon()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the icon associated with the object (if any)
+ *
+ * @return The xpm based icon strign
+ */
+//------------------------------------------------------------------------------
+const char** GmatBase::GetIcon()
+{
+   return NULL;
+}
+
+//------------------------------------------------------------------------------
+// void SetIconIndex(Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets the index for icons used in GUI components
+ *
+ * The default method here does nothing but define the interface
+ *
+ * @param index The index value
+ */
+//------------------------------------------------------------------------------
+void GmatBase::SetIconIndex(Integer index)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetIconIndex()
+//------------------------------------------------------------------------------
+/**
+ * Returns index of an icon, used in tree structures that handle icons by index
+ *
+ * Tree widgets can handle icons using an indexed list.  This method provides
+ * a mechanism to access such icons rather than adding a new copy to the tree
+ * each time the icon is needed.
+ *
+ * Classes that use this mechism should set the index as a class (static) member
+ * so that all objects created from the class access the same icon instance.
+ *
+ * @return The icon index, or -1 if the icon does not exist or has not set an
+ * index.
+ */
+//------------------------------------------------------------------------------
+Integer GmatBase::GetIconIndex()
+{
+   return -1;
+}

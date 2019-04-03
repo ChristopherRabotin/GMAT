@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1062,7 +1062,7 @@ StringArray Factory::GetListOfCreatableObjects(const std::string &qualifier)
  * Checks if a creatable object type matches a subtype.
  *
  * Occasionally GMAT factories will build types that are subtyped at a
- * granularity finer than is supported in the Gmat::ObjectType enumeration.
+ * granularity finer than is supported in the UnsignedInt enumeration.
  * This method allows detection of the fine grained subtyping.  An example is
  * the Solver subsystem, which provides for targeters and related boundary value
  * solvers, optimizers, estimators, simulators, and parametric scanners.  This
@@ -1188,7 +1188,7 @@ bool Factory::AddCreatableObjects(StringArray newList)
 
 
 //------------------------------------------------------------------------------
-//  Gmat::ObjectType GetFactoryType() const
+//  UnsignedInt GetFactoryType() const
 //------------------------------------------------------------------------------
 /**
  * This method returns the type of objects created by this factory.
@@ -1197,7 +1197,7 @@ bool Factory::AddCreatableObjects(StringArray newList)
  *
  */
 //------------------------------------------------------------------------------
-Gmat::ObjectType Factory::GetFactoryType() const
+UnsignedInt Factory::GetFactoryType() const
 {
    return itsType;
 }
@@ -1222,7 +1222,7 @@ bool Factory::IsTypeCaseSensitive() const
 //  protected methods
 //---------------------------------
 //------------------------------------------------------------------------------
-//  Factory(Gmat::ObjectType ofType)
+//  Factory(UnsignedInt ofType)
 //------------------------------------------------------------------------------
 /**
  * This method creates an object of the base class Factory (called by
@@ -1232,7 +1232,7 @@ bool Factory::IsTypeCaseSensitive() const
  *                 this factory.
  */
 //------------------------------------------------------------------------------
-Factory::Factory(Gmat::ObjectType ofType)
+Factory::Factory(UnsignedInt ofType)
 {
    itsType = ofType;
    isCaseSensitive = true;
@@ -1240,7 +1240,7 @@ Factory::Factory(Gmat::ObjectType ofType)
 }
 
 //------------------------------------------------------------------------------
-//  Factory(StringArray createList, Gmat::ObjectType ofType)
+//  Factory(StringArray createList, UnsignedInt ofType)
 //------------------------------------------------------------------------------
 /**
  * This method creates an object of the base class Factory (called by
@@ -1251,7 +1251,7 @@ Factory::Factory(Gmat::ObjectType ofType)
  *                 this factory.
  */
 //------------------------------------------------------------------------------
-Factory::Factory(StringArray createList, Gmat::ObjectType ofType)
+Factory::Factory(StringArray createList, UnsignedInt ofType)
 {
    itsType    = ofType;
    isCaseSensitive = true;

@@ -23,12 +23,12 @@ ADD_DEFINITIONS("-DEXP_STL")
 
 SET(SPICE_SRCS
   "attitude/SpiceAttitude.cpp"
-  "util/SpiceAttitudeKernelReader.cpp"
-  "util/SpiceInterface.cpp"
-  "util/SpiceOrbitKernelReader.cpp"
-  "util/SpiceKernelReader.cpp"
-  "util/SpiceKernelWriter.cpp"
-  "util/SpiceOrbitKernelWriter.cpp")
+  "spice/SpiceAttitudeKernelReader.cpp"
+  "spice/SpiceInterface.cpp"
+  "spice/SpiceOrbitKernelReader.cpp"
+  "spice/SpiceKernelReader.cpp"
+  "spice/SpiceKernelWriter.cpp"
+  "spice/SpiceOrbitKernelWriter.cpp")
 
 # ====================================================================
 # F2C
@@ -47,6 +47,7 @@ SET(BASE_DIRS
   event
   executive
   factory
+  factory/guicomponents
   forcemodel
   forcemodel/harmonic
   foundation
@@ -54,7 +55,6 @@ SET(BASE_DIRS
   hardware
   include
   interface
-  interpolator
   interpreter
   math
   parameter
@@ -62,11 +62,10 @@ SET(BASE_DIRS
   propagator
   solarsys
   solver
+  spice
   spacecraft
   stopcond
   subscriber
-  util
-  util/datawriter
   )
 
 # ====================================================================
@@ -143,6 +142,8 @@ SET(BASE_SRCS
     command/Write.cpp
     configs/ConfigManagerException.cpp
     configs/ConfigManager.cpp
+    configs/ItemManager.cpp
+    configs/PluginItemManager.cpp
     coordsystem/AxisSystem.cpp
     coordsystem/BodyFixedAxes.cpp
     coordsystem/BodyInertialAxes.cpp
@@ -213,6 +214,9 @@ SET(BASE_SRCS
     factory/SpacecraftFactory.cpp
     factory/StopConditionFactory.cpp
     factory/SubscriberFactory.cpp
+    factory/guicomponents/GuiFactory.cpp
+    factory/guicomponents/GmatWidget.cpp
+    factory/guicomponents/PluginWidget.cpp
     forcemodel/DragForce.cpp
     forcemodel/FiniteThrust.cpp
     forcemodel/ODEModelException.cpp
@@ -227,13 +231,13 @@ SET(BASE_SRCS
     forcemodel/RelativisticCorrection.cpp
     forcemodel/harmonic/Harmonic.cpp
     forcemodel/harmonic/HarmonicGravity.cpp
-    forcemodel/harmonic/HarmonicGravityCof.cpp
-    forcemodel/harmonic/HarmonicGravityGrv.cpp
     foundation/Covariance.cpp
     foundation/ElementWrapper.cpp
+    foundation/FileUpdaterSVN.cpp
     foundation/GmatBaseException.cpp
     foundation/GmatBase.cpp
     foundation/GmatState.cpp
+    foundation/GmatType.cpp
     foundation/IChangeListener.cpp
     foundation/ObjectInitializer.cpp
     foundation/SpacePoint.cpp
@@ -262,13 +266,6 @@ SET(BASE_SRCS
     interface/InterfaceException.cpp
     interface/Interface.cpp
     interface/GmatInterface.cpp
-    interpolator/InterpolatorException.cpp
-    interpolator/Interpolator.cpp
-    interpolator/BrentDekkerZero.cpp
-    interpolator/CubicSplineInterpolator.cpp
-    interpolator/LinearInterpolator.cpp
-    interpolator/NotAKnotInterpolator.cpp
-    interpolator/LagrangeInterpolator.cpp
     interpreter/InterpreterException.cpp
     interpreter/Interpreter.cpp
     interpreter/MathParser.cpp
@@ -397,6 +394,8 @@ SET(BASE_SRCS
     parameter/VariableWrapper.cpp
     parameter/AttitudeString.cpp
     plugin/DynamicLibrary.cpp
+    plugin/GmatEventHandler.cpp
+    plugin/GuiInterface.cpp
     propagator/AdamsBashforthMoulton.cpp
     propagator/DormandElMikkawyPrince68.cpp
     propagator/Integrator.cpp
@@ -465,70 +464,6 @@ SET(BASE_SRCS
     subscriber/XyPlot.cpp
     subscriber/OrbitPlot.cpp
     subscriber/GroundTrackPlot.cpp
-    util/A1Date.cpp
-    util/A1Mjd.cpp
-    util/AngleUtil.cpp
-    util/AttitudeConversionUtility.cpp
-    util/AttitudeUtil.cpp
-    util/BaseException.cpp
-    util/BodyFixedStateConverter.cpp
-    util/CalculationUtilities.cpp
-    util/Code500EphemerisFile.cpp
-    util/ColorDatabase.cpp
-    util/CCSDSAEMEulerAngleSegment.cpp
-    util/CCSDSAEMQuaternionSegment.cpp
-    util/CCSDSAEMReader.cpp
-    util/CCSDSAEMSegment.cpp
-    util/CCSDSEMReader.cpp
-    util/CCSDSEMSegment.cpp
-    util/CCSDSEMWriter.cpp
-    util/CCSDSOEMSegment.cpp
-    util/CCSDSOEMWriter.cpp
-    util/Date.cpp
-    util/DateUtil.cpp
-    util/ElapsedTime.cpp
-    util/EopFile.cpp
-    util/FileManager.cpp
-    util/FileUpdaterSVN.cpp
-    util/FileUtil.cpp
-    util/GmatGlobal.cpp
-    util/GmatTime.cpp
-    util/GregorianDate.cpp
-    util/IFileUpdater.cpp
-    util/LeapSecsFileReader.cpp
-    util/Linear.cpp
-    util/MemoryTracker.cpp
-    util/MessageInterface.cpp
-    util/MessageReceiver.cpp
-    util/RandomNumber.cpp
-    util/RealUtilities.cpp
-    util/RgbColor.cpp
-    util/Rmatrix33.cpp
-    util/Rmatrix66.cpp
-    util/Rmatrix.cpp
-    util/Rvector3.cpp
-    util/Rvector6.cpp
-    util/Rvector.cpp
-    util/StringTokenizer.cpp
-    util/StringUtil.cpp
-    util/SPADFileReader.cpp
-    util/STKEphemerisFile.cpp
-    util/TextParser.cpp
-    util/TimeSystemConverter.cpp
-    util/TimeTypes.cpp
-    util/UtcDate.cpp
-    util/StateConversionUtil.cpp
-    util/GravityFileUtil.cpp
-    util/Frozen.cpp
-    util/OrbitDesignerTime.cpp
-    util/SunSync.cpp
-    util/RepeatSunSync.cpp
-    util/RepeatGroundTrack.cpp
-    util/datawriter/DataBucket.cpp
-    util/datawriter/DataWriter.cpp
-    util/datawriter/DataWriterInterface.cpp
-    util/datawriter/DataWriterMaker.cpp
-    util/datawriter/WriterData.cpp
     solarsys/SimpleExponentialAtmosphere.cpp
     solarsys/SpecialCelestialPoint.cpp
     ${MSISE_SRCS}
@@ -554,6 +489,8 @@ TARGET_INCLUDE_DIRECTORIES(${TargetName} PUBLIC ${CSPICE_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(${TargetName} PUBLIC optimized ${CSPICE_LIB} debug ${CSPICE_LIB_DEBUG})
 TARGET_LINK_LIBRARIES(${TargetName} PRIVATE XercesC::XercesC)
 TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${CMAKE_DL_LIBS})
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE GmatUtil)
+
 if(UNIX)
   if(APPLE)
     TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${COREFOUNDATION_LIBRARY} ${CORESERVICES_LIBRARY})

@@ -20,6 +20,13 @@
 SET(SrcTargets "")
 
 # ====================================================================
+# GMAT util library
+SET(SRCDIR "gmatutil")
+ADD_SUBDIRECTORY(${SRCDIR})
+GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${SRCDIR} DEFINITION TargetName)
+SET(SrcTargets ${SrcTargets} ${tmp})
+
+# ====================================================================
 # GMAT base library
 SET(SRCDIR "base")
 ADD_SUBDIRECTORY(${SRCDIR})

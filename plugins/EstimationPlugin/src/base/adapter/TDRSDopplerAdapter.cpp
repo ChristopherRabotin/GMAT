@@ -739,7 +739,7 @@ const StringArray& TDRSDopplerAdapter::GetStringArrayParameter(
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string& oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string& oldName,
 //       const std::string& newName)
 //------------------------------------------------------------------------------
 /**
@@ -752,7 +752,7 @@ const StringArray& TDRSDopplerAdapter::GetStringArrayParameter(
  * @return true if a rename happened, false if not
  */
 //------------------------------------------------------------------------------
-bool TDRSDopplerAdapter::RenameRefObject(const Gmat::ObjectType type,
+bool TDRSDopplerAdapter::RenameRefObject(const UnsignedInt type,
       const std::string& oldName, const std::string& newName)
 {
    // Handle additional renames specific to this adapter
@@ -768,7 +768,7 @@ bool TDRSDopplerAdapter::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase* obj, const UnsignedInt type,
 //       const std::string& name)
 //------------------------------------------------------------------------------
 /**
@@ -782,7 +782,7 @@ bool TDRSDopplerAdapter::RenameRefObject(const Gmat::ObjectType type,
  */
 //------------------------------------------------------------------------------
 bool TDRSDopplerAdapter::SetRefObject(GmatBase* obj,
-      const Gmat::ObjectType type, const std::string& name)
+      const UnsignedInt type, const std::string& name)
 {
    bool retval = true;
    retval = adapterSL->SetRefObject(obj, type, name) && retval;
@@ -795,7 +795,7 @@ bool TDRSDopplerAdapter::SetRefObject(GmatBase* obj,
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase* obj, const UnsignedInt type,
 //       const std::string& name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -810,7 +810,7 @@ bool TDRSDopplerAdapter::SetRefObject(GmatBase* obj,
  */
 //------------------------------------------------------------------------------
 bool TDRSDopplerAdapter::SetRefObject(GmatBase* obj,
-      const Gmat::ObjectType type, const std::string& name, const Integer index)
+      const UnsignedInt type, const std::string& name, const Integer index)
 {
    bool retval = true;
    retval = adapterSL->SetRefObject(obj, type, name, index) && retval;
@@ -925,7 +925,8 @@ bool TDRSDopplerAdapter::Initialize()
  */
 //------------------------------------------------------------------------------
 const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
-      ObservationData* forObservation, std::vector<RampTableData>* rampTable)
+      ObservationData* forObservation, std::vector<RampTableData>* rampTable,
+      bool forSimulation)
 {
    #ifdef DEBUG_DOPPLER_CALCULATION
       MessageInterface::ShowMessage("TDRSDopplerAdapter::CalculateMeasurement(%s, "
@@ -986,7 +987,7 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
    addBias   = false;
    rangeOnly = true;
    withMediaCorrection = false;
-   RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
+   RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB, forSimulation);
    measDataEL = GetMeasurement();
 
    addNoise  = addNoiseOption;
@@ -996,18 +997,19 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
    
    // 2.2.2. Specify uplink frequency
    // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
-   uplinkFreq        = calcData->GetUplinkFrequency(0, NULL);    // No ramp table is used for TDRS measurement   // calcData->GetUplinkFrequency(0, rampTB);
+   uplinkFreq        = calcData->GetUplinkFrequency(0, NULL);                   // No ramp table is used for TDRS measurement   // calcData->GetUplinkFrequency(0, rampTB);
    uplinkFreqAtRecei = calcData->GetUplinkFrequencyAtReceivedEpoch(0, NULL);    // No ramp table is used for TDRS measurement   // calcData->GetUplinkFrequency(0, rampTB);
-   freqBand          = calcData->GetUplinkFrequencyBand(0, NULL);  // No ramp table is used for TDRS measurement   // calcData->GetUplinkFrequencyBand(0, rampTB);
+   freqBand          = calcData->GetUplinkFrequencyBand(0, NULL);               // No ramp table is used for TDRS measurement   // calcData->GetUplinkFrequencyBand(0, rampTB);
    
    // 2.3.1. Measurement time is the same as the one for End-path
-   GmatTime tm = cMeasurement.epoch;                                // Get measurement time
+   GmatTime tm = cMeasurement.epochGT;                              // Get measurement time
    ObservationData* obData = NULL;
    if (forObservation)
       obData = new ObservationData(*forObservation);
    else
       obData = new ObservationData();
-   obData->epoch = tm.GetMjd();
+   obData->epochGT = tm;
+   obData->epoch   = tm.GetMjd();
 
    // 2.3.2. Compute range in Km w/o any noise and bias for End-Short path
    // For End-Short path, range calculation does not add bias and noise to calculated value
@@ -1015,7 +1017,7 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
    adapterES->AddNoise(false);
    adapterES->SetRangeOnly(true);
    adapterES->AddMediaCorrection(false);
-   adapterES->CalculateMeasurement(withEvents, obData, rampTB);
+   adapterES->CalculateMeasurement(withEvents, obData, rampTB, forSimulation);
    measDataES = adapterES->GetMeasurement();
    measDataES.value[0] = measDataES.value[0] / adapterES->GetMultiplierFactor();      // convert to full range in km  // Does it need to convert to full range ?????? Answer: Yes, when (Range_KM) Range measurement takes half range to be its value, in this case, we need to convert to full range 
 
@@ -1043,8 +1045,8 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
    adapterSS->AddMediaCorrection(false);
 
    // 3.3. Compute range for Start long and short paths
-   adapterSL->CalculateMeasurement(withEvents, obData, rampTB);
-   adapterSS->CalculateMeasurement(withEvents, obData, rampTB);
+   adapterSL->CalculateMeasurement(withEvents, obData, rampTB, forSimulation);
+   adapterSS->CalculateMeasurement(withEvents, obData, rampTB, forSimulation);
 
    // 3.4. Remove obData object when it is not used
    if (obData)
@@ -1306,6 +1308,7 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("===================================================================\n");
          MessageInterface::ShowMessage("====  TDRSDopplerAdapter: Range Calculation for Measurement Data %dth  \n", i);
          MessageInterface::ShowMessage("===================================================================\n");
+         MessageInterface::ShowMessage("      . Measurement epoch          : %.12lf\n", cMeasurement.epochGT.GetMjd());
          MessageInterface::ShowMessage("      . Measurement type            : <%s>\n", measurementType.c_str());
          MessageInterface::ShowMessage("      . Noise adding option         : %s\n", (addNoise?"true":"false"));
          MessageInterface::ShowMessage("      . Doppler count interval      : %.12lf seconds\n", dopplerCountInterval);

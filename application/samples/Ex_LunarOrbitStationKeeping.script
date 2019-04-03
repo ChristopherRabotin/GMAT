@@ -96,6 +96,7 @@ GMAT DefaultOrbitView.ViewPointVector = [ 3500 3500 3500 ];
 GMAT DefaultOrbitView.ViewDirection = Luna;
 GMAT DefaultOrbitView.ViewScaleFactor = 1;
 GMAT DefaultOrbitView.ViewUpCoordinateSystem = MoonInertial;
+GMAT DefaultOrbitView.MaxPlotPoints = 200000;
 
 Create XYPlot XYPlot1;
 GMAT XYPlot1.UpperLeft = [ 0.3858823529411765 0.4986737400530504 ];

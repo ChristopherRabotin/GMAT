@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -103,6 +103,8 @@ protected:
    Integer                      epochID;
    /// Starting epoch for the propagation
    std::vector<GmatEpoch>       baseEpoch;
+   std::vector<GmatTime>        baseEpochGT;
+
    /// Epoch where a derivative zero was located
    GmatEpoch                    derivativeEpoch;
 
@@ -110,6 +112,8 @@ protected:
    RealArray                    elapsedTime;
    /// Start epoch for the step
    RealArray                    currEpoch;
+   std::vector<GmatTime>        currEpochGT;
+
    /// The Propagators
    std::vector<Propagator*>     p;
    /// The ForceModels
@@ -118,6 +122,9 @@ protected:
    std::vector<PropagationStateManager*>  psm;
    /// List of forces that can be turned on or off by other commands
    std::vector<PhysicalModel*>  *transientForces;
+
+   /// MaxStep settings for the propagators
+   RealArray                    maxSteps;
 
    /// The Mean-of-J2000 propagation state vector data
    Real                         *j2kState;

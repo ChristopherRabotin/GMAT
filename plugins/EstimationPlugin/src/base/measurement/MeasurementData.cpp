@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -48,6 +48,7 @@ MeasurementData::MeasurementData() :
    uniqueID                   (-1),
    epochSystem                (TimeConverterUtil::A1MJD),
    epoch                      (0.0),
+   epochGT                    (0.0),
    isFeasible                 (false),
    unfeasibleReason           ("N"),
    feasibilityValue           (0.0),
@@ -108,9 +109,18 @@ MeasurementData::MeasurementData(const MeasurementData& md) :
    uniqueID                 (md.uniqueID),
    epochSystem              (md.epochSystem),
    epoch                    (md.epoch),
+   epochGT                  (md.epochGT),
    participantIDs           (md.participantIDs),
    sensorIDs                (md.sensorIDs),
    value                    (md.value),
+   correction               (md.correction),
+   rangeVecs                (md.rangeVecs),
+   tBodies                  (md.tBodies),
+   rBodies                  (md.rBodies),
+   tPrecTimes               (md.tPrecTimes),
+   rPrecTimes               (md.rPrecTimes),
+   tLocs                    (md.tLocs),
+   rLocs                    (md.rLocs),
    isFeasible               (md.isFeasible),
    unfeasibleReason         (md.unfeasibleReason),
    feasibilityValue         (md.feasibilityValue),
@@ -156,9 +166,18 @@ MeasurementData MeasurementData::operator=(const MeasurementData& md)
       uniqueID                 = md.uniqueID;
       epochSystem              = md.epochSystem;
       epoch                    = md.epoch;
+      epochGT                  = md.epochGT;
       participantIDs           = md.participantIDs;
       sensorIDs                = md.sensorIDs;
       value                    = md.value;
+      correction               = md.correction;
+      rangeVecs                = md.rangeVecs;
+      tBodies                  = md.tBodies;
+      rBodies                  = md.rBodies;
+      tPrecTimes               = md.tPrecTimes;
+      rPrecTimes               = md.rPrecTimes;
+      tLocs                    = md.tLocs;
+      rLocs                    = md.rLocs;
       isFeasible               = md.isFeasible;
 	   unfeasibleReason         = md.unfeasibleReason;
 	   feasibilityValue         = md.feasibilityValue;

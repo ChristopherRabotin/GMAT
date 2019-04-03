@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -63,7 +63,7 @@ Hardware::PARAMETER_TYPE[HardwareParamCount - GmatBaseParamCount] =
 
 
 //------------------------------------------------------------------------------
-//  Hardware(Gmat::ObjectType typeId, const std::string &typeStr, 
+//  Hardware(UnsignedInt typeId, const std::string &typeStr,
 //           const std::string &nomme)
 //------------------------------------------------------------------------------
 /**
@@ -74,7 +74,7 @@ Hardware::PARAMETER_TYPE[HardwareParamCount - GmatBaseParamCount] =
  * @param nomme Name of the component.
  */
 //------------------------------------------------------------------------------
-Hardware::Hardware(Gmat::ObjectType typeId, const std::string &typeStr, 
+Hardware::Hardware(UnsignedInt typeId, const std::string &typeStr,
                    const std::string &nomme) :
    GmatBase(typeId, typeStr, nomme)
 {

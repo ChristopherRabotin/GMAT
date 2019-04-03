@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -215,7 +215,7 @@ GmatBase* NonlinearConstraint::Clone() const
 
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -228,7 +228,7 @@ GmatBase* NonlinearConstraint::Clone() const
  * @return true on success.
  */
 //------------------------------------------------------------------------------
-bool NonlinearConstraint::RenameRefObject(const Gmat::ObjectType type,
+bool NonlinearConstraint::RenameRefObject(const UnsignedInt type,
                                const std::string &oldName,
                                const std::string &newName)
 {
@@ -270,7 +270,7 @@ const ObjectTypeArray& NonlinearConstraint::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves the list of ref objects used by the Vary.
@@ -282,7 +282,7 @@ const ObjectTypeArray& NonlinearConstraint::GetRefObjectTypeArray()
  * 
  */
 //------------------------------------------------------------------------------
-const StringArray& NonlinearConstraint::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& NonlinearConstraint::GetRefObjectNameArray(const UnsignedInt type)
 {
    refObjectNames.clear();
    
@@ -579,7 +579,7 @@ bool NonlinearConstraint::SetStringParameter(const Integer id,
 }
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                                   const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -592,7 +592,7 @@ bool NonlinearConstraint::SetStringParameter(const Integer id,
  * @return success of the operation.
  */
 //------------------------------------------------------------------------------
-bool NonlinearConstraint::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool NonlinearConstraint::SetRefObject(GmatBase *obj, const UnsignedInt type,
                             const std::string &name)
 {   
    if (type == Gmat::SOLVER) 

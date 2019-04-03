@@ -680,7 +680,7 @@ bool ThrustSegment::SetStringParameter(const Integer id, const char *value, cons
    {
       if (index < massSource.size())
       {
-         massSource[index] == value;
+          massSource[index] = value;
       }
       else if (index == massSource.size())
       {
@@ -696,7 +696,7 @@ bool ThrustSegment::SetStringParameter(const Integer id, const char *value, cons
    {
       if (index < solveFors.size())
       {
-         solveFors[index] == value;
+         solveFors[index] = value;
       }
       else if (index == solveFors.size())
       {
@@ -734,7 +734,7 @@ bool ThrustSegment::SetStringParameter(const Integer id, const std::string &valu
    {
       if (index < massSource.size())
       {
-         massSource[index] == value;
+         massSource[index] = value;
       }
       else if (index == massSource.size())
       {
@@ -750,7 +750,7 @@ bool ThrustSegment::SetStringParameter(const Integer id, const std::string &valu
    {
       if (index < solveFors.size())
       {
-         solveFors[index] == value;
+         solveFors[index] = value;
       }
       else if (index == solveFors.size())
       {

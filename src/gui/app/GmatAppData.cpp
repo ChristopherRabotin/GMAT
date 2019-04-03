@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -64,7 +64,9 @@ GmatAppData* GmatAppData::theGmatAppData = NULL;
 GmatAppData* GmatAppData::Instance()
 {
    if (!theGmatAppData)
+   {
       theGmatAppData = new GmatAppData;
+   }
    
    return theGmatAppData;
 }
@@ -141,7 +143,8 @@ wxConfigBase* GmatAppData::GetPersonalizationConfig()
    {
       // Find personalization file from the search path (LOJ: 2014.07.02)
       //std::string pfile = FileManager::Instance()->GetFullPathname(FileManager::PERSONALIZATION_FILE);
-      std::string pfile = FileManager::Instance()->FindPath("", "PERSONALIZATION_FILE", true, false, false);
+//      std::string pfile = FileManager::Instance()->FindPath("", "PERSONALIZATION_FILE", true, false, false);
+      std::string pfile = FileManager::Instance()->FindPath("", "PERSONALIZATION_FILE", true, true, true);
       #ifdef DEBUG_GUI_CONFIG
       MessageInterface::ShowMessage("   pfile = '%s'\n", pfile.c_str());
       #endif
@@ -150,17 +153,18 @@ wxConfigBase* GmatAppData::GetPersonalizationConfig()
       //if (!FileManager::Instance()->DoesDirectoryExist(pfile))
       if (pfile == "")
       {
-         // Show actual cross-platform home directory in the message
-         if (GmatGlobal::Instance()->IsWritingFilePathInfo())
-         {
+         // Show actual OS-specific directory in the message?
+//         if (GmatGlobal::Instance()->IsWritingFilePathInfo())
+//         {
             MessageInterface::ShowMessage
-               ( "*** WARNING *** Invalid personalization file specified: '%s',\n"
-                 "   so creating local configuration file 'GMAT.ini' in the user's home directory.",
+               ( "*** WARNING *** Invalid personalization file specified, \n"
+                 "so reading/writing local configuration file in an OS-specific "
+                 "location (see User's Guide for more information).\n",
                  pfile.c_str() );
-         }
+//         }
          
          // Make blank pfile so that default local configureation file can be written
-         // to user's home directory 
+         // to user's home directory  (See NOTE below on location of file)
          // If it is changed to use GMAT.ini it will update GMAT.ini in bin directory
          // which we don't want it to happen. (LOJ: 2014.07.08)
          pfile = "";
@@ -171,15 +175,21 @@ wxConfigBase* GmatAppData::GetPersonalizationConfig()
       /*On non-VMS Unix systems, the default local configuration file is ~/.appname.  However, this path may be also used as user data directory (see wxStandardPaths::GetUserDataDir) if the application has several data files. In this case wxCONFIG_USE_SUBDIR flag, which changes the default local configuration file to ~/.appname/appname should be used. Notice that this flag is ignored on non-Unix system, including VMS, or if a non-default localFilename is provided. This function is new since wxWidgets version 2.8.2
        */
       // Currently it is created in home directory such as C:\Users\ljun\GMAT.ini
+      // On Mac, if the file name is blank or does not exist, it will read/update the file
+      // '/Users/<your-username-here>/Library/Preferences/GMAT Preferences'
       
+      #ifdef DEBUG_GUI_CONFIG
+         MessageInterface::ShowMessage("   pfile before making new wxFileConfig = '%s'\n",
+         pfile.c_str());
+      #endif
       thePersonalizationConfig = new wxFileConfig(wxEmptyString, wxEmptyString, pfile.c_str(),
-         wxEmptyString, wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_RELATIVE_PATH);
+                                 wxEmptyString, wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_RELATIVE_PATH);
    }
    
    #ifdef DEBUG_GUI_CONFIG
-   MessageInterface::ShowMessage
-      ("GmatAppData::GetPersonalizationConfig() returning <%p>\n   path = '%s'\n",
-       thePersonalizationConfig, thePersonalizationConfig->GetPath().c_str());
+      MessageInterface::ShowMessage
+         ("GmatAppData::GetPersonalizationConfig() returning <%p>\n   path = '%s'\n",
+         thePersonalizationConfig, thePersonalizationConfig->GetPath().WX_TO_C_STRING);
    #endif
    return thePersonalizationConfig;
 }

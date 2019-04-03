@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -699,7 +699,7 @@ bool Receiver::SetStringParameter(const std::string &label, const std::string &v
 //}
 
 
-GmatBase* Receiver::GetRefObject(const Gmat::ObjectType type, const std::string &name)
+GmatBase* Receiver::GetRefObject(const UnsignedInt type, const std::string &name)
 {
    if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::ERROR_MODEL))
    {
@@ -714,7 +714,7 @@ GmatBase* Receiver::GetRefObject(const Gmat::ObjectType type, const std::string 
 }
 
 
-bool Receiver::SetRefObject(GmatBase *obj, const Gmat::ObjectType type, const std::string &name)
+bool Receiver::SetRefObject(GmatBase *obj, const UnsignedInt type, const std::string &name)
 {
    if (obj == NULL)
       return false;
@@ -770,7 +770,7 @@ bool Receiver::SetRefObject(GmatBase *obj, const Gmat::ObjectType type, const st
 }
 
 
-ObjectArray& Receiver::GetRefObjectArray(const Gmat::ObjectType type)
+ObjectArray& Receiver::GetRefObjectArray(const UnsignedInt type)
 {
    if (type == Gmat::ERROR_MODEL)
    {
@@ -786,11 +786,11 @@ ObjectArray& Receiver::GetRefObjectArray(const std::string& typeString)
    if (typeString == "ErrorModel")
       return errorModels;
 
-   RFHardware::GetRefObjectArray(typeString);
+   return RFHardware::GetRefObjectArray(typeString);
 }
 
 
-const StringArray& Receiver::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Receiver::GetRefObjectNameArray(const UnsignedInt type)
 {
    RFHardware::GetRefObjectNameArray(type);
 
@@ -845,7 +845,7 @@ const StringArray& Receiver::GetStringArrayParameter(const std::string &label) c
 }
 
 
-bool Receiver::RenameRefObject(const Gmat::ObjectType type, const std::string &oldName,
+bool Receiver::RenameRefObject(const UnsignedInt type, const std::string &oldName,
                                const std::string &newName)
 {
    if ((type == Gmat::UNKNOWN_OBJECT)||(type == Gmat::ERROR_MODEL))

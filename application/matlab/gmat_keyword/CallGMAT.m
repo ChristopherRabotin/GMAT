@@ -20,7 +20,7 @@
 % @param  cmd  input command name (such as Create, Propagate, GMAT)
 % @param  varargin  command arguments (such as DefaultProp(DefaultSC))
 %-------------------------------------------------------------------------------
-% Copyright (c) 2002 - 2017 United States Government as represented by the
+% Copyright (c) 2002 - 2018 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
 % All Other Rights Reserved.
 %

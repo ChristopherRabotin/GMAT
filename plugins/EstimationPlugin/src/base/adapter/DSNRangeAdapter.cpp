@@ -299,7 +299,7 @@ Real DSNRangeAdapter::SetRealParameter(const std::string &label, const Real valu
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string& oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string& oldName,
 //       const std::string& newName)
 //------------------------------------------------------------------------------
 /**
@@ -312,7 +312,7 @@ Real DSNRangeAdapter::SetRealParameter(const std::string &label, const Real valu
  * @return true if a rename happened, false if not
  */
 //------------------------------------------------------------------------------
-bool DSNRangeAdapter::RenameRefObject(const Gmat::ObjectType type,
+bool DSNRangeAdapter::RenameRefObject(const UnsignedInt type,
       const std::string& oldName, const std::string& newName)
 {
    bool retval = RangeAdapterKm::RenameRefObject(type, oldName, newName);
@@ -367,7 +367,8 @@ bool DSNRangeAdapter::Initialize()
  */
 //------------------------------------------------------------------------------
 const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
-      ObservationData* forObservation, std::vector<RampTableData>* rampTable)
+      ObservationData* forObservation, std::vector<RampTableData>* rampTable, 
+      bool forSimulation)
 {
    #ifdef DEBUG_RANGE_CALCULATION
       MessageInterface::ShowMessage("DSNRangeAdapter::CalculateMeasurement(%s, "
@@ -389,7 +390,7 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
       rangeModulo = obsData->rangeModulo;                                                                         // unit: RU
    
    // 2. Compute range in km
-   RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);             // it needs to include ramp table in calculation
+   RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB, forSimulation);
 
    // 3. Convert range from km to RU and store in cMeasurement:
    for (UnsignedInt i = 0; i < cMeasurement.value.size(); ++i)
@@ -418,7 +419,8 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
 
          try
          {
-            cMeasurement.value[i] = IntegralRampedFrequency(cMeasurement.epoch, realTravelTime, errnum);                  // unit: RU
+            //cMeasurement.value[i] = IntegralRampedFrequency(cMeasurement.epoch, realTravelTime, errnum);                  // unit: RU
+            cMeasurement.value[i] = IntegralRampedFrequency(cMeasurement.epochGT, realTravelTime, errnum);                  // unit: RU
          } catch (MeasurementException exp)
          {
             cMeasurement.value[i] = 0.0;               // It has no C-value due to the failure of calculation of IntegralRampedFrequency()
@@ -490,6 +492,7 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
             MessageInterface::ShowMessage("%s,  ", participantLists[i]->at(k).c_str());
          MessageInterface::ShowMessage("\n");
 
+         MessageInterface::ShowMessage("      . Measurement epoch          : %.12lf\n", cMeasurement.epochGT.GetMjd());
          MessageInterface::ShowMessage("      . Measurement type           : <%s>\n", measurementType.c_str());
          MessageInterface::ShowMessage("      . Noise adding option        : %s\n", (addNoise?"true":"false"));
          MessageInterface::ShowMessage("      . Range modulo constant      : %.12lf RU\n", rangeModulo);
@@ -802,7 +805,7 @@ Real DSNRangeAdapter::GetFrequencyFactor(Real frequency)
  * Assumptions: ramp table had been sorted by epoch 
  */
 //------------------------------------------------------------------------------
-Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err)
+Real DSNRangeAdapter::IntegralRampedFrequency(GmatTime t1, Real delta_t, Integer& err)
 {
    // Verify ramp table and elpase time
    err = 0;
@@ -819,7 +822,7 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
       errMsg = "Error: No ramp table available for measurement calculation\n";
       throw MeasurementException("Error: No ramp table available for measurement calculation\n");
    }
-   
+
    if ((*rampTB).size() == 0)
    {
       err = 3;
@@ -832,23 +835,25 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
    // Get the beginning index and the ending index for frequency data records for this measurement model 
    BeginEndIndexesOfRampTable(err);
 
+   //Real t0 = t1 - delta_t / GmatTimeConstants::SECS_PER_DAY;
+   GmatTime t0 = t1;
+   t0.SubtractSeconds(delta_t);
 
-   Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
-   Real time_min = (*rampTB)[beginIndex].epoch;
+   GmatTime time_min = (*rampTB)[beginIndex].epochGT;
 
    if (t1 < time_min)
    {
       // Convert t1 and time_min from A1Mjd to TAIMjd
-      Real t1TAI, tminTAI;
+      GmatTime t1TAI, tminTAI;
       std::string tais;
-      Real a1Time = t1;
+      GmatTime a1Time = t1;
       TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", t1TAI, tais);
       a1Time = time_min;
       TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
 
       // Generate error message
       char s[200];
-      sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf, +Inf) of ramp table\n", t1TAI, tminTAI);
+      sprintf(&s[0], "Error: End epoch t3R = %s is out of range [%s, +Inf) of ramp table\n", t1TAI.ToString().c_str(), tminTAI.ToString().c_str());
       std::string st(&s[0]);
       err = 4;
       errMsg = st;
@@ -858,16 +863,16 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
    if (t0 < time_min)
    {
       // Convert t0 and time_min from A1Mjd to TAIMjd
-      Real t0TAI, tminTAI;
+      GmatTime t0TAI, tminTAI;
       std::string tais;
-      Real a1Time = t0;
+      GmatTime a1Time = t0;
       TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", t0TAI, tais);
       a1Time = time_min;
       TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
 
       // Generate error message
       char s[200];
-      sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf, +Inf) of ramp table\n", t0TAI, tminTAI);
+      sprintf(&s[0], "Error: Start epoch t1T = %s is out of range [%s, +Inf) of ramp table\n", t0TAI.ToString().c_str(), tminTAI.ToString().c_str());
       std::string st(&s[0]);
       err = 5;
       errMsg = st;
@@ -879,7 +884,7 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
    UnsignedInt end_interval = beginIndex;
    for (UnsignedInt i = beginIndex; i < endIndex; ++i)
    {
-      if (t1 >= (*rampTB)[i].epoch)
+      if (t1 >= (*rampTB)[i].epochGT)
          end_interval = i;
       else
          break;
@@ -898,9 +903,9 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
    {
       // Specify frequency at the begining and lenght of the current interval   
       if (i == end_interval)
-         interval_len = (t1 - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;                         // convert day to second
+         interval_len = (t1 - (*rampTB)[i].epochGT).GetTimeInSec();                         // unit:sec
       else
-         interval_len = ((*rampTB)[i+1].epoch - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;       // convert day to second
+         interval_len = ((*rampTB)[i + 1].epochGT - (*rampTB)[i].epochGT).GetTimeInSec();   // unit: sec
 
       f0 = (*rampTB)[i].rampFrequency;                              // unit: Hz
       f_dot = (*rampTB)[i].rampRate;                                // unit: Hz/second
@@ -914,8 +919,8 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
       f1 = f0 + f_dot*interval_len;
 
       // Take integral for the current interval
-      value1 = ((GetFrequencyFactor(f0) + GetFrequencyFactor(f1))/2 - basedFreqFactor) * interval_len;
-      value  = value + value1;
+      value1 = ((GetFrequencyFactor(f0) + GetFrequencyFactor(f1)) / 2 - basedFreqFactor) * interval_len;
+      value = value + value1;
 
       // Specify dt 
       dt = dt - interval_len;

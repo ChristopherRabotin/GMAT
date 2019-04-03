@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -43,10 +43,15 @@
 #include "CoordinateSystem.hpp"
 #include "AxisSystem.hpp"
 #include "Subscriber.hpp"
+#include "GmatWidget.hpp"
 
 // forward references
 class Moderator;
 class Publisher;
+
+/// Convenience type for creation callback for the GUI plugin code
+typedef GmatWidget* (*GuiWidgetCreatorCallback)(const std::string&, GmatBase *, void *);
+
 
 class GMAT_API ObjectInitializer
 {
@@ -62,8 +67,10 @@ public:
    void SetObjectMap(ObjectMap *objMap);
    void SetInternalCoordinateSystem(CoordinateSystem* cs);
    bool InitializeObjects(bool registerSubs = false,
-                          Gmat::ObjectType objType = Gmat::UNKNOWN_OBJECT,
+                          UnsignedInt objType = Gmat::UNKNOWN_OBJECT,
                           StringArray *unusedGOL = NULL);
+   // Plugin GUI extension
+   void SetWidgetCreator(GuiWidgetCreatorCallback creatorFun);
    
 protected:
    
@@ -78,8 +85,11 @@ protected:
    bool registerSubscribers;
    bool inFunction;
    
+   /// Callback used to plugin GUI widgets
+   GuiWidgetCreatorCallback          pCreateWidget;
+
    void SetObjectJ2000Body(ObjectMap *objMap);
-   void InitializeObjectsInTheMap(ObjectMap *objMap, Gmat::ObjectType objType,
+   void InitializeObjectsInTheMap(ObjectMap *objMap, UnsignedInt objType,
                                   bool usingGOS = false,
                                   StringArray *unusedGOL = NULL);
    void InitializeSystemParameters(ObjectMap *objMap);

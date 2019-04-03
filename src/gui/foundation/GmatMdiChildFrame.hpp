@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -33,6 +33,7 @@
 #include "GmatMenuBar.hpp"
 #include "GuiInterpreter.hpp"
 #include "GmatTreeItemData.hpp"  // for namespace GmatTree::
+#include "PluginWidget.hpp"
 
 #ifdef __USE_STC_EDITOR__
 #include "ScriptEditor.hpp"
@@ -71,6 +72,8 @@ public:
    bool               IsActiveChild();
    void               UpdateGuiItem(int updateEdit, int updateAnimation);
    void               UpdateActiveChild();
+
+   bool               ChildIsClosing();
    
 #ifdef __USE_STC_EDITOR__
    // Renamed Editor to ScriptEditor to fix name collision with wxWidget's Scintilla lib
@@ -96,6 +99,9 @@ public:
    
    virtual void SetSaveLocationFlag(bool tf = true);
    virtual void SaveChildPositionAndSize();
+
+   void SetPluginWidget(PluginWidget *widget);
+   PluginWidget *GetPluginWidget();
 
 protected:
    
@@ -123,6 +129,11 @@ protected:
    
    // GuiInterpreter
    GuiInterpreter *theGuiInterpreter;
+
+   /// Plugin widget used for windows that remain open between runs
+   PluginWidget *thePluginWidget;
+
+   bool childIsClosing;
 
 
 #ifdef __USE_STC_EDITOR__

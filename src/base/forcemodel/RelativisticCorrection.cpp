@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -519,8 +519,12 @@ Rvector6 RelativisticCorrection::GetDerivativesForSpacecraft(Spacecraft* sc)
    Real *j2kState = sc->GetState().GetState();
    Real state[6];
    Real now = sc->GetEpoch();
+   GmatTime nowgt = sc->GetEpochGT();
 
-   BuildModelState(now, state, j2kState);
+   if (hasPrecisionTime)
+      BuildModelStateGT(nowgt, state, j2kState);
+   else
+      BuildModelState(now, state, j2kState);
 
    Real      c      = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM *
          GmatMathConstants::M_TO_KM;
@@ -549,7 +553,11 @@ Rvector6 RelativisticCorrection::GetDerivativesForSpacecraft(Spacecraft* sc)
       Real      posMag, muCBc2r3;
       Real      threeOver2 = 3.0 / 2.0;
 
-      stateWRTSun  = body->GetMJ2000State(now) - theSun->GetMJ2000State(now);
+      if (hasPrecisionTime)
+         stateWRTSun = body->GetMJ2000State(nowgt) - theSun->GetMJ2000State(nowgt);
+      else
+         stateWRTSun  = body->GetMJ2000State(now) - theSun->GetMJ2000State(now);
+
       posWRTSun[0] = stateWRTSun[0];
       posWRTSun[1] = stateWRTSun[1];
       posWRTSun[2] = stateWRTSun[2];
@@ -590,7 +598,11 @@ Rvector6 RelativisticCorrection::GetDerivativesForSpacecraft(Spacecraft* sc)
 
    bodyRadius   = body->GetEquatorialRadius();
    // We want the body's fixed to inertial rotation matrix
-   cc.Convert(now, dummy, bodyFixed, dummyResult, bodyInertial);
+   if (hasPrecisionTime)
+      cc.Convert(nowgt, dummy, bodyFixed, dummyResult, bodyInertial);
+   else
+      cc.Convert(now, dummy, bodyFixed, dummyResult, bodyInertial);
+
    R            = cc.GetLastRotationMatrix();
    Rdot         = cc.GetLastRotationDotMatrix();
 

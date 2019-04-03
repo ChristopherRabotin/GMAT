@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -118,19 +118,33 @@ protected:
    Integer                 stateIndex;
    /// Array of A.1 epochs at the start of each data block
    RealArray               startEpochs;
+
    /// Array of time steps in each data block
    RealArray               timeSteps;
    /// Time from the start of the ephem, in seconds
    Real                    timeFromEphemStart;
    /// Most recent epoch used from this propagator
    GmatEpoch               lastEpoch;
+   GmatTime                lastEpochGT;
+   /// Time spanned by each data block
+   RealArray               timeSpans;
+
+   /// CoordinateConverter instance
+   CoordinateConverter     cc;
+   /// Coordinate system used in the ephemeris file
+   CoordinateSystem        *ephemCoord;
+   /// MJ2000 Coordinate System about the ephemeris file's central body
+   CoordinateSystem        *j2k;
 
    virtual void            UpdateState();
    virtual void            SetEphemSpan(Integer whichOne = 0);
 
    void                    FindRecord(GmatEpoch forEpoch);
+   void                    FindRecord(GmatTime forEpoch);
    void                    UpdateInterpolator(const GmatEpoch &forEpoch);
+   void                    UpdateInterpolator(const GmatTime &forEpoch);
    void                    GetState(GmatEpoch forEpoch, Rvector6 &outstate);
+   void                    GetState(GmatTime forEpoch, Rvector6 &outstate);
 
    /// Parameter IDs
    enum

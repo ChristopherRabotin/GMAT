@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -674,7 +674,7 @@ bool AveragedDoppler::SetEventData(Event *locatedEvent)
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string &name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -688,7 +688,7 @@ bool AveragedDoppler::SetEventData(Event *locatedEvent)
  * @return true if the object was processed
  */
 //------------------------------------------------------------------------------
-bool AveragedDoppler::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool AveragedDoppler::SetRefObject(GmatBase *obj, const UnsignedInt type,
       const std::string & name, const Integer index)
 {
    return PhysicalMeasurement::SetRefObject(obj, type, name, index);
@@ -696,7 +696,7 @@ bool AveragedDoppler::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -709,7 +709,7 @@ bool AveragedDoppler::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return true if the object was processed
  */
 //------------------------------------------------------------------------------
-bool AveragedDoppler::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool AveragedDoppler::SetRefObject(GmatBase *obj, const UnsignedInt type,
       const std::string & name)
 {
    bool retval = false;

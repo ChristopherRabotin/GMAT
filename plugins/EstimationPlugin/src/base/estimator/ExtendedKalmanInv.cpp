@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -269,7 +269,7 @@ void ExtendedKalmanInv::Estimate()
 
    // Advance MeasMan to the next measurement and get its epoch
    measManager.AdvanceObservation();
-   nextMeasurementEpoch = measManager.GetEpoch();
+   nextMeasurementEpochGT = measManager.GetEpochGT();
    FindTimeStep();
 
    #ifdef DEBUG_ESTIMATION
@@ -278,7 +278,7 @@ void ExtendedKalmanInv::Estimate()
             nextMeasurementEpoch, timeStep);
    #endif
 
-   if (currentEpoch < nextMeasurementEpoch)
+   if (currentEpochGT < nextMeasurementEpochGT)
    {
       // Reset the STM
       for (UnsignedInt i = 0; i < stateSize; ++i)
@@ -421,7 +421,7 @@ void ExtendedKalmanInv::ComputeObs()
    {
       ocDiff = currentObs->value[k] - calculatedMeas->value[k];
       ocDiffVec.push_back(ocDiff);
-      measurementEpochs.push_back(currentEpoch);
+      measurementEpochs.push_back(currentEpochGT);
       measurementResiduals.push_back(ocDiff);
       measurementResidualID.push_back(calculatedMeas->uniqueID);
       yi.push_back(ocDiff);
@@ -430,7 +430,7 @@ void ExtendedKalmanInv::ComputeObs()
       #endif
    }
    measurementResVectors.push_back(ocDiffVec);
-   measurementTimes.push_back(currentEpoch);
+   measurementTimes.push_back(currentEpochGT);
    observationID.push_back(calculatedMeas->uniqueID);
 
    if (currentObs->noiseCovariance == NULL)

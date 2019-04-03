@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,6 +35,7 @@
 
 #include "ephempropagator_defs.hpp"
 #include "Propagator.hpp"
+#include "Ephemeris.hpp"
 
 /**
  * EphemerisPropagator is the base class for objects that model orbit evolution
@@ -59,6 +60,7 @@ public:
    // Access methods for the scriptable parameters
    virtual bool         IsParameterReadOnly(const Integer id) const;
    virtual bool         IsParameterReadOnly(const std::string &label) const;
+   virtual bool         IsParameterCommandModeSettable(const Integer id) const;
 
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
@@ -117,27 +119,27 @@ public:
                                                 const Integer index) const;
 
    // Access methods derived classes can override on reference objects
-   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual std::string  GetRefObjectName(const UnsignedInt type) const;
 //   virtual const ObjectTypeArray&
 //                        GetRefObjectTypeArray();
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+                        GetRefObjectNameArray(const UnsignedInt type);
+   virtual bool         SetRefObjectName(const UnsignedInt type,
                                          const std::string &name);
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
-//   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+//   virtual GmatBase*    GetRefObject(const UnsignedInt type,
 //                                     const std::string &name);
-//   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+//   virtual GmatBase*    GetRefObject(const UnsignedInt type,
 //                                     const std::string &name,
 //                                     const Integer index);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name = "");
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index);
-//   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+//   virtual ObjectArray& GetRefObjectArray(const UnsignedInt type);
 //   virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
    bool                 UsesODEModel();
@@ -149,7 +151,10 @@ public:
    virtual Integer      GetDimension();
    virtual Real*        GetState();
    virtual Real*        GetJ2KState();
+   
    virtual void         UpdateSpaceObject(Real newEpoch = -1.0);
+   virtual void         UpdateSpaceObjectGT(GmatTime newEpoch = -1.0);
+
    virtual void         UpdateFromSpaceObject();
    virtual void         RevertSpaceObject();
    virtual void         BufferState();
@@ -167,6 +172,8 @@ public:
    };
 
 protected:
+   /// The ephemeris used for propagation  (Note: Refactoring needed for some types)
+   Ephemeris                  *theEphem;
    /// Step used to propagate through the ephemeris
    Real                       ephemStep;
    /// Format used for the start epoch data
@@ -175,8 +182,10 @@ protected:
    std::string                startEpoch;
    /// Initial epoch
    Real                       initialEpoch;
+   GmatTime                   initialEpochGT;
    /// Current epoch
    Real                       currentEpoch;
+   GmatTime                   currentEpochGT;
    /// Current epoch - initial epoch (used to minimize accumulated error)
    Real                       timeFromEpoch;
 
@@ -240,6 +249,8 @@ protected:
 
    virtual void MoveToOrigin(Real newEpoch = -1.0);
    virtual void ReturnFromOrigin(Real newEpoch = -1.0);
+   virtual void MoveToOriginGT(GmatTime newEpoch = -1.0);
+   virtual void ReturnFromOriginGT(GmatTime newEpoch = -1.0);
 
 };
 

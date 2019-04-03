@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -61,8 +61,8 @@ public:
 protected:
    // The inherited methods from RefData
    virtual void InitializeRefObjects();
-   virtual bool IsValidObjectType(Gmat::ObjectType type);
-   virtual bool AddRefObject(const Gmat::ObjectType type,
+   virtual bool IsValidObjectType(UnsignedInt type);
+   virtual bool AddRefObject(const UnsignedInt type,
                              const std::string &name, GmatBase *obj = NULL,
                              bool replaceName = false);
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -637,7 +637,7 @@ const StringArray& TrackingSystem::GetStringArrayParameter(
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type,
+// bool RenameRefObject(const UnsignedInt type,
 //          const std::string & oldName, const std::string & newName)
 //------------------------------------------------------------------------------
 /**
@@ -650,7 +650,7 @@ const StringArray& TrackingSystem::GetStringArrayParameter(
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool TrackingSystem::RenameRefObject(const Gmat::ObjectType type,
+bool TrackingSystem::RenameRefObject(const UnsignedInt type,
          const std::string & oldName, const std::string & newName)
 {
    /// @todo TrackingSystem rename code needs to be implemented
@@ -659,7 +659,7 @@ bool TrackingSystem::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string & name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string & name)
 //------------------------------------------------------------------------------
 /**
  * This method sets a reference object's name
@@ -670,7 +670,7 @@ bool TrackingSystem::RenameRefObject(const Gmat::ObjectType type,
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool TrackingSystem::SetRefObjectName(const Gmat::ObjectType type,
+bool TrackingSystem::SetRefObjectName(const UnsignedInt type,
          const std::string & name)
 {
    return GmatBase::SetRefObjectName(type, name);
@@ -693,7 +693,7 @@ const ObjectTypeArray & TrackingSystem::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Initialization method that identifies the reference objects needed
@@ -704,7 +704,7 @@ const ObjectTypeArray & TrackingSystem::GetRefObjectTypeArray()
  */
 //------------------------------------------------------------------------------
 const StringArray& TrackingSystem::GetRefObjectNameArray(
-         const Gmat::ObjectType type)
+         const UnsignedInt type)
 {
    #ifdef DEBUG_TRACKINGSYSTEM_INITIALIZATION
       MessageInterface::ShowMessage(
@@ -755,7 +755,7 @@ const StringArray& TrackingSystem::GetRefObjectNameArray(
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Retrieves the name of a referenced object of a given type
@@ -765,14 +765,14 @@ const StringArray& TrackingSystem::GetRefObjectNameArray(
  * @return The name of the associated object
  */
 //------------------------------------------------------------------------------
-std::string TrackingSystem::GetRefObjectName(const Gmat::ObjectType type) const
+std::string TrackingSystem::GetRefObjectName(const UnsignedInt type) const
 {
    return GmatBase::GetRefObjectName(type);
 }
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string & name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string & name)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a pointer to a referenced object of a given type and name
@@ -783,7 +783,7 @@ std::string TrackingSystem::GetRefObjectName(const Gmat::ObjectType type) const
  * @return The pointer to the associated object
  */
 //------------------------------------------------------------------------------
-GmatBase *TrackingSystem::GetRefObject(const Gmat::ObjectType type,
+GmatBase *TrackingSystem::GetRefObject(const UnsignedInt type,
          const std::string & name)
 {
    return GmatBase::GetRefObject(type, name);
@@ -791,7 +791,7 @@ GmatBase *TrackingSystem::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string & name,
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string & name,
 //       const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -805,7 +805,7 @@ GmatBase *TrackingSystem::GetRefObject(const Gmat::ObjectType type,
  * @return The pointer to the associated object
  */
 //------------------------------------------------------------------------------
-GmatBase *TrackingSystem::GetRefObject(const Gmat::ObjectType type,
+GmatBase *TrackingSystem::GetRefObject(const UnsignedInt type,
          const std::string & name, const Integer index)
 {
    return GmatBase::GetRefObject(type, name, index);
@@ -813,7 +813,7 @@ GmatBase *TrackingSystem::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string & name)
 //------------------------------------------------------------------------------
 /**
@@ -826,7 +826,7 @@ GmatBase *TrackingSystem::GetRefObject(const Gmat::ObjectType type,
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool TrackingSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool TrackingSystem::SetRefObject(GmatBase *obj, const UnsignedInt type,
          const std::string & name)
 {
    #ifdef DEBUG_TRACKINGSYSTEM_INITIALIZATION
@@ -887,7 +887,7 @@ bool TrackingSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string &name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -902,7 +902,7 @@ bool TrackingSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool TrackingSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool TrackingSystem::SetRefObject(GmatBase *obj, const UnsignedInt type,
          const std::string & name, const Integer index)
 {
    #ifdef DEBUG_TRACKINGSYSTEM_INITIALIZATION
@@ -933,7 +933,7 @@ ObjectArray& TrackingSystem::GetRefObjectArray(const std::string & typeString)
 
 
 //------------------------------------------------------------------------------
-// ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+// ObjectArray& GetRefObjectArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * This method retrieves an array of reference objects of a given type
@@ -943,7 +943,7 @@ ObjectArray& TrackingSystem::GetRefObjectArray(const std::string & typeString)
  * @return The array of objects
  */
 //------------------------------------------------------------------------------
-ObjectArray& TrackingSystem::GetRefObjectArray(const Gmat::ObjectType type)
+ObjectArray& TrackingSystem::GetRefObjectArray(const UnsignedInt type)
 {
    return GmatBase::GetRefObjectArray(type);
 }

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -51,6 +51,7 @@
 //#define DEBUG_ACTIVATE
 //#define DEBUG_ICONIZE
 //#define DEBUG_GMAT_FUNCTION
+//#define DEBUG_UPDATE_ACTIVE_CHILD
 
 Integer GmatMdiChildFrame::maxZOrder = 0;
 
@@ -102,6 +103,7 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent,
    mCanSaveLocation = true;
    mIsActiveChild = false;
    mCanBeDeleted = true;
+   childIsClosing = false;
    mItemType = type;
    theScriptTextCtrl = NULL;
    theMenuBar = NULL;
@@ -109,6 +111,8 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent,
    
    GmatAppData *gmatAppData = GmatAppData::Instance();
    theGuiInterpreter = gmatAppData->GetGuiInterpreter();
+
+   thePluginWidget = NULL;
 
    #ifdef __USE_STC_EDITOR__
    theEditor = NULL;
@@ -393,7 +397,7 @@ void GmatMdiChildFrame::OnActivate(wxActivateEvent &event)
    #ifdef DEBUG_ACTIVATE
    MessageInterface::ShowMessage
       ("\nGmatMdiChildFrame::OnActivate() entered, title='%s', mItemType=%d\n",
-       GetTitle().c_str(), mItemType);
+       GetTitle().WX_TO_C_STRING, mItemType);
    #endif
    
    // update both edit and animation tools
@@ -408,7 +412,7 @@ void GmatMdiChildFrame::OnActivate(wxActivateEvent &event)
    #ifdef DEBUG_ACTIVATE
    MessageInterface::ShowMessage
       ("GmatMdiChildFrame::OnActivate() leaving, title='%s'\n   zOrder set to %d, and maxZOrder set to %d\n",
-       GetTitle().c_str(), relativeZOrder, maxZOrder);
+       GetTitle().WX_TO_C_STRING, relativeZOrder, maxZOrder);
    #endif
    event.Skip();
 }
@@ -556,11 +560,23 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
    // wxSafeYield();
    // This causes crash on exit with Red X/button on XP and Mac - wcs 2013.03.20
 //   event.Skip();
+
+   if (mCanClose)
+      childIsClosing = true;
    
    #ifdef DEBUG_CLOSE
    MessageInterface::ShowMessage("GmatMdiChildFrame::OnClose() leaving\n");
    #endif
 }
+
+//------------------------------------------------------------------------------
+// bool ChildIsClosing()
+//------------------------------------------------------------------------------
+bool GmatMdiChildFrame::ChildIsClosing()
+{
+   return childIsClosing;
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -646,7 +662,8 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
        (mItemType == GmatTree::OUTPUT_TEXT_EPHEM_FILE ) ||
        (mItemType == GmatTree::OUTPUT_ORBIT_VIEW) ||
        (mItemType == GmatTree::OUTPUT_XY_PLOT) ||
-       (mItemType == GmatTree::OUTPUT_GROUND_TRACK_PLOT)
+       (mItemType == GmatTree::OUTPUT_GROUND_TRACK_PLOT) ||
+       (mItemType == GmatTree::USER_DEFINED_OBJECT)
        // We'll want to add the event reports eventually, but they are not subscriber based
        //|| (mItemType == GmatTree::EVENT_REPORT)
        )
@@ -709,10 +726,13 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
       location << upperLeft[0] << " " << upperLeft[1];
       std::stringstream size("");
       size << childSize[0] << " " << childSize[1];
-      pConfig->Write("/MissionTree/UpperLeft", location.str().c_str());
-      pConfig->Write("/MissionTree/Size", size.str().c_str());
-      pConfig->Write("/MissionTree/IsMaximized", isMaximized);
-      pConfig->Write("/MissionTree/IsMinimized", isMinimized);
+      if (GmatGlobal::Instance()->GetWritePersonalizationFile())
+      {
+         pConfig->Write("/MissionTree/UpperLeft", location.str().c_str());
+         pConfig->Write("/MissionTree/Size", size.str().c_str());
+         pConfig->Write("/MissionTree/IsMaximized", isMaximized);
+         pConfig->Write("/MissionTree/IsMinimized", isMinimized);
+      }
    }
    else if (mItemType == GmatTree::SCRIPT_FILE)
    {
@@ -723,10 +743,13 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
       location << upperLeft[0] << " " << upperLeft[1];
       std::stringstream size("");
       size << childSize[0] << " " << childSize[1];
-      pConfig->Write("/ScriptEditor/UpperLeft", location.str().c_str());
-      pConfig->Write("/ScriptEditor/Size", size.str().c_str());
-      pConfig->Write("/ScriptEditor/IsMaximized", isMaximized);
-      pConfig->Write("/ScriptEditor/IsMinimized", isMinimized);
+      if (GmatGlobal::Instance()->GetWritePersonalizationFile())
+      {
+         pConfig->Write("/ScriptEditor/UpperLeft", location.str().c_str());
+         pConfig->Write("/ScriptEditor/Size", size.str().c_str());
+         pConfig->Write("/ScriptEditor/IsMaximized", isMaximized);
+         pConfig->Write("/ScriptEditor/IsMinimized", isMinimized);
+      }
    }
 }
 
@@ -757,6 +780,36 @@ wxString GmatMdiChildFrame::GetTitle()
 
 
 //------------------------------------------------------------------------------
+// void SetPluginWidget(PluginWidget *widget)
+//------------------------------------------------------------------------------
+/**
+ * Method used to set plugin widgets for between-run persistence
+ *
+ * @return the persistent widget
+ */
+//------------------------------------------------------------------------------
+void GmatMdiChildFrame::SetPluginWidget(PluginWidget *widget)
+{
+   thePluginWidget = widget;
+}
+
+
+//------------------------------------------------------------------------------
+// PluginWidget *GetPluginWidget()
+//------------------------------------------------------------------------------
+/**
+ * Method used to retrieve plugin widgets for between-run persistence
+ *
+ * @return the persistent widget
+ */
+//------------------------------------------------------------------------------
+PluginWidget *GmatMdiChildFrame::GetPluginWidget()
+{
+   return thePluginWidget;
+}
+
+
+//------------------------------------------------------------------------------
 // void UpdateEditGuiItem(int updateEdit, int updateAnimation)
 //------------------------------------------------------------------------------
 /**
@@ -775,7 +828,7 @@ void GmatMdiChildFrame::UpdateGuiItem(int updateEdit, int updateAnimation)
    #ifdef DEBUG_UPDATE_GUI_ITEM
    MessageInterface::ShowMessage
       ("GmatMdiChildFrame::UpdateGuiItem() entered, name='%s'\n   updateEdit=%d, "
-       "updateAnimation=%d, iconized=%d\n", mChildName.c_str(), updateEdit,
+       "updateAnimation=%d, iconized=%d\n", mChildName.WX_TO_C_STRING, updateEdit,
        updateAnimation, IsIconized());
    #endif
    
@@ -788,8 +841,8 @@ void GmatMdiChildFrame::UpdateGuiItem(int updateEdit, int updateAnimation)
    #ifdef DEBUG_UPDATE_GUI_ITEM
    bool isAnimationRunning = ((GmatMainFrame*)theParent)->IsAnimationRunning();
    MessageInterface::ShowMessage
-      ("   IsMissionRunning=%d, IsAnimationRunning=%d, isAnimatable=%d\n",
-       isMissionRunning, isAnimationRunning, isAnimatable);
+      ("   IsAnimationRunning=%d, isAnimatable=%d\n",
+       isAnimationRunning, isAnimatable);
    #endif
    
    int editIndex = theMenuBar->FindMenu("Edit");
@@ -877,8 +930,14 @@ void GmatMdiChildFrame::UpdateActiveChild()
       theChild = (GmatMdiChildFrame *)node->GetData();
       
       #ifdef DEBUG_UPDATE_ACTIVE_CHILD
-      MessageInterface::ShowMessage
-         ("   theChild=%s\n", theChild->GetName().c_str());
+      if (!theChild)
+         MessageInterface::ShowMessage("   UpdateActiveChild - theChild is NULL!!\n");
+      else
+      {
+         MessageInterface::ShowMessage
+            ("   UpdateActiveChild theChild=%s, mChildName = %s\n",
+             theChild->GetName().WX_TO_C_STRING, mChildName.WX_TO_C_STRING);
+      }
       #endif
       
       if (theChild->GetName().IsSameAs(mChildName))
@@ -888,4 +947,7 @@ void GmatMdiChildFrame::UpdateActiveChild()
       
       node = node->GetNext();
    }
+#ifdef DEBUG_UPDATE_ACTIVE_CHILD
+   MessageInterface::ShowMessage("   LEAVING UpdateActiveChild\n");
+#endif
 }

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -241,7 +241,7 @@ GmatBase* FiniteThrust::Clone() const
 
 
 //------------------------------------------------------------------------------
-// void Clear(const Gmat::ObjectType type)
+// void Clear(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Clears the arrays of elements that get set by the Propagate commands
@@ -250,7 +250,7 @@ GmatBase* FiniteThrust::Clone() const
  *             Gmat::UNKNOWN_OBJECT to clear all of the configrable arrays.
  */
 //------------------------------------------------------------------------------
-void FiniteThrust::Clear(const Gmat::ObjectType type)
+void FiniteThrust::Clear(const UnsignedInt type)
 {
    if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::SPACECRAFT)) 
    {
@@ -266,7 +266,7 @@ void FiniteThrust::Clear(const Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Sets the names for referenced objects.
@@ -280,7 +280,7 @@ void FiniteThrust::Clear(const Gmat::ObjectType type)
  * @return true on success, false otherwise.
  */
 //------------------------------------------------------------------------------
-bool FiniteThrust::SetRefObjectName(const Gmat::ObjectType type,
+bool FiniteThrust::SetRefObjectName(const UnsignedInt type,
                                   const std::string &name)
 {
    if (type == Gmat::SPACECRAFT) 
@@ -302,7 +302,7 @@ bool FiniteThrust::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Accesses the names for referenced objects.
@@ -313,7 +313,7 @@ bool FiniteThrust::SetRefObjectName(const Gmat::ObjectType type,
  */
 //------------------------------------------------------------------------------
 const StringArray& FiniteThrust::GetRefObjectNameArray(
-                                                   const Gmat::ObjectType type)
+                                                   const UnsignedInt type)
 {
    if (type == Gmat::SPACECRAFT)
       return mySpacecraft;
@@ -326,7 +326,7 @@ const StringArray& FiniteThrust::GetRefObjectNameArray(
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -339,7 +339,7 @@ const StringArray& FiniteThrust::GetRefObjectNameArray(
  * @return true if the object is set, false if not.
  */
 //------------------------------------------------------------------------------
-bool FiniteThrust::SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
+bool FiniteThrust::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                 const std::string &name)
 {
    if (type == Gmat::FINITE_BURN) 
@@ -363,7 +363,7 @@ bool FiniteThrust::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string &name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -377,7 +377,7 @@ bool FiniteThrust::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return true if the object is set, false if not.
  */
 //------------------------------------------------------------------------------
-bool FiniteThrust::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool FiniteThrust::SetRefObject(GmatBase *obj, const UnsignedInt type,
       const std::string &name, const Integer index)
 {
    return PhysicalModel::SetRefObject(obj, type, name, index);
@@ -385,7 +385,7 @@ bool FiniteThrust::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string &oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string &oldName,
 //       const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -398,7 +398,7 @@ bool FiniteThrust::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return true if a change was made, false if not
  */
 //------------------------------------------------------------------------------
-bool FiniteThrust::RenameRefObject(const Gmat::ObjectType type,
+bool FiniteThrust::RenameRefObject(const UnsignedInt type,
       const std::string &oldName, const std::string &newName)
 {
    if (type == Gmat::FINITE_BURN)
@@ -422,7 +422,7 @@ bool FiniteThrust::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a pointer to a reference object
@@ -433,7 +433,7 @@ bool FiniteThrust::RenameRefObject(const Gmat::ObjectType type,
  * @return The object pointer
  */
 //------------------------------------------------------------------------------
-GmatBase* FiniteThrust::GetRefObject(const Gmat::ObjectType type,
+GmatBase* FiniteThrust::GetRefObject(const UnsignedInt type,
       const std::string &name)
 {
    if (type == Gmat::FINITE_BURN)
@@ -467,7 +467,7 @@ GmatBase* FiniteThrust::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name,
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name,
 //       const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -480,7 +480,7 @@ GmatBase* FiniteThrust::GetRefObject(const Gmat::ObjectType type,
  * @return The object pointer
  */
 //------------------------------------------------------------------------------
-GmatBase* FiniteThrust::GetRefObject(const Gmat::ObjectType type,
+GmatBase* FiniteThrust::GetRefObject(const UnsignedInt type,
       const std::string &name, const Integer index)
 {
    return PhysicalModel::GetRefObject(type, name, index);

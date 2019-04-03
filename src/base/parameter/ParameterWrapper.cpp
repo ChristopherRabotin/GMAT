@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -295,7 +295,7 @@ std::string ParameterWrapper::EvaluateString() const
       "Cannot return value of Parameter - pointer is NULL\n");
    #ifdef DEBUG_PW
       MessageInterface::ShowMessage(
-      "In ParameterWrapper::EvaluateString, value is '%s'\n", param->EvaluateString());
+      "In ParameterWrapper::EvaluateString, value is '%s'\n", (param->EvaluateString()).c_str());
    #endif
    return param->EvaluateString();
 }

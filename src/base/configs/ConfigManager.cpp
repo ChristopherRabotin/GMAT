@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -33,6 +33,7 @@
 #include "ConfigManager.hpp"
 #include "ConfigManagerException.hpp"
 #include "StringUtil.hpp"               // for GmatStringUtil::
+#include "PluginItemManager.hpp"
 
 //#define DEBUG_RENAME 1
 //#define DEBUG_CONFIG 1
@@ -157,7 +158,7 @@ std::string ConfigManager::GetNewName(const std::string &name, Integer startCoun
 
 
 //------------------------------------------------------------------------------
-// void AddObject(Gmat::ObjectType objType, GmatBase *obj)
+// void AddObject(UnsignedInt objType, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Adds an object to the configuration.
@@ -166,7 +167,7 @@ std::string ConfigManager::GetNewName(const std::string &name, Integer startCoun
  * @param obj Pointer to the object instance.
  */
 //------------------------------------------------------------------------------
-void ConfigManager::AddObject(Gmat::ObjectType objType, GmatBase *obj)
+void ConfigManager::AddObject(UnsignedInt objType, GmatBase *obj)
 {
    #ifdef DEBUG_ADD_OBJECT
    MessageInterface::ShowMessage
@@ -180,7 +181,7 @@ void ConfigManager::AddObject(Gmat::ObjectType objType, GmatBase *obj)
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
    
-   if (!obj->IsOfType(objType))
+   if ((!obj->IsOfType(objType)) && (objType < Gmat::USER_DEFINED_OBJECT))
       throw ConfigManagerException(name + " is not a valid object type");
    
    AddObject(obj);
@@ -978,7 +979,7 @@ const StringArray& ConfigManager::GetListOfAllItems()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfItemsHas(Gmat::ObjectType type, const std::string &name,
+// const StringArray& GetListOfItemsHas(UnsignedInt type, const std::string &name,
 //                                      bool includeSysParam)
 //------------------------------------------------------------------------------
 /**
@@ -991,7 +992,7 @@ const StringArray& ConfigManager::GetListOfAllItems()
  * @return array of item names where the name is used.
  */
 //------------------------------------------------------------------------------
-const StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
+const StringArray& ConfigManager::GetListOfItemsHas(UnsignedInt type,
                                                     const std::string &name,
                                                     bool includeSysParam)
 {
@@ -1157,7 +1158,7 @@ const StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfItems(Gmat::ObjectType itemType)
+// const StringArray& GetListOfItems(UnsignedInt itemType)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a list of all configured objects of a given type.
@@ -1167,7 +1168,7 @@ const StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
  * @return The list of objects.
  */
 //------------------------------------------------------------------------------
-const StringArray& ConfigManager::GetListOfItems(Gmat::ObjectType itemType)
+const StringArray& ConfigManager::GetListOfItems(UnsignedInt itemType)
 {
    listOfItems.erase(listOfItems.begin(), listOfItems.end());
     
@@ -1175,8 +1176,13 @@ const StringArray& ConfigManager::GetListOfItems(Gmat::ObjectType itemType)
       (std::vector<GmatBase*>::iterator)(objects.begin());
    while (current != (std::vector<GmatBase*>::iterator)(objects.end()))
    {
-      if ((*current)->IsOfType(itemType))
-         listOfItems.push_back((*current)->GetName());
+      if (itemType < Gmat::USER_DEFINED_OBJECT)
+      {
+         if ((*current)->IsOfType(itemType))
+            listOfItems.push_back((*current)->GetName());
+      }
+      else if ((*current)->GetType() >= Gmat::USER_DEFINED_OBJECT)
+            listOfItems.push_back((*current)->GetName());
       ++current;
    }
    return listOfItems;
@@ -1248,7 +1254,7 @@ GmatBase* ConfigManager::AddClone(const std::string &name, std::string &cloneNam
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetFirstItemUsing(Gmat::ObjectType type, const std::string &name,
+// GmatBase* GetFirstItemUsing(UnsignedInt type, const std::string &name,
 //                            bool includeSysParam = true);
 //------------------------------------------------------------------------------
 /**
@@ -1261,7 +1267,7 @@ GmatBase* ConfigManager::AddClone(const std::string &name, std::string &cloneNam
  * @return A pointer to the object.
  */
 //------------------------------------------------------------------------------
-GmatBase* ConfigManager::GetFirstItemUsing(Gmat::ObjectType type,
+GmatBase* ConfigManager::GetFirstItemUsing(UnsignedInt type,
                                            const std::string &name,
                                            bool includeSysParam)
 {
@@ -1338,10 +1344,10 @@ GmatBase* ConfigManager::GetItem(const std::string &name)
 }
 
 //------------------------------------------------------------------------------
-// bool ChangeMappingName(Gmat::ObjectType itemType, const std::string &oldName,
+// bool ChangeMappingName(UnsignedInt itemType, const std::string &oldName,
 //                        const std::string &newName, GmatBase *mapObj)
 //------------------------------------------------------------------------------
-bool ConfigManager::ChangeMappingName(Gmat::ObjectType itemType,
+bool ConfigManager::ChangeMappingName(UnsignedInt itemType,
                                       const std::string &oldName,
                                       const std::string &newName,
                                       GmatBase **mapObj)
@@ -1405,7 +1411,7 @@ bool ConfigManager::ChangeMappingName(Gmat::ObjectType itemType,
 }
 
 //------------------------------------------------------------------------------
-// bool RenameItem(Gmat::ObjectType type, const std::string &oldName,
+// bool RenameItem(UnsignedInt type, const std::string &oldName,
 //                 const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -1418,7 +1424,7 @@ bool ConfigManager::ChangeMappingName(Gmat::ObjectType itemType,
  * @return true if the object was renamed, false if not.
  */
 //------------------------------------------------------------------------------
-bool ConfigManager::RenameItem(Gmat::ObjectType itemType,
+bool ConfigManager::RenameItem(UnsignedInt itemType,
                                const std::string &oldName,
                                const std::string &newName)
 {
@@ -1821,12 +1827,14 @@ bool ConfigManager::RemoveAllItems()
    newObjects.clear();
    mapping.clear();
    
+   PluginItemManager::Instance()->ClearAllPluginItems();
+
    return true;
 }
 
 
 //------------------------------------------------------------------------------
-// bool RemoveItem(Gmat::ObjectType type, const std::string &name)
+// bool RemoveItem(UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Removes a specific item from memory.
@@ -1837,7 +1845,7 @@ bool ConfigManager::RemoveAllItems()
  * @return true on success, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name,
+bool ConfigManager::RemoveItem(UnsignedInt type, const std::string &name,
                                bool removeAssociatedSysParam)
 {
    #ifdef DEBUG_CONFIG_REMOVE
@@ -2752,7 +2760,7 @@ ObjectMap* ConfigManager::GetObjectMap()
 }
 
 //------------------------------------------------------------------------------
-// bool RelatedNameChange(std::vector<Gmat::ObjectType> &itemType,
+// bool RelatedNameChange(std::vector<UnsignedInt> &itemType,
 //       StringArray& oldName, StringArray& newName)
 //------------------------------------------------------------------------------
 /**
@@ -2772,7 +2780,7 @@ ObjectMap* ConfigManager::GetObjectMap()
  * @return true if there are name changes to be processed, false if not
  */
 //------------------------------------------------------------------------------
-bool ConfigManager::RelatedNameChange(std::vector<Gmat::ObjectType> &itemType,
+bool ConfigManager::RelatedNameChange(std::vector<UnsignedInt> &itemType,
 StringArray& oldName, StringArray& newName)
 {
    itemType.clear();

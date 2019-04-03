@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -45,7 +45,7 @@ public:
             GmatBase *obj = NULL, const std::string &desc = "",
             const std::string &unit = "",
             GmatParam::DepObject depObj = GmatParam::NO_DEP,
-            Gmat::ObjectType ownerType = Gmat::UNKNOWN_OBJECT);
+            UnsignedInt ownerType = Gmat::UNKNOWN_OBJECT);
    Rvec6Var(const Rvec6Var &copy);
    Rvec6Var& operator= (const Rvec6Var& right);
    virtual ~Rvec6Var();

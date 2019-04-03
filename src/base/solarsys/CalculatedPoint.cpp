@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -83,7 +83,8 @@ CalculatedPoint::CalculatedPoint(const std::string &ptType,
    numberOfBodies (0),
    isBuiltIn      (false),
    builtInType    (""),
-   lastStateTime  (GmatTimeConstants::MJD_OF_J2000)
+   lastStateTime  (GmatTimeConstants::MJD_OF_J2000),
+   lastStateTimeGT(GmatTime(GmatTimeConstants::MJD_OF_J2000))
 {
    objectTypes.push_back(Gmat::CALCULATED_POINT);
    objectTypeNames.push_back("CalculatedPoint");
@@ -114,6 +115,7 @@ CalculatedPoint::CalculatedPoint(const CalculatedPoint &cp) :
    isBuiltIn     (cp.isBuiltIn),
    builtInType   (cp.builtInType),
    lastStateTime (cp.lastStateTime),
+   lastStateTimeGT (cp.lastStateTimeGT),
    lastState     (cp.lastState)
 {
    bodyNames.clear();
@@ -179,6 +181,7 @@ CalculatedPoint& CalculatedPoint::operator=(const CalculatedPoint &cp)
    isBuiltIn       = cp.isBuiltIn;
    builtInType     = cp.builtInType;
    lastStateTime   = cp.lastStateTime;
+   lastStateTimeGT = cp.lastStateTimeGT;
    lastState       = cp.lastState;
 
    return *this;
@@ -267,6 +270,16 @@ Real CalculatedPoint::SetEpoch(const Real ep)
    GetMJ2000State(a1);
    return lastStateTime.Get();
 }
+
+Real CalculatedPoint::SetEpoch(const GmatTime ep)
+{
+   GmatTime a1(ep);
+   GetMJ2000State(a1);
+   lastStateTime = lastStateTimeGT.GetMjd();
+
+   return lastStateTime.Get();
+}
+
 
 Rvector6 CalculatedPoint::GetLastState()
 {
@@ -805,7 +818,7 @@ const StringArray& CalculatedPoint::GetStringArrayParameter(
 }
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name,
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name,
 //                        const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -818,7 +831,7 @@ const StringArray& CalculatedPoint::GetStringArrayParameter(
  * @return reference object pointer.
  */
 //------------------------------------------------------------------------------
-GmatBase* CalculatedPoint::GetRefObject(const Gmat::ObjectType type,
+GmatBase* CalculatedPoint::GetRefObject(const UnsignedInt type,
                                         const std::string &name,
                                         const Integer index)
 {
@@ -838,7 +851,7 @@ GmatBase* CalculatedPoint::GetRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -853,7 +866,7 @@ GmatBase* CalculatedPoint::GetRefObject(const Gmat::ObjectType type,
  */
 //------------------------------------------------------------------------------
 bool CalculatedPoint::SetRefObject(GmatBase *obj, 
-                                   const Gmat::ObjectType type,
+                                   const UnsignedInt type,
                                    const std::string &name)
 {
    if (obj->IsOfType(Gmat::SPACE_POINT))
@@ -922,7 +935,7 @@ bool CalculatedPoint::SetRefObject(GmatBase *obj,
 
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -935,7 +948,7 @@ bool CalculatedPoint::SetRefObject(GmatBase *obj,
  * @return true if object name changed, false if not.
  */
 //------------------------------------------------------------------------------
-bool CalculatedPoint::RenameRefObject(const Gmat::ObjectType type,
+bool CalculatedPoint::RenameRefObject(const UnsignedInt type,
                                       const std::string &oldName,
                                       const std::string &newName)
 {
@@ -992,7 +1005,7 @@ const ObjectTypeArray& CalculatedPoint::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//  const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Returns the names of the reference object. 
@@ -1003,7 +1016,7 @@ const ObjectTypeArray& CalculatedPoint::GetRefObjectTypeArray()
  * @return The names of the reference object.
  */
 //------------------------------------------------------------------------------
-const StringArray& CalculatedPoint::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& CalculatedPoint::GetRefObjectNameArray(const UnsignedInt type)
 {
    if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
    {

@@ -215,7 +215,7 @@ std::string GPSAdapter::GetParameterTypeString(const Integer id) const
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string& oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string& oldName,
 //       const std::string& newName)
 //------------------------------------------------------------------------------
 /**
@@ -228,7 +228,7 @@ std::string GPSAdapter::GetParameterTypeString(const Integer id) const
  * @return true if a rename happened, false if not
  */
 //------------------------------------------------------------------------------
-bool GPSAdapter::RenameRefObject(const Gmat::ObjectType type,
+bool GPSAdapter::RenameRefObject(const UnsignedInt type,
       const std::string& oldName, const std::string& newName)
 {
    bool retval = TrackingDataAdapter::RenameRefObject(type, oldName, newName);
@@ -342,7 +342,8 @@ bool GPSAdapter::Initialize()
  */
 //------------------------------------------------------------------------------
 const MeasurementData& GPSAdapter::CalculateMeasurement(bool withEvents,
-      ObservationData* forObservation, std::vector<RampTableData>* rampTB)
+      ObservationData* forObservation, std::vector<RampTableData>* rampTB,
+      bool forSimulation)
 {
    #ifdef DEBUG_ADAPTER_EXECUTION
       MessageInterface::ShowMessage("GPSAdapter::CalculateMeasurement(%s, "
@@ -355,12 +356,13 @@ const MeasurementData& GPSAdapter::CalculateMeasurement(bool withEvents,
             instanceName + " before the measurement was set");
    
    // Fire the measurement model to build the collection of signal data
-   if (((GPSPointMeasureModel*)calcData)->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB))
+   if (((GPSPointMeasureModel*)calcData)->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB, forSimulation))
    {
       // 1. Get measurment data
       std::vector<SignalData*> data = calcData->GetSignalData();
       
-      cMeasurement.epoch = data[0]->rPrecTime.GetMjd();
+      cMeasurement.epochGT = data[0]->rPrecTime;
+      cMeasurement.epoch   = data[0]->rPrecTime.GetMjd();
       cMeasurement.isFeasible = true;
       cMeasurement.feasibilityValue = 0.0;
       cMeasurement.unfeasibleReason = "N";            // Normal
@@ -375,7 +377,7 @@ const MeasurementData& GPSAdapter::CalculateMeasurement(bool withEvents,
       if (cs->GetOrigin()->GetName() != "Earth")
       {
          CelestialBody * origin = (CelestialBody*)(cs->GetOrigin());
-         Rvector3 fromScOriginToEarth = earthBody->GetMJ2000Position(cMeasurement.epoch) - origin->GetMJ2000Position(cMeasurement.epoch);
+         Rvector3 fromScOriginToEarth = earthBody->GetMJ2000Position(cMeasurement.epochGT) - origin->GetMJ2000Position(cMeasurement.epochGT);
          pos = pos - fromScOriginToEarth;
       }
       // 2.3. Convert EarthMJ200Eq to EarthFixed coordinate system
@@ -606,7 +608,7 @@ bool GPSAdapter::ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex,
 
 const MeasurementData& GPSAdapter::CalculateMeasurementAtOffset(
       bool withEvents, Real dt, ObservationData* forObservation,
-      std::vector<RampTableData>* rampTB)
+      std::vector<RampTableData>* rampTB, bool forSimulation)
 {
    static MeasurementData offsetMeas;
 

@@ -1,4 +1,4 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>CelestialBody</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="BatchEstimatorInv.html" title="BatchEstimatorInv"><link rel="next" href="CoordinateSystem.html" title="CoordinateSystem"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">CelestialBody</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="BatchEstimatorInv.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="CoordinateSystem.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="CelestialBody"></a><div class="titlepage"></div><a name="N15D1C" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">CelestialBody</span></h2><p>CelestialBody &mdash; A celestial body model</p></div><div class="refsection"><a name="N15D2D"></a><h2>Description</h2><p>The <span class="guilabel">CelestialBody</span> resource is a model of a
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>CelestialBody</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="BatchEstimatorInv.html" title="BatchEstimatorInv"><link rel="next" href="CoordinateSystem.html" title="CoordinateSystem"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">CelestialBody</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="BatchEstimatorInv.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="CoordinateSystem.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="CelestialBody"></a><div class="titlepage"></div><a name="N15E46" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">CelestialBody</span></h2><p>CelestialBody &mdash; A celestial body model</p></div><div class="refsection"><a name="N15E57"></a><h2>Description</h2><p>The <span class="guilabel">CelestialBody</span> resource is a model of a
     celestial body containing settings for the physical properties, as well as
     the models for the orbital motion and orientation. GMAT contains built-in
     models for the Sun, the 8 planets, Earth's moon, and Pluto. You can create
@@ -73,23 +73,13 @@
                       <span class="guilabel">SPICE</span>
                     </p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">DE405</span> for built-in bodies.
                     <span class="guilabel">SPICE</span> for user-defined bodies.</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RotationConstant </span></td><td><p> The body's spin angle at the orientation epoch.
-            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>190.147</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RotationDataSource</span></td><td><p>For <span class="guilabel">Earth</span> default is
-            <span class="guilabel">FK5IAU1980</span>, for <span class="guilabel">Luna</span>
-            default is <span class="guilabel">DE405</span>, for selected built in
-            bodies <span class="guilabel">IAU2000</span>, and for selected built in
-            bodies and all user defined bodies, default is
-            <span class="guilabel">IAUSimplified</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">IAUSimplified</span>,
-                    <span class="guilabel">DE405</span>,
+            </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>190.147</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RotationDataSource</span></td><td><p> Deprecated.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">IAUSimplified</span>,
+                    <span class="guilabel">DEFile</span>,
                     <span class="guilabel">FK5IAU1980</span>,
-                    <span class="guilabel">IAU2000</span>. See discussion below for
-                    more details as not all options are allowed for all
-                    bodies.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>For <span class="guilabel">Earth</span> default is
-                    <span class="guilabel">FK5IAU1980</span>, for
-                    <span class="guilabel">Luna</span> default is
-                    <span class="guilabel">DE405</span>, for selected built in bodies
-                    <span class="guilabel">IAU2000</span>, and for selected built in
-                    bodies and all user defined bodies, default is
-                    <span class="guilabel">IAUSimplified</span>.</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RotationRate</span></td><td><p> The body's spin rate. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>360.9856235</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg/day</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SpiceFrameId</span></td><td><p>SPICE ID of body-fixed frame. Used to define
+                    <span class="guilabel">IAU2002</span>. See <a class="link" href="CelestialBody.html#CelestialBody_Remarks" title="Remarks">Remarks</a> for more
+                    details as not all options are allowed for all
+                    bodies.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>none</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>See the <a class="link" href="CelestialBody.html#CelestialBody_Remarks" title="Remarks">Remarks</a> for how the
+                    default model is chosen based on the celestial body</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RotationRate</span></td><td><p> The body's spin rate. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>360.9856235</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg/day</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SpiceFrameId</span></td><td><p>SPICE ID of body-fixed frame. Used to define
             celestial body properties for use with
             <span class="guilabel">ContactLocator</span> and
             <span class="guilabel">EclipseLocator</span>. See <a class="link" href="CelestialBody.html#CelestialBody_ConfiguringForEventLocation" title="Configuring for event location">Remarks</a>.</p>
@@ -116,7 +106,7 @@
                     <span class="guilabel">Moon</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">TextureMapFileName</span></td><td><p>Allows you to load a texture map file for your
             celestial body.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>texture map files in jpeg format</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <code class="literal">'GenericCelestialBody.jpg'</code>
-                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N163B4"></a><h2>GUI</h2><p>The <span class="guilabel">CelestialBody</span> GUI has three tabs that allow
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N164C2"></a><h2>GUI</h2><p>The <span class="guilabel">CelestialBody</span> GUI has three tabs that allow
     you to set the physical properties, orbital properties, and the
     orientation model. <span class="guilabel">CelestialBody</span> resources can be
     used in <span class="guilabel">ForceModels</span>,
@@ -161,13 +151,14 @@
     can set data such as 3d model of a celestial body, texture file,
     translation and rotation of a celestial body on all three axes, scale of
     the 3D model as well as assign orbit and target colors to the orbit of the
-    body.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_CelestialBody_GUI_7.png" align="middle" height="563"></td></tr></table></div></div></div><div class="refsection"><a name="CelestialBody_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N16473"></a><h3>Celestial body orientation model</h3><p>The orientation of built-in celestial bodies is modeled using high
+    body.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_CelestialBody_GUI_7.png" align="middle" height="563"></td></tr></table></div></div></div><div class="refsection"><a name="CelestialBody_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N16581"></a><h3>Celestial body orientation model</h3><p>The orientation of built-in celestial bodies is modeled using high
       fidelity theories on a per-body basis. The orientation of Earth is
       modeled using IAU-1976/FK5. The orientation of the Moon is modeled using
-      lunar librations from the DE405 file. The remaining built-in celestial
-      body orientations are modeled using data published by the IAU/IAG in
-      "Report of the IAU/IAG Working Group on Cartographic Coordinates and
-      Rotational Elements of the Planets and Satellites: 2000".</p><p>The orientation of a custom <span class="guilabel">CelestialBody</span> is
+      lunar librations from the DE file. The orientation of Neptune is modeled
+      using IAU-2002. The remaining built-in celestial body orientations are
+      modeled using data published by the IAU/IAG in "Report of the IAU/IAG
+      Working Group on Cartographic Coordinates and Rotational Elements of the
+      Planets and Satellites: 2000".</p><p>The orientation of a custom <span class="guilabel">CelestialBody</span> is
       modeled by providing three angles and their rates based on IAU/IAG
       conventions. The figure below illustrates the angles. The angles &#945;o, &#948;o,
       and W, are respectively the <span class="guilabel">SpinAxisRAConstant</span>,
@@ -203,10 +194,9 @@ Vesta.RotationRate        = 1617.332776</code></pre><p>Note: The orientation mod
       applications, <span class="guilabel">NutationUpdateInterval</span> should be set
       to zero. The <span class="guilabel">RotationDataSource</span> field for Earth and
       Luna defines the theory used for the rotation of those bodies.
-      Currently, only FK5IAU1980 and DE405 are available for Earth and Luna
-      respectively and the field is displayed for information purposes only.
-      Future versions of GMAT will support DE421 for Luna and IAU-2000A theory
-      for Earth.</p></div><div class="refsection"><a name="N164C0"></a><h3>Setting colors on orbits of celestial bodies</h3><p>GMAT allows you to assign colors to orbits of celestial bodies
+      Currently, only FK5IAU1980 and DE are available for Earth and Luna
+      respectively and the field is displayed for information purposes
+      only.</p></div><div class="refsection"><a name="N165CE"></a><h3>Setting colors on orbits of celestial bodies</h3><p>GMAT allows you to assign colors to orbits of celestial bodies
       that are drawn in the <span class="guilabel">OrbitView</span> graphics display
       windows. GMAT also allows you to assign colors to perturbing celestial
       body orbital trajectories drawn during iterative processes such as
@@ -216,7 +206,7 @@ Vesta.RotationRate        = 1617.332776</code></pre><p>Note: The orientation mod
       fields are used to assign colors to both orbital and perturbing
       trajectories. See the <a class="xref" href="CelestialBody.html#CelestialBody_Resource_Fields" title="Fields">Fields</a> section for description of these two fields.
       Also see <a class="xref" href="Color.html" title="Color"><span class="refentrytitle">Color</span></a> documentation for discussion and
-      examples on how to set colors on a celestial body.</p></div><div class="refsection"><a name="N164D8"></a><h3>Configuring orbit ephemerides</h3><p>The ephemerides for built-in celestial bodies is specified by the
+      examples on how to set colors on a celestial body.</p></div><div class="refsection"><a name="N165E6"></a><h3>Configuring orbit ephemerides</h3><p>The ephemerides for built-in celestial bodies is specified by the
       <span class="guilabel">SolarSystem.EphemerisSource</span> field and the same
       source is used for all built-in bodies. Ephemerides for a custom
       <span class="guilabel">CelestialBody</span> are provided by SPICE files. Archives
@@ -251,7 +241,7 @@ Ceres.SourceFilename = '../data/planetary_ephem/spk/ceres_1900_2100.bsp'</code><
         <span class="guilabel">SolarSystem.EphemerisSource</span> field. SPICE kernels
         are typically distributed with a ".cmt" file and in that file the line
         that contains the ephemeris model looks like this:</p><p><code class="literal">Planetary Ephemeris Number:
-        DE-0421/LE-0421</code></p></div></div><div class="refsection"><a name="N16520"></a><h3>Configuring physical properties</h3><p>GMAT models all celestial bodies as spherical ellipsoids. To
+        DE-0421/LE-0421</code></p></div></div><div class="refsection"><a name="N1662E"></a><h3>Configuring physical properties</h3><p>GMAT models all celestial bodies as spherical ellipsoids. To
       define the physical properties use the <span class="guilabel">Flattening</span>,
       <span class="guilabel">EquatorialRadius</span>, and <span class="guilabel">Mu</span>
       fields.</p></div><div class="refsection"><a name="CelestialBody_ConfiguringForEventLocation"></a><h3>Configuring for event location</h3><p>GMAT's event location subsystem (consisting of
@@ -305,7 +295,7 @@ Ceres.SourceFilename = '../data/planetary_ephem/spk/ceres_1900_2100.bsp'</code><
       file. Other versions of the MOON_PA frame are available from
       NAIF.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><code class="filename">moon_pa_de421_1900-2050.bpc</code>: Moon
           orientation consistent with DE421 PA frame</p></li><li class="listitem"><p><code class="filename">moon_080317.tf</code>: MOON_PA frame
-          definition</p></li></ul></div></div></div><div class="refsection"><a name="N165F2"></a><h2>Examples</h2><div class="informalexample"><p>Configure a <span class="guilabel">CelestialBody</span> to model Saturn's
+          definition</p></li></ul></div></div></div><div class="refsection"><a name="N16700"></a><h2>Examples</h2><div class="informalexample"><p>Configure a <span class="guilabel">CelestialBody</span> to model Saturn's
       moon Titan. Note you must obtain the SPICE kernel named
       "<code class="filename">sat288.bsp</code>" from <a class="link" href="ftp://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/" target="_top">here</a>
       and place it in the directory identified in the script snippet

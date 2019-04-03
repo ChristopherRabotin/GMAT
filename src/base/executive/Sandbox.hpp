@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -76,16 +76,19 @@ public:
    bool SetPublisher(Publisher *pub = NULL);
    
    GmatBase* GetInternalObject(std::string name,
-                               Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT);
+                               UnsignedInt type = Gmat::UNKNOWN_OBJECT);
    
    std::map<std::string, GmatBase *>
              GetObjectMap();
+   std::map<std::string, GmatBase *>
+      GetGlobalObjectMap();
 
    // Execution methods
    bool Initialize();
    bool Execute();
    bool Interrupt();
    void Clear();
+   void SetWidgetCreator(GuiWidgetCreatorCallback creatorFun);
 
 protected:
     
@@ -147,6 +150,9 @@ private:
    /// Trigger managers for this Sandbox
    std::vector<TriggerManager*>      triggerManagers;
 
+   /// Callback used to plugin GUI widgets
+   GuiWidgetCreatorCallback          pCreateWidget;
+
    Sandbox(const Sandbox&);
    Sandbox& operator=(const Sandbox&);
    
@@ -170,7 +176,7 @@ private:
                                            Integer updatedParameterIndex);
 
    #ifdef DEBUG_SANDBOX_CLONING
-      std::vector<Gmat::ObjectType>  clonable;
+      std::vector<UnsignedInt>  clonable;
    #endif
 };
 

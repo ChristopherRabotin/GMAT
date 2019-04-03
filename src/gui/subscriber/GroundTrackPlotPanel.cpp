@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -142,7 +142,7 @@ bool GroundTrackPlotPanel::PrepareObjectNameChange()
 
 
 //------------------------------------------------------------------------------
-// virtual void ObjectNameChanged(Gmat::ObjectType type, const wxString &oldName,
+// virtual void ObjectNameChanged(UnsignedInt type, const wxString &oldName,
 //                                const wxString &newName)
 //------------------------------------------------------------------------------
 /*
@@ -151,7 +151,7 @@ bool GroundTrackPlotPanel::PrepareObjectNameChange()
  * object name, so all we need to do is re-load the data.
  */
 //------------------------------------------------------------------------------
-void GroundTrackPlotPanel::ObjectNameChanged(Gmat::ObjectType type,
+void GroundTrackPlotPanel::ObjectNameChanged(UnsignedInt type,
                                        const wxString &oldName,
                                        const wxString &newName)
 {
@@ -326,6 +326,14 @@ void GroundTrackPlotPanel::Create()
       new wxStaticText(this, -1, wxT("cycle(s)"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    
+   // Number of maximum points to plot
+   wxStaticText *maxPlottedDataPointsLabel =
+      new wxStaticText(this, -1, wxT("Max number of data points to plot "),
+                       wxDefaultPosition, wxSize(-1, -1), 0);
+   mMaxPlottedDataPointsTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("20000"), wxDefaultPosition,
+                     wxSize(200, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+
    // Number of points to redraw
    wxStaticText *numPointsToRedrawLabel =
       new wxStaticText(this, -1, wxT("Num. points to redraw\n(Enter 0 to draw all)"),
@@ -348,6 +356,9 @@ void GroundTrackPlotPanel::Create()
    dataOptionFlexSizer->Add(updatePlotFreqLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    dataOptionFlexSizer->Add(mUpdatePlotFreqTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    dataOptionFlexSizer->Add(updatePlotFreqUnit, 0, wxALIGN_LEFT|wxALL, bsize);
+   dataOptionFlexSizer->Add(maxPlottedDataPointsLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   dataOptionFlexSizer->Add(mMaxPlottedDataPointsTextCtrl, 0, wxALIGN_LEFT | wxALL, bsize);
+   dataOptionFlexSizer->Add(10, 2, 0, wxALIGN_LEFT | wxALL, bsize);
    dataOptionFlexSizer->Add(numPointsToRedrawLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    dataOptionFlexSizer->Add(mNumPointsToRedrawTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    dataOptionFlexSizer->Add(10, 2, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -492,6 +503,8 @@ void GroundTrackPlotPanel::LoadData()
       mDataCollectFreqTextCtrl->SetValue(str);
       str.Printf("%d", mGroundTrackPlot->GetIntegerParameter("UpdatePlotFrequency"));
       mUpdatePlotFreqTextCtrl->SetValue(str);
+      str.Printf("%d", mGroundTrackPlot->GetIntegerParameter("MaxPlotPoints"));
+      mMaxPlottedDataPointsTextCtrl->SetValue(str);
       str.Printf("%d", mGroundTrackPlot->GetIntegerParameter("NumPointsToRedraw"));
       mNumPointsToRedrawTextCtrl->SetValue(str);
       
@@ -540,7 +553,7 @@ void GroundTrackPlotPanel::SaveData()
    
    canClose = true;
    std::string str1, str2;
-   Integer collectFreq = 0, updateFreq = 0, pointsToRedraw = 0;
+   Integer collectFreq = 0, updateFreq = 0, maxPlotPoints = 0, pointsToRedraw = 0;
    
    //-----------------------------------------------------------------
    // check values from text field
@@ -553,7 +566,10 @@ void GroundTrackPlotPanel::SaveData()
       
       CheckInteger(updateFreq, mUpdatePlotFreqTextCtrl->GetValue().c_str(),
                    "UpdatePlotFrequency", "Integer Number > 0", false, true, true);
-      
+
+      CheckInteger(maxPlotPoints, mMaxPlottedDataPointsTextCtrl->GetValue().c_str(),
+                   "MaxPlotPoints", "Integer Number > 0", false, true, true);
+
       CheckInteger(pointsToRedraw, mNumPointsToRedrawTextCtrl->GetValue().c_str(),
                    "NumPointsToRedraw", "Integer Number >= 0", false, true, true, true);
    }
@@ -605,6 +621,7 @@ void GroundTrackPlotPanel::SaveData()
          #endif
          clonedObj->SetIntegerParameter("DataCollectFrequency", collectFreq);
          clonedObj->SetIntegerParameter("UpdatePlotFrequency", updateFreq);
+         clonedObj->SetIntegerParameter("MaxPlotPoints", maxPlotPoints);
          clonedObj->SetIntegerParameter("NumPointsToRedraw", pointsToRedraw);
          mHasIntegerDataChanged = false;
       }
@@ -863,6 +880,7 @@ void GroundTrackPlotPanel::OnTextChange(wxCommandEvent& event)
    {
       if (obj == mDataCollectFreqTextCtrl ||
           obj == mUpdatePlotFreqTextCtrl  ||
+          obj == mMaxPlottedDataPointsTextCtrl ||
           obj == mNumPointsToRedrawTextCtrl)
       {
          mHasIntegerDataChanged = true;

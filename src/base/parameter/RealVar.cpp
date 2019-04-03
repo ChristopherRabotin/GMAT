@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -82,9 +82,9 @@ RealVar::PARAMETER_TYPE[RealVarParamCount - ParameterParamCount] =
 RealVar::RealVar(const std::string &name, const std::string &valStr,
                  const std::string &typeStr, GmatParam::ParameterKey key,
                  GmatBase *obj, const std::string &desc, const std::string &unit,
-                 GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
+                 GmatParam::DepObject depObj, UnsignedInt ownerType,
                  bool isTimeParam, bool isSettable, bool isPlottable,
-                 bool isReportable,Gmat::ObjectType ownedObjType)
+                 bool isReportable,UnsignedInt ownedObjType)
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam,
                isSettable, isPlottable, isReportable, ownedObjType)
 {
@@ -215,8 +215,9 @@ bool RealVar::Initialize()
 //------------------------------------------------------------------------------
 std::string RealVar::ToString()
 {
+   Evaluate(); // WCS 2018.01.09 add to get latest & correct value to report(s)
    // use default global precision to convert to string (loj: 2008.03.05)
-   return GmatStringUtil::ToString(mRealValue, false, false, false, 
+   return GmatStringUtil::ToString(mRealValue, false, false, false,
                                    GmatGlobal::DATA_PRECISION, 1);
    
    //std::stringstream ss("");

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -323,7 +323,7 @@ Set& Set::operator=(const Set& sv)
 
 
 //------------------------------------------------------------------------------
-// bool GetRefObjectName(const Gmat::ObjectType type)
+// bool GetRefObjectName(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves the reference object names.
@@ -333,7 +333,7 @@ Set& Set::operator=(const Set& sv)
  * @return the name of the object.
  */
 //------------------------------------------------------------------------------
-std::string Set::GetRefObjectName(const Gmat::ObjectType type) const
+std::string Set::GetRefObjectName(const UnsignedInt type) const
 {
    if (type == Gmat::INTERFACE)
       return interfaceName;
@@ -343,7 +343,7 @@ std::string Set::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Accesses arrays of names for referenced objects.
@@ -353,7 +353,7 @@ std::string Set::GetRefObjectName(const Gmat::ObjectType type) const
  * @return the StringArray containing the referenced object names.
  */
 //------------------------------------------------------------------------------
-const StringArray& Set::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Set::GetRefObjectNameArray(const UnsignedInt type)
 {
    refObjectNames.clear();
    refObjectNames.push_back(interfaceName);
@@ -366,7 +366,7 @@ const StringArray& Set::GetRefObjectNameArray(const Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Sets the reference objects that get Set and their sources.
@@ -377,7 +377,7 @@ const StringArray& Set::GetRefObjectNameArray(const Gmat::ObjectType type)
  * @return true on success, false on failure.
  */
 //------------------------------------------------------------------------------
-bool Set::SetRefObjectName(const Gmat::ObjectType type,
+bool Set::SetRefObjectName(const UnsignedInt type,
                             const std::string &name)
 {
 //   if (name == "")
@@ -752,7 +752,7 @@ bool Set::TakeAction(const std::string &action, const std::string &actionData)
 
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -765,7 +765,7 @@ bool Set::TakeAction(const std::string &action, const std::string &actionData)
  * @return true on success.
  */
 //------------------------------------------------------------------------------
-bool Set::RenameRefObject(const Gmat::ObjectType type,
+bool Set::RenameRefObject(const UnsignedInt type,
                            const std::string &oldName,
                            const std::string &newName)
 {

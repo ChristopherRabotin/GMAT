@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -93,6 +93,7 @@ HarmonicField::PARAMETER_TEXT[HarmonicFieldParamCount - GravityBaseParamCount] =
    "MaxOrder",
    "Degree",
    "Order",
+   "StmLimit",
    "PotentialFile",
    "PotentialFileFullPath",
    "InputCoordinateSystem",
@@ -107,6 +108,7 @@ HarmonicField::PARAMETER_TYPE[HarmonicFieldParamCount - GravityBaseParamCount] =
    Gmat::INTEGER_TYPE,   // "MaxOrder",
    Gmat::INTEGER_TYPE,   // "Degree",
    Gmat::INTEGER_TYPE,   // "Order",
+   Gmat::INTEGER_TYPE,   // "StmLimit",
    Gmat::FILENAME_TYPE,  // "PotentialFile",
    Gmat::FILENAME_TYPE,  // "potentialFileFullPath",
    Gmat::STRING_TYPE,    // "InputCoordinateSystem",
@@ -138,6 +140,7 @@ maxDegree               (maxDeg),
 maxOrder                (maxOrd),
 degree                  (4),
 order                   (4),
+stmLimit                (100),
 filename                (""),
 filenameFullPath        (""),
 fileRead                (false),
@@ -154,8 +157,6 @@ eop                     (NULL)
 {
    objectTypeNames.push_back("HarmonicField");
    parameterCount = HarmonicFieldParamCount;
-   r = s = t = u = 0.0;
-   
    FileManager *fm = FileManager::Instance();
    potPath = fm->GetAbsPathname(bodyName + "_POT_PATH");
    #ifdef DEBUG_EOP_FILE
@@ -195,10 +196,7 @@ maxDegree               (hf.maxDegree),
 maxOrder                (hf.maxOrder),
 degree                  (hf.degree),
 order                   (hf.order),
-r                       (0.0),
-s                       (0.0),
-t                       (0.0),
-u                       (0.0),
+stmLimit                (hf.stmLimit),
 filename                (hf.filename),
 filenameFullPath        (hf.filenameFullPath),
 fileRead                (false),
@@ -240,10 +238,7 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
    maxOrder       = hf.maxOrder;
    degree         = hf.degree;
    order          = hf.order;
-   r              = 0.0;     // or hf.r?
-   s              = 0.0;     // or hf.s?
-   t              = 0.0;     // or hf.t?
-   u              = 0.0;     // or hf.u?
+   stmLimit       = hf.stmLimit;
    filename       = hf.filename;
    filenameFullPath = hf.filenameFullPath;
    fileRead       = false;
@@ -361,7 +356,7 @@ bool HarmonicField::CheckQualifier(const std::string &qualifier,
  * @return flag indicating success of the operation.
  */
 //------------------------------------------------------------------------------
-bool HarmonicField::SetDegreeOrder(Integer deg, Integer ord)
+bool HarmonicField::SetDegreeOrder (Integer deg, Integer ord, Integer stmlimit)
 {
     bool retval = true;
 
@@ -384,7 +379,7 @@ bool HarmonicField::SetDegreeOrder(Integer deg, Integer ord)
         MessageInterface::ShowMessage(
           "In HarmonicField, Potential Order exceeds valid range in model");
     }
-
+    stmLimit = stmlimit;
     return retval;
 }
 
@@ -571,6 +566,7 @@ Integer HarmonicField::GetIntegerParameter(const Integer id) const
    if (id == MAX_ORDER)   return maxOrder;
    if (id == DEGREE)      return degree;
    if (id == ORDER)       return order;
+   if (id == STMLIMIT)    return stmLimit;
 
    return GravityBase::GetIntegerParameter(id);
 }
@@ -623,6 +619,22 @@ Integer HarmonicField::SetIntegerParameter(const Integer id, const Integer value
             "and < the maximum specified by the model, Order <= Degree].");
       }
       return order;
+   }
+   if (id == STMLIMIT)
+   {
+      if (value >= 0)
+         stmLimit = value;
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
+         throw ODEModelException(
+            "The value of \"" + buffer.str() + "\" for field \"" 
+            + GetParameterText(id).c_str() + "\" on object \"" 
+            + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [Integer >= 0].");
+      }
+      return stmLimit;
    }
 
    return GravityBase::SetIntegerParameter(id, value);
@@ -845,7 +857,7 @@ bool HarmonicField::SetStringParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//  GmatBase* GetRefObject(const UnsignedInt type,
 //                         const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -858,7 +870,7 @@ bool HarmonicField::SetStringParameter(const std::string &label,
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* HarmonicField::GetRefObject(const Gmat::ObjectType type,
+GmatBase* HarmonicField::GetRefObject(const UnsignedInt type,
                                       const std::string &name)
 {
    switch (type)
@@ -882,7 +894,7 @@ GmatBase* HarmonicField::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//  const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Returns the names of the reference object. (Derived classes should implement
@@ -894,7 +906,7 @@ GmatBase* HarmonicField::GetRefObject(const Gmat::ObjectType type,
  * @return The names of the reference object.
  */
 //------------------------------------------------------------------------------
-const StringArray& HarmonicField::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& HarmonicField::GetRefObjectNameArray(const UnsignedInt type)
 {
    static StringArray refs;
    
@@ -942,7 +954,7 @@ const StringArray& HarmonicField::GetRefObjectNameArray(const Gmat::ObjectType t
 
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -957,7 +969,7 @@ const StringArray& HarmonicField::GetRefObjectNameArray(const Gmat::ObjectType t
  */
 //------------------------------------------------------------------------------
 bool HarmonicField::SetRefObject(GmatBase *obj,
-                                 const Gmat::ObjectType type,
+                                 const UnsignedInt type,
                                  const std::string &name)
 {
    if (obj->IsOfType(Gmat::COORDINATE_SYSTEM))
@@ -995,7 +1007,7 @@ bool HarmonicField::SetRefObject(GmatBase *obj,
 
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -1058,7 +1070,7 @@ bool HarmonicField::IsParameterReadOnly(const Integer id) const
          "Attempting to determine accessibility of a parameter outside of the "
          "scope of a HarmonicField object.");
    
-   if ((id == DEGREE) || (id == ORDER) || (id == FILENAME))
+   if ((id == DEGREE) || (id == ORDER) || (id == STMLIMIT) || (id == FILENAME))
       return false;
    
    if (id == POT_FILE_FULLPATH)

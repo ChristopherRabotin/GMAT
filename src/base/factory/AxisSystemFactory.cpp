@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -223,6 +223,8 @@ Factory(Gmat::AXIS_SYSTEM) //loj: 1/19/05 Changed from ATMOSPHERE
 	  creatables.push_back("ICRF");
 	  creatables.push_back("BodySpinSun");
    }
+
+   GmatType::RegisterType(Gmat::AXIS_SYSTEM, "AxisSystem");
 }
 
 //------------------------------------------------------------------------------

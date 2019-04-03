@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -47,8 +47,12 @@
 //------------------------------------------------------------------------------
 IonosphereCorrectionModel* IonosphereCorrectionModel::instance = NULL;
 
-const Real Ionosphere::NUM_OF_INTERVALS = 20;
-const Real Ionosphere::IONOSPHERE_MAX_ATTITUDE = 2000.0;
+const Real Ionosphere::NUM_OF_INTERVALS = 200;
+const Real Ionosphere::IONOSPHERE_MAX_ALTITUDE = 2000.0;
+
+//// These arrays are used for Guasian Quadratic algorithm
+//const Real Ionosphere::QUAD_WEIGHTS[20] = { 0.008807003569575835, 0.02030071490019353, 0.03133602416705452, 0.04163837078835238, 0.05096505990862025, 0.05909726598075916, 0.06584431922458829, 0.07104805465919108, 0.07458649323630191, 0.076376693565363, 0.076376693565363, 0.07458649323630191, 0.07104805465919108, 0.06584431922458829, 0.05909726598075916, 0.05096505990862025, 0.04163837078835238, 0.03133602416705452, 0.02030071490019353, 0.008807003569575835 };
+//const Real Ionosphere::QUAD_POINTS[20] = { 0.003435700407452558, 0.0180140363610431, 0.04388278587433703, 0.08044151408889055, 0.1268340467699246, 0.1819731596367425, 0.2445664990245864, 0.3131469556422902, 0.3861070744291775, 0.4617367394332513, 0.5382632605667487, 0.6138929255708225, 0.6868530443577098, 0.7554335009754136, 0.8180268403632576, 0.8731659532300754, 0.9195584859111095, 0.956117214125663, 0.981985963638957, 0.9965642995925474 };
 
 
 IonosphereCorrectionModel* IonosphereCorrectionModel::Instance() 
@@ -522,26 +526,78 @@ Real Ionosphere::TEC()
    MessageInterface::ShowMessage("            to spacecraft location:       (%lf,  %lf,  %lf)km\n", spacecraftLoc[0], spacecraftLoc[1], spacecraftLoc[2]);
    MessageInterface::ShowMessage("         Earth radius : %lf\n", earthRadius);
 #endif
-   Rvector3 sR;
-   if (spacecraftLoc.GetMagnitude() - earthRadius > IONOSPHERE_MAX_ATTITUDE)
-      sR = spacecraftLoc.GetUnitVector() * (IONOSPHERE_MAX_ATTITUDE + earthRadius); 
-   else
-      sR = spacecraftLoc;
+//   Rvector3 sR;
+//   if (spacecraftLoc.GetMagnitude() - earthRadius > IONOSPHERE_MAX_ATTITUDE)
+//      sR = spacecraftLoc.GetUnitVector() * (IONOSPHERE_MAX_ATTITUDE + earthRadius); 
+//   else
+//      sR = spacecraftLoc;
 
+//   //Rvector3 dR = (spacecraftLoc - stationLoc) / NUM_OF_INTERVALS;
+//   Rvector3 dR = (sR - stationLoc) / NUM_OF_INTERVALS;
+//   Rvector3 p1 = stationLoc;
+
+   // Fix bug to calculate end point
+   // Solution to where a line intersects a sphere is a quadratic equation
+   Real a, b, c, discriminant;
+   Rvector3 s = spacecraftLoc - stationLoc;
+   // Solve for intersection of signal with sphere of IONOSPHERE_MAX_ALTITUDE
+   a = s*s;
+   b = 2.0 * stationLoc * s;
+   c = stationLoc*stationLoc - GmatMathUtil::Pow(earthRadius + IONOSPHERE_MAX_ALTITUDE, 2);
+
+   discriminant = b*b - 4.0 * a*c;
+   if (discriminant <= 0)
+   {
+       return 0; // Path does not travel through ionosphere
+   }
+
+   Real d1, d2; // Roots of quadratic equation
+
+   d1 = (-b - GmatMathUtil::Sqrt(b*b - 4.0*a*c)) / (2.0*a);
+   d2 = (-b + GmatMathUtil::Sqrt(b*b - 4.0*a*c)) / (2.0*a);
+
+   if ((d1 > 1 && d2 > 1) || (d1 < 0 && d2 < 0))
+   {
+       return 0; // Segment between start and end does not travel through ionosphere
+   }
+
+   d1 = GmatMathUtil::Max(d1, 0); // Truncate segment before start point of signal
+   d2 = GmatMathUtil::Min(d2, 1); // Truncate segment after end point of signal
+
+   Rvector3 start, end;
+   start = stationLoc + d1*s;
+   end   = stationLoc + d2*s;
+
+   // This is our old algorithm for integration
    //Rvector3 dR = (spacecraftLoc - stationLoc) / NUM_OF_INTERVALS;
-   Rvector3 dR = (sR - stationLoc) / NUM_OF_INTERVALS;
-   Rvector3 p1 = stationLoc;
+
+   // Evenly spaced integration points
+   Rvector3 dR = (end - start) / NUM_OF_INTERVALS;
+   Rvector3 p1 = start;
    Rvector3 p2;
    Real electdensity, ds;
    Real tec = 0.0;
    for(int i = 0; i < NUM_OF_INTERVALS; ++i)
    {
       p2 = p1 + dR;
-      electdensity = ElectronDensity(p1);                   // unit: electron / m^3
+      electdensity = ElectronDensity((p1+p2)/2);                // unit: electron / m^3
       ds = (p2-p1).GetMagnitude()*GmatMathConstants::KM_TO_M;   // unit: m
       tec += electdensity*ds;                                   // unit: electron / m^2
       p1 = p2;
    }
+
+   //// Gaussian Quadrature:
+   //Rvector3 dR = (end - start);
+   //Rvector3 p1 = start;
+   //Rvector3 p2;
+   //Real electdensity, ds;
+   //Real tec = 0.0;
+   //for(int i = 0; i < NUM_OF_INTERVALS; ++i)
+   //{
+   //   p2 = start + dR*Ionosphere::QUAD_POINTS[i];
+   //   electdensity = ElectronDensity(p2)*Ionosphere::QUAD_WEIGHTS[i];                   // unit: electron / m^3
+   //   tec += electdensity*dR.GetMagnitude()*GmatMathConstants::KM_TO_M;                                   // unit: electron / m^2
+   //}
    
    return tec;
 }

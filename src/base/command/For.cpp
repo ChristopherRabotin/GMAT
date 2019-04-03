@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -488,7 +488,7 @@ const std::string& For::GetGeneratingString(Gmat::WriteMode mode,
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//  GmatBase* GetRefObject(const UnsignedInt type,
 //                         const std::string &name) const
 //------------------------------------------------------------------------------
 /**
@@ -501,7 +501,7 @@ const std::string& For::GetGeneratingString(Gmat::WriteMode mode,
  * @return pointer to the requested reference object
  */
 //------------------------------------------------------------------------------
-GmatBase* For::GetRefObject(const Gmat::ObjectType type,
+GmatBase* For::GetRefObject(const UnsignedInt type,
                             const std::string &name)
 {
    // Not handled here -- invoke the next higher GetRefObject call
@@ -509,7 +509,7 @@ GmatBase* For::GetRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(const Gmat::ObjectType type,
+//  bool SetRefObject(const UnsignedInt type,
 //                    const std::string &name) const
 //------------------------------------------------------------------------------
 /**
@@ -521,7 +521,7 @@ GmatBase* For::GetRefObject(const Gmat::ObjectType type,
  * @return success of the operation.
  */
 //------------------------------------------------------------------------------
-bool For::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool For::SetRefObject(GmatBase *obj, const UnsignedInt type,
                        const std::string &name)
 {
    // Not handled here -- invoke the next higher SetRefObject call
@@ -529,7 +529,7 @@ bool For::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 }
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 /*
@@ -542,7 +542,7 @@ bool For::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return always true to indicate RenameRefObject() was implemented.
  */
 //---------------------------------------------------------------------------
-bool For::RenameRefObject(const Gmat::ObjectType type,
+bool For::RenameRefObject(const UnsignedInt type,
                           const std::string &oldName,
                           const std::string &newName)
 {
@@ -588,7 +588,7 @@ const ObjectTypeArray& For::GetRefObjectTypeArray()
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves the list of reference objects used by the For.
@@ -600,7 +600,7 @@ const ObjectTypeArray& For::GetRefObjectTypeArray()
  * 
  */
 //------------------------------------------------------------------------------
-const StringArray& For::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& For::GetRefObjectNameArray(const UnsignedInt type)
 {
    refObjectNames.clear();
    

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -180,7 +180,7 @@ const ObjectTypeArray& PlotCommand::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Accesses arrays of names for referenced objects.
@@ -190,7 +190,7 @@ const ObjectTypeArray& PlotCommand::GetRefObjectTypeArray()
  * @return the StringArray containing the referenced object names.
  */
 //------------------------------------------------------------------------------
-const StringArray& PlotCommand::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& PlotCommand::GetRefObjectNameArray(const UnsignedInt type)
 {
    // There are only subscribers, so ignore object type
    return plotNameList;
@@ -198,10 +198,10 @@ const StringArray& PlotCommand::GetRefObjectNameArray(const Gmat::ObjectType typ
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool PlotCommand::RenameRefObject(const Gmat::ObjectType type,
+bool PlotCommand::RenameRefObject(const UnsignedInt type,
                                 const std::string &oldName,
                                 const std::string &newName)
 {

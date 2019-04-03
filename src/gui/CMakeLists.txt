@@ -59,6 +59,7 @@ SET(GUI_DIRS
   include/il
   mission
   output
+  plugin
   propagator
   rendering
   solarsys
@@ -158,6 +159,7 @@ SET(GUI_SRCS
     output/EventFilePanel.cpp
     output/OutputTree.cpp
     output/ReportFilePanel.cpp
+    plugin/WxGuiInterface.cpp
     propagator/PropagationConfigPanel.cpp
     propagator/PropagatorSelectDialog.cpp
     rendering/Camera.cpp
@@ -250,18 +252,28 @@ SET(GUI_SRCS ${GUI_SRCS} ${GMAT_ICON_RC})
 # ====================================================================
 # add the install targets
 
+# Import wxWidgets build information (headers/libs)
+# RPATHs are always set for the GmatGui installed executable, but in order
+# for wxWidgets libs to be found by the GmatGui build executable this
+# INCLUDE step must occur before the GmatGui target is created.
+INCLUDE(${wxWidgets_USE_FILE})
+
 # Create GmatGui as an executable
 ADD_EXECUTABLE(${TargetName} ${GUI_SRCS} ${GUI_HEADERS})
 
 # Add includes
-INCLUDE(${wxWidgets_USE_FILE})
 TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE ${GUI_DIRS})
 TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE ${OPENGL_INCLUDE_DIR})
 
 # Add libraries
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE GmatUtil)
 TARGET_LINK_LIBRARIES(${TargetName} PRIVATE GmatBase)
 TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${wxWidgets_LIBRARIES})
 TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${OPENGL_LIBRARIES})
+
+if(UNIX AND NOT APPLE)    # for threaded OpenGL on Linux
+   TARGET_LINK_LIBRARIES(${TargetName} PRIVATE X11)
+endif()
 
 # The GUI name should be just "GMAT"
 SET_TARGET_PROPERTIES(${TargetName} PROPERTIES OUTPUT_NAME "GMAT")

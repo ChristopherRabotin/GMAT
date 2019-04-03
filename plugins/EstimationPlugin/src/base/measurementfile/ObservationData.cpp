@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -53,6 +53,7 @@ ObservationData::ObservationData() :
    uniqueID          (-1),
    epochSystem       (TimeConverterUtil::A1MJD),
    epoch             (-1.0),
+   epochGT           (-1.0),
    noiseCovariance   (NULL),
 ///// TBD: Determine if there is a more generic way to add these, and if they go here
    unit              ("km"),
@@ -102,6 +103,7 @@ ObservationData::ObservationData(const ObservationData& od):
    uniqueID                (od.uniqueID),
    epochSystem             (od.epochSystem),
    epoch                   (od.epoch),
+   epochGT                 (od.epochGT),
    epochAtEnd              (od.epochAtEnd),
    epochAtIntegrationEnd   (od.epochAtIntegrationEnd),
    participantIDs          (od.participantIDs),
@@ -154,6 +156,7 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
       uniqueID                = od.uniqueID;
       epochSystem             = od.epochSystem;
       epoch                   = od.epoch;
+      epochGT                 = od.epochGT;
       epochAtEnd              = od.epochAtEnd;
       epochAtIntegrationEnd   = od.epochAtIntegrationEnd;
       participantIDs          = od.participantIDs;
@@ -200,6 +203,7 @@ void ObservationData::Clear()
    type                    = Gmat::UNKNOWN_MEASUREMENT;
    uniqueID                = -1;
    epoch                   = 0.0;
+   epochGT                 = 0.0;
    participantIDs.clear();
    sensorIDs.clear();
    value.clear();

@@ -24,6 +24,10 @@
 #include "MessageInterface.hpp"
 #include "SignalBase.hpp"
 #include "ErrorModel.hpp"
+#include "BodyFixedPoint.hpp"
+#include "SpaceObject.hpp"
+#include "PropSetup.hpp"
+#include "ODEModel.hpp"
 #include <sstream>
 
 
@@ -33,6 +37,13 @@
 //#define DEBUG_SET_PARAMETER
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_RANGE_CALCULATION
+//#define DEBUG_TAYLOR_SERIES
+
+//---------------------------------
+//  static data
+//---------------------------------
+const Real RangeAdapterKm::USE_TAYLOR_SERIES = true;
+const Real RangeAdapterKm::USE_CHEBYSHEV_DIFFERENCE = true;
 
 
 //------------------------------------------------------------------------------
@@ -212,7 +223,7 @@ std::string RangeAdapterKm::GetParameterTypeString(const Integer id) const
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string& oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string& oldName,
 //       const std::string& newName)
 //------------------------------------------------------------------------------
 /**
@@ -225,7 +236,7 @@ std::string RangeAdapterKm::GetParameterTypeString(const Integer id) const
  * @return true if a rename happened, false if not
  */
 //------------------------------------------------------------------------------
-bool RangeAdapterKm::RenameRefObject(const Gmat::ObjectType type,
+bool RangeAdapterKm::RenameRefObject(const UnsignedInt type,
       const std::string& oldName, const std::string& newName)
 {
    bool retval = TrackingDataAdapter::RenameRefObject(type, oldName, newName);
@@ -331,20 +342,21 @@ bool RangeAdapterKm::Initialize()
  */
 //------------------------------------------------------------------------------
 const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
-      ObservationData* forObservation, std::vector<RampTableData>* rampTB)
+      ObservationData* forObservation, std::vector<RampTableData>* rampTB,
+      bool forSimulation)
 {
    #ifdef DEBUG_ADAPTER_EXECUTION
       MessageInterface::ShowMessage("RangeAdapterKm::CalculateMeasurement(%s, "
             "<%p>, <%p>) called\n", (withEvents ? "true" : "false"), forObservation,
             rampTB);
    #endif
-
+   
    if (!calcData)
       throw MeasurementException("Measurement data was requested for " +
             instanceName + " before the measurement was set");
    
    // Fire the measurement model to build the collection of signal data
-   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB))
+   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB, forSimulation))
    {
       // QA Media correction:
       cMeasurement.isIonoCorrectWarning = false;
@@ -380,22 +392,29 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
       cMeasurement.unfeasibleReason = "";
       cMeasurement.feasibilityValue = 90.0;
 
-      GmatEpoch transmitEpoch, receiveEpoch;
-      RealArray values;
+      GmatTime transmitEpoch, receiveEpoch;
+      RealArray values, corrections;
+      cMeasurement.rangeVecs.clear();
+      cMeasurement.tBodies.clear();
+      cMeasurement.rBodies.clear();
+      cMeasurement.tPrecTimes.clear();
+      cMeasurement.rPrecTimes.clear();
+      cMeasurement.tLocs.clear();
+      cMeasurement.rLocs.clear();
       for (UnsignedInt i = 0; i < paths.size(); ++i)           // In the current version of GmatEstimation plugin, it has only 1 signal path. The code has to be modified for multiple signal paths 
       {
          // Calculate C-value for signal path ith:
          values.push_back(0.0);
+         corrections.push_back(0.0);
          SignalBase *currentleg = paths[i];
          SignalData *current = ((currentleg == NULL)?NULL:(currentleg->GetSignalDataObject()));
          SignalData *first = current;
          UnsignedInt legIndex = 0;
-         
          while (currentleg != NULL)
          {
             ++legIndex;
             // Set feasibility value
-            if (current->feasibilityReason == "N")
+            if (current->feasibilityReason[0] == 'N')
             {
                if ((current->stationParticipant)&&(cMeasurement.unfeasibleReason == ""))
                {
@@ -404,10 +423,10 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
                   cMeasurement.feasibilityValue = current->feasibilityValue;
                }
             }
-            else if (current->feasibilityReason == "B")
+            else if (current->feasibilityReason[0] == 'B')
             {
                std::stringstream ss;
-               ss << "B" << legIndex;
+               ss << "B" << legIndex << current->feasibilityReason.substr(1);
                current->feasibilityReason = ss.str();
                if ((cMeasurement.unfeasibleReason == "")||(cMeasurement.unfeasibleReason == "N"))
                {
@@ -416,37 +435,83 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
                   cMeasurement.feasibilityValue = current->feasibilityValue;
                }
             }
+
+            // Get leg participants
+
+            SpacePoint* body;
+            BodyFixedPoint *bf;
+            CoordinateSystem *cs;
+            SpaceObject* spObj;
+
+            if (current->tNode->IsOfType(Gmat::GROUND_STATION))
+            {
+               bf = (BodyFixedPoint*) current->tNode;
+               cs = bf->GetBodyFixedCoordinateSystem();
+               body = cs->GetOrigin();
+            }
+            else
+            {
+               body = current->tPropagator->GetODEModel()->GetForceOrigin();
+            }
+            cMeasurement.tBodies.push_back((CelestialBody*) body);
+
+            if (current->rNode->IsOfType(Gmat::GROUND_STATION))
+            {
+               bf = (BodyFixedPoint*) current->rNode;
+               cs = bf->GetBodyFixedCoordinateSystem();
+               body = cs->GetOrigin();
+            }
+            else
+            {
+               body = current->rPropagator->GetODEModel()->GetForceOrigin();
+            }
+            cMeasurement.rBodies.push_back(body);
+
+            cMeasurement.tPrecTimes.push_back(current->tPrecTime);
+            cMeasurement.rPrecTimes.push_back(current->rPrecTime);
+            cMeasurement.tLocs.push_back(new Rvector3(current->tLoc));
+            cMeasurement.rLocs.push_back(new Rvector3(current->rLoc));
             
             // accumulate all light time range for signal path ith 
             Rvector3 signalVec = current->rangeVecInertial;
-            values[i] += signalVec.GetMagnitude();
+            cMeasurement.rangeVecs.push_back(new Rvector3(signalVec));
+            values[i] += signalVec.GetMagnitude();               // unit: km
 
             // accumulate all range corrections for signal path ith
             for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
             {
                if (current->useCorrection[j])
+               {
                   values[i] += current->corrections[j];
+                  corrections[i] += current->corrections[j];
+               }
             }// for j loop
-
+            
             // accumulate all hardware delays for signal path ith
             values[i] += ((current->tDelay + current->rDelay)*
-                  GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);
+                  GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);   // unit: km
+            corrections[i] += ((current->tDelay + current->rDelay)*
+                  GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);   // unit: km
             
             // Get measurement epoch in the first signal path. It will apply for all other paths
             if (i == 0)
             {
-               transmitEpoch = first->tPrecTime.GetMjd() - first->tDelay / GmatTimeConstants::SECS_PER_DAY;
-               receiveEpoch  = current->rPrecTime.GetMjd() + current->rDelay / GmatTimeConstants::SECS_PER_DAY;
+               transmitEpoch = first->tPrecTime - first->tDelay / GmatTimeConstants::SECS_PER_DAY;
+               receiveEpoch  = current->rPrecTime + current->rDelay / GmatTimeConstants::SECS_PER_DAY;
                if (calcData->GetTimeTagFlag())
                {
                   // Measurement epoch will be at the end of signal path when time tag is at the receiver
                   if (current->next == NULL)
-                     cMeasurement.epoch = receiveEpoch;
+                  {
+                     cMeasurement.epochGT = receiveEpoch;
+                     cMeasurement.epoch   = receiveEpoch.GetMjd();
+                  }
                }
                else
                {
                   // Measurement epoch will be at the begin of signal path when time tag is at the transmiter
-                  cMeasurement.epoch = transmitEpoch;
+                  cMeasurement.epochGT = transmitEpoch;
+                  cMeasurement.epoch   = transmitEpoch.GetMjd();
                }
             }
             
@@ -456,7 +521,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          }// while loop
          
       }// for i loop
-
+      
       // Caluclate uplink frequency at received time and transmit time
       cMeasurement.uplinkFreq = calcData->GetUplinkFrequency(0, rampTB) * 1.0e6;                        // unit: Hz
       cMeasurement.uplinkFreqAtRecei = calcData->GetUplinkFrequencyAtReceivedEpoch(0,rampTB) * 1.0e6;   // unit: Hz
@@ -475,12 +540,17 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
 
       // Set measurement values
       cMeasurement.value.clear();
+      cMeasurement.correction.clear();
       for (UnsignedInt i = 0; i < values.size(); ++i)
+      {
          cMeasurement.value.push_back(0.0);
+         cMeasurement.correction.push_back(0.0);
+      }
 
       for (UnsignedInt i = 0; i < values.size(); ++i)
       {
-         Real measVal = values[i];
+         Real measVal = values[i];                    // unit: km
+         Real corrVal = corrections[i];               // unit: km
          #ifdef DEBUG_RANGE_CALCULATION
             MessageInterface::ShowMessage("===================================================================\n");
             MessageInterface::ShowMessage("====  RangeAdapterKm (%s): Range Calculation for Measurement Data %dth  \n", GetName().c_str(), i);
@@ -511,6 +581,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             // Apply multiplier for ("Range_KM") "Range" measurement model. This step has to
             // be done before adding bias and noise
             measVal = measVal*multiplier;
+            corrVal = corrVal*multiplier;
 
             // if need range value only, skip this section, otherwise add noise and bias as possible
             // Note: for Doppler measurement for E and S paths, we only need range value only and no noise and bias are added to measurement value. 
@@ -521,17 +592,22 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
                {
                   // Add noise here
                   RandomNumber* rn = RandomNumber::Instance();
-                  Real val = rn->Gaussian(measVal, noiseSigma[i]);                  // noise sigma unit: Km
+                  Real val = rn->Gaussian(0.0, noiseSigma[i]);                  // noise sigma unit: Km
                   //val = rn->Gaussian(measVal, noiseSigma[i]);
-                  measVal = val;
+                  measVal += val;
+                  corrVal += val;
                }
 
                // Add bias to measurement value only after noise had been added in order to avoid adding bias' noise 
                if (addBias)
+               {
                   measVal = measVal + measurementBias[i];                          // bias unit: Km
+                  corrVal = corrVal + measurementBias[i];                          // bias unit: Km
+               }
             }
          }
-         cMeasurement.value[i] = measVal;
+         cMeasurement.value[i] = measVal;                                          // unit: km
+         cMeasurement.correction[i] = corrVal;                                          // unit: km
 
          #ifdef DEBUG_RANGE_CALCULATION
             MessageInterface::ShowMessage("      . C-value with noise and bias : %.12lf km\n", cMeasurement.value[i]);
@@ -717,7 +793,7 @@ bool RangeAdapterKm::ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathInde
 
 const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
       bool withEvents, Real dt, ObservationData* forObservation,
-      std::vector<RampTableData>* rampTB)
+      std::vector<RampTableData>* rampTB, bool forSimulation)
 {
    static MeasurementData offsetMeas;
 
@@ -726,7 +802,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
             instanceName + " before the measurement was set");
 
    // Fire the measurement model to build the collection of signal data
-   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB, dt))
+   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB, forSimulation, dt))
    {
       std::vector<SignalData*> data = calcData->GetSignalData();
       std::string unfeasibilityReason;
@@ -750,17 +826,17 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
          {
             ++legIndex;
             // Set feasibility value
-            if (current->feasibilityReason == "N")
+            if (current->feasibilityReason[0] == 'N')
             {
                if (current->stationParticipant)
                   offsetMeas.feasibilityValue = current->feasibilityValue;
             }
-            else if (current->feasibilityReason == "B")
+            else if (current->feasibilityReason[0] == 'B')
             {
                std::stringstream ss;
-               ss << "B" << legIndex;
+               ss << "B" << legIndex << current->feasibilityReason.substr(1);
                current->feasibilityReason = ss.str();
-               if (offsetMeas.unfeasibleReason == "N")
+               if (offsetMeas.unfeasibleReason[0] == 'N')
                {
                   offsetMeas.unfeasibleReason = current->feasibilityReason;
                   offsetMeas.isFeasible = false;
@@ -790,12 +866,16 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
                {
                   // Measurement epoch will be at the end of signal path when time tag is at the receiver
                   if (current->next == NULL)
-                     offsetMeas.epoch = current->rPrecTime.GetMjd() + current->rDelay/GmatTimeConstants::SECS_PER_DAY;
+                  {
+                     offsetMeas.epochGT = current->rPrecTime + current->rDelay / GmatTimeConstants::SECS_PER_DAY;
+                     offsetMeas.epoch   = current->rPrecTime.GetMjd() + current->rDelay / GmatTimeConstants::SECS_PER_DAY;
+                  }
                }
                else
                {
                   // Measurement epoch will be at the begin of signal path when time tag is at the transmiter
-                  offsetMeas.epoch = first->tPrecTime.GetMjd() - first->tDelay/GmatTimeConstants::SECS_PER_DAY;
+                  offsetMeas.epochGT = first->tPrecTime - first->tDelay / GmatTimeConstants::SECS_PER_DAY;
+                  offsetMeas.epoch   = first->tPrecTime.GetMjd() - first->tDelay/GmatTimeConstants::SECS_PER_DAY;
                }
             }
 
@@ -1056,4 +1136,149 @@ void RangeAdapterKm::SetCorrection(const std::string& correctionName,
       const std::string& correctionType)
 {
    TrackingDataAdapter::SetCorrection(correctionName, correctionType);
+}
+
+Real RangeAdapterKm::PathMagnitudeDelta(Rvector3 pathVec, Rvector3 delta)
+{
+   Real Delta = 0;
+   
+   Real a, b, c, D;
+   Rvector3 D_unit;
+   Real tolerance = 1.0e-9;
+   Real rx, ry, rz, r1;
+
+   D = delta.GetMagnitude();
+   D_unit = delta / D;
+
+   a=D_unit[0];
+   b=D_unit[1];
+   c=D_unit[2];
+
+   rx=pathVec[0];
+   ry=pathVec[1];
+   rz=pathVec[2];
+   r1=pathVec.GetMagnitude();
+
+
+   Real term1, term2, term3;
+   Real D2 = D*D;
+   Real D3 = D2*D;
+   Real r12 = r1*r1;
+   Real r13 = r12*r1;
+   Real r14 = r13*r1;
+   Real r15 = r14*r1;
+
+   term1 = (D*(a*rx + b*ry + c*rz))/r1;
+   term2 = (D2*(r12 - GmatMathUtil::Pow(a*rx + b*ry + c*rz,2)))/(2*r13);
+   term3 = -((D3*(a*rx + b*ry + c*rz)*(r12 - GmatMathUtil::Pow(a*rx + b*ry + c*rz,2)))/(2*r15));
+
+   Delta = term1 + term2 + term3;
+   
+#ifdef DEBUG_TAYLOR_SERIES
+   MessageInterface::ShowMessage("   Taylor series terms to tolerance %le:\n", tolerance);
+   MessageInterface::ShowMessage("      term1 = %.12le\n", term1);
+   MessageInterface::ShowMessage("      term2 = %.12le\n", term2);
+   MessageInterface::ShowMessage("      term3 = %.12le\n", term3);
+#endif
+
+   if (GmatMathUtil::Abs(term3) < tolerance)
+      return Delta;
+
+   Real term;
+   Real a2, b2, c2;
+   Real a3, b3, c3;
+   Real a4, b4, c4;
+   Real rx2, ry2, rz2;
+   Real rx4, ry4, rz4;
+   a2 = a*a;
+   b2 = b*b;
+   c2 = c*c;
+   rx2 = rx*rx;
+   ry2 = ry*ry;
+   rz2 = rz*rz;
+
+   UnsignedInt numTerms = 7;
+
+   if (numTerms >= 6U)
+   {
+      a3 = a2*a;
+      b3 = b2*b;
+      c3 = c2*c;
+      a4 = a3*a;
+      b4 = b3*b;
+      c4 = c3*c;
+      rx4 = rx2*rx2;
+      ry4 = ry2*ry2;
+      rz4 = rz2*rz2;
+   }
+
+   for (UnsignedInt termNumber = 4; termNumber <= numTerms; termNumber++)
+   {
+      switch (termNumber)
+      {
+      case(4) :
+         term = -((1/(8*GmatMathUtil::Pow(r1,7)))*(GmatMathUtil::Pow(D,4)*(a2*(r1 - rx)*(r1 + rx) + b2*(r1 - ry)*(r1 + ry) -
+                   2*b*c*ry*rz + c2*(r1 - rz)*(r1 + rz) - 2*a*rx*(b*ry + c*rz))*
+                   (a2*(r12 - 5*rx2) + b2*(r12 - 5*ry2) - 10*b*c*ry*rz -
+                   10*a*rx*(b*ry + c*rz) + c2*(r12 - 5*rz2))));
+         break;
+      case(5) :
+         term = (1/(8*GmatMathUtil::Pow(r1,9)))*(GmatMathUtil::Pow(D,5)*(a*rx + b*ry + c*rz)*(a2*(-r12 + rx2) + b2*(-r12 + ry2) +
+                   2*b*c*ry*rz + 2*a*rx*(b*ry + c*rz) + c2*(-r12 + rz2))*
+                   (a2*(-3*r12 + 7*rx2) + b2*(-3*r12 + 7*ry2) + 14*b*c*ry*rz +
+                   14*a*rx*(b*ry + c*rz) + c2*(-3*r12 + 7*rz2)));
+         break;
+      case(6) :
+         term = (1/(16*GmatMathUtil::Pow(r1,11)))*(GmatMathUtil::Pow(D,6)*(a2*(r1 - rx)*(r1 + rx) + b2*(r1 - ry)*(r1 + ry) -
+                   2*b*c*ry*rz + c2*(r1 - rz)*(r1 + rz) - 2*a*rx*(b*ry + c*rz))*
+                   (a4*(r14 - 14*r12*rx2 + 21*rx4) + b4*(r14 - 14*r12*ry2 + 21*ry4) -
+                   28*b3*c*ry*(r12 - 3*ry2)*rz - 28*a3*rx*(r12 - 3*rx2)*(b*ry + c*rz) -
+                   28*b*c3*ry*rz*(r12 - 3*rz2) + c4*(r14 - 14*r12*rz2 + 21*rz4) -
+                   28*a*rx*(b*ry + c*rz)*(b2*(r12 - 3*ry2) - 6*b*c*ry*rz +
+                   c2*(r12 - 3*rz2)) + 2*b2*c2*(r14 + 63*ry2*rz2 -
+                   7*r12*(ry2 + rz2)) +
+                   2*a2*(b2*(r14 + 63*rx2*ry2 - 7*r12*(rx2 + ry2)) -
+                   14*b*c*(r12 - 9*rx2)*ry*rz + c2*(r14 + 63*rx2*rz2 -
+                   7*r12*(rx2 + rz2)))));
+         break;
+      case(7) :
+         term = (1/(16*GmatMathUtil::Pow(r1,13)))*(GmatMathUtil::Pow(D,7)*(a*rx + b*ry + c*rz)*(a2*(-r12 + rx2) +
+                   b2*(-r12 + ry2) + 2*b*c*ry*rz + 2*a*rx*(b*ry + c*rz) + c2*(-r12 + rz2))*
+                   (a4*(5*r14 - 30*r12*rx2 + 33*rx4) +
+                   b4*(5*r14 - 30*r12*ry2 + 33*ry4) + 12*b3*c*ry*(-5*r12 + 11*ry2)*rz +
+                   12*a3*rx*(-5*r12 + 11*rx2)*(b*ry + c*rz) +
+                   12*b*c3*ry*rz*(-5*r12 + 11*rz2) + c4*(5*r14 - 30*r12*rz2 + 33*rz4) +
+                   2*b2*c2*(5*r14 + 99*ry2*rz2 - 15*r12*(ry2 + rz2)) +
+                   12*a*rx*(b*ry + c*rz)*(b2*(-5*r12 + 11*ry2) + 22*b*c*ry*rz +
+                   c2*(-5*r12 + 11*rz2)) +
+                   2*a2*(b2*(5*r14 + 99*rx2*ry2 - 15*r12*(rx2 + ry2)) +
+                   6*b*c*(-5*r12 + 33*rx2)*ry*rz + c2*(5*r14 + 99*rx2*rz2 -
+                   15*r12*(rx2 + rz2)))));
+         break;
+      default:
+         
+#ifdef DEBUG_TAYLOR_SERIES
+         MessageInterface::ShowMessage("      Warning:  Last term of Taylor Series expansion used for "
+                                       "Doppler type measurement was greater than tolerance %le\n", tolerance);
+#endif
+         return Delta;
+         break;
+      }
+
+      Delta += term;
+
+#ifdef DEBUG_TAYLOR_SERIES
+      MessageInterface::ShowMessage("      term%d = %.12le\n", termNumber, term);
+#endif
+      
+      if (GmatMathUtil::Abs(term) < tolerance)
+         return Delta;
+   }
+         
+#ifdef DEBUG_TAYLOR_SERIES
+   MessageInterface::ShowMessage("      Warning:  Last term of Taylor Series expansion used for "
+                                 "Doppler type measurement was greater than tolerance %le\n", tolerance);
+#endif
+
+   return Delta;
 }

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -37,9 +37,7 @@
 #include "MeasurementException.hpp"
 #include <sstream>
 
-#ifdef IONOSPHERE
 #include "CoordinateConverter.hpp"
-#endif
 
 //#define DEBUG_DERIVATIVES
 //#define DEBUG_RANGE_CALC_WITH_EVENTS
@@ -80,9 +78,7 @@ PhysicalMeasurement::PhysicalMeasurement(const std::string &type,
    objectTypeNames.push_back("PhysicalMeasurement");
 
    troposphere   = NULL;
-   #ifdef IONOSPHERE
-      ionosphere = NULL;
-   #endif
+   ionosphere = NULL;
 }
 
 
@@ -98,10 +94,8 @@ PhysicalMeasurement::~PhysicalMeasurement()
    if (troposphere != NULL)
       delete troposphere;
 
-   //#ifdef IONOSPHERE
-   //   if (ionosphere != NULL)
-   //      delete ionosphere;
-   //#endif
+   if (ionosphere != NULL)
+      delete ionosphere;
 }
 
 
@@ -129,9 +123,7 @@ PhysicalMeasurement::PhysicalMeasurement(const PhysicalMeasurement& pm) :
    else
       troposphere = NULL;
 
-   #ifdef IONOSPHERE
-      ionosphere = pm.ionosphere;
-   #endif
+   ionosphere = pm.ionosphere;
 }
 
 
@@ -170,9 +162,7 @@ PhysicalMeasurement& PhysicalMeasurement::operator=(
       else
          troposphere = NULL;
 
-      #ifdef IONOSPHERE
-         ionosphere = pm.ionosphere;
-      #endif
+      ionosphere = pm.ionosphere;
    }
 
    return *this;
@@ -317,13 +307,14 @@ void PhysicalMeasurement::AddCorrection(const std::string& modelName,
    #endif
    if (mediaCorrectionType == "TroposphereModel")
    {
-      if (modelName == "HopfieldSaastamoinen")
+      if (modelName == "HopfieldSaastamoinen" || modelName == "Marini")
       {
          if (troposphere != NULL)
             delete troposphere;
 
          // Create troposphere correction model
          troposphere = new Troposphere(modelName);
+         troposphere->SetModelTypeName(modelName);
 
          #ifdef DEBUG_MEDIA_CORRECTION
             MessageInterface::ShowMessage("   Set as troposphere model:   troposphere(%p)\n", troposphere);
@@ -335,7 +326,7 @@ void PhysicalMeasurement::AddCorrection(const std::string& modelName,
       else
       {
          throw MeasurementException("Error: '" + modelName +"' is not a valid name for Troposphere correction.\n"
-         +"Currently only 'HopfieldSaastamoinen' is allowed for Troposphere.\n");
+         +"Currently only 'HopfieldSaastamoinen', 'Marini', and 'None' are allowed for Troposphere.\n");
       }
    }
    else if (mediaCorrectionType == "IonosphereModel")
@@ -348,16 +339,9 @@ void PhysicalMeasurement::AddCorrection(const std::string& modelName,
 
 ///// TBD: Determine if there is a more generic way to add these
          // Create IRI2007 ionosphere correction model
-         #ifdef IONOSPHERE
-            if (ionosphere == NULL)
-               ionosphere = IonosphereCorrectionModel::Instance()->GetIonosphereInstance();
-         #else
-            MessageInterface::ShowMessage("Ionosphere IRI2007 model currently is not "
-                     "available.\nIt will be be added to GMAT in a future release.\n");
+         if (ionosphere == NULL)
+            ionosphere = IonosphereCorrectionModel::Instance()->GetIonosphereInstance();
 
-            throw GmatBaseException("Ionosphere IRI2007 model currently is not "
-               "available.\nIt will be be added to GMAT in a future release.\n");
-         #endif
       }
       else if (modelName == "None")
       {
@@ -421,7 +405,7 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Rvector3 rVec, R
 
 
 //------------------------------------------------------------------------
-//RealArray TroposphereCorrection(Real freq, Real distance, Real elevationAngle)
+//RealArray TroposphereCorrection(Real freq, Real distance, Real elevationAngle, Real epoch)
 //------------------------------------------------------------------------
 /**
  * This function is used to calculate Troposphere correction.
@@ -429,11 +413,12 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Rvector3 rVec, R
  * @param freq              The frequency of signal   (unit: MHz)
  * @param distance          Distance from ground station to spacecraft (unit: km)
  * @param elevationAngle    The elevation angle from ground station to spacecraft (unit: radian)
+ * @param epoch  Time at which the signal is transmitted or received at ground station      (unit: Julian day)
  *                 
  * return Troposphere correction vector
  */
 //------------------------------------------------------------------------
-RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Real distance, Real elevationAngle)
+RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Real distance, Real elevationAngle, Real epoch)
 {
    RealArray tropoCorrection;
 
@@ -449,9 +434,27 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Real distance, R
       {
          if (participants[i]->IsOfType(Gmat::GROUND_STATION))
          {
-            troposphere->SetTemperature(((GroundstationInterface*)participants[i])->GetRealParameter("Temperature"));
-            troposphere->SetPressure(((GroundstationInterface*)participants[i])->GetRealParameter("Pressure"));
-            troposphere->SetHumidityFraction(((GroundstationInterface*)participants[i])->GetRealParameter("Humidity")/100);
+            GroundstationInterface* gs = (GroundstationInterface*) participants[i];
+            
+            Rvector3 gsLoc = gs->GetBodyFixedLocation(epoch);
+            SpacePoint *gsBody = gs->GetBodyFixedCoordinateSystem()->GetOrigin();
+         
+            Rvector3 lla;
+            if (gsBody->IsOfType("CelestialBody"))
+            {
+               CelestialBody *gsBodyCB = (CelestialBody*)gs->GetBodyFixedCoordinateSystem()->GetOrigin();
+               lla = BodyFixedStateConverterUtil::CartesianToSphericalEllipsoid(gsLoc, gsBodyCB->GetFlattening(), gsBodyCB->GetEquatorialRadius());
+            }
+            else
+            {
+               lla = BodyFixedStateConverterUtil::CartesianToSpherical(gsLoc, 0, 0);
+            }
+
+            troposphere->SetTemperature(gs->GetRealParameter("Temperature"));
+            troposphere->SetPressure(gs->GetRealParameter("Pressure"));
+            troposphere->SetHumidityFraction(gs->GetRealParameter("Humidity")/100);
+            troposphere->SetLatitude(lla[0]);
+            troposphere->SetLongitude(lla[1]);
             break;
          }
       }
@@ -459,6 +462,7 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Real distance, R
       troposphere->SetWaveLength(wavelength);
       troposphere->SetElevationAngle(elevationAngle);
       troposphere->SetRange(distance*GmatMathConstants::KM_TO_M);
+      troposphere->SetTime(epoch);
       tropoCorrection = troposphere->Correction();                      // tropoCorrection[0] unit: m
 
       #ifdef DEBUG_TROPOSPHERE_MEDIA_CORRECTION
@@ -494,7 +498,6 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Real distance, R
  * return          An array containing results of Ionosphere corection
  */
 //------------------------------------------------------------------------
-#ifdef IONOSPHERE
 RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2)
 {
    RealArray ionoCorrection;
@@ -582,7 +585,7 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1B, Rve
    }
    return ionoCorrection;
 }
-#endif
+
 
 //---------------------------------------------------------------------------
 // RealArray CalculateMediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, 
@@ -622,7 +625,7 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B,
    {
       // 2. Run Troposphere correction:
       // MessageInterface::ShowMessage("Calculate Troposphere correction\n");
-      mediaCorrection = TroposphereCorrection(freq, rangeVector.GetMagnitude(), elevationAngle);
+      mediaCorrection = TroposphereCorrection(freq, rangeVector.GetMagnitude(), elevationAngle, epoch1);
 
       // GMT-5576 QA Check for Atmosphere Correction
       if (mediaCorrection[0] < 0.0)
@@ -649,7 +652,7 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B,
          MessageInterface::ShowMessage(" TroposhereCorrection = (%lf m,  %lf arcsec,   %le s)\n", mediaCorrection[0], mediaCorrection[1], mediaCorrection[2]);
       #endif
 
-      #ifdef IONOSPHERE
+      
       // 3. Run Ionosphere correction:
       // MessageInterface::ShowMessage("Calculate Ionosphere correction\n");
       RealArray ionoCorrection = this->IonosphereCorrection(freq, r1B, r2B, epoch1, epoch2);
@@ -678,7 +681,7 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B,
       mediaCorrection[0] += ionoCorrection[0];         // unit: m
       mediaCorrection[1] += ionoCorrection[1];
       mediaCorrection[2] += ionoCorrection[2];         // unit: second
-      #endif
+      
    }
    else
    {

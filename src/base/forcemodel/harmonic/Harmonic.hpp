@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -21,6 +21,7 @@
 // Author: John P. Downing/GSFC/595
 // Created: 2010.10.28
 // (modified for style, etc. by Wendy Shoan/GSFC/583 2011.05.31)
+// Tide fix, Cleaned up, April 2016 - John Downing
 //
 /**
  * This is the base class for the Harmonic set of classes (HarmonicGravity,
@@ -56,65 +57,65 @@
 //====================================================================
 #ifndef Harmonic_hpp
 #define Harmonic_hpp
-
+//------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
 #include "Rmatrix33.hpp"
-
-class Harmonic
+//------------------------------------------------------------------------------
+class GMAT_API Harmonic
 {
 public:
    Harmonic();
+private: // Copy protected
    Harmonic(const Harmonic& x);
    Harmonic& operator=(const Harmonic& x);
+public:
    virtual ~Harmonic();
 
-   virtual Real Cnm(const Real& jday, const Integer& n, const Integer& m) const;
-   virtual Real Snm(const Real& jday, const Integer& n, const Integer& m) const;
-   Integer      GetNN() const;
-   Integer      GetMM() const;
-   Real         GetRadius() const;
-   Real         GetFactor() const;
-   void         CalculateField1(const Real& jday,  const Real pos[3],        const Integer& nn,
-                               const Integer& mm, const bool& fillgradient, Real  acc[3],
-                               Rmatrix33& gradient) const;
-   void         CalculateField(const Real& jday,  const Real pos[3],        const Integer& nn,
-                               const Integer& mm, const bool& fillgradient, Real  acc[3],
-                               Rmatrix33& gradient) const;
-
+   virtual Real Cnm (const Real& jday, 
+      const Integer& n, const Integer& m) const = 0;
+   virtual Real Snm (const Real& jday, 
+      const Integer& n, const Integer& m) const = 0;
+   Integer GetNN() const;
+   Integer GetMM() const;
+   Real GetFieldRadius() const;
+   Real GetFactor() const;
+   void CalculateField(const Real& jday, const Real pos[3], 
+       const Integer& nn, const Integer& mm, const bool& fillgradient, 
+       const Integer& gradientlimit, Real acc[3], Rmatrix33& gradient) const;
+//--------------------------------------------------------------------
 protected:
    Integer     NN;      // Maximum value of n (Jn=J2,J3...)
    Integer     MM;      // Maximum value of m (Jnm=Jn2,Jn3...
-   Real        bodyRadius;  // Radius of body
-   Real        factor;  // factor = 1 (magnetic) or -mu (gravity)
-   Real        C[361][361];
-   Real        S[361][361];
+   Real        FieldRadius;  // Radius for harmonic coefficients
+   Real        Factor;  // Factor = 1 (magnetic) or -mu (gravity)
+   Real**      C;       // Normalized harmonic coefficients
+   Real**      S;       // Normalized harmonic coefficients
    Real**      A;       // Normalized 'derived' Assoc. Legendre Poly
    Real**      V;       // Normalization factor
    Real*       Re;      // powers of projection of pos onto x_ecf (re)
    Real*       Im;      // powers of projection of pos onto y_ecf (im)
    Real**      N1;      // Temporary
    Real**      N2;      // Temporary
-   Real        VR01[361][361];    // Temporary
-   Real        VR11[361][361];    // Temporary
-   Real        VR02[361][361];    // Temporary
-   Real        VR12[361][361];    // Temporary
-   Real        VR22[361][361];    // Temporary
+   Real**      VR01;    // Temporary
+   Real**      VR11;    // Temporary
+   Real**      VR02;    // Temporary
+   Real**      VR12;    // Temporary
+   Real**      VR22;    // Temporary
    /// Flag used to warn about truncating matrix calculations to 20x20 only once
    static bool matrixTruncationWasPosted;
-
+protected:
    void Allocate();
    void Deallocate();
-   void Copy(Harmonic& x);
-
-   static void AllocateArray(Real**& a,   const Integer& nn, const Integer& excess);
-   static void AllocateArray(Real*& a,    const Integer& nn, const Integer& excess);
-   static void DeallocateArray(Real**& a, const Integer& nn, const Integer& excess);
-   static void DeallocateArray(Real*& a,  const Integer& nn, const Integer& excess);
-   static void CopyArray(Real**& a, Real**& b, const Integer& nn, const Integer& excess);
-   static void CopyArray(Real*& a,  Real*& b,  const Integer& nn, const Integer& excess);
+protected:
+   static void AllocateArray (Real**& a,   
+      const Integer& nn, const Integer& excess);
+   static void AllocateArray (Real*& a,    
+      const Integer& nn, const Integer& excess);
+   static void DeallocateArray (Real**& a, 
+      const Integer& nn, const Integer& excess);
+   static void DeallocateArray (Real*& a,  
+      const Integer& nn, const Integer& excess);
 //--------------------------------------------------------------------
-
-
 };
-
+//====================================================================
 #endif // Harmonic_hpp

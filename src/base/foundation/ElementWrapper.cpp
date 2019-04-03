@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -141,6 +141,41 @@ std::string ElementWrapper::ToString()
    throw be;
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetPropertyNames()
+//------------------------------------------------------------------------------
+/**
+* Retrieves the object's property names
+*
+* @return The property names
+*/
+//------------------------------------------------------------------------------
+const StringArray& ElementWrapper::GetPropertyNames()
+{
+   GmatBaseException be;
+   be.SetDetails
+      ("ElementWrapper::GetPropertyNames() has not been implemented for wrapper "
+      "type %d, description of \"%s\"", wrapperType, description.c_str());
+   throw be;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetPropertyId()
+//------------------------------------------------------------------------------
+/**
+* Retrieves the object's property ID
+*
+* @return The ID
+*/
+//------------------------------------------------------------------------------
+Integer ElementWrapper::GetPropertyId()
+{
+   GmatBaseException be;
+   be.SetDetails
+      ("ElementWrapper::GetPropertyID() has not been implemented for wrapper "
+      "type %d, description of \"%s\"", wrapperType, description.c_str());
+   throw be;
+}
 
 //---------------------------------------------------------------------------
 // void AllowOneDimArraySetting(bool allow)

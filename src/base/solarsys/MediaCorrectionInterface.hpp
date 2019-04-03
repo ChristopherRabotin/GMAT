@@ -33,12 +33,12 @@ public:
    virtual ~MediaCorrectionInterface();
    MediaCorrectionInterface(const MediaCorrectionInterface& mdc);
    MediaCorrectionInterface& operator=(const MediaCorrectionInterface& mc);
-   virtual GmatBase*    Clone() const;
 
    virtual bool Initialize();
 
    virtual bool SetModel(Integer mod);
    virtual bool SetModelName(std::string modName);
+   virtual bool SetModelTypeName(std::string type);
 
    virtual void SetSolarSystem(SolarSystem *ss);
 
@@ -48,8 +48,10 @@ public:
    virtual bool SetWaveLength(Real lambda);
    virtual bool SetElevationAngle(Real elevation);
    virtual bool SetRange(Real r);
+   virtual bool SetLatitude(Real lat);
+   virtual bool SetLongitude(Real lon);
 
-   virtual RealArray Correction();
+   virtual RealArray Correction() = 0;
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES
@@ -58,6 +60,7 @@ public:
 protected:
    Integer model;
    std::string modelName;
+   std::string modelTypeName;
 
    SolarSystem *solarSystem;
 
@@ -67,6 +70,8 @@ protected:
    Real waveLength;                // unit: m
    Real elevationAngle;            // unit: radian
    Real range;                     // unit: m
+   Real latitude;                  // unit: radian
+   Real longitude;                 // unit: radian
 
    /// Contain path name of data folder. It needs for Ionosphere code to read ap.dat file and specify the epoch range
    std::string     dataPath;

@@ -53,7 +53,7 @@ public:
                                          const Real value);
 
 
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
 
@@ -63,7 +63,8 @@ public:
    virtual const MeasurementData&
                         CalculateMeasurement(bool withEvents = false,
                               ObservationData* forObservation = NULL,
-                              std::vector<RampTableData>* rampTB = NULL);
+                              std::vector<RampTableData>* rampTB = NULL,
+                              bool forSimulation = false);
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
                               Integer id);
@@ -98,7 +99,7 @@ protected:
                                                    RangeAdapterKmParamCount];
 
    Real                 GetFrequencyFactor(Real frequency);
-   virtual Real         IntegralRampedFrequency(Real t1, Real delta_t, Integer& err);
+   virtual Real         IntegralRampedFrequency(GmatTime t1, Real delta_t, Integer& err);
 
 };
 

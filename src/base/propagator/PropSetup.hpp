@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -101,10 +101,10 @@ public:
    Integer              GetNumForces();
    
    // inherited from GmatBase
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name = "");
    
    virtual GmatBase*    Clone(void) const;
@@ -113,7 +113,7 @@ public:
    virtual bool         HasRefObjectTypeArray();
    virtual const        ObjectTypeArray& GetRefObjectTypeArray();
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
+                        GetRefObjectNameArray(const UnsignedInt type);
    virtual GmatBase*    GetOwnedObject(Integer whichOne);
    virtual bool         IsOwnedObject(Integer id) const;
    
@@ -128,6 +128,7 @@ public:
    virtual Integer      GetParameterID(const std::string &str) const;
    virtual bool         IsParameterReadOnly(const Integer id) const;
    virtual bool         IsParameterReadOnly(const std::string &label) const;
+   virtual bool         IsParameterCommandModeSettable(const Integer id) const;
    
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const std::string &label) const;
@@ -192,6 +193,9 @@ public:
    virtual void UpdateClonedObjectParameter(GmatBase *obj,
                                             Integer updatedParameterId);
 
+   virtual bool SetPrecisionTimeFlag(bool onOff);
+
+
 private:
    
    bool mInitialized;
@@ -206,7 +210,7 @@ private:
    void    ClonePropagator(Propagator *prop);
    void    CloneODEModel(ODEModel *fm);
    void    DeleteOwnedObject(Integer id, bool forceDelete = false);
-   Integer GetOwnedObjectId(Integer id, Gmat::ObjectType objType) const;
+   Integer GetOwnedObjectId(Integer id, UnsignedInt objType) const;
    
    enum
    {

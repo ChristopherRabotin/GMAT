@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -45,6 +45,7 @@
 RungeKutta4::RungeKutta4(const std::string &name) :
    RungeKutta      (4, 4, "RungeKutta4", name)
 {
+   hasErrorControl = false;
 }
 
 //------------------------------------------------------------------------------
@@ -70,6 +71,7 @@ RungeKutta4::~RungeKutta4()
 RungeKutta4::RungeKutta4(const RungeKutta4& rk) :
    RungeKutta        (rk)
 {
+   hasErrorControl = rk.hasErrorControl;
 }
 
 //------------------------------------------------------------------------------
@@ -89,6 +91,7 @@ RungeKutta4& RungeKutta4::operator =(const RungeKutta4& rk)
    {
       RungeKutta::operator =(rk);
    }
+   hasErrorControl = rk.hasErrorControl;
    return *this;
 }
 

@@ -2,7 +2,7 @@
 //====================================================================
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -88,7 +88,7 @@ ModelObject::~ModelObject()
 char ModelObject::Load (const std::string &full_path)
    {
    std::string path, string, extension;
-   UnsignedInt loc = full_path.find_last_of('/');
+   size_t loc = full_path.find_last_of('/');
    if (loc != std::string::npos)
       path = full_path.substr(0,loc);
 
@@ -192,7 +192,7 @@ int ModelObject::LoadTexture(const std::string &filename)
    }
   
    // Load the file
-   UnsignedInt loc = filename.find_last_of('.');
+   size_t loc = filename.find_last_of('.');
    if (loc != std::string::npos)
       ext = filename.substr(loc+1);
    if (strcmp(ext.c_str(), "bmp") == 0 || strcmp(ext.c_str(), "BMP") == 0)

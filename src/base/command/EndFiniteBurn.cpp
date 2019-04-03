@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -161,7 +161,7 @@ bool EndFiniteBurn::TakeAction(const std::string &action,
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Accesses names for referenced objects.
@@ -171,7 +171,7 @@ bool EndFiniteBurn::TakeAction(const std::string &action,
  * @return The referenced object's name.
  */
 //------------------------------------------------------------------------------
-std::string EndFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
+std::string EndFiniteBurn::GetRefObjectName(const UnsignedInt type) const
 {
    switch (type)
    {
@@ -210,7 +210,7 @@ const ObjectTypeArray& EndFiniteBurn::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Accesses arrays of names for referenced objects.
@@ -221,7 +221,7 @@ const ObjectTypeArray& EndFiniteBurn::GetRefObjectTypeArray()
  */
 //------------------------------------------------------------------------------
 const StringArray& EndFiniteBurn::GetRefObjectNameArray(
-                             const Gmat::ObjectType type)
+                             const UnsignedInt type)
 {
    refObjectNames.clear();
    
@@ -243,7 +243,7 @@ const StringArray& EndFiniteBurn::GetRefObjectNameArray(
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Sets names for referenced objects.
@@ -254,7 +254,7 @@ const StringArray& EndFiniteBurn::GetRefObjectNameArray(
  * @return true if the name was set, false if not.
  */
 //------------------------------------------------------------------------------
-bool EndFiniteBurn::SetRefObjectName(const Gmat::ObjectType type, 
+bool EndFiniteBurn::SetRefObjectName(const UnsignedInt type,
                                      const std::string &name)
 {
    switch (type)
@@ -317,7 +317,7 @@ GmatBase* EndFiniteBurn::Clone() const
 
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -330,7 +330,7 @@ GmatBase* EndFiniteBurn::Clone() const
  * @return true on success.
  */
 //------------------------------------------------------------------------------
-bool EndFiniteBurn::RenameRefObject(const Gmat::ObjectType type,
+bool EndFiniteBurn::RenameRefObject(const UnsignedInt type,
                                     const std::string &oldName,
                                     const std::string &newName)
 {

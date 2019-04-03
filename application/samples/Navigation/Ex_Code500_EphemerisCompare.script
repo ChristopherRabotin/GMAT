@@ -54,7 +54,6 @@ GMAT Sat1.DateFormat = UTCGregorian;
 Create Spacecraft Sat2;
 GMAT Sat2.DateFormat = UTCGregorian;
 
-GMAT Prop500_1.CentralBody = Earth;
 GMAT Prop500_1.EpochFormat = 'UTCModJulian';
 
 Create CoordinateSystem RIC;
@@ -442,7 +441,7 @@ Report ricCompare blank
 
 description = '                                                MINIMUM VELOCITY DIFFERENCE                           MAXIMUM VELOCITY DIFFERENCE';
 Report ricCompare description
-description = '                                      DD MON YYYY HH:MM:SS.SSS           (km/sec)           YYYY MON DD HH:MM:SS.SSS           (km/sec)';
+description = '                                      DD MON YYYY HH:MM:SS.SSS           (km/sec)           DD MON YYYY HH:MM:SS.SSS           (km/sec)';
 Report ricCompare description
 Report ricCompare blank
 description = sprintf('                      RADIAL          %24s  %21.6e       %24s  %21.6e', minEpochRV, minRadialV, maxEpochRV, maxRadialV);  

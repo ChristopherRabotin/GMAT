@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -110,7 +110,7 @@ public:
    // inherited from GmatBase
    virtual GmatBase*    Clone(void) const;
    virtual void         Copy(const GmatBase* orig);
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
    virtual const std::string
@@ -122,22 +122,22 @@ public:
    virtual void         SetInlineAttributeComment(Integer index,
                                                   const std::string &comment);
    
-   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual std::string  GetRefObjectName(const UnsignedInt type) const;
 
    virtual bool         HasRefObjectTypeArray();
    virtual const        ObjectTypeArray& GetRefObjectTypeArray();
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+                        GetRefObjectNameArray(const UnsignedInt type);
+   virtual bool         SetRefObjectName(const UnsignedInt type,
                                          const char *name);
-   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+   virtual bool         SetRefObjectName(const UnsignedInt type,
                                          const std::string &name);
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string &name);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name = "");
 
-   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+   virtual ObjectArray& GetRefObjectArray(const UnsignedInt type);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
    // Parameter accessor methods -- overridden from GmatBase
@@ -152,6 +152,13 @@ public:
                               const Integer r = 0, const Integer c = 0) const;
    virtual Real         ParameterDvInitialValue(const Integer id,
                               const Integer r = 0, const Integer c = 0) const;
+
+   virtual GmatTime     GetGmatTimeParameter(const Integer id) const;
+   virtual GmatTime     SetGmatTimeParameter(const Integer id, 
+                                             const GmatTime value);
+   virtual GmatTime     GetGmatTimeParameter(const std::string &label) const;
+   virtual GmatTime     SetGmatTimeParameter(const std::string &label, 
+                                             const GmatTime value);
 
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         GetRealParameter(const std::string &label) const;
@@ -230,7 +237,7 @@ public:
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
-   virtual Gmat::ObjectType
+   virtual UnsignedInt
                         GetPropertyObjectType(const Integer id) const;
    virtual bool         CanAssignStringToObjectProperty(const Integer id) const;
    
@@ -251,6 +258,9 @@ public:
 
    std::string GetEpochString();
    void SetDateFormat(const std::string &dateType);
+
+   bool SetPrecisionTimeFlag(bool onOff);
+   
    void SetEpoch(const std::string &ep);
    void SetEpoch(const std::string &type, const std::string &ep, Real a1mjd);
    void SetState(const std::string &type, const Rvector6 &cartState);
@@ -529,7 +539,7 @@ protected:
    Real              reflectCoeffSigma;
 
    /// Estimation error covariance
-   std::string       estimationStateType;
+   //std::string       estimationStateType;
    Rmatrix           orbitErrorCovariance;
 
    /// String specifying the epoch time system (A1, TAI, UTC, or TT)
@@ -701,6 +711,7 @@ protected:
    bool              SetElement(const std::string &label, const Real &value);
    Integer           LookUpLabel(const std::string &label, std::string &rep);
    void              RecomputeStateAtEpoch(const GmatEpoch &toEpoch);
+   void              RecomputeStateAtEpochGT(const GmatTime &toEpoch);
 
 private:
    bool              VerifyAddHardware();
@@ -710,6 +721,9 @@ private:
 
    bool              SetAttitudeAndCopyData(Attitude *oldAtt, Attitude *newAtt, bool deleteOldAtt = false);
    void              BuildStateElementLabelsAndUnits();
+
+   void              RecomputeStateDueToChangeOfEpochPrecision(bool fromLowToHi);
+
 };
 
 #endif // Spacecraft_hpp

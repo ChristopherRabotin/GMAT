@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -714,7 +714,7 @@ const ObjectTypeArray& LocalAlignedConstrainedAxes::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//  GmatBase* GetRefObject(const UnsignedInt type,
 //                         const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -727,7 +727,7 @@ const ObjectTypeArray& LocalAlignedConstrainedAxes::GetRefObjectTypeArray()
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* LocalAlignedConstrainedAxes::GetRefObject(const Gmat::ObjectType type,
+GmatBase* LocalAlignedConstrainedAxes::GetRefObject(const UnsignedInt type,
                                                     const std::string &name)
 {
    switch (type)
@@ -748,7 +748,7 @@ GmatBase* LocalAlignedConstrainedAxes::GetRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//  const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Returns the name(s) of the reference object(s). (Derived classes should implement
@@ -761,7 +761,7 @@ GmatBase* LocalAlignedConstrainedAxes::GetRefObject(const Gmat::ObjectType type,
  */
 //------------------------------------------------------------------------------
 const StringArray& LocalAlignedConstrainedAxes::GetRefObjectNameArray(
-                                                const Gmat::ObjectType type)
+                                                const UnsignedInt type)
 {
    static StringArray refs;
    refs.clear();
@@ -792,7 +792,7 @@ const StringArray& LocalAlignedConstrainedAxes::GetRefObjectNameArray(
 
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -807,7 +807,7 @@ const StringArray& LocalAlignedConstrainedAxes::GetRefObjectNameArray(
  */
 //------------------------------------------------------------------------------
 bool LocalAlignedConstrainedAxes::SetRefObject(GmatBase *obj,
-                                               const Gmat::ObjectType type,
+                                               const UnsignedInt type,
                                                const std::string &name)
 {
    #ifdef DEBUG_REFERENCE_SETTING
@@ -856,11 +856,11 @@ bool LocalAlignedConstrainedAxes::SetRefObject(GmatBase *obj,
 }
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName,
 //                       const std::string &newName)
 //---------------------------------------------------------------------------
-bool LocalAlignedConstrainedAxes::RenameRefObject(const Gmat::ObjectType type,
+bool LocalAlignedConstrainedAxes::RenameRefObject(const UnsignedInt type,
                                                   const std::string &oldName,
                                                   const std::string &newName)
 {

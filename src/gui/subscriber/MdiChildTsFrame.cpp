@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -182,8 +182,8 @@ MdiChildTsFrame::~MdiChildTsFrame()
       ("~MdiChildTsFrame() mPlotName=%s\n", mPlotName.c_str());
    #endif
 
-   MdiTsPlot::mdiChildren.DeleteObject(this);
-   MdiTsPlot::numChildren--;
+   //MdiTsPlot::mdiChildren.DeleteObject(this);
+   //MdiTsPlot::numChildren--;
    
    #ifdef DEBUG_MDI_TS_FRAME
    MessageInterface::ShowMessage("~MdiChildTsFrame() exiting\n");
@@ -1091,6 +1091,9 @@ void MdiChildTsFrame::OnClose(wxCloseEvent& event)
    GmatMdiChildFrame::OnClose(event);
    event.Skip();
    
+   MdiTsPlot::mdiChildren.DeleteObject(this);
+   MdiTsPlot::numChildren--;
+
    #ifdef DEBUG_PLOT_CLOSE
    MessageInterface::ShowMessage
       ("MdiChildTsFrame::OnClose() mPlotName='%s' exiting\n", mPlotName.c_str());
@@ -1234,8 +1237,8 @@ void MdiChildTsFrame::OnOpenXyPlotFile(wxCommandEvent& WXUNUSED(event) )
       wxString xyPlotFileName = fileDialog.GetPath();
       
       ++MdiTsPlot::numChildren;
-      gmatAppData->GetMainFrame()->tsSubframe->SetPlotName("XYPlotFile" +
-                                                           MdiTsPlot::numChildren);
+      gmatAppData->GetMainFrame()->tsSubframe->SetPlotName(
+                        "XYPlotFile" + std::to_string(MdiTsPlot::numChildren));
       gmatAppData->GetMainFrame()->tsSubframe->SetTitle(xyPlotFileName);
       
       //-----------------------------------

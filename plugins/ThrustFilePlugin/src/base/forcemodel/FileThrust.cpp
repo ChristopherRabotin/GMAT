@@ -181,7 +181,7 @@ GmatBase* FileThrust::Clone() const
 }
 
 //------------------------------------------------------------------------------
-// void Clear(const Gmat::ObjectType type)
+// void Clear(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Clears the arrays of elements that get set by the Propagate commands
@@ -190,7 +190,7 @@ GmatBase* FileThrust::Clone() const
  *             Gmat::UNKNOWN_OBJECT to clear all of the configrable arrays.
  */
 //------------------------------------------------------------------------------
-void FileThrust::Clear(const Gmat::ObjectType type)
+void FileThrust::Clear(const UnsignedInt type)
 {
    if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::SPACECRAFT))
    {
@@ -218,7 +218,7 @@ const ObjectTypeArray& FileThrust::GetRefObjectTypeArray()
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string& name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string& name)
 //------------------------------------------------------------------------------
 /**
  * Sets the names for referenced objects.
@@ -232,7 +232,7 @@ const ObjectTypeArray& FileThrust::GetRefObjectTypeArray()
  * @return true on success, false otherwise.
  */
 //------------------------------------------------------------------------------
-bool FileThrust::SetRefObjectName(const Gmat::ObjectType type,
+bool FileThrust::SetRefObjectName(const UnsignedInt type,
       const std::string& name)
 {
    if (type == Gmat::SPACECRAFT)
@@ -253,7 +253,7 @@ bool FileThrust::SetRefObjectName(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Accesses the names for referenced objects.
@@ -264,7 +264,7 @@ bool FileThrust::SetRefObjectName(const Gmat::ObjectType type,
  */
 //------------------------------------------------------------------------------
 const StringArray& FileThrust::GetRefObjectNameArray(
-      const Gmat::ObjectType type)
+      const UnsignedInt type)
 {
    #ifdef DEBUG_REF_OBJECTS
       MessageInterface::ShowMessage("FileThrust::GetRefObjectNameArray called "
@@ -289,7 +289,7 @@ const StringArray& FileThrust::GetRefObjectNameArray(
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -302,7 +302,7 @@ const StringArray& FileThrust::GetRefObjectNameArray(
  * @return true if the object is set, false if not.
  */
 //------------------------------------------------------------------------------
-bool FileThrust::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+bool FileThrust::SetRefObject(GmatBase* obj, const UnsignedInt type,
       const std::string& name)
 {
    if (type == Gmat::COORDINATE_SYSTEM)
@@ -336,7 +336,7 @@ bool FileThrust::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string &name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -350,7 +350,7 @@ bool FileThrust::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
  * @return true if the object is set, false if not.
  */
 //------------------------------------------------------------------------------
-bool FileThrust::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+bool FileThrust::SetRefObject(GmatBase* obj, const UnsignedInt type,
       const std::string& name, const Integer index)
 {
    MessageInterface::ShowMessage("Setting %s\n", name.c_str());
@@ -359,7 +359,7 @@ bool FileThrust::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string &oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string &oldName,
 //       const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -372,7 +372,7 @@ bool FileThrust::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
  * @return true if a change was made, false if not
  */
 //------------------------------------------------------------------------------
-bool FileThrust::RenameRefObject(const Gmat::ObjectType type,
+bool FileThrust::RenameRefObject(const UnsignedInt type,
       const std::string& oldName, const std::string& newName)
 {
    if (type == Gmat::SPACECRAFT)
@@ -399,7 +399,7 @@ bool FileThrust::RenameRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a pointer to a reference object
@@ -410,7 +410,7 @@ bool FileThrust::RenameRefObject(const Gmat::ObjectType type,
  * @return The object pointer
  */
 //------------------------------------------------------------------------------
-GmatBase* FileThrust::GetRefObject(const Gmat::ObjectType type,
+GmatBase* FileThrust::GetRefObject(const UnsignedInt type,
       const std::string& name)
 {
    if (type == Gmat::SPACECRAFT)
@@ -428,7 +428,7 @@ GmatBase* FileThrust::GetRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name,
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name,
 //       const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -441,7 +441,7 @@ GmatBase* FileThrust::GetRefObject(const Gmat::ObjectType type,
  * @return The object pointer
  */
 //------------------------------------------------------------------------------
-GmatBase* FileThrust::GetRefObject(const Gmat::ObjectType type,
+GmatBase* FileThrust::GetRefObject(const UnsignedInt type,
       const std::string& name, const Integer index)
 {
    return PhysicalModel::GetRefObject(type, name, index);
@@ -1353,7 +1353,7 @@ void FileThrust::ConvertDirectionToInertial(Real *dir, Real *dirInertial, Real e
 
    // Now rotate to base system axes, we don't want to translate so
    // set coincident to true
-   coordSystem->ToBaseSystem(epoch, inDir, outDir, true);
+   coordSystem->ToBaseSystem(A1Mjd(epoch), inDir, outDir, true);
 
    dirInertial[0] = outDir[0];
    dirInertial[1] = outDir[1];

@@ -153,7 +153,8 @@ GmatBase* TDRSRangeAdapter::Clone() const
 */
 //------------------------------------------------------------------------------
 const MeasurementData& TDRSRangeAdapter::CalculateMeasurement(bool withEvents,
-         ObservationData* forObservation, std::vector<RampTableData>* rampTB)
+         ObservationData* forObservation, std::vector<RampTableData>* rampTB,
+         bool forSimulation)
 {
 #ifdef DEBUG_ADAPTER_EXECUTION
    MessageInterface::ShowMessage("TDRSRangeAdapter::CalculateMeasurement(%s, "
@@ -166,7 +167,7 @@ const MeasurementData& TDRSRangeAdapter::CalculateMeasurement(bool withEvents,
       instanceName + " before the measurement was set");
 
    // Fire the measurement model to build the collection of signal data
-   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB))
+   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB, forSimulation))
    {
       // QA Media correction:
       cMeasurement.isIonoCorrectWarning = false;
@@ -202,7 +203,7 @@ const MeasurementData& TDRSRangeAdapter::CalculateMeasurement(bool withEvents,
       cMeasurement.unfeasibleReason = "";
       cMeasurement.feasibilityValue = 90.0;
 
-      GmatEpoch transmitEpoch, receiveEpoch;
+      GmatTime transmitEpoch, receiveEpoch;
       RealArray values;
       for (UnsignedInt i = 0; i < paths.size(); ++i)           // In the current version of GmatEstimation plugin, it has only 1 signal path. The code has to be modified for multiple signal paths 
       {
@@ -217,7 +218,7 @@ const MeasurementData& TDRSRangeAdapter::CalculateMeasurement(bool withEvents,
          {
             ++legIndex;
             // Set feasibility value
-            if (current->feasibilityReason == "N")
+            if (current->feasibilityReason[0] == 'N')
             {
                if ((current->stationParticipant) && (cMeasurement.unfeasibleReason == ""))
                {
@@ -226,10 +227,10 @@ const MeasurementData& TDRSRangeAdapter::CalculateMeasurement(bool withEvents,
                   cMeasurement.feasibilityValue = current->feasibilityValue;
                }
             }
-            else if (current->feasibilityReason == "B")
+            else if (current->feasibilityReason[0] == 'B')
             {
                std::stringstream ss;
-               ss << "B" << legIndex;
+               ss << "B" << legIndex << current->feasibilityReason.substr(1);
                current->feasibilityReason = ss.str();
                if ((cMeasurement.unfeasibleReason == "") || (cMeasurement.unfeasibleReason == "N"))
                {
@@ -257,18 +258,22 @@ const MeasurementData& TDRSRangeAdapter::CalculateMeasurement(bool withEvents,
             // Get measurement epoch in the first signal path. It will apply for all other paths
             if (i == 0)
             {
-               transmitEpoch = first->tPrecTime.GetMjd() - first->tDelay / GmatTimeConstants::SECS_PER_DAY;
-               receiveEpoch = current->rPrecTime.GetMjd() + current->rDelay / GmatTimeConstants::SECS_PER_DAY;
+               transmitEpoch = first->tPrecTime - first->tDelay / GmatTimeConstants::SECS_PER_DAY;
+               receiveEpoch = current->rPrecTime + current->rDelay / GmatTimeConstants::SECS_PER_DAY;
                if (calcData->GetTimeTagFlag())
                {
                   // Measurement epoch will be at the end of signal path when time tag is at the receiver
                   if (current->next == NULL)
-                     cMeasurement.epoch = receiveEpoch;
+                  {
+                     cMeasurement.epochGT = receiveEpoch;
+                     cMeasurement.epoch   = receiveEpoch.GetMjd();
+                  }
                }
                else
                {
                   // Measurement epoch will be at the begin of signal path when time tag is at the transmiter
-                  cMeasurement.epoch = transmitEpoch;
+                  cMeasurement.epochGT = transmitEpoch;
+                  cMeasurement.epoch   = transmitEpoch.GetMjd();
                }
             }
 
@@ -310,6 +315,7 @@ const MeasurementData& TDRSRangeAdapter::CalculateMeasurement(bool withEvents,
             MessageInterface::ShowMessage("%s,  ", participantLists[i]->at(k).c_str());
          MessageInterface::ShowMessage("\n");
 
+         MessageInterface::ShowMessage("      . Measurement epoch          : %.12lf\n", cMeasurement.epochGT.GetMjd());
          MessageInterface::ShowMessage("      . Measurement type           : <%s>\n", measurementType.c_str());
          MessageInterface::ShowMessage("      . C-value w/o noise and bias : %.12lf km \n", values[i]);
          MessageInterface::ShowMessage("      . Noise adding option        : %s\n", (addNoise ? "true" : "false"));

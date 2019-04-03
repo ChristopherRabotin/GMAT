@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -252,7 +252,7 @@ const std::string& Target::GetGeneratingString(Gmat::WriteMode mode,
 }
 
 //---------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type,
+// bool RenameRefObject(const UnsignedInt type,
 //                      const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 /**
@@ -265,7 +265,7 @@ const std::string& Target::GetGeneratingString(Gmat::WriteMode mode,
  * @return true on success.
  */
 //------------------------------------------------------------------------------
-bool Target::RenameRefObject(const Gmat::ObjectType type,
+bool Target::RenameRefObject(const UnsignedInt type,
                              const std::string &oldName,
                              const std::string &newName)
 {   
@@ -430,7 +430,7 @@ bool Target::GetBooleanParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
-//  std::string GetRefObjectName(const Gmat::ObjectType type) const
+//  std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Retrieve the name of a reference object.
@@ -440,7 +440,7 @@ bool Target::GetBooleanParameter(const Integer id) const
  * @return the object's name.
  */
 //------------------------------------------------------------------------------
-std::string Target::GetRefObjectName(const Gmat::ObjectType type) const
+std::string Target::GetRefObjectName(const UnsignedInt type) const
 {
    if (type == Gmat::SOLVER)
       return solverName;
@@ -449,7 +449,7 @@ std::string Target::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Set the name of a reference object.
@@ -460,7 +460,7 @@ std::string Target::GetRefObjectName(const Gmat::ObjectType type) const
  * @return true on success, false on failure.
  */
 //------------------------------------------------------------------------------
-bool Target::SetRefObjectName(const Gmat::ObjectType type,
+bool Target::SetRefObjectName(const UnsignedInt type,
                               const std::string &name)
 {
    if (type == Gmat::SOLVER) {

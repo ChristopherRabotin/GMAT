@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -48,14 +48,14 @@
 
 //------------------------------------------------------------------------------
 // RefData(const std::string &name = "", const std::string &typeName = "",
-//         Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT)
+//         UnsignedInt paramOwnerType = Gmat::SPACECRAFT)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  */
 //------------------------------------------------------------------------------
 RefData::RefData(const std::string &name, const std::string &typeName,
-                 const Gmat::ObjectType paramOwnerType,
+                 const UnsignedInt paramOwnerType,
                  GmatParam::DepObject depObj, bool isSettable)
 {
    #ifdef DEBUG_REFDATA_CREATE
@@ -259,9 +259,9 @@ GmatBase* RefData::GetParameterOwner()
 }
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
-std::string RefData::GetRefObjectName(const Gmat::ObjectType type) const
+std::string RefData::GetRefObjectName(const UnsignedInt type) const
 {
    #if DEBUG_REFDATA_OBJECT > 1
    MessageInterface::ShowMessage
@@ -320,7 +320,7 @@ std::string RefData::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves reference object name array for given type. It will return all
@@ -330,7 +330,7 @@ std::string RefData::GetRefObjectName(const Gmat::ObjectType type) const
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-const StringArray& RefData::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& RefData::GetRefObjectNameArray(const UnsignedInt type)
 {
    mAllRefObjectNames.clear();
 
@@ -367,7 +367,7 @@ const StringArray& RefData::GetRefObjectNameArray(const Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Adds type and name to reference object list.
@@ -379,7 +379,7 @@ const StringArray& RefData::GetRefObjectNameArray(const Gmat::ObjectType type)
  *
  */
 //------------------------------------------------------------------------------
-bool RefData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
+bool RefData::SetRefObjectName(UnsignedInt type, const std::string &name)
 {
    #if DEBUG_REFDATA_OBJECT
    MessageInterface::ShowMessage
@@ -436,10 +436,10 @@ bool RefData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type,
+// GmatBase* GetRefObject(const UnsignedInt type,
 //                        const std::string &name = "");
 //------------------------------------------------------------------------------
-GmatBase* RefData::GetRefObject(const Gmat::ObjectType type,
+GmatBase* RefData::GetRefObject(const UnsignedInt type,
                                 const std::string &name)
 {
    #if DEBUG_REF_OBJECT
@@ -482,7 +482,7 @@ GmatBase* RefData::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -491,7 +491,7 @@ GmatBase* RefData::GetRefObject(const Gmat::ObjectType type,
  * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
-bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool RefData::SetRefObject(GmatBase *obj, const UnsignedInt type,
                            const std::string &name)
 {
    #ifdef DEBUG_REF_OBJECTS
@@ -515,7 +515,7 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    // Since Sandbox calls SetRefObject() with obj->GetType(), I need to
    // set type to SPACE_POINT if CELESTIAL_BODY
    
-   Gmat::ObjectType actualType = type;
+   UnsignedInt actualType = type;
    if (type == Gmat::CELESTIAL_BODY)
       actualType = Gmat::SPACE_POINT;
    
@@ -574,7 +574,7 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 /*
@@ -583,7 +583,7 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * object owned object name such as Sat.Thruster1.DutyCycle.
  */
 //---------------------------------------------------------------------------
-bool RefData::RenameRefObject(const Gmat::ObjectType type,
+bool RefData::RenameRefObject(const UnsignedInt type,
                               const std::string &oldName,
                               const std::string &newName)
 {
@@ -676,7 +676,7 @@ const std::string* RefData::GetValidObjectList() const
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// bool AddRefObject(const Gmat::ObjectType type, const std::string &name,
+// bool AddRefObject(const UnsignedInt type, const std::string &name,
 //                   GmatBase *obj = NULL, bool replaceName = false)
 //------------------------------------------------------------------------------
 /**
@@ -685,7 +685,7 @@ const std::string* RefData::GetValidObjectList() const
  * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
-bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
+bool RefData::AddRefObject(const UnsignedInt type, const std::string &name,
                            GmatBase *obj, bool replaceName)
 {
    #if DEBUG_REFDATA_ADD
@@ -695,7 +695,7 @@ bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
        type, name.c_str(), obj, replaceName);
    #endif
    
-   Gmat::ObjectType actualType = type;
+   UnsignedInt actualType = type;
    if (type == Gmat::CELESTIAL_BODY)
       actualType = Gmat::SPACE_POINT;
    
@@ -738,7 +738,7 @@ bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectWithNewName(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObjectWithNewName(GmatBase *obj, const UnsignedInt type,
 //                              const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -747,7 +747,7 @@ bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
  * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
-bool RefData::SetRefObjectWithNewName(GmatBase *obj, const Gmat::ObjectType type,
+bool RefData::SetRefObjectWithNewName(GmatBase *obj, const UnsignedInt type,
                                       const std::string &name)
 {
    #if DEBUG_REFDATA_OBJECT
@@ -834,13 +834,13 @@ GmatBase* RefData::FindFirstObject(const std::string &typeName) const
 
 
 //------------------------------------------------------------------------------
-// GmatBase* FindFirstObject(const Gmat::ObjectType type) const
+// GmatBase* FindFirstObject(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * @return first object found for given object type.
  */
 //------------------------------------------------------------------------------
-GmatBase* RefData::FindFirstObject(const Gmat::ObjectType type) const
+GmatBase* RefData::FindFirstObject(const UnsignedInt type) const
 {
    #if DEBUG_REFDATA_FIND
    MessageInterface::ShowMessage
@@ -890,13 +890,13 @@ std::string RefData::FindFirstObjectName(const std::string &typeName) const
 
 
 //------------------------------------------------------------------------------
-// std::string FindFirstObjectName(const Gmat::ObjectType type) const
+// std::string FindFirstObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * @return first object name found for given object type.
  */
 //------------------------------------------------------------------------------
-std::string RefData::FindFirstObjectName(const Gmat::ObjectType type) const
+std::string RefData::FindFirstObjectName(const UnsignedInt type) const
 {
    #if DEBUG_REFDATA_OBJECT > 1
    MessageInterface::ShowMessage
@@ -929,9 +929,9 @@ std::string RefData::FindFirstObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// StringArray FindObjectNames(const Gmat::ObjectType type) const
+// StringArray FindObjectNames(const UnsignedInt type) const
 //------------------------------------------------------------------------------
-StringArray RefData::FindObjectNames(const Gmat::ObjectType type) const
+StringArray RefData::FindObjectNames(const UnsignedInt type) const
 {
    StringArray refNames;
    
@@ -952,9 +952,9 @@ StringArray RefData::FindObjectNames(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// GmatBase* FindObject(const Gmat::ObjectType type, const std::string name) const
+// GmatBase* FindObject(const UnsignedInt type, const std::string name) const
 //------------------------------------------------------------------------------
-GmatBase* RefData::FindObject(const Gmat::ObjectType type, const std::string name) const
+GmatBase* RefData::FindObject(const UnsignedInt type, const std::string name) const
 {
    #if DEBUG_REFDATA_FIND
    MessageInterface::ShowMessage

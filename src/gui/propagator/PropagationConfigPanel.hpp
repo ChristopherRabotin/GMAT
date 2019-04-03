@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -93,14 +93,19 @@ private:
    {
       wxString bodyName;
       wxString gravType;
+      wxString tideData;
+      wxString tideModel;
       wxString dragType;
       wxString magfType;
       wxString gravDegree;
-      wxString gravOrder;
+      wxString gravOrrder;
+      wxString gravStmLimit;
       wxString magfDegree;
       wxString magfOrder;
       wxString potFile;
       wxString potFileFullPath;
+      wxString tideFile;
+      wxString tideFileFullPath;
       PointMassForce *pmf;
       GravityField *gravf;
       DragForce *dragf;
@@ -109,13 +114,28 @@ private:
       bool relativisticCorrection;
       
       ForceType(const wxString &body, const wxString &grav = "None",
+                const wxString &tData = "None", const wxString &tide = "None",
                 const wxString &drag = "None", const wxString &mag = "None",
                 PointMassForce *pf = NULL, GravityField *gf = NULL,
                 DragForce *df = NULL)
          {
-            bodyName = body; gravType = grav; dragType = drag; magfType = mag;
-            gravDegree = "4"; gravOrder = "4"; magfDegree = "0"; 
-            magfOrder = "0"; potFile = ""; potFileFullPath = ""; pmf = pf; gravf = gf; 
+            bodyName = body; 
+            gravType = grav; 
+            tideData = tData; 
+            tideModel = tide; 
+            dragType = drag; 
+            magfType = mag;
+            gravDegree = "4"; 
+            gravOrrder = "4"; 
+            gravStmLimit = "100"; 
+            magfDegree = "0"; 
+            magfOrder = "0"; 
+            potFile = ""; 
+            potFileFullPath = ""; 
+            tideFile = "";
+            tideFileFullPath = "";
+            pmf = pf; 
+            gravf = gf; 
             dragf = df; srpf = NULL; useSrp = false; relativisticCorrection = false;
          }
       
@@ -124,12 +144,25 @@ private:
             if (this == &right)
                return *this;
             
-            bodyName = right.bodyName; gravType = right.gravType;
-            dragType = right.dragType; magfType = right.magfType; 
-            gravDegree = right.gravDegree; gravOrder = right.gravOrder;
-            magfDegree = right.magfDegree; magfOrder = right.magfOrder;
-            potFile = right.potFile; potFileFullPath = right.potFileFullPath;
-            pmf = right.pmf; gravf = right.gravf; dragf = right.dragf; srpf = right.srpf;
+            bodyName = right.bodyName; 
+            gravType = right.gravType;
+            tideData = right.tideData;
+            tideModel = right.tideModel;
+            dragType = right.dragType; 
+            magfType = right.magfType; 
+            gravDegree = right.gravDegree; 
+            gravOrrder = right.gravOrrder;
+            gravStmLimit = right.gravStmLimit;
+            magfDegree = right.magfDegree; 
+            magfOrder = right.magfOrder;
+            potFile = right.potFile; 
+            potFileFullPath = right.potFileFullPath;
+            tideFile = right.tideFile;
+            tideFileFullPath = right.tideFileFullPath;
+            pmf = right.pmf; 
+            gravf = right.gravf; 
+            dragf = right.dragf; 
+            srpf = right.srpf;
             useSrp = right.useSrp; relativisticCorrection = right.relativisticCorrection;
             return *this;
          }
@@ -156,6 +189,9 @@ private:
    wxStaticText *minIntErrorStaticText;
    wxStaticText *nomIntErrorStaticText;
    wxStaticText *potFileStaticText;
+   wxStaticText *tideDataStaticText;
+   wxStaticText *tideFileStaticText;
+   wxStaticText *tideModelStaticText;
    
    wxStaticText *initialStepSizeStaticText;
    wxStaticText *unitsInitStepSizeStaticText;
@@ -177,8 +213,13 @@ private:
    wxTextCtrl *nomIntErrorTextCtrl;
 //   wxTextCtrl *bodyTextCtrl;
    wxTextCtrl *gravityDegreeTextCtrl;
+   wxTextCtrl *gravityMaxDegreeTextCtrl;
    wxTextCtrl *gravityOrderTextCtrl;
+   wxTextCtrl *gravityMaxOrderTextCtrl;
+   wxTextCtrl *gravityStmLimitTextCtrl;
    wxTextCtrl *potFileTextCtrl;
+   wxTextCtrl *tideFileTextCtrl;
+   wxTextCtrl *tideTextCtrl;
    wxTextCtrl *magneticDegreeTextCtrl;
    wxTextCtrl *magneticOrderTextCtrl;
    wxTextCtrl *pmEditTextCtrl;
@@ -187,12 +228,16 @@ private:
    wxComboBox *theOriginComboBox;
    wxComboBox *thePrimaryBodyComboBox;
    wxComboBox *theGravModelComboBox;
+   wxComboBox *theTideDataComboBox;
+   wxComboBox *theTideModelComboBox;
    wxComboBox *theAtmosModelComboBox;
    wxComboBox *theMagfModelComboBox;
    wxComboBox *theErrorComboBox;
    wxComboBox *theSRPModelComboBox;
    
    wxBitmapButton *theGravModelSearchButton;
+   wxBitmapButton *theGravModelSaveButton;
+   wxBitmapButton *theTideModelSearchButton;
    wxButton *theDragSetupButton;
    wxButton *theMagModelSearchButton;
    
@@ -230,17 +275,14 @@ private:
    
    wxString currentBodyName;
    wxString gravTypeName;
+   wxString tideDataName;
+   wxString tideModelName;
    wxString dragTypeName;
    wxString propOriginName;
    wxString errorControlTypeName;
    wxString srpModelName;
    
    wxArrayString integratorTypeArray;
-   wxArrayString earthGravModelArray;
-   wxArrayString lunaGravModelArray;
-   wxArrayString venusGravModelArray;
-   wxArrayString marsGravModelArray;
-   wxArrayString othersGravModelArray;
    wxArrayString dragModelArray;
    wxArrayString magfModelArray;
    wxArrayString errorControlArray;
@@ -254,18 +296,8 @@ private:
    wxArrayString secondaryBodiesArray;
    wxArrayString integratorArray;
    
-//   Integer numOfBodies;
    Integer numOfForces;
    Integer currentBodyId;
-   
-   /// normalized harmonic coefficients
-   Real               Cbar[361][361];
-   /// normalized harmonic coefficients
-   Real               Sbar[361][361];
-   /// coefficient drifts per year
-   Real               dCbar[17][17];
-   /// coefficient drifts per year
-   Real               dSbar[17][17];
    
    /// Flag indicating that the drag buffer has been filled
    bool               dragBufferReady;
@@ -281,6 +313,8 @@ private:
    bool isAtmosChanged;
    bool isDegOrderChanged;
    bool isPotFileChanged;
+   bool isTideFileChanged;
+   bool isTideModelChanged;
    bool isMagfTextChanged;
    bool isIntegratorChanged;
    bool isIntegratorDataChanged;
@@ -298,7 +332,7 @@ private:
    SolarSystem                    *theSolarSystem;
    CelestialBody                  *theCelestialBody;
    AtmosphereModel                *theAtmosphereModel;
-   std::vector<PointMassForce *>  thePMForces;
+//   std::vector<PointMassForce *>  thePMForces;
 //   std::vector<ForceType*>        primaryBodyList;
    std::vector<ForceType*>        pointMassBodyList;
    
@@ -322,7 +356,8 @@ private:
    void DisplayIntegratorData(bool integratorChanged);
    void DisplayPrimaryBodyData();
    void DisplayForceData();
-   void DisplayGravityFieldData(const wxString& bodyName, bool textValueChanged = false);
+   void DisplayGravityFieldData (const wxString& bodyName, bool potValueChanged = false,
+       bool tideValueChanged = false);
    void DisplayAtmosphereModelData();
    void DisplayPointMassData();
    void DisplayMagneticFieldData();
@@ -338,6 +373,8 @@ private:
    bool SavePropagatorData();
    bool SaveDegOrder();
    bool SavePotFile();
+   bool SaveTideFile();
+   bool SaveTideModel();
    bool SaveAtmosModel();
    
    // Converting Data
@@ -346,6 +383,7 @@ private:
    // Text control event method
    void OnIntegratorTextUpdate(wxCommandEvent &event);
    void OnGravityTextUpdate(wxCommandEvent& event);
+   void OnTideTextUpdate(wxCommandEvent& event);
    void OnMagneticTextUpdate(wxCommandEvent& event);
 
    // Checkbox event method
@@ -358,6 +396,8 @@ private:
    void OnPrimaryBodyComboBox(wxCommandEvent &event);
    void OnOriginComboBox(wxCommandEvent &event);
    void OnGravityModelComboBox(wxCommandEvent &event);
+   void OnTideDataComboBox(wxCommandEvent &event);
+   void OnTideModelComboBox(wxCommandEvent &event);
    void OnAtmosphereModelComboBox(wxCommandEvent &event);
    void OnErrorControlComboBox(wxCommandEvent &event);
    void OnPropOriginComboBox(wxCommandEvent &);
@@ -371,6 +411,8 @@ private:
    // Button event methods
    void OnAddBodyButton(wxCommandEvent &event);
    void OnGravSearchButton(wxCommandEvent &event);
+   void OnGravSaveButton(wxCommandEvent &event);
+   void OnTideSearchButton(wxCommandEvent &event);
    void OnSetupButton(wxCommandEvent &event);
    void OnMagSearchButton(wxCommandEvent &event);
    void OnPMEditButton(wxCommandEvent &event);
@@ -380,15 +422,6 @@ private:
    void ShowPropData(const std::string &header);
    void ShowForceList(const std::string &header);
    void ShowForceModel(const std::string &header);
-   
-   // for reading gravity files
-   void ParseDATGravityFile(const wxString& fname);
-   void ParseGRVGravityFile(const wxString& fname);
-   void ParseCOFGravityFile(const wxString& fname);
-   void PrepareGravityArrays();
-   
-   // Strictly for reading gravity files
-   static const Integer GRAV_MAX_DRIFT_DEGREE = 2;
    
    void ShowIntegratorLayout(bool isIntegrator = true, bool isEphem = true);
 
@@ -404,6 +437,7 @@ private:
       ID_TEXTCTRL,
       ID_TEXTCTRL_PROP,
       ID_TEXTCTRL_GRAV,
+      ID_TEXTCTRL_TIDE,
       ID_TEXTCTRL_MAGF,
       ID_SRP_CHECKBOX,
       ID_REL_CORRECTION_CHECKBOX,
@@ -412,12 +446,16 @@ private:
       ID_CB_BODY,
       ID_CB_ORIGIN,
       ID_CB_GRAV,
+      ID_CB_TIDE,
+      ID_CB_TIDE_DATA,
       ID_CB_ATMOS,
       ID_CB_MAG,
       ID_CB_ERROR,
       ID_CB_SRP_MODEL,
       ID_BUTTON_ADD_BODY,
       ID_BUTTON_GRAV_SEARCH,
+      ID_BUTTON_GRAV_SAVE,
+      ID_BUTTON_TIDE_SEARCH,
       ID_BUTTON_SETUP,
       ID_BUTTON_MAG_SEARCH,
       ID_BUTTON_PM_EDIT,
@@ -427,6 +465,6 @@ private:
       ID_CB_PROP_EPOCHSTART
    };
 };
-
+//------------------------------------------------------------------------------
 #endif // PropagationConfigPanel_hpp
 

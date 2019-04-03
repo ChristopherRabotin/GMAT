@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -128,13 +128,28 @@ public:
    virtual void    FromBaseSystem(const A1Mjd &epoch, const Real *inState,
                                   Real *outState, bool coincident = false,
                                   bool forceComputation = false);
+   
+   virtual Rvector ToBaseSystem(const GmatTime &epoch, const Rvector &inState,
+                                bool coincident = false,
+                                bool forceComputation = false); 
+
+   virtual void    ToBaseSystem(const GmatTime &epoch, const Real *inState,
+                                Real *outState, bool coincident = false,
+                                bool forceComputation = false); 
+   
+   virtual Rvector FromBaseSystem(const GmatTime &epoch, const Rvector &inState,
+                                  bool coincident = false,
+                                  bool forceComputation = false);
+   virtual void    FromBaseSystem(const GmatTime &epoch, const Real *inState,
+                                  Real *outState, bool coincident = false,
+                                  bool forceComputation = false);
 
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
    virtual GmatBase*    Clone() const;
    virtual void         Copy(const GmatBase* orig);
    
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
 
@@ -167,7 +182,7 @@ public:
    virtual bool         SetBooleanParameter(const std::string &label,
                                             const bool value);
    
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string &name);
    virtual bool         IsOwnedObject(Integer id) const;
    virtual GmatBase*    GetOwnedObject(Integer whichOne);
@@ -175,14 +190,13 @@ public:
    virtual const ObjectTypeArray&
                         GetRefObjectTypeArray();
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                        GetRefObjectNameArray(const UnsignedInt type);
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const char *name);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name = "");
    
-   virtual Gmat::ObjectType
-                        GetPropertyObjectType(const Integer id) const;
+   virtual UnsignedInt  GetPropertyObjectType(const Integer id) const;
    
    // WARNING: The J200Body must be set identically for all objects in a GMAT run;
    // not doing so will give incorrect results.
@@ -221,6 +235,16 @@ protected:
    virtual bool TranslateFromBaseSystem(const A1Mjd &epoch, const Rvector &inState,
                                         Rvector &outState);
    virtual bool TranslateFromBaseSystem(const A1Mjd &epoch, const Real *inState,
+                                        Real *outState);
+   
+   virtual bool TranslateToBaseSystem(const GmatTime &epoch, const Rvector &inState,
+                                      Rvector &outState);
+   virtual bool TranslateToBaseSystem(const GmatTime &epoch, const Real *inState,
+                                      Real *outState);
+   
+   virtual bool TranslateFromBaseSystem(const GmatTime &epoch, const Rvector &inState,
+                                        Rvector &outState);
+   virtual bool TranslateFromBaseSystem(const GmatTime &epoch, const Real *inState,
                                         Real *outState);
    
    /// axis system

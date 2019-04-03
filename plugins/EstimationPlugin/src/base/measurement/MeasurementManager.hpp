@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -120,8 +120,9 @@ public:
 
    UnsignedInt             GetCurrentRecordNumber();
    
-   GmatEpoch               GetEpoch();
-   GmatEpoch               GetNextEpoch();
+   GmatTime                GetEpochGT();
+   GmatTime                GetNextEpochGT();
+
    const ObservationData * GetObsData(const Integer observationToGet = -1);
    ObservationData*        GetObsDataObject(const Integer observationToGet = -1);
    bool                    AdvanceObservation();                                    // made changes for Bug 8 in ticket GMT-4314
@@ -135,6 +136,8 @@ public:
    bool                    AutoGenerateTrackingDataAdapters();
 
    bool                    SetStatisticsDataFiltersToDataFiles(UnsignedInt index);
+
+   ObjectArray             GetStatisticsDataFilters(TrackingFileSet* tfs = NULL);
 
 protected:
    /// List of the managed measurement models
@@ -158,9 +161,10 @@ protected:
 
 
    /// Current measurement epoch, ignoring event searching
-   GmatEpoch                        anchorEpoch;
+   GmatTime                         anchorEpochGT;
    /// Current measurement epoch, including event searching
-   GmatEpoch                        currentEpoch;
+   GmatTime                         currentEpochGT;
+
    /// Measurement calculations
    std::vector<MeasurementData>     measurements;
 

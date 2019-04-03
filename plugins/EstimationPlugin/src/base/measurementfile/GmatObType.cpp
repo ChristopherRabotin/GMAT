@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -312,14 +312,27 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
 
    std::stringstream dataLine;
    char databuffer[200];
-   char epochbuffer[200];
 
-   Real taiEpoch = (md->epochSystem == TimeConverterUtil::TAIMJD ? md->epoch :
+   if (md->epochGT.GetMjd() <= 0.0)
+   {
+      Real taiEpoch = (md->epochSystem == TimeConverterUtil::TAIMJD ? md->epoch :
          TimeConverterUtil::ConvertToTaiMjd(md->epochSystem, md->epoch,
-               GmatTimeConstants::JD_NOV_17_1858));
+         GmatTimeConstants::JD_NOV_17_1858));
 
-   sprintf(epochbuffer, "%18.12lf", taiEpoch);
-   dataLine << epochbuffer << "    " << md->typeName
+      char epochbuffer[200];
+      sprintf(epochbuffer, "%18.12lf", taiEpoch);
+      dataLine << epochbuffer;
+   }
+   else
+   {
+      GmatTime taiEpoch = (md->epochSystem == TimeConverterUtil::TAIMJD ? md->epochGT :
+         TimeConverterUtil::ConvertToTaiMjd(md->epochSystem, md->epochGT,
+         GmatTimeConstants::JD_NOV_17_1858));
+      
+      dataLine << taiEpoch.ToString();
+   }
+
+   dataLine << "    " << md->typeName
             << "    " << md->type << "    ";
 #ifdef USE_OLD_GMDFILE_FORMAT
    if (md->type < 9000)
@@ -365,9 +378,9 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
       dataLine << md->uplinkBand << "    ";
       dataLine << md->dopplerCountInterval << "    ";
    }
-   else if (md->typeName == "SN_Doppler")                    //else if (md->typeName == "TDRSDoppler_HZ")
+   else if (md->typeName == "SN_Doppler")
    {
-      sprintf(databuffer, "    %.15le    %d    %s    %d   %d   %f",
+      sprintf(databuffer, "    %.15le    %d    %s    %d   %d   %f   ",
          md->tdrsNode4Freq, md->tdrsNode4Band, md->tdrsServiceID.c_str(), md->tdrsDataFlag, md->tdrsSMARID, md->dopplerCountInterval);
       dataLine << databuffer;
    }
@@ -375,9 +388,9 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
    for (UnsignedInt k = 0; k < md->value.size(); ++k)
    {
       if (md->typeName == "DSN_SeqRange")
-         sprintf(databuffer, "%20.8lf",GmatMathUtil::Mod(md->value[k],md->rangeModulo));      // increasing 6 decimal places to 8 decimal places
+         sprintf(databuffer, "%.16le",GmatMathUtil::Mod(md->value[k],md->rangeModulo));
       else
-         sprintf(databuffer, "%20.8lf", md->value[k]);                                        // increasing 6 decimal places to 8 decimal places
+         sprintf(databuffer, "%.16le", md->value[k]);
       dataLine << databuffer;
       if (k < md->value.size()-1)
          dataLine << "    ";
@@ -427,6 +440,7 @@ ObservationData* GmatObType::ReadObservation()
 
    std::string str;
    std::stringstream theLine;
+   std::stringstream theLine1;
 
    Integer participantSize;
    Integer dataSize;
@@ -455,15 +469,24 @@ ObservationData* GmatObType::ReadObservation()
 
    // Processing data in the line
    theLine << str;
+   theLine1 << str;
    currentObs.Clear();
    currentObs.dataFormat = "GMATInternal";
 
    // format: 21545.05439854615    Range    7000    GS2ID    ODSatID    2713.73185
    Real value;
 
+   std::string taiEpochStr;
+   theLine1 >> taiEpochStr;
+   GmatTime  taiEpochGT(0.0);
+   taiEpochGT.SetMjdString(taiEpochStr);
+   currentObs.epochGT = (currentObs.epochSystem == TimeConverterUtil::TAIMJD ?
+            taiEpochGT :
+            TimeConverterUtil::ConvertFromTaiMjd(currentObs.epochSystem, taiEpochGT,
+            GmatTimeConstants::JD_NOV_17_1858));
+
    GmatEpoch taiEpoch;
    theLine >> taiEpoch;
-
    currentObs.epoch = (currentObs.epochSystem == TimeConverterUtil::TAIMJD ?
          taiEpoch :
          TimeConverterUtil::ConvertFromTaiMjd(currentObs.epochSystem, taiEpoch,

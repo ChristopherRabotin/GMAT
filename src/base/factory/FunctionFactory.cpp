@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -82,8 +82,8 @@ Function* FunctionFactory::CreateFunction(const std::string &ofType,
    
    #if DEBUG_MATH_FACTORY
    MessageInterface::ShowMessage
-      ("FunctionFactory::CreateFunction() ofType=%s, newType=%s, withName=%s\n",
-       ofType.c_str(), newType.c_str(), withName.c_str());
+      ("FunctionFactory::CreateFunction() ofType=%s, withName=%s\n",
+       ofType.c_str(), withName.c_str());
    #endif
    
    // Create builtin function
@@ -113,6 +113,8 @@ FunctionFactory::FunctionFactory()
    
    if (creatables.empty())
       BuildCreatables();
+
+   GmatType::RegisterType(Gmat::FUNCTION, "Function");
 }
 
 

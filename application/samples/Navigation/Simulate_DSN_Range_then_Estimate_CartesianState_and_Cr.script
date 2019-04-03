@@ -137,7 +137,7 @@ ODProp_ForceModel.PointMasses = {Earth, Luna, Sun};
 ODProp_ForceModel.Drag = None;
 ODProp_ForceModel.SRP = On;
 ODProp_ForceModel.RelativisticCorrection = Off;
-ODProp_ForceModel.ErrorControl = RSSStep;
+ODProp_ForceModel.ErrorControl = None;
 ODProp_ForceModel.SRP.Flux = 1370.052;
 ODProp_ForceModel.SRP.SRPModel = Spherical;
 ODProp_ForceModel.SRP.Nominal_Sun = 149597870.691;
@@ -179,7 +179,7 @@ DSNRange_ErrorModel.SolveFors = {};
 %---------- TrackingFileSet
 %----------------------------------------
 Create TrackingFileSet simData;
-simData.AddTrackingConfig = { '{{GDS,SimSat,GDS},DSNRange}', '{{MAD,SimSat,MAD},DSNRange}', '{{CAN,SimSat,CAN},DSNRange}'};
+simData.AddTrackingConfig = { '{{GDS,SimSat,GDS},DSN_SeqRange}', '{{MAD,SimSat,MAD},DSN_SeqRange}', '{{CAN,SimSat,CAN},DSN_SeqRange}'};
 simData.FileName = {'TrkFile_SimEst_DSN_DS.gmd'};
 simData.RampTable = {};
 simData.UseLightTime = true;
@@ -193,7 +193,7 @@ simData.SimTDRSSmarId = 0;
 simData.SimTDRSDataFlag = 0;
 
 Create TrackingFileSet estData;
-estData.AddTrackingConfig = {'{{GDS,EstSat,GDS},DSNRange}', '{{CAN,EstSat,CAN},DSNRange}', '{{MAD,EstSat,MAD},DSNRange}'};
+estData.AddTrackingConfig = {'{{GDS,EstSat,GDS},DSN_SeqRange}', '{{CAN,EstSat,CAN},DSN_SeqRange}', '{{MAD,EstSat,MAD},DSN_SeqRange}'};
 estData.FileName = {'TrkFile_SimEst_DSN_DS.gmd'};
 estData.RampTable = {};
 estData.UseLightTime = true;

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -285,6 +285,12 @@ Integer  DeFile::GetBodyID(std::string bodyName)
    return -1;
 }
 
+Gmat::DeFileType DeFile::GetDeFileType() const
+{
+   return defType;
+}
+
+
 //------------------------------------------------------------------------------
 //  Real* GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
 //------------------------------------------------------------------------------
@@ -424,6 +430,298 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
        result[0], result[1], result[2], result[3], result[4], result[5]);
    #endif
    
+   //if (forBody == 11)
+   //{
+   //   MessageInterface::ShowMessage
+   //      ("DeFile::GetPosVel(forBody = %d)  state from DE file = %.12f  %.12f  %.12f  %.12f  %.12f  %.12f\n", forBody,
+   //      result[0], result[1], result[2], result[3], result[4], result[5]);
+   //}
+
+   return result;
+}
+
+
+Real* DeFile::GetPosVel(Integer forBody, GmatTime atTime, bool overrideTimeSystem)
+{
+#ifdef DEBUG_DEFILE_GET
+   MessageInterface::ShowMessage
+      ("DeFile::GetPosVel() entered, forBody=%d, atTime=%.12lf, overrideTimeSystem=%d, reading file %s\n",
+      forBody, atTime.GetMjd(), overrideTimeSystem, itsName.c_str());
+#endif
+
+   if (atTime < mA1FileBeg)
+   {
+      std::stringstream ss;
+      ss << "Attempting to read data for an epoch (" << atTime.GetMjd()
+         << ") earlier than the beginning of the current DE File (" << mA1FileBeg
+         << "); exiting.\n";
+      throw PlanetaryEphemException(ss.str());
+      //      throw PlanetaryEphemException("Attempting to read data for an epoch "
+      //            "earlier than the beginning of the current DE File; exiting.\n");
+   }
+   static Real      result[6];
+   // if we're asking for the Earth state, return 0.0 (since we're
+   // currently assuming Earth-Centered Equatorial
+   if (forBody == DeFile::EARTH_ID) // this should check for the J2000Body <<<<
+   {
+      result[0] = 0.0;
+      result[1] = 0.0;
+      result[2] = 0.0;
+      result[3] = 0.0;
+      result[4] = 0.0;
+      result[5] = 0.0;
+      return result;
+   }
+
+   stateType rv;
+   GmatTime absJD = 0.0;
+   if (overrideTimeSystem)
+   {
+      GmatTime mjdTT = TimeConverterUtil::Convert(atTime,
+         TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
+         GmatTimeConstants::JD_JAN_5_1941);
+
+      absJD = mjdTT;
+
+#ifdef DEBUG_DEFILE_GET
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() : mjdTT = %.12lf\n", mjdTT.GetMjd());
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() : absJD = %.12lf\n", absJD.GetMjd());
+#endif
+   }
+   else
+   {
+      GmatTime mjdTDB = TimeConverterUtil::Convert(atTime,
+         TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD,
+         GmatTimeConstants::JD_JAN_5_1941);
+
+      absJD = mjdTDB;
+
+#ifdef DEBUG_DEFILE_GET
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() : mjdTDB = %.12f\n", mjdTDB.GetMjd());
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() : absJD = %.12f\n", absJD.GetMjd());
+#endif
+   }
+   //MessageInterface::ShowMessage("A1 = [%d  %d  %.12lf]  to  absJD = [%d  %d  %.12lf]\n", atTime.GetDays(), atTime.GetSec(), atTime.GetFracSec(), absJD.GetDays(), absJD.GetSec(), absJD.GetFracSec());
+
+   // if we're asking for the moon state, just get it and return it, as
+   // it is supposed to be a geocentric state from the DE file  << should check for Moon w.r.t J2000Body here?
+
+   // interpolate the data to get the state
+   Interpolate_State(absJD, forBody, &rv);
+#ifdef DEBUG_DEFILE_GET
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel()  state from DE file = %.12lf  %.12lf  %.12lf  %.12lf  %.12lf  %.12lf\n",
+         rv.Position[0], rv.Position[1], rv.Position[2], rv.Velocity[0], rv.Velocity[1], rv.Velocity[2]);
+#endif
+   
+   if (forBody == DeFile::MOON_ID)
+   {
+      result[0] = (Real)rv.Position[0];
+      result[1] = (Real)rv.Position[1];
+      result[2] = (Real)rv.Position[2];
+      result[3] = (Real)rv.Velocity[0];
+      result[4] = (Real)rv.Velocity[1];
+      result[5] = (Real)rv.Velocity[2];
+      return result;
+   }
+
+   // otherwise, we must take the body's state (in Solar System Barycentric
+   // coordinates), then get the Earth-Moon state in SSBarycentric,
+   // then get the Earth state from that (using the Moon state in
+   // geocentric), then figure out the body's state wrt the Earth  << should be checking wrt the J2000Body here??
+   stateType emrv, mrv;
+   // earth-moon barycenter relative to solar system barycenter
+   Interpolate_State(absJD, (int)DeFile::EARTH_ID, &emrv);
+   // moon state (geocentric)
+   Interpolate_State(absJD, (int)DeFile::MOON_ID, &mrv);
+#ifdef DEBUG_DEFILE_GET
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() Earth-Moon barycenter state = %.12lf  %.12lf  %.12lf  %.12lf  %.12lf  %.12lf\n",
+         emrv.Position[0], emrv.Position[1], emrv.Position[2], emrv.Velocity[0], emrv.Velocity[1], emrv.Velocity[2]);
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() Moon (geocentric) state = %.12lf  %.12lf  %.12lf  %.12lf  %.12lf  %.12lf\n",
+         mrv.Position[0], mrv.Position[1], mrv.Position[2], mrv.Velocity[0], mrv.Velocity[1], mrv.Velocity[2]);
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() R1.EMRAT = %.15f\n", R1.EMRAT);
+#endif
+   
+   result[0] = rv.Position[0] - (emrv.Position[0] - (mrv.Position[0] / (R1.EMRAT + 1.0)));
+   result[1] = rv.Position[1] - (emrv.Position[1] - (mrv.Position[1] / (R1.EMRAT + 1.0)));
+   result[2] = rv.Position[2] - (emrv.Position[2] - (mrv.Position[2] / (R1.EMRAT + 1.0)));
+   result[3] = rv.Velocity[0] - (emrv.Velocity[0] - (mrv.Velocity[0] / (R1.EMRAT + 1.0)));
+   result[4] = rv.Velocity[1] - (emrv.Velocity[1] - (mrv.Velocity[1] / (R1.EMRAT + 1.0)));
+   result[5] = rv.Velocity[2] - (emrv.Velocity[2] - (mrv.Velocity[2] / (R1.EMRAT + 1.0)));
+
+#ifdef DEBUG_DEFILE_GET
+   MessageInterface::ShowMessage
+      ("DeFile::GetPosVel() returning %.12lf, %.12lf, %.12lf, %.12lf, %.12lf, %.12lf\n",
+      result[0], result[1], result[2], result[3], result[4], result[5]);
+#endif
+
+
+   //if (forBody == 11)
+   //{
+   //   MessageInterface::ShowMessage
+   //      ("DeFile::GetPosVel(forBody = %d)  state from DE file = %.12f  %.12f  %.12f  %.12f  %.12f  %.12f\n", forBody,
+   //      result[0], result[1], result[2], result[3], result[4], result[5]);
+   //}
+   return result;
+}
+
+//------------------------------------------------------------------------------
+//  Real* GetPosDelta(Integer forBody, const GmatTime &atTime1, const GmatTime &atTime2, bool overrideTimeSystem)
+//------------------------------------------------------------------------------
+/**
+ * This method returns the change in the position of the specified
+ * body between the requested times.
+ *
+ * @param <forbody>            the requested body (ID number on DE file).
+ * @param <atTime1>            first time for which state of the body is requested.
+ * @param <atTime2>            second time for which state of the body is requested.
+ * @param <overrideTimeSystem> override the TDB time and use TT?
+ *
+ * @return state of the body at the requested time.
+ *
+ * @exception <PlanetaryEphemException> thrown if the position cannot
+ *            be obtained due to problems opening or reading the DE File;
+ *            message is based on error
+ */
+//------------------------------------------------------------------------------
+Real* DeFile::GetPosDelta(Integer forBody,
+                          const GmatTime &atTime1,
+                          const GmatTime &atTime2,
+                          bool overrideTimeSystem)
+{
+#ifdef DEBUG_DEFILE_GET
+   MessageInterface::ShowMessage
+      ("DeFile::GetPosVelDelta() entered, forBody=%d, atTime1=%.12lf, atTime2=%.12lf, overrideTimeSystem=%d, reading file %s\n",
+      forBody, atTime1.GetMjd(), atTime2.GetMjd(), overrideTimeSystem, itsName.c_str());
+#endif
+
+   if (atTime1 < mA1FileBeg)
+   {
+      std::stringstream ss;
+      ss << "Attempting to read data for an epoch (" << atTime1.GetMjd()
+         << ") earlier than the beginning of the current DE File (" << mA1FileBeg
+         << "); exiting.\n";
+      throw PlanetaryEphemException(ss.str());
+      //      throw PlanetaryEphemException("Attempting to read data for an epoch "
+      //            "earlier than the beginning of the current DE File; exiting.\n");
+   }
+   static Real      result[3];
+   // if we're asking for the Earth state, return 0.0 (since we're
+   // currently assuming Earth-Centered Equatorial
+   if (forBody == DeFile::EARTH_ID) // this should check for the J2000Body <<<<
+   {
+      result[0] = 0.0;
+      result[1] = 0.0;
+      result[2] = 0.0;
+      return result;
+   }
+
+   stateType rDelta;
+   GmatTime absJD1 = 0.0;
+   GmatTime absJD2 = 0.0;
+   if (overrideTimeSystem)
+   {
+      GmatTime mjdTT1 = TimeConverterUtil::Convert(atTime1,
+         TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
+         GmatTimeConstants::JD_JAN_5_1941);
+      GmatTime mjdTT2 = TimeConverterUtil::Convert(atTime2,
+         TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
+         GmatTimeConstants::JD_JAN_5_1941);
+
+      absJD1 = mjdTT1;
+      absJD2 = mjdTT2;
+
+#ifdef DEBUG_DEFILE_GET
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() : mjdTT1 = %.12lf\n", mjdTT1.GetMjd());
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() : absJD1 = %.12lf\n", absJD1.GetMjd());
+#endif
+   }
+   else
+   {
+      GmatTime mjdTDB1 = TimeConverterUtil::Convert(atTime1,
+         TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD,
+         GmatTimeConstants::JD_JAN_5_1941);
+      GmatTime mjdTDB2 = TimeConverterUtil::Convert(atTime2,
+         TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD,
+         GmatTimeConstants::JD_JAN_5_1941);
+
+      absJD1 = mjdTDB1;
+      absJD2 = mjdTDB2;
+
+#ifdef DEBUG_DEFILE_GET
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() : mjdTDB = %.12f\n", mjdTDB1.GetMjd());
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() : absJD = %.12f\n", absJD1.GetMjd());
+#endif
+   }
+   //MessageInterface::ShowMessage("A1 = [%d  %d  %.12lf]  to  absJD = [%d  %d  %.12lf]\n", atTime.GetDays(), atTime.GetSec(), atTime.GetFracSec(), absJD.GetDays(), absJD.GetSec(), absJD.GetFracSec());
+
+   // if we're asking for the moon state, just get it and return it, as
+   // it is supposed to be a geocentric state from the DE file  << should check for Moon w.r.t J2000Body here?
+
+   // interpolate the data to get the state
+   Interpolate_State_Delta(absJD1, absJD2, forBody, &rDelta);
+#ifdef DEBUG_DEFILE_GET
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel()  state delta from DE file = %.12lf  %.12lf  %.12lf\n",
+         rDelta.Position[0], rDelta.Position[1], rDelta.Position[2]);
+#endif
+   
+   if (forBody == DeFile::MOON_ID)
+   {
+      result[0] = (Real)rDelta.Position[0];
+      result[1] = (Real)rDelta.Position[1];
+      result[2] = (Real)rDelta.Position[2];
+      return result;
+   }
+
+   // otherwise, we must take the body's state (in Solar System Barycentric
+   // coordinates), then get the Earth-Moon state in SSBarycentric,
+   // then get the Earth state from that (using the Moon state in
+   // geocentric), then figure out the body's state wrt the Earth  << should be checking wrt the J2000Body here??
+   stateType emrDelta, mrDelta;
+   // earth-moon barycenter relative to solar system barycenter
+   Interpolate_State_Delta(absJD1, absJD2, (int)DeFile::EARTH_ID, &emrDelta);
+   // moon state (geocentric)
+   Interpolate_State_Delta(absJD1, absJD2, (int)DeFile::MOON_ID, &mrDelta);
+#ifdef DEBUG_DEFILE_GET
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() Earth-Moon barycenter state delta = %.12lf  %.12lf  %.12lf\n",
+         emrDelta.Position[0], emrDelta.Position[1], emrDelta.Position[2]);
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() Moon (geocentric) state delta = %.12lf  %.12lf  %.12lf\n",
+         mrDelta.Position[0], mrDelta.Position[1], mrDelta.Position[2]);
+      MessageInterface::ShowMessage
+         ("DeFile::GetPosVel() R1.EMRAT = %.15f\n", R1.EMRAT);
+#endif
+   
+   result[0] = rDelta.Position[0] - (emrDelta.Position[0] - (mrDelta.Position[0] / (R1.EMRAT + 1.0)));
+   result[1] = rDelta.Position[1] - (emrDelta.Position[1] - (mrDelta.Position[1] / (R1.EMRAT + 1.0)));
+   result[2] = rDelta.Position[2] - (emrDelta.Position[2] - (mrDelta.Position[2] / (R1.EMRAT + 1.0)));
+
+#ifdef DEBUG_DEFILE_GET
+   MessageInterface::ShowMessage
+      ("DeFile::GetPosVel() returning %.12lf, %.12lf, %.12lf\n",
+      result[0], result[1], result[2]);
+#endif
+
+
+   //if (forBody == 11)
+   //{
+   //   MessageInterface::ShowMessage
+   //      ("DeFile::GetPosVel(forBody = %d)  state from DE file = %.12f  %.12f  %.12f\n", forBody,
+   //      result[0], result[1], result[2]);
+   //}
    return result;
 }
 
@@ -450,6 +748,35 @@ void  DeFile::GetAnglesAndRates(A1Mjd atTime, Real* angles, Real* rates,
                        TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD, 
                        GmatTimeConstants::JD_JAN_5_1941);
        absJD         = mjdTDB;
+   }
+
+   #ifdef DEBUG_DEFILE_LIB
+   MessageInterface::ShowMessage
+      ("DeFile::GetAnglesAndRates() Calling Interpolate_Libration(%.9f)\n", absJD);
+   #endif
+   
+   Interpolate_Libration(absJD, 12, angles, rates);
+}
+
+
+void  DeFile::GetAnglesAndRates(const GmatTime &atTime, Real* angles, Real* rates, 
+                                bool overrideTimeSystem)
+{
+   // assume Luna for now - check for name later
+   GmatTime absJD(0);
+   if (overrideTimeSystem)
+   {
+       GmatTime mjdTT = TimeConverterUtil::Convert(atTime,
+                        TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
+                        GmatTimeConstants::JD_JAN_5_1941);
+       absJD          = mjdTT;
+   }
+   else
+   {
+       GmatTime mjdTDB = TimeConverterUtil::Convert(atTime,
+                         TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD, 
+                         GmatTimeConstants::JD_JAN_5_1941);
+       absJD           = mjdTDB;
    }
 
    #ifdef DEBUG_DEFILE_LIB
@@ -715,6 +1042,75 @@ void DeFile::Read_Coefficients( double Time )
    }
 }
 
+
+void DeFile::Read_Coefficients(GmatTime Time)
+{
+#ifdef DEBUG_DEFILE_READ
+   MessageInterface::ShowMessage("DeFile::Read_Coefficients() Time=%.9f)\n", Time.GetMjd());
+   MessageInterface::ShowMessage(" DE filename = '%s'\n", theFileName.c_str());
+#endif
+
+   double  T_delta = 0.0;
+   int     Offset = 0;
+
+#ifdef DEBUG_DEFILE_READ
+   MessageInterface::ShowMessage
+      ("DeFile::Read_Coefficients() T_beg=%f, T_end=%f\n", T_beg, T_end);
+#endif
+
+   /*--------------------------------------------------------------------------*/
+   /*  Find ephemeris data that record contains input time. Note that one, and */
+   /*  only one, of the following conditional statements will be true (if both */
+   /*  were false, this function would not have been called).                  */
+   /*--------------------------------------------------------------------------*/
+
+   if (Time < T_beg)                    /* Compute backwards location offset */
+   {
+      T_delta = (GmatTime(T_beg) - Time).GetTimeInSec();
+      Offset = (int)-ceil(T_delta / (T_span*GmatTimeConstants::SECS_PER_DAY));
+   }
+
+   if (Time > T_end)                    /* Compute forwards location offset */
+   {
+      T_delta = (Time - GmatTime(T_end)).GetTimeInSec();
+      Offset = (int)ceil(T_delta / (T_span*GmatTimeConstants::SECS_PER_DAY));
+   }
+
+   /*--------------------------------------------------------------------------*/
+   /*  Retrieve ephemeris data from new record.                                */
+   /*--------------------------------------------------------------------------*/
+
+#ifdef DEBUG_DEFILE_READ
+   MessageInterface::ShowMessage
+      ("DeFile::Read_Coefficients() Offset=%d\n", Offset);
+#endif
+
+   // if time is less than file begin time, do not update time info.
+   if (Time > mFileBeg) //loj: 9/15/05 Added
+   {
+      fseek(Ephemeris_File, (Offset - 1)*arraySize*sizeof(double), SEEK_CUR);
+
+      // Intentionally get the return and then ignore it to move warning from
+      // system libraries to GMAT code base.  The "unused variable" warning here
+      // can be safely ignored.
+      size_t len = fread(&Coeff_Array, sizeof(double), arraySize, Ephemeris_File);
+      if ((Integer)len != arraySize)
+      {
+         // Write detaild message (LOJ: 2015.10.03)
+         //throw PlanetaryEphemException("Requested epoch is not on the DE file");
+         PlanetaryEphemException ex;
+         ex.SetDetails("Requested epoch %.9f is not on the DE file '%s'.\n", Time.GetMjd(),
+            theFileName.c_str());
+         throw ex;
+      }
+
+      T_beg = Coeff_Array[0] - baseEpoch;
+      T_end = Coeff_Array[1] - baseEpoch;
+      T_span = T_end - T_beg;
+   }
+}
+
+
 /**==========================================================================**/
 /**  Initialize_Ephemeris                                                    **/
 /**                                                                          **/
@@ -905,6 +1301,131 @@ void DeFile::Interpolate_Libration( double Time , int Target ,
          }
             
       Tc = 2.0*(Time - T_seg) / T_sub - 1.0;
+      C  = C + 3 * offset * N;
+       
+      for (i=C ; i<(C+3*N) ; i++) A[i-C] = Coeff_Array[i];
+   }
+   else                                   /* Something has gone terribly wrong */
+   {
+      //printf("\n Number of granules must be >= 1: check header data.\n");
+   }
+
+   /*--------------------------------------------------------------------------*/
+   /* Compute interpolated the libration angles and rates                      */
+   /*--------------------------------------------------------------------------*/
+   for ( i=0 ; i<3 ; i++ )
+   {
+      Cp[0] = 1.0;
+      Cp[1] = Tc;
+      Cp[2] = 2.0 * Tc*Tc - 1.0;
+        
+      Up[0] = 0.0;
+      Up[1] = 1.0;
+      Up[2] = 4.0 * Tc;
+
+      for ( j=3 ; j<N ; j++ )
+      {
+         Cp[j] = 2.0 * Tc * Cp[j-1] - Cp[j-2];
+         Up[j] = 2.0 * Tc * Up[j-1] + 2.0 * Cp[j-1] - Up[j-2];
+      }
+
+      sum[i]     = 0.0;
+      rateSum[i] = 0.0;
+
+      for ( j=N-1 ; j>-1 ; j-- )  sum[i]     = sum[i] + A[j+i*N] * Cp[j];
+      for ( j=N-1 ; j>0  ; j-- )  rateSum[i] = rateSum[i] + A[j+i*N] * Up[j];
+      Libration[i] = sum[i];
+      rates[i]     = rateSum[i] * 2.0 * ((double) G) / (T_span * GmatTimeConstants::SECS_PER_DAY);
+   }
+   /*--------------------------------------------------------------------------*/
+   /* Compute interpolated the rates.                                          */
+   /*--------------------------------------------------------------------------*/
+      
+   return;
+}
+
+
+void DeFile::Interpolate_Libration( const GmatTime &Time , int Target , 
+                                    double Libration[3], double rates[3] )
+{
+   double    A[50] , Cp[50]  , Up[50], sum[3] , rateSum[3];
+   double    T_break , T_seg = 0.0 , T_sub = 0.0 , Tc = 0.0;
+   int       i , j;
+   long int  C , G , N , offset = 0;
+
+   #ifdef DEBUG_DEFILE_LIB
+      MessageInterface::ShowMessage
+         ("DeFile::Interpolate_Libration(%.9f, %d)\n", Time, Target);
+      MessageInterface::ShowMessage("   addr T_beg=%p\n", &T_beg);
+      MessageInterface::ShowMessage("   addr T_end=%p\n", &T_end);
+   #endif
+  
+   /*--------------------------------------------------------------------------*/
+   /* This function only computes librations.                                  */
+   /*--------------------------------------------------------------------------*/
+   if ( Target != 12 )             /* Also protects against weird input errors */
+   {
+      // printf("\n This function only computes librations.\n");
+      return;
+   }
+ 
+   /*--------------------------------------------------------------------------*/
+   /* Initialize local coefficient array.                                      */
+   /*--------------------------------------------------------------------------*/
+   for ( i=0 ; i<50 ; i++ )
+   {
+      A[i] = 0.0;
+   }
+  
+   /*--------------------------------------------------------------------------*/
+   /* Determine if a new record needs to be input (if so, get it).             */
+   /*--------------------------------------------------------------------------*/
+   if ( Time < T_beg || Time > T_end )
+   {
+      #ifdef DEBUG_DEFILE_LIB
+         MessageInterface::ShowMessage
+            ("DeFile::Interpolate_Libration() Calling Read_Coefficients(%.9f)\n",
+             Time);
+      #endif
+     
+      Read_Coefficients(Time);
+   }
+  
+   /*--------------------------------------------------------------------------*/
+   /* Read the coefficients from the binary record.                            */
+   /*--------------------------------------------------------------------------*/
+   C = R1.libratPtr[0] - 1;                   /* Coefficient array entry point */
+   N = R1.libratPtr[1];                       /*        Number of coefficients */
+   G = R1.libratPtr[2];                       /*    Granules in current record */
+
+   /*--------------------------------------------------------------------------*/
+   /*  Compute the normalized time, then load the Tchebeyshev coefficients     */
+   /*  into array A[]. If T_span is covered by a single granule this is easy.  */
+   /*  If not, the granule that contains the interpolation time is found, and  */
+   /*  an offset from the array entry point for the libration angles is used   */
+   /*  to load the coefficients.                                               */
+   /*--------------------------------------------------------------------------*/
+   if ( G == 1 )
+   {
+      Tc = 2.0*(Time - T_beg).GetMjd() / T_span - 1.0;
+      for (i=C ; i<(C+3*N) ; i++)  A[i-C] = Coeff_Array[i];
+   }
+   else if ( G > 1 )
+   {
+      T_sub = T_span / ((double) G);          /* Compute subgranule interval */
+       
+      for ( j=G ; j>0 ; j-- )
+      {
+         T_break = T_beg + ((double) j-1) * T_sub;
+         if ( Time > T_break )
+         {
+            T_seg  = T_break;
+            offset = j-1;
+            break;
+            }
+         }
+            
+      Tc = 2.0*(Time - T_seg).GetMjd() / T_sub - 1.0;
       C  = C + 3 * offset * N;
        
       for (i=C ; i<(C+3*N) ; i++) A[i-C] = Coeff_Array[i];
@@ -1183,11 +1704,11 @@ void DeFile::Interpolate_Position( double Time , int Target , double Position[3]
 /**==========================================================================**/
 void DeFile::Interpolate_State(double Time , int Target, stateType *p)
 {
-   register double    A[50]   , /*B[50] ,*/ Cp[50] , P_Sum[3] , V_Sum[3] , Up[50] ,
+   double    A[50]   , /*B[50] ,*/ Cp[50] , P_Sum[3] , V_Sum[3] , Up[50] ,
                       T_break , T_seg = 0.0 , T_sub  , Tc = 0.0;
-   register int       i , j;
-   register long int  C , G , N , offset = 0;
-   register stateType X;
+   int       i , j;
+   long int  C , G , N , offset = 0;
+   stateType X;
 
    /*--------------------------------------------------------------------------*/
    /* This function doesn't "do" nutations or librations.                      */
@@ -1302,7 +1823,299 @@ void DeFile::Interpolate_State(double Time , int Target, stateType *p)
    /*--------------------------------------------------------------------------*/
 
    *p = X;
-  
+   //MessageInterface::ShowMessage("target = %d  epoch = %.12lf  State: [%.12lf  %.12lf  %.12lf  %.12lf  %.12lf  %.12lf]\n", Target, Time, p->Position[0], p->Position[1], p->Position[2], p->Velocity[0], p->Velocity[1], p->Velocity[2]);
+   return;
+}
+
+
+void DeFile::Interpolate_State(GmatTime Time, int Target, stateType *p)
+{
+   double    A[50], /*B[50] ,*/ Cp[50], P_Sum[3], V_Sum[3], Up[50],
+      T_break, T_seg = 0.0, T_sub, Tc = 0.0;
+   int       i, j;
+   long int  C, G, N, offset = 0;
+   stateType X;
+
+   /*--------------------------------------------------------------------------*/
+   /* This function doesn't "do" nutations or librations.                      */
+   /*--------------------------------------------------------------------------*/
+   if (Target >= SS_BARY_ID)             /* Also protects against weird input errors */
+   {
+      //MessageInterface::ShowMessage("DeFile::Interpolate_State() function does not compute nutations or librations.\n");
+      return;
+   }
+
+   /*--------------------------------------------------------------------------*/
+   /* Initialize local coefficient array.                                      */
+   /*--------------------------------------------------------------------------*/
+   for (i = 0; i<50; i++)
+   {
+      A[i] = 0.0;
+      //      B[i] = 0.0;
+   }
+
+   /*--------------------------------------------------------------------------*/
+   /* Determine if a new record needs to be input.                             */
+   /*--------------------------------------------------------------------------*/
+#ifdef DEBUG_DEFILE_INTERPOLATE
+   MessageInterface::ShowMessage
+      ("DeFile::Interpolate_State() before Read_Coefficients()\nTime=%f, T_beg=%f, "
+      "T_end=%f T_span=%f\n", Time, T_beg, T_end, T_span);
+#endif
+
+   if (Time < T_beg || Time > T_end)  Read_Coefficients(Time);
+
+#ifdef DEBUG_DEFILE_INTERPOLATE
+   MessageInterface::ShowMessage
+      ("DeFile::Interpolate_State() after  Read_Coefficients()\nTime=%f, T_beg=%f, "
+      "T_end=%f T_span=%f\n", Time, T_beg, T_end, T_span);
+#endif
+
+   /*--------------------------------------------------------------------------*/
+   /* Read the coefficients from the binary record.                            */
+   /*--------------------------------------------------------------------------*/
+
+   C = R1.coeffPtr[Target][0] - 1;               /*    Coeff array entry point */
+   N = R1.coeffPtr[Target][1];                   /*          Number of coeff's */
+   G = R1.coeffPtr[Target][2];                   /* Granules in current record */
+
+   /*--------------------------------------------------------------------------*/
+   /*  Compute the normalized time, then load the Tchebeyshev coefficients     */
+   /*  into array A[]. If T_span is covered by a single granule this is easy.  */
+   /*  If not, the granule that contains the interpolation time is found, and  */
+   /*  an offset from the array entry point for the ephemeris body is used to  */
+   /*  load the coefficients.                                                  */
+   /*--------------------------------------------------------------------------*/
+   Real dTc;
+   if (G == 1)
+   {
+      //Tc = 2.0*(Time.GetMjd() - T_beg) / T_span - 1.0;
+      //dTc = 2.0*(Time - GmatTime(Time.GetMjd())).GetTimeInSec() / T_span / GmatTimeConstants::SECS_PER_DAY;
+      //Tc = Tc + dTc;
+      
+      Tc = 2.0*(Time - T_beg).GetMjd() / T_span - 1.0;
+
+      for (i = C; i<(C + 3 * N); i++)  A[i - C] = Coeff_Array[i];
+   }
+   else if (G > 1)
+   {
+      T_sub = T_span / ((double)G);          /* Compute subgranule interval */
+      for (j = G; j>0; j--)
+      {
+         T_break = T_beg + ((double)j - 1) * T_sub;
+         if (Time > T_break)
+         {
+            T_seg = T_break;
+            offset = j - 1;
+            break;
+         }
+      }
+
+      //Tc = 2.0*(Time.GetMjd() - T_seg) / T_sub - 1.0;
+      //dTc = 2.0*(Time - GmatTime(Time.GetMjd())).GetTimeInSec() / T_span / GmatTimeConstants::SECS_PER_DAY;
+      //Tc = Tc + dTc;
+
+      Tc = 2.0*(Time - T_seg).GetMjd() / T_sub - 1.0;
+      C = C + 3 * offset * N;
+
+      for (i = C; i<(C + 3 * N); i++) A[i - C] = Coeff_Array[i];
+   }
+   else                                   /* Something has gone terribly wrong */
+   {
+      //printf("\n Number of granules must be >= 1: check header data.\n");
+   }
+
+   /*--------------------------------------------------------------------------*/
+   /* Compute the interpolated position & velocity                             */
+   /*--------------------------------------------------------------------------*/
+   for (i = 0; i<3; i++)                /* Compute interpolating polynomials */
+   {
+      Cp[0] = 1.0;
+      Cp[1] = Tc;
+      Cp[2] = 2.0 * Tc*Tc - 1.0;
+
+      Up[0] = 0.0;
+      Up[1] = 1.0;
+      Up[2] = 4.0 * Tc;
+
+      for (j = 3; j<N; j++)
+      {
+         Cp[j] = 2.0 * Tc * Cp[j - 1] - Cp[j - 2];
+         Up[j] = 2.0 * Tc * Up[j - 1] + 2.0 * Cp[j - 1] - Up[j - 2];
+      }
+
+      P_Sum[i] = 0.0;           /* Compute interpolated position & velocity */
+      V_Sum[i] = 0.0;
+
+      for (j = N - 1; j>-1; j--)  P_Sum[i] = P_Sum[i] + A[j + i*N] * Cp[j];
+      for (j = N - 1; j>0; j--)  V_Sum[i] = V_Sum[i] + A[j + i*N] * Up[j];
+
+      X.Position[i] = P_Sum[i];
+      //X.Velocity[i] = V_Sum[i] * 2.0 * ((double)G) / (T_span * GmatTimeConstants::SECS_PER_DAY);
+      X.Velocity[i] = V_Sum[i] * 2.0 * ((double)G) / T_span / GmatTimeConstants::SECS_PER_DAY;
+   }
+
+   /*--------------------------------------------------------------------------*/
+   /*  Return computed values.                                                 */
+   /*--------------------------------------------------------------------------*/
+
+   *p = X;
+   //MessageInterface::ShowMessage("target = %d  epoch = %.12lf  State: [%.12lf  %.12lf  %.12lf  %.12lf  %.12lf  %.12lf]\n",Target, Time.GetMjd(), p->Position[0], p->Position[1], p->Position[2], p->Velocity[0], p->Velocity[1], p->Velocity[2]);
+   return;
+}
+
+
+/**==========================================================================**/
+/**  Interpolate_State_Delta                                                 **/
+/**                                                                          **/
+/**     This function computes position delta vectors for a                  **/
+/**     selected planetary body from Chebyshev coefficients that are read in **/
+/**     from an ephemeris data file. These coefficients are read from the    **/
+/**     data file by calling the function Read_Coefficients (when necessary).**/
+/**                                                                          **/
+/**  Inputs:                                                                 **/
+/**     Time1    -- Time for which position is desired (Julian Date).        **/
+/**     Time2    -- Time for which position is desired (Julian Date).        **/
+/**     Target   -- Solar system body for which position is desired.         **/
+/**     Position -- Pointer to external array to receive the position.       **/
+/**                                                                          **/
+/**  Returns: Nothing (explicitly)                                           **/
+/**==========================================================================**/
+void DeFile::Interpolate_State_Delta(const GmatTime &Time, const GmatTime &Time2,
+                                     int Target, stateType *p)
+{
+   register double    A[50], /*B[50] ,*/ Cp[50], P_Sum[3], Cp_Delta[50],
+      T_break, T_seg = 0.0, T_sub, Tc = 0.0, Tc2 = 0.0, dt = 0.0;
+   register int       i, j;
+   register long int  C, G, N, offset = 0;
+   register stateType X;
+
+   /*--------------------------------------------------------------------------*/
+   /* This function doesn't "do" nutations or librations.                      */
+   /*--------------------------------------------------------------------------*/
+   if (Target >= SS_BARY_ID)             /* Also protects against weird input errors */
+   {
+      //MessageInterface::ShowMessage("DeFile::Interpolate_State_Delta() function does not compute nutations or librations.\n");
+      return;
+   }
+
+   /*--------------------------------------------------------------------------*/
+   /* Initialize local coefficient array.                                      */
+   /*--------------------------------------------------------------------------*/
+   for (i = 0; i<50; i++)
+   {
+      A[i] = 0.0;
+      //      B[i] = 0.0;
+   }
+
+   /*--------------------------------------------------------------------------*/
+   /* Determine if a new record needs to be input.                             */
+   /*--------------------------------------------------------------------------*/
+#ifdef DEBUG_DEFILE_INTERPOLATE
+   MessageInterface::ShowMessage
+      ("DeFile::Interpolate_State_Delta() before Read_Coefficients()\nTime=%f, Time2=%f, T_beg=%f, "
+      "T_end=%f T_span=%f\n", Time, Time2, T_beg, T_end, T_span);
+#endif
+
+   if (Time < T_beg || Time > T_end)  Read_Coefficients(Time);
+
+#ifdef DEBUG_DEFILE_INTERPOLATE
+   MessageInterface::ShowMessage
+      ("DeFile::Interpolate_State_Delta() after  Read_Coefficients()\nTime=%f, Time2=%f, T_beg=%f, "
+      "T_end=%f T_span=%f\n", Time, Time2, T_beg, T_end, T_span);
+#endif
+
+   /*--------------------------------------------------------------------------*/
+   /* Read the coefficients from the binary record.                            */
+   /*--------------------------------------------------------------------------*/
+
+   C = R1.coeffPtr[Target][0] - 1;               /*    Coeff array entry point */
+   N = R1.coeffPtr[Target][1];                   /*          Number of coeff's */
+   G = R1.coeffPtr[Target][2];                   /* Granules in current record */
+
+   /*--------------------------------------------------------------------------*/
+   /*  Compute the normalized time, then load the Tchebeyshev coefficients     */
+   /*  into array A[]. If T_span is covered by a single granule this is easy.  */
+   /*  If not, the granule that contains the interpolation time is found, and  */
+   /*  an offset from the array entry point for the ephemeris body is used to  */
+   /*  load the coefficients.                                                  */
+   /*--------------------------------------------------------------------------*/
+   Real dTc;
+   if (G == 1)
+   {
+      //Tc = 2.0*(Time.GetMjd() - T_beg) / T_span - 1.0;
+      //dTc = 2.0*(Time - GmatTime(Time.GetMjd())).GetTimeInSec() / T_span / GmatTimeConstants::SECS_PER_DAY;
+      //Tc = Tc + dTc;
+      
+      Tc = 2.0*(Time - T_beg).GetMjd() / T_span - 1.0;
+      Tc2 = 2.0*(Time2 - T_beg).GetMjd() / T_span - 1.0;
+      dt = 2.0*(Time2 - Time).GetMjd() / T_span;
+
+      for (i = C; i<(C + 3 * N); i++)  A[i - C] = Coeff_Array[i];
+   }
+   else if (G > 1)
+   {
+      T_sub = T_span / ((double)G);          /* Compute subgranule interval */
+      for (j = G; j>0; j--)
+      {
+         T_break = T_beg + ((double)j - 1) * T_sub;
+         if (Time > T_break)
+         {
+            T_seg = T_break;
+            offset = j - 1;
+            break;
+         }
+      }
+
+      //Tc = 2.0*(Time.GetMjd() - T_seg) / T_sub - 1.0;
+      //dTc = 2.0*(Time - GmatTime(Time.GetMjd())).GetTimeInSec() / T_span / GmatTimeConstants::SECS_PER_DAY;
+      //Tc = Tc + dTc;
+
+      Tc = 2.0*(Time - T_seg).GetMjd() / T_sub - 1.0;
+      Tc2 = 2.0*(Time2 - T_seg).GetMjd() / T_sub - 1.0;
+      dt = 2.0*(Time2 - Time).GetMjd() / T_sub;
+      C = C + 3 * offset * N;
+
+      for (i = C; i<(C + 3 * N); i++) A[i - C] = Coeff_Array[i];
+   }
+   else                                   /* Something has gone terribly wrong */
+   {
+      //printf("\n Number of granules must be >= 1: check header data.\n");
+   }
+
+   /*--------------------------------------------------------------------------*/
+   /* Compute the interpolated position & velocity                             */
+   /*--------------------------------------------------------------------------*/
+   for (i = 0; i<3; i++)                /* Compute interpolating polynomials */
+   {
+      Cp[0] = 1.0;
+      Cp[1] = Tc;
+      Cp[2] = 2.0 * Tc*Tc - 1.0;
+
+      Cp_Delta[0] = 0.0;
+      Cp_Delta[1] = dt;
+      Cp_Delta[2] = 2.0 * Tc2*dt + 2.0*dt*Tc;
+
+      for (j = 3; j<N; j++)
+      {
+         Cp[j] = 2.0 * Tc * Cp[j - 1] - Cp[j - 2];
+         Cp_Delta[j] = 2.0 * Tc2 * Cp_Delta[j - 1] + 2.0 * dt * Cp[j - 1] - Cp_Delta[j - 2];
+      }
+
+      P_Sum[i] = 0.0;           /* Compute interpolated position */
+
+      for (j = N - 1; j>-1; j--)  P_Sum[i] = P_Sum[i] + A[j + i*N] * Cp_Delta[j];
+
+      X.Position[i] = P_Sum[i];
+      X.Velocity[i] = 0.0;
+   }
+
+   /*--------------------------------------------------------------------------*/
+   /*  Return computed values.                                                 */
+   /*--------------------------------------------------------------------------*/
+
+   *p = X;
+   //MessageInterface::ShowMessage("target = %d  epoch = %.12lf  State: [%.12lf  %.12lf  %.12lf  %.12lf  %.12lf  %.12lf]\n",Target, Time.GetMjd(), p->Position[0], p->Position[1], p->Position[2], p->Velocity[0], p->Velocity[1], p->Velocity[2]);
    return;
 }
 

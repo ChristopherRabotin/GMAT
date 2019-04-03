@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -291,7 +291,7 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError/*,
    {
       #ifdef DEBUG_CHECK_OBJECT
       MessageInterface::ShowMessage
-         ("   %s\n", GmatBase::GetObjectTypeString(refTypes[i]).c_str());
+         ("REF TYPE:   %s\n", GmatType::GetTypeName(refTypes[i]).c_str());
       #endif
       
       // We don't need to check for unknown object type
@@ -415,8 +415,8 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError/*,
    
    #ifdef DEBUG_CHECK_OBJECT
    MessageInterface::ShowMessage
-      ("Validator::CheckUndefinedReference() validatorErrorList.size()=%d, returning %d\n",
-       validatorErrorList.size(), retval);
+      ("Validator::CheckUndefinedReference() validatorErrorList.size()=%s, returning %d\n",
+       validatorErrorList.size(), (retval? "true" : "false"));
    #endif
    
    return retval;
@@ -623,6 +623,13 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
          catch (BaseException &ex)
          {
             theErrorMsg = ex.GetFullMessage();
+            // remove 'Interpreter Exception:' part of message (to avoid duplicates)
+            theErrorMsg = GmatStringUtil::Replace(theErrorMsg,
+                                          "Interpreter Exception: ", "");
+            #ifdef DEBUG_HANDLE_ERROR
+            MessageInterface::ShowMessage("About to call HandleError with %s\n",
+                                          theErrorMsg.c_str());
+            #endif
             return HandleError();
          }
       }
@@ -1120,6 +1127,8 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
          // Added to show LHS error message (LOJ: 2013.12.03)
          // When lhs object does not exist, it said that there was an error but
          // no error message was written out
+         theErrorMsg = "LHS object \"" + lhs +
+                       "\" in Assignment is invalid or undefined";
          HandleError(false);
       }
       //if (leftEw != NULL)
@@ -1170,6 +1179,9 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
    {
       isLeftValid = false;
       theErrorMsg = ex.GetFullMessage();
+      // remove 'Interpreter Exception:' part of message (to avoid duplicates)
+      theErrorMsg = GmatStringUtil::Replace(theErrorMsg,
+                                            "Interpreter Exception: ", "");
       // Do not return to handle LHS error and continue on RHS (LOJ: 2013.02.27)
       //return HandleError(false);
       HandleError(false);
@@ -1375,6 +1387,9 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
          catch (BaseException &ex)
          {
             theErrorMsg = ex.GetFullMessage();
+            // remove 'Interpreter Exception:' part of message (to avoid duplicates)
+            theErrorMsg = GmatStringUtil::Replace(theErrorMsg,
+                          "Interpreter Exception: ", "");
             return HandleError(false);
          }
       }
@@ -1622,6 +1637,9 @@ ElementWrapper* Validator::CreateSolarSystemWrapper(GmatBase *obj,
          catch (BaseException &e)
          {
             theErrorMsg = e.GetFullMessage();
+            // remove 'Interpreter Exception:' part of message (to avoid duplicates)
+            theErrorMsg = GmatStringUtil::Replace(theErrorMsg,
+                                          "Interpreter Exception: ", "");
             HandleError();
          }
       }
@@ -2599,7 +2617,7 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
    Integer numberOfDots = GmatStringUtil::NumberOfOccurrences(theDescription, '.');
    ParameterInfo *paramInfo = ParameterInfo::Instance();
    GmatParam::DepObject depType = paramInfo->GetDepObjectType(type);
-   Gmat::ObjectType ownedObjType = paramInfo->GetOwnedObjectType(type);
+   UnsignedInt ownedObjType = paramInfo->GetOwnedObjectType(type);
    
    // if there are two dots, then treat it as a Parameter
    // e.g. Sat.Thruster1.K1
@@ -2662,7 +2680,7 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
          // LOJ: 2013.03.04 Moved to top
          //ParameterInfo *paramInfo = ParameterInfo::Instance();
          //GmatParam::DepObject depType = paramInfo->GetDepObjectType(type);
-         //Gmat::ObjectType ownedObjType = paramInfo->GetOwnedObjectType(type);
+         //UnsignedInt ownedObjType = paramInfo->GetOwnedObjectType(type);
          #if DBGLVL_WRAPPERS > 1
          MessageInterface::ShowMessage
             ("   depType=%d, ownedObjType=%d(%s)\n", depType, ownedObjType,
@@ -3629,6 +3647,10 @@ bool Validator::HandleError(bool addFunction)
    
    if (continueOnError)
    {
+      // remove duplicate exception message
+      theErrorMsg = GmatStringUtil::Replace(theErrorMsg,
+                    "Interpreter Exception: Interpreter Exception: ",
+                    "Interpreter Exception: ");
       validatorErrorList.push_back(theErrorMsg);
       return false;
    }
@@ -3645,6 +3667,10 @@ bool Validator::HandleError(bool addFunction)
       }
       theErrorMsg = theErrorMsg + fnMsg;
       
+      // remove duplicate exception message
+      theErrorMsg = GmatStringUtil::Replace(theErrorMsg,
+                    "Interpreter Exception: Interpreter Exception: ",
+                    "Interpreter Exception: ");
       InterpreterException ex(theErrorMsg);
       throw ex;
    }

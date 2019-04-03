@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -115,7 +115,7 @@ EventManager& EventManager::operator=(const EventManager& em)
 //-----------------------------------------------------------------------------
 void EventManager::SetObject(GmatBase* obj)
 {
-   Gmat::ObjectType type = obj->GetType();
+   UnsignedInt type = obj->GetType();
 
    switch (type)
    {
@@ -147,7 +147,7 @@ void EventManager::ClearObject(GmatBase* obj)
 {
    if (obj != NULL)
    {
-      Gmat::ObjectType type = obj->GetType();
+      UnsignedInt type = obj->GetType();
 
       switch (type)
       {

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -45,8 +45,8 @@ public:
    Integer GetNumParameters() const;
    const StringArray& GetTypesOfParameters();
    const StringArray& GetNamesOfParameters();
-   Gmat::ObjectType GetObjectType(const std::string &type);
-   Gmat::ObjectType GetOwnedObjectType(const std::string &type);
+   UnsignedInt GetObjectType(const std::string &type);
+   UnsignedInt GetOwnedObjectType(const std::string &type);
    GmatParam::DepObject GetDepObjectType(const std::string &name);
    bool IsPlottable(const std::string &type);
    bool IsReportable(const std::string &type);
@@ -57,8 +57,8 @@ public:
    bool IsForOwnedObject(const std::string &type);
    bool IsForAttachedObject(const std::string &type);
    
-   void Add(const std::string &type, Gmat::ObjectType objectType,
-            Gmat::ObjectType ownedObjType, const std::string &name,
+   void Add(const std::string &type, UnsignedInt objectType,
+            UnsignedInt ownedObjType, const std::string &name,
             GmatParam::DepObject depType, bool isPlottable,
             bool isReportable, bool isSettable, bool isTimeParam,
             const std::string &desc);
@@ -73,8 +73,8 @@ private:
    static ParameterInfo *theInstance;
    
    std::map<std::string, GmatParam::DepObject> mDepObjMap;
-   std::map<std::string, Gmat::ObjectType> mOwnerTypeMap;
-   std::map<std::string, Gmat::ObjectType> mOwnedObjTypeMap;
+   std::map<std::string, UnsignedInt> mOwnerTypeMap;
+   std::map<std::string, UnsignedInt> mOwnedObjTypeMap;
    std::map<std::string, bool> mIsPlottableMap;
    std::map<std::string, bool> mIsReportableMap;
    std::map<std::string, bool> mIsSettableMap;

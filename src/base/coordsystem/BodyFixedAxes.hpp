@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -77,7 +77,7 @@ public:
 
 //   // We need to override this method from CoordinateBase
 //   // to check for a CelestialBody or Spacecraft origin only
-   virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool            SetRefObject(GmatBase *obj, const UnsignedInt type,
                                         const std::string &name = "");
 
 protected:
@@ -89,9 +89,12 @@ protected:
    
    virtual void CalculateRotationMatrix(const A1Mjd &atEpoch,
                                         bool forceComputation = false);
+   
+   virtual void CalculateRotationMatrix(const GmatTime &atEpoch,
+                                        bool forceComputation = false);
 
    DeFile                   *de;
-   Real                     prevEpoch;
+   GmatTime                 prevEpoch;
    Real                     prevUpdateInterval;
    Real                     prevOriginUpdateInterval;
    Gmat::RotationDataSource prevLunaSrc;

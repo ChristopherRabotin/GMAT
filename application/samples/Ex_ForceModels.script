@@ -43,7 +43,7 @@ GMAT PointMass.ErrorControl = RSSStep;
 GMAT PointMass.GravityField.Earth.Degree = 0;
 GMAT PointMass.GravityField.Earth.Order = 0;
 GMAT PointMass.GravityField.Earth.PotentialFile = 'JGM2.cof';
-GMAT PointMass.GravityField.Earth.EarthTideModel = 'None';
+GMAT PointMass.GravityField.Earth.TideModel = 'None';
 
 
 %  Define Force Model with third bodies 
@@ -58,7 +58,7 @@ GMAT ThirdBodies.ErrorControl = RSSStep;
 GMAT ThirdBodies.GravityField.Earth.Degree = 0;
 GMAT ThirdBodies.GravityField.Earth.Order = 0;
 GMAT ThirdBodies.GravityField.Earth.PotentialFile = 'JGM2.cof';
-GMAT ThirdBodies.GravityField.Earth.EarthTideModel = 'None';
+GMAT ThirdBodies.GravityField.Earth.TideModel = 'None';
 
 
 %  Define Force Model with 12x12 gravity
@@ -72,7 +72,7 @@ GMAT NonSpherical12.ErrorControl = RSSStep;
 GMAT NonSpherical12.GravityField.Earth.Degree = 12;
 GMAT NonSpherical12.GravityField.Earth.Order = 12;
 GMAT NonSpherical12.GravityField.Earth.PotentialFile = 'JGM2.cof';
-GMAT NonSpherical12.GravityField.Earth.EarthTideModel = 'None';
+GMAT NonSpherical12.GravityField.Earth.TideModel = 'None';
 
 
 %  Define Force Model with MSISE90 Drag 
@@ -85,7 +85,7 @@ GMAT MSISE90Drag.ErrorControl = RSSStep;
 GMAT MSISE90Drag.GravityField.Earth.Degree = 0;
 GMAT MSISE90Drag.GravityField.Earth.Order = 0;
 GMAT MSISE90Drag.GravityField.Earth.PotentialFile = 'JGM2.cof';
-GMAT MSISE90Drag.GravityField.Earth.EarthTideModel = 'None';
+GMAT MSISE90Drag.GravityField.Earth.TideModel = 'None';
 GMAT MSISE90Drag.Drag.AtmosphereModel = MSISE90;
 GMAT MSISE90Drag.Drag.HistoricWeatherSource = 'ConstantFluxAndGeoMag';
 GMAT MSISE90Drag.Drag.PredictedWeatherSource = 'ConstantFluxAndGeoMag';
@@ -108,7 +108,7 @@ GMAT JRDrag.ErrorControl = RSSStep;
 GMAT JRDrag.GravityField.Earth.Degree = 0;
 GMAT JRDrag.GravityField.Earth.Order = 0;
 GMAT JRDrag.GravityField.Earth.PotentialFile = 'JGM2.cof';
-GMAT JRDrag.GravityField.Earth.EarthTideModel = 'None';
+GMAT JRDrag.GravityField.Earth.TideModel = 'None';
 GMAT JRDrag.Drag.AtmosphereModel = JacchiaRoberts;
 GMAT JRDrag.Drag.HistoricWeatherSource = 'ConstantFluxAndGeoMag';
 GMAT JRDrag.Drag.PredictedWeatherSource = 'ConstantFluxAndGeoMag';
@@ -132,7 +132,7 @@ GMAT SRP.ErrorControl = RSSStep;
 GMAT SRP.GravityField.Earth.Degree = 0;
 GMAT SRP.GravityField.Earth.Order = 0;
 GMAT SRP.GravityField.Earth.PotentialFile = 'JGM2.cof';
-GMAT SRP.GravityField.Earth.EarthTideModel = 'None';
+GMAT SRP.GravityField.Earth.TideModel = 'None';
 GMAT SRP.SRP.Flux = 1367;
 GMAT SRP.SRP.SRPModel = Spherical;
 GMAT SRP.SRP.Nominal_Sun = 149597870.691;
@@ -148,7 +148,7 @@ GMAT AllForces.ErrorControl = RSSStep;
 GMAT AllForces.GravityField.Earth.Degree = 20;
 GMAT AllForces.GravityField.Earth.Order = 20;
 GMAT AllForces.GravityField.Earth.PotentialFile = 'JGM2.cof';
-GMAT AllForces.GravityField.Earth.EarthTideModel = 'None';
+GMAT AllForces.GravityField.Earth.TideModel = 'None';
 GMAT AllForces.SRP.Flux = 1367;
 GMAT AllForces.SRP.SRPModel = Spherical;
 GMAT AllForces.SRP.Nominal_Sun = 149597870.691;

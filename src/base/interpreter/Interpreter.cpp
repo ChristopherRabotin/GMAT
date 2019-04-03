@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -217,6 +217,8 @@ void Interpreter::Initialize()
    inCommandMode = false;
    parsingDelayedBlock = false;
    ignoreError = false;
+   errorLines.clear();
+   warningLines.clear();
    
    if (initialized)
    {
@@ -351,7 +353,7 @@ void Interpreter::BuildCreatableObjectMaps(bool finalBuild)
 
 
 //------------------------------------------------------------------------------
-// StringArray GetCreatableList(Gmat::ObjectType type, Integer subType)
+// StringArray GetCreatableList(UnsignedInt type, Integer subType)
 //------------------------------------------------------------------------------
 /**
  * Returns the list of objects of a given type that can be built.
@@ -362,7 +364,7 @@ void Interpreter::BuildCreatableObjectMaps(bool finalBuild)
  * odSolvers.  The subType parameter is included to support this feature when it
  * becomes available.
  * 
- * @param type The Gmat::ObjectType requested.
+ * @param type The UnsignedInt requested.
  * @param subType The subtype.
  * 
  * @return The list of creatable objects.
@@ -372,7 +374,7 @@ void Interpreter::BuildCreatableObjectMaps(bool finalBuild)
  *       Moderator::GetListOfFactoryItems() instead. 
  */
 //------------------------------------------------------------------------------
-StringArray Interpreter::GetCreatableList(Gmat::ObjectType type, 
+StringArray Interpreter::GetCreatableList(UnsignedInt type,
                                           const std::string subType)
 {
    #ifdef DEBUG_SUBTYPES
@@ -549,7 +551,7 @@ void Interpreter::RegisterAliases()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfObjects(Gmat::ObjectType type)
+// const StringArray& GetListOfObjects(UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Returns names of all configured items of object type.
@@ -559,7 +561,7 @@ void Interpreter::RegisterAliases()
  * @return array of configured item names; return empty array if none
  */
 //------------------------------------------------------------------------------
-const StringArray& Interpreter::GetListOfObjects(Gmat::ObjectType type)
+const StringArray& Interpreter::GetListOfObjects(UnsignedInt type)
 {
    return theModerator->GetListOfObjects(type);
 }
@@ -613,9 +615,9 @@ const StringArray& Interpreter::GetListOfViewableCommands()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfViewableSubtypesOf(Gmat::ObjectType type)
+// const StringArray& GetListOfViewableSubtypesOf(UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& Interpreter::GetListOfViewableSubtypesOf(Gmat::ObjectType type)
+const StringArray& Interpreter::GetListOfViewableSubtypesOf(UnsignedInt type)
 {
    return theModerator->GetListOfViewableItems(type);
 }
@@ -699,7 +701,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
          return NULL;
       }
    }
-   
+
    // Go through more checking if name is not blank
    if (name != "")
    {
@@ -790,7 +792,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    if (find(allObjectTypeList.begin(), allObjectTypeList.end(), type) != 
        allObjectTypeList.end())
    {
-      Gmat::ObjectType objType = GetObjectType(type);
+      UnsignedInt objType = GetObjectType(type);
       
       // Check for special type such as Parameter since additional parsing is needed
       if (objType == Gmat::PARAMETER)
@@ -4770,7 +4772,7 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
             Parameter *fromParam = (Parameter*)fromObj;
             Gmat::ParameterType fromType = fromParam->GetReturnType();
          #endif
-         Gmat::ObjectType toObjPropObjType = toObj->GetPropertyObjectType(toId);
+         UnsignedInt toObjPropObjType = toObj->GetPropertyObjectType(toId);
          
          #ifdef DEBUG_SET
          MessageInterface::ShowMessage
@@ -4863,7 +4865,7 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
          #endif
          
          bool success = false;
-         Gmat::ObjectType objPropType = Gmat::UNKNOWN_OBJECT;
+         UnsignedInt objPropType = Gmat::UNKNOWN_OBJECT;
          
          // Check if object name is valid object type
          if (toObj->IsOwnedObject(toId))
@@ -5653,15 +5655,15 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          }
          break;
       }
-   case Gmat::UNSIGNED_INTARRAY_TYPE:
+      case Gmat::UNSIGNED_INTARRAY_TYPE:
       {
          UnsignedInt ival;
          if (GmatStringUtil::ToUnsignedInt(valueToUse, ival))
          {
             #ifdef DEBUG_SET
             MessageInterface::ShowMessage
-               ("   Calling '%s'->SetUnsignedIntParameter(%d, %d, %d)\n",
-                obj->GetName().c_str(), id, ival, index);
+            ("   Calling '%s'->SetUnsignedIntParameter(%d, %d, %d)\n",
+             obj->GetName().c_str(), id, ival, index);
             #endif
             
             obj->SetUnsignedIntParameter(id, ival, index);
@@ -5673,7 +5675,31 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
                errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
             else
                errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
-            errorMsg2 = " Only unsigned integer number is allowed";
+            errorMsg2 = " Only an unsigned integer number is allowed";
+         }
+         break;
+      }
+      case Gmat::INTARRAY_TYPE:
+      {
+         Integer ival;
+         if (GmatStringUtil::ToInteger(valueToUse, ival))
+         {
+            #ifdef DEBUG_SET
+            MessageInterface::ShowMessage
+            ("   Calling '%s'->SetIntegerParameter(%d, %d, %d)\n",
+             obj->GetName().c_str(), id, ival, index);
+            #endif
+            
+            obj->SetIntegerParameter(id, ival, index);
+            retval = true;
+         }
+         else
+         {
+            if (errorMsg1 == "")
+               errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
+            else
+               errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
+            errorMsg2 = " Only an integer number is allowed";
          }
          break;
       }
@@ -5959,7 +5985,7 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
             
             // Check if object is valid object type
             // (LOJ: 2013.03.18 GMT-3155 FIX)
-            Gmat::ObjectType objPropType = obj->GetPropertyObjectType(id);
+            UnsignedInt objPropType = obj->GetPropertyObjectType(id);
             #ifdef DEBUG_SET
             MessageInterface::ShowMessage
                ("   objPropType=%d<%s>\n", objPropType, GmatBase::GetObjectTypeString(objPropType).c_str());
@@ -8005,8 +8031,27 @@ void Interpreter::HandleErrorMessage(const BaseException &e,
                                      const std::string &line,
                                      bool writeLine, bool isWarning, bool showWarning)
 {
+   #ifdef DEBUG_HANDLE_ERROR
+      MessageInterface::ShowMessage("Entering HandleError with lineNumber = %s, "
+                                    "line = %s, writeLine = %s, isWarning = %s', "
+                                    "showWarning = %s\n",
+                                    lineNumber.c_str(), line.c_str(),
+                                    (writeLine? "true" : "false"),
+                                    (isWarning? "true" : "false"),
+                                    (showWarning? "true" : "false"));
+   #endif
    std::string currMsg = "";
    std::string msgKind = "**** ERROR **** ";
+
+   if (lineNumber != "")
+   {
+      int lineNumInt = std::stoi(lineNumber,nullptr);
+      if (isWarning)
+         warningLines.push_back(lineNumInt);
+      else
+         errorLines.push_back(lineNumInt);
+   }
+
    if (isWarning)
       msgKind = "*** WARNING *** ";
    
@@ -8028,7 +8073,8 @@ void Interpreter::HandleErrorMessage(const BaseException &e,
    std::string msg = msgKind + e.GetFullMessage() + currMsg;
    
    #ifdef DEBUG_HANDLE_ERROR
-   MessageInterface::ShowMessage("%s, continueOnError=%d\n", debugMsg.c_str(), continueOnError);
+   MessageInterface::ShowMessage("%s, continueOnError=%d\n",
+                                 debugMsg.c_str(), continueOnError);
    #endif
    
    // Add current script file (LOJ: 2016.04.12)
@@ -9464,7 +9510,7 @@ bool Interpreter::ValidateSolverCmdLevels(GmatCommand *sbc, Integer cmdLevel)
                if (current->GetStringParameter("SolverName") != solverName)
                {
                   std::string generator = current->GetGeneratingString();
-                  UnsignedInt loc = generator.find("{SOLVER IS",0);
+                  size_t loc = generator.find("{SOLVER IS",0);
                   if (loc != std::string::npos)
                   {
                      generator = generator.substr(0,loc);
@@ -9499,7 +9545,7 @@ bool Interpreter::ValidateSolverCmdLevels(GmatCommand *sbc, Integer cmdLevel)
             {
                std::string generator = current->GetGeneratingString();
 
-               UnsignedInt loc = generator.find("{SOLVER IS",0);
+               size_t loc = generator.find("{SOLVER IS",0);
                if (loc != std::string::npos)
                {
                   generator = generator.substr(0,loc);
@@ -9670,14 +9716,14 @@ bool Interpreter::IsCommandType(const std::string &type)
 
 
 //------------------------------------------------------------------------------
-// Gmat::ObjectType GetObjectType(const std::string &type)
+// UnsignedInt GetObjectType(const std::string &type)
 //------------------------------------------------------------------------------
 /*
- * Returns corresponding Gmat::ObjectType, or Gmat::UNKNOWN_OBJECT if type is
+ * Returns corresponding UnsignedInt, or Gmat::UNKNOWN_OBJECT if type is
  * not valid object type name.
  */
 //------------------------------------------------------------------------------
-Gmat::ObjectType Interpreter::GetObjectType(const std::string &type)
+UnsignedInt Interpreter::GetObjectType(const std::string &type)
 {
    if (objectTypeMap.find(type) != objectTypeMap.end())
       return objectTypeMap[type];
@@ -10456,3 +10502,12 @@ void Interpreter::ShowObjectMap(const std::string &title, ObjectMap *objMap)
       MessageInterface::ShowMessage(" passed object map is NULL\n");
 }
 
+std::vector<Integer> Interpreter::GetErrorLines()
+{
+   return errorLines;
+}
+
+std::vector<Integer> Interpreter::GetWarningLines()
+{
+   return warningLines;
+}

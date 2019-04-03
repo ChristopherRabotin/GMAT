@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -140,6 +140,9 @@
 #include <wx/utils.h>     // for ::wxLaunchDefaultBrowser()
 #include "ddesetup.hpp"   // for IPC_SERVICE, IPC_TOPIC
 
+// Interface to GUI plugin components
+#include "WxGuiInterface.hpp"
+
 
 // If we want to show GL option dialog from tool bar
 //#define __SHOW_GL_OPTION_DIALOG__
@@ -174,6 +177,7 @@
 //#define DEBUG_CHILD_OPEN
 //#define DEBUG_CHILD_WINDOW
 //#define DEBUG_REMOVE_CHILD
+//#define DEBUG_REMOVE_CHILD_DETAIL
 //#define DEBUG_OPEN_SCRIPT
 //#define DEBUG_REFRESH_SCRIPT
 //#define DEBUG_INTERPRET
@@ -632,6 +636,11 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
       useChildDelete = true;
    }
 
+   // Configure the GuiInterface
+   WxGuiInterface *guiInterface = (WxGuiInterface *)WxGuiInterface::Instance();
+   guiInterface->SetResourceTree(gmatAppData->GetResourceTree());
+
+
    #ifdef DEBUG_OS_DETECTION
    MessageInterface::ShowMessage("OS info: %d.%d ==> %d gives id %d; %sWin 8 or higher\n", 
       osMajor, osMinor, osNum, osId, (!useChildDelete ? "Is " : "Is not "));
@@ -687,8 +696,11 @@ GmatMainFrame::~GmatMainFrame()
    location << windowX << " " << windowY;
    std::stringstream windowSize("");
    windowSize << windowW << " " << windowH;
-   pConfig->Write("/MainFrame/UpperLeft", location.str().c_str());
-   pConfig->Write("/MainFrame/Size", windowSize.str().c_str());
+   if (GmatGlobal::Instance()->GetWritePersonalizationFile())
+   {
+      pConfig->Write("/MainFrame/UpperLeft", location.str().c_str());
+      pConfig->Write("/MainFrame/Size", windowSize.str().c_str());
+   }
    #endif
    //=======================================================
    
@@ -733,9 +745,18 @@ bool GmatMainFrame::Show(bool show)
 {
    bool retval = wxMDIParentFrame::Show(show);
    if (retval)
-      // Only show the Welcome panel is it exists and if the MainFrame is shown
+      // Only show the Welcome panel if it exists and if the MainFrame is shown
       if ((mWelcomePanel != NULL) && show)
          mWelcomePanel->Raise();
+
+   guiFactories = theGuiInterpreter->RetrieveGuiFactories();
+
+   #ifdef DEBUG_GUI_PLUGINS
+      MessageInterface::ShowMessage("The GmatMainFrame has %d GUI Factories\n",
+            guiFactories.size());
+      for (UnsignedInt i = 0; i < guiFactories.size(); ++i)
+         MessageInterface::ShowMessage("   %d: %p\n", i, guiFactories[i]);
+   #endif
 
    return retval;
 }
@@ -839,6 +860,8 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
    if (itemType > GmatTree::BEGIN_OF_RESOURCE &&
        itemType < GmatTree::END_OF_RESOURCE)
    {
+      GmatBase *obj = NULL;
+
       // Added check for SCRIPT_FILE when showing error message(LOJ: 2009.03.04)
       if (item->GetTitle() == "")
       {
@@ -849,7 +872,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
          else
          {
             wxString name = item->GetName();
-            GmatBase *obj = theGuiInterpreter->GetConfiguredObject(name.c_str());
+            obj = theGuiInterpreter->GetConfiguredObject(name.c_str());
             if (obj == NULL)
             {
                MessageInterface::ShowMessage
@@ -864,8 +887,14 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
             item->SetTitle(newTitle);
          }
       }
+      else
+      {
+         if (itemType != GmatTree::SCRIPT_FILE)
+            obj = theGuiInterpreter->GetConfiguredObject(item->GetName().c_str());
+      }
       
-      newChild = CreateNewResource(item->GetTitle(), item->GetName(), itemType);
+      newChild = CreateNewResource(item->GetTitle(), item->GetName(), itemType,
+            obj);
    }
    else if (itemType > GmatTree::BEGIN_OF_COMMAND &&
             itemType < GmatTree::END_OF_COMMAND)
@@ -980,7 +1009,7 @@ GmatMdiChildFrame* GmatMainFrame::GetChild(const wxString &name)
 {
    #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage
-      ("GmatMainFrame::GetChild() name=%s\n", name.c_str());
+      ("GmatMainFrame::GetChild() name=%s\n", name.WX_TO_C_STRING);
    #endif
 
    GmatMdiChildFrame *theChild = NULL;
@@ -991,7 +1020,7 @@ GmatMdiChildFrame* GmatMainFrame::GetChild(const wxString &name)
 
       #ifdef DEBUG_MAINFRAME
       MessageInterface::ShowMessage
-         ("   theChild=%s\n", theChild->GetName().c_str());
+         ("   theChild=%s\n", theChild->GetName().WX_TO_C_STRING);
       #endif
 
       if (theChild->GetName().IsSameAs(name))
@@ -1267,7 +1296,7 @@ bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item, bool restore)
    #ifdef DEBUG_CHILD_OPEN
    MessageInterface::ShowMessage
       ("GmatMainFrame::IsChildOpen() this=<%p> entered, title='%s'\n   name='%s'\n   "
-       "theMdiChildren=<%p>\n", this, item->GetTitle().c_str(), item->GetName().c_str(),
+      "theMdiChildren=<%p>\n", this, item->GetTitle().WX_TO_C_STRING, item->GetName().WX_TO_C_STRING,
        theMdiChildren);
    #endif
 
@@ -1356,12 +1385,15 @@ bool GmatMainFrame::IsChildOpen(GmatTree::ItemType itemType)
       #ifdef DEBUG_CHILD_OPEN
       MessageInterface::ShowMessage
          ("   child title='%s'\n   child name='%s'\n",
-          theChild->GetTitle().c_str(), item->GetName().c_str());
+         theChild->GetTitle().WX_TO_C_STRING, theChild->GetName().WX_TO_C_STRING);
       #endif
       
       // If item is script file, compare the name which is script path and name
       if (theChild->GetItemType() == itemType)
       {
+         #ifdef DEBUG_CHILD_OPEN
+            MessageInterface::ShowMessage("GmatMainFrame::IsChildOpen() returning true\n");
+         #endif
          return true;
       }
       
@@ -1395,7 +1427,7 @@ bool GmatMainFrame::IsChildOpen(const wxString &itemName, GmatTree::ItemType ite
    #ifdef DEBUG_CHILD_OPEN
    MessageInterface::ShowMessage
       ("GmatMainFrame::IsChildOpen() this=<%p> entered, itemName='%s', "
-       "itemType=%d\n", this, itemName.c_str(), itemType);
+       "itemType=%d\n", this, itemName.WX_TO_C_STRING, itemType);
    #endif
    
    wxNode *node = theMdiChildren->GetFirst();
@@ -1406,7 +1438,7 @@ bool GmatMainFrame::IsChildOpen(const wxString &itemName, GmatTree::ItemType ite
       #ifdef DEBUG_CHILD_OPEN
       MessageInterface::ShowMessage
          ("   child title='%s'\n   child name='%s'\n",
-          theChild->GetTitle().c_str(), item->GetName().c_str());
+         theChild->GetTitle().WX_TO_C_STRING, theChild->GetName().WX_TO_C_STRING);
       #endif
       
       bool isChildAlreadyOpen = false;
@@ -1546,7 +1578,7 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
       #ifdef DEBUG_REMOVE_CHILD_DETAIL
       MessageInterface::ShowMessage
          ("   childName='%s', childTitle='%s', childItemType=%d\n",
-          childName.c_str(), childTitle.c_str(), childItemType);
+          childName.WX_TO_C_STRING, childTitle.WX_TO_C_STRING, childItemType);
       #endif
       
       if ((childItemType == itemType) && (childName.IsSameAs(name)))
@@ -1779,6 +1811,10 @@ void GmatMainFrame::CloseActiveChild()
 
    GmatMdiChildFrame *child = (GmatMdiChildFrame *)GetActiveChild();
    CloseChild(child);
+
+   #ifdef DEBUG_REMOVE_CHILD
+   MessageInterface::ShowMessage("Leaving GmatMainFrame::CloseActiveChild()\n");
+   #endif
 }
 
 
@@ -1818,10 +1854,13 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       wxFileConfig *pConfig;
       pConfig = (wxFileConfig *) GmatAppData::Instance()->GetPersonalizationConfig();
       Integer x = 0, y = 0, width = 0;
-      if (IsMissionTreeUndocked(x, y, width))
-         pConfig->Write("/MissionTree/Docked", "false");
-      else
-         pConfig->Write("/MissionTree/Docked", "true");
+      if (GmatGlobal::Instance()->GetWritePersonalizationFile())
+      {
+         if (IsMissionTreeUndocked(x, y, width))
+            pConfig->Write("/MissionTree/Docked", "false");
+         else
+            pConfig->Write("/MissionTree/Docked", "true");
+      }
    }
    // Make sure the Script Editor data is set in the personalization file
    if (closeScriptWindow)
@@ -1829,10 +1868,13 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       wxFileConfig *pConfig;
       pConfig = (wxFileConfig *) GmatAppData::Instance()->GetPersonalizationConfig();
       Integer x = 0, y = 0, width = 0, height = 0;
-      if (IsScriptEditorOpen(x, y, width, height))
-         pConfig->Write("/ScriptEditor/Open", "true");
-      else
-         pConfig->Write("/ScriptEditor/Open", "false");
+      if (GmatGlobal::Instance()->GetWritePersonalizationFile())
+      {
+         if (IsScriptEditorOpen(x, y, width, height))
+            pConfig->Write("/ScriptEditor/Open", "true");
+         else
+            pConfig->Write("/ScriptEditor/Open", "false");
+      }
    }
    wxString name;
    wxString title;
@@ -1939,6 +1981,10 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          {
             canDelete = true;
          }
+      }
+      else if ((type == GmatTree::USER_DEFINED_OBJECT) && closePlots)
+      {
+         canDelete = true;
       }
       
       //--------------------------------------------------------------
@@ -2062,12 +2108,17 @@ void GmatMainFrame::MinimizeChildren()
    {
       GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
       if (child->GetItemType() != GmatTree::OUTPUT_ORBIT_VIEW &&
-          child->GetItemType() != GmatTree::OUTPUT_GROUND_TRACK_PLOT &&
-          child->GetItemType() != GmatTree::OUTPUT_XY_PLOT &&
-          child->GetItemType() != GmatTree::MISSION_TREE_UNDOCKED &&
-          child->GetItemType() != GmatTree::OUTPUT_COMPARE_REPORT)
-         child->Iconize(true);
-
+         child->GetItemType() != GmatTree::OUTPUT_GROUND_TRACK_PLOT &&
+         child->GetItemType() != GmatTree::OUTPUT_XY_PLOT &&
+         child->GetItemType() != GmatTree::MISSION_TREE_UNDOCKED &&
+         child->GetItemType() != GmatTree::OUTPUT_COMPARE_REPORT)
+      {
+         bool iconize = true;
+         PluginWidget *plugin = child->GetPluginWidget();
+         if (plugin)
+            iconize = plugin->MinimizeOnRun();
+         child->Iconize(iconize);
+      }
       // If mission tree is undocked and plot mode is tile, then iconize it
       if (child->GetItemType() == GmatTree::MISSION_TREE_UNDOCKED &&
           GmatGlobal::Instance()->GetPlotMode() == GmatGlobal::TILED_PLOT)
@@ -2457,7 +2508,8 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
    gmatAppData->GetResourceTree()->ClearResource(true);
    gmatAppData->GetMissionTree()->ClearMission();
    gmatAppData->GetOutputTree()->UpdateOutput(true, true, true);
-   
+   wxTheApp->ProcessIdle();
+
    // Indicate active script in bold face in the ResourceTree (LOJ: 2010.12.27)
    // Pass false so that it will not reload the file contents
    RefreshActiveScript(filename, false);
@@ -2499,6 +2551,22 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
    }
    catch (...)
    {
+      // See if we can figure out the thrown exception
+      try
+      {
+         throw;
+      }
+      catch (const std::exception &e)
+      {
+          std::stringstream theex;
+          theex << "Error caught in interpreter: raw C++ exception is \"" <<
+                e.what() << "\"\n";
+          MessageInterface::ShowMessage("%s\n", theex.str().c_str());
+      }
+      catch(...)
+      {
+      }
+
       MessageInterface::ShowMessage
          ("Unknown error encountered during interpreting a script in "
           "GmatMainFrame::InterpretScript\n");
@@ -2511,6 +2579,26 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
       #ifdef DEBUG_INTERPRET
       MessageInterface::ShowMessage("   Now updating ResourceTree and MissionTree\n");
       #endif
+
+      // Clear marked lines in the editor, if any
+      GmatMdiChildFrame *child = NULL;
+      child = GetChild(filename.c_str());
+      if (child)
+      {
+         ScriptEditor *editor = child->GetEditor();
+
+         if (editor)
+         {
+            wxColour Blurple = wxColour(0xff, 0xC0, 0xC0);
+
+            editor->MarkerDefine(1, wxSTC_MARK_BACKGROUND, _T("YELLOW"), _T("YELLOW"));
+            editor->MarkerDefine(2, wxSTC_MARK_BACKGROUND, Blurple, Blurple);
+
+            editor->MarkerDeleteAll(1);
+            editor->MarkerDeleteAll(2);
+         }
+      }
+
       // Update ResourceTree and MissionTree
       gmatAppData->GetResourceTree()->UpdateResource(true);
       gmatAppData->GetMissionTree()->UpdateMission(true);
@@ -2564,7 +2652,40 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
       // open script editor
       if (scriptOpenOpt == GmatGui::ALWAYS_OPEN_SCRIPT ||
           scriptOpenOpt == GmatGui::OPEN_SCRIPT_ON_ERROR)
+      {
          OpenScript();
+
+         std::vector<Integer> errors = theGuiInterpreter->GetErrorLines();
+         std::vector<Integer> warnings = theGuiInterpreter->GetWarningLines();
+
+         GmatMdiChildFrame *child = NULL;
+         child = GetChild(filename.c_str());
+
+         if (child)
+         {
+            ScriptEditor *editor = child->GetEditor();
+
+            if (editor)
+            {
+               wxColour Blurple = wxColour(0xff, 0xC0, 0xC0);
+
+               editor->MarkerDefine(1, wxSTC_MARK_BACKGROUND, _T("YELLOW"), _T("YELLOW"));
+               editor->MarkerDefine(2, wxSTC_MARK_BACKGROUND, Blurple, Blurple);
+
+               editor->MarkerDeleteAll(1);
+               for (unsigned i = 0; i < warnings.size(); i++) {
+                  editor->MarkerAdd(warnings[i] - 1, 1);
+               }
+
+               editor->MarkerDeleteAll(2);
+               for (unsigned i = 0; i < errors.size(); i++) {
+                  editor->MarkerAdd(errors[i] - 1, 2);
+               }
+            }
+            else
+               MessageInterface::ShowMessage("Cannot highlight lines: No editor\n");
+         }
+      }
       
       UpdateGuiScriptSyncStatus(1, 3);
       
@@ -3867,6 +3988,10 @@ void GmatMainFrame::OnCloseActive(wxCommandEvent& WXUNUSED(event))
       // Deactivate screen capture when no children is showing
       toolBar->EnableTool(TOOL_SCREENSHOT, false);
    }
+
+   #ifdef DEBUG_REMOVE_CHILD
+   MessageInterface::ShowMessage("Leaving GmatMainFrame::OnCloseActive\n");
+   #endif
 }
 
 
@@ -3991,11 +4116,42 @@ void GmatMainFrame::OnHelpTutorial(wxCommandEvent& WXUNUSED(event))
    MessageInterface::ShowMessage
       ("GmatMainFrame::OnHelpTutorial() text tutorials url='%s'\n", url.c_str());
    #endif
+
+
    if ((GmatAppData::Instance()->GetMainFrame()->GetHelpController() == NULL) || 
 	   url.Contains("\\") || url.Contains("/") || url.Contains(":") )
 	   ::wxLaunchDefaultBrowser(url);
    else
-	   GmatAppData::Instance()->GetMainFrame()->GetHelpController()->DisplaySection(url);		
+   {
+
+       // work around for wxWidgets bug: http://trac.wxwidgets.org/ticket/14888
+       // chm help fails for Windows 8,10.
+       // solution taken from: https://stackoverflow.com/questions/29944745/
+
+       bool useHelpController = true;
+
+       #ifdef _WIN32  // All Win platforms define this, even when 64-bit       
+          //For Windows 8 is dwMajorVersion = 6, dwMinorVersion = 2.
+          OSVERSIONINFOEX info;
+          ZeroMemory(&info, sizeof(OSVERSIONINFOEX));
+          info.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+          GetVersionEx((LPOSVERSIONINFO)&info);//info requires typecasting
+
+          Real winVersion = (Real)info.dwMajorVersion + (Real)info.dwMinorVersion / 10.0;
+          if (winVersion > 6.1)
+             useHelpController = false;
+       #endif
+       
+       if (useHelpController)
+       {
+          GmatAppData::Instance()->GetMainFrame()->GetHelpController()->DisplaySection(url);
+       }
+       else
+       {
+          GmatAppData::Instance()->GetMainFrame()->GetHelpController()->DisplayContents();
+       }
+       
+   }
 }
 
 
@@ -4138,14 +4294,29 @@ void GmatMainFrame::OnHelpFeedback(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 GmatMdiChildFrame*
 GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
-                                 GmatTree::ItemType itemType)
+                                 GmatTree::ItemType itemType,
+                                 GmatBase *forObject)
 {
    #ifdef DEBUG_CREATE_CHILD
    MessageInterface::ShowMessage
       ("GmatMainFrame::CreateNewResource() entered, title='%s', name='%s', itemType=%d\n",
-       title.c_str(), name.c_str(), itemType);
+       title.WX_TO_C_STRING, name.WX_TO_C_STRING, itemType);
    #endif
    
+   // Handle GUI plugin resource panels
+   if (forObject != NULL)
+   {
+      if (forObject->HasGuiPlugin())
+      {
+         if (forObject->GetGuiPanelNames("Configuration").size() > 0)
+         {
+            GmatWidget *widget = NULL;
+            return CreatePluginChild(title.WX_TO_C_STRING, name.WX_TO_C_STRING,
+                  "Configuration", itemType, forObject, &widget);
+         }
+      }
+   }
+
    // if variable, then display dialog, TGG 4/2010
    // Actually we don't want to use dialog here since it does not have standard
    // Show Script, OK, Apply, and Cancel buttons. So changed to use ArraySetupPanel
@@ -4246,7 +4417,7 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
       sizer->Add(new EphemerisFilePanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::GROUND_TRACK_PLOT:
-		// Set reload values on ComboBox change to true here
+      // Set reload values on ComboBox change to true here
       //sizer->Add(new GmatBaseSetupPanel(scrolledWin, name, true), 0, wxGROW|wxALL, 0);
       // Try custom panel (LOJ: 2013.09.17)
       sizer->Add(new GroundTrackPlotPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
@@ -4273,10 +4444,10 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
    case GmatTree::SCRIPT_FILE:
       {
          bool activeScript = false;
-         
+
          if (GmatFileUtil::IsSameFileName(mScriptFilename.c_str(), name.c_str()))
             activeScript = true;
-         
+
          #ifdef __USE_STC_EDITOR__
          EditorPanel *editorPanel = new EditorPanel(scrolledWin, name, activeScript);
          sizer->Add(editorPanel, 0, wxGROW|wxALL, 0);
@@ -4360,6 +4531,201 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
        title.c_str(), newChild);
    #endif
    return newChild;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatMdiChildFrame* CreatePluginChild(const wxString &title,
+//       const wxString &name, GmatTree::ItemType itemType,
+//       GmatBase *forObject)
+//------------------------------------------------------------------------------
+/**
+ * Method used to build child frames for GUI plugin components
+ *
+ * @param title The window title
+ * @param name The name associated with the child window
+ * @paran panelType The type of plugin panel used in the window
+ * @param itemType The type of the object driving the window
+ * @param forObject The object associated with the panel
+ * @param returnedWidget The GmatWidget used to build the child
+ *
+ * @return The child window pointer
+ */
+//------------------------------------------------------------------------------
+GmatMdiChildFrame*
+GmatMainFrame::CreatePluginChild(const std::string &title, const std::string &name,
+                                 const std::string panelType,
+                                 GmatTree::ItemType itemType,
+                                 GmatBase *forObject,
+                                 GmatWidget **returnedWidget)
+{
+   GmatMdiChildFrame *theChild = GetChild(title.c_str());
+
+   if (theChild == NULL)
+   {
+      Real l = -1, t = -1, w = -1, h = -1;
+      Integer left, top, width, height;
+      bool isRuntimeWindow = false;
+
+      wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
+      theChild = new GmatMdiChildFrame(this, name.c_str(),
+            title.c_str(), itemType);
+      wxScrolledWindow *scrolledWin = new wxScrolledWindow(theChild);
+
+      StringArray configPanels = forObject->GetGuiPanelNames(panelType);
+      std::string panelName = configPanels[0];
+
+      *returnedWidget = GetPluginWidget(panelName, forObject, scrolledWin);
+      wxPanel *thePanel = dynamic_cast<wxPanel*>((*returnedWidget)->GetGuiWidget());
+      sizer->Add(thePanel, 0, wxGROW|wxALL, 0);
+
+      StringArray names = forObject->GetGuiPanelNames("Execution");
+      for (Integer i = 0; i < names.size(); ++i)
+         if (names[i] == panelName)
+            isRuntimeWindow = true;
+
+      (*returnedWidget)->GetGeometry(l, t, w, h);
+
+      #ifdef DEBUG_GUI_PLUGIN
+         MessageInterface::ShowMessage("Locating window for %s at [%lf, %lf] "
+               "with size [%lf, %lf]\n", panelName.c_str(), l, t, w, h);
+      #endif
+
+      Integer screenWidth = 0;
+      Integer screenHeight = 0;
+
+      #ifdef __WXMAC__
+         screenWidth = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
+         screenHeight = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
+      #else
+         GetActualClientSize(&screenWidth, &screenHeight, true);
+      #endif
+
+      // if position and size were not saved from an earlier run, figure out the initial values
+      if (GmatMathUtil::IsEqual(l, 0.0) && GmatMathUtil::IsEqual(t, 0.0) &&
+         GmatMathUtil::IsEqual(w, 0.0) && GmatMathUtil::IsEqual(h, 0.0))
+      {
+         #ifdef __WXMAC__
+            left = -1;   // @todo - move it so it doesn't come up in the upper left corner on top of the main frame
+            top = -1;
+            width = -1;
+            height = -1;
+         #else
+            if (isRuntimeWindow)
+            {
+               width  = (Integer)((Real)screenWidth * 0.6);
+               height = (Integer)((Real)screenHeight * 0.6);
+            }
+            else
+            {
+               width  = -1;
+               height = -1;
+            }
+            left = -1;
+            top = -1;
+         #endif
+      }
+      else
+      {
+         left = (Integer)(l * screenWidth);
+         top = (Integer)(t * screenHeight);
+         width = (Integer)(w * screenWidth);
+         height = (Integer)(h * screenHeight);
+      }
+
+      wxPoint loc(left, top);
+      wxSize  dim(width, height);
+
+      scrolledWin->SetScrollRate(5, 5);
+      scrolledWin->SetAutoLayout(TRUE);
+      scrolledWin->SetSizer(sizer);
+      sizer->Fit(scrolledWin);
+      sizer->SetSizeHints(scrolledWin);
+
+      #ifdef __USE_CHILD_BEST_SIZE__
+         if (itemType != GmatTree::SCRIPT_FILE)
+         {
+            wxSize bestSize = theChild->GetBestSize();
+            theChild->SetSize(bestSize.GetWidth(), bestSize.GetHeight());
+         }
+         else
+         {
+            #ifndef __WXMSW__
+            wxSize bestSize = theChild->GetBestSize();
+            theChild->SetSize(bestSize.GetWidth(), bestSize.GetHeight());
+            #endif
+         }
+      #endif
+
+      // list of open children
+      theMdiChildren->Append(theChild);
+      theChild->SetPluginWidget((*returnedWidget)->GetGuiWidget());
+
+      // Force the new child to display
+      theChild->SetPosition(loc);
+      theChild->SetInitialSize(dim);
+      (*returnedWidget)->GetMinimumSize(width, height);
+      wxSize minSize(width, height);
+      theChild->SetMinSize(minSize);
+
+      if (isRuntimeWindow)
+         theChild->Show();
+   }
+   else     // The GUI window is already in place from a previous run
+   {
+      StringArray configPanels = forObject->GetGuiPanelNames(panelType);
+      std::string panelName = configPanels[0];
+
+      (*returnedWidget) = new GmatWidget(panelName, forObject);
+      PluginWidget *guiWidget = theChild->GetPluginWidget();
+      (*returnedWidget)->SetWidget(guiWidget, "Panel");
+   }
+
+   return theChild;
+}
+
+//------------------------------------------------------------------------------
+// GmatWidget *GetPluginWidget(const std::string type, GmatBase *forObject)
+//------------------------------------------------------------------------------
+/**
+ * Method used to access GUI plugin panels and other widgets
+ *
+ * @param type The (unique) name of the requested widget
+ * @param forObject The object that is accessed via the widget
+ * @oaram withParent The parent wxWindow for the new widget
+ *
+ * @return The GmatWidget structure containing the widget (as a NULL pointer)
+ */
+//------------------------------------------------------------------------------
+GmatWidget *GmatMainFrame::GetPluginWidget(const std::string type, GmatBase *forObject,
+      wxWindow *withParent)
+{
+   GmatWidget *theWidget = NULL;
+
+   for (UnsignedInt i = 0; i < guiFactories.size(); ++i)
+   {
+      #ifdef DEBUG_GUI_PLUGIN_CREATE
+         MessageInterface::ShowMessage("GuiFactory %d = <%p>\n", i, guiFactories[i]);
+      #endif
+
+      // Does this factory support the type needed?
+      if (guiFactories[i]->SupportsType(type))
+      {
+         #ifdef DEBUG_GUI_PLUGIN_CREATE
+            MessageInterface::ShowMessage("Creating Widget of type %s\n", type.c_str());
+         #endif
+
+         theWidget = guiFactories[i]->CreateWidget(type, withParent, forObject);
+
+         #ifdef DEBUG_GUI_PLUGIN_CREATE
+            MessageInterface::ShowMessage("Widget created at address %p\n", theWidget);
+         #endif
+
+         break;
+      }
+   }
+
+   return theWidget;
 }
 
 //------------------------------------------------------------------------------

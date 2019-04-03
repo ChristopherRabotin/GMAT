@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -319,7 +319,8 @@ void DragInputsDialog::SaveData()
       std::string fileToCheck;
 
       // Check the flux files
-      if (historicFileComboBox->GetStringSelection().WX_TO_C_STRING != "ConstantFluxAndGeoMag")
+      if (strcmp(historicFileComboBox->GetStringSelection().WX_TO_C_STRING,
+                 "ConstantFluxAndGeoMag") != 0)
       {
          fileToCheck = cssiFileTextCtrl->GetValue().WX_TO_C_STRING;
 
@@ -332,9 +333,11 @@ void DragInputsDialog::SaveData()
          }
       }
       
-      if (predictedFileComboBox->GetStringSelection().WX_TO_C_STRING != "ConstantFluxAndGeoMag")
+      if (strcmp(predictedFileComboBox->GetStringSelection().WX_TO_C_STRING,
+                 "ConstantFluxAndGeoMag") != 0)
       {
-         if (predictedFileComboBox->GetStringSelection().WX_TO_C_STRING == "CSSISpaceWeatherFile")
+         if (strcmp(predictedFileComboBox->GetStringSelection().WX_TO_C_STRING,
+                    "CSSISpaceWeatherFile") == 0)
          {
             MessageInterface::PopupMessage
                (Gmat::ERROR_, "CSSI predict data is not supported in GMAT");

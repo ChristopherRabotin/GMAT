@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -66,7 +66,7 @@
 OrbitReal::OrbitReal(const std::string &name, const std::string &typeStr, 
                      GmatBase *obj, const std::string &desc, const std::string &unit,
                      GmatParam::DepObject depObj, Integer itemId, bool isSettable,
-                     bool isPlottable, bool isReportable, Gmat::ObjectType paramOwnerType)
+                     bool isPlottable, bool isReportable, UnsignedInt paramOwnerType)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
              depObj, paramOwnerType, false, isSettable, isPlottable, isReportable),
      OrbitData(name, typeStr, paramOwnerType, depObj, isSettable)
@@ -381,10 +381,10 @@ bool OrbitReal::Initialize()
 //-------------------------------------
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool OrbitReal::RenameRefObject(const Gmat::ObjectType type,
+bool OrbitReal::RenameRefObject(const UnsignedInt type,
                                 const std::string &oldName,
                                 const std::string &newName)
 {
@@ -396,7 +396,7 @@ bool OrbitReal::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
+// virtual std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Calls OrbitData to get reference object name for given type.
@@ -404,7 +404,7 @@ bool OrbitReal::RenameRefObject(const Gmat::ObjectType type,
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-std::string OrbitReal::GetRefObjectName(const Gmat::ObjectType type) const
+std::string OrbitReal::GetRefObjectName(const UnsignedInt type) const
 {
    std::string objName = OrbitData::GetRefObjectName(type);
    
@@ -420,7 +420,7 @@ std::string OrbitReal::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves reference object name array for given type. It will return all
@@ -430,14 +430,14 @@ std::string OrbitReal::GetRefObjectName(const Gmat::ObjectType type) const
  * @return reference object name.
  */
 //------------------------------------------------------------------------------
-const StringArray& OrbitReal::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& OrbitReal::GetRefObjectNameArray(const UnsignedInt type)
 {
    return OrbitData::GetRefObjectNameArray(type);
 }
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObjectName(const Gmat::ObjectType type,
+// virtual bool SetRefObjectName(const UnsignedInt type,
 //                               const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -448,7 +448,7 @@ const StringArray& OrbitReal::GetRefObjectNameArray(const Gmat::ObjectType type)
  *
  */
 //------------------------------------------------------------------------------
-bool OrbitReal::SetRefObjectName(const Gmat::ObjectType type,
+bool OrbitReal::SetRefObjectName(const UnsignedInt type,
                                  const std::string &name)
 {
    return OrbitData::SetRefObjectName(type, name);
@@ -456,7 +456,7 @@ bool OrbitReal::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+// virtual GmatBase* GetRefObject(const UnsignedInt type,
 //                                const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -468,7 +468,7 @@ bool OrbitReal::SetRefObjectName(const Gmat::ObjectType type,
  * @return reference object pointer for given object type and name
  */
 //------------------------------------------------------------------------------
-GmatBase* OrbitReal::GetRefObject(const Gmat::ObjectType type,
+GmatBase* OrbitReal::GetRefObject(const UnsignedInt type,
                                   const std::string &name)
 {
    #ifdef DEBUG_REF_OBJECT
@@ -498,7 +498,7 @@ GmatBase* OrbitReal::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -512,7 +512,7 @@ GmatBase* OrbitReal::GetRefObject(const Gmat::ObjectType type,
  *
  */
 //------------------------------------------------------------------------------
-bool OrbitReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool OrbitReal::SetRefObject(GmatBase *obj, const UnsignedInt type,
                              const std::string &name)
 {
    #if DEBUG_REF_OBJECT

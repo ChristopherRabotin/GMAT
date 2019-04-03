@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -135,11 +135,14 @@ public:
                                Gmat::UNKNOWN_STATE);
 
    virtual bool UpdateState();
+   
+   /// Get state in J2000BodyMJ2000Eq coordinates (currently it is in EarthMJ2000Eq - GMAT internal coordinates).
    virtual GmatState* GetState();
+
    virtual Integer GetStateSize();
    
    virtual bool GetStateObjects(ObjectArray& pObjects, 
-         Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT);
+         UnsignedInt type = Gmat::UNKNOWN_OBJECT);
    
    virtual const StringArray& GetObjectList(std::string ofType = "");
    virtual const std::vector<ListItem*>* GetStateMap();
@@ -147,6 +150,7 @@ public:
 protected:
    /// Size of the managed state vector
    Integer                    stateSize;
+   /// The state in J2000BodyMJ2000Eq coordinates (currently it is in EarthMJ2000Eq - GMAT internal coordinates).
    GmatState                  state;
    
    ObjectArray                objects;

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -65,6 +65,8 @@ RunEstimator::RunEstimator() :
 {
    overridePropInit = true;
    delayInitialization = true;
+
+   hasPrecisionTime = true;
 }
 
 
@@ -155,7 +157,7 @@ GmatBase *RunEstimator::Clone() const
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Accesses names for referenced objects.
@@ -165,7 +167,7 @@ GmatBase *RunEstimator::Clone() const
  * @return the referenced object's name.
  */
 //------------------------------------------------------------------------------
-std::string RunEstimator::GetRefObjectName(const Gmat::ObjectType type) const
+std::string RunEstimator::GetRefObjectName(const UnsignedInt type) const
 {
    switch (type)
    {
@@ -186,7 +188,7 @@ std::string RunEstimator::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Sets names for referenced objects.
@@ -197,7 +199,7 @@ std::string RunEstimator::GetRefObjectName(const Gmat::ObjectType type) const
  * @return true if the name was set, false if not.
  */
 //------------------------------------------------------------------------------
-bool RunEstimator::SetRefObjectName(const Gmat::ObjectType type,
+bool RunEstimator::SetRefObjectName(const UnsignedInt type,
                                      const std::string &name)
 {
    if (type == Gmat::SOLVER)
@@ -212,7 +214,7 @@ bool RunEstimator::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -225,7 +227,7 @@ bool RunEstimator::SetRefObjectName(const Gmat::ObjectType type,
  * @return true on success.
  */
 //------------------------------------------------------------------------------
-bool RunEstimator::RenameRefObject(const Gmat::ObjectType type,
+bool RunEstimator::RenameRefObject(const UnsignedInt type,
                                     const std::string &oldName,
                                     const std::string &newName)
 {
@@ -600,6 +602,7 @@ bool RunEstimator::PreExecution()
 #endif
       // Next comes the propagator
       PropSetup *obj = theEstimator->GetPropagator();
+      obj->SetPrecisionTimeFlag(true);
 
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("Propagator at address %p ", obj);
@@ -1019,6 +1022,8 @@ void RunEstimator::PrepareToEstimate()
             {
                MessageInterface::ShowMessage("      Epoch: [%s]\n",
                      poa->at(j)->GetStringParameter("Epoch").c_str());
+               MessageInterface::ShowMessage("      EpochGT: [%s]\n",
+                  ((SpaceObject*)poa->at(j))->GetEpochGT().ToString().c_str());
                MessageInterface::ShowMessage("      [%16.14lf, %16.14lf, %16.14lf]:\n",
                      poa->at(j)->GetRealParameter("X"),
                      poa->at(j)->GetRealParameter("Y"),
@@ -1083,17 +1088,25 @@ void RunEstimator::Propagate()
    
    Real dt = theEstimator->GetTimeStep();
    
-   // todo: This is a temporary fix; need to evaluate to find a more elegant
-   //       solution here
-   Real maxStep = 60.0;
+   /// @note Wnen estimators allow multiple prop settings, adapt this code
+   Real maxStep = fabs(maxSteps[0]);
+
+   #ifdef DEBUG_STEP_CONTROL
+      MessageInterface::ShowMessage("Estimator step = %.12lf; \n", dt);
+   #endif
+
    if (fabs(dt) > maxStep)
       dt = (dt > 0.0 ? maxStep : -maxStep);
 
-   #ifdef DEBUG_INITIAL_STATE
-      MessageInterface::ShowMessage("Stepping by %.12lf = ", dt);
+   #ifdef DEBUG_STEP_CONTROL
+      MessageInterface::ShowMessage("Stepping by %.12lf; could be %lf\n", dt, p[0]->GetStepSize());
    #endif
 
-   #ifdef DEBUG_EVENT_STATE_STEP
+   #ifdef DEBUG_INITIAL_STATE
+      MessageInterface::ShowMessage("Stepping by %.12lf seconds\n", dt);
+   #endif
+
+   #ifdef DEBUG_EVENT_STATE
       dim = fm[0]->GetDimension();
       Real *b4State = fm[0]->GetState();
 
@@ -1108,7 +1121,7 @@ void RunEstimator::Propagate()
    Step(dt);
    bufferFilled = false;
    
-   theEstimator->UpdateCurrentEpoch(currEpoch[0]);
+   theEstimator->UpdateCurrentEpoch(currEpochGT[0]);
    
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("Exit RunEstimator::Propagate()\n");
@@ -1118,7 +1131,7 @@ void RunEstimator::Propagate()
       dim = fm[0]->GetDimension();
       Real *odeState = fm[0]->GetState();
 
-      MessageInterface::ShowMessage("State after prop:\n  ");
+      MessageInterface::ShowMessage("State after prop: epoch = %s\n", currEpochGT[0].ToString().c_str());
       fm[0]->ReportEpochData();
       MessageInterface::ShowMessage("  ");
       for (Integer i = 0; i < dim; ++i)

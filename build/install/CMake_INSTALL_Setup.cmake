@@ -22,6 +22,7 @@ MESSAGE("Setting up install directory structure for GMAT " ${VERSION})
 MESSAGE(STATUS "Will install GMAT to " ${CMAKE_INSTALL_PREFIX})
 
 # Install common items from application/ directory
+# Exclude items specific to the developer
 INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/application/"
   DESTINATION ${CMAKE_INSTALL_PREFIX}
   USE_SOURCE_PERMISSIONS
@@ -29,6 +30,7 @@ INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/application/"
   PATTERN "debug" EXCLUDE # don't copy debug directory
   PATTERN "bin" EXCLUDE # don't copy bin directory
   PATTERN "plugins" EXCLUDE # don't copy plugins directory
+  PATTERN "lib" EXCLUDE # don't copy lib directory
   )
 
 # Install gmat_startup_file based on OS and build configuration

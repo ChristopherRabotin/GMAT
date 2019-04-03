@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -79,6 +79,7 @@ OrbitPlot::PARAMETER_TEXT[OrbitPlotParamCount - SubscriberParamCount] =
    "UpdatePlotFrequency",
    "NumPointsToRedraw",
    "ShowPlot",
+   "MaxPlotPoints"
 }; 
 
 
@@ -94,6 +95,7 @@ OrbitPlot::PARAMETER_TYPE[OrbitPlotParamCount - SubscriberParamCount] =
    Gmat::INTEGER_TYPE,           //"UpdatePlotFrequency"
    Gmat::INTEGER_TYPE,           //"NumPointsToRedraw"
    Gmat::BOOLEAN_TYPE,           //"ShowPlot"
+   Gmat::INTEGER_TYPE            //"MaxPlotPoints"
 };
 
 
@@ -122,6 +124,7 @@ OrbitPlot::OrbitPlot(const std::string &type, const std::string &name)
    mNumPointsToRedraw = 0;
    mNumData = 0;
    mNumCollected = 0;
+   mMaxData = 20000;
    mDataAbsentWarningCount = 0;
    
    mScNameArray.clear();
@@ -159,7 +162,6 @@ OrbitPlot::OrbitPlot(const std::string &type, const std::string &name)
    mScCount = 0;
    mObjectCount = 0;
    mNonStdBodyCount = 0;
-   
 }
 
 
@@ -182,6 +184,7 @@ OrbitPlot::OrbitPlot(const OrbitPlot &plot)
    mDataCollectFrequency = plot.mDataCollectFrequency;
    mUpdatePlotFrequency = plot.mUpdatePlotFrequency;
    mNumPointsToRedraw = plot.mNumPointsToRedraw;
+   mMaxData = plot.mMaxData;
    
    mAllSpCount = plot.mAllSpCount;
    mScCount = plot.mScCount;
@@ -249,6 +252,7 @@ OrbitPlot& OrbitPlot::operator=(const OrbitPlot& plot)
    mDataCollectFrequency = plot.mDataCollectFrequency;
    mUpdatePlotFrequency = plot.mUpdatePlotFrequency;
    mNumPointsToRedraw = plot.mNumPointsToRedraw;
+   mMaxData = plot.mMaxData;
    
    mAllSpCount = plot.mAllSpCount;
    mScCount = plot.mScCount;
@@ -289,7 +293,7 @@ OrbitPlot& OrbitPlot::operator=(const OrbitPlot& plot)
    mNumData = plot.mNumData;
    mNumCollected = plot.mNumCollected;
    mDataAbsentWarningCount = plot.mDataAbsentWarningCount;
-   
+
    return *this;
 }
 
@@ -430,7 +434,7 @@ bool OrbitPlot::Initialize()
       return true;
    
    Subscriber::Initialize();
-   
+
    #if DBGLVL_INIT
    MessageInterface::ShowMessage
       ("OrbitPlot::Initialize() this=<%p>'%s', active=%d, isInitialized=%d, "
@@ -637,10 +641,10 @@ bool OrbitPlot::TakeAction(const std::string &action,
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool OrbitPlot::RenameRefObject(const Gmat::ObjectType type,
+bool OrbitPlot::RenameRefObject(const UnsignedInt type,
                                 const std::string &oldName,
                                 const std::string &newName)
 {
@@ -864,6 +868,8 @@ Integer OrbitPlot::GetIntegerParameter(const Integer id) const
       return mUpdatePlotFrequency;
    case NUM_POINTS_TO_REDRAW:
       return mNumPointsToRedraw;
+   case MAX_DATA:
+      return mMaxData;
    default:
       return Subscriber::GetIntegerParameter(id);
    }
@@ -926,6 +932,20 @@ Integer OrbitPlot::SetIntegerParameter(const Integer id, const Integer value)
          se.SetDetails(errorMessageFormat.c_str(),
                        GmatStringUtil::ToString(value, 1).c_str(),
                        "NumPointsToRedraw", "Integer Number >= 0");
+         throw se;
+      }
+   case MAX_DATA:
+      if (value > 0)
+      {
+         mMaxData = value;
+         return value;
+      }
+      else
+      {
+         SubscriberException se;
+         se.SetDetails(errorMessageFormat.c_str(),
+                       GmatStringUtil::ToString(value, 1).c_str(),
+                       "MaxPlotPoints", "Integer Number > 0");
          throw se;
       }
    default:
@@ -1272,9 +1292,9 @@ bool OrbitPlot::SetBooleanArrayParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-// virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
+// virtual std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
-std::string OrbitPlot::GetRefObjectName(const Gmat::ObjectType type) const
+std::string OrbitPlot::GetRefObjectName(const UnsignedInt type) const
 {
    if (type == Gmat::COORDINATE_SYSTEM)
    {
@@ -1316,9 +1336,9 @@ const ObjectTypeArray& OrbitPlot::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& OrbitPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& OrbitPlot::GetRefObjectNameArray(const UnsignedInt type)
 {
    #ifdef DBGLVL_OBJ
    MessageInterface::ShowMessage
@@ -1351,10 +1371,10 @@ const StringArray& OrbitPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+// virtual GmatBase* GetRefObject(const UnsignedInt type,
 //                                const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* OrbitPlot::GetRefObject(const Gmat::ObjectType type,
+GmatBase* OrbitPlot::GetRefObject(const UnsignedInt type,
                                   const std::string &name)
 {
    if (type == Gmat::COORDINATE_SYSTEM)
@@ -1368,7 +1388,7 @@ GmatBase* OrbitPlot::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -1379,7 +1399,7 @@ GmatBase* OrbitPlot::GetRefObject(const Gmat::ObjectType type,
  * @param <name> Reference object name
  */
 //------------------------------------------------------------------------------
-bool OrbitPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool OrbitPlot::SetRefObject(GmatBase *obj, const UnsignedInt type,
                              const std::string &name)
 {
    #if DBGLVL_OBJ
@@ -1592,9 +1612,9 @@ void OrbitPlot::SetSegmentOrbitColor(GmatBase *originator, bool overrideColor,
 }
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
-Gmat::ObjectType OrbitPlot::GetPropertyObjectType(const Integer id) const
+UnsignedInt OrbitPlot::GetPropertyObjectType(const Integer id) const
 {
    if (id == ADD)
       return Gmat::SPACE_POINT;

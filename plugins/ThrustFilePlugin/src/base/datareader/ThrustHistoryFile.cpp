@@ -167,7 +167,7 @@ GmatBase* ThrustHistoryFile::Clone() const
 }
 
 //------------------------------------------------------------------------------
-// bool ThrustHistoryFile::RenameRefObject(Gmat::ObjectType type,
+// bool ThrustHistoryFile::RenameRefObject(UnsignedInt type,
 //       const std::string& oldname, const std::string& newname)
 //------------------------------------------------------------------------------
 /**
@@ -180,7 +180,7 @@ GmatBase* ThrustHistoryFile::Clone() const
  * @return true if a name was changed
  */
 //------------------------------------------------------------------------------
-bool ThrustHistoryFile::RenameRefObject(Gmat::ObjectType type,
+bool ThrustHistoryFile::RenameRefObject(UnsignedInt type,
       const std::string& oldname, const std::string& newname)
 {
    bool retval = false;
@@ -672,7 +672,7 @@ const ObjectTypeArray& ThrustHistoryFile::GetRefObjectTypeArray()
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Returns the names of the reference object. (Derived classes should implement
@@ -683,7 +683,7 @@ const ObjectTypeArray& ThrustHistoryFile::GetRefObjectTypeArray()
  * @return The names of the reference object.
  */
 //------------------------------------------------------------------------------
-const StringArray& ThrustHistoryFile::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& ThrustHistoryFile::GetRefObjectNameArray(const UnsignedInt type)
 {
    if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::INTERFACE)
    {
@@ -697,7 +697,7 @@ const StringArray& ThrustHistoryFile::GetRefObjectNameArray(const Gmat::ObjectTy
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                                   const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -709,7 +709,7 @@ const StringArray& ThrustHistoryFile::GetRefObjectNameArray(const Gmat::ObjectTy
  * @return success of the operation.
  */
 //------------------------------------------------------------------------------
-bool ThrustHistoryFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool ThrustHistoryFile::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                   const std::string &name)
 {
    switch (type)

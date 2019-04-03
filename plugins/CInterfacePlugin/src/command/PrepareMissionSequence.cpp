@@ -1,6 +1,6 @@
 //$Id$
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -143,10 +143,10 @@ GmatBase* PrepareMissionSequence::Clone() const
 
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
-bool PrepareMissionSequence::RenameRefObject(const Gmat::ObjectType type,
+bool PrepareMissionSequence::RenameRefObject(const UnsignedInt type,
                                            const std::string &oldName,
                                            const std::string &newName)
 {

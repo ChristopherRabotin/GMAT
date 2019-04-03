@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -94,10 +94,10 @@ class GMAT_API GravityField : public HarmonicField
 {
 public:
    GravityField(const std::string &name, const std::string &forBodyName,
-                Integer maxDeg = HarmonicField::HF_MAX_DEGREE,
-                Integer maxOrd = HarmonicField::HF_MAX_ORDER);
+                Integer maxDeg = DEFAULT_DEGREE,
+                Integer maxOrd = DEFAULT_ORDER);
    virtual ~GravityField();
-   GravityField(const GravityField & gf);
+   GravityField (const GravityField & gf);
    GravityField&   operator=(const GravityField & gf);
 
    virtual bool    Initialize();
@@ -118,6 +118,8 @@ public:
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
    virtual bool        IsParameterReadOnly(const Integer id) const;
+   virtual bool        IsParameterValid(const Integer id, const std::string &value);
+   virtual bool        IsParameterValid(const std::string &label, const std::string &value);
 
    virtual Real        GetRealParameter(const Integer id) const;
    virtual Real        SetRealParameter(const Integer id,
@@ -142,13 +144,48 @@ public:
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
 
+   static HarmonicGravity* GetHarmonicGravity 
+     (const std::string& filename, const std::string& tideFilename,
+      const Real &radius, const Real &mukm, const std::string& bodyname,
+      const bool& loadCoefficients);
+
+   // constants defining maximum degree and order
+   static const Integer DEFAULT_DEGREE = 360;
+   static const Integer DEFAULT_ORDER  = 360;
+
+   enum GravityModelType
+      {
+      // Earth Models
+      GFM_EGM96,
+      GFM_JGM2,
+      GFM_JGM3,
+      // Luna Models
+      GFM_LP165P,
+      // Mars Models
+      GFM_MARS50C,
+      // Venus Models
+      GFM_MGNP180U,
+      // Other or unknown models
+      GFM_OTHER,
+      GFM_NONE,
+      NumGravityModels
+      };
+   /// names of the gravity models
+   static const std::string GRAVITY_MODEL_NAMES[NumGravityModels];
+   static GravityModelType GetModelType(const char *filename, const char *forBody);
+   static GravityModelType GetModelType(const std::string &filename, const std::string &forBody);
+
+   virtual bool SetTideFilename(const std::string &fn, bool validateOnly = false);
+
 protected:
 
    enum
    {
       MU = HarmonicFieldParamCount,
       A,
-      EARTH_TIDE_MODEL,
+      TIDE_FILENAME,
+      TIDE_FILE_FULLPATH,
+      TIDE_MODEL,
       GravityFieldParamCount
    };
 
@@ -164,8 +201,12 @@ protected:
    Real               mu;
    /// radius of central body ( mean equatorial )
    Real               a;
+   /// The name of the tide file
+   std::string        tideFilename;
+   /// The full path file name of the tide file
+   std::string        tideFilenameFullPath;
    /// string for tide model
-   std::string        earthTideModel;
+   std::string        TideModel;
    /// default mu
    Real               defaultMu;
    /// default equatorial radius
@@ -178,7 +219,6 @@ protected:
    bool               orderTruncateReported;   // no longer needed - only truncated in Initialize
    /// Flag used to keep from scrolling the "truncating to degree" message
    bool               degreeTruncateReported;  // no longer needed - only truncated in Initialize
-   
    HarmonicGravity    *gravityModel;    // JPD
    
 
@@ -191,15 +231,18 @@ protected:
    Rvector6 frv;
    Rvector6 trv;
    A1Mjd    now;
+   GmatTime nowGT;
    
    CoordinateConverter cc;
+   CoordinateSystem    *j2k;
 
    //  JPD added these ...............
+   void GetTideData (Real dt, const std::string bodyname, 
+      Real pos[3], Real& mukm);
    void Calculate (Real dt, Real state[6],
-                   Real force[3], Rmatrix33& grad);
+      Real force[3], Rmatrix33& grad);
    void InverseRotate(Rmatrix33& rot, const Real in[3], Real out[3]);
    
-   HarmonicGravity* GetGravityFile(const std::string &filename, const Real &radius, const Real &mukm);
 };
 
 

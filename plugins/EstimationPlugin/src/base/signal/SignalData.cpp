@@ -121,12 +121,11 @@ SignalData::SignalData(const SignalData& sd) :
    rOStateSSB           (sd.rOStateSSB),
    rLocRcs              (sd.rLocRcs),
    tVel                 (sd.tVel),
-//   tVelTcs              (sd.tVelTcs),
    rVel                 (sd.rVel),
-//   rVelRcs              (sd.rVelRcs),
    j2kOriginSep         (sd.j2kOriginSep),
    j2kOriginVel         (sd.j2kOriginVel),
    rangeVecInertial     (sd.rangeVecInertial),
+   rangeVecI            (sd.rangeVecI),
    rangeRateVecInertial (sd.rangeRateVecInertial),
    rangeVecObs          (sd.rangeVecObs),
    rangeRateVecObs      (sd.rangeRateVecObs),
@@ -186,12 +185,11 @@ SignalData& SignalData::operator=(const SignalData& sd)
       rOStateSSB           = sd.rOStateSSB;
       rLocRcs              = sd.rLocRcs;
       tVel                 = sd.tVel;
-//      tVelTcs              = sd.tVelTcs;
       rVel                 = sd.rVel;
-//      rVelRcs              = sd.rVelRcs;
       j2kOriginSep         = sd.j2kOriginSep;
       j2kOriginVel         = sd.j2kOriginVel;
       rangeVecInertial     = sd.rangeVecInertial;
+      rangeVecI            = sd.rangeVecI;
       rangeRateVecInertial = sd.rangeRateVecInertial;
       rangeVecObs          = sd.rangeVecObs;
       rangeRateVecObs      = sd.rangeRateVecObs;

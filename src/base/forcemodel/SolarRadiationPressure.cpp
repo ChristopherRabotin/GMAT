@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1537,18 +1537,29 @@ Rvector6 SolarRadiationPressure::GetDerivativesForSpacecraft(Spacecraft *sc)
    mass = sc->GetRealParameter("TotalMass");
 
    Real ep = sc->GetEpoch();
-   sunrv = theSun->GetState(ep);
+   GmatTime epGT = sc->GetEpochGT();
+   if (hasPrecisionTime)
+      sunrv = theSun->GetState(epGT);
+   else
+      sunrv = theSun->GetState(ep);
 
    Real *j2kState = sc->GetState().GetState();
    Real state[6];
 
-   BuildModelState(ep, state, j2kState);
+   if (hasPrecisionTime)
+      BuildModelStateGT(epGT, state, j2kState);
+   else
+      BuildModelState(ep, state, j2kState);
 
    // Rvector6 is initialized to all 0.0's; only change it if the body is not
    // the Sun
    if (!bodyIsTheSun)
    {
-      cbrv = body->GetState(ep);
+      if (hasPrecisionTime)
+         cbrv = body->GetState(epGT);
+      else
+         cbrv = body->GetState(ep);
+
       cbSunVector[0] = sunrv[0] - cbrv[0];
       cbSunVector[1] = sunrv[1] - cbrv[1];
       cbSunVector[2] = sunrv[2] - cbrv[2];
@@ -1632,7 +1643,11 @@ Rvector6 SolarRadiationPressure::GetDerivativesForSpacecraft(Spacecraft *sc)
          MessageInterface::ShowMessage("   mass           = %12.10f\n", mass);
          #endif
          Rvector3 sunSC(sunSat[0],sunSat[1],sunSat[2]);
-         spadArea = sc->GetSPADSRPArea(ep,sunSC);
+         if (hasPrecisionTime)
+            spadArea = sc->GetSPADSRPArea(epGT.GetMjd(), sunSC);
+         else
+            spadArea = sc->GetSPADSRPArea(ep,sunSC);
+
          #ifdef DEBUG_SPAD_DATA
             MessageInterface::ShowMessage("in SRP, SPAD area (per SC) from file = %12.10f  %12.10f  %12.10f\n",
                   spadArea[0],spadArea[1],spadArea[2]);

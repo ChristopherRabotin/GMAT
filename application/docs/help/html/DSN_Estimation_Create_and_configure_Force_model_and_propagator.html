@@ -12,19 +12,12 @@ Fm.PointMasses             = {Sun, Earth, Luna, Mars, Saturn, ...
                              Uranus, Mercury, Venus, Jupiter};
 Fm.SRP                     = On;
 Fm.RelativisticCorrection  = On;
+Fm.ErrorControl            = None;
 Prop.FM                    = Fm;
-Prop.MinStep               = 0;
-Prop.MaxStep               = 86400  </pre><p>We say a few words about our choice of minimum and maximum step
-    sizes for our propagator. As mentioned in the
-    <span class="guilabel">BatchEstimatorInv</span> Help, it is recommended that if the
-    <span class="guilabel">ForceModel</span> resource associated with your propagator
-    is using relative step control, i.e., <code class="code">ErrorControl = RSSStep</code>,
-    then the minimum step size, <span class="guilabel">MinStep</span>, of your
-    propagator should be set to 0. We have not directly set the value of
-    <span class="guilabel">Fm.ErrorControl</span> but since we know that, by default,
-    its value is RSSStep, we set <span class="guilabel">Prop.MinStep</span> equal to 0.
-    For our deep space orbit, the dynamics are slowly changing and we want our
-    integrator to take large steps as long as the default accuracy error
-    tolerance of approximately 1e-11 is maintained. Thus, we set our max step
-    to 1 day. Finally, we note that for actual operational missions, the user
-    may want to use a more stringent accuracy error tolerance.</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="DSN_Estimation_Define_the_types_of_measurements_that_will_be_processed.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="DSN_Estimation_Create_and_configure_BatchEstimatorInv_object.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Define the types of measurements that will be processed&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Create and configure BatchEstimatorInv object</td></tr></table></div></body></html>
+Prop.MinStep               = 0;    </pre><p>We set <code class="code">ErrorControl = None</code> because for the current
+    release of GMAT, batch estimation requires fixed step numerical
+    integration. The fixed step size is given by
+    <code class="code">Prop.InitialStepSize</code> which has a default value of 60 seconds.
+    For our deep space orbit, the dynamics are slowly changing and this step
+    size is not too big. For more dynamic force models, a smaller step size
+    may be needed.</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="DSN_Estimation_Define_the_types_of_measurements_that_will_be_processed.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="DSN_Estimation_Create_and_configure_BatchEstimatorInv_object.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Define the types of measurements that will be processed&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Create and configure BatchEstimatorInv object</td></tr></table></div></body></html>

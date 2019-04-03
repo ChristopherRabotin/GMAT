@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -301,7 +301,7 @@ bool EventModel::SetStart(Gmat::StateElementId id, Integer index,
 }
 
 //-----------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //-----------------------------------------------------------------------------
 /**
  *  Retrieves the names of reference objects for the model
@@ -312,7 +312,7 @@ bool EventModel::SetStart(Gmat::StateElementId id, Integer index,
  */
 //-----------------------------------------------------------------------------
 const StringArray& EventModel::GetRefObjectNameArray(
-      const Gmat::ObjectType type)
+      const UnsignedInt type)
 {
    refObjectNames.clear();
    PhysicalModel::GetRefObjectNameArray(type);
@@ -333,7 +333,7 @@ const StringArray& EventModel::GetRefObjectNameArray(
 
 
 //-----------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string &name)
 //-----------------------------------------------------------------------------
 /**
@@ -346,7 +346,7 @@ const StringArray& EventModel::GetRefObjectNameArray(
  *  @return true if the reference was set, false if not
  */
 //-----------------------------------------------------------------------------
-bool EventModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool EventModel::SetRefObject(GmatBase *obj, const UnsignedInt type,
       const std::string &name)
 {
    bool retval = false;
@@ -362,7 +362,7 @@ bool EventModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool EventModel::RenameRefObject(const Gmat::ObjectType type,
+// bool EventModel::RenameRefObject(const UnsignedInt type,
 //       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -377,7 +377,7 @@ bool EventModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @note This method may be redundant here, since the locators are not clones
  */
 //------------------------------------------------------------------------------
-bool EventModel::RenameRefObject(const Gmat::ObjectType type,
+bool EventModel::RenameRefObject(const UnsignedInt type,
       const std::string &oldName, const std::string &newName)
 {
    bool retval = false;

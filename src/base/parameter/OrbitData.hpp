@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -47,7 +47,7 @@ class GMAT_API OrbitData : public RefData
 public:
 
    OrbitData(const std::string &name = "", const std::string &typeName = "",
-             const Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT,
+             const UnsignedInt paramOwnerType = Gmat::SPACECRAFT,
              GmatParam::DepObject depObj = GmatParam::NO_DEP,
              bool isSettable = false);
    OrbitData(const OrbitData &data);
@@ -134,24 +134,24 @@ public:
    virtual const std::string* GetValidObjectList() const;
 
    // More inherited methods from RefData
-   virtual std::string        GetRefObjectName(const Gmat::ObjectType type) const;
-   virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual std::string        GetRefObjectName(const UnsignedInt type) const;
+   virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type);
 
-   virtual bool               SetRefObjectName(const Gmat::ObjectType type,
+   virtual bool               SetRefObjectName(const UnsignedInt type,
                                                const std::string &name);
-   virtual GmatBase*          GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*          GetRefObject(const UnsignedInt type,
                                            const std::string &name = "");
-   virtual bool               SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool               SetRefObject(GmatBase *obj, const UnsignedInt type,
                                            const std::string &name = "");
 
 protected:
 
    // Inherited methods from RefData
-   virtual bool AddRefObject(const Gmat::ObjectType type,
+   virtual bool AddRefObject(const UnsignedInt type,
                              const std::string &name, GmatBase *obj = NULL,
                              bool replaceName = false);
    virtual void InitializeRefObjects();
-   virtual bool IsValidObjectType(Gmat::ObjectType type);
+   virtual bool IsValidObjectType(UnsignedInt type);
    
    // Methods
    SolarSystem* GetSolarSystem();

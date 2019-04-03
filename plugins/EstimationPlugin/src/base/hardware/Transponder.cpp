@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -847,8 +847,11 @@ bool Transponder::SetSignal(Signal* s,Integer whichOne)
 Real Transponder::GetTurnAroundRatio()
 {
    Real ratio;
-   size_t loc = turnAroundRatio.find('/');                       // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
-   if (loc >= 0)
+   size_t loc = turnAroundRatio.find('/');
+   // above is changed from std::string::size_type to size_t in order to be
+   // compatible with C++98 and C++11
+   
+   if (loc != std::string::npos) // "/" is found
    {
       Integer len = turnAroundRatio.length();
       std::string num_s = turnAroundRatio.substr(0, loc);

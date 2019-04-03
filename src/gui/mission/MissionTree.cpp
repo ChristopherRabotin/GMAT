@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -985,7 +985,8 @@ wxTreeItemId MissionTree::BuildTreeItem(wxTreeItemId parent, GmatCommand *cmd,
    #if DEBUG_BUILD_TREE_ITEM
    MessageInterface::ShowMessage
       ("\nMissionTree::BuildTreeItem() entered, parent='%s', cmd=<%s>'%s', level=%d\n",
-       GetItemText(parent).c_str(), cmdTypeName.c_str(), cmdName.c_str(), level);
+       GetItemText(parent).WX_TO_C_STRING, cmdTypeName.WX_TO_C_STRING,
+       cmdName.WX_TO_C_STRING, level);
    MessageInterface::ShowMessage
       ("   inScriptEvent=%d, mViewAll=%d, mUsingViewLevel=%d, mViewLevel=%d\n",
        inScriptEvent, mViewAll, mUsingViewLevel, mViewLevel);
@@ -1026,7 +1027,8 @@ wxTreeItemId MissionTree::BuildTreeItem(wxTreeItemId parent, GmatCommand *cmd,
    
    #if DEBUG_BUILD_TREE_ITEM
    MessageInterface::ShowMessage
-      ("   Creating command node for <%s>'%s'\n", cmdTypeName.c_str(), cmdName.c_str());
+      ("   Creating command node for <%s>'%s'\n", cmdTypeName.WX_TO_C_STRING,
+       cmdName.WX_TO_C_STRING);
    #endif
    
    node = UpdateCommandTree(parent, cmd, level);
@@ -4404,8 +4406,8 @@ GmatTree::ItemType MissionTree::GetCommandId(const wxString &cmd)
       return GmatTree::MANAGE_OBJECT;
    if (cmd == "Report")
       return GmatTree::REPORT;
-   if (cmd == "Write")
-      return GmatTree::WRITE_COMMAND;
+//   if (cmd == "Write")
+//      return GmatTree::WRITE_COMMAND;
    if (cmd == "For")
       return GmatTree::FOR_CONTROL;
    if (cmd == "EndFor")

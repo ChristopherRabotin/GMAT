@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,6 +39,7 @@
 //#define DEBUG_EVENT_LOCATION
 //#define DEBUG_STATE_BUFFERING
 //#define DEBUG_EVENT_STATE
+//#define DEBUG_INITIAL_STATE
 
 
 //------------------------------------------------------------------------------
@@ -60,6 +61,7 @@ RunSimulator::RunSimulator() :
    includeSTMPropagation   (false)
 {
    overridePropInit = true;
+   hasPrecisionTime = true;
 }
 
 
@@ -148,7 +150,7 @@ GmatBase* RunSimulator::Clone() const
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Accesses names for referenced objects.
@@ -158,7 +160,7 @@ GmatBase* RunSimulator::Clone() const
  * @return the referenced object's name.
  */
 //------------------------------------------------------------------------------
-std::string RunSimulator::GetRefObjectName(const Gmat::ObjectType type) const
+std::string RunSimulator::GetRefObjectName(const UnsignedInt type) const
 {
    switch (type)
    {
@@ -179,7 +181,7 @@ std::string RunSimulator::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Sets names for referenced objects.
@@ -190,7 +192,7 @@ std::string RunSimulator::GetRefObjectName(const Gmat::ObjectType type) const
  * @return true if the name was set, false if not.
  */
 //------------------------------------------------------------------------------
-bool RunSimulator::SetRefObjectName(const Gmat::ObjectType type,
+bool RunSimulator::SetRefObjectName(const UnsignedInt type,
                                      const std::string &name)
 {
    if (type == Gmat::SOLVER)
@@ -205,7 +207,7 @@ bool RunSimulator::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -218,7 +220,7 @@ bool RunSimulator::SetRefObjectName(const Gmat::ObjectType type,
  * @return true on success.
  */
 //------------------------------------------------------------------------------
-bool RunSimulator::RenameRefObject(const Gmat::ObjectType type,
+bool RunSimulator::RenameRefObject(const UnsignedInt type,
       const std::string &oldName, const std::string &newName)
 {
    // RunSimulator needs to know about Solver name only
@@ -397,6 +399,7 @@ bool RunSimulator::Initialize()
       if (obj->IsOfType(Gmat::PROP_SETUP))
       {
          PropSetup *ps = (PropSetup*)obj->Clone();
+         ps->SetPrecisionTimeFlag(true);
 
          // RunSimulator only manages one PropSetup.  If that changes, so
          // does this code
@@ -704,11 +707,12 @@ void RunSimulator::PrepareToSimulate()
    #ifdef DEBUG_SIMULATOR_EXECUTION
       MessageInterface::ShowMessage("Entered RunSimulator::PrepareToSimulate()\n");
    #endif
-
    // Prep the measurement manager
    MeasurementManager *measman = theSimulator->GetMeasurementManager();
 
    PropSetup *thePropagator = theSimulator->GetPropagator();
+   thePropagator->SetPrecisionTimeFlag(true);
+
    if (measman->PrepareForProcessing(true) == false)
       throw CommandException(
             "Measurement Manager was unable to prepare for processing");
@@ -716,7 +720,8 @@ void RunSimulator::PrepareToSimulate()
    PrepareToPropagate();  // ?? Test return value here?
    // measman->LoadRampTables();                     // This command is moved to Simulator::CompleteInitialization()
 
-   theSimulator->UpdateCurrentEpoch(baseEpoch[0]);
+
+   theSimulator->UpdateCurrentEpoch(baseEpochGT[0]);
    commandRunning  = true;
    commandComplete = false;
 
@@ -768,7 +773,9 @@ void RunSimulator::Propagate()
    #ifdef DEBUG_SIMULATOR_EXECUTION
       MessageInterface::ShowMessage("Entered RunSimulator::Propagate()\n");
    #endif
-   Real dt = theSimulator->GetTimeStep(currEpoch[0]);
+   
+   Real dt = theSimulator->GetTimeStep(currEpochGT[0]);
+      
 
    #ifdef DEBUG_SIMULATOR_EXECUTION
       MessageInterface::ShowMessage("dt = %.15lf\n", dt);
@@ -786,19 +793,16 @@ void RunSimulator::Propagate()
       MessageInterface::ShowMessage("\n");
    #endif
 
-   // todo: This is a temporary fix; need to evaluate to find a more elegant
-   //       solution here
-   //Real maxStep = 600.0;
-   //if (dt > maxStep)
-   //   dt = maxStep;
-   Real maxStep = 60.0;
+   /// @note Wnen simulators allow multiple prop settings, adapt this code
+   Real maxStep = fabs(maxSteps[0]);
+
    if (fabs(dt) > maxStep)
       dt = (dt > 0.0 ? maxStep : -maxStep);
 
    Step(dt);
    bufferFilled = false;
 
-   theSimulator->UpdateCurrentEpoch(currEpoch[0]);
+   theSimulator->UpdateCurrentEpoch(currEpochGT[0]);
 
    #ifdef DEBUG_EVENT_STATE
       dim = fm[0]->GetDimension();

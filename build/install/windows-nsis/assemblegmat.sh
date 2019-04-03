@@ -44,7 +44,8 @@ done
 
 # File sources
 gmatshare='//mesa-file.gsfc.nasa.gov/595/GMAT'
-buildpath="$gmatshare/Builds/windows/VS2013_build_32/LatestCompleteVersion"
+buildpath="$gmatshare/Builds/windows/VS2013_build_64/LatestCompleteVersion"
+wxpath="$gmatshare/Builds/windows/wxWidgets_vc_x64_dll"
 libpath="$gmatshare/Builds/windows/vc_lib"
 
 # Validate build
@@ -71,6 +72,9 @@ cp -pRv "$buildpath"/* "$dest"
 # Copy VC libs
 cp -av "$libpath/msvcp120.dll" "$dest/bin"
 cp -av "$libpath/msvcr120.dll" "$dest/bin"
+
+# Copy Wx files
+cp -pRv "$wxpath"/* "$dest/bin"
 
 # Remove Windows hidden files
 find "$dest" -iname thumbs.db -delete

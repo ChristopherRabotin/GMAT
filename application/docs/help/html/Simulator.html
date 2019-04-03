@@ -1,5 +1,5 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Simulator</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="ReportFile.html" title="ReportFile"><link rel="next" href="SNOPTOptimizer.html" title="SNOPT"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Simulator</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ReportFile.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="SNOPTOptimizer.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Simulator"></a><div class="titlepage"></div><a name="N1CFC2" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Simulator</span></h2><p>Simulator &mdash; Configures the generation of simulated tracking data
-    measurements.</p></div><div class="refsection"><a name="N1CFD3"></a><h2>Description</h2><p>A <span class="guilabel">Simulator</span> configures the generation of
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Simulator</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="ReportFile.html" title="ReportFile"><link rel="next" href="SNOPTOptimizer.html" title="SNOPT"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Simulator</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ReportFile.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="SNOPTOptimizer.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Simulator"></a><div class="titlepage"></div><a name="N1D37A" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Simulator</span></h2><p>Simulator &mdash; Configures the generation of simulated tracking data
+    measurements.</p></div><div class="refsection"><a name="N1D38B"></a><h2>Description</h2><p>A <span class="guilabel">Simulator</span> configures the generation of
     simulated tracking data measurements. These measurements can then be used
     by a <span class="guilabel">BatchEstimatorInv</span> resource as part of an
     estimation run.</p><p>The <span class="guilabel">Simulator</span> object requires specification of
@@ -19,7 +19,7 @@
     <span class="guilabel">Simulator.AddNoise</span> option is set to On, noise with
     the standard deviation specified on each measurement strand&rsquo;s
     <span class="guilabel">GroundStation.ErrorModel</span>, is added to the
-    measurements.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="TrackingFileSet.html" title="TrackingFileSet"><span class="refentrytitle">TrackingFileSet</span></a>, <a class="xref" href="RunEstimator.html" title="RunEstimator"><span class="refentrytitle">RunEstimator</span></a></p></div><div class="refsection"><a name="N1CFF9"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AddData</span></td><td><p>A list of one or more
+    measurements.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="TrackingFileSet.html" title="TrackingFileSet"><span class="refentrytitle">TrackingFileSet</span></a>, <a class="xref" href="RunEstimator.html" title="RunEstimator"><span class="refentrytitle">RunEstimator</span></a></p></div><div class="refsection"><a name="N1D3B1"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AddData</span></td><td><p>A list of one or more
             <span class="guilabel">TrackingFileSets</span></p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p><span class="guilabel">TrackingFileSet</span> object</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any valid <span class="guilabel">TrackingFileSet</span>
                     object</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <span class="guilabel">None</span>
@@ -51,14 +51,33 @@
             for calculation</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p><span class="guilabel">Propagator</span> Object</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any valid <span class="guilabel">Propagator</span>
                     object</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <span class="guilabel">None</span>
-                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1D177"></a><h2>Remarks</h2><div class="refsection"><a name="N1D17A"></a><h3>Interactions</h3><div class="informaltable"><table border="1"><colgroup><col width="16%"><col width="84%"></colgroup><thead><tr><th>Resource</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">TrackingFileSet resource</span></td><td><p> Must be created in order to tell the
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1D52F"></a><h2>Remarks</h2><div class="refsection"><a name="N1D532"></a><h3>Navigation Requires Use of Fixed Step Numerical
+      Integration</h3><p>GMAT navigation requires use of fixed stepped propagation. The
+      <span class="guilabel">Simulator</span> resource has a
+      <span class="guilabel">Propagator</span> field containing the name of the
+      <span class="guilabel">Propagator</span> resource that will be used during the
+      simulation. As shown in the <span class="guilabel">Note</span> below, there are
+      some hard restrictions on the choice of error control specified for the
+      <span class="guilabel">ForceModel</span> resource associated with your
+      propagator.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>For simulation, the <code class="code">ErrorControl</code> parameter
+        specified for the <span class="guilabel">ForceModel</span> resource associated
+        with the <span class="guilabel">Simulator</span>
+        <span class="guilabel">Propagator</span> must be set to '<code class="code">None</code>.' Of
+        course, when using fixed step control, the user must choose a step
+        size, as given by the <span class="guilabel">Propagator</span>
+        <code class="code">InitialStepSize</code> field, for the chosen orbit regime and
+        force profile, that yields the desired accuracy.</p></div></div><div class="refsection"><a name="N1D55E"></a><h3>Propagator Settings</h3><p>The <span class="guilabel">Simulator</span> resource has a
+      <span class="guilabel">Propagator</span> field containing the name of the
+      <span class="guilabel">Propagator</span> resource that will be used during the
+      estimation process. The minimum step size, <span class="guilabel">MinStep</span>,
+      of your propagator should always be set to 0.</p></div><div class="refsection"><a name="N1D56F"></a><h3>Interactions</h3><div class="informaltable"><table border="1"><colgroup><col width="16%"><col width="84%"></colgroup><thead><tr><th>Resource</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">TrackingFileSet resource</span></td><td><p> Must be created in order to tell the
               <span class="guilabel">Simulator</span> resource, via the
               <span class="guilabel">AddData</span> field, which data types will be
               simulated and to specify the name of the output tracking data
               file (via <span class="guilabel">FileName</span>)</p></td></tr><tr><td><span class="guilabel">Propagator</span>
               <span class="guilabel">resource</span></td><td>Used by GMAT to generate the simulated orbit</td></tr><tr><td><span class="guilabel">RunSimulator command</span></td><td><p> Must use the <span class="guilabel">RunSimulator</span>
               command to actually create the data defined by the
-              <span class="guilabel">Simulator</span> resource</p></td></tr></tbody></table></div></div></div><div class="refsection"><a name="N1D1B3"></a><h2>Examples</h2><div class="informalexample"><p>The example below illustrates using the simulator to generate DSN
+              <span class="guilabel">Simulator</span> resource</p></td></tr></tbody></table></div></div></div><div class="refsection"><a name="N1D5A8"></a><h2>Examples</h2><div class="informalexample"><p>The example below illustrates using the simulator to generate DSN
       range measurements. This example is more detailed than usual as it can
       actually be run to produce a file, <code class="filename">simData.gmd</code>,
       that contains a single range measurement for a fictional DSN ground
@@ -106,7 +125,12 @@ GMAT simData.AddTrackingConfig = {{DSN,SimSat,DSN}, DSN_SeqRange};
 GMAT simData.FileName          = {'simData.gmd'};
 
 %   Create and configure the Simulator object
+Create ForceModel FM1
+FM1.ErrorControl = None   %Fixed step integration required for Navigation
+
 Create Propagator prop;
+prop.FM = FM1
+prop.MinStep = 0          %For Navigation, allow propagator to take arbitrarily small steps   
 
 Create Simulator sim;
 GMAT sim.AddData             = {simData};

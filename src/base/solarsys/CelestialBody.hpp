@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -122,9 +122,10 @@ namespace Gmat
    
    enum RotationDataSource
    {
-      DE_405_FILE = 0,
-      DE_421_FILE,
-      DE_424_FILE,
+      DE_FILE = 0,  // use current default (or selected) DE file
+//      DE_405_FILE = 0,
+//      DE_421_FILE,
+//      DE_424_FILE,
 //      DE_430_FILE,
       IAU_2002,
 //      IAU_FILE,   // TBD
@@ -135,9 +136,10 @@ namespace Gmat
    
    const std::string ROTATION_DATA_SOURCE_STRINGS[RotationDataSrcCount] = 
    {
-      "DE405File",
-      "DE421File",
-      "DE424File",
+      "DEFile",
+//      "DE405File",
+//      "DE421File",
+//      "DE424File",
 //      "DE430File",
       "IAU2002",
 //      "IAUFile",  // TBD
@@ -165,16 +167,29 @@ public:
    virtual void                 SetUpBody();
    
    virtual Real                 GetEpoch();
+   virtual GmatTime             GetEpochGT();
+
    virtual Real                 SetEpoch(const Real ep);
+   virtual GmatTime             SetEpochGT(const GmatTime& ep);
+
    virtual Rvector6             GetLastState();
 
    // method to return the state (position and velocity) of the body at
    // the specified time, using the specified method
    virtual Real                 GetFirstStateTime();
+
+
    virtual const Rvector6&      GetState(A1Mjd atTime);
    virtual const Rvector6&      GetState(Real atTime); 
    virtual void                 GetState(const A1Mjd &atTime, Real *outState);
    
+   virtual const Rvector6&      GetState(GmatTime atTime);
+   virtual void                 GetState(const GmatTime&atTime, Real *outState);
+   
+   virtual const Rvector3       GetPositionDelta(const GmatTime &atTime1, const GmatTime &atTime2);
+   virtual const Rvector3       GetPositionDeltaSSB(const GmatTime &atTime1, const GmatTime &atTime2);
+
+
    // methods to return the body type, central body, gravitational constant,
    // radius, mass, posvel source, analytic method, and userDefined flag
    virtual Gmat::BodyType       GetBodyType() const;
@@ -257,6 +272,14 @@ public:
    virtual const Rvector3 GetMJ2000Position(const A1Mjd &atTime);
    virtual const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime);
 
+   virtual const Rvector6 GetMJ2000State(const Real atTime) { return GetMJ2000State(A1Mjd(atTime)); };
+   virtual const Rvector3 GetMJ2000Position(const Real atTime) { return GetMJ2000Position(A1Mjd(atTime)); };
+   virtual const Rvector3 GetMJ2000Velocity(const Real atTime) { return GetMJ2000Velocity(A1Mjd(atTime)); };
+
+   virtual const Rvector6 GetMJ2000State(const GmatTime &atTime);
+   virtual const Rvector3 GetMJ2000Position(const GmatTime &atTime);
+   virtual const Rvector3 GetMJ2000Velocity(const GmatTime &atTime);
+
    // Inputs to SetOrientationParameters are in the order:
    // SpinAxisRAConstant
    // SpinAxisRARate
@@ -319,10 +342,10 @@ public:
                                                  const Rvector &value);
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
 
-   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*   GetRefObject(const UnsignedInt type,
                                     const std::string &name);
-   const StringArray&  GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   const StringArray&  GetRefObjectNameArray(const UnsignedInt type);
+   virtual bool        SetRefObject(GmatBase *obj, const UnsignedInt type,
                                     const std::string &name = "");
    
    virtual bool        IsParameterReadOnly(const Integer id) const;
@@ -432,6 +455,7 @@ protected:
    Rvector6                 state;
    // time of the state
    A1Mjd                    stateTime;
+   GmatTime                 stateTimeGT;
    
    /// name of central body around which this body revolves
    std::string              theCentralBodyName;
@@ -526,6 +550,8 @@ protected:
    Real                   ephemUpdateInterval;
    /// last time that the state was calculated
    A1Mjd                  lastEphemTime;
+   GmatTime               lastEphemTimeGT;
+
    /// last state value calculated
    Rvector6               lastState;
    /// last MJ2000 state calculated

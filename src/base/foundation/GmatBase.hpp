@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -44,6 +44,10 @@
 #include "Rvector.hpp"
 #include "Rmatrix.hpp"
 #include "Covariance.hpp"
+#include "GmatWidget.hpp"
+
+// Make the typename singleton available everywhere
+#include "GmatType.hpp"
 
 #include <algorithm>                    // Required by GCC 4.3 for find
 
@@ -51,6 +55,8 @@
 // Forward reference
 class SolarSystem;
 class CoordinateSystem;
+class GmatWidget;
+
 
 // The allocation size used to construct estimation object parameter IDs
 #define ESTIMATION_TYPE_ALLOCATION  250
@@ -80,15 +86,14 @@ class GMAT_API GmatBase
 {
 public:
    // The usual suspects
-   GmatBase(Gmat::ObjectType typeId, const std::string &typeStr,
+   GmatBase(UnsignedInt typeId, const std::string &typeStr,
             const std::string &nomme = "");
    virtual ~GmatBase() = 0;
    GmatBase(const GmatBase &a);
    GmatBase&            operator=(const GmatBase &a);
 
    // Access methods called on the base class
-   virtual Gmat::ObjectType
-                        GetType() const;
+   virtual UnsignedInt  GetType() const;
    inline std::string   GetTypeName() const;
    inline std::string   GetName() const;
    virtual bool         SetName(const std::string &who,
@@ -101,7 +106,7 @@ public:
 
    virtual Integer      GetParameterCount() const;
 
-   bool                 IsOfType(Gmat::ObjectType ofType) const;
+   bool                 IsOfType(UnsignedInt ofType) const;
    bool                 IsOfType(const std::string &typeDescription) const;
    StringArray          GetTypeNames() const;
    
@@ -132,30 +137,30 @@ public:
                                                   const std::string &comment);
 
    // Access methods derived classes can override on reference objects
-   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual std::string  GetRefObjectName(const UnsignedInt type) const;
    virtual bool         HasRefObjectTypeArray();
    virtual const ObjectTypeArray&
                         GetRefObjectTypeArray();
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+                        GetRefObjectNameArray(const UnsignedInt type);
+   virtual bool         SetRefObjectName(const UnsignedInt type,
                                          const char *name);
-   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+   virtual bool         SetRefObjectName(const UnsignedInt type,
                                          const std::string &name);
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName) = 0;
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string &name);
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name = "");
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index);
-   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+   virtual ObjectArray& GetRefObjectArray(const UnsignedInt type);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
    /// Returns the list of names used in the wrappers
@@ -170,7 +175,7 @@ public:
    virtual bool         IncludeOwnedObjectsInValidation();
    virtual bool         SetIsGlobal(bool globalFlag);
    virtual bool         IsGlobal() const;
-	virtual bool         IsAutomaticGlobal() const;
+   virtual bool         IsAutomaticGlobal() const;
    virtual bool         SetIsLocal(bool localFlag);
    virtual bool         IsLocal() const;
    virtual bool         IsObjectCloaked() const;
@@ -230,7 +235,7 @@ public:
                               const Integer r = 0, const Integer c = 0) const;
    virtual bool         ParameterUpdatesAfterSuperposition(const Integer id) const;
 
-   virtual Gmat::ObjectType
+   virtual UnsignedInt
                         GetPropertyObjectType(const Integer id) const;
    virtual const StringArray&
                         GetPropertyEnumStrings(const Integer id) const;
@@ -239,6 +244,10 @@ public:
    virtual bool         CanAssignStringToObjectProperty(const Integer id) const;
    virtual bool         IsSquareBracketAllowedInSetting(const Integer id) const;
    
+   virtual GmatTime     GetGmatTimeParameter(const Integer id) const;
+   virtual GmatTime     SetGmatTimeParameter(const Integer id, 
+                                             const GmatTime value);
+
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
                                          const Real value);
@@ -321,6 +330,10 @@ public:
    virtual bool         SetBooleanParameter(const Integer id,
                                             const bool value,
                                             const Integer index);
+
+   virtual GmatTime     GetGmatTimeParameter(const std::string &label) const;
+   virtual GmatTime     SetGmatTimeParameter(const std::string &label, 
+                                             const GmatTime value);
 
    virtual Real         GetRealParameter(const std::string &label) const;
    virtual Real         SetRealParameter(const std::string &label,
@@ -462,9 +475,9 @@ public:
    /// Method to return the current number of instantiated objects
    static Integer          GetInstanceCount();
    /// Method for getting GMAT object type
-   static Gmat::ObjectType GetObjectType(const std::string &typeString);
+   static UnsignedInt GetObjectType(const std::string &typeString);
    /// Method for getting GMAT object type string
-   static std::string      GetObjectTypeString(Gmat::ObjectType type);
+   static std::string      GetObjectTypeString(UnsignedInt type);
    /// Method for getting data precision
    static Integer          GetDataPrecision();
    /// Method for getting time precision
@@ -524,8 +537,19 @@ public:
    /// Functions use information from Moderator
    ObjectMap               GetConfiguredObjectMap();
    GmatBase*               GetConfiguredObject(const std::string &name);
-   const StringArray       GetListOfObjects(Gmat::ObjectType type);
+   const StringArray       GetListOfObjects(UnsignedInt type);
    const StringArray       GetListOfObjects(const std::string &typeName);
+
+   /// Hooks for GUI plugins
+   virtual bool            HasGuiPlugin();
+   virtual StringArray     GetGuiPanelNames(const std::string &type = "");
+   virtual void            SetWidget(GmatWidget *widget);
+   virtual const char**    GetIcon();
+   virtual void            SetIconIndex(Integer index);
+   virtual Integer         GetIconIndex();
+
+   bool                    HasPrecisionTime();
+   virtual bool            SetPrecisionTimeFlag(bool onOff);
 
 protected:
    /// Parameter IDs
@@ -561,7 +585,7 @@ protected:
    /// created from the main script
    bool                forceGenerateObjectString;
    /// Enumerated base type of the object
-   Gmat::ObjectType    type;
+   UnsignedInt         type;
    /// Number of owned objects that belong to this instance
    Integer             ownedObjectCount;
    /// Script string used to build the object
@@ -572,7 +596,7 @@ protected:
    StringArray         objectTypeNames;
 
    /// Flag used to determine if associations have been made
-   bool                 isInitialized;
+   bool                isInitialized;
 
    /// The list of object types referenced by this class
    ObjectTypeArray     refObjectTypes;
@@ -580,6 +604,9 @@ protected:
    StringArray         refObjectNames;
    /// The list of names of Wrapper objects
    StringArray         wrapperObjectNames;
+
+   /// flag indicating whether or not the object using GmatTime for epoch
+   bool                hasPrecisionTime;
 
    /// flag indicating whether or not the object is Global
    bool                isGlobal;

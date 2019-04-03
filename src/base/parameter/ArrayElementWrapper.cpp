@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -421,8 +421,8 @@ Real ArrayElementWrapper::EvaluateReal() const
    {
       std::string errmsg = "Cannot return Real value for array " + 
                             array->GetName(); 
-      errmsg += " with row " + rowInt;
-      errmsg += " and column " + columnInt;
+      errmsg += " with row " + std::to_string(rowInt);
+      errmsg += " and column " + std::to_string(columnInt);
       errmsg += " - exception thrown: " + be.GetFullMessage();
       throw ParameterException(errmsg);
    }

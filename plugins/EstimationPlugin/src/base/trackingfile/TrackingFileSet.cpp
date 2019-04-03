@@ -1686,7 +1686,7 @@ bool TrackingFileSet::SetBooleanParameter(const std::string& label,
 
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Retrieves object type of parameter of given id.
@@ -1696,7 +1696,7 @@ bool TrackingFileSet::SetBooleanParameter(const std::string& label,
  * @return parameter ObjectType
  */
 //---------------------------------------------------------------------------
-Gmat::ObjectType TrackingFileSet::GetPropertyObjectType(const Integer id) const
+UnsignedInt TrackingFileSet::GetPropertyObjectType(const Integer id) const
 {
    if (id == DATA_FILTERS)
       return Gmat::DATA_FILTER;
@@ -1706,7 +1706,7 @@ Gmat::ObjectType TrackingFileSet::GetPropertyObjectType(const Integer id) const
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Retrieves the name of a single reference object
@@ -1716,7 +1716,7 @@ Gmat::ObjectType TrackingFileSet::GetPropertyObjectType(const Integer id) const
  * @return The name of the object
  */
 //------------------------------------------------------------------------------
-std::string TrackingFileSet::GetRefObjectName(const Gmat::ObjectType type) const
+std::string TrackingFileSet::GetRefObjectName(const UnsignedInt type) const
 {
    return MeasurementModelBase::GetRefObjectName(type);
 }
@@ -1743,7 +1743,7 @@ const ObjectTypeArray& TrackingFileSet::GetRefObjectTypeArray()
 
 //------------------------------------------------------------------------------
 // const StringArray& TrackingFileSet::GetRefObjectNameArray(
-//       const Gmat::ObjectType type)
+//       const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves the names of reference objects
@@ -1754,7 +1754,7 @@ const ObjectTypeArray& TrackingFileSet::GetRefObjectTypeArray()
  */
 //------------------------------------------------------------------------------
 const StringArray& TrackingFileSet::GetRefObjectNameArray(
-      const Gmat::ObjectType type)
+      const UnsignedInt type)
 {
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("Called TrackingFileSet<%s,%p>::"
@@ -1803,7 +1803,7 @@ const StringArray& TrackingFileSet::GetRefObjectNameArray(
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string& name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string& name)
 //------------------------------------------------------------------------------
 /**
  * Sets names for reference objects
@@ -1814,7 +1814,7 @@ const StringArray& TrackingFileSet::GetRefObjectNameArray(
  * @return true if set, false if not
  */
 //------------------------------------------------------------------------------
-bool TrackingFileSet::SetRefObjectName(const Gmat::ObjectType type,
+bool TrackingFileSet::SetRefObjectName(const UnsignedInt type,
       const std::string& name)
 {
    bool retval = false;
@@ -1822,7 +1822,7 @@ bool TrackingFileSet::SetRefObjectName(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string& oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string& oldName,
 //      const std::string& newName)
 //------------------------------------------------------------------------------
 /**
@@ -1835,7 +1835,7 @@ bool TrackingFileSet::SetRefObjectName(const Gmat::ObjectType type,
  * @return true if a name was changed, false if not
  */
 //------------------------------------------------------------------------------
-bool TrackingFileSet::RenameRefObject(const Gmat::ObjectType type,
+bool TrackingFileSet::RenameRefObject(const UnsignedInt type,
       const std::string& oldName, const std::string& newName)
 {
    #ifdef DEBUG_INITIALIZATION
@@ -1890,7 +1890,7 @@ bool TrackingFileSet::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string& name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string& name)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a reference object, given its type and name
@@ -1901,7 +1901,7 @@ bool TrackingFileSet::RenameRefObject(const Gmat::ObjectType type,
  * @return The object pointer, or NULL if it is not set
  */
 //------------------------------------------------------------------------------
-GmatBase* TrackingFileSet::GetRefObject(const Gmat::ObjectType type,
+GmatBase* TrackingFileSet::GetRefObject(const UnsignedInt type,
       const std::string& name)
 {
    if ((type == Gmat::DATA_FILTER)||(type == Gmat::UNKNOWN_OBJECT))
@@ -1918,7 +1918,7 @@ GmatBase* TrackingFileSet::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string& name,
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string& name,
 //       const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -1931,7 +1931,7 @@ GmatBase* TrackingFileSet::GetRefObject(const Gmat::ObjectType type,
  * @return The object pointer, or NULL if it is not set
  */
 //------------------------------------------------------------------------------
-GmatBase* TrackingFileSet::GetRefObject(const Gmat::ObjectType type,
+GmatBase* TrackingFileSet::GetRefObject(const UnsignedInt type,
       const std::string& name, const Integer index)
 {
    if (type == Gmat::SPACE_POINT)
@@ -1952,7 +1952,7 @@ GmatBase* TrackingFileSet::GetRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase* obj, const UnsignedInt type,
 //       const std::string& name)
 //------------------------------------------------------------------------------
 /**
@@ -1965,7 +1965,7 @@ GmatBase* TrackingFileSet::GetRefObject(const Gmat::ObjectType type,
  * @return true if a pointer was set, false if not
  */
 //------------------------------------------------------------------------------
-bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+bool TrackingFileSet::SetRefObject(GmatBase* obj, const UnsignedInt type,
       const std::string& name)
 {
    #ifdef DEBUG_INITIALIZATION
@@ -2013,7 +2013,7 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase* obj, const UnsignedInt type,
 //       const std::string& name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -2027,7 +2027,7 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
  * @return true if a pointer was set, false if not
  */
 //------------------------------------------------------------------------------
-bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+bool TrackingFileSet::SetRefObject(GmatBase* obj, const UnsignedInt type,
       const std::string& name, const Integer index)
 {
    #ifdef DEBUG_INITIALIZATION
@@ -2061,7 +2061,7 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+// ObjectArray& GetRefObjectArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves an array of reference objects
@@ -2071,7 +2071,7 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
  * @return The array of objects
  */
 //------------------------------------------------------------------------------
-ObjectArray& TrackingFileSet::GetRefObjectArray(const Gmat::ObjectType type)
+ObjectArray& TrackingFileSet::GetRefObjectArray(const UnsignedInt type)
 {
    static ObjectArray objectList;
    objectList.clear();
@@ -2464,7 +2464,7 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       // If found then add value to designators map
       if (j < references.size())
       {
-         Gmat::ObjectType pType = references[j]->GetType();
+         UnsignedInt pType = references[j]->GetType();
 
          switch(pType)
          {

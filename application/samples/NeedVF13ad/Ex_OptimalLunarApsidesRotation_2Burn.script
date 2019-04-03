@@ -176,6 +176,7 @@ GMAT DefaultOpenGL.UseInitialView = On;
 GMAT DefaultOpenGL.StarCount = 7000;
 GMAT DefaultOpenGL.EnableStars = On;
 GMAT DefaultOpenGL.EnableConstellations = On;
+GMAT DefaultOpenGL.MaxPlotPoints = 200000;
 
 Create XYPlot ApoPerIterations;
 GMAT ApoPerIterations.SolverIterations  = All;

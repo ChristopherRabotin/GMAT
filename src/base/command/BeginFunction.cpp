@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -126,7 +126,7 @@ GmatBase* BeginFunction::Clone() const
 }
 
 
-GmatBase* BeginFunction::GetRefObject(const Gmat::ObjectType type,
+GmatBase* BeginFunction::GetRefObject(const UnsignedInt type,
                                     const std::string &name)
 {
    if (type == Gmat::UNKNOWN_OBJECT)  // Just find it by name
@@ -153,7 +153,7 @@ GmatBase* BeginFunction::GetRefObject(const Gmat::ObjectType type,
 
 
 // Function used to put objects in the local onject map
-bool BeginFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool BeginFunction::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                     const std::string &name)
 {
    bool retval = false;
@@ -172,7 +172,7 @@ bool BeginFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    return retval;
 }
 
-bool BeginFunction::RenameRefObject(const Gmat::ObjectType type,
+bool BeginFunction::RenameRefObject(const UnsignedInt type,
                                     const std::string &oldName,
                                     const std::string &newName)
 {

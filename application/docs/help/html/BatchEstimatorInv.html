@@ -1,9 +1,9 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>BatchEstimatorInv</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="Barycenter.html" title="Barycenter"><link rel="next" href="CelestialBody.html" title="CelestialBody"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">BatchEstimatorInv</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Barycenter.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="CelestialBody.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="BatchEstimatorInv"></a><div class="titlepage"></div><a name="N15836" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">BatchEstimatorInv</span></h2><p>BatchEstimatorInv &mdash; A batch least squares estimator</p></div><div class="refsection"><a name="N15847"></a><h2>Description</h2><p>A batch least squares estimator is a method for obtaining an
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>BatchEstimatorInv</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="Barycenter.html" title="Barycenter"><link rel="next" href="CelestialBody.html" title="CelestialBody"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">BatchEstimatorInv</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Barycenter.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="CelestialBody.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="BatchEstimatorInv"></a><div class="titlepage"></div><a name="N15846" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">BatchEstimatorInv</span></h2><p>BatchEstimatorInv &mdash; A batch least squares estimator</p></div><div class="refsection"><a name="N15857"></a><h2>Description</h2><p>A batch least squares estimator is a method for obtaining an
     estimate for a parameter vector, x0, such that a performance index, which
     is a function of that parameter, J = J(x0), is minimized. For our
     application, x0 typically includes the spacecraft position and velocity at
-    a specific epoch and the performance index is a weighted sum of the square
-    of the measurement residuals.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="TrackingFileSet.html" title="TrackingFileSet"><span class="refentrytitle">TrackingFileSet</span></a>, <a class="xref" href="RunEstimator.html" title="RunEstimator"><span class="refentrytitle">RunEstimator</span></a></p></div><div class="refsection"><a name="N15856"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AbsoluteTol</span></td><td><p>Absolute Weighted RMS convergence criteria tolerance
+    a specific epoch and the performance index is a weighted sum of the
+    squares of the measurement residuals.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="TrackingFileSet.html" title="TrackingFileSet"><span class="refentrytitle">TrackingFileSet</span></a>, <a class="xref" href="RunEstimator.html" title="RunEstimator"><span class="refentrytitle">RunEstimator</span></a></p></div><div class="refsection"><a name="N15866"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AbsoluteTol</span></td><td><p>Absolute Weighted RMS convergence criteria tolerance
             </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <span class="guilabel">0.001</span>
                     </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DataFilters</span></td><td><p>Defines filters to be applied to the data. One or
@@ -28,6 +28,12 @@
             field. In later releases, additional options will be allowed.
             </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>'FromParticipants'</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <span class="guilabel">'FromParticipants'</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FreezeIteration</span></td><td><p>Specifies which iteration to freeze the selection of
+            measurements that are edited out</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>any positive integer</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">4</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FreezeMeasurementEditing</span></td><td><p>Allows the selection of measurements that are edited
+            out to be frozen</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>true/false</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true or false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">false</span>
                     </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">InversionAlgorithm</span></td><td><p>Algorithm used to invert the normal equations</p>
             <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Internal, Cholesky, Schur</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <span class="guilabel">Internal</span>
@@ -43,18 +49,24 @@
             batch estimation</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>any positive integer</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <span class="guilabel">15</span>
                     </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Measurements</span></td><td><p>Specifies a list of measurements used for batch
-            estimation</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>ObjectArray</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>valid <span class="guilabel">TrackingFileSet</span>
-                    object</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+            estimation</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>ObjectArray</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>one or more valid
+                    <span class="guilabel">TrackingFileSet</span> objects</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <span class="guilabel">empty list</span>
                     </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel"> OLSEAdditiveConstant</span></td><td><p>Additive constant used for outer loop sigma editing
             (OLSE)</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>any real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <span class="guilabel">0.0</span>
-                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">OLSEInitialRMSSigma</span></td><td><p>Initial predicted root-mean-square value used for
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">OLSEInitialRMSSigma</span></td><td><p>Initial predicted root-mean-square value used for
             outer loop sigma editing (OLSE)</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0.0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <span class="guilabel">3000.0</span>
                     </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">OLSEMultiplicativeConstant </span></td><td><p>Multiplicative constant used for outer loop sigma
             editing (OLSE)</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0.0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <span class="guilabel">3.0</span>
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">OLSEUseRMSP</span></td><td><p>Flag used to specify editing algorithm used for outer
+            loop sigma editing (OLSE) for iterations greater than 1. See
+            <span class="guilabel">Behavior of Outer Loop Sigma Editing (OLSE)</span>
+            in the <span class="guilabel">Remarks</span> section for details. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>true/false</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true or false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">true</span>
                     </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>dimensionless</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Propagator</span></td><td><p><span class="guilabel">Propagator</span> object used for batch
             estimation</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Object</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>valid <span class="guilabel">Propagator</span> object</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <span class="guilabel">None</span>
@@ -67,9 +79,9 @@
                       '.data'</span>
                     </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ReportStyle</span></td><td><p>Specifies the type of estimation report. The
             <code class="code">Normal</code> style excludes reporting of observation TAI,
-            partials, and frequency information. For GMAT version R2016A, for
-            normal GMAT operation, only the <code class="code">Normal</code> style is an
-            allowed choice. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Normal</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+            partials, and frequency information. For this current GMAT
+            version, for normal GMAT operation, only the <code class="code">Normal</code>
+            style is an allowed choice. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Normal</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <span class="guilabel">Normal</span>
                     </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ResetBestRMSIfDiverging</span></td><td><p>If set true and the estimation process has diverged,
             then the Best RMS is reset to the current RMS.
@@ -85,25 +97,43 @@
             <span class="guilabel">Spacecraft.OrbitErrorCovariance</span>,
             <span class="guilabel">Spacecraft.CdSigma</span>,
             <span class="guilabel">Spacecraft.CrSigma</span>, or
-            <span class="guilabel">ErrorModel.BiasSigma</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>true/false</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true or false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+            <span class="guilabel">ErrorModel.BiasSigma</span>. See the
+            <span class="guilabel">Remarks</span> section below for some restrictions
+            on the use of this field.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>true/false</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true or false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <span class="guilabel">false</span>
-                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N15C5D"></a><h2>Remarks</h2><div class="refsection"><a name="N15C60"></a><h3>Behavior of Convergence Criteria</h3><p>GMAT has four input fields, <span class="guilabel">RelativeTol</span>,
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N15D06"></a><h2>Remarks</h2><div class="refsection"><a name="N15D09"></a><h3>Navigation Requires Use of Fixed Step Numerical
+      Integration</h3><p>GMAT navigation requires use of fixed stepped propagation. The
+      <span class="guilabel">BatchEstimatorInv</span> resource has a
+      <span class="guilabel">Propagator</span> field containing the name of the
+      <span class="guilabel">Propagator</span> resource that will be used during the
+      estimation process. As shown in the <span class="guilabel">Note</span> below,
+      there are some hard restrictions on the choice of error control
+      specified for the <span class="guilabel">ForceModel</span> resource associated
+      with your propagator.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>For batch estimation, the <code class="code">ErrorControl</code> parameter
+        specified for the <span class="guilabel">ForceModel</span> resource associated
+        with the <span class="guilabel">BatchEstimatorInv</span>
+        <span class="guilabel">Propagator</span> must be set to '<code class="code">None</code>.' Of
+        course, when using fixed step control, the user must choose a step
+        size, as given by the <span class="guilabel">Propagator</span>
+        <code class="code">InitialStepSize</code> field, for the chosen orbit regime and
+        force profile, that yields the desired accuracy.</p></div></div><div class="refsection"><a name="N15D35"></a><h3>Behavior of Convergence Criteria</h3><p>GMAT has four input fields, <span class="guilabel">RelativeTol</span>,
       <span class="guilabel">AbsoluteTol</span>,
       <span class="guilabel">MaximumIterations</span>, and
       <span class="guilabel">MaxConsecutiveDivergences</span> that are used to
       determine if the estimator has converged after each new iteration.
       Associated with these input fields are the two convergence tests shown
       below:</p><p><span class="bold"><strong>Absolute Weighted RMS convergence criteria
-      </strong></span></p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Weighted RMScurrent &le; AbsoluteTol</p><p><span class="bold"><strong>Relative Weighted Root Mean Square (RMS)
-      convergence criteria</strong></span></p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|RMSP &ndash; RMSB|/ RMSB &le; RelativeTol</p><p>where</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RMSB = smallest Weighted RMS achieved during the current
+      </strong></span></p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Weighted RMScurrent &lt;= AbsoluteTol</p><p><span class="bold"><strong>Relative Weighted Root Mean Square (RMS)
+      convergence criteria</strong></span></p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|RMSP &ndash; RMSB|/ RMSB &lt;= RelativeTol</p><p>where</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RMSB = smallest Weighted RMS achieved during the current
       and previous iterations</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RMSP = predicted Weighted RMS of next iteration</p><p>Batch estimation is considered to have converged when either or
       both of the above criteria is met within
       <span class="guilabel">MaximumIterations</span> iterations or less.</p><p>Batch estimation is considered to have diverged when number of
       consecutive diverging iterations is equal to or greater than
       <span class="guilabel">MaxConsecutiveDivergences</span> or the number of
-      iterations exceeds <span class="guilabel">MaximumIterations</span>.</p></div><div class="refsection"><a name="N15C90"></a><h3>Behavior of Outer Loop Sigma Editing (OLSE)</h3><p>GMAT has three input fields,
+      iterations exceeds <span class="guilabel">MaximumIterations</span>.</p></div><div class="refsection"><a name="N15D65"></a><h3>Behavior of Outer Loop Sigma Editing (OLSE)</h3><p>GMAT has four input fields,
       <span class="guilabel">OLSEMultiplicativeConstant</span>,
-      <span class="guilabel">OLSEAdditiveConstant</span>, and
+      <span class="guilabel">OLSEAdditiveConstant</span>,
+      <span class="guilabel">OLSEUseRMSP</span>, and
       <span class="guilabel">OLSEInitialRMSSigma</span>, that are used to 'edit' (i.e.,
       reject or throw away) bad measurement data. There are plans to have both
       an inner loop and and outer loop iteration editing procedure. Currently,
@@ -116,22 +146,72 @@
       <span class="guilabel">OLSEInitialRMSSigma</span></p><p>where the Weighted Measurement Residual for a single given
       measurement is given by</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(O-C)/<span class="guilabel">NoiseSigma</span></p><p>and where <span class="guilabel">NoiseSigma</span> is the input noise (one
       sigma) for the measurement type associated with the given measurement.
-      On subsequent outer loop iterations, data is edited if</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|Weighted Measurement Residual| &gt;
-      <span class="guilabel">OLSEMultiplicativeConstant</span> * WRMSP +
-      <span class="guilabel">OLSEAdditiveConstan</span>t</p><p>where WRMSP is the predicted weighted RMS calculated at the end of
-      the previous iteration.</p></div><div class="refsection"><a name="N15CB7"></a><h3>Propagator Settings</h3><p>The <span class="guilabel">BatchEstimatorInv</span> resource has a
+      On subsequent outer loop iterations, the data is edited if</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|Weighted Measurement Residual| &gt;
+      <span class="guilabel">OLSEMultiplicativeConstant</span> * RMS +
+      <span class="guilabel">OLSEAdditiveConstan</span>t</p><p>The editing algorithm above depends upon the user input value of
+      <span class="guilabel">OLSEUseRMSP</span>. If <span class="guilabel">OLSEUseRMSP</span> =
+      True, then RMS = <span class="guilabel">WRMSP</span> where
+      <span class="guilabel">WRMSP</span> is the predicted weighted RMS calculated at
+      the end of the previous iteration. Otherwise, If
+      <span class="guilabel">OLSEUseRMSP</span> = False, then RMS =
+      <span class="guilabel">WRMS</span> where <span class="guilabel">WRMS</span> is the actual
+      weighted RMS calculated at the end of the previous iteration.</p></div><div class="refsection"><a name="N15DA4"></a><h3>Behavior of Freezing Measurement Editing</h3><p>GMAT has two input fields,
+      <span class="guilabel">FreezeMeasurementEditing</span> and
+      <span class="guilabel">FreezeIteration</span>, that are used to determine if and
+      when to 'freeze' (i.e., no longer change) the selection of measurements
+      which are edited out by the Outer Loop Sigma Editor. Freezing the
+      measurement editing only takes place when
+      <span class="guilabel">FreezeMeasurementEditing</span> is true.</p><p>If freezing is enabled, the selection of measurements to edit is
+      locked after the iteration specified by
+      <span class="guilabel">FreezeIteration</span>. If the value of
+      <span class="guilabel">FreezeIteration</span> is 1, the estimator uses the value
+      of <span class="guilabel">OLSEInitialRMSSigma</span>, as defined above, to
+      determine which measurements are used to calculate the first iteration
+      of the state vector deviation vector. Afterwards, the same measurements
+      edited out by the initial RMS sigma filter are edited out for the
+      remainder of the iterations. If the value of
+      <span class="guilabel">FreezeIteration</span> is 2 or greater, the estimator uses
+      the above defined outer loop sigma editing to determine the state vector
+      deviation vector up to the iteration specified by
+      <span class="guilabel">FreezeIteration</span>, at which point whichever
+      measurements are edited out by the outer loop sigma editor stay edited
+      out for the remainder of the iterations. Frozen measurements that are
+      edited out will retain the edit flag the outer loop sigma editor used
+      the iteration they were edited out.</p><p>Freezing measurement editing can be useful in situations where a
+      solution takes an excessive number of iterations to converge and latter
+      iterations are only editing a small amount of data. If this is the case,
+      enabling the editing freeze on an appropriate iteration will generally
+      force the solution to converge quickly after reaching the frozen
+      iteration.</p></div><div class="refsection"><a name="N15DC5"></a><h3>Propagator Settings</h3><p>The <span class="guilabel">BatchEstimatorInv</span> resource has a
       <span class="guilabel">Propagator</span> field containing the name of the
       <span class="guilabel">Propagator</span> resource that will be used during the
-      estimation process. It is recommended that if the
-      <span class="guilabel">ForceModel</span> resource associated with your propagator
-      is using relative step control, i.e., <code class="code">ErrorControl =
-      RSSStep</code>, then the minimum step size,
-      <span class="guilabel">MinStep</span>, of your propagator should be set to
-      0.</p></div><div class="refsection"><a name="N15CCE"></a><h3>Interactions</h3><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Resource</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">TrackingFileSet resource</span></td><td><p> Must be created in order to tell the
+      estimation process. The minimum step size, <span class="guilabel">MinStep</span>,
+      of your propagator should always be set to 0.</p></div><div class="refsection"><a name="BatchEstimatorInv_UseInitialCovariance"></a><h3>UseInitialCovariance Restrictions</h3><p>As mentioned in the Field spec above, if this field is set to
+      true, then the <span class="emphasis"><em>a priori</em></span> error covariance term is
+      added to the estimation cost function. For the current GMAT release,
+      there are some restrictions on the use of this field as given
+      below.</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>The user must input the <span class="emphasis"><em>a priori</em></span> orbit
+          state covariance in the EarthMJ200Eq coordinate system.</p></li><li class="listitem"><p>If the user is solving for the Cartesian orbit state, e.g.,
+          Sat.SolveFors = {CartesianState}, then the input <span class="emphasis"><em>a
+          priori</em></span> orbit state covariance must be in terms of
+          Cartesian elements. Likewise, if the user is solving for the
+          Keplerian orbit state, e.g., Sat.SolveFors = {KeplerianState}, then
+          the input <span class="emphasis"><em>a priori</em></span> orbit state covariance must
+          be in terms of Keplerian elements.</p></li><li class="listitem"><p>If the user is solving for the Keplerian orbit state, e.g.,
+          Sat.SolveFors = {KeplerianState}, then the input <span class="emphasis"><em>a
+          priori</em></span> orbit state covariance must be expressed in terms
+          in terms of spacecraft Mean Anomaly (MA) and not True Anomaly (TA).
+          To be more specific, in this situation, the diagonal elements of the
+          6x6 orbit state error covariance are the variance of the SMA (km^2),
+          eccentricity (dimensionless), INC (deg^2), RAAN (deg^2), AOP
+          (deg^2), and MA (deg^2). Note that, in this case, we require the
+          <span class="emphasis"><em>a priori</em></span> covariance to be input in terms of MA
+          even though, for the current release of GMAT, the associated orbit
+          state can not be set using MA.</p></li></ol></div></div><div class="refsection"><a name="N15DF8"></a><h3>Interactions</h3><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Resource</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">TrackingFileSet resource</span></td><td><p> Must be created in order to tell the
               <span class="guilabel">BatchEstimatorInv</span> resource which data will
               be processed</p></td></tr><tr><td><span class="guilabel">Propagator resource</span></td><td>Used by GMAT to generate the predicted orbit</td></tr><tr><td><span class="guilabel">RunEstimator command</span></td><td><p> Must use the <span class="guilabel">RunEstimator</span>
               command to actually process the data defined by the
-              <span class="guilabel">BatchEstimatorInv</span> resource</p></td></tr></tbody></table></div></div></div><div class="refsection"><a name="N15CFE"></a><h2>Examples</h2><div class="informalexample"><p>Below is an example of a configured batch estimator instance. In
+              <span class="guilabel">BatchEstimatorInv</span> resource</p></td></tr></tbody></table></div></div></div><div class="refsection"><a name="N15E28"></a><h2>Examples</h2><div class="informalexample"><p>Below is an example of a configured batch estimator instance. In
       this example, <span class="guilabel">estData</span> is an instance of a
       <span class="guilabel">TrackingFileSet</span> and <span class="guilabel">ODProp</span> is
       an instance of <span class="guilabel">Propagator</span>.</p><pre class="programlisting">Create BatchEstimatorInv bat;

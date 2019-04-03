@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -21,6 +21,7 @@
 // Author: John P. Downing/GSFC/595
 // Created: 2010.10.28
 // (modified for style, etc. by Wendy Shoan/GSFC/583 2011.05.31)
+// Tide fix, Cleaned up, April 2016 - John Downing
 //
 /**
  * This is the base class for the HarmonicGravity set of classes
@@ -29,66 +30,114 @@
 //------------------------------------------------------------------------------
 #ifndef HarmonicGravity_hpp
 #define HarmonicGravity_hpp
-
+//------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
 #include "Harmonic.hpp"
 #include "Rmatrix33.hpp"
-
-class HarmonicGravity : public Harmonic
-{
+//------------------------------------------------------------------------------
+const Integer LoveMax = 4;
+//------------------------------------------------------------------------------
+class GMAT_API HarmonicValue {
 public:
-   HarmonicGravity (const std::string& filename);
-   HarmonicGravity(const HarmonicGravity& hg);
+   HarmonicValue ();
+   HarmonicValue (const Integer& n, const Integer& m, 
+      const Real& c, const Real& s);
+public:
+   Integer N;
+   Integer M; 
+   Real    C;
+   Real    S;
+};
+//------------------------------------------------------------------------------
+class GMAT_API HarmonicGravity : public Harmonic {
+public:
+   HarmonicGravity 
+     (const std::string& filename, const std::string& tideFilename, const Real& radius,
+      const Real& mukm, const std::string& bodyname, const bool& loadCoefficients);
+private: // Copy protected
+   HarmonicGravity (const HarmonicGravity& hg);
    HarmonicGravity& operator=(const HarmonicGravity& hg);
+public:
    virtual ~HarmonicGravity();
 
-   std::string              GetFilename();
-
+   std::string GetFilename();
+   std::string GetTideFilename();
+   std::string GetBodyName();
+   bool HaveTideModel (const int& etide);
+   bool IsTideFree();
+   bool IsZeroTide();
+   std::string TideString();
    virtual Real Cnm(const Real& jday, const Integer& n, const Integer& m) const;
    virtual Real Snm(const Real& jday, const Integer& n, const Integer& m) const;
-   virtual void CalculatePointField(const Real& jday,         const Real pos[3],
-                                    const Integer& nn,        const Integer& mm,
-                                    const bool& usetides,     const Real sunpos[3], const Real moonpos[3],
-                                    const bool& fillgradient, Real  acc[3],          Rmatrix33& gradient);
-   virtual void CalculateFullField(const Real& jday,         const Real pos[3],
-                                   const Integer& nn,        const Integer& mm,
-                                   const bool& usetides,     const Real sunpos[3], const Real moonpos[3],
-                                   const Real& sunMass,      const Real& moonMass,
-                                   const Real &xp,           const Real &yp,
-                                   const bool& fillgradient, Real  acc[3],          Rmatrix33& gradient);
-protected:
-   std::string gravityFilename;
-   bool        useTideModel;
+   void CalculatePointField(const Real& jday, const Real pos[3],
+      const Integer& nn, const Integer& mm,
+      const bool& fillgradient,  const Integer& gradientlimit,
+      Real  acc[3], Rmatrix33& gradient);
+   void CalculateFullField(const Real& jday, const Real pos[3],
+      const Integer& nn, const Integer& mm, const Integer& tidelevel, 
+      const Real sunpos[3], const Real& sunmukm, 
+      const Real otherpos[3], const Real& othermukm,
+      const Real &xp, const Real &yp,
+      const bool& fillgradient,  const Integer& gradientlimit,
+      Real acc[3], Rmatrix33& gradient);
 
-   /// Earth tide coefficients
-   Real          CTide[5][5];
-   Real          STide[5][5];
+   void AddZeroTide (const Integer& n, const Integer& m, 
+      const Real& c, const Real& s);
+   void WriteCofFile (const std::string& filename);
 
-   /// Methods useful in Earth Tide computations
-   void SetTide(const Real &jday,      const bool &removepermtide,
-                const Real sunpos[3],  const Real moonpos[3],
-                const Real &sunMass,   const Real &moonMass,
-                const Real &earthMass, const Real &earthRadius,
-                const Real &xp,        const Real &yp);
-   void CartesianToPolar(const Real pos[3], Real out[3]);
-   void PolarToLegendre(const Real polar[3], Real P[5][5]);
+   enum ETide { NoTide,Solid,SolidAndPole };
+   static const std::string ETideString[3];
+   static const Integer ETideCount;
 
-   // Love numbers, k(n,m), IERS p.71, Table 6.3
-   static const Real    k[4][4];
-   static const Real    k_plus[3];
+private: 
+   std::string Filename;
+   std::string TideFilename;
+   std::string BodyName;
+   std::string ModelName;
+   bool Normalized;
+   bool HaveZeroTide;         // In C,s
+   bool HaveTideFree;         // In CTideFree,STideFree
+   bool HaveLoveNumbers;      // In K,KPlus
+   Integer TideLevel;   // Temporary during full field call
 
-   // Table 6.3a, IERS p.64 (for C21,S21 coefficients)
-   static const Integer Table63aDim1 = 48;
-   static const Real    Table63a[Table63aDim1][7];
+   // Tide Free coefficients
+   Integer  ZeroTideMax;
+   std::vector<HarmonicValue> ZeroTideValues;
+   // Love Numbers
+   Real   K[LoveMax+1][LoveMax+1];   
+   Real   KPlus[LoveMax+1];
+   // Variable Coefficients (Temporary)
+   Real   DeltaC[LoveMax+1][LoveMax+1];  // Temporary during full field call
+   Real   DeltaS[LoveMax+1][LoveMax+1];  // Temporary during full field call
 
-   // Table 6.3b, IERS p.66 (for C20 coefficient)
-   static const Integer Table63bDim1 = 21;
-   static const Real    Table63b[Table63bDim1][7];
-
-   // Table 6.3c, IERS p.66 (for C22 coefficient)
-   static const Integer Table63cDim1 = 2;  // 21;  // 21??! should be 2
-   static const Real    Table63c[Table63cDim1][6];
-
+   // Methods useful in Tide computations
+   void ClearDeltaCS ();
+   void IncrementSolidTide (const Real pos[3], const Real& mukm);
+   void IncrementEarthTide (const Real &jday, 
+      const Real sunpos[3], const Real& sunmukm, 
+      const Real otherpos[3], const Real& othermukm,
+      const Real &xp, const Real &yp);
+   // Load Module
+   void LM_Error (const std::string& error);
+   void LM_TideError (const std::string& error);
+   void LM_SetNN (const std::string& st);
+   void LM_SetMM (const std::string& st);
+   void LM_SetMu (const std::string& st);
+   void LM_SetNormalized (const std::string& st);
+   void LM_SetFieldRadius (const std::string& st);
+   void LM_SetCoefficients (const StringArray& sa, 
+      const bool& zerotidevalue); 
+   void LM_SetCoefficients (const std::string& line, 
+      const bool& zerotidevalue); 
+   void LM_SetDefaultEarthTide ();
+   void LM_Load (const bool& loadcoefficients);
+   void LM_Load (std::string& filename, const bool& loadcoefficients);
+   void LM_LoadCof (std::ifstream& instream, const bool& loadcoefficients);
+   void LM_LoadGfc (std::ifstream& instream, const bool& loadcoefficients);
+   void LM_LoadGrv (std::ifstream& instream, const bool& loadcoefficients);
+   void LM_LoadTab (std::ifstream& instream, const bool& loadcoefficients);
+   void LM_LoadTide (std::string& filename, const bool& loadcoefficients);
+   void CheckEarthCoefficient ();
 };
-
+//------------------------------------------------------------------------------
 #endif // HarmonicGravity_hpp

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -99,7 +99,7 @@ bool FactoryManager::RegisterFactory(Factory* fact)
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* CreateObject(const Gmat::ObjectType generalType,
+//  GmatBase* CreateObject(const UnsignedInt generalType,
 //               const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
@@ -112,7 +112,7 @@ bool FactoryManager::RegisterFactory(Factory* fact)
  * @return pointer to the newly-created Spacecraft object
  */
 //------------------------------------------------------------------------------
-GmatBase* FactoryManager::CreateObject(const Gmat::ObjectType generalType,
+GmatBase* FactoryManager::CreateObject(const UnsignedInt generalType,
                                        const std::string &ofType,
                                        const std::string &withName)
 {
@@ -848,7 +848,7 @@ FactoryManager::CreateCoordinateSystem(const std::string &withName)
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfItems(Gmat::ObjectType byType,
+// const StringArray& GetListOfItems(UnsignedInt byType,
 //             const std::string &withQualifier = "")
 //------------------------------------------------------------------------------
 /**
@@ -860,7 +860,7 @@ FactoryManager::CreateCoordinateSystem(const std::string &withName)
  * @return list of creatable items of type byType.
  */
 //------------------------------------------------------------------------------
-const StringArray& FactoryManager::GetListOfItems(Gmat::ObjectType byType,
+const StringArray& FactoryManager::GetListOfItems(UnsignedInt byType,
             const std::string &withQualifier)
 {
    entireList.clear();
@@ -884,7 +884,7 @@ const StringArray& FactoryManager::GetListOfAllItems()
    // Build all creatable object list
    // Now we can do this since data member factoryTypeList was added (LOJ: 2010.08.19)
    // factoryTypeList is filled when factory is registered in the Moderator
-   std::list<Gmat::ObjectType>::iterator ftype = factoryTypeList.begin();
+   std::list<UnsignedInt>::iterator ftype = factoryTypeList.begin();
    while (ftype != factoryTypeList.end())
    {
       GetList(*ftype, "");
@@ -910,7 +910,7 @@ const StringArray& FactoryManager::GetListOfAllItemsExcept(const ObjectTypeArray
    entireList.clear();
    
    // Build all creatable object list except given types
-   std::list<Gmat::ObjectType>::iterator ftype = factoryTypeList.begin();
+   std::list<UnsignedInt>::iterator ftype = factoryTypeList.begin();
    while (ftype != factoryTypeList.end())
    {
       if (find(types.begin(), types.end(), *ftype) == types.end())
@@ -923,7 +923,7 @@ const StringArray& FactoryManager::GetListOfAllItemsExcept(const ObjectTypeArray
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfViewableItems(Gmat::ObjectType byType)
+// const StringArray& GetListOfViewableItems(UnsignedInt byType)
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type byType that can be viewed via GUI.
@@ -933,14 +933,14 @@ const StringArray& FactoryManager::GetListOfAllItemsExcept(const ObjectTypeArray
  * @return list of viewable items of type byType.
  */
 //------------------------------------------------------------------------------
-const StringArray& FactoryManager::GetListOfViewableItems(Gmat::ObjectType byType)
+const StringArray& FactoryManager::GetListOfViewableItems(UnsignedInt byType)
 {
    entireList.clear();
    return GetListOfViewables(byType);
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfUnviewableItems(Gmat::ObjectType byType)
+// const StringArray& GetListOfUnviewableItems(UnsignedInt byType)
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type byType that cannot be viewed via GUI.
@@ -950,7 +950,7 @@ const StringArray& FactoryManager::GetListOfViewableItems(Gmat::ObjectType byTyp
  * @return list of unviewable items of type byType.
  */
 //------------------------------------------------------------------------------
-const StringArray& FactoryManager::GetListOfUnviewableItems(Gmat::ObjectType byType)
+const StringArray& FactoryManager::GetListOfUnviewableItems(UnsignedInt byType)
 {
    entireList.clear();
    return GetListOfUnviewables(byType);
@@ -969,7 +969,7 @@ const ObjectTypeArrayMap& FactoryManager::GetAllObjectTypeArrayMap()
 {
    objectTypeArrayMap.clear();
    
-   std::list<Gmat::ObjectType>::iterator ftype = factoryTypeList.begin();
+   std::list<UnsignedInt>::iterator ftype = factoryTypeList.begin();
    StringArray currList;
    while (ftype != factoryTypeList.end())
    {
@@ -997,7 +997,7 @@ const ObjectTypeArrayMap& FactoryManager::GetAllObjectTypeArrayMap()
  *         not match the subtype
  */
 //------------------------------------------------------------------------------
-bool FactoryManager::DoesObjectTypeMatchSubtype(const Gmat::ObjectType coreType,
+bool FactoryManager::DoesObjectTypeMatchSubtype(const UnsignedInt coreType,
       const std::string &theType, const std::string &theSubtype)
 {
    Factory* theFactory = FactoryManager::FindFactory(coreType, theType);
@@ -1008,27 +1008,27 @@ bool FactoryManager::DoesObjectTypeMatchSubtype(const Gmat::ObjectType coreType,
 
 
 //------------------------------------------------------------------------------
-// Gmat::ObjectType GetBaseTypeOf(const std::string &typeName)
+// UnsignedInt GetBaseTypeOf(const std::string &typeName)
 //------------------------------------------------------------------------------
 /**
  * Return the base type for the input string.
  *
  * @param <typeName> string type name.
  *
- * @return the base Gmat::ObjectType for this string type name.
+ * @return the base UnsignedInt for this string type name.
  */
 //------------------------------------------------------------------------------
-Gmat::ObjectType FactoryManager::GetBaseTypeOf(const std::string &typeName)
+UnsignedInt FactoryManager::GetBaseTypeOf(const std::string &typeName)
 {
    // Special case for the "Create Propagator" line - do we want this?
    //if (typeName == "Propagator") return Gmat::PROP_SETUP;
    StringArray listByType;
    for (int ii = Gmat::SPACECRAFT; ii < Gmat::UNKNOWN_OBJECT; ii++)
    {
-      listByType = GetListOfItems((Gmat::ObjectType)ii);
+      listByType = GetListOfItems((UnsignedInt)ii);
       unsigned int sz = listByType.size();
       for (unsigned int jj = 0; jj < sz; jj++)
-         if (listByType.at(jj) == typeName)  return (Gmat::ObjectType)ii;
+         if (listByType.at(jj) == typeName)  return (UnsignedInt)ii;
    }
    return Gmat::UNKNOWN_OBJECT;
 }
@@ -1078,7 +1078,7 @@ FactoryManager::FactoryManager()
 
 
 //------------------------------------------------------------------------------
-// Factory* FindFactory(Gmat::ObjectType ofType, const std::string forType)
+// Factory* FindFactory(UnsignedInt ofType, const std::string forType)
 //------------------------------------------------------------------------------
 /**
  * Return a pointer to a factory that can create objects of type forType.
@@ -1089,7 +1089,7 @@ FactoryManager::FactoryManager()
  * @return pointer to a factory that creates objects of the requested type.
  */
 //------------------------------------------------------------------------------
-Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
+Factory* FactoryManager::FindFactory(UnsignedInt ofType,
                                      const std::string &forType)
 {
    #ifdef DEBUG_FACTORY_CREATE
@@ -1149,7 +1149,7 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetList(Gmat::ObjectType ofType,
+// const StringArray& GetList(UnsignedInt ofType,
 //             const std::string &withQualifier) const
 //------------------------------------------------------------------------------
 /**
@@ -1161,7 +1161,7 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
  * @return list of creatable items of type ofType.
  */
 //------------------------------------------------------------------------------
-const StringArray& FactoryManager::GetList(Gmat::ObjectType ofType,
+const StringArray& FactoryManager::GetList(UnsignedInt ofType,
             const std::string &withQualifier)
 {
    //entireList.clear();
@@ -1198,7 +1198,7 @@ const StringArray& FactoryManager::GetList(Gmat::ObjectType ofType,
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfViewables(Gmat::ObjectType ofType) const
+// const StringArray& GetListOfViewables(UnsignedInt ofType) const
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type ofType that can be viewed via GUI.
@@ -1208,7 +1208,7 @@ const StringArray& FactoryManager::GetList(Gmat::ObjectType ofType,
  * @return list of viewable items of type ofType.
  */
 //------------------------------------------------------------------------------
-const StringArray& FactoryManager::GetListOfViewables(Gmat::ObjectType ofType)
+const StringArray& FactoryManager::GetListOfViewables(UnsignedInt ofType)
 {
    std::list<Factory*>::iterator f = factoryList.begin();
    while (f != factoryList.end())
@@ -1229,7 +1229,7 @@ const StringArray& FactoryManager::GetListOfViewables(Gmat::ObjectType ofType)
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfUnviewables(Gmat::ObjectType ofType) const
+// const StringArray& GetListOfUnviewables(UnsignedInt ofType) const
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type ofType that can be viewed via GUI.
@@ -1239,7 +1239,7 @@ const StringArray& FactoryManager::GetListOfViewables(Gmat::ObjectType ofType)
  * @return list of viewable items of type ofType.
  */
 //------------------------------------------------------------------------------
-const StringArray& FactoryManager::GetListOfUnviewables(Gmat::ObjectType ofType)
+const StringArray& FactoryManager::GetListOfUnviewables(UnsignedInt ofType)
 {
    std::list<Factory*>::iterator f = factoryList.begin();
    while (f != factoryList.end())

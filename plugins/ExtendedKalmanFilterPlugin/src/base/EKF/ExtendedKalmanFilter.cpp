@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -234,7 +234,7 @@ void ExtendedKalmanFilter::CompleteInitialization()
    }
 
    currentObs =  measManager.GetObsData();
-   prevObsEpoch = currentEpoch;
+   prevObsEpochGT = currentEpochGT;
 }
 
 
@@ -367,7 +367,7 @@ void ExtendedKalmanFilter::Estimate()
    }
 
    // Convert current estimation state from GMAT internal coordinate system to participants' coordinate system
-   GetEstimationStateForReport(currentSolveForState);
+   currentSolveForState = esm.GetEstimationStateForReport();
    UpdateReportText();
 
 
@@ -433,7 +433,7 @@ void ExtendedKalmanFilter::UpdateProcessNoise()
    // TODO implement SNC and DMC models
 
    static bool isFirst = true;
-   dt = (calculatedMeas->epoch - prevObsEpoch)*GmatTimeConstants::SECS_PER_DAY;
+   dt = (calculatedMeas->epochGT - prevObsEpochGT).GetTimeInSec();
 
    if (processNoiseType == ProcessNoiseType::Constant)
    {
@@ -1014,7 +1014,7 @@ void ExtendedKalmanFilter::AdvanceEpoch()
    }
    else
    {
-      nextMeasurementEpoch = measManager.GetEpoch();
+      nextMeasurementEpochGT = measManager.GetEpochGT();
       FindTimeStep();
 
       #ifdef DEBUG_ESTIMATION
@@ -1024,7 +1024,8 @@ void ExtendedKalmanFilter::AdvanceEpoch()
       #endif
 
       // this magical number is from the Batch Estimator in its accumulating state...
-      if (currentEpoch <= (nextMeasurementEpoch+5.0e-12))
+      //if (currentEpoch <= (nextMeasurementEpoch+5.0e-12))
+      if ((currentEpochGT - nextMeasurementEpochGT).GetMjd() <= 5.0e-12)
       {
          // Reset the STM
          for (UnsignedInt i = 0; i < stateSize; ++i)
@@ -1057,7 +1058,7 @@ void ExtendedKalmanFilter::AdvanceEpoch()
       }
    }
 
-   prevObsEpoch = calculatedMeas->epoch;
+   prevObsEpochGT = calculatedMeas->epochGT;
 }
 
 

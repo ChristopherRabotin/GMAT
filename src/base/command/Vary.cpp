@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -396,10 +396,10 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool Vary::RenameRefObject(const Gmat::ObjectType type,
+bool Vary::RenameRefObject(const UnsignedInt type,
                            const std::string &oldName,
                            const std::string &newName)
 {
@@ -481,7 +481,7 @@ const ObjectTypeArray& Vary::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves the list of ref objects used by the Vary.
@@ -493,7 +493,7 @@ const ObjectTypeArray& Vary::GetRefObjectTypeArray()
  * 
  */
 //------------------------------------------------------------------------------
-const StringArray& Vary::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& Vary::GetRefObjectNameArray(const UnsignedInt type)
 {
    refObjectNames.clear();
    
@@ -766,7 +766,7 @@ bool Vary::SetStringParameter(const std::string &label, const std::string &value
 
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -779,7 +779,7 @@ bool Vary::SetStringParameter(const std::string &label, const std::string &value
  * @return success of the operation.
  */
 //------------------------------------------------------------------------------
-bool Vary::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool Vary::SetRefObject(GmatBase *obj, const UnsignedInt type,
                         const std::string &name)
 {
    if (type == Gmat::SOLVER)

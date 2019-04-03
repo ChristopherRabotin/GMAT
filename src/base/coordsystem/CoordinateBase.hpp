@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -57,7 +57,7 @@ class GMAT_API CoordinateBase : public GmatBase
 public:
 
    // default constructor
-   CoordinateBase(Gmat::ObjectType ofType, const std::string &itsType,
+   CoordinateBase(UnsignedInt ofType, const std::string &itsType,
                   const std::string &itsName = "");
    // copy constructor
    CoordinateBase(const CoordinateBase &coordBase);
@@ -164,12 +164,12 @@ public:
                                               const char *value);
    virtual bool            SetStringParameter(const std::string &label, 
                                               const std::string &value);
-   virtual GmatBase*       GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*       GetRefObject(const UnsignedInt type,
                                         const std::string &name);
-   const StringArray&      GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   const StringArray&      GetRefObjectNameArray(const UnsignedInt type);
+   virtual bool            SetRefObject(GmatBase *obj, const UnsignedInt type,
                                         const std::string &name = "");
-   virtual bool            RenameRefObject(const Gmat::ObjectType type,
+   virtual bool            RenameRefObject(const UnsignedInt type,
                                            const std::string &oldName,
                                            const std::string &newName);
 

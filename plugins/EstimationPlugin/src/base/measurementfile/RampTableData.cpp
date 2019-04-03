@@ -39,6 +39,7 @@ RampTableData::RampTableData() :
    type              (Gmat::UNKNOWN_MEASUREMENT),
    epochSystem       (TimeConverterUtil::A1MJD),
    epoch             (-1.0),
+   epochGT           (-1.0),
    uplinkBand        (0),
    rampType          (1),
    rampFrequency     (0.0),
@@ -75,6 +76,7 @@ RampTableData::RampTableData(const RampTableData& rtd):
    type                    (rtd.type),
    epochSystem             (rtd.epochSystem),
    epoch                   (rtd.epoch),
+   epochGT                 (rtd.epochGT),
    participantIDs          (rtd.participantIDs),
    uplinkBand              (rtd.uplinkBand),
    rampType                (rtd.rampType),
@@ -106,6 +108,7 @@ RampTableData& RampTableData::operator=(const RampTableData& rtd)
 	   type                    = rtd.type;
       epochSystem             = rtd.epochSystem;
       epoch                   = rtd.epoch;
+      epochGT                 = rtd.epochGT;
       participantIDs          = rtd.participantIDs;
       uplinkBand              = rtd.uplinkBand;
 	   rampType                = rtd.rampType;
@@ -132,6 +135,7 @@ void RampTableData::Clear()
    type                    = Gmat::UNKNOWN_MEASUREMENT;
    epochSystem             = TimeConverterUtil::A1MJD;
    epoch                   = 0.0;
+   epochGT                 = 0.0;
    participantIDs.clear();
    uplinkBand              = 0;
    rampType                = 1;

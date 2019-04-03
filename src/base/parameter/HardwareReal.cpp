@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -40,7 +40,7 @@
 //              bool isSettable)
 //------------------------------------------------------------------------------
 HardwareReal::HardwareReal(const std::string &name, const std::string &typeStr, 
-                           Gmat::ObjectType ownerType, Gmat::ObjectType ownedObjType,
+                           UnsignedInt ownerType, UnsignedInt ownedObjType,
                            GmatBase *obj, const std::string &desc, const std::string &unit,
                            bool isSettable)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
@@ -180,10 +180,10 @@ bool HardwareReal::SetName(const std::string &newName, const std::string &oldNam
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string &oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string &oldName,
 //                      const std::string &newName)
 //------------------------------------------------------------------------------
-bool HardwareReal::RenameRefObject(const Gmat::ObjectType type,
+bool HardwareReal::RenameRefObject(const UnsignedInt type,
                                    const std::string &oldName,
                                    const std::string &newName)
 {
@@ -192,9 +192,9 @@ bool HardwareReal::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
-std::string HardwareReal::GetRefObjectName(const Gmat::ObjectType type) const
+std::string HardwareReal::GetRefObjectName(const UnsignedInt type) const
 {
    std::string objName = SpacecraftData::GetRefObjectName(type);
    
@@ -210,18 +210,18 @@ std::string HardwareReal::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& HardwareReal::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& HardwareReal::GetRefObjectNameArray(const UnsignedInt type)
 {
    return SpacecraftData::GetRefObjectNameArray(type);
 }
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
-bool HardwareReal::SetRefObjectName(const Gmat::ObjectType type,
+bool HardwareReal::SetRefObjectName(const UnsignedInt type,
                                     const std::string &name)
 {
    bool ret = SpacecraftData::SetRefObjectName(type, name);
@@ -237,9 +237,9 @@ bool HardwareReal::SetRefObjectName(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* HardwareReal::GetRefObject(const Gmat::ObjectType type,
+GmatBase* HardwareReal::GetRefObject(const UnsignedInt type,
                                      const std::string &name)
 {
    GmatBase *obj = SpacecraftData::GetRefObject(type, name);
@@ -257,10 +257,10 @@ GmatBase* HardwareReal::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name)
 //------------------------------------------------------------------------------
-bool HardwareReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool HardwareReal::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                 const std::string &name)
 {
    #if DEBUG_REF_OBJECT

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -147,7 +147,7 @@ void ExpressionParser::SetParameterDatabase(ParameterDatabase *pdb)
 //------------------------------------------------------------------------------
 void ExpressionParser::EvalTwoTerms(Real &result)
 {
-   register char op; // it's heavily used
+   char op; // it's heavily used
    Real temp;
 
    EvalTwoFactors(result);
@@ -181,7 +181,7 @@ void ExpressionParser::EvalTwoTerms(Real &result)
 //------------------------------------------------------------------------------
 void ExpressionParser::EvalTwoFactors(Real &result)
 {
-   register char op; // it's heavily used
+   char op; // it's heavily used
    Real temp;
 
    EvalExponent(result);
@@ -253,7 +253,7 @@ void ExpressionParser::EvalExponent(Real &result)
 //------------------------------------------------------------------------------
 void ExpressionParser::EvalUnary(Real &result)
 {
-   register char op;
+   char op;
 
    op = 0;
 
@@ -378,7 +378,7 @@ Real ExpressionParser::EvalVariable(char *var)
 //------------------------------------------------------------------------------
 void ExpressionParser::GetToken()
 {
-   register char *temp;
+   char *temp;
 
    mTokenType = NUMBER;
    temp = mToken;

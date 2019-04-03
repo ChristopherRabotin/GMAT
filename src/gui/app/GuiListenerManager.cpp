@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -41,16 +41,20 @@
 
 #endif
 
+#include "MessageInterface.hpp"
+
 #include "GuiListenerManager.hpp"
 
 //#define DEBUG_TABLE_CREATE 1
 //#define DEBUG_PLOT_PERSISTENCE 1
+//#define DEBUG_TABLE_LISTENERS
 
 //---------------------------------
 //  static data
 //---------------------------------
 GuiListenerManager* GuiListenerManager::theGuiListenerManager = NULL;
 int GuiListenerManager::NumListeners = 0;
+std::map<std::string, Integer> GuiListenerManager::nameMap;
 
 //------------------------------------------------------------------------------
 // GuiListenerManager* GuiListenerManager::Instance()
@@ -90,6 +94,7 @@ GuiListenerManager::GuiListenerManager()
 //------------------------------------------------------------------------------
 GuiListenerManager::~GuiListenerManager()
 {
+   
 }
 
 ISolverListener* GuiListenerManager::CreateSolverListener(const std::string &tableName,
@@ -107,7 +112,7 @@ ISolverListener* GuiListenerManager::CreateSolverListener(const std::string &tab
    #if DEBUG_TABLE_CREATE
    MessageInterface::ShowMessage
       ("GuiListenerManager::CreateSolverListener() Creating MdiTableViewFrame "
-         "%s\n", plotName.c_str());
+         "%s\n", tableName.c_str());
    #endif
       
    Integer x, y, w, h;
@@ -115,15 +120,46 @@ ISolverListener* GuiListenerManager::CreateSolverListener(const std::string &tab
    ComputePlotPositionAndSize(positionX, positionY,
                               width, height, x, y, w, h,
                               isUsingSaved);
-      
+   
+   // Manage the tableName to use, to avoid duplication, which causes problems
+   // on deletion/close
+   bool nameUsed = false;
+   std::stringstream nameToUse;
+   nameToUse << tableName;
+   std::map<std::string, Integer>::iterator pos;
+   for (pos = nameMap.begin(); pos != nameMap.end(); ++pos)
+   {
+      if (pos->first == tableName)
+      {
+         nameToUse << " (" << pos->second << ")";
+         #if DEBUG_TABLE_CREATE
+            MessageInterface::ShowMessage("   Using name '%s' for tableName %s\n",
+                   nameToUse.str().c_str(), tableName.c_str());
+         #endif
+         pos->second++;
+         nameUsed = true;
+         break;
+      }
+   }
+   if (!nameUsed)
+   {
+      nameMap.insert(std::make_pair(tableName, 1));
+      #if DEBUG_TABLE_CREATE
+         MessageInterface::ShowMessage("   Adding name '%s' to map\n",
+                                       tableName.c_str());
+      #endif
+   }
+   
    // create a frame, containing a plot canvas
    #if DEBUG_TABLE_CREATE
    MessageInterface::ShowMessage("   Creating MdiTableViewFrame...\n");
    #endif
    frame = new MdiTableViewFrame
       (GmatAppData::Instance()->GetMainFrame(),
-         tableName, "Solver Window - " + tableName,
-         wxPoint(x, y), wxSize(w, h), wxDEFAULT_FRAME_STYLE);
+       nameToUse.str(), "Solver Window - " + tableName,
+       wxPoint(x, y), wxSize(w, h), wxDEFAULT_FRAME_STYLE);
+//      tableName, "Solver Window - " + tableName,
+//      wxPoint(x, y), wxSize(w, h), wxDEFAULT_FRAME_STYLE);
    if (frame)
    {
       frame->SetSavedConfigFlag(isUsingSaved);
@@ -154,7 +190,7 @@ ISolverListener* GuiListenerManager::CreateSolverListener(const std::string &tab
    #if DEBUG_TABLE_CREATE
    MessageInterface::ShowMessage
       ("GuiListenerManager::CreateSolverListener() frame created, frame->GetPlotName()=%s\n",
-         frame->GetPlotName().c_str());
+         frame->GetPlotName().WX_TO_C_STRING);
    #endif
       
    // Tile plots if TILED_PLOT mode is set from the startup file
@@ -209,6 +245,9 @@ bool GuiListenerManager::ComputePlotPositionAndSize(Real positionX,
    }
    
    Integer plotCount = NumListeners++;//MdiGlPlot::numChildren + MdiTsPlot::numChildren;
+#ifdef DEBUG_TABLE_LISTENERS
+   MessageInterface::ShowMessage("NumListeners has just been set to %d\n", NumListeners); // ***
+#endif
    bool isPresetSizeUsed = false;
    
    Integer screenWidth = 0;
@@ -299,4 +338,7 @@ bool GuiListenerManager::ComputePlotPositionAndSize(Real positionX,
 void GuiListenerManager::ClosingSolverListener()
 {
    NumListeners--;
+#ifdef DEBUG_TABLE_LISTENERS
+   MessageInterface::ShowMessage("NumListeners has just been DECREASED to %d\n", NumListeners); // ***
+#endif
 }

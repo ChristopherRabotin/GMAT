@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -42,6 +42,7 @@
 #include "MJ2000EqAxes.hpp"
 #include "MJ2000EcAxes.hpp"
 #include "TopocentricAxes.hpp"
+#include "TODEqAxes.hpp"
 #include "BodyFixedAxes.hpp"
 #include "Rmatrix33.hpp"
 #include "GmatGlobal.hpp"               // for GetEopFile(), GetItrfCoefficientsFile()
@@ -1146,6 +1147,72 @@ Rvector CoordinateSystem::ToBaseSystem(const A1Mjd &epoch, const Rvector &inStat
 }
 
 //------------------------------------------------------------------------------
+//  Rvector  ToBaseSystem(const GmatTime &epoch, const Rvector &inState,
+//                        bool coincident, bool forceComputation)
+//------------------------------------------------------------------------------
+/**
+ * This method converts the input state, in 'this' axisSystem, to the base system.
+ *
+ * @param epoch            epoch for which to do the conversion.
+ * @param inState          input state to convert.
+ * @param coincident       are the systems coincident?.
+ * @param forceComputation should we force computation even if it is not time to
+ *                         compute
+ *
+ * @return input state converted to the base system.
+ *
+ */
+//------------------------------------------------------------------------------
+Rvector CoordinateSystem::ToBaseSystem(const GmatTime &epoch, const Rvector &inState,
+                                       bool coincident,
+                                       bool forceComputation)
+{
+   static Rvector internalState;
+   static Rvector finalState;
+   #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+      "In CS::ToBaseSystem, inState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
+   #endif
+   internalState.SetSize(inState.GetSize());
+   finalState.SetSize(inState.GetSize());
+   
+   if (axes)
+   {
+      if (!axes->RotateToBaseSystem(epoch,inState,internalState, forceComputation))
+         throw CoordinateSystemException("Error rotating state to the base system for "
+                                         + instanceName);
+   }
+   else // assume this is the base system, so no rotation is necessary
+      internalState = inState;
+
+   if (!coincident)
+   {
+      if (!TranslateToBaseSystem(epoch,internalState, finalState))
+         throw CoordinateSystemException("Error translating state to the base system for "
+                                         + instanceName);
+      #ifdef DEBUG_INPUTS_OUTPUTS
+         MessageInterface::ShowMessage(
+         "In CS::ToBaseSystem, translation happening\n");
+      #endif
+   }
+   else
+      finalState = internalState;
+
+   #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+      "In CS::ToBaseSystem, internalState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      internalState[0], internalState[1], internalState[2], 
+      internalState[3],internalState[4], internalState[5]);
+      MessageInterface::ShowMessage(
+      "In CS::ToBaseSystem, finalState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      finalState[0], finalState[1], finalState[2], 
+      finalState[3],finalState[4], finalState[5]);
+   #endif
+   return finalState; // implicit copy constructor
+}
+
+//------------------------------------------------------------------------------
 // void ToBaseSystem(const A1Mjd &epoch, const Real *inState, Real *outState,
 //                   bool coincident, bool forceComputation)
 //------------------------------------------------------------------------------
@@ -1161,6 +1228,69 @@ Rvector CoordinateSystem::ToBaseSystem(const A1Mjd &epoch, const Rvector &inStat
  */
 //------------------------------------------------------------------------------
 void CoordinateSystem::ToBaseSystem(const A1Mjd &epoch, const Real *inState,
+                                    Real *outState,     bool coincident,
+                                    bool forceComputation)
+{
+   #ifdef DEBUG_INPUTS_OUTPUTS
+   MessageInterface::ShowMessage
+      ("In CS::ToBaseSystem, inState = \n   %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+       inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
+   MessageInterface::ShowMessage
+      ("   axes=<%p> '%s'\n", axes, axes ? (axes->GetName().c_str() == "" ?
+       axes->GetTypeName().c_str() : axes->GetName().c_str()) : "NULL");
+   #endif
+   Real internalState[6];
+   if (axes)
+   {
+      if (!axes->RotateToBaseSystem(epoch, inState, internalState, forceComputation))
+         throw CoordinateSystemException("Error rotating state to the base system for "
+                                         + instanceName);
+      #ifdef DEBUG_INPUTS_OUTPUTS
+      Rvector6 rv(internalState);
+      MessageInterface::ShowMessage
+         ("In CS::ToBaseSystem, Rotated to the base system, internalState=\n   %s\n",
+          rv.ToString().c_str());
+      #endif
+   }
+   else // assume this is the base system, so no rotation is necessary
+      for (Integer i=0; i<6;i++) internalState[i] = inState[i];
+   
+   #ifdef DEBUG_TRANSLATION
+      MessageInterface::ShowMessage("In ToBaseSystem for %s, coincident = %s\n",
+            instanceName.c_str(), (coincident? "TRUE" : "FALSE"));
+   #endif
+   if (!coincident)
+   {
+      if (!TranslateToBaseSystem(epoch, internalState, outState))
+         throw CoordinateSystemException("Error translating state to the base system for "
+                                         + instanceName);
+      #ifdef DEBUG_INPUTS_OUTPUTS
+      Rvector6 rv(outState);
+      MessageInterface::ShowMessage
+         ("In CS::ToBaseSystem, translated to the base system, outState=\n   %s\n",
+          rv.ToString().c_str());
+      #endif
+   }
+   else
+      for (Integer i=0; i<6; i++)  outState[i] = internalState[i];
+}
+
+//------------------------------------------------------------------------------
+// void ToBaseSystem(const A1Mjd &epoch, const Real *inState, Real *outState,
+//                   bool coincident, bool forceComputation)
+//------------------------------------------------------------------------------
+/**
+ * This method converts the input state, in 'this' axisSystem, to the base system.
+ *
+ * @param epoch            epoch for which to do the conversion.
+ * @param inState          input state to convert.
+ * @parm  outState         output state resulting from the conversion
+ * @param coincident       are the systems coincident?.
+ * @param forceComputation should we force computation even if it is not time to
+ *                         compute
+ */
+//------------------------------------------------------------------------------
+void CoordinateSystem::ToBaseSystem(const GmatTime &epoch, const Real *inState,
                                     Real *outState,     bool coincident,
                                     bool forceComputation)
 {
@@ -1276,6 +1406,73 @@ Rvector CoordinateSystem::FromBaseSystem(const A1Mjd &epoch, const Rvector &inSt
    return finalState; // implicit copy constructor
 }
 
+//------------------------------------------------------------------------------
+//  Rvector  FromBaseSystem(const GmatTime &epoch, const Rvector &inState,
+//                          bool coincident, bool forceComputation)
+//------------------------------------------------------------------------------
+/**
+ * This method converts the input state, in the base axisSystem, to "this"
+ * axisSystem.
+ *
+ * @param epoch            epoch for which to do the conversion.
+ * @param inState          input state to convert.
+ * @param coincident       are the systems coincident?.
+ * @param forceComputation should we force computation even if it is not time to
+ *                         compute
+ *
+ * @return input state converted from the base system to 'this' axisSystem.
+ *
+ */
+//------------------------------------------------------------------------------
+Rvector CoordinateSystem::FromBaseSystem(const GmatTime &epoch, const Rvector &inState,
+                                         bool coincident,
+                                         bool forceComputation)
+{
+   static Rvector internalState;
+   static Rvector finalState;
+   #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+      "In CS::FromBaseSystem, inState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
+   #endif
+   internalState.SetSize(inState.GetSize());
+   finalState.SetSize(inState.GetSize());
+   if (!coincident)
+   {
+      if (!TranslateFromBaseSystem(epoch,inState, internalState))//,j2000Body))
+         throw CoordinateSystemException("Error translating from the base system for "
+                                         + instanceName);
+    #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+      "In CS::FromBaseSystem (2), translation happening ...\n");
+    #endif
+   }
+   else
+      internalState = inState;
+      
+   if (axes)
+   {
+      if (!axes->RotateFromBaseSystem(epoch,internalState,finalState,
+          forceComputation))//,j2000Body))
+         throw CoordinateSystemException("Error rotating state from the base system for "
+                                         + instanceName);
+   }
+   else
+      finalState    = internalState;
+                                         
+
+   #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+      "In CS::FromBaseSystem, internalState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      internalState[0], internalState[1], internalState[2], 
+      internalState[3],internalState[4], internalState[5]);
+      MessageInterface::ShowMessage(
+      "In CS::FromBaseSystem, finalState = %.17f  %.17f  %.17f  %.17f  %.17f  %.17f\n",
+      finalState[0], finalState[1], finalState[2], 
+      finalState[3], finalState[4], finalState[5]);
+   #endif
+   return finalState; // implicit copy constructor
+}
 
 //------------------------------------------------------------------------------
 //  void  FromBaseSystem(const A1Mjd &epoch, const Rvector &inState,
@@ -1295,6 +1492,79 @@ Rvector CoordinateSystem::FromBaseSystem(const A1Mjd &epoch, const Rvector &inSt
  */
 //------------------------------------------------------------------------------
 void CoordinateSystem::FromBaseSystem(const A1Mjd &epoch, const Real *inState,
+                                      Real *outState,  bool coincident,
+                                      bool forceComputation)
+{
+   #ifdef DEBUG_INPUTS_OUTPUTS
+     MessageInterface::ShowMessage(
+     "Entering CS::FromBaseSystem (1) ..........\n");
+   #endif
+   Real internalState[6];
+   if (!coincident)
+   {
+      if (!TranslateFromBaseSystem(epoch,inState, internalState))//,j2000Body))
+         throw CoordinateSystemException("Error translating from the base system for "
+                                         + instanceName);
+    #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+      "In CS::FromBaseSystem (1), translation happening\n");
+    #endif
+   }
+   else
+      for (Integer i=0; i<6; i++) internalState[i] = inState[i];
+
+   #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+     "In CS::FromBaseSystem set internalState ... %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  \n",
+     internalState[0],internalState[1],internalState[2],internalState[3],internalState[4],internalState[5]);
+   #endif
+      
+
+   if (axes)
+   {
+      #ifdef DEBUG_INPUTS_OUTPUTS
+         MessageInterface::ShowMessage("About to call RotateFromBaseSystem for object %s\n",
+               (GetName()).c_str());
+      #endif
+      if (!axes->RotateFromBaseSystem(epoch,internalState,outState,
+          forceComputation))//,j2000Body))
+         throw CoordinateSystemException("Error rotating state from the base system for "
+                                         + instanceName);
+   }
+   else
+   {
+      #ifdef DEBUG_INPUTS_OUTPUTS
+         MessageInterface::ShowMessage("AXES are NULL in CS::FromBaseSystem (1) for c.s.of type %s\n",
+               (GetTypeName()).c_str());
+      #endif
+      for (Integer i=0; i<6; i++) outState[i]    = internalState[i];
+   }
+   #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+     "LEAVING CS::FromBaseSystem outSTate =  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  \n",
+     outState[0],outState[1],outState[2],outState[3],outState[4],outState[5]);
+   #endif
+                                         
+}
+
+//------------------------------------------------------------------------------
+//  void  FromBaseSystem(const GmatTime &epoch, const Rvector &inState,
+//                       bool coincident, bool forceComputation)
+//------------------------------------------------------------------------------
+/**
+ * This method converts the input state, in the base axisSystem, to "this"
+ * axisSystem.
+ *
+ * @param epoch            epoch for which to do the conversion.
+ * @param inState          input state to convert.
+ * @param outState         output state resulting from the conversion
+ * @param coincident       are the systems coincident?.
+ * @param forceComputation should we force computation even if it is not time to
+ *                         compute
+ *
+ */
+//------------------------------------------------------------------------------
+void CoordinateSystem::FromBaseSystem(const GmatTime &epoch, const Real *inState,
                                       Real *outState,  bool coincident,
                                       bool forceComputation)
 {
@@ -1385,7 +1655,7 @@ void CoordinateSystem::Copy(const GmatBase* orig)
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 /**
@@ -1400,7 +1670,7 @@ void CoordinateSystem::Copy(const GmatBase* orig)
  *         false otherwise
  */
 //---------------------------------------------------------------------------
-bool CoordinateSystem::RenameRefObject(const Gmat::ObjectType type,
+bool CoordinateSystem::RenameRefObject(const UnsignedInt type,
                                        const std::string &oldName,
                                        const std::string &newName)
 {
@@ -1801,7 +2071,7 @@ bool CoordinateSystem::SetBooleanParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//  GmatBase* GetRefObject(const UnsignedInt type,
 //                         const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -1814,7 +2084,7 @@ bool CoordinateSystem::SetBooleanParameter(const std::string &label,
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* CoordinateSystem::GetRefObject(const Gmat::ObjectType type,
+GmatBase* CoordinateSystem::GetRefObject(const UnsignedInt type,
                                          const std::string &name)
 {
    switch (type)
@@ -1931,7 +2201,7 @@ const ObjectTypeArray& CoordinateSystem::GetRefObjectTypeArray()
 
 // DJC added 5/9/05 to facilitate Sandbox initialization
 //------------------------------------------------------------------------------
-//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//  const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Returns the name(s) of the reference object(s). (Derived classes should implement
@@ -1943,7 +2213,7 @@ const ObjectTypeArray& CoordinateSystem::GetRefObjectTypeArray()
  * @return The name(s) of the reference object(s).
  */
 //------------------------------------------------------------------------------
-const StringArray& CoordinateSystem::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& CoordinateSystem::GetRefObjectNameArray(const UnsignedInt type)
 {
    #if DEBUG_CS_REF_OBJECT
    MessageInterface::ShowMessage
@@ -1996,21 +2266,21 @@ const StringArray& CoordinateSystem::GetRefObjectNameArray(const Gmat::ObjectTyp
 }
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const char *name)
 //------------------------------------------------------------------------------
 /**
- * @see SetRefObject(GmatBase *obj, const Gmat::ObjectType type, const std::string &name)
+ * @see SetRefObject(GmatBase *obj, const UnsignedInt type, const std::string &name)
  */
 //------------------------------------------------------------------------------
-bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool CoordinateSystem::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                     const char *name)
 {
    return SetRefObject(obj, type, std::string(name));
 }
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -2024,7 +2294,7 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  *
  */
 //------------------------------------------------------------------------------
-bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool CoordinateSystem::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                     const std::string &name)
 {
    if (obj == NULL)
@@ -2103,7 +2373,7 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 }
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Retrieves object type of parameter of given id.
@@ -2113,7 +2383,7 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return parameter ObjectType
  */
 //---------------------------------------------------------------------------
-Gmat::ObjectType CoordinateSystem::GetPropertyObjectType(const Integer id) const
+UnsignedInt CoordinateSystem::GetPropertyObjectType(const Integer id) const
 {
    switch (id)
    {
@@ -2250,7 +2520,8 @@ CoordinateSystem* CoordinateSystem::CreateLocalCoordinateSystem(
    }
    // these are needed at least by the Measurement code
    else if ((axesType == "MJ2000Eq") || (axesType == "MJ2000Ec") ||
-            (axesType == "Topocentric") || (axesType == "BodyFixed" ))
+            (axesType == "Topocentric") || (axesType == "TODEq" ) ||
+            (axesType == "BodyFixed" ))
    {
       localCS = new CoordinateSystem("CoordinateSystem",csName);
       if (axesType == "MJ2000Eq")
@@ -2259,6 +2530,8 @@ CoordinateSystem* CoordinateSystem::CreateLocalCoordinateSystem(
          theAxes = new MJ2000EcAxes(csName);
       else if (axesType == "Topocentric")
          theAxes = new TopocentricAxes(csName);
+      else if (axesType == "TODEq")
+         theAxes = new TODEqAxes(csName);
       else
          theAxes = new BodyFixedAxes(csName);
       
@@ -2410,6 +2683,79 @@ bool CoordinateSystem::TranslateToBaseSystem(const A1Mjd &epoch,
 }
 
 //------------------------------------------------------------------------------
+//  bool  TranslateToBaseSystem(const GmatTime &epoch, const Rvector &inState,
+//                              Rvector &outState)
+//------------------------------------------------------------------------------
+/**
+ * This method translates the input state, in "this" axisSystem to the base system
+ * axisSystem.
+ *
+ * @param epoch      epoch for which to do the conversion.
+ * @param inState    input state to convert.
+ * @param outState   output (converted) state.
+ *
+ * @return true if successful; false if not.
+ *
+ */
+//------------------------------------------------------------------------------
+bool CoordinateSystem::TranslateToBaseSystem(const GmatTime &epoch,
+                                             const Rvector &inState,
+                                             Rvector &outState)
+{
+   #ifdef DEBUG_TRANSLATION
+      MessageInterface::ShowMessage(
+            "In TranslateToBaseSystem, coord. system is %s, origin is %s and j2000Body is %s\n",
+            (axes->GetTypeName()).c_str(), (origin->GetName()).c_str(), (j2000Body->GetName()).c_str());
+   #endif
+   if (origin == j2000Body)  
+      outState = inState;
+   else
+   {
+      // currently assuming an Rvector6 - update needed later?!?!   - awaiting Darrel on this
+      // compute vector from origin of the base system to origin of this system
+      Rvector6 rif =  origin->GetMJ2000State(epoch) - 
+                      (j2000Body->GetMJ2000State(epoch));
+	  if (this->GetBaseSystem() == "ICRF")
+	  {
+		  // get rotation matrix R from ICRF to FK5:
+		  CoordinateConverter cc;
+		  Rmatrix33 R = cc.GetRotationMatrixFromICRFToFK5(epoch.GetMjd());
+		  // convert rif coordinate from FK5 to ICRF:
+		  Rvector3 r(rif(0), rif(1), rif(2));
+		  Rvector3 v(rif(3), rif(4), rif(5));
+		  r = R.Transpose()*r;
+		  v = R.Transpose()*v;
+		  rif.Set(r(0), r(1), r(2), v(0), v(1), v(2));
+	  }
+
+      outState = inState + rif;
+      #ifdef DEBUG_TRANSLATION
+         Rvector6 tmpOrigin = origin->GetMJ2000State(epoch);
+         MessageInterface::ShowMessage(
+            "In translation, origin state is %12.17f  %12.17f  %12.17f \n",
+            tmpOrigin[0], tmpOrigin[1], tmpOrigin[2]);
+         MessageInterface::ShowMessage(
+            "                                %12.17f  %12.17f  %12.17f \n",
+            tmpOrigin[3], tmpOrigin[4], tmpOrigin[5]);
+         Rvector6 tmpJ2000 = j2000Body->GetMJ2000State(epoch);
+         MessageInterface::ShowMessage(
+            "In translation, J2000Body state is %12.17f  %12.17f  %12.17f \n",
+            tmpJ2000[0], tmpJ2000[1], tmpJ2000[2]);
+         MessageInterface::ShowMessage(
+            "                                %12.17f  %12.17f  %12.17f \n",
+            tmpJ2000[3], tmpJ2000[4], tmpJ2000[5]);
+         MessageInterface::ShowMessage(
+            "In translation, outState is %12.17f  %12.17f  %12.17f \n",
+            outState[0], outState[1], outState[2]);
+         MessageInterface::ShowMessage(
+            "                            %12.17f  %12.17f  %12.17f \n",
+            outState[3], outState[4], outState[5]);
+      #endif
+   }
+   return true;
+}
+
+//------------------------------------------------------------------------------
 // bool TranslateToBaseSystem(const A1Mjd &epoch, const Real *inState,
 //                            Real *outState)
 //------------------------------------------------------------------------------
@@ -2460,6 +2806,74 @@ bool CoordinateSystem::TranslateToBaseSystem(const A1Mjd &epoch,
 		  // get rotation matrix R from ICRF to FK5:
 		  CoordinateConverter cc;
 		  Rmatrix33 R = cc.GetRotationMatrixFromICRFToFK5(epoch);
+		  // convert rif coordinate from FK5 to ICRF:
+		  Rvector3 r(rif(0), rif(1), rif(2));
+		  Rvector3 v(rif(3), rif(4), rif(5));
+		  r = R.Transpose()*r;
+		  v = R.Transpose()*v;
+		  rif.Set(r(0), r(1), r(2), v(0), v(1), v(2));
+	  }
+
+      #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage("   rif = %s\n", rif.ToString().c_str());
+      #endif
+      const Real *toRif = rif.GetDataVector();
+      for (Integer i=0; i<6; i++)  outState[i] = inState[i] + toRif[i];
+   }
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// bool TranslateToBaseSystem(const GmatTime &epoch, const Real *inState,
+//                            Real *outState)
+//------------------------------------------------------------------------------
+/**
+ * This method translates the input state, in "this" axisSystem to the base system
+ * axisSystem.
+ *
+ * @param epoch      epoch for which to do the conversion.
+ * @param inState    input state to convert.
+ * @param outState   output (converted) state.
+ *
+ * @return true if successful; false if not.
+ *
+ */
+//------------------------------------------------------------------------------
+bool CoordinateSystem::TranslateToBaseSystem(const GmatTime &epoch,
+                                             const Real *inState,
+                                             Real *outState)
+{
+   #ifdef DEBUG_TRANSLATION
+      MessageInterface::ShowMessage(
+            "In TranslateToBaseSystem, coord. system is %s, origin is %s and j2000Body is %s\n",
+            (axes->GetTypeName()).c_str(), (origin->GetName()).c_str(), (j2000Body->GetName()).c_str());
+   #endif
+   #ifdef DEBUG_INPUTS_OUTPUTS
+   MessageInterface::ShowMessage
+      ("In CS::TranslateToBaseSystem, inState = %.17f  %.17f  %.17f  %.17f  %.17f  "
+       "%.17f\n", inState[0], inState[1], inState[2], inState[3],inState[4], inState[5]);
+   #endif
+   if (origin == j2000Body)  
+      for (Integer i=0; i<6; i++) outState[i] = inState[i];
+   else
+   {
+      #ifdef DEBUG_INPUTS_OUTPUTS
+      Rvector6 originState = origin->GetMJ2000State(epoch);
+      Rvector6 j2000BodyState = j2000Body->GetMJ2000State(epoch);
+      MessageInterface::ShowMessage
+         ("   originState =\n   %s\n", originState.ToString().c_str());
+      MessageInterface::ShowMessage
+         ("   j2000BodyState =\n   %s\n", j2000BodyState.ToString().c_str());
+      #endif
+      
+      Rvector6 rif =  origin->GetMJ2000State(epoch) -
+                      (j2000Body->GetMJ2000State(epoch));
+      
+	  if (this->GetBaseSystem() == "ICRF")
+	  {
+		  // get rotation matrix R from ICRF to FK5:
+		  CoordinateConverter cc;
+		  Rmatrix33 R = cc.GetRotationMatrixFromICRFToFK5(epoch.GetMjd());
 		  // convert rif coordinate from FK5 to ICRF:
 		  Rvector3 r(rif(0), rif(1), rif(2));
 		  Rvector3 v(rif(3), rif(4), rif(5));
@@ -2546,6 +2960,74 @@ bool CoordinateSystem::TranslateFromBaseSystem(const A1Mjd &epoch,
 }
 
 //------------------------------------------------------------------------------
+//  bool  TranslateFromBaseSystem(const GmatTime &epoch, const Rvector &inState,
+//                                Rvector &outState)
+//------------------------------------------------------------------------------
+/**
+ * This method translates the input state, in the base axisSystem to 'this'
+ * axisSystem.
+ *
+ * @param epoch      epoch for which to do the conversion.
+ * @param inState    input state to convert.
+ * @param outState   output (converted) state.
+ *
+ * @return true if successful; false if not.
+ *
+ */
+//------------------------------------------------------------------------------
+bool CoordinateSystem::TranslateFromBaseSystem(const GmatTime &epoch,
+                                               const Rvector &inState,
+                                               Rvector &outState)
+{
+   #ifdef DEBUG_TRANSLATION
+      MessageInterface::ShowMessage(
+            "In TranslateFromBaseSystem, coord. system is %s, origin is %s and j2000Body is %s\n",
+            (axes->GetTypeName()).c_str(), (origin->GetName()).c_str(), (j2000Body->GetName()).c_str());
+      MessageInterface::ShowMessage("   inState  = %le  %le  %le  %le  %le  %le\n",
+            inState[0], inState[1], inState[2], inState[3], inState[4], inState[5]);
+      MessageInterface::ShowMessage("   epoch = %le\n", epoch.Get());
+   #endif
+   if (origin == j2000Body)  
+   {
+      #ifdef DEBUG_TRANSLATION
+         MessageInterface::ShowMessage(
+               "In TranslateFromBaseSystem, origin IS the same as j2000Body\n");
+      #endif
+      outState = inState;
+   }
+   else
+   {
+      #ifdef DEBUG_TRANSLATION
+         MessageInterface::ShowMessage(
+               "In TranslateFromBaseSystem, origin IS NOT the same as j2000Body\n");
+      #endif
+      // currently assuming an Rvector6 - update needed later?!?!    - awaiting Darrel on this
+      // compute vector from origin of of this system to origin of the base system
+      Rvector6 rif =  j2000Body->GetMJ2000State(epoch) - 
+                      (origin->GetMJ2000State(epoch));
+
+	  if (this->GetBaseSystem() == "ICRF")
+	  {
+		  // get rotation matrix R from ICRF to FK5:
+		  CoordinateConverter cc;
+		  Rmatrix33 R = cc.GetRotationMatrixFromICRFToFK5(epoch.GetMjd());
+		  // convert rif coordinate from FK5 to ICRF:
+		  Rvector3 r(rif(0), rif(1), rif(2));
+		  Rvector3 v(rif(3), rif(4), rif(5));
+		  r = R.Transpose()*r;
+		  v = R.Transpose()*v;
+		  rif.Set(r(0), r(1), r(2), v(0), v(1), v(2));
+	  }
+
+      outState = inState + rif;
+   }
+   #ifdef DEBUG_TRANSLATION
+      MessageInterface::ShowMessage("Leaving TranslateFromBaseSystem\n");
+   #endif
+   return true;
+}
+
+//------------------------------------------------------------------------------
 // bool TranslateFromBaseSystem(const A1Mjd &epoch, const Real *inState,
 //                              Real *outState)
 //------------------------------------------------------------------------------
@@ -2592,6 +3074,74 @@ bool CoordinateSystem::TranslateFromBaseSystem(const A1Mjd &epoch,
 		  // get rotation matrix R from ICRF to FK5:
 		  CoordinateConverter cc;
 		  Rmatrix33 R = cc.GetRotationMatrixFromICRFToFK5(epoch);
+		  // convert rif coordinate from FK5 to ICRF:
+		  Rvector3 r(rif(0), rif(1), rif(2));
+		  Rvector3 v(rif(3), rif(4), rif(5));
+		  r = R.Transpose()*r;
+		  v = R.Transpose()*v;
+		  rif.Set(r(0), r(1), r(2), v(0), v(1), v(2));
+	  }
+
+      #ifdef DEBUG_TRANSLATION
+         MessageInterface::ShowMessage(
+               "In TranslateFromBaseSystem (2), rif = %s\n",rif.ToString().c_str());
+      #endif
+      const Real *toRif = rif.GetDataVector();
+      for (Integer i=0; i<6; i++) outState[i] = inState[i] + toRif[i];
+   }
+   #ifdef DEBUG_TRANSLATION
+      MessageInterface::ShowMessage("Leaving TranslateFromBaseSystem (2)\n");
+   #endif
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// bool TranslateFromBaseSystem(const GmatTime &epoch, const Real *inState,
+//                              Real *outState)
+//------------------------------------------------------------------------------
+/**
+ * This method translates the input state, in the base axisSystem to 'this'
+ * axisSystem.
+ *
+ * @param epoch      epoch for which to do the conversion.
+ * @param inState    input state to convert.
+ * @param outState   output (converted) state.
+ *
+ * @return true if successful; false if not.
+ *
+ */
+//------------------------------------------------------------------------------
+bool CoordinateSystem::TranslateFromBaseSystem(const GmatTime &epoch,
+                                               const Real *inState,
+                                               Real *outState)
+{
+   #ifdef DEBUG_TRANSLATION
+      MessageInterface::ShowMessage(
+            "In TranslateFromBaseSystem (2), coord. system is %s, origin is %s and j2000Body is %s\n",
+            (axes->GetTypeName()).c_str(), (origin->GetName()).c_str(), (j2000Body->GetName()).c_str());
+   #endif
+   if (origin == j2000Body)
+   {
+      #ifdef DEBUG_TRANSLATION
+         MessageInterface::ShowMessage(
+               "In TranslateFromBaseSystem (2), origin IS the same as j2000Body\n");
+      #endif
+      for (Integer i=0; i<6; i++) outState[i] = inState[i];
+   }
+   else
+   {
+      #ifdef DEBUG_TRANSLATION
+         MessageInterface::ShowMessage(
+               "In TranslateFromBaseSystem (2), origin IS NOT the same as j2000Body\n");
+      #endif
+      Rvector6 rif =  j2000Body->GetMJ2000State(epoch) - 
+                      (origin->GetMJ2000State(epoch));
+
+	  if (this->GetBaseSystem() == "ICRF")
+	  {
+		  // get rotation matrix R from ICRF to FK5:
+		  CoordinateConverter cc;
+		  Rmatrix33 R = cc.GetRotationMatrixFromICRFToFK5(epoch.GetMjd());
 		  // convert rif coordinate from FK5 to ICRF:
 		  Rvector3 r(rif(0), rif(1), rif(2));
 		  Rvector3 v(rif(3), rif(4), rif(5));

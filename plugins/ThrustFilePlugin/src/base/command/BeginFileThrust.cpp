@@ -169,7 +169,7 @@ bool BeginFileThrust::TakeAction(const std::string& action,
 }
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Retrieves the name of a reference object
@@ -179,7 +179,7 @@ bool BeginFileThrust::TakeAction(const std::string& action,
  * @return The name
  */
 //------------------------------------------------------------------------------
-std::string BeginFileThrust::GetRefObjectName(const Gmat::ObjectType type) const
+std::string BeginFileThrust::GetRefObjectName(const UnsignedInt type) const
 {
    switch (type)
    {
@@ -216,7 +216,7 @@ const ObjectTypeArray& BeginFileThrust::GetRefObjectTypeArray()
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a list of the names of reference objects used.
@@ -227,7 +227,7 @@ const ObjectTypeArray& BeginFileThrust::GetRefObjectTypeArray()
  */
 //------------------------------------------------------------------------------
 const StringArray& BeginFileThrust::GetRefObjectNameArray(
-      const Gmat::ObjectType type)
+      const UnsignedInt type)
 {
 
    refObjectNames.clear();
@@ -249,7 +249,7 @@ const StringArray& BeginFileThrust::GetRefObjectNameArray(
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(const Gmat::ObjectType type, const std::string& name)
+// bool SetRefObjectName(const UnsignedInt type, const std::string& name)
 //------------------------------------------------------------------------------
 /**
  * Sets the name for a reference object
@@ -260,7 +260,7 @@ const StringArray& BeginFileThrust::GetRefObjectNameArray(
  * @return true if the reference was set
  */
 //------------------------------------------------------------------------------
-bool BeginFileThrust::SetRefObjectName(const Gmat::ObjectType type,
+bool BeginFileThrust::SetRefObjectName(const UnsignedInt type,
       const std::string& name)
 {
    switch (type)
@@ -310,7 +310,7 @@ bool BeginFileThrust::SetRefObjectName(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// GmatBase* GetGmatObject(const Gmat::ObjectType type,
+// GmatBase* GetGmatObject(const UnsignedInt type,
 //       const std::string objName)
 //------------------------------------------------------------------------------
 /**
@@ -322,7 +322,7 @@ bool BeginFileThrust::SetRefObjectName(const Gmat::ObjectType type,
  * @return The object
  */
 //------------------------------------------------------------------------------
-GmatBase* BeginFileThrust::GetGmatObject(const Gmat::ObjectType type,
+GmatBase* BeginFileThrust::GetGmatObject(const UnsignedInt type,
       const std::string objName)
 {
    if (type == Gmat::TRANSIENT_FORCE)
@@ -331,7 +331,7 @@ GmatBase* BeginFileThrust::GetGmatObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, const std::string& oldName,
+// bool RenameRefObject(const UnsignedInt type, const std::string& oldName,
 //       const std::string& newName)
 //------------------------------------------------------------------------------
 /**
@@ -344,7 +344,7 @@ GmatBase* BeginFileThrust::GetGmatObject(const Gmat::ObjectType type,
  * @return true if a name change happened
  */
 //------------------------------------------------------------------------------
-bool BeginFileThrust::RenameRefObject(const Gmat::ObjectType type,
+bool BeginFileThrust::RenameRefObject(const UnsignedInt type,
       const std::string& oldName, const std::string& newName)
 {
    // BeginFiniteBurn needs to know about Burn and Spacecraft only
@@ -480,7 +480,7 @@ bool BeginFileThrust::Initialize()
             }
          }
 
-         Gmat::ObjectType type = Gmat::SPACECRAFT;
+         UnsignedInt type = Gmat::SPACECRAFT;
          StringArray::iterator iter;
 
          // load up the spacecraft name list

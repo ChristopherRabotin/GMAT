@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -154,7 +154,7 @@ bool OrbitViewPanel::PrepareObjectNameChange()
 
 
 //------------------------------------------------------------------------------
-// virtual void ObjectNameChanged(Gmat::ObjectType type, const wxString &oldName,
+// virtual void ObjectNameChanged(UnsignedInt type, const wxString &oldName,
 //                                const wxString &newName)
 //------------------------------------------------------------------------------
 /*
@@ -163,7 +163,7 @@ bool OrbitViewPanel::PrepareObjectNameChange()
  * object name, so all we need to do is re-load the data.
  */
 //------------------------------------------------------------------------------
-void OrbitViewPanel::ObjectNameChanged(Gmat::ObjectType type,
+void OrbitViewPanel::ObjectNameChanged(UnsignedInt type,
                                        const wxString &oldName,
                                        const wxString &newName)
 {
@@ -256,7 +256,7 @@ void OrbitViewPanel::Create()
    #endif
    
    //-----------------------------------------------------------------
-   // Data collect and update frequency
+   // Data collect, update frequency and max plot points
    //-----------------------------------------------------------------
    wxStaticText *dataCollectFreqLabel1 =
       new wxStaticText(this, -1, wxT("Collect data every "),
@@ -270,12 +270,18 @@ void OrbitViewPanel::Create()
    wxStaticText *updatePlotFreqLabel2 =
       new wxStaticText(this, -1, wxT("cycle"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
-   
+   wxStaticText *maxPlottedDataPointsLabel1 =
+      new wxStaticText(this, -1, wxT("Max number of data points to plot "),
+      wxDefaultPosition, wxSize(-1, -1), 0);
+
    mDataCollectFreqTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(40, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
    mUpdatePlotFreqTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(40, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+
+   mMaxPlottedDataPointsTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("20000"), wxDefaultPosition, wxSize(80, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
    mEnableStarsCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Enable Stars"), wxDefaultPosition, wxDefaultSize, 0);
@@ -300,6 +306,10 @@ void OrbitViewPanel::Create()
    updFreqSizer->Add(mUpdatePlotFreqTextCtrl, 1, wxALIGN_LEFT|wxALL, bsize);
    updFreqSizer->Add(updatePlotFreqLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
 
+   wxBoxSizer *maxPlotPointsSizer = new wxBoxSizer(wxHORIZONTAL);
+   maxPlotPointsSizer->Add(maxPlottedDataPointsLabel1, 0, wxALIGN_LEFT | wxALL, bsize);
+   maxPlotPointsSizer->Add(mMaxPlottedDataPointsTextCtrl, 1, wxALIGN_LEFT | wxALL, bsize);
+
    wxBoxSizer *starOptionSizer = new wxBoxSizer(wxHORIZONTAL);
    starOptionSizer->Add(mStarCountStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    starOptionSizer->Add(mStarCountTextCtrl, 1, wxALIGN_LEFT|wxALL, bsize);
@@ -307,6 +317,7 @@ void OrbitViewPanel::Create()
    wxBoxSizer *plotOptionSizer = new wxBoxSizer(wxVERTICAL);   
    plotOptionSizer->Add(colFreqSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    plotOptionSizer->Add(updFreqSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionSizer->Add(maxPlotPointsSizer, 0, wxALIGN_LEFT | wxALL, bsize);
    plotOptionSizer->Add(mEnableStarsCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    plotOptionSizer->Add(mEnableConstellationsCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    plotOptionSizer->Add(starOptionSizer, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -770,6 +781,8 @@ void OrbitViewPanel::LoadData()
       mDataCollectFreqTextCtrl->SetValue(str);
       str.Printf("%d", mOrbitView->GetIntegerParameter("UpdatePlotFrequency"));
       mUpdatePlotFreqTextCtrl->SetValue(str);
+      str.Printf("%d", mOrbitView->GetIntegerParameter("MaxPlotPoints"));
+      mMaxPlottedDataPointsTextCtrl->SetValue(str);
       str.Printf("%d", mOrbitView->GetIntegerParameter("NumPointsToRedraw"));
       mNumPointsToRedrawTextCtrl->SetValue(str);
       str.Printf("%d", mOrbitView->GetIntegerParameter("StarCount"));
@@ -1095,7 +1108,7 @@ void OrbitViewPanel::SaveData()
    
    canClose = true;
    std::string str1, str2;
-   Integer collectFreq = 0, updateFreq = 0, pointsToRedraw = 0, starCount = 0;
+   Integer collectFreq = 0, updateFreq = 0, maxPlotPoints = 0, pointsToRedraw = 0, starCount = 0;
    #ifdef __ENABLE_FOV__
    Integer initialFOV = 0, minFOV = 0, maxFOV = 0;
    #endif
@@ -1115,6 +1128,9 @@ void OrbitViewPanel::SaveData()
       
       CheckInteger(updateFreq, mUpdatePlotFreqTextCtrl->GetValue().c_str(),
                    "UpdatePlotFrequency", "Integer Number > 0", false, true, true);
+
+      CheckInteger(maxPlotPoints, mMaxPlottedDataPointsTextCtrl->GetValue().c_str(),
+                   "MaxPlotPoints", "Integer Number > 0", false, true, true);
       
       CheckInteger(pointsToRedraw, mNumPointsToRedrawTextCtrl->GetValue().c_str(),
                    "NumPointsToRedraw", "Integer Number >= 0", false, true, true, true);
@@ -1206,6 +1222,7 @@ void OrbitViewPanel::SaveData()
          mHasIntegerDataChanged = false;
          mOrbitView->SetIntegerParameter("DataCollectFrequency", collectFreq);
          mOrbitView->SetIntegerParameter("UpdatePlotFrequency", updateFreq);
+         mOrbitView->SetIntegerParameter("MaxPlotPoints", maxPlotPoints);
          mOrbitView->SetIntegerParameter("NumPointsToRedraw", pointsToRedraw);
          mOrbitView->SetIntegerParameter("StarCount", starCount);
          #ifdef __ENABLE_FOV__
@@ -2098,7 +2115,8 @@ void OrbitViewPanel::OnTextChange(wxCommandEvent& event)
       if (obj == mDataCollectFreqTextCtrl ||
           obj == mUpdatePlotFreqTextCtrl ||
           obj == mNumPointsToRedrawTextCtrl ||
-          obj == mStarCountTextCtrl
+          obj == mStarCountTextCtrl ||
+          obj == mMaxPlottedDataPointsTextCtrl
           #ifdef __ENABLE_FOV__
           || obj == mFovTextCtrl ||
           obj == mFovMinTextCtrl ||

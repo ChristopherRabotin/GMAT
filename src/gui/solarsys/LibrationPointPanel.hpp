@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,7 +38,7 @@ class LibrationPointPanel: public GmatPanel
 public:
    LibrationPointPanel(wxWindow *parent, const wxString &name);
    ~LibrationPointPanel();
-   virtual bool RefreshObjects(Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT);
+   virtual bool RefreshObjects(UnsignedInt type = Gmat::UNKNOWN_OBJECT);
    
    
 private:

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -4000,11 +4000,20 @@ void SolarSystem::SetDefaultPlanetarySource()
 bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
                                Gmat::DeFileFormat format)
 {
+   #ifdef DEBUG_SS_PLANETARY_FILE
+      MessageInterface::ShowMessage
+      ("ENTERING SolarSystem::CreateDeFile()\n");
+   #endif
    bool status = false;
    Gmat::DeFileType deFileType;
 
    if (theDefaultDeFile != NULL)
    {
+      #ifdef DEBUG_SS_PLANETARY_FILE
+         MessageInterface::ShowMessage
+         ("SolarSystem::CreateDeFile() on entry, current DeFile = <%p>\n",
+          theDefaultDeFile);
+      #endif
       if (theDefaultDeFile->GetName() == fileName)
       {
          status = true;
@@ -4014,13 +4023,27 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
       {
          #ifdef DEBUG_SS_PLANETARY_FILE
          MessageInterface::ShowMessage
-            ("SolarSystem::CreateDeFile() deleting old DeFile %s\n",
-             (theDefaultDeFile->GetName()).c_str());
+            ("SolarSystem::CreateDeFile() deleting OLD DeFile %s <%p>\n",
+             (theDefaultDeFile->GetName()).c_str(), theDefaultDeFile);
          #endif
+         // NOTE - do we want to do this?  There is an array of pointers to
+         // all of the planetary source options - won't this wreck that? *******
          delete theDefaultDeFile;
          theDefaultDeFile = NULL;
+         #ifdef DEBUG_SS_PLANETARY_FILE
+            MessageInterface::ShowMessage
+               ("SolarSystem::CreateDeFile()  theDefaultDeFile is now  <%p>\n",
+               theDefaultDeFile);
+         #endif
       }
    }
+   #ifdef DEBUG_SS_PLANETARY_FILE
+   else
+   {
+      MessageInterface::ShowMessage
+      ("SolarSystem::CreateDeFile() on entry, current DeFile = NULL\n");
+   }
+   #endif
    switch (id)
    {
    case Gmat::DE405:
@@ -4055,6 +4078,10 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
    FILE *defile = fopen(fileName.c_str(), "rb");
    if (defile == NULL)
    {
+      #ifdef DEBUG_SS_PLANETARY_FILE
+         MessageInterface::ShowMessage
+            ("SolarSystem::CreateDeFile()  COULDN'T find the defile as specified\n");
+      #endif
       // MessageInterface::PopupMessage
       //    (Gmat::WARNING_,
       //     "Error opening the DE file named: %s.\n"
@@ -4089,15 +4116,19 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
    else
    {
       fclose(defile);
+      #ifdef DEBUG_SS_PLANETARY_FILE
+         MessageInterface::ShowMessage
+            ("SolarSystem::CreateDeFile() FOUND the defile as specified right away\n");
+      #endif
 
       try
       {
-         theDefaultDeFile = new DeFile(deFileType, fileName, format);
+         theDefaultDeFile  = new DeFile(deFileType, fileName, format);
          thePlanetaryEphem = theDefaultDeFile;
          #ifdef DEBUG_SS_PLANETARY_FILE
          MessageInterface::ShowMessage
-            ("SolarSystem::CreateDeFile() NOW creating DeFile %s\n",
-             fileName.c_str());
+            ("SolarSystem::CreateDeFile() CREATED DeFile %s <%p> of type %d\n",
+             fileName.c_str(), theDefaultDeFile, (Integer) deFileType);
          #endif
 
          if (theDefaultDeFile != NULL)
@@ -4114,6 +4145,11 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
          throw sse;
       }
    }
+   #ifdef DEBUG_SS_PLANETARY_FILE
+      MessageInterface::ShowMessage
+      ("SolarSystem::CreateDeFile() EXITing with theDefaultDeFile = <%p>, thePlanetaryEphem = <%p>\n",
+       theDefaultDeFile, thePlanetaryEphem);
+   #endif
    return status;
 }
 

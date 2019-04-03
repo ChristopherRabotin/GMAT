@@ -40,7 +40,8 @@ public:
    virtual const MeasurementData&
       CalculateMeasurement(bool withEvents = false,
       ObservationData* forObservation = NULL,
-      std::vector<RampTableData>* rampTB = NULL);
+      std::vector<RampTableData>* rampTB = NULL,
+      bool forSimulation = false);
 
 };
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -511,10 +511,10 @@ GmatBase* ObjectReferencedAxes::Clone() const
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool ObjectReferencedAxes::RenameRefObject(const Gmat::ObjectType type,
+bool ObjectReferencedAxes::RenameRefObject(const UnsignedInt type,
                                            const std::string &oldName,
                                            const std::string &newName)
 {
@@ -737,7 +737,7 @@ bool ObjectReferencedAxes::SetStringParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//  GmatBase* GetRefObject(const UnsignedInt type,
 //                         const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -750,7 +750,7 @@ bool ObjectReferencedAxes::SetStringParameter(const std::string &label,
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* ObjectReferencedAxes::GetRefObject(const Gmat::ObjectType type,
+GmatBase* ObjectReferencedAxes::GetRefObject(const UnsignedInt type,
                                              const std::string &name)
 {
    switch (type)
@@ -767,7 +767,7 @@ GmatBase* ObjectReferencedAxes::GetRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//  const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Returns the name(s) of the reference object(s). (Derived classes should implement
@@ -779,7 +779,7 @@ GmatBase* ObjectReferencedAxes::GetRefObject(const Gmat::ObjectType type,
  * @return The name(s) of the reference object(s) of the specified type
  */
 //------------------------------------------------------------------------------
-const StringArray& ObjectReferencedAxes::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& ObjectReferencedAxes::GetRefObjectNameArray(const UnsignedInt type)
 {
    if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
    {
@@ -811,7 +811,7 @@ const StringArray& ObjectReferencedAxes::GetRefObjectNameArray(const Gmat::Objec
 
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -826,7 +826,7 @@ const StringArray& ObjectReferencedAxes::GetRefObjectNameArray(const Gmat::Objec
  */
 //------------------------------------------------------------------------------
 bool ObjectReferencedAxes::SetRefObject(GmatBase *obj,
-                                        const Gmat::ObjectType type,
+                                        const UnsignedInt type,
                                         const std::string &name)
 {
    if (obj->IsOfType(Gmat::SPACE_POINT))

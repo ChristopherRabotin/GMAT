@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1088,6 +1088,58 @@ void ODEModel::UpdateSpaceObject(Real newEpoch)
 }
 
 
+void ODEModel::UpdateSpaceObjectGT(GmatTime newEpoch)
+{
+#ifdef DEBUG_ODEMODEL_EXE
+   MessageInterface::ShowMessage(
+      "ODEModel::UpdateSpaceObjectGT(%s) called\n", newEpoch.ToString().c_str());
+#endif
+
+   Integer stateSize;
+   Integer vectorSize;
+   GmatState *state;
+   ReturnFromOriginGT(newEpoch);
+
+   state = psm->GetState();
+   stateSize = state->GetSize();
+   vectorSize = stateSize * sizeof(Real);
+
+   previousState = (*state);
+
+#ifdef DEBUG_ODEMODEL_EXE
+   MessageInterface::ShowMessage("Raw state: [%lf %lf %lf...\n", rawState[0],
+      rawState[1], rawState[2]);
+#endif
+
+   memcpy(state->GetState(), rawState, vectorSize);
+
+   GmatTime newepoch = epochGT;
+   newepoch.AddSeconds(elapsedTime);
+
+   // Update the epoch if it was passed in
+   if (newEpoch != GmatTime(-1.0))
+      newepoch = newEpoch;
+
+   state->SetEpochGT(newepoch);
+   psm->MapVectorToObjects();
+
+   // Update elements for each Formation
+   for (UnsignedInt i = 0; i < stateObjects.size(); ++i)
+      if (stateObjects[i]->IsOfType(Gmat::FORMATION))
+         ((FormationInterface*)stateObjects[i])->UpdateElements();
+
+#ifdef DEBUG_ODEMODEL_EXE
+   MessageInterface::ShowMessage
+      ("ODEModel::UpdateSpaceObjectGT() on \"%s\" prevElapsedTime = %s "
+      "elapsedTime = %f newepoch = %s passed in epoch = %s "
+      "dX's: [%.12lf] - [%.12lf] = [%.12lf]\n",
+      GetName().c_str(), previousState.GetEpochGT().ToString().c_str(), elapsedTime,
+      newepoch.ToString().c_str(), newEpoch.ToString().c_str(), (*state)[0], previousState[0],
+      ((*state)[0] - previousState[0]));
+#endif
+}
+
+
 //------------------------------------------------------------------------------
 // void UpdateFromSpacecraft()
 //------------------------------------------------------------------------------
@@ -1116,7 +1168,10 @@ void ODEModel::UpdateFromSpaceObject()
 
     // Transform to the force model origin
     // MoveToOrigin();					   // Notice that: without epoch, it will get wrong state of center body
-   MoveToOrigin(state->GetEpoch());
+   if (hasPrecisionTime)
+      MoveToOriginGT(state->GetEpochGT());
+   else
+      MoveToOrigin(state->GetEpoch());
 }
 
 
@@ -1141,7 +1196,11 @@ void ODEModel::RevertSpaceObject()
    elapsedTime = prevElapsedTime;
 
    memcpy(rawState, previousState.GetState(), dimension*sizeof(Real));
-   MoveToOrigin();
+
+   if (hasPrecisionTime)
+      MoveToOriginGT();
+   else
+      MoveToOrigin();
 }
 
 
@@ -1573,11 +1632,15 @@ bool ODEModel::Initialize()
 //         MessageInterface::PopupMessage(Gmat::WARNING_, warn.str());
          epoch = coverageStart;
          state->SetEpoch(epoch);
+         state->SetEpochGT(GmatTime(epoch));
       }
       coverageStartDetermined = true;
    }
       
-   MoveToOrigin();
+   if (hasPrecisionTime)
+      MoveToOriginGT();
+   else
+      MoveToOrigin();
 
    // Variables used to set spacecraft parameters
    std::string parmName, stringParm;
@@ -2211,6 +2274,13 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
             // Update local value for epoch
             epoch = parm;
             pm->SetRealParameter(PhysicalModel::EPOCH, parm);
+            if (hasPrecisionTime)
+            {
+               GmatTime parmGT = sat->GetGmatTimeParameter(satIds[0]);
+               epochGT = parmGT;
+               pm->SetGmatTimeParameter(PhysicalModel::EPOCH, parmGT);
+            }
+
             #ifdef DEBUG_PM_EPOCH
                MessageInterface::ShowMessage("ODEModel '%s', Member %s: epoch being set to %le (from sc %s)\n",
                    GetName().c_str(), pm->GetTypeName().c_str(), parm, sat->GetName().c_str());
@@ -3368,7 +3438,7 @@ PhysicalModel* ODEModel::GetForceOfType(const std::string& forceType,
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 /*
@@ -3381,7 +3451,7 @@ PhysicalModel* ODEModel::GetForceOfType(const std::string& forceType,
  * @return always true to indicate RenameRefObject() was implemented.
  */
 //---------------------------------------------------------------------------
-bool ODEModel::RenameRefObject(const Gmat::ObjectType type,
+bool ODEModel::RenameRefObject(const UnsignedInt type,
                                  const std::string &oldName,
                                  const std::string &newName)
 {
@@ -3453,7 +3523,7 @@ const ObjectTypeArray& ODEModel::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//  const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves the list of ref objects used by the member forces.
@@ -3465,7 +3535,7 @@ const ObjectTypeArray& ODEModel::GetRefObjectTypeArray()
  * 
  */
 //------------------------------------------------------------------------------
-const StringArray& ODEModel::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& ODEModel::GetRefObjectNameArray(const UnsignedInt type)
 {
    std::string pmName;
    StringArray pmRefs;
@@ -3630,7 +3700,7 @@ void ODEModel::SetForceOrigin(CelestialBody* toBody)
 
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -3646,7 +3716,7 @@ void ODEModel::SetForceOrigin(CelestialBody* toBody)
  *       indicate success or failure.
  */
 //------------------------------------------------------------------------------
-bool ODEModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool ODEModel::SetRefObject(GmatBase *obj, const UnsignedInt type,
                               const std::string &name)
 {
    #ifdef DEBUG_FORCE_REF_OBJ
@@ -4541,7 +4611,7 @@ const StringArray& ODEModel::BuildUserForceList() const
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Accesses an internal object used in the ODEModel.
@@ -4557,7 +4627,7 @@ const StringArray& ODEModel::BuildUserForceList() const
  * @return A pointer to the object.
  */
 //------------------------------------------------------------------------------
-GmatBase* ODEModel::GetRefObject(const Gmat::ObjectType type,
+GmatBase* ODEModel::GetRefObject(const UnsignedInt type,
                                    const std::string &name)
 {
    if (type != Gmat::PHYSICAL_MODEL)
@@ -4579,7 +4649,7 @@ GmatBase* ODEModel::GetRefObject(const Gmat::ObjectType type,
 
                                     
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name, 
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name,
 //                        const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -4599,7 +4669,7 @@ GmatBase* ODEModel::GetRefObject(const Gmat::ObjectType type,
  * @return A pointer to the object.
  */
 //------------------------------------------------------------------------------
-GmatBase* ODEModel::GetRefObject(const Gmat::ObjectType type, 
+GmatBase* ODEModel::GetRefObject(const UnsignedInt type,
                                    const std::string &name, const Integer index)
 {
    if (type != Gmat::PHYSICAL_MODEL)
@@ -4781,6 +4851,84 @@ void ODEModel::MoveToOrigin(Real newEpoch)
 }
 
 
+void ODEModel::MoveToOriginGT(GmatTime newEpoch)
+{
+#ifdef DEBUG_REORIGIN
+   MessageInterface::ShowMessage("ODEModel::MoveToOriginGT entered with "
+      "newEpoch = %s\n", newEpoch.ToString().c_str());
+   MessageInterface::ShowMessage("      and epoch = %s\n", epochGT.ToString().c_str());
+#endif
+
+#ifdef DEBUG_REORIGIN
+   MessageInterface::ShowMessage(
+      "SatCount = %d, dimension = %d, stateSize = %d\n", cartesianCount,
+      dimension, stateSize);
+   MessageInterface::ShowMessage(
+      "StatePointers: rawState = %p, modelState = %p\n", rawState,
+      modelState);
+   MessageInterface::ShowMessage(
+      "ODEModel::MoveToOriginGT()\n   Input state: [ ");
+   for (Integer i = 0; i < dimension; ++i)
+      MessageInterface::ShowMessage("%lf ", rawState[i]);
+   MessageInterface::ShowMessage("]\n   model state: [ ");
+   for (Integer i = 0; i < dimension; ++i)
+      MessageInterface::ShowMessage("%lf ", modelState[i]);
+   MessageInterface::ShowMessage("]\n\n");
+#endif
+
+   memcpy(modelState, rawState, dimension*sizeof(Real));
+
+   if (centralBodyName != j2kBodyName)
+   {
+      Rvector6 cbState, j2kState, delta;
+      GmatTime now = ((newEpoch < 0.0) ? epochGT : newEpoch);
+      cbState = forceOrigin->GetState(now);
+      j2kState = j2kBody->GetState(now);
+
+      delta = cbState - j2kState;
+
+      for (Integer i = 0; i < cartesianCount; ++i)
+      {
+         Integer i6 = cartesianStart + i * 6;
+         for (int j = 0; j < 6; ++j)
+            modelState[i6 + j] = rawState[i6 + j] - delta[j];
+
+#ifdef DEBUG_REORIGIN
+         MessageInterface::ShowMessage(
+            "ODEModel::MoveToOrigin()\n"
+            "   Input state: [%lf %lf %lf %lf %lf %lf]\n"
+            "   j2k state:   [%lf %lf %lf %lf %lf %lf]\n"
+            "   cb state:    [%lf %lf %lf %lf %lf %lf]\n"
+            "   delta:       [%lf %lf %lf %lf %lf %lf]\n"
+            "   model state: [%lf %lf %lf %lf %lf %lf]\n\n",
+            rawState[i6], rawState[i6 + 1], rawState[i6 + 2], rawState[i6 + 3],
+            rawState[i6 + 4], rawState[i6 + 5],
+            j2kState[0], j2kState[1], j2kState[2], j2kState[3], j2kState[4],
+            j2kState[5],
+            cbState[0], cbState[1], cbState[2], cbState[3], cbState[4],
+            cbState[5],
+            delta[0], delta[1], delta[2], delta[3], delta[4], delta[5],
+            modelState[i6], modelState[i6 + 1], modelState[i6 + 2],
+            modelState[i6 + 3], modelState[i6 + 4], modelState[i6 + 5]);
+#endif
+      }
+   }
+
+#ifdef DEBUG_REORIGIN
+   MessageInterface::ShowMessage(
+      "   Move Complete\n   Input state: [ ");
+   for (Integer i = 0; i < dimension; ++i)
+      MessageInterface::ShowMessage("%lf ", rawState[i]);
+   MessageInterface::ShowMessage("]\n   model state: [ ");
+   for (Integer i = 0; i < dimension; ++i)
+      MessageInterface::ShowMessage("%lf ", modelState[i]);
+   MessageInterface::ShowMessage("]\n\n");
+
+   MessageInterface::ShowMessage("ODEModel::MoveToOriginGT Finished\n");
+#endif
+}
+
+
 //------------------------------------------------------------------------------
 // void ReturnFromOrigin(Real newEpoch)
 //------------------------------------------------------------------------------
@@ -4828,6 +4976,50 @@ void ODEModel::ReturnFromOrigin(Real newEpoch)
                    rawState[0], rawState[1], rawState[2], rawState[3],
                    rawState[4], rawState[5]);
          #endif
+      }
+   }
+}
+
+
+void ODEModel::ReturnFromOriginGT(GmatTime newEpoch)
+{
+#ifdef DEBUG_REORIGIN
+   MessageInterface::ShowMessage("ODEModel::ReturnFromOriginGT entered\n");
+#endif
+
+   memcpy(rawState, modelState, dimension*sizeof(Real));
+   if (centralBodyName != j2kBodyName)
+   {
+      Rvector6 cbState, j2kState, delta;
+      GmatTime now = ((newEpoch < 0.0) ? epochGT : newEpoch);
+      cbState = forceOrigin->GetState(now);
+      j2kState = j2kBody->GetState(now);
+
+      delta = j2kState - cbState;
+
+
+      for (Integer i = 0; i < cartesianCount; ++i)
+      {
+         Integer i6 = cartesianStart + i * 6;
+         for (int j = 0; j < 6; ++j)
+            rawState[i6 + j] = modelState[i6 + j] - delta[j];
+#ifdef DEBUG_REORIGIN
+         MessageInterface::ShowMessage(
+            "ODEModel::ReturnFromOriginGT()\n   Input (model) state: [%lf %lf %lf %lf %lf"
+            " %lf]\n   j2k state:   [%lf %lf %lf %lf %lf %lf]\n"
+            "   cb state:    [%lf %lf %lf %lf %lf %lf]\n"
+            "   delta:       [%lf %lf %lf %lf %lf %lf]\n"
+            "   raw state: [%lf %lf %lf %lf %lf %lf]\n\n",
+            modelState[0], modelState[1], modelState[2], modelState[3], modelState[4],
+            modelState[5],
+            j2kState[0], j2kState[1], j2kState[2], j2kState[3], j2kState[4],
+            j2kState[5],
+            cbState[0], cbState[1], cbState[2], cbState[3], cbState[4],
+            cbState[5],
+            delta[0], delta[1], delta[2], delta[3], delta[4], delta[5],
+            rawState[0], rawState[1], rawState[2], rawState[3],
+            rawState[4], rawState[5]);
+#endif
       }
    }
 }

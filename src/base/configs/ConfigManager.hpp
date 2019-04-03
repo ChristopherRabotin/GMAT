@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -75,7 +75,7 @@ public:
    
    std::string         GetNewName(const std::string &name, Integer startCount);
    
-   void                AddObject(Gmat::ObjectType objType, GmatBase *obj);
+   void                AddObject(UnsignedInt objType, GmatBase *obj);
    void                AddPhysicalModel(PhysicalModel *pm);
    void                AddPropagator(Propagator *prop);
    void                AddODEModel(ODEModel *fm);
@@ -109,29 +109,29 @@ public:
    void                AddTrackingData(TrackingData *td);
 
    const StringArray&  GetListOfAllItems();
-   const StringArray&  GetListOfItems(Gmat::ObjectType itemType);
+   const StringArray&  GetListOfItems(UnsignedInt itemType);
    const StringArray&  GetListOfItems(const std::string &typeName);
-   const StringArray&  GetListOfItemsHas(Gmat::ObjectType type,
+   const StringArray&  GetListOfItemsHas(UnsignedInt type,
                                          const std::string &name,
                                          bool includeSysParam = true);
    GmatBase*           AddClone(const std::string &name, std::string &cloneName);
-   GmatBase*           GetFirstItemUsing(Gmat::ObjectType type,
+   GmatBase*           GetFirstItemUsing(UnsignedInt type,
                                          const std::string &name,
                                          bool includeSysParam = true);
    GmatBase*           GetItem(const std::string &name);
    
-   bool                ChangeMappingName(Gmat::ObjectType itemType,
+   bool                ChangeMappingName(UnsignedInt itemType,
                                          const std::string &oldName,
                                          const std::string &newName,
                                          GmatBase **mapObj);
-   bool                RenameItem(Gmat::ObjectType itemType,
+   bool                RenameItem(UnsignedInt itemType,
                                   const std::string &oldName,
                                   const std::string &newName);
-   bool                RelatedNameChange(std::vector<Gmat::ObjectType> &itemType,
+   bool                RelatedNameChange(std::vector<UnsignedInt> &itemType,
                                   StringArray &oldName, StringArray &newName);
    
    bool                RemoveAllItems();
-   bool                RemoveItem(Gmat::ObjectType type, const std::string &name,
+   bool                RemoveItem(UnsignedInt type, const std::string &name,
                                   bool removeAssociatedSysParam = false);
    bool                ReconfigureItem(GmatBase *newobj, const std::string &name);
    
@@ -186,7 +186,7 @@ private:
 
    // Data structures for name changes that need to propagate into commands
    /// Array of type updates
-   std::vector<Gmat::ObjectType>       changedItemType;
+   std::vector<UnsignedInt>       changedItemType;
    /// Old names that were changed
    StringArray                         oldRelatedName;
    /// The new names for the related objects

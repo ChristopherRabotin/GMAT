@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -292,14 +292,14 @@ namespace GmatTree
       EVENT_LOCATOR = 41650,
       MEASUREMENT_MODEL,
       
-      GMAT_FUNCTION = 41700,
+      GMAT_FUNCTION = 41675,
       MATLAB_FUNCTION,
       PREDEFINED_COORDINATE_SYSTEM,
       USER_COORDINATE_SYSTEM,
 
       INTERFACE_OPENABLE,           // Kludge to make data interfaces work
 
-      USER_DEFINED_OBJECT = 41750,
+      USER_DEFINED_OBJECT = 10001,  // 41750 gave results in conflict with other IDs
 
       // scripts
       SCRIPT_FILE = 41800,
@@ -342,7 +342,10 @@ namespace GmatTree
       SCRIPT_EVENT,
       SET,
       OTHER_COMMAND,
-      END_OF_COMMAND,
+
+      USER_COMMAND = 43800,         // Allow plugin commands
+
+      END_OF_COMMAND = 43900,
 
       // control logic
       BEGIN_OF_CONTROL = 44000,
@@ -402,17 +405,20 @@ class GmatTreeItemData : public wxTreeItemData
 {
 public:
    GmatTreeItemData(const wxString &name, GmatTree::ItemType type,
-                    const wxString &title = "", bool isClonable = true);
+                    const wxString &title = "", bool isClonable = true,
+                    bool pluginGui = false);
    
    wxString GetName();
    wxString GetTitle();
    GmatTree::ItemType GetItemType();
    bool IsClonable();
+   bool HasPluginGui();
    
    void SetName(const wxString &objName);
    void SetTitle(const wxString &title);
    void SetItemType(GmatTree::ItemType type);
    void SetClonable(bool clonable);
+   void SetPluginGui(bool pluginGui);
    
    virtual GmatCommand* GetCommand();
    virtual wxTreeItemId GetNodeId();
@@ -422,6 +428,7 @@ protected:
    wxString mItemName;
    GmatTree::ItemType mItemType;
    bool mIsClonable;
+   bool mHasPluginGui;
 };
 
 #endif // GmatTreeItemData_hpp

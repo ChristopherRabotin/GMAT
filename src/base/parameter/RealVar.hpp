@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -44,10 +44,10 @@ public:
            GmatBase *obj = NULL, const std::string &desc = "",
            const std::string &unit = "",
            GmatParam::DepObject depObj = GmatParam::NO_DEP,
-           Gmat::ObjectType ownerType = Gmat::UNKNOWN_OBJECT,
+           UnsignedInt ownerType = Gmat::UNKNOWN_OBJECT,
            bool isTimeParam = false, bool isSettable = false,
            bool isPlottable = true, bool isReportable = true,
-           Gmat::ObjectType ownedObjType = Gmat::UNKNOWN_OBJECT);
+           UnsignedInt ownedObjType = Gmat::UNKNOWN_OBJECT);
    RealVar(const RealVar &copy);
    RealVar& operator= (const RealVar& right);
    virtual ~RealVar();

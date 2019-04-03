@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -56,7 +56,7 @@ public:
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
-   virtual Gmat::ObjectType GetPropertyObjectType(const Integer id) const;
+   virtual UnsignedInt GetPropertyObjectType(const Integer id) const;
 
    // These are the parameter accessors.  The commented out versions may be
    // needed if derived classes implement them in order to prevent compiler
@@ -74,17 +74,17 @@ public:
    virtual bool         SetStringParameter(const std::string &label,
                                       const std::string &value, const Integer index);
 
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string &name = "");
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type, const std::string &name, const Integer index);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type, const std::string &name, const Integer index);
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name = "");
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name, const Integer index);
 
-   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual std::string  GetRefObjectName(const UnsignedInt type) const;
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
+                        GetRefObjectNameArray(const UnsignedInt type);
 
    virtual const        ObjectTypeArray& GetRefObjectTypeArray();
    virtual bool         HasRefObjectTypeArray();

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -258,7 +258,7 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
 }
 
 //------------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -271,7 +271,7 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
  * @return true on success.
  */
 //------------------------------------------------------------------------------
-bool BeginScript::RenameRefObject(const Gmat::ObjectType type,
+bool BeginScript::RenameRefObject(const UnsignedInt type,
                                   const std::string &oldName,
                                   const std::string &newName)
 {   

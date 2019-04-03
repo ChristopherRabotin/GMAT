@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -577,6 +577,7 @@ const StringArray& SPKPropagator::GetStringArrayParameter(
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
+//@todo: need GmatTime modification
 bool SPKPropagator::Initialize()
 {
    #ifdef DEBUG_INITIALIZATION
@@ -691,46 +692,94 @@ bool SPKPropagator::Initialize()
                {
                   Rvector6  outState;
 
-                  for (UnsignedInt i = 0; i < propObjects.size(); ++i)
+                  if (hasPrecisionTime)
                   {
-                     std::string scName = propObjectNames[i];
-                     Integer id = naifIds[i];
+                     for (UnsignedInt i = 0; i < propObjects.size(); ++i)
+                     {
+                        std::string scName = propObjectNames[i];
+                        Integer id = naifIds[i];
 
-                     currentEpoch = initialEpoch + timeFromEpoch /
+                        currentEpochGT = initialEpochGT;
+                        currentEpochGT.AddSeconds(timeFromEpoch);
+
+                        // Allow for slop in the last few bits
+                        if ((currentEpochGT < ephemStart - 1e-10) ||
+                           (currentEpochGT > ephemEnd + 1e-10))
+                        {
+                           std::stringstream errmsg;
+                           errmsg.precision(16);
+                           errmsg << "The SPKPropagator "
+                              << instanceName 
+                              << " is attempting to initialize outside of the "
+                              "timespan  of the ephemeris data; halting.  ";
+                           errmsg << "The current SPICE ephemeris covers the A.1 "
+                              "modified Julian span ";
+                           errmsg << ephemStart << " to " << ephemEnd << " and the " 
+                              "requested epoch is " << currentEpochGT.ToString() << ".\n";
+                           throw PropagatorException(errmsg.str());
+                        }
+                        #ifdef DEBUG_INITIALIZATION
+                        MessageInterface::ShowMessage("Getting target state in %p " 
+                           "for %s (ID = %ld) at epoch %s and CB %s\n", this, 
+                           scName.c_str(), id, currentEpochGT.ToString().c_str(), 
+                           spkCentralBody.c_str());
+                        #endif
+
+                        outState = skr->GetTargetState(scName, id, currentEpochGT,
+                                            spkCentralBody, spkCentralBodyNaifId);
+
+                        std::memcpy(state, outState.GetDataVector(),
+                                    dimension*sizeof(Real));
+                     }
+
+                     UpdateSpaceObjectGT(currentEpochGT);
+
+                     retval = true;
+                  }
+                  else
+                  {
+                     for (UnsignedInt i = 0; i < propObjects.size(); ++i)
+                     {
+                        std::string scName = propObjectNames[i];
+                        Integer id = naifIds[i];
+
+                        currentEpoch = initialEpoch + timeFromEpoch /
                            GmatTimeConstants::SECS_PER_DAY;
 
-                     // Allow for slop in the last few bits
-                     if ((currentEpoch < ephemStart - 1e-10) ||
-                         (currentEpoch > ephemEnd + 1e-10))
-                     {
-                        std::stringstream errmsg;
-                        errmsg.precision(16);
-                        errmsg << "The SPKPropagator "
-                               << instanceName
-                               << " is attempting to initialize outside of the "
-                                  "timespan  of the ephemeris data; halting.  ";
-                        errmsg << "The current SPICE ephemeris covers the A.1 "
-                                  "modified Julian span ";
-                        errmsg << ephemStart << " to " << ephemEnd << " and the "
-                                 "requested epoch is " << currentEpoch << ".\n";
-                        throw PropagatorException(errmsg.str());
-                     }
-                     #ifdef DEBUG_INITIALIZATION
+                        // Allow for slop in the last few bits
+                        if ((currentEpoch < ephemStart - 1e-10) ||
+                           (currentEpoch > ephemEnd + 1e-10))
+                        {
+                           std::stringstream errmsg;
+                           errmsg.precision(16);
+                           errmsg << "The SPKPropagator "
+                              << instanceName
+                              << " is attempting to initialize outside of the "
+                              "timespan  of the ephemeris data; halting.  ";
+                           errmsg << "The current SPICE ephemeris covers the A.1 "
+                              "modified Julian span ";
+                           errmsg << ephemStart << " to " << ephemEnd << " and the "
+                              "requested epoch is " << currentEpoch << ".\n";
+                           throw PropagatorException(errmsg.str());
+                        }
+                        #ifdef DEBUG_INITIALIZATION
                         MessageInterface::ShowMessage("Getting target state in %p "
-                              "for %s (ID = %ld) at epoch %lf and CB %s\n", this,
-                              scName.c_str(), id, currentEpoch,
-                              spkCentralBody.c_str());
-                     #endif
-                     outState = skr->GetTargetState(scName, id, currentEpoch,
-                           spkCentralBody, spkCentralBodyNaifId);
+                           "for %s (ID = %ld) at epoch %lf and CB %s\n", this,
+                           scName.c_str(), id, currentEpoch,
+                           spkCentralBody.c_str());
+                        #endif
 
-                     std::memcpy(state, outState.GetDataVector(),
-                           dimension*sizeof(Real));
+                        outState = skr->GetTargetState(scName, id, A1Mjd(currentEpoch),
+                                                       spkCentralBody, spkCentralBodyNaifId);
+
+                        std::memcpy(state, outState.GetDataVector(),
+                                    dimension*sizeof(Real));
+                     }
+
+                     UpdateSpaceObject(currentEpoch);
+
+                     retval = true;
                   }
-
-                  UpdateSpaceObject(currentEpoch);
-
-                  retval = true;
                }
                catch (BaseException &e)
                {
@@ -772,6 +821,7 @@ bool SPKPropagator::Initialize()
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
+//@todo: need GmatTime modification
 bool SPKPropagator::Step()
 {
    #ifdef DEBUG_PROPAGATION
@@ -788,52 +838,55 @@ bool SPKPropagator::Step()
       {
          Rvector6  outState;
 
-         for (UnsignedInt i = 0; i < propObjects.size(); ++i)
+         if (hasPrecisionTime)
          {
-            std::string scName = propObjectNames[i];
-            Integer id = naifIds[i];
-
-            timeFromEpoch += ephemStep;
-            stepTaken = ephemStep;
-            currentEpoch = initialEpoch + timeFromEpoch /
-                  GmatTimeConstants::SECS_PER_DAY;
-
-            // Allow for slop in the last few bits
-            if ((currentEpoch < ephemStart - 1e-10) ||
-                (currentEpoch > ephemEnd + 1e-10))
+            for (UnsignedInt i = 0; i < propObjects.size(); ++i)
             {
-               std::stringstream errmsg;
-               errmsg.precision(16);
-               errmsg << "The SPKPropagator "
-                      << instanceName
-                      << " is attempting to step outside of the span of the "
-                         "ephemeris data; halting.  ";
-               errmsg << "The current SPICE ephemeris covers the A.1 modified "
-                         "Julian span ";
-               errmsg << ephemStart << " to " << ephemEnd << " and the "
-                     "requested epoch is " << currentEpoch << ".\n";
-               throw PropagatorException(errmsg.str());
-            }
+               std::string scName = propObjectNames[i];
+               Integer id = naifIds[i];
 
-            outState = skr->GetTargetState(scName, id, currentEpoch,
+               timeFromEpoch += ephemStep;
+               stepTaken = ephemStep;
+
+               currentEpochGT = initialEpochGT;
+               currentEpochGT.AddSeconds(timeFromEpoch);
+
+               // Allow for slop in the last few bits
+               if ((currentEpochGT < ephemStart - 1e-10) || 
+                  (currentEpochGT > ephemEnd + 1e-10))
+               {
+                  std::stringstream errmsg;
+                  errmsg.precision(16);
+                  errmsg << "The SPKPropagator " 
+                     << instanceName 
+                     << " is attempting to step outside of the span of the " 
+                     "ephemeris data; halting.  ";
+                  errmsg << "The current SPICE ephemeris covers the A.1 modified " 
+                     "Julian span ";
+                  errmsg << ephemStart << " to " << ephemEnd << " and the " 
+                     "requested epoch is " << currentEpochGT.ToString() << ".\n";
+                  throw PropagatorException(errmsg.str());
+               }
+
+               outState = skr->GetTargetState(scName, id, currentEpochGT, 
                   spkCentralBody, spkCentralBodyNaifId);
 
-            /**
-             *  @todo: When SPKProp can evolve more than one spacecraft, these
-             *  memcpy lines need revision
-             */
-//            std::memcpy(state, outState.GetDataVector(),
-//                  dimension*sizeof(Real));
-//            ReturnFromOrigin(currentEpoch);
-//            std::memcpy(j2kState, outState.GetDataVector(),
-            std::memcpy(state, outState.GetDataVector(),
+               /**
+               *  @todo: When SPKProp can evolve more than one spacecraft, these
+               *  memcpy lines need revision
+               */
+               //            std::memcpy(state, outState.GetDataVector(),
+               //                  dimension*sizeof(Real));
+               //            ReturnFromOrigin(currentEpoch);
+               //            std::memcpy(j2kState, outState.GetDataVector(),
+               std::memcpy(state, outState.GetDataVector(), 
                   dimension*sizeof(Real));
-            //MoveToOrigin(currentEpoch);
-            UpdateSpaceObject(currentEpoch);
+               //MoveToOrigin(currentEpoch);
+               UpdateSpaceObjectGT(currentEpochGT);
 
-            #ifdef DEBUG_PROPAGATION
-               MessageInterface::ShowMessage("(Step for %p) State at epoch "
-                     "%.12lf is [", this, currentEpoch);
+#ifdef DEBUG_PROPAGATION
+               MessageInterface::ShowMessage("(Step for %p) State at epoch " 
+                  "%s is [", this, currentEpochGT.ToString().c_str());
                for (Integer i = 0; i < dimension; ++i)
                {
                   MessageInterface::ShowMessage("%.12lf", state[i]);
@@ -842,10 +895,72 @@ bool SPKPropagator::Step()
                   else
                      MessageInterface::ShowMessage("]\n");
                }
-            #endif
-         }
+#endif
+            }
 
-         retval = true;
+            retval = true;
+         }
+         else
+         {
+            for (UnsignedInt i = 0; i < propObjects.size(); ++i)
+            {
+               std::string scName = propObjectNames[i];
+               Integer id = naifIds[i];
+
+               timeFromEpoch += ephemStep;
+               stepTaken = ephemStep;
+               currentEpoch = initialEpoch + timeFromEpoch /
+                  GmatTimeConstants::SECS_PER_DAY;
+
+               // Allow for slop in the last few bits
+               if ((currentEpoch < ephemStart - 1e-10) ||
+                  (currentEpoch > ephemEnd + 1e-10))
+               {
+                  std::stringstream errmsg;
+                  errmsg.precision(16);
+                  errmsg << "The SPKPropagator "
+                     << instanceName
+                     << " is attempting to step outside of the span of the "
+                     "ephemeris data; halting.  ";
+                  errmsg << "The current SPICE ephemeris covers the A.1 modified "
+                     "Julian span ";
+                  errmsg << ephemStart << " to " << ephemEnd << " and the "
+                     "requested epoch is " << currentEpoch << ".\n";
+                  throw PropagatorException(errmsg.str());
+               }
+
+               outState = skr->GetTargetState(scName, id, A1Mjd(currentEpoch), 
+                  spkCentralBody, spkCentralBodyNaifId);
+
+               /**
+                *  @todo: When SPKProp can evolve more than one spacecraft, these
+                *  memcpy lines need revision
+                */
+               //            std::memcpy(state, outState.GetDataVector(),
+               //                  dimension*sizeof(Real));
+               //            ReturnFromOrigin(currentEpoch);
+               //            std::memcpy(j2kState, outState.GetDataVector(),
+               std::memcpy(state, outState.GetDataVector(),
+                  dimension*sizeof(Real));
+               //MoveToOrigin(currentEpoch);
+               UpdateSpaceObject(currentEpoch);
+
+               #ifdef DEBUG_PROPAGATION
+               MessageInterface::ShowMessage("(Step for %p) State at epoch "
+                  "%.12lf is [", this, currentEpoch);
+               for (Integer i = 0; i < dimension; ++i)
+               {
+                  MessageInterface::ShowMessage("%.12lf", state[i]);
+                  if (i < 5)
+                     MessageInterface::ShowMessage("   ");
+                  else
+                     MessageInterface::ShowMessage("]\n");
+               }
+               #endif
+            }
+
+            retval = true;
+         }
       }
       catch (BaseException &e)
       {
@@ -908,7 +1023,11 @@ Real SPKPropagator::GetStepTaken()
 void SPKPropagator::UpdateState()
 {
    #ifdef DEBUG_EXECUTION
-      MessageInterface::ShowMessage("Updating state to epoch %.12lf\n",
+      if (hasPrecisionTime)
+         MessageInterface::ShowMessage("Updating state to epochGT %s\n", 
+            currentEpochGT.ToString().c_str());
+      else
+         MessageInterface::ShowMessage("Updating state to epoch %.12lf\n",
             currentEpoch);
    #endif
 
@@ -918,46 +1037,48 @@ void SPKPropagator::UpdateState()
       {
          Rvector6  outState;
 
-         for (UnsignedInt i = 0; i < propObjects.size(); ++i)
+         if (hasPrecisionTime)
          {
-            std::string scName = propObjectNames[i];
-            Integer id = naifIds[i];
-
-            // Allow for slop in the last few bits
-            if ((currentEpoch < ephemStart - 1e-10) ||
-                (currentEpoch > ephemEnd + 1e-10))
+            for (UnsignedInt i = 0; i < propObjects.size(); ++i)
             {
-               std::stringstream errmsg;
-               errmsg.precision(16);
-               errmsg << "The SPKPropagator "
-                      << instanceName
-                      << " is attempting to access state data outside of the "
-                         "span of the ephemeris data; halting.  ";
-               errmsg << "The current SPICE ephemeris covers the A.1 modified "
-                         "Julian span "
-                      << ephemStart << " to " << ephemEnd << " and the "
-                         "requested epoch is " << currentEpoch << ".\n";
-               throw PropagatorException(errmsg.str());
-            }
+               std::string scName = propObjectNames[i];
+               Integer id = naifIds[i];
 
-            outState = skr->GetTargetState(scName, id, currentEpoch,
+               // Allow for slop in the last few bits
+               if ((currentEpochGT < ephemStart - 1e-10) || 
+                  (currentEpochGT > ephemEnd + 1e-10))
+               {
+                  std::stringstream errmsg;
+                  errmsg.precision(16);
+                  errmsg << "The SPKPropagator " 
+                     << instanceName 
+                     << " is attempting to access state data outside of the " 
+                     "span of the ephemeris data; halting.  ";
+                  errmsg << "The current SPICE ephemeris covers the A.1 modified " 
+                     "Julian span " 
+                     << ephemStart << " to " << ephemEnd << " and the " 
+                     "requested epoch is " << currentEpochGT.ToString() << ".\n";
+                  throw PropagatorException(errmsg.str());
+               }
+
+               outState = skr->GetTargetState(scName, id, currentEpochGT, 
                   spkCentralBody, spkCentralBodyNaifId);
 
-            /**
-             *  @todo: When SPKProp can evolve more than one spacecraft, this
-             *  memcpy line needs revision
-             */
-//            std::memcpy(state, outState.GetDataVector(),
-//                  dimension*sizeof(Real));
-//            std::memcpy(j2kState, outState.GetDataVector(),
-            std::memcpy(state, outState.GetDataVector(),
+               /**
+               *  @todo: When SPKProp can evolve more than one spacecraft, this
+               *  memcpy line needs revision
+               */
+               //            std::memcpy(state, outState.GetDataVector(),
+               //                  dimension*sizeof(Real));
+               //            std::memcpy(j2kState, outState.GetDataVector(),
+               std::memcpy(state, outState.GetDataVector(), 
                   dimension*sizeof(Real));
-//            MoveToOrigin(currentEpoch);
-//            UpdateSpaceObject(currentEpoch);
+               //            MoveToOrigin(currentEpoch);
+               //            UpdateSpaceObject(currentEpoch);
 
-            #ifdef DEBUG_PROPAGATION
-               MessageInterface::ShowMessage("(UpdateState for %p) State at "
-                     "epoch %.12lf is [", this, currentEpoch);
+               #ifdef DEBUG_PROPAGATION
+               MessageInterface::ShowMessage("(UpdateState for %p) State at " 
+                  "epoch %s is [", this, currentEpochGT.ToString().c_str());
                for (Integer i = 0; i < dimension; ++i)
                {
                   MessageInterface::ShowMessage("%.12lf", state[i]);
@@ -966,7 +1087,61 @@ void SPKPropagator::UpdateState()
                   else
                      MessageInterface::ShowMessage("]\n");
                }
-            #endif
+               #endif
+            }
+         }
+         else
+         {
+            for (UnsignedInt i = 0; i < propObjects.size(); ++i)
+            {
+               std::string scName = propObjectNames[i];
+               Integer id = naifIds[i];
+
+               // Allow for slop in the last few bits
+               if ((currentEpoch < ephemStart - 1e-10) ||
+                  (currentEpoch > ephemEnd + 1e-10))
+               {
+                  std::stringstream errmsg;
+                  errmsg.precision(16);
+                  errmsg << "The SPKPropagator "
+                     << instanceName
+                     << " is attempting to access state data outside of the "
+                     "span of the ephemeris data; halting.  ";
+                  errmsg << "The current SPICE ephemeris covers the A.1 modified "
+                     "Julian span "
+                     << ephemStart << " to " << ephemEnd << " and the "
+                     "requested epoch is " << currentEpoch << ".\n";
+                  throw PropagatorException(errmsg.str());
+               }
+
+               outState = skr->GetTargetState(scName, id, A1Mjd(currentEpoch), 
+                  spkCentralBody, spkCentralBodyNaifId);
+
+               /**
+                *  @todo: When SPKProp can evolve more than one spacecraft, this
+                *  memcpy line needs revision
+                */
+               //            std::memcpy(state, outState.GetDataVector(),
+               //                  dimension*sizeof(Real));
+               //            std::memcpy(j2kState, outState.GetDataVector(),
+               std::memcpy(state, outState.GetDataVector(),
+                  dimension*sizeof(Real));
+               //            MoveToOrigin(currentEpoch);
+               //            UpdateSpaceObject(currentEpoch);
+
+               #ifdef DEBUG_PROPAGATION
+               MessageInterface::ShowMessage("(UpdateState for %p) State at "
+                  "epoch %.12lf is [", this, currentEpoch);
+               for (Integer i = 0; i < dimension; ++i)
+               {
+                  MessageInterface::ShowMessage("%.12lf", state[i]);
+                  if (i < 5)
+                     MessageInterface::ShowMessage("   ");
+                  else
+                     MessageInterface::ShowMessage("]\n");
+               }
+               #endif
+            }
          }
       }
       catch (BaseException &e)

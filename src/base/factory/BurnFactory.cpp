@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -100,6 +100,11 @@ BurnFactory::BurnFactory() :
       creatables.push_back("ImpulsiveBurn");  
       creatables.push_back("FiniteBurn"); 
    }
+
+   GmatType::RegisterType(Gmat::BURN, "Burn");
+   GmatType::RegisterType(Gmat::IMPULSIVE_BURN, "ImpulsiveBurn");
+   GmatType::RegisterType(Gmat::FINITE_BURN, "FiniteBurn");
+   GmatType::RegisterType(Gmat::TRANSIENT_FORCE, "TransientForce");  // Owned force
 }
 
 //------------------------------------------------------------------------------

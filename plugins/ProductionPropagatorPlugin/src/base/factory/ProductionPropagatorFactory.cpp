@@ -4,7 +4,9 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Darrel Conway
 // Created: Nov 6, 2013

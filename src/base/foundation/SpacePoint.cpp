@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -142,14 +142,14 @@ SpacePoint::DEFAULT_TARGET_COLOR[MAX_SP_COLOR] =
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  SpacePoint(Gmat::ObjectType ofType, const std::string &itsType,
+//  SpacePoint(UnsignedInt ofType, const std::string &itsType,
 //             const std::string &itsName);
 //---------------------------------------------------------------------------
 /**
  * Constructs base SpacePoint structures used in derived classes
  * (default constructor).
  *
- * @param <ofType>  Gmat::ObjectTypes enumeration for the object.
+ * @param <ofType>  UnsignedInts enumeration for the object.
  * @param <itsType> GMAT script string associated with this type of object.
  * @param <itsName> Optional name for the object.  Defaults to "".
  *
@@ -157,7 +157,7 @@ SpacePoint::DEFAULT_TARGET_COLOR[MAX_SP_COLOR] =
  *       classes must pass in the typeId and typeStr parameters.
  */
 //---------------------------------------------------------------------------
-SpacePoint::SpacePoint(Gmat::ObjectType ofType, const std::string &itsType,
+SpacePoint::SpacePoint(UnsignedInt ofType, const std::string &itsType,
                        const std::string &itsName) :
 GmatBase(ofType,itsType,itsName),
 theSolarSystem     (NULL),
@@ -374,6 +374,13 @@ Real SpacePoint::GetEpoch()
    throw GmatBaseException(errmsg);
 }
 
+GmatTime SpacePoint::GetEpochGT()
+{
+   std::string errmsg = "GetEpochGT not implemented for SpacePoint ";
+   errmsg += instanceName + "\n";
+   throw GmatBaseException(errmsg);
+}
+
 
 //------------------------------------------------------------------------------
 // Real SetEpoch(const Real ep)
@@ -391,6 +398,14 @@ Real SpacePoint::GetEpoch()
 Real SpacePoint::SetEpoch(const Real ep)
 {
    std::string errmsg = "SetEpoch not implemented for SpacePoint ";
+   errmsg += instanceName + "\n";
+   throw GmatBaseException(errmsg);
+}
+
+
+GmatTime SpacePoint::SetEpochGT(const GmatTime ep)
+{
+   std::string errmsg = "GmatTime SpacePoint::SetEpoch(const GmatTime rp) function was not implemented for SpacePoint ";
    errmsg += instanceName + "\n";
    throw GmatBaseException(errmsg);
 }
@@ -1005,63 +1020,127 @@ const Rvector3 SpacePoint::GetMJ2000Acceleration(const A1Mjd &atTime)
 }
 
 //------------------------------------------------------------------------------
+// const Rvector3 GetMJ2000Acceleration(const GmatTime &atTime)
+//------------------------------------------------------------------------------
+const Rvector3 SpacePoint::GetMJ2000Acceleration(const GmatTime &atTime)
+{
+   return Rvector3(0.0, 0.0, 0.0);
+}
+
+
+//------------------------------------------------------------------------------
 // const Rvector6 GetMJ2000PrecState(const GmatTime &atTime)
 //------------------------------------------------------------------------------
 const Rvector6 SpacePoint::GetMJ2000PrecState(const GmatTime &atTime)
 {
-   GmatTime t = atTime;						// GmatTime value of atTime
-   GmatEpoch te = t.GetMjd();				// GmatEpoch value of atTime		Note that: value of t and value of te are different due to their type's precision
-   Real dt = (t-te).GetTimeInSec();			// difference in time (second) between GmatTime value and Gmatepoch value of atTime)  
+   Rvector6 s;
+   if (hasPrecisionTime)
+      s = GetMJ2000State(atTime);
+   else
+   {
+      if (IsOfType(Gmat::SPACECRAFT))
+      {
+         GmatTime t = atTime;						      // GmatTime value of atTime
+         GmatEpoch te = t.GetMjd();				      // GmatEpoch value of atTime		Note that: value of t and value of te are different due to their type's precision
+         Real dt = (t - te).GetTimeInSec();			// difference in time (second) between GmatTime value and Gmatepoch value of atTime)  
 
-   Rvector6 s = GetMJ2000State(A1Mjd(te));				// state at time te
-   Rvector3 a = GetMJ2000Acceleration(A1Mjd(te));		// acceleration at time te
-   Rvector6 sdot(s[3],s[4],s[5],a[0],a[1],a[2]); 		// velocity at time te
-   s = s + sdot*dt;							// state at time atTime 
+         s = GetMJ2000State(A1Mjd(te));				// state at time te
+         Rvector3 a = GetMJ2000Acceleration(A1Mjd(te));		      // acceleration at time te
+         Rvector6 sdot(s[3], s[4], s[5], a[0], a[1], a[2]); 		// velocity at time te
+         s = s + sdot*dt;							      // state at time atTime 
+      }
+      else
+      {
+         s = GetMJ2000State(atTime);
+      }
+   }
 
    return s;
 }
+
 
 //------------------------------------------------------------------------------
 // const Rvector3 GetMJ2000PrecPosition(const GmatTime &atTime)
 //------------------------------------------------------------------------------
 const Rvector3 SpacePoint::GetMJ2000PrecPosition(const GmatTime &atTime)
 {
-   GmatTime t = atTime;						// GmatTime value of atTime
-   GmatEpoch te = t.GetMjd();				// GmatEpoch value of atTime		Note that: value of t and value of te are different due to their type's precision
-   Real dt = (t-te).GetTimeInSec();			// difference in time (second) between GmatTime value and Gmatepoch value of atTime)  
+   Rvector3 r;
+   if (hasPrecisionTime)
+      r = GetMJ2000Position(atTime);
+   else
+   {
+      if (IsOfType(Gmat::SPACECRAFT))
+      {
+         GmatTime t = atTime;						// GmatTime value of atTime
+         GmatEpoch te = t.GetMjd();				// GmatEpoch value of atTime		Note that: value of t and value of te are different due to their type's precision
+         Real dt = (t - te).GetTimeInSec();  // difference in time (second) between GmatTime value and Gmatepoch value of atTime)  
 
-   Rvector3 r = GetMJ2000Position(A1Mjd(te));		// position at time te
-   Rvector3 v = GetMJ2000Velocity(A1Mjd(te));		// velocity at time te
-   r = r + v*dt;							// pocition at time atTime 
+         r = GetMJ2000Position(A1Mjd(te));		         // position at time te
+         Rvector3 v = GetMJ2000Velocity(A1Mjd(te));		// velocity at time te
+         r = r + v*dt;							               // pocition at time atTime 
+      }
+      else
+      {
+         r = GetMJ2000Position(atTime);
+      }
+   }
 
    return r;
 }
+
+
 
 //------------------------------------------------------------------------------
 // const Rvector3 GetMJ2000PrecVelocity(const GmatTime &atTime)
 //------------------------------------------------------------------------------
 const Rvector3 SpacePoint::GetMJ2000PrecVelocity(const GmatTime &atTime)
 {
-   GmatTime t = atTime;						// GmatTime value of atTime
-   GmatEpoch te = t.GetMjd();				// GmatEpoch value of atTime		Note that: value of t and value of te are different due to their type's precision
-   Real dt = (t-te).GetTimeInSec();			// difference in time (second) between GmatTime value and Gmatepoch value of atTime)  
+   Rvector3 v;
+   if (hasPrecisionTime)
+      v = GetMJ2000Velocity(atTime);
+   else
+   {
+      if (IsOfType(Gmat::SPACECRAFT))
+      {
+         GmatTime t = atTime;						      // GmatTime value of atTime
+         GmatEpoch te = t.GetMjd();				      // GmatEpoch value of atTime		Note that: value of t and value of te are different due to their type's precision
+         Real dt = (t - te).GetTimeInSec();			// difference in time (second) between GmatTime value and Gmatepoch value of atTime)  
 
-   Rvector3 v = GetMJ2000Velocity(A1Mjd(te));		// velocity at time te
-   Rvector3 a = GetMJ2000Acceleration(A1Mjd(te));	// acceleration at time te
-   v = v + a*dt;							// velocity at time atTime 
+         v = GetMJ2000Velocity(A1Mjd(te));		         // velocity at time te
+         Rvector6 s = GetMJ2000State(A1Mjd(te));
+         Rvector3 a = GetMJ2000Acceleration(A1Mjd(te));	// acceleration at time te
+         v = v + a*dt;			               				// velocity at time atTime 
+      }
+      else
+      {
+         v = GetMJ2000Velocity(atTime);
+      }
+   }
 
    return v;
 }
+
 
 //------------------------------------------------------------------------------
 // const Rvector3 GetMJ2000PrecAcceleration(const GmatTime &atTime)
 //------------------------------------------------------------------------------
 const Rvector3 SpacePoint::GetMJ2000PrecAcceleration(const GmatTime &atTime)
 {
-   GmatTime t = atTime;
-   // Assume that acceleration is the same with a very tiny change of time
-   return GetMJ2000Acceleration(A1Mjd(t.GetMjd()));
+   if (hasPrecisionTime)
+      return GetMJ2000Acceleration(atTime);
+   else
+   {
+      if (IsOfType(Gmat::SPACECRAFT))
+      {
+         GmatTime t = atTime;
+         // Assume that acceleration is the same with a very tiny change of time
+         return GetMJ2000Acceleration(A1Mjd(t.GetMjd()));
+      }
+      else
+         return GetMJ2000Acceleration(atTime);
+   }
 }
+
 
 void SpacePoint::RemoveSpiceKernelName(const std::string &kernelType,
                                        const std::string &fileName)
@@ -1754,7 +1833,7 @@ const StringArray& SpacePoint::GetStringArrayParameter(const std::string &label)
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//  GmatBase* GetRefObject(const UnsignedInt type,
 //                         const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -1767,7 +1846,7 @@ const StringArray& SpacePoint::GetStringArrayParameter(const std::string &label)
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* SpacePoint::GetRefObject(const Gmat::ObjectType type,
+GmatBase* SpacePoint::GetRefObject(const UnsignedInt type,
                                    const std::string &name)
 {
    switch (type)
@@ -1783,7 +1862,7 @@ GmatBase* SpacePoint::GetRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -1801,7 +1880,7 @@ GmatBase* SpacePoint::GetRefObject(const Gmat::ObjectType type,
  * not been tested.
  */
 //------------------------------------------------------------------------------
-bool SpacePoint::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool SpacePoint::SetRefObject(GmatBase *obj, const UnsignedInt type,
                               const std::string &name)
 {
    
@@ -2024,7 +2103,7 @@ bool SpacePoint::SetStringParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name, 
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name,
 //                        const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -2038,7 +2117,7 @@ bool SpacePoint::SetStringParameter(const std::string &label,
  * @return pointer to the reference object requested.
  */
 //------------------------------------------------------------------------------
-GmatBase* SpacePoint::GetRefObject(const Gmat::ObjectType type,
+GmatBase* SpacePoint::GetRefObject(const UnsignedInt type,
                                    const std::string &name, 
                                    const Integer index)
 {
@@ -2047,7 +2126,7 @@ GmatBase* SpacePoint::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name, const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -2062,7 +2141,7 @@ GmatBase* SpacePoint::GetRefObject(const Gmat::ObjectType type,
  * @return true if successful; otherwise, false.
  */
 //------------------------------------------------------------------------------
-bool SpacePoint::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool SpacePoint::SetRefObject(GmatBase *obj, const UnsignedInt type,
                               const std::string &name, const Integer index)
 {
    return GmatBase::SetRefObject(obj, type, name, index);

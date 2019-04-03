@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -79,8 +79,8 @@
 //------------------------------------------------------------------------------
 MeasurementManager::MeasurementManager() :
    thePropagator     (NULL),
-   anchorEpoch       (GmatTimeConstants::MJD_OF_J2000),
-   currentEpoch      (GmatTimeConstants::MJD_OF_J2000),
+   anchorEpochGT     (GmatTimeConstants::MJD_OF_J2000),
+   currentEpochGT    (GmatTimeConstants::MJD_OF_J2000),
    idBase            (10000),
    largestId         (10000),
    eventCount        (0),
@@ -111,8 +111,8 @@ MeasurementManager::~MeasurementManager()
 //------------------------------------------------------------------------------
 MeasurementManager::MeasurementManager(const MeasurementManager &mm) :
    thePropagator     (mm.thePropagator),
-   anchorEpoch       (mm.anchorEpoch),
-   currentEpoch      (mm.currentEpoch),
+   anchorEpochGT     (mm.anchorEpochGT),
+   currentEpochGT    (mm.currentEpochGT),
    idBase            (mm.idBase),
    largestId         (mm.largestId),
    eventCount        (mm.eventCount),
@@ -187,8 +187,8 @@ MeasurementManager& MeasurementManager::operator=(const MeasurementManager &mm)
    if (&mm != this)
    {
       thePropagator    = mm.thePropagator;
-      anchorEpoch      = mm.anchorEpoch;
-      currentEpoch     = mm.currentEpoch;
+      anchorEpochGT    = mm.anchorEpochGT;
+      currentEpochGT   = mm.currentEpochGT;
       modelNames       = mm.modelNames;
       eventCount       = mm.eventCount;
       inSimulationMode = mm.inSimulationMode;
@@ -444,6 +444,58 @@ bool MeasurementManager::Initialize()
    return retval;
 }
 
+
+//-----------------------------------------------------------------------------------
+// ObjectArray MeasurementManager::GetStatisticsDataFilters(TrackingFileSet* tfs)
+//-----------------------------------------------------------------------------------
+/** This function is used to get all statistics data filters set to a given 
+*      TrackingFileSet.
+* @param tfs      given tracking file set. If it is NULL, that means all tracking 
+*                 file sets
+*
+* @return         a list of data filter objects
+*/
+//-----------------------------------------------------------------------------------
+ObjectArray MeasurementManager::GetStatisticsDataFilters(TrackingFileSet* tfs)
+{
+   
+   ObjectArray objList;
+   if (tfs == NULL)
+   {
+      for (Integer i = 0; i < trackingSets.size(); ++i)
+      {
+         // Get list of data filter objects from trackingSet[i]
+         ObjectArray objs = trackingSets[i]->GetRefObjectArray(Gmat::DATA_FILTER);
+         
+         // Add them to objList
+         for (Integer j = 0; j < objs.size(); ++j)
+         {
+            // Get name of objs[j]
+            std::string name = objs[j]->GetName();
+
+            // if it is not already in objList, then add it to the list
+            bool found = false;
+            for (Integer k = 0; k < objList.size(); ++k)
+            {
+               if (name == objList[k]->GetName())
+               {
+                  found = true;
+                  break;
+               }
+            }
+            
+            if (!found)
+               objList.push_back(objs[j]);
+         }
+      }
+   }
+   else
+   {
+      objList = tfs->GetRefObjectArray("DataFilters");
+   }
+   
+   return objList;
+}
 
 //-----------------------------------------------------------------------------------
 // bool SetStatisticsDataFiltersToDataFiles(Integer option)
@@ -798,17 +850,12 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
             od = &(*currentObs);
 
          measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od, rt);
-         MessageInterface::ShowMessage("Calculating adapter based measurement...");
 
          if (measurements[j].isFeasible)
          {
-            MessageInterface::ShowMessage("Calculated feasible measurement\n");
             ++successCount;
             eventCount += measurements[j].eventCount;
          }
-         else
-            MessageInterface::ShowMessage("NOT feasible\n");
-
       }
    }
    else
@@ -831,7 +878,8 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
          measurements[measurementToCalc] = 
             models[measurementToCalc]->CalculateMeasurement(withEvents, od, rt);
          
-         if (measurements[measurementToCalc].isFeasible)
+         if ((measurements[measurementToCalc].isFeasible) || 
+            (measurements[measurementToCalc].unfeasibleReason.substr(0,1) == "B"))
          {
             successCount = 1;
             eventCount = measurements[measurementToCalc].eventCount;
@@ -879,7 +927,8 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
                   measurements[measurementToCalc].value[0]);
          #endif
 
-         if (measurements[measurementToCalc].isFeasible)
+         if ((measurements[measurementToCalc].isFeasible) || 
+            (measurements[measurementToCalc].unfeasibleReason.substr(0, 1) == "B"))
          {
             successCount = 1;
             eventCount = measurements[measurementToCalc].eventCount;
@@ -1721,7 +1770,7 @@ void MeasurementManager::LoadRampTables()
 
 
 //-----------------------------------------------------------------------------
-// GmatEpoch GetEpoch()
+// GmatTime GetEpoch()
 //-----------------------------------------------------------------------------
 /**
  * Retrieves the epoch of the current observation
@@ -1729,16 +1778,16 @@ void MeasurementManager::LoadRampTables()
  * @return The (a.1 modified Julian) epoch of the observation.
  */
 //-----------------------------------------------------------------------------
-GmatEpoch MeasurementManager::GetEpoch()
+GmatTime MeasurementManager::GetEpochGT()
 {
    if (currentObs == observations.end())
       return 0.0;
-   return currentObs->epoch;
+   return currentObs->epochGT;
 }
 
 
 //-----------------------------------------------------------------------------
-// GmatEpoch GetNextEpoch()
+// GmatTime GetNextEpoch()
 //-----------------------------------------------------------------------------
 /**
  * Retrieves the epoch for the next available observation
@@ -1746,7 +1795,7 @@ GmatEpoch MeasurementManager::GetEpoch()
  * @return The (a.1 modified Julian) epoch of the next observation.
  */
 //-----------------------------------------------------------------------------
-GmatEpoch MeasurementManager::GetNextEpoch()
+GmatTime MeasurementManager::GetNextEpochGT()
 {
    std::vector<ObservationData>::iterator nextObs = observations.end();
    if (currentObs != observations.end())
@@ -1755,10 +1804,10 @@ GmatEpoch MeasurementManager::GetNextEpoch()
    if (nextObs == observations.end())
       return 0.0;
 
-   #ifdef DEBUG_FLOW
-      MessageInterface::ShowMessage("Next epoch: %.12lf\n", nextObs->epoch);
-   #endif
-   return nextObs->epoch;
+#ifdef DEBUG_FLOW
+   MessageInterface::ShowMessage("Next epoch: %s\n", nextObs->epochGT.ToString().c_str());
+#endif
+   return nextObs->epochGT;
 }
 
 
@@ -1855,6 +1904,7 @@ bool MeasurementManager::AdvanceObservation()
    else
      return false;
 }
+
 
 //------------------------------------------------------------------------------
 // Integer AddMeasurement(MeasurementModel *meas)
@@ -2420,7 +2470,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             else
                MessageInterface::ShowMessage(" Simulation: measurement adapter %s without events\n", adapters[i]->GetName().c_str());
          #endif
-         measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
+         measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt, forSimulation);
          if (measurements[i].unfeasibleReason == "R")
             throw MeasurementException(adapters[i]->GetErrorMessage());
 
@@ -2490,6 +2540,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          if (isbelong == false)
          {
             measurements[j].typeName       = models[j]->GetStringParameter("Type");
+            measurements[j].epochGT        = od->epochGT;
             measurements[j].epoch          = od->epoch;
             measurements[j].epochSystem        = od->epochSystem;
             measurements[j].isFeasible       = false;
@@ -2556,6 +2607,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          if (isbelong == false)
          {
             measurements[j].typeName         = adapters[j]->GetStringParameter("MeasurementType");
+            measurements[j].epochGT          = od->epochGT;
             measurements[j].epoch            = od->epoch;
             measurements[j].epochSystem      = od->epochSystem;
             measurements[j].isFeasible       = false;
@@ -2574,7 +2626,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             std::vector<RampTableData>* rt = NULL;
             if (sr.size() > 0)
                rt = &(rampTables[sr[0]]);
-            measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od, rt);
+            measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od, rt, forSimulation);
             
             if (measurements[j].isFeasible)
             {

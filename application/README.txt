@@ -10,7 +10,7 @@ to improve current missions.
                           License and Copyright
 -----------------------------------------------------------------------
 
-Copyright (c) 2002 - 2017 United States Government as represented by
+Copyright (c) 2002 - 2018 United States Government as represented by
 the Administrator of the National Aeronautics and Space Administration.
 All Other Rights Reserved.
 
@@ -70,24 +70,21 @@ tarball file and uncompress it into place using the command
 
     tar -zxf <TarballPackageName>
 
-where <TarballPackageName> is either gmat-ubuntu-x64-R2017a.tar.gz
-or gmat-rhel7-x64-R2017a.tar.gz.  
+where <TarballPackageName> is either gmat-ubuntu-x64-R2018a.tar.gz
+or gmat-rhel7-x64-R2018a.tar.gz.  
 
 MAC
 
-The Mac distribution is packaged as a ZIP file, ready for
-expansion and use.  This prebuilt release was built and tested on 
-Mac OS X 10.11.  
+The Mac distribution is packaged as a ZIP file, gmat-macosx-x64-R2018a.zip, 
+ready for expansion and use.  This prebuilt release was built and tested on 
+Mac OS X 10.12.
 
 Mac users can download the zip archive and uncompress it into place
-by double-clicking it in the Finder or by opening a Terminal window
-and typing the command
+by double-clicking it in the Finder.
 
-    unzip gmat-macosx-x64-R2017a.zip
-
-NOTE that there is a Gatekeeper/translocation issue with OS X Sierra.
-Since the GMAT application is currently unsigned, the Gatekeeper will not
-allow it to run in the bin folder and will make a copy of it in a 
+NOTE that there is a Gatekeeper/translocation issue with OS X Sierra and High
+Sierra.  Since the GMAT application is currently unsigned, the Gatekeeper will
+not allow it to run in the bin folder and will make a copy of it in a 
 temporary location.  This can be fixed manually by doing the following:
 
 1. Open the Finder
@@ -96,7 +93,7 @@ temporary location.  This can be fixed manually by doing the following:
 folder!) to a different location (e.g. the Desktop)
 4. Drag and drop the GMAT application back into the bin folder
 
-This will clear the ‘UseAppTranslocation’ flag in Sierra and will allow
+This will clear the ‘UseAppTranslocation’ flag in the OS and will allow
 GMAT to be run from the bin folder.
 
 A future release of GMAT will address the signing issue further.
@@ -113,9 +110,14 @@ http://gmatcentral.org/display/GW/GMAT+CMake+Build+System.
 
 WINDOWS
 
-On Windows, click Start, and then point to All Programs. Point to GMAT,
-GMAT R2017a, and then click GMAT R2017a. If you are using the zip-file
-bundle, double-click the bin\GMAT.exe application.
+On Windows 7, click Start, and then point to All Programs. Point to 
+GMAT, GMAT R2018a, and then click GMAT R2018a.
+
+On Windows 10, point to the Start menu, scroll to the GMAT folder in
+the applications list, and select GMAT R2018a.
+
+If you are using the zip-file bundle, double-click the 
+bin\GMAT.exe application.
 
 LINUX
 
@@ -161,13 +163,13 @@ application in that folder:
 The Beta GUI application can be run using the ‘open’ Terminal command, 
 executed in the bin folder:
 
-   open GMAT-R2017a_Beta.app
+   open GMAT-R2018a_Beta.app
 
-or by double-clicking the GMAT-R2017a_Beta.app in the Finder.  If running
+or by double-clicking the GMAT-R2018a_Beta.app in the Finder.  If running
 GMAT fails and you see an error message about GMAT not being able to 
 read the startup file in a temporary location that includes 
-“AppTranslocation” in the path, see the note above about OS X Sierra and 
-the Gatekeeper.
+“AppTranslocation” in the path, see the note above about the Gatekeeper and
+OS X Sierra (and High Sierra).
 
 Python Interface note for Mac users:
 
@@ -180,7 +182,7 @@ Python installation elsewhere.
 
 MATLAB interface note for Mac users:
 
-To use the Matlab interface with the Mac GMAT-R2017a_Beta.app application, 
+To use the Matlab interface with the Mac GMAT-R2018a_Beta.app application, 
 you must open the MATLABConfigure.txt in the bin directory and edit the 
 MATLAB_APP_PATH field to point to the location of your MATLAB installation. 
 
@@ -192,6 +194,18 @@ are using a .bashrc, you may need to add something like this:
 export MATLAB = <your MATLAB app location here>
 export DYLD_LIBRARY_PATH=$MATLAB/bin/maci64:$DYLD_LIBRARY_PATH
 export PATH=$PATH:$MATLAB/bin
+
+Note for MacBooks with a Touch Bar:
+
+There appears to be an issue with WxWidgets, the third party GUI library
+used by GMAT, and the Mac Touch Bar.  Crashes occur frequently and the
+traceback indicates that the issue lies in Apple code, related to the Touch
+bar specifically, possibly caused by a NULL string pointer.  Our analysis
+suggests this issue cannot be addressed by the GMAT team or by WxWidgets;
+however, we will continue to investigate.  In the meantime, the GMAT Console
+version will continue to work, and the GUI version (Beta) will work on Macs
+without a Touch Bar.
+
 
 -----------------------------------------------------------------------
                            User Information
@@ -218,7 +232,7 @@ For a complete list of changes made in this version see the Release
 Notes section of the user guide.
 
 Source code is available here:
-https://sourceforge.net/p/gmat/git/ci/GMAT-R2016a/tree/
+https://sourceforge.net/p/gmat/git/
 
 Compilation instructions are available here: 
 http://gmatcentral.org/display/GW/GMAT+CMake+Build+System

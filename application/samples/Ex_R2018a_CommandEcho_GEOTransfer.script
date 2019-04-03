@@ -1,0 +1,136 @@
+%General Mission Analysis Tool(GMAT) Script
+%Created: 2010-09-04 09:04:32
+
+% Script demonstrating echoing of the executing
+% command to the GMAT message window and log file.
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+Create Spacecraft geoSat;
+GMAT geoSat.DateFormat = TAIModJulian;
+GMAT geoSat.Epoch = '21545';
+GMAT geoSat.CoordinateSystem = EarthMJ2000Eq;
+GMAT geoSat.DisplayStateType = Keplerian;
+GMAT geoSat.SMA = 6578;
+GMAT geoSat.ECC = 0.001;
+GMAT geoSat.INC = 28.5;
+GMAT geoSat.RAAN = 67;
+GMAT geoSat.AOP = 355;
+GMAT geoSat.TA = 250;
+
+
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+Create ForceModel AllForces;
+GMAT AllForces.CentralBody = Earth;
+GMAT AllForces.PrimaryBodies = {Earth};
+GMAT AllForces.SRP = On;
+GMAT AllForces.ErrorControl = RSSStep;
+GMAT AllForces.GravityField.Earth.Degree = 20;
+GMAT AllForces.GravityField.Earth.Order = 20;
+GMAT AllForces.Drag.AtmosphereModel = MSISE90;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+Create Propagator DefaultProp;
+GMAT DefaultProp.FM = AllForces;
+GMAT DefaultProp.Type = PrinceDormand78;
+
+%----------------------------------------
+%---------- Burns
+%----------------------------------------
+Create ImpulsiveBurn TOI;
+GMAT TOI.CoordinateSystem = Local;
+GMAT TOI.Origin = Earth;
+GMAT TOI.Axes = VNB;
+
+Create ImpulsiveBurn MCC;
+GMAT MCC.CoordinateSystem = Local;
+GMAT MCC.Origin = Earth;
+GMAT MCC.Axes = VNB;
+
+Create ImpulsiveBurn MOI;
+GMAT MOI.CoordinateSystem = Local;
+GMAT MOI.Origin = Earth;
+GMAT MOI.Axes = VNB;
+
+%----------------------------------------
+%---------- Solvers
+%----------------------------------------
+Create DifferentialCorrector DC;
+GMAT DC.ShowProgress = true;
+GMAT DC.ReportStyle = Normal;
+GMAT DC.ReportFile = 'DifferentialCorrectorDC1.data';
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+Create OrbitView inertialView;
+GMAT inertialView.SolverIterations = Current;
+GMAT inertialView.UpperLeft = [ 0.37 0.006 ];
+GMAT inertialView.Size = [ 0.57 0.46 ];
+GMAT inertialView.Add = {geoSat, Earth};
+GMAT inertialView.CoordinateSystem = EarthMJ2000Eq;
+GMAT inertialView.ViewPointVector = [ -90000 -90000 20000 ];
+GMAT inertialView.ViewDirection = Earth;
+GMAT inertialView.ViewUpCoordinateSystem = EarthMJ2000Eq;
+
+Create OrbitView fixedView;
+GMAT fixedView.SolverIterations = Current;
+GMAT fixedView.UpperLeft = [ 0.37 0.49 ];
+GMAT fixedView.Size = [ 0.57 0.47 ];
+GMAT fixedView.Add = {geoSat, Earth};
+GMAT fixedView.CoordinateSystem = EarthFixed;
+GMAT fixedView.ViewPointVector = [ -20000 -50000 0 ];
+GMAT fixedView.ViewDirection = Earth;
+GMAT fixedView.ViewScaleFactor = 1.2;
+GMAT fixedView.ViewUpCoordinateSystem = EarthFixed;
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+Create Variable I lowerBound upperBound;
+GMAT lowerBound = -119;
+GMAT upperBound = -117.5;
+
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+BeginMissionSequence;
+Propagate 'Prop to Z Crossing' DefaultProp(geoSat) {geoSat.Z = 0, StopTolerance = 1e-05};
+
+Target 'Raise Apogee' DC {SolveMode = Solve, ExitMode = DiscardAndContinue, ShowProgressWindow = true};
+   Vary 'Vary TOI.V' DC(TOI.Element1 = 1, {Perturbation = .0001, Lower = -9.999999e300, Upper = 9.999999e300, MaxStep = .5, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+   Maneuver 'Apply TOI' TOI(geoSat);
+   Propagate 'Prop To Apogee' DefaultProp(geoSat) {geoSat.Apoapsis};
+   Achieve 'Achieve RMAG' DC(geoSat.RMAG = 85000, {Tolerance = .1});
+EndTarget;  % For targeter DC
+
+Propagate 'Prop to Perigee' DefaultProp(geoSat) {geoSat.Earth.Periapsis};
+Propagate 'Prop to Plane Crossing' DefaultProp(geoSat) {geoSat.Z = 0, StopTolerance = 1e-05};
+
+Target 'Change Plane/Perigee' DC {SolveMode = Solve, ExitMode = DiscardAndContinue, ShowProgressWindow = true};
+   CommandEcho 'Write sequence to message window' On
+   Vary 'Vary MCC.V' DC(MCC.Element1 = 0.1, {Perturbation = .0001, Lower = -9.999999e300, Upper = 9.999999e300, MaxStep = 0.5, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+   Vary 'Vary MCC.N' DC(MCC.Element2 = 0.1, {Perturbation = .0001, Lower = -9.999999e300, Upper = 9.999999e300, MaxStep = 0.5, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+   Maneuver 'Apply MCC' MCC(geoSat);
+   Propagate 'Prop to Perigee' DefaultProp(geoSat) {geoSat.Periapsis};
+   Achieve 'Apply INC' DC(geoSat.EarthMJ2000Eq.INC = 2, {Tolerance = .001});
+   CommandEcho 'Stop writing' Off
+   Achieve 'Achieve RMAG' DC(geoSat.RMAG = 42195, {Tolerance = .001});
+EndTarget;  % For targeter DC
+
+Target 'Lower Apogee' DC {SolveMode = Solve, ExitMode = DiscardAndContinue, ShowProgressWindow = true};
+   Vary 'Vary MOI.V' DC(MOI.Element1 = -0.1, {Perturbation = .0001, Lower = -9.999999e300, Upper = 9.999999e300, MaxStep = .1, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+   Maneuver 'Apply MOI' MOI(geoSat);
+   Achieve 'Achieve SMA' DC(geoSat.Earth.SMA = 42166.90, {Tolerance = .001});
+EndTarget;  % For targeter DC
+
+Propagate 'Prop 10 days' DefaultProp(geoSat) {geoSat.ElapsedDays = 10};

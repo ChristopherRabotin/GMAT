@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -875,10 +875,10 @@ bool ReportFile::TakeAction(const std::string &action,
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool ReportFile::RenameRefObject(const Gmat::ObjectType type,
+bool ReportFile::RenameRefObject(const UnsignedInt type,
                                  const std::string &oldName,
                                  const std::string &newName)
 {
@@ -1413,10 +1413,10 @@ bool ReportFile::SetOnOffParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+// virtual GmatBase* GetRefObject(const UnsignedInt type,
 //                                const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* ReportFile::GetRefObject(const Gmat::ObjectType type,
+GmatBase* ReportFile::GetRefObject(const UnsignedInt type,
                                    const std::string &name)
 {
    for (int i=0; i<mNumParams; i++)
@@ -1431,10 +1431,10 @@ GmatBase* ReportFile::GetRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// virtual bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                           const std::string &name = "")
 //------------------------------------------------------------------------------
-bool ReportFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool ReportFile::SetRefObject(GmatBase *obj, const UnsignedInt type,
                               const std::string &name)
 {   
    #if DBGLVL_REPORTFILE_REF_OBJ
@@ -1509,9 +1509,9 @@ const ObjectTypeArray& ReportFile::GetRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& ReportFile::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& ReportFile::GetRefObjectNameArray(const UnsignedInt type)
 {
    mAllRefObjectNames.clear();
 

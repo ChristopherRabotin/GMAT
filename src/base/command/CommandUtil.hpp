@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -52,11 +52,11 @@ namespace GmatCommandUtil
    void GMAT_API ResetBranchCommandChanged(GmatCommand *brCmd, Integer level);
    bool GMAT_API HasCommandSequenceChanged(GmatCommand *cmd);
    bool GMAT_API HasBranchCommandChanged(GmatCommand *brCmd, Integer level);
-   bool GMAT_API FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
+   bool GMAT_API FindObject(GmatCommand *cmd, UnsignedInt objType,
                      const std::string &objName, std::string &cmdName,
                      GmatCommand **cmdUsing, bool checkWrappers = false);
    bool GMAT_API FindObjectFromSubCommands(GmatCommand *brCmd, Integer level,
-                     Gmat::ObjectType objType, const std::string &objName,
+                     UnsignedInt objType, const std::string &objName,
                      std::string &cmdName, GmatCommand **cmdUsing, bool checkWrappers = false);
    std::string GMAT_API GetCommandSeqString(GmatCommand *cmd, bool showAddr = true,
                      bool showGenStr = false, bool showSummaryName = false,

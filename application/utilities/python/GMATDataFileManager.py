@@ -1,7 +1,10 @@
 
 
+import urllib
+# --- needed (for some reason) to run on Mac
 import urllib.request
 import urllib.error
+# ---
 import os
 import re
 from ftplib import FTP
@@ -38,8 +41,10 @@ class GMATFileManager:
           fManager.UpdateSPICEPlanetaryPCKFile()
           fManager.UpdateSPICEBPCFiles()
           fManager.UpdateSPICETFFiles()
+		  fManager.UpdateIGRZFile()
           fManager.UpdateCSSISpaceWeatherFile()
-          fManager.UpdateCssiSpaceDataFile()
+		  fManager.UpdateCSSISpaceWeatherAllFile()
+          fManager.UpdateApFileForIRIModel()
           
       NOTE: The class archives old files to the current working directory by
       default, appending the time of update to the file name.  The archive 
@@ -78,7 +83,7 @@ class GMATFileManager:
        self.eopDirectory = '//data//planetary_coeff//'
        self.leapSecDirectory = '//data//time//'
        self.spaceWeatherDirectory = '//data//atmosphere//earth//'
-       self.cssiSpaceDataDirectory = '//data//IonosphereData//'
+       self.ionoDataDirectory = '//data//IonosphereData//'
        # data file names
        self.spkLeapSecondFileName = 'SPICELeapSecondKernel.tls'
        self.planetaryPCKFileName = 'SPICEPlanetaryConstantsKernel.tpc'
@@ -89,9 +94,11 @@ class GMATFileManager:
        self.lunaFKFilename = 'SPICELunaFrameKernel.tf'
        self.gmatLeapSecondFileName = 'tai-utc.dat'
        self.gmatEOPFileName = 'eopc04_08.62-now'
-       self.cssiSpaceWeatherFileName = 'SpaceWeather-All-v1.2.txt'
+       self.cssiSpaceWeatherAllFileName = 'SpaceWeather-All-v1.2.txt'
+       self.cssiSpaceWeatherFileName = 'SpaceWeather-v1.2.txt'
        self.cssiSpaceDataFileName = 'sw19571001.txt'
-       self.gmatSpaceDataFileName = 'ap.dat'
+       self.apFileForIRIModel = 'ap.dat'
+       self.igrzDataFileName = 'ig_rz.dat'
        # data file prefixes, extensions, types
        self.earthLatestPrefix = 'earth_latest'
        self.earthBPCIgnorePrefix = 'earth_[0-9]{6}_[0-9]{6}_[0-9]{6}'
@@ -117,7 +124,8 @@ class GMATFileManager:
            'ftp://ftp.agi.com/pub/DynamicEarthData/SpaceWeather-All-v1.2.txt'
        self.apDataURL = \
            'ftp://ftp.agi.com/pub/DynamicEarthData/SpaceWeather-All-v1.2.txt'
-       # archive info
+       self.igrzDataURL = 'http://irimodel.org//indices//ig_rz.dat'
+	   # archive info
        self.archiveOldFiles = archiveOldFiles
        self.archiveDirectory = archiveDirectory;
        self.logFile = archiveDirectory + logFileName
@@ -138,21 +146,61 @@ class GMATFileManager:
        os.chdir(currentDir)
 
     def UpdateAllFiles(self):
-       leapSecondOK       = self.UpdateGMATLeapSecondFile()
-       eopOK              = self.UpdateGMATEOPFile()
-       naifLskOK          = self.UpdateSPICELeapSecondFile()
-       naifPckOK          = self.UpdateSPICEPlanetaryPCKFile()
-       naifBpcOK          = self.UpdateSPICEBPCFiles()
-       naifLunaFrameOK    = self.UpdateSPICETFFiles()
+        
+       #  Update all files
+       updateSucceded = True;
+       leapSecondOK = self.UpdateGMATLeapSecondFile()
+       eopOK = self.UpdateGMATEOPFile()
+       naifLskOK = self.UpdateSPICELeapSecondFile()
+       naifPckOK = self.UpdateSPICEPlanetaryPCKFile()
+       naifBpcOK = self.UpdateSPICEBPCFiles()
+       naifLunaFrameOK = self.UpdateSPICETFFiles()
+       igrzOK = self.UpdateIGRZFile()
        cssiSpaceWeatherOK = self.UpdateCSSISpaceWeatherFile()
-       cssiSpaceDataOK    = self.UpdateCssiSpaceDataFile()
-       if (not leapSecondOK)       or (not eopOK)     or (not naifLskOK) or \
-          (not naifBpcOK)          or (not naifPckOK) or                    \
-          (not cssiSpaceWeatherOK) or (not cssiSpaceDataOK) or \
-          (not naifLunaFrameOK) :
+       cssiSpaceWeatherAllOK = self.UpdateCSSISpaceWeatherAllFile()
+       apForIRIDataOK = self.UpdateApFileForIRIModel()
+       
+       #  Write results of update to the screen and report.
+       self.PrintToScreenAndLog('\n')
+       self.PrintToScreenAndLog(\
+            '------------------- FILE UPDATE RESULTS ------------------ \n')
+       if (not leapSecondOK):
+           self.PrintToScreenAndLog('*** ERROR updating GMAT leap second file!\n')
+           updateSucceded = False
+       if (not eopOK):    
+           self.PrintToScreenAndLog('*** ERROR updating GMAT EOP file!\n')
+           updateSucceded = False
+       if (not naifLskOK): 
+           self.PrintToScreenAndLog('*** ERROR updating SPICE leap second file!\n')
+           updateSucceded = False
+       if (not naifBpcOK):
+           self.PrintToScreenAndLog('*** ERROR updating SPICE BPC files!\n')
+           updateSucceded = False
+       if (not naifPckOK): 
+           self.PrintToScreenAndLog('*** ERROR updating SPICE PCK files!\n')
+           updateSucceded = False
+       if (not cssiSpaceWeatherOK):
+           self.PrintToScreenAndLog('*** ERROR updating CSSI space weather file!\n')
+           updateSucceded = False
+       if (not cssiSpaceWeatherAllOK): 
+           self.PrintToScreenAndLog('*** ERROR updating CSSI space weather file!\n')
+           updateSucceded = False
+       if (not apForIRIDataOK): 
+           self.PrintToScreenAndLog('*** ERROR updating ap Data for IRI model!\n')
+           updateSucceded = False
+       if (not naifLunaFrameOK): 
+           self.PrintToScreenAndLog('*** ERROR updating SPICE Lunar Frame Datal!\n')
+           updateSucceded = False
+       if (not igrzOK):
+           self.PrintToScreenAndLog('*** ERROR updating IRI model data!\n')
+           updateSucceded = False
+           
+       if (not updateSucceded):    
           self.PrintToScreenAndLog('*** ERROR updating one or more files!\n')
           return False;
-       return True;
+       else:
+          self.PrintToScreenAndLog('SUCCESS: All files updated successfully!\n')
+          return True;
 
     def GetArchivePrefix(self):
        currentTime = time.time()
@@ -363,7 +411,35 @@ class GMATFileManager:
           self.PrintTimeToScreenAndLog("Process Finished At ")
        return isOK;
                                                       
+    def UpdateIGRZFile(self):
+       " Replaces the ig_rz.dat file used by IRI model with latest version "
+       self.PrintToScreenAndLog('')
+       self.PrintToScreenAndLog('--------UPDATING IG_RZ FILE ----------------------')
+       self.PrintTimeToScreenAndLog("Process Began At ")
+       isOK = True;
+
+       try:
+          self.Downloadfile(self.igrzDataURL,
+                            self.igrzDataFileName )
     
+          currentLoc = self.gmatRootDirectory + self.ionoDataDirectory
+          newLoc = self.archiveDirectory
+          self.Handleoldfile(currentLoc,self.archiveDirectory,
+                             self.igrzDataFileName,
+                             self.GetArchivePrefix(),self.archiveOldFiles)
+        
+          currentLoc = os.getcwd() + '//'
+          newLoc = self.gmatRootDirectory + self.ionoDataDirectory
+          self.Movefile(currentLoc,newLoc,self.igrzDataFileName)
+       except:
+          isOK = False
+          
+       if not isOK:
+          self.PrintToScreenAndLog('ERROR downloading igrz.dat file!!!')  
+       self.PrintTimeToScreenAndLog("Process Finished At ")
+       return isOK;
+	
+	
     def UpdateCSSISpaceWeatherFile(self):
        " Replaces the CSSI space weather file with latest version "
        self.PrintToScreenAndLog('')
@@ -388,11 +464,38 @@ class GMATFileManager:
           isOK = False
        self.PrintTimeToScreenAndLog("Process Finished At ")
        return isOK;
-    
-    def UpdateCssiSpaceDataFile(self):
-       " Replaces the CSSI space data file with latest (modified-for-GMAT) version "
+
+    def UpdateCSSISpaceWeatherAllFile(self):
+       " Replaces the CSSI space weather file with latest version "
        self.PrintToScreenAndLog('')
-       self.PrintToScreenAndLog('--------UPDATING CSSI SPACE DATA FILE ----------------------')
+       self.PrintToScreenAndLog('--------UPDATING CSSI SPACE WEATHER FILE ----------------------')
+       self.PrintTimeToScreenAndLog("Process Began At ")
+       isOK = True;
+       # CSSI_FLUX_FILE = ATMOSPHERE_PATH/CSSI_2004To2026.txt
+       try:
+          self.Downloadfile(self.spaceWeatherURL,
+                            self.cssiSpaceWeatherAllFileName )
+    
+          currentLoc = self.gmatRootDirectory + self.spaceWeatherDirectory
+          newLoc = self.archiveDirectory
+          self.Handleoldfile(currentLoc,self.archiveDirectory,
+                             self.cssiSpaceWeatherAllFileName,
+                             self.GetArchivePrefix(),self.archiveOldFiles)
+        
+          currentLoc = os.getcwd() + '//'
+          newLoc = self.gmatRootDirectory + self.spaceWeatherDirectory
+          self.Movefile(currentLoc,newLoc,self.cssiSpaceWeatherAllFileName)
+       except:
+          isOK = False
+       self.PrintTimeToScreenAndLog("Process Finished At ")
+       return isOK;
+	   
+    def UpdateApFileForIRIModel(self):
+       """ Replaces ap.dat used in IRI model by extacting data from CSSS Space
+         Weather File"""
+       self.PrintToScreenAndLog('')
+       self.PrintToScreenAndLog(\
+        '--------UPDATING ap.data file used by IRI model --------------------')
        self.PrintTimeToScreenAndLog("Process Began At ")
        isOK = True;
        try:
@@ -401,7 +504,7 @@ class GMATFileManager:
           # this is where we need to read the file and create our own mini-file
           step = 1
           inFile  = open(self.cssiSpaceDataFileName);
-          outFile = open(self.gmatSpaceDataFileName, 'w');
+          outFile = open(self.apFileForIRIModel, 'w');
           # skip over records before 1958
           writeTheData = False;
           for line in inFile:
@@ -434,15 +537,15 @@ class GMATFileManager:
           self.PrintToScreenAndLog('Downloaded file ' +
                         self.cssiSpaceDataFileName + ' deleted successfully')
           
-          currentLoc = self.gmatRootDirectory + self.cssiSpaceDataDirectory
+          currentLoc = self.gmatRootDirectory + self.ionoDataDirectory
           newLoc = self.archiveDirectory
           self.Handleoldfile(currentLoc,self.archiveDirectory,
-                             self.gmatSpaceDataFileName,
+                             self.apFileForIRIModel,
                              self.GetArchivePrefix(),self.archiveOldFiles)
                               
           currentLoc = os.getcwd() + '//'
-          newLoc = self.gmatRootDirectory + self.cssiSpaceDataDirectory
-          self.Movefile(currentLoc,newLoc,self.gmatSpaceDataFileName)
+          newLoc = self.gmatRootDirectory + self.ionoDataDirectory
+          self.Movefile(currentLoc,newLoc,self.apFileForIRIModel)
        except:
           isOK = False
           # todo - do we need to make sure the files are closed here?
@@ -698,9 +801,9 @@ class GMATFileManager:
 # NOTE - these must be changed to point to your GMAT location and the location
 # where you want the file(s) to be backed up.  You may also specify a name for
 # your log file.
-gmatLocation = ""
-archLoc = ""
-logName = "MyDataFileLog.txt"
+gmatLocation = "REPLACE WITH PATH TO GMAT ROOT DIRECTORY"
+archLoc = "REPLACE WITH PATH TO FILE ARCHIVE"
+logName = "REPLACE WITH NAME AND EXTENSION OF LOG FILE"
 
 try:
    fManager = GMATFileManager(gmatLocation,archiveDirectory = archLoc,
@@ -715,8 +818,10 @@ try:
    #isOK = isOK and fManager.UpdateSPICEPlanetaryPCKFile()
    #isOK = isOK and fManager.UpdateSPICEBPCFiles()
    #isOK = isOK and fManager.UpdateSPICETFFiles()
+   #isOK = isOK and fManager.UpdateIGRZFile()
    #isOK = isOK and fManager.UpdateCSSISpaceWeatherFile()
-   #isOK = isOK and fManager.UpdateCssiSpaceDataFile()
+   #isOK = isOK and fManager.UpdateCSSISpaceWeatherAllFile()
+   #isOK = isOK and fManager.UpdateApFileForIRIModel()
 
    if (not isOK):
       fManager.PrintToScreenAndLog(

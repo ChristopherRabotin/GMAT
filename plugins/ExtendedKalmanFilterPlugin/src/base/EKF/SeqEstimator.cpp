@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1199,7 +1199,8 @@ void SeqEstimator::CompleteInitialization()
 
       throw EstimatorException(sstm.str());
    }
-   currentEpoch         = ((Spacecraft*)satArray[0])->GetEpoch();
+   
+   currentEpochGT = ((Spacecraft*)satArray[0])->GetEpoch();
 
    ObjectArray objects;                                                                     
    esm.GetStateObjects(objects);                                                            
@@ -1228,7 +1229,7 @@ void SeqEstimator::CompleteInitialization()
 #endif
 // End EKF mod
 
-   nextMeasurementEpoch = measManager.GetEpoch();
+   nextMeasurementEpochGT = measManager.GetEpochGT();
 
    hAccum.clear();
    residuals.SetSize(stateSize);
@@ -1236,7 +1237,7 @@ void SeqEstimator::CompleteInitialization()
    dx.SetSize(stateSize);
 
    esm.MapObjectsToVector();
-   GetEstimationStateForReport(aprioriSolveForState);  // EKF mod 12/16
+   aprioriSolveForState = esm.GetEstimationStateForReport();  // EKF mod 12/16
 
    measurementResiduals.clear();
    isInitialized = true;
@@ -1277,14 +1278,13 @@ void SeqEstimator::CompleteInitialization()
 // End EKF mod
    ReportProgress();
 
-   if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
+   if (GmatMathUtil::IsEqual(currentEpochGT, nextMeasurementEpochGT))
    {
       currentState = CALCULATING;
    }
    else
    {
-      timeStep = (nextMeasurementEpoch - currentEpoch) *
-            GmatTimeConstants::SECS_PER_DAY;
+      timeStep = (nextMeasurementEpochGT - currentEpochGT).GetTimeInSec();
       PrepareForStep();
       currentState = PROPAGATING;
    }
@@ -1321,13 +1321,13 @@ void SeqEstimator::CompleteInitialization()
 void SeqEstimator::FindTimeStep()
 {
 // if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch)) EKF mod 12/16 changed to next line
-   if (fabs((currentEpoch - nextMeasurementEpoch)/currentEpoch) < GmatRealConstants::REAL_EPSILON)
+   if (fabs((currentEpochGT - nextMeasurementEpochGT).GetMjd() / currentEpochGT.GetMjd()) < GmatRealConstants::REAL_EPSILON)
    {
       // We're at the next measurement, so process it
       currentState = CALCULATING;
       timeStep = 0.0; // EKF mod 12/16 we are at the next measurement... so do not advance it further
    }
-   else if (nextMeasurementEpoch == 0.0)
+   else if (nextMeasurementEpochGT == 0.0)
    {
       // Finished running through the data
       currentState = CHECKINGRUN;
@@ -1336,12 +1336,11 @@ void SeqEstimator::FindTimeStep()
    {
       // Calculate the time step in seconds and stay in the PROPAGATING state;
       // timeStep could be positive or negative
-      timeStep = (nextMeasurementEpoch - currentEpoch) *
-            GmatTimeConstants::SECS_PER_DAY;
+      timeStep = (nextMeasurementEpochGT - currentEpochGT).GetTimeInSec(); 
       #ifdef DEBUG_EXECUTION
          MessageInterface::ShowMessage("SeqEstimator::FindTimeStep   timestep = %.12lf; nextepoch = "
-               "%.12lf; current = %.12lf\n", timeStep, nextMeasurementEpoch,
-               currentEpoch);
+               "%s; current = %s\n", timeStep, nextMeasurementEpochGT.ToString().c_str(),
+               currentEpochGT.ToString().c_str());
       #endif
    }
 }
@@ -1369,10 +1368,10 @@ void SeqEstimator::CalculateData()
    {
       // No measurements were possible
       measManager.AdvanceObservation();
-      nextMeasurementEpoch = measManager.GetEpoch();
+      nextMeasurementEpochGT = measManager.GetEpochGT();
       FindTimeStep();
 
-      if (currentEpoch < nextMeasurementEpoch)
+      if (currentEpochGT < nextMeasurementEpochGT)
       {
          currentState = PROPAGATING;
          PrepareForStep();
@@ -1501,14 +1500,17 @@ void SeqEstimator::RunComplete()
       MessageInterface::ShowMessage("SeqEstimator::cleared hAccum\n");
    #endif
    Weight.clear();
-   OData.clear();
-   CData.clear();
+   //OData.clear();
+   //CData.clear();
+
    #ifdef DEBUG_RUNCOMPLETE
       MessageInterface::ShowMessage("SeqEstimator::cleared Weight, OData, CData\n");
    #endif
    measurementResiduals.clear();
    measurementEpochs.clear();
    measurementResidualID.clear();
+   KeyIndex.clear();
+
    #ifdef DEBUG_RUNCOMPLETE
       MessageInterface::ShowMessage("SeqEstimator::cleared measurementResiduals\n");
       MessageInterface::ShowMessage("SeqEstimator::entering WriteToTextFile()\n");
@@ -1635,7 +1637,7 @@ void SeqEstimator::WriteHeader()
 #ifdef DEBUG_REPORTS
    MessageInterface::ShowMessage("WriteHeader() started\n");
 #endif
-   Real taiMjdEpoch, utcMjdEpoch;
+   GmatTime taiMjdEpoch, utcMjdEpoch;
    std::string utcEpoch;
 
    GmatState outputEstimationState;
@@ -1655,17 +1657,19 @@ void SeqEstimator::WriteHeader()
    textFile.precision(15);
    //char s[100];
    textFile << "              Epoch:\n"
-            << "   " << currentEpoch <<  " A.1 Mod. Julian\n";
-   taiMjdEpoch = TimeConverterUtil::Convert(currentEpoch,
+            << "   " << currentEpochGT.ToString() << " A.1 Mod. Julian\n";
+
+   taiMjdEpoch = TimeConverterUtil::Convert(currentEpochGT,
          TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
-   utcMjdEpoch = TimeConverterUtil::Convert(currentEpoch,
+   utcMjdEpoch = TimeConverterUtil::Convert(currentEpochGT,
          TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
-   textFile << "   " << taiMjdEpoch << " TAI Mod. Julian\n";
-   utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+   textFile << "   " << taiMjdEpoch.ToString() << " TAI Mod. Julian\n";
+   utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch.GetMjd());
    textFile << "   " << utcEpoch << " UTCG\n";
 
    // Convert state to participants' coordinate system:
-   GetEstimationStateForReport(outputEstimationState);
+   outputEstimationState = esm.GetEstimationStateForReport();
+
    // write out state
    textFile.precision(8);
    for (UnsignedInt i = 0; i < map->size(); ++i)
@@ -1810,7 +1814,8 @@ void SeqEstimator::WriteSummary(Solver::SolverState sState)
    {
       /// 1. Write state summary
       // Convert state to participants' coordinate system:
-      GetEstimationStateForReport(outputEstimationState);
+      outputEstimationState = esm.GetEstimationStateForReport(); 
+
       // Write state to report file
       Integer max_len = 15;
       for (UnsignedInt i = 0; i < map->size(); ++i)
@@ -2001,7 +2006,8 @@ void SeqEstimator::WriteSummary(Solver::SolverState sState)
                << "      No Computed Value Configuration Available : " << numRemovedRecords["U"] << "\n"
                << "      Out of Ramped Table Range                 : " << numRemovedRecords["R"] << "\n"
                << "      Signal Blocked                            : " << numRemovedRecords["B"] << "\n"
-               << "      Sigma Editing                             : " << ((iterationsTaken == 0)?numRemovedRecords["IRMS"]:numRemovedRecords["OLSE"]) << "\n\n";
+               //<< "      Sigma Editing                             : " << ((iterationsTaken == 0)?numRemovedRecords["IRMS"]:numRemovedRecords["OLSE"]) << "\n\n";
+               << "      Sigma Editing                             : " << ((numRemovedRecords["IRMS"] != 0) ? numRemovedRecords["IRMS"] : numRemovedRecords["OLSE"]) << "\n\n";
 
       // TODO SeqEstimator stats table??
       /// 2.2. Write statistics table:
@@ -2435,7 +2441,7 @@ void SeqEstimator::WriteConclusion()
 #ifdef DEBUG_REPORTS
    MessageInterface::ShowMessage("WriteConclusion() started\n");
 #endif
-   Real taiMjdEpoch, utcMjdEpoch;
+   GmatTime taiMjdEpoch, utcMjdEpoch; 
    std::string utcEpoch;
 
    GmatState outputEstimationState;
@@ -2444,7 +2450,7 @@ void SeqEstimator::WriteConclusion()
    /// 1. Write estimation status
    textFile << "\n"
             << "********************************************************\n"
-            << "*** Estimating Completed in " << iterationsTaken << " iterations\n"
+            << "*** Estimation Completed in " << iterationsTaken << " iterations\n"
             << "********************************************************\n\n"
             << "Estimation ";
    switch(estimationStatus)
@@ -2475,16 +2481,17 @@ void SeqEstimator::WriteConclusion()
    else
    {
       textFile << "              Epoch:\n"
-               << "   " << currentEpoch <<  " A.1 Mod. Julian\n";
-      taiMjdEpoch = TimeConverterUtil::Convert(currentEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
-      utcMjdEpoch = TimeConverterUtil::Convert(currentEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
-      textFile << "   " << taiMjdEpoch << " TAI Mod. Julian\n";
-      utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+               << "   " << currentEpochGT.ToString() << " A.1 Mod. Julian\n";
+      taiMjdEpoch = TimeConverterUtil::Convert(currentEpochGT, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
+      utcMjdEpoch = TimeConverterUtil::Convert(currentEpochGT, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
+      textFile << "   " << taiMjdEpoch.ToString() << " TAI Mod. Julian\n";
+      utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch.GetMjd());
       textFile << "   " << utcEpoch << " UTCG\n";
    }
 
    /// 3. Write final state
-   GetEstimationStateForReport(outputEstimationState);
+   outputEstimationState = esm.GetEstimationStateForReport(); 
+
    textFile.precision(8);
    for (UnsignedInt i = 0; i < map->size(); ++i)
    {
@@ -2836,7 +2843,7 @@ std::string SeqEstimator::GetProgressString()
          case ESTIMATING:
             progress << "Current estimated state:\n";
             progress << "   Estimation Epoch: "
-                     << currentEpoch << "\n";
+                     << currentEpochGT.ToString() << "\n"; 
 
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
@@ -2853,13 +2860,13 @@ std::string SeqEstimator::GetProgressString()
          case FINISHED:
             progress << "\n****************************"
                      << "****************************\n"
-                     << "*** Estimating Completed"
+                     << "*** Estimation Completed"
                      << "\n****************************"
                      << "****************************\n\n"
                      << "\n\nFinal Estimated State:\n\n";
 
             progress << "   Estimation Epoch (A.1 modified Julian): "
-                        << currentEpoch << "\n\n";
+                     << currentEpochGT.ToString() << "\n\n"; 
 
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
@@ -2929,7 +2936,7 @@ void SeqEstimator::GetEstimationState(GmatState& outputState)
 
     for (UnsignedInt i = 0; i < map->size(); ++i)
     {
-        ConvertToPartCoordSys((*map)[i], estimationEpoch, (*estimationState)[i], &outputStateElement);
+        ConvertToPartCoordSys((*map)[i], estimationEpochGT, (*estimationState)[i], &outputStateElement); 
         outputState[i] = outputStateElement;
     }
    #ifdef DEBUG_RESIDUALS
@@ -2956,7 +2963,9 @@ void SeqEstimator::GetEstimationState(GmatState& outputState)
  *
 */
 //------------------------------------------------------------------------------
-bool SeqEstimator::ConvertToPartCoordSys(ListItem* infor, Real epoch,
+//bool SeqEstimator::ConvertToPartCoordSys(ListItem* infor, Real epoch,
+//      Real inputStateElement, Real* outputStateElement)
+bool SeqEstimator::ConvertToPartCoordSys(ListItem* infor, GmatTime epoch,
       Real inputStateElement, Real* outputStateElement)
 {
 
@@ -2989,7 +2998,7 @@ bool SeqEstimator::ConvertToPartCoordSys(ListItem* infor, Real epoch,
          inState.SetElement(index, inputStateElement);
          Rvector6 outState;
 
-         cv->Convert(A1Mjd(epoch), inState, gmatcs, outState, cs);
+         cv->Convert(epoch, inState, gmatcs, outState, cs); 
 
          (*outputStateElement) = outState[index];
          delete cv;
@@ -3128,6 +3137,14 @@ std::map<GmatBase*, Rvector6> SeqEstimator::CalculateKeplerianStateMap(const std
 
          if ((kState[1] <= 0)||(kState[1] >= 1.0))
             MessageInterface::ShowMessage("Warning: eccentricity (%lf) is out of range (0,1) when convert Cartesian state (%lf, %lf, %lf, %lf, %lf, %lf) to Keplerian state.\n", kState[1], state[i], state[i+1], state[i+2], state[i+3], state[i+4], state[i+5]);
+
+         stateMap[(*map)[i]->object] = kState;
+         i = i + 5;
+      }
+      else if ((*map)[i]->elementName == "CartesianState")
+      {
+         Rvector6 kState;
+         kState.Set(state[i], state[i + 1], state[i + 2], state[i + 3], state[i + 4], state[i + 5]);
 
          stateMap[(*map)[i]->object] = kState;
          i = i + 5;

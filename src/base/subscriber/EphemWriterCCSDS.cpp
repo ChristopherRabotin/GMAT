@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -579,10 +579,13 @@ void EphemWriterCCSDS::StartNewSegment(const std::string &comments, bool saveEpo
    // Write data for the rest of times on waiting
    FinishUpWriting();
    
-   // Write comments here
-   writeCommentAfterData = writeAfterData;
-   currComments = comments;
-   WriteDataComments(comments, false, ignoreBlankComments);
+   // Add non-empty comments to the meta data object, so that they
+   // are included in meta data upon call to 
+   // CCSDSOEMSegment::GetMetaDataForWriting()
+   if (comments != "")
+   {
+       ccsdsOemWriter->AddMetaComment(comments);
+   }
    
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage

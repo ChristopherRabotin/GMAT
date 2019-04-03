@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -71,7 +71,7 @@ TimeData::VALID_OBJECT_TYPE_LIST[TimeDataObjectCount] =
  */
 //------------------------------------------------------------------------------
 TimeData::TimeData(const std::string &name, const std::string &typeName,
-                   Gmat::ObjectType paramOwnerType)
+                   UnsignedInt paramOwnerType)
    : RefData(name, typeName, paramOwnerType)
 {
    #ifdef DEBUG_CONSTRUCTOR
@@ -559,9 +559,9 @@ const std::string* TimeData::GetValidObjectList() const
 
 // The inherited methods from RefData
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
-std::string TimeData::GetRefObjectName(const Gmat::ObjectType type) const
+std::string TimeData::GetRefObjectName(const UnsignedInt type) const
 {
    #ifdef DEBUG_TIMEDATA_OBJNAME
    MessageInterface::ShowMessage
@@ -577,7 +577,7 @@ std::string TimeData::GetRefObjectName(const Gmat::ObjectType type) const
       // if the type was SpacePoint, we may need to look in the Spacecraft
       // list (or vice versa?), since we are looking for a Spacecraft
       // and a Spacecraft is a SpacePoint
-      Gmat::ObjectType altType = type;
+      UnsignedInt altType = type;
       if (type == Gmat::SPACE_POINT)
          altType = Gmat::SPACECRAFT;
       else if (type == Gmat::SPACECRAFT)
@@ -607,9 +607,9 @@ std::string TimeData::GetRefObjectName(const Gmat::ObjectType type) const
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
-const StringArray& TimeData::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& TimeData::GetRefObjectNameArray(const UnsignedInt type)
 {
    RefData::GetRefObjectNameArray(type);
 
@@ -625,7 +625,7 @@ const StringArray& TimeData::GetRefObjectNameArray(const Gmat::ObjectType type)
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObjectName(Gmat::ObjectType type, const std::string &name)
+// bool SetRefObjectName(UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Adds type and name to reference object list.
@@ -637,10 +637,10 @@ const StringArray& TimeData::GetRefObjectNameArray(const Gmat::ObjectType type)
  *
  */
 //------------------------------------------------------------------------------
-bool TimeData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
+bool TimeData::SetRefObjectName(UnsignedInt type, const std::string &name)
 {
    // We need to be able to handle SpacePoints, not just Spacecraft
-   Gmat::ObjectType useType = type;
+   UnsignedInt useType = type;
    if ((type == Gmat::GROUND_STATION)   || (type == Gmat::BODY_FIXED_POINT) ||
        (type == Gmat::CALCULATED_POINT) || (type == Gmat::LIBRATION_POINT)  ||
        (type == Gmat::BARYCENTER)       || (type == Gmat::CELESTIAL_BODY))
@@ -651,9 +651,9 @@ bool TimeData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
 }
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* TimeData::GetRefObject(const Gmat::ObjectType type,
+GmatBase* TimeData::GetRefObject(const UnsignedInt type,
                                  const std::string &name)
 {
    try
@@ -666,7 +666,7 @@ GmatBase* TimeData::GetRefObject(const Gmat::ObjectType type,
       // if the type was SpacePoint, we may need to look in the Spacecraft
       // list (or vice versa?), since we are looking for a Spacecraft
       // and a Spacecraft is a SpacePoint
-      Gmat::ObjectType altType = type;
+      UnsignedInt altType = type;
       if (type == Gmat::SPACE_POINT) altType = Gmat::SPACECRAFT;
       for (int i=0; i<mNumRefObjects; i++)
       {
@@ -694,7 +694,7 @@ GmatBase* TimeData::GetRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                   const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -703,11 +703,11 @@ GmatBase* TimeData::GetRefObject(const Gmat::ObjectType type,
  * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
-bool TimeData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool TimeData::SetRefObject(GmatBase *obj, const UnsignedInt type,
                             const std::string &name)
 {
    // We need to be able to handle SpacePoints, not just Spacecraft
-   Gmat::ObjectType useType = type;
+   UnsignedInt useType = type;
    if ((type == Gmat::GROUND_STATION)   || (type == Gmat::BODY_FIXED_POINT) ||
        (type == Gmat::CALCULATED_POINT) || (type == Gmat::LIBRATION_POINT)  ||
        (type == Gmat::BARYCENTER)       || (type == Gmat::CELESTIAL_BODY))
@@ -839,7 +839,7 @@ void TimeData::InitializeRefObjects()
 
 
 //------------------------------------------------------------------------------
-// virtual bool IsValidObjectType(Gmat::ObjectType type)
+// virtual bool IsValidObjectType(UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Checks reference object type.
@@ -847,7 +847,7 @@ void TimeData::InitializeRefObjects()
  * @return return true if object is valid object, false otherwise
  */
 //------------------------------------------------------------------------------
-bool TimeData::IsValidObjectType(Gmat::ObjectType type)
+bool TimeData::IsValidObjectType(UnsignedInt type)
 {
    for (int i=0; i<TimeDataObjectCount; i++)
    {
@@ -859,7 +859,7 @@ bool TimeData::IsValidObjectType(Gmat::ObjectType type)
 
 }
 
-bool TimeData::AddRefObject(const Gmat::ObjectType type,
+bool TimeData::AddRefObject(const UnsignedInt type,
                             const std::string &name, GmatBase *obj,
                             bool replaceName)
 {
@@ -875,7 +875,7 @@ bool TimeData::AddRefObject(const Gmat::ObjectType type,
       }
    #endif
    // We need to be able to handle SpacePoints, not just Spacecraft
-   Gmat::ObjectType useType = type;
+   UnsignedInt useType = type;
    if ((type == Gmat::GROUND_STATION)    || (type == Gmat::BODY_FIXED_POINT)  ||
        (type == Gmat::CALCULATED_POINT)  || (type == Gmat::LIBRATION_POINT) ||
        (type == Gmat::BARYCENTER))

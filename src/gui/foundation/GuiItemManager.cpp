@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -300,7 +300,7 @@ void GuiItemManager::SetLastErrorMessage(const wxString &errMsg)
 
 
 //------------------------------------------------------------------------------
-// int IsValidObjectProperty(const std::string &varName, Gmat::ObjectType allowedType,
+// int IsValidObjectProperty(const std::string &varName, UnsignedInt allowedType,
 //                           bool allowNonPlottable = true)
 //------------------------------------------------------------------------------
 /**
@@ -313,7 +313,7 @@ void GuiItemManager::SetLastErrorMessage(const wxString &errMsg)
  */
 //------------------------------------------------------------------------------
 int GuiItemManager::IsValidObjectProperty(const std::string &varName,
-                                          Gmat::ObjectType allowedType,
+                                          UnsignedInt allowedType,
                                           bool allowNonPlottable)
 {
    #ifdef DEBUG_GUI_ITEM_VALIDATE
@@ -386,7 +386,7 @@ int GuiItemManager::IsValidObjectProperty(const std::string &varName,
 
 
 //------------------------------------------------------------------------------
-// int IsValidParameter(const std::string &varName, Gmat::ObjectType allowedType,
+// int IsValidParameter(const std::string &varName, UnsignedInt allowedType,
 //                      bool allowNonPlottable = true, bool allowWholeArray = false)
 //------------------------------------------------------------------------------
 /**
@@ -409,7 +409,7 @@ int GuiItemManager::IsValidObjectProperty(const std::string &varName,
  */
 //------------------------------------------------------------------------------
 int GuiItemManager::IsValidParameter(const std::string &varName,
-                                     Gmat::ObjectType allowedType,
+                                     UnsignedInt allowedType,
                                      bool allowNonPlottable, bool allowWholeArray)
 {
    #ifdef DEBUG_GUI_ITEM_VALIDATE
@@ -510,7 +510,7 @@ int GuiItemManager::IsValidParameter(const std::string &varName,
    {
       std::string ownerName = param->GetStringParameter("Object");
       GmatBase *owner = theGuiInterpreter->GetConfiguredObject(ownerName);
-      Gmat::ObjectType ownerType = allowedType;
+      UnsignedInt ownerType = allowedType;
       
       // If we don't want to check for the type, just use owner type
       if (allowedType == Gmat::UNKNOWN_OBJECT)
@@ -559,7 +559,7 @@ int GuiItemManager::IsValidParameter(const std::string &varName,
 
 
 //------------------------------------------------------------------------------
-// int IsValidVariable(const std::string &varName, Gmat::ObjectType allowedType,
+// int IsValidVariable(const std::string &varName, UnsignedInt allowedType,
 //           bool allowNumber, bool allowNonPlottable, bool allowObjectProperty,
 //           bool allowWholeArray)
 //------------------------------------------------------------------------------
@@ -585,7 +585,7 @@ int GuiItemManager::IsValidParameter(const std::string &varName,
  */
 //------------------------------------------------------------------------------
 int GuiItemManager::IsValidVariable(const std::string &varName,
-                                    Gmat::ObjectType allowedType, bool allowNumber,
+                                    UnsignedInt allowedType, bool allowNumber,
                                     bool allowNonPlottable, bool allowObjectProperty,
                                     bool allowWholeArray)
 {
@@ -637,7 +637,7 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
       {
          ParameterInfo *paramInfo = ParameterInfo::Instance();
          GmatParam::DepObject depType = paramInfo->GetDepObjectType(type);
-         Gmat::ObjectType ownedObjType = paramInfo->GetOwnedObjectType(type);
+         UnsignedInt ownedObjType = paramInfo->GetOwnedObjectType(type);
          bool isParameter = theGuiInterpreter->IsParameter(type);
          if (isParameter && depType == GmatParam::ATTACHED_OBJ && numberOfDots != 2)
             isParameter = false;
@@ -763,7 +763,7 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
 
 
 //------------------------------------------------------------------------------
-//  void UpdateAll(Gmat::ObjectType objType = UNKNOWN_OBJECT)
+//  void UpdateAll(UnsignedInt objType = UNKNOWN_OBJECT)
 //------------------------------------------------------------------------------
 /**
  * Updates all objects.
@@ -771,7 +771,7 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
  * @param  objType  Type of the object to be updated
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateAll(Gmat::ObjectType objType)
+void GuiItemManager::UpdateAll(UnsignedInt objType)
 {
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage
@@ -1391,11 +1391,11 @@ bool GuiItemManager::PrepareObjectNameChange()
 
 
 //------------------------------------------------------------------------------
-// virtual void NotifyObjectNameChange(Gmat::ObjectType type,
+// virtual void NotifyObjectNameChange(UnsignedInt type,
 //                                     const wxString &oldName,
 //                                     const wxString &newName)
 //------------------------------------------------------------------------------
-void GuiItemManager::NotifyObjectNameChange(Gmat::ObjectType type,
+void GuiItemManager::NotifyObjectNameChange(UnsignedInt type,
                                             const wxString &oldName,
                                             const wxString &newName)
 {
@@ -1928,8 +1928,8 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
    
    std::string paramName;
    wxString objTypeName, ownedObjTypeName;
-   Gmat::ObjectType objType = Gmat::UNKNOWN_OBJECT;
-   Gmat::ObjectType ownedObjType = Gmat::UNKNOWN_OBJECT;
+   UnsignedInt objType = Gmat::UNKNOWN_OBJECT;
+   UnsignedInt ownedObjType = Gmat::UNKNOWN_OBJECT;
    
    // Get object and owned object type name
    GmatBase *obj = theGuiInterpreter->GetConfiguredObject(objName.c_str());
@@ -1965,7 +1965,7 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
          for (int i = 0; i < numScOwnedObjProperty; i++)
          {
             paramName = theScAttachedObjPropertyList[i].c_str();
-            Gmat::ObjectType paramOwnedObjType = theParamInfo->GetOwnedObjectType(paramName);
+            UnsignedInt paramOwnedObjType = theParamInfo->GetOwnedObjectType(paramName);
             #if DBGLVL_GUI_ITEM_PROPERTY > 1
             MessageInterface::ShowMessage
                ("   '%s' ownedObjType=%d, paramOwnedObjType=%d \n", paramName.c_str(),
@@ -2339,7 +2339,8 @@ wxComboBox* GuiItemManager::GetCoordSysComboBox(wxWindow *parent, wxWindowID id,
  */
 //------------------------------------------------------------------------------
 wxComboBox* GuiItemManager::GetCoordSystemComboBox(wxWindow *parent, wxWindowID id,
-                                                   const wxSize &size, bool getMJ2000EqOnly)
+                                                   const wxSize &size, bool getMJ2000EqOnly,
+                                                   bool getCode500Only)
 {
    wxComboBox *coordSysComboBox;
    if (getMJ2000EqOnly)
@@ -2360,6 +2361,32 @@ wxComboBox* GuiItemManager::GetCoordSystemComboBox(wxWindow *parent, wxWindowID 
       coordSysComboBox =
          new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
                         mj2000AxisList, wxCB_READONLY);
+   }
+   else if (getCode500Only)
+   {
+      wxArrayString code500AxisList;
+      for (int i = 0; i<theNumCoordSys; i++)
+      {
+         std::string csName = theCoordSysList[i].WX_TO_STD_STRING;
+         // check for axis type
+         GmatBase *cs = theGuiInterpreter->GetConfiguredObject(csName);
+         if (cs)
+         {
+            GmatBase *axis = cs->GetOwnedObject(0);
+            if (axis)
+            {
+               if (axis->IsOfType("MJ2000EqAxes") ||
+                  axis->IsOfType("BodyFixedAxes") ||
+                  axis->IsOfType("TrueOfDateAxes"))
+               {
+                  code500AxisList.Add(csName.c_str());
+               }
+            }
+         }
+      }
+      coordSysComboBox =
+         new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+         code500AxisList, wxCB_READONLY);
    }
    else
    {
@@ -4900,7 +4927,7 @@ void GuiItemManager::UpdatePropertyList()
    theNumScProperty = 0;
    theNumSpacePtProperty = 0;
    theNumImpBurnProperty = 0;
-   Gmat::ObjectType objectType;
+   UnsignedInt objectType;
    ParameterInfo *theParamInfo = ParameterInfo::Instance();
    theScPropertyList.Clear();
    theSpacePointPropertyList.Clear();
@@ -6415,7 +6442,7 @@ void GuiItemManager::UpdateSubscriberList()
       
       #if DBGLVL_GUI_ITEM_SUBS > 1
       MessageInterface::ShowMessage
-         ("   %s added to theSubscriberList\n", theSubscriberList[i].c_str());
+         ("   %s added to theSubscriberList\n", theSubscriberList[i].WX_TO_C_STRING);
       #endif
    }
    

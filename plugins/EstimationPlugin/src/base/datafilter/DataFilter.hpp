@@ -73,24 +73,28 @@ public:
    virtual const StringArray&
                         GetStringArrayParameter(const std::string &label) const;
 
+   // Use to get initial epoch and fimal epoch
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         GetRealParameter(const std::string &label) const;
 
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string & oldName, const std::string & newName);
    virtual const ObjectTypeArray& 
                         GetRefObjectTypeArray();
    virtual const StringArray& 
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+                        GetRefObjectNameArray(const UnsignedInt type);
+   virtual std::string  GetRefObjectName(const UnsignedInt type) const;
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string & name);
-   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
                                      const std::string & name, const Integer index);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string & name);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string & name, const Integer index);
    virtual ObjectArray& GetRefObjectArray(const std::string & typeString);
-   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+   virtual ObjectArray& GetRefObjectArray(const UnsignedInt type);
 
 
 

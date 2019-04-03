@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -103,8 +103,6 @@ protected:
    std::string             ephemName;
    /// The ephem reader
    STKEphemerisFile        ephem;
-   /// Interpolator used to propagate to points off of the ephem nodes
-   Interpolator            *interp;
    /// Flag indicating the file handle status
    bool                    fileDataLoaded;
    /// Ephemeris data from the file
@@ -119,13 +117,18 @@ protected:
    /// Most recent epoch used from this propagator
    GmatEpoch               lastEpoch;
 
+// We need code corresponding to this:
+   GmatTime                lastEpochGT;
+
    virtual void            UpdateState();
    virtual void            SetEphemSpan(Integer whichOne = 0);
 
-   void                    FindRecord(GmatEpoch forEpoch);
-   void                    UpdateInterpolator(const GmatEpoch &forEpoch);
-   void                    GetState(GmatEpoch forEpoch, Rvector6 &outstate);
+// We need code corresponding to these:
+//   void                    FindRecord(GmatTime forEpoch);
+//   void                    UpdateInterpolator(const GmatTime &forEpoch);
+//   void                    GetState(GmatTime forEpoch, Rvector6 &outstate);
 
+   
    /// Parameter IDs
    enum
    {

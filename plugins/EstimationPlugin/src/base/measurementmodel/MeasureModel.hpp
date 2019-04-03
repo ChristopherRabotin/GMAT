@@ -91,20 +91,20 @@ public:
                                                 const Integer index) const;
 
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
-//   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+                        GetRefObjectNameArray(const UnsignedInt type);
+//   virtual bool         SetRefObjectName(const UnsignedInt type,
 //                                         const std::string &name);
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
+   virtual bool RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
-//   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+//   virtual GmatBase*    GetRefObject(const UnsignedInt type,
 //                                     const std::string &name);
-//   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+//   virtual GmatBase*    GetRefObject(const UnsignedInt type,
 //                                     const std::string &name,
 //                                     const Integer index);
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name = "");
-   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name,
                                      const Integer index);
 
@@ -117,6 +117,7 @@ public:
                        bool withMediaCorrection = true,
                        ObservationData* forObservation = NULL,
                        std::vector<RampTableData>* rampTB = NULL,
+                       bool forSimulation = false, 
                        Real atTimeOffset = 0.0, 
                        Integer forStrand = -1);
    virtual bool ReCalculateFrequencyAndMediaCorrection(

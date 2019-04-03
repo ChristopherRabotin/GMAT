@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -466,9 +466,9 @@ bool GroundStation::SetStringParameter(const Integer id,
 
    if (id == TROPOSPHERE_MODEL)
    {
-      if ((value != "HopfieldSaastamoinen")&&(value != "None"))
+      if ((value != "HopfieldSaastamoinen")&&(value != "Marini")&&(value != "None"))
          throw AssetException("Error: '" + value +"' is not a valid name for TroposphereModel.\n"
-         +"Currently only 'HopfieldSaastamoinen' and 'None' are allowed for Troposphere.\n");
+         +"Currently only 'HopfieldSaastamoinen', 'Marini', and 'None' are allowed for Troposphere.\n");
 
       troposphereModel = value;
       return true;
@@ -822,10 +822,10 @@ Real GroundStation::SetRealParameter(const std::string &label,
 
 
 //---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
+//  bool RenameRefObject(const UnsignedInt type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
-bool GroundStation::RenameRefObject(const Gmat::ObjectType type,
+bool GroundStation::RenameRefObject(const UnsignedInt type,
                                  const std::string &oldName,
                                  const std::string &newName)
 {
@@ -854,15 +854,18 @@ bool GroundStation::RenameRefObject(const Gmat::ObjectType type,
       }
       return true;
       break;
+         
+   default:
+      break;
    }
-
+   
    return GroundstationInterface::RenameRefObject(type, oldName, newName);
 }
 
 
 //------------------------------------------------------------------------------
 // const StringArray&
-// GroundStation::GetRefObjectNameArray(const Gmat::ObjectType type)
+// GroundStation::GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Gets an array of referenced object names
@@ -873,7 +876,7 @@ bool GroundStation::RenameRefObject(const Gmat::ObjectType type,
  */
 //------------------------------------------------------------------------------
 const StringArray&
-GroundStation::GetRefObjectNameArray(const Gmat::ObjectType type)
+GroundStation::GetRefObjectNameArray(const UnsignedInt type)
 {
    #ifdef DEBUG_INIT
       MessageInterface::ShowMessage("GroundStation::GetRefObjectNameArray(%d)",
@@ -925,7 +928,7 @@ GroundStation::GetRefObjectNameArray(const Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GroundStation::GetRefObject(const Gmat::ObjectType type,
+// GmatBase* GroundStation::GetRefObject(const UnsignedInt type,
 //                                     const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -937,7 +940,7 @@ GroundStation::GetRefObjectNameArray(const Gmat::ObjectType type)
  * @return the referenced object match with type and name.
  */
 //------------------------------------------------------------------------------
-GmatBase* GroundStation::GetRefObject(const Gmat::ObjectType type,
+GmatBase* GroundStation::GetRefObject(const UnsignedInt type,
                                      const std::string &name)
 {
    if ((type == Gmat::UNKNOWN_OBJECT)||(type == Gmat::HARDWARE))
@@ -975,7 +978,7 @@ GmatBase* GroundStation::GetRefObject(const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// bool GroundStation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool GroundStation::SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                                     const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
@@ -988,7 +991,7 @@ GmatBase* GroundStation::GetRefObject(const Gmat::ObjectType type,
  * @return true when the assignment is successful.
  */
 //------------------------------------------------------------------------------
-bool GroundStation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool GroundStation::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                      const std::string &name)
 {
    #ifdef DEBUG_INIT
@@ -1070,12 +1073,14 @@ bool GroundStation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       else
          return false;      // <-- throw here; It was supposed to be error model, but isn't.
       break;
+   default:
+      break;
    }
 
    return GroundstationInterface::SetRefObject(obj, type, name);
 }
 
-ObjectArray& GroundStation::GetRefObjectArray(const Gmat::ObjectType type)
+ObjectArray& GroundStation::GetRefObjectArray(const UnsignedInt type)
 {
    switch(type)
    {
@@ -1153,7 +1158,7 @@ const ObjectTypeArray& GroundStation::GetRefObjectTypeArray()
 //-------------------------------------------------------------------------
 bool GroundStation::VerifyAddHardware()
 {
-   Gmat::ObjectType type;
+   UnsignedInt type;
    std::string subTypeName;
    GmatBase* obj;
 

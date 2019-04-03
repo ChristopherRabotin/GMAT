@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -244,7 +244,7 @@ CoreMeasurement& CoreMeasurement::operator=(const CoreMeasurement& core)
 
 
 //-----------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //            const std::string &name)
 //-----------------------------------------------------------------------------
 /**
@@ -258,7 +258,7 @@ CoreMeasurement& CoreMeasurement::operator=(const CoreMeasurement& core)
  */
 //-----------------------------------------------------------------------------
 bool CoreMeasurement::SetRefObject(GmatBase *obj,
-	  const Gmat::ObjectType type, const std::string &name)
+	  const UnsignedInt type, const std::string &name)
 {
    #ifdef DEBUG_INIT
       MessageInterface::ShowMessage(
@@ -329,7 +329,7 @@ bool CoreMeasurement::SetRefObject(GmatBase *obj,
 
 
 //-----------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //            const std::string &name, const Integer index)
 //-----------------------------------------------------------------------------
 /**
@@ -344,7 +344,7 @@ bool CoreMeasurement::SetRefObject(GmatBase *obj,
  */
 //-----------------------------------------------------------------------------
 bool CoreMeasurement::SetRefObject(GmatBase *obj,
-	  const Gmat::ObjectType type, const std::string &name, const Integer index)
+	  const UnsignedInt type, const std::string &name, const Integer index)
 {
    // todo: Manage anchor participant
    return true;

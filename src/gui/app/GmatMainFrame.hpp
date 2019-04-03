@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -47,6 +47,10 @@
 #include "GmatServer.hpp"
 #include "GmatMdiChildFrame.hpp"
 #include "GmatNotebook.hpp"
+
+// Plugin GUI elements
+#include "GmatWidget.hpp"
+#include "GuiFactory.hpp"
 
 #include <wx/notebook.h>
 #include <wx/toolbar.h>
@@ -252,6 +256,14 @@ public:
    MdiChildTsFrame *tsSubframe;
    wxList *theMdiChildren;
 
+   // Plugin Window Creator
+   GmatMdiChildFrame* CreatePluginChild(const std::string &title,
+                                    const std::string &name,
+                                    const std::string panelType,
+                                    GmatTree::ItemType itemType,
+                                    GmatBase *forObject,
+                                    GmatWidget **returnedWidget);
+
 protected:
 
 private:
@@ -289,7 +301,8 @@ private:
    
    GmatMdiChildFrame* CreateNewResource(const wxString &title,
                                         const wxString &name,
-                                        GmatTree::ItemType itemType);
+                                        GmatTree::ItemType itemType,
+                                        GmatBase *forObject = NULL);    // Added for GUI plugins
    GmatMdiChildFrame* CreateNewCommand(GmatTree::ItemType itemType,
                                        GmatTreeItemData *item);
    GmatMdiChildFrame* CreateNewControl(const wxString &title,
@@ -323,6 +336,11 @@ private:
                               const wxString &basePrefix, wxArrayString &baseFileNameArray,
                               wxArrayString &noPrefixNameArray);
    
+   // GUI Plugin additions
+   std::vector <GuiFactory*> guiFactories;
+   GmatWidget *GetPluginWidget(const std::string type, GmatBase *forObject,
+         wxWindow *withParent = NULL);
+
    // IDs for the controls
    enum
    {

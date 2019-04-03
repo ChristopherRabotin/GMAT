@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -110,13 +110,13 @@ public:
    
    // Methods used to setup objects
    virtual bool         SetObject(const std::string &name,
-                                  const Gmat::ObjectType type,
+                                  const UnsignedInt type,
                                   const std::string &associate = "",
-                                  const Gmat::ObjectType associateType =
+                                  const UnsignedInt associateType =
                                        Gmat::UNKNOWN_OBJECT);
    virtual bool         SetObject(GmatBase *obj,
-                                  const Gmat::ObjectType type);
-   virtual GmatBase*    GetGmatObject(const Gmat::ObjectType type, 
+                                  const UnsignedInt type);
+   virtual GmatBase*    GetGmatObject(const UnsignedInt type,
                                   const std::string objName = "");
    
    virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
@@ -135,10 +135,11 @@ public:
    virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
    virtual void         SetPublisher(Publisher *p);
    virtual Publisher*   GetPublisher();
-   
+   virtual bool         GetPropStatus();
+
    // Methods used in validation
    virtual const StringArray& GetObjectList();
-   virtual bool         AcceptsObjectType(Gmat::ObjectType theType);
+   virtual bool         AcceptsObjectType(UnsignedInt theType);
    virtual bool         Validate();
 
    // Access methods inherited from GmatBase
@@ -198,6 +199,7 @@ public:
    virtual Integer      GetGoalCount();
    
    virtual bool         InterpretAction();
+   virtual bool         VerifyObjects();
    
    Integer              DepthIncrement();
    bool                 HasPropStateChanged();

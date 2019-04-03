@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -172,7 +172,7 @@ public:
    bool                     AddCreatableObjects(StringArray newList);
    
    // method to return the type of factory this is
-   Gmat::ObjectType         GetFactoryType() const;  
+   UnsignedInt              GetFactoryType() const;
    bool                     IsTypeCaseSensitive() const;
    
    // destructor
@@ -180,10 +180,10 @@ public:
 
 protected:
    // constructor specifying the type of objects creatable by the factory
-   Factory(Gmat::ObjectType ofType = Gmat::UNKNOWN_OBJECT);
+   Factory(UnsignedInt ofType = Gmat::UNKNOWN_OBJECT);
    // constructor specifying the type of objects creatable by the factory and the
    // specific types that this factory can create
-   Factory(StringArray createList, Gmat::ObjectType ofType = Gmat::UNKNOWN_OBJECT);
+   Factory(StringArray createList, UnsignedInt ofType = Gmat::UNKNOWN_OBJECT);
    // copy constructor
    Factory(const Factory& fact);
    // assignment operator
@@ -191,7 +191,7 @@ protected:
 
    // protected data
    // the type of the factory (i.e. what type of objects it can create)
-   Gmat::ObjectType         itsType;
+   UnsignedInt         itsType;
    // a list of all of the specific types of objects (of type itsType) that
    // can be created by this factory.
    StringArray              creatables;

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,6 +35,7 @@
 #include "Moderator.hpp"
 #include "GmatMainFrame.hpp"
 #include "GmatAppData.hpp"
+#include "GmatGlobal.hpp"
 
 #if wxUSE_PRINTING_ARCHITECTURE
 // global print data, to remember settings during the session
@@ -75,6 +76,7 @@ private:
    bool runScript;
    bool runBatch;
    bool startMatlabServer;
+   bool skipSplash;
 
    /// Buffer for messages based on command line parameters, so they can
    /// display after the Moderator initializes

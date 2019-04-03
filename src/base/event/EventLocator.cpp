@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1082,7 +1082,7 @@ bool EventLocator::TakeAction(const std::string &action,
 
 
 //---------------------------------------------------------------------------
-// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+// UnsignedInt GetPropertyObjectType(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Retrieves object type of parameter of given id.
@@ -1092,7 +1092,7 @@ bool EventLocator::TakeAction(const std::string &action,
  * @return parameter ObjectType
  */
 //---------------------------------------------------------------------------
-Gmat::ObjectType EventLocator::GetPropertyObjectType(const Integer id) const
+UnsignedInt EventLocator::GetPropertyObjectType(const Integer id) const
 {
    #ifdef DEBUG_OBJECTS
       MessageInterface::ShowMessage(
@@ -1350,7 +1350,7 @@ void EventLocator::SetAppend(bool appendIt)
 }
 
 //------------------------------------------------------------------------------
-// std::string GetRefObjectName(const Gmat::ObjectType type) const
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  * Retrieves the name of the reference object
@@ -1360,7 +1360,7 @@ void EventLocator::SetAppend(bool appendIt)
  * @return Object name
  */
 //------------------------------------------------------------------------------
-std::string EventLocator::GetRefObjectName(const Gmat::ObjectType type) const
+std::string EventLocator::GetRefObjectName(const UnsignedInt type) const
 {
    if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACECRAFT)
    {
@@ -1370,7 +1370,7 @@ std::string EventLocator::GetRefObjectName(const Gmat::ObjectType type) const
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+// const StringArray& GetRefObjectNameArray(const UnsignedInt type)
 //------------------------------------------------------------------------------
 /**
  * Retrieves the list of reference objects
@@ -1381,7 +1381,7 @@ std::string EventLocator::GetRefObjectName(const Gmat::ObjectType type) const
  */
 //------------------------------------------------------------------------------
 const StringArray& EventLocator::GetRefObjectNameArray(
-      const Gmat::ObjectType type)
+      const UnsignedInt type)
 {
    refObjectNames.clear();
    // Get ref. objects for requesting type from the parent class
@@ -1433,7 +1433,7 @@ const StringArray& EventLocator::GetRefObjectNameArray(
 
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //       const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -1446,7 +1446,7 @@ const StringArray& EventLocator::GetRefObjectNameArray(
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-bool EventLocator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool EventLocator::SetRefObject(GmatBase *obj, const UnsignedInt type,
                                 const std::string &name)
 {
    if ((satName == name) && (obj->IsOfType(Gmat::SPACECRAFT)))
@@ -1510,7 +1510,7 @@ bool EventLocator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, 
+// bool RenameRefObject(const UnsignedInt type,
 //       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------
 /**
@@ -1523,7 +1523,7 @@ bool EventLocator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * @return true if object name changed, false if not.
  */
 //------------------------------------------------------------------------------
-bool EventLocator::RenameRefObject(const Gmat::ObjectType type, 
+bool EventLocator::RenameRefObject(const UnsignedInt type,
    const std::string &oldName, const std::string &newName)
 {
    bool retval = false;

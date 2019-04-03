@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -123,7 +123,7 @@ void OutputTree::RemoveItem(GmatTree::ItemType type, const wxString &name, bool 
 {
    #if DEBUG_OUTPUT_TREE
    MessageInterface::ShowMessage
-      ("OutputTree::RemoveItem() entered, type=%d, name=%s\n", type, name.c_str());
+      ("OutputTree::RemoveItem() entered, type=%d, name=%s\n", type, name.WX_TO_C_STRING);
    #endif
    
    wxTreeItemId parentId;

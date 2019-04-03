@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -61,13 +61,13 @@ public:
    
    // Methods used for configuration
 //   virtual bool         SetObject(const std::string &name,
-//                                  const Gmat::ObjectType type,
+//                                  const UnsignedInt type,
 //                                  const std::string &associate = "",
-//                                  const Gmat::ObjectType associateType =
+//                                  const UnsignedInt associateType =
 //                                  Gmat::UNKNOWN_OBJECT);
 //
 //   virtual bool         SetObject(GmatBase *obj,
-//                                  const Gmat::ObjectType type);
+//                                  const UnsignedInt type);
    
    // inherited from GmatBase
    virtual GmatBase* Clone() const;
@@ -77,14 +77,14 @@ public:
                                             const std::string &prefix = "",
                                             const std::string &useName = "");
    
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
    
    virtual const ObjectTypeArray&
                         GetRefObjectTypeArray();
    virtual const StringArray&
-                        GetRefObjectNameArray(const Gmat::ObjectType type);
+                        GetRefObjectNameArray(const UnsignedInt type);
    
    // Parameter accessor methods -- overridden from GmatBase
    virtual std::string  GetParameterText(const Integer id) const;

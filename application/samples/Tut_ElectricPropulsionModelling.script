@@ -29,7 +29,6 @@ GMAT DefaultSC.NAIFId = -10006001;
 GMAT DefaultSC.NAIFIdReferenceFrame = -9006001;
 GMAT DefaultSC.OrbitColor = Red;
 GMAT DefaultSC.TargetColor = Teal;
-GMAT DefaultSC.EstimationStateType = 'Cartesian';
 GMAT DefaultSC.OrbitErrorCovariance = [ 1e+070 0 0 0 0 0 ; 0 1e+070 0 0 0 0 ; 0 0 1e+070 0 0 0 ; 0 0 0 1e+070 0 0 ; 0 0 0 0 1e+070 0 ; 0 0 0 0 0 1e+070 ];
 GMAT DefaultSC.CdSigma = 1e+070;
 GMAT DefaultSC.CrSigma = 1e+070;
@@ -118,7 +117,7 @@ GMAT DefaultProp_ForceModel.ErrorControl = RSSStep;
 GMAT DefaultProp_ForceModel.GravityField.Earth.Degree = 4;
 GMAT DefaultProp_ForceModel.GravityField.Earth.Order = 4;
 GMAT DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
-GMAT DefaultProp_ForceModel.GravityField.Earth.EarthTideModel = 'None';
+GMAT DefaultProp_ForceModel.GravityField.Earth.TideModel = 'None';
 
 %----------------------------------------
 %---------- Propagators

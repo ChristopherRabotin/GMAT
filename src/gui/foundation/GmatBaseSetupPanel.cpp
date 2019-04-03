@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -679,7 +679,7 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
    wxControl *control = NULL;
    
    Gmat::ParameterType paramType = theObject->GetParameterType(index);
-   Gmat::ObjectType paramObjType = theObject->GetPropertyObjectType(index);
+   UnsignedInt paramObjType = theObject->GetPropertyObjectType(index);
    #ifdef DEBUG_BUILD_CONTROL
    MessageInterface::ShowMessage
       ("BuildControl() object type is %s\n", GmatBase::GetObjectTypeString(paramObjType).c_str());

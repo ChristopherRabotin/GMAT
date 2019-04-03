@@ -72,14 +72,14 @@ public:
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
    
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const UnsignedInt type,
                                         const std::string &oldName,
                                         const std::string &newName);
    virtual bool         SetRefObject(GmatBase* obj,
-                                     const Gmat::ObjectType type, 
+                                     const UnsignedInt type,
                                      const std::string& name);
    virtual bool         SetRefObject(GmatBase* obj,
-                                     const Gmat::ObjectType type, 
+                                     const UnsignedInt type,
                                      const std::string& name, 
                                      const Integer index);
 
@@ -96,7 +96,8 @@ public:
    virtual const MeasurementData&
                         CalculateMeasurement(bool withEvents = false,
                               ObservationData* forObservation = NULL,
-                              std::vector<RampTableData>* rampTB = NULL);
+                              std::vector<RampTableData>* rampTB = NULL,
+                              bool forSimulation = false);
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
                               Integer id);

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -177,6 +177,7 @@ PointMassForce::PointMassForce(const PointMassForce& pmf) :
    orig                   (pmf.orig),
    rv                     (pmf.rv),
    now                    (pmf.now),
+   nowGT                  (pmf.nowGT),
    satCount               (pmf.satCount)
 {
    parameterCount = PointMassParamCount;
@@ -212,6 +213,7 @@ PointMassForce& PointMassForce::operator= (const PointMassForce& pmf)
    orig             = pmf.orig;
    rv               = pmf.rv;
    now              = pmf.now;
+   nowGT            = pmf.nowGT;
    satCount         = pmf.satCount;
 
    return *this;
@@ -334,10 +336,21 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
    
       epoch = theState->GetEpoch();
       now = epoch + dt/GmatTimeConstants::SECS_PER_DAY;
+      epochGT = theState->GetEpochGT();
+      nowGT = epochGT; nowGT.AddSeconds(dt);
+
       Real relativePosition[3];
-      bodyrv = body->GetState(now);
-      orig = forceOrigin->GetState(now);
-      
+      if (hasPrecisionTime)
+      {
+         bodyrv = body->GetState(nowGT);
+         orig = forceOrigin->GetState(nowGT);
+      }
+      else
+      {
+         bodyrv = body->GetState(now);
+         orig = forceOrigin->GetState(now);
+      }
+
       #ifdef DUMP_PLANET_DATA
          MessageInterface::ShowMessage("%s, %17.12lf, %17.12lf, %17.12lf, "
             "%17.12lf, %17.16lf, %17.16lf, %17.16lf, %s, %17.12lf, %17.12lf, "
@@ -706,8 +719,12 @@ Rvector6 PointMassForce::GetDerivativesForSpacecraft(Spacecraft *sc)
    Real *j2kState = sc->GetState().GetState();
    Real state[6];
    Real now = sc->GetEpoch();
+   GmatTime nowgt = sc->GetEpochGT();
 
-   BuildModelState(now, state, j2kState);
+   if (hasPrecisionTime)
+      BuildModelStateGT(nowgt, state, j2kState);
+   else
+      BuildModelState(now, state, j2kState);
 
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
@@ -719,8 +736,17 @@ Rvector6 PointMassForce::GetDerivativesForSpacecraft(Spacecraft *sc)
    Real radius, r3, mu_r, rbb3, mu_rbb, a_indirect[3];
 
    Real relativePosition[3];
-   Rvector6 bodyrv = body->GetState(now);
-   Rvector6 orig = forceOrigin->GetMJ2000State(now);
+   Rvector6 bodyrv, orig;
+   if (hasPrecisionTime)
+   {
+      bodyrv = body->GetState(nowgt);
+      orig = forceOrigin->GetMJ2000State(nowgt);
+   }
+   else
+   {
+      bodyrv = body->GetState(now);
+      orig = forceOrigin->GetMJ2000State(now);
+   }
 
    const Real *brv = bodyrv.GetDataVector(), *orv = orig.GetDataVector();
    Real rv[3];

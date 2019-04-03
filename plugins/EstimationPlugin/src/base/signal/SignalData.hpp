@@ -88,18 +88,15 @@ public:
    Rvector3 rLocRcs;
    /// MJ2000Eq transmitter velocity
    Rvector3 tVel;
-   ///// Transmitter velocity in its coordinate system
-   //Rvector3 tVelTcs;
    /// MJ2000Eq receiver velocity
    Rvector3 rVel;
-   ///// Receiver velocity in its coordinate system
-   //Rvector3 rVelRcs;
    /// Displacement of origins from the transmit node at time tTime and receive node at time rTime
    Rvector3 j2kOriginSep;
    /// Relative velocity of the origin of the receive node at time rTime w.r.t. the origin of the transmit node at time tTime
    Rvector3 j2kOriginVel;
    /// The SSBMj2000 equatorial range vector from transmit at time tTime to receive node at time rTime
    Rvector3 rangeVecInertial;
+   Rvector3 rangeVecI;
    /// Relative velocity of the receive node at time rTime w.r.t. the transmit node at time tTime
    Rvector3 rangeRateVecInertial;
    /// The range vector from transmit to receive node in obs coordinates

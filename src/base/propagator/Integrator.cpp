@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -121,7 +121,7 @@ Integrator::PARAMETER_TYPE[IntegratorParamCount - PropagatorParamCount] =
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// Integrator::Integrator(void)
+// Integrator(const std::string &typeStr, const std::string &nomme)
 //------------------------------------------------------------------------------
 /**
  * Default constructor for the Integrator
@@ -137,7 +137,7 @@ Integrator::Integrator(const std::string &typeStr, const std::string &nomme)
       fixedStepsize           (300.0),
       minimumStep             (0.001),				// 1 millisec
       maximumStep             (2700.0),         // 45 minutes
-      smallestTime            (1.0e-6),
+      smallestTime            (1.0e-12),
       stepAttempts            (0),
       maxStepAttempts         (50),
       stopIfAccuracyViolated  (true),
@@ -148,7 +148,8 @@ Integrator::Integrator(const std::string &typeStr, const std::string &nomme)
       ddt                     (NULL),
       errorEstimates          (NULL),
       errorThreshold          (0.10),
-      derivativeOrder         (1)
+      derivativeOrder         (1),
+      hasErrorControl         (true)
 {
    objectTypeNames.push_back("Integrator");
    parameterCount = IntegratorParamCount;
@@ -181,13 +182,14 @@ Integrator::Integrator(const Integrator& i) :
     ddt                     (NULL),
     errorEstimates          (NULL),
     errorThreshold          (i.errorThreshold),
-    derivativeOrder         (i.derivativeOrder)
+    derivativeOrder         (i.derivativeOrder),
+    hasErrorControl         (i.hasErrorControl)
 {
    parameterCount = IntegratorParamCount;
 }
 
 //------------------------------------------------------------------------------
-// Integrator& Integrator::operator=(const Integrator& i)
+// Integrator& operator=(const Integrator& i)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator for the Integrator
@@ -221,25 +223,26 @@ Integrator& Integrator::operator=(const Integrator& i)
     ddt                    = NULL;
     errorEstimates         = NULL;
     errorThreshold         = i.errorThreshold;
+    hasErrorControl        = i.hasErrorControl;
 
     return *this;
 }
 
 //------------------------------------------------------------------------------
-// Integrator::~Integrator(void)
+// ~Integrator()
 //------------------------------------------------------------------------------
 /**
  * Destructor for the Integrator
  */
 //------------------------------------------------------------------------------
-Integrator::~Integrator(void)
+Integrator::~Integrator()
 {
     if (errorEstimates)
         delete [] errorEstimates;
 }
 
 //------------------------------------------------------------------------------
-// std::string Integrator::GetParameterText(const Integer id) const
+// std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 /**
 * @see GmatBase
@@ -254,7 +257,7 @@ std::string Integrator::GetParameterText(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
-// Integer Integrator::GetParameterID(const std::string &str) const
+// Integer GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 /**
 * @see GmatBase
@@ -650,6 +653,21 @@ void Integrator::SetPhysicalModel(PhysicalModel *pPhysicalModel)
 Real Integrator::GetStepTaken()
 {
    return stepTaken;
+}
+
+//------------------------------------------------------------------------------
+// Real UsesErrorControl()
+//------------------------------------------------------------------------------
+/**
+* Returns the boolean of whether error control is being used or not.
+*
+* @return hasErrorControl, boolean indicating whether error control is being 
+*         used
+*/
+//------------------------------------------------------------------------------
+bool Integrator::UsesErrorControl()
+{
+   return hasErrorControl;
 }
 
 //------------------------------------------------------------------------------

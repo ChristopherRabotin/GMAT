@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -280,7 +280,7 @@ GmatBase* ITRFAxes::Clone() const
 }
 
 //------------------------------------------------------------------------------
-//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//  bool SetRefObject(GmatBase *obj, const UnsignedInt type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -296,7 +296,7 @@ GmatBase* ITRFAxes::Clone() const
  *
  */
 //------------------------------------------------------------------------------
-bool ITRFAxes::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+bool ITRFAxes::SetRefObject(GmatBase *obj, const UnsignedInt type,
                             const std::string &name)
 {
    if (obj == NULL)

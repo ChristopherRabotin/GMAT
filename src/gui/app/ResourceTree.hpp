@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2017 United States Government as represented by the
+// Copyright (c) 2002 - 2018 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -69,6 +69,8 @@ public:
    void QuitRunningScriptFolder();
    
    // Added so plugin code can update the tree structure
+   void RegisterGuiPluginResources();
+   void BindPluginGuiPanels(Gmat::PluginResource *rec);
    void AddUserResources(std::vector<Gmat::PluginResource*> *rcs,
          bool onlyChildNodes = false);
    wxTreeItemId AddUserTreeNode(const std::string &newNodeName,
@@ -113,16 +115,33 @@ protected:
    wxTreeItemId mUniverseItem;
    wxTreeItemId interfaceItem;
 
+   // Plugin top level items go in this collection
+   std::vector<wxTreeItemId> mUserItems;
+
    /// Mapping for plug-in objects
    std::map<Integer, std::string> pluginMap;
+   /// Index used for GUI message connections
+   Integer nextGuiPluginId;
+
+   /// Structure setting wx ID and string settings
+   struct MenuData
+   {
+      Integer guiID;
+      std::string menuText;
+   };
+
+   /// Mapping for pop-up menus
+   std::map<Integer, std::vector<MenuData>> popupMenuMap;
    /// Plugin tree item IDs
    std::vector<wxTreeItemId> mPluginItems;
    /// node Id -> Type mapping
-   std::map<std::string, Gmat::ObjectType> nodeTypeMap;
+   std::map<std::string, UnsignedInt> nodeTypeMap;
    /// nodeId -> subtype mapping
    std::map<std::string, std::string> nodeSubtypeMap;
    /// List of the function types supported, so they can move to plugins
    StringArray functionTypes;
+   /// User (plugin) type mapping
+   std::map<std::string, Integer> userIdMap;
    
    /// Tree item icon Mapping for all object type names (for future use)
    //std::map<std::string, Integer> typeIconMap;
@@ -146,8 +165,10 @@ protected:
    void AddItemFolder(wxTreeItemId parentItemId, wxTreeItemId &itemId,
                       const wxString &itemName, GmatTree::ItemType itemType);
    
+public:
    wxTreeItemId AddObjectToTree(GmatBase *obj, bool showDebug = false);
    
+protected:
    void AddDefaultResources();
    void AddDefaultBodies(wxTreeItemId itemId);
    void AddDefaultGroundStation(wxTreeItemId itemId, bool resetCounter = true);
@@ -246,10 +267,13 @@ protected:
 
    // menu
    void ShowMenu(wxTreeItemId id, const wxPoint& pt);
+   void CreatePopupMenuMap();
+   bool UpdatePopupMenuMap(const Integer itemType, const Integer itemID,
+         const std::string &newItem);
    wxMenu* CreatePopupMenu(GmatTree::ItemType type,
-         const Gmat::ObjectType gmatType = Gmat::UNKNOWN_OBJECT,
+         const UnsignedInt gmatType = Gmat::UNKNOWN_OBJECT,
          const std::string &subtype = "");
-   Gmat::ObjectType GetObjectType(GmatTree::ItemType itemType);
+   UnsignedInt GetObjectType(GmatTree::ItemType itemType);
    wxTreeItemId GetTreeItemId(GmatTree::ItemType type);
    
    // icon
@@ -275,6 +299,8 @@ protected:
                               const wxString &scriptName, bool active,
                               bool &scriptFound);
    
+   Integer GetUserID(std::string);
+
    DECLARE_EVENT_TABLE();
 
    // for popup menu
