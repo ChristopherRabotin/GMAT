@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -242,6 +242,10 @@ public:
                                            const std::string &prefix = "",
                                            const std::string &useName = "");
 
+	virtual Rmatrix33   GetRotationMatrix(GmatTime &epochGT);           // made changes by TUAN NGUYEN
+	virtual std::vector<Rmatrix33>
+                       GetRotationMatrixDerivative(GmatTime &epochGT, CoordinateSystem *j2kCS);   // made changes by TUAN NGUYEN
+
    DEFAULT_TO_NO_CLONES
 
 protected:
@@ -457,7 +461,8 @@ protected:
     */
    //------------------------------------------------------------------------------
    virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime) = 0;
-   
+   virtual void ComputeCosineMatrixAndAngularVelocity(GmatTime &atTime) = 0;            // made changes by TUAN NGUYEN
+
 private:
    // default constructor - not implemented
    Attitude();

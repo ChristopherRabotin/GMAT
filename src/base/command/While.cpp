@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -62,8 +62,9 @@ While::PARAMETER_TYPE[WhileParamCount - ConditionalBranchParamCount] =
  */
 //------------------------------------------------------------------------------
 While::While() :
-   ConditionalBranch  ("While"),
-   nestLevel          (0)
+   ConditionalBranch       ("While"),
+   nestLevel               (0),
+   emptyLoopWarningPosted  (false)
 {
 }
 
@@ -75,8 +76,9 @@ While::While() :
  */
 //------------------------------------------------------------------------------
 While::While(const While &wc) :
-   ConditionalBranch  (wc),
-   nestLevel          (0)
+   ConditionalBranch       (wc),
+   nestLevel               (0),
+   emptyLoopWarningPosted  (false)
 {
 }
 
@@ -95,6 +97,7 @@ While& While::operator=(const While &wc)
       return *this;
    ConditionalBranch::operator=(wc);
    nestLevel = wc.nestLevel;
+   emptyLoopWarningPosted = false;
 
    return *this;
 }
@@ -257,6 +260,7 @@ bool While::Initialize()
                localParameters.size(), lhsWrappers.size(), rhsWrappers.size());
       #endif
 
+      emptyLoopWarningPosted = false;
       retval = true;
    }
 
@@ -288,6 +292,24 @@ bool While::Execute()
    #endif
 
    bool retval = true;
+
+   if (GetChildCommand(0)->IsOfType("EndWhile"))
+   {
+      if (!emptyLoopWarningPosted)
+      {
+         MessageInterface::ShowMessage("***WARNING*** While command has no "
+               "subcommands; skipping execution\n");
+         emptyLoopWarningPosted = true;
+      }
+
+      publisher->FlushBuffers();
+      commandComplete  = true;
+      commandExecuting = false;
+      branchExecuting  = false;
+      BuildCommandSummary(true);
+
+      return true;
+   }
 
    if (!commandExecuting)
    {

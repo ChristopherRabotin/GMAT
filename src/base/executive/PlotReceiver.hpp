@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,6 +35,7 @@
 #include "Rvector.hpp"
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
+#include "DynamicDataStruct.hpp"
 
 /**
  * PlotReceiver defines the interfaces used for 3D and XY plot classes.
@@ -203,6 +204,21 @@ public:
    virtual bool ActivateXyPlot(const std::string &plotName) = 0;
    virtual bool TakeXYAction(const std::string &plotName,
                         const std::string &action) = 0;
+
+   // for dynamic data display
+   virtual bool CreateDynamicDataDisplay(const std::string &plotName,
+                        const std::string &oldName,
+                        const std::string &plotTitle, Real positionX,
+                        Real positionY, Real width, Real height) = 0;
+   virtual bool SetDynamicDataTableSize(const std::string &plotName,
+                        Integer maxRowCount, Integer maxColCount) = 0;
+   virtual bool UpdateDynamicDataDisplay(const std::string &plotName,
+                        std::vector<std::vector<DDD>> newData) = 0;
+   virtual bool DeleteDynamicData(const std::string &plotName,
+                        const std::string &oldName) = 0;
+   virtual bool SetDynamicDataTextColor(const std::string &plotName,
+                        std::vector<std::vector<DDD>>) =
+                        0;
 
 protected:
    GmatPlot::ViewType currentView;

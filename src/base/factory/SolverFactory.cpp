@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -36,7 +36,6 @@
 // Headers for the supported Solvers
 #include "DifferentialCorrector.hpp"
 //#include "QuasiNewton.hpp"
-//#include "SteepestDescent.hpp"
 //#include "Broyden.hpp"
 //#include "ParametricScanner.hpp"
 //#include "MonteCarlo.hpp"
@@ -90,8 +89,6 @@ Solver* SolverFactory::CreateSolver(const std::string &ofType,
      
    //if (ofType == "QuasiNewton") 
    //   return new QuasiNewton(withName);
-   //else if (ofType == "SteepestDescent")
-   //   return new SteepestDescent(withName);
    // else if (ofType == "Broyden")
    //   return new Broyden(withName);
    //else if (ofType == "ParametricScanner")
@@ -117,7 +114,6 @@ SolverFactory::SolverFactory() :
    if (creatables.empty())
    {
       //creatables.push_back("QuasiNewton");
-      //creatables.push_back("SteepestDescent");
       creatables.push_back("DifferentialCorrector");
       //creatables.push_back("Broyden");
       //creatables.push_back("ParametricScanner");
@@ -157,7 +153,6 @@ SolverFactory::SolverFactory(const SolverFactory& fact) :
    if (creatables.empty())
    {
       //creatables.push_back("QuasiNewton");
-      //creatables.push_back("SteepestDescent");
       creatables.push_back("DifferentialCorrector");
       //creatables.push_back("Broyden");
       //creatables.push_back("ParametricScanner");

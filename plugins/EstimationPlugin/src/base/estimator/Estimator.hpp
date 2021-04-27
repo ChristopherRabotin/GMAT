@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -37,6 +37,9 @@
 #include "MeasurementManager.hpp"
 #include "EstimationStateManager.hpp"
 #include "PropSetup.hpp"
+#include "DataWriter.hpp"
+#include "DataBucket.hpp"
+#include "TimeSystemConverter.hpp"   // for the TimeSystemConverter singleton
 
 /**
  * The base class used for GMAT's estimators
@@ -56,9 +59,11 @@ public:
    virtual void         SetSolarSystem(SolarSystem *ss);
 
    virtual bool         Initialize();
-   bool                 Reinitialize();
+   virtual bool         Reinitialize();
    virtual void         CompleteInitialization();
    virtual bool         Finalize();
+
+   virtual bool         IsFinalPass() = 0;
 
    // methods overridden from GmatBase
    virtual std::string  GetParameterText(const Integer id) const;
@@ -67,8 +72,8 @@ public:
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
-
    virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const std::string &label) const;
 
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
@@ -85,8 +90,18 @@ public:
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value,
                                            const Integer index);
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value);
+   virtual std::string  GetStringParameter(const std::string &label,
+                                           const Integer index) const;
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value,
+                                           const Integer index);
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
 
    virtual std::string  GetOnOffParameter(const Integer id) const;
    virtual bool         SetOnOffParameter(const Integer id,
@@ -95,12 +110,11 @@ public:
    virtual bool         SetOnOffParameter(const std::string &label,
                                           const std::string &value);
 
-   virtual bool         GetBooleanParameter(const Integer id) const;
-   virtual bool         SetBooleanParameter(const Integer id,
-                                            const bool value);
+   virtual const StringArray& GetPropertyEnumStrings(const Integer id) const;
 
-   virtual UnsignedInt
-                        GetPropertyObjectType(const Integer id) const;
+   virtual UnsignedInt  GetPropertyObjectType(const Integer id) const;
+   virtual UnsignedInt  GetPropertyObjectType(const Integer id,
+         const Integer index) const;
 
    // Access methods for the reference objects
    virtual std::string  GetRefObjectName(const UnsignedInt type) const;
@@ -126,27 +140,33 @@ public:
    virtual ObjectArray& GetRefObjectArray(const UnsignedInt type);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
-   Real                 GetTimeStep();
+   virtual Real         GetTimeStep();
 
    virtual bool         TakeAction(const std::string &action,
                                    const std::string &actionData = "");
 
    virtual void         UpdateCurrentEpoch(GmatTime newEpoch);
    virtual GmatTime     GetCurrentEpoch();
+   virtual void         BeginPredicting(Real predictSpan);
+   virtual UnsignedInt  TrimObsByEpoch(const GmatTime& epoch, bool removeObsAtEpoch);
+   virtual bool         UpdateInitialConditions();
 
-   PropSetup*           GetPropagator();
+   virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
+
+   PropSetup*           GetPropagator(const std::string &forSpacecraft);
    MeasurementManager*  GetMeasurementManager();
    EstimationStateManager*
                         GetEstimationStateManager();
 
-   bool                 ResetState();
+   virtual bool         ResetState();
+   virtual void         ResetSTM();
 
    virtual bool HasLocalClones();
    virtual void UpdateClonedObject(GmatBase *obj);
    virtual void UpdateClonedObjectParameter(GmatBase *obj,
          Integer updatedParameterId);
 
-   void                SetDelayInitialization(bool delay); 
+   virtual void        SetDelayInitialization(bool delay);
    
 protected:
 ///// TBD: Do we need to separate TS and MM like this going forward?
@@ -158,12 +178,14 @@ protected:
    StringArray             solveForStrings;
    /// The consider parameters in the estimation problem
    StringArray             considerStrings;
-   /// Tolerance measure applied to RMS state change to test for convergence
-   Real                    absoluteTolerance;
-   /// Tolerance measure applied to RMS residual change to test for convergence
-   Real                    relativeTolerance;
-   /// Name of the PropSetup used to evolve the system
-   std::string             propagatorName;
+
+   /// Names of default PropSetup and spacecraft propagators used to evolve the system
+   std::vector<std::string> propagatorNames;
+   /// Map of spacecraft propagators that override the default propagator
+   std::map<std::string, StringArray> propagatorSatMap;
+   /// Propagator name used for sat prop filling
+   std::string             currentPropagator;
+
    /// Flag used to check for a state load from the objects prior to propagation
    bool                    resetState;
 
@@ -188,25 +210,37 @@ protected:
    MeasurementManager      measManager;
    /// The estimator's state manager
    EstimationStateManager  esm;
-   /// The propagator configured for simulation
-   PropSetup               *propagator;
+   /// Indexes of rows/columns of 0s that were removed from the normal matrix
+   IntegerArray            removedNormalMatrixIndexes;
+   /// Transient forces used in estimation
+   std::vector<PhysicalModel *>     *transientForces;
 
+   /// The propagators configured for simulation
+   std::vector<PropSetup*> propagators;
+   /// A mapping from a spacecraft name to the associated propagator
+   std::map<std::string, PropSetup*> satPropMap;
+   /// Flag indicating if the satellite propagator map needs to be built
+   bool                    needsSatPropMap;
+
+   /// Time system used to specify the estimation epoch
+   std::string             estEpochFormat;
+   /// The estimation epoch.  "FromParticipants" means use the spacecraft epoch.
+   std::string             estEpoch;
    /// Epoch of the current estimation state
    GmatTime                estimationEpochGT;
    /// Currrrent simulation epoch
    GmatTime                currentEpochGT;
    /// The next epoch desired from propagation
    GmatTime                nextMeasurementEpochGT;
+   /// How long to propagate past the last measurement in seconds
+   Real                    predictTimeSpan;
+   /// Epoch to predict to
+   GmatTime                finalEpochGT;
+   /// If the estimator is predicting past the last measurement
+   bool                    isPredicting;
 
    /// The measurement derivatives at the measurement epoch, \tilde H
    std::vector<RealArray>  hTilde;
-   /// The accumulated measurement data (transformed to the estimation epoch)
-   std::vector<RealArray>  hAccum;
-
-   /// Weight, Observation data, calculated data
-   RealArray Weight;
-   //RealArray OData;        // correction value of observation data
-   //RealArray CData;
    
    /// The indices for the MeasurementModels with observations at current epoch
    IntegerArray            modelsToAccess;
@@ -220,11 +254,10 @@ protected:
    /// The estimated state in solve-for state type (solve-for state could be CartesianState or KeplerianState)
    GmatState               estimationStateS;
 
-
-   /// The previous estimated state in GMAT internal coordinate system (in Cartesian coordinate system)
-   GmatState               oldEstimationState;
-   /// The previous estimated state in solve-for state type (solve-for could be CartesianState or KeplerianState)
-   GmatState               oldEstimationStateS;
+   /// Cartesian to Solve-for state conversion derivative matrix [dX/dS]
+   Rmatrix                 cart2SolvMatrix;
+   /// Solve-for state to Keplerian conversion derivative matrix [dS/dK]
+   Rmatrix                 solv2KeplMatrix;
 
    /// Apriori estimation state presenting in MJ2000Eq cooridnate system and solve-for state type
    GmatState aprioriMJ2000EqSolveForState;
@@ -243,46 +276,36 @@ protected:
    GmatState aprioriSolveForStateC;
    /// Previous estimation state presenting in participants' Cartesian coordinate system
    GmatState previousSolveForStateC;
-   /// Current estimation state presenting in participants' coordinate systems
+   /// Current estimation state presenting in participants' Cartesian coordinate systems
    GmatState currentSolveForStateC;
+
+   /// Apriori estimation state presenting in participants' Keplerian coordinate system
+   GmatState aprioriSolveForStateK;
+   /// Previous estimation state presenting in participants' Keplerian coordinate system
+   GmatState previousSolveForStateK;
+   /// Current estimation state presenting in participants' Keplerian coordinate systems
+   GmatState currentSolveForStateK;
 
 
    /// Size of the estimation state vector
    UnsignedInt             stateSize;
-   /// The estimated state in Cartesian coordinate system
-   GmatState               initialEstimationState;
+
    /// The estimated state in solve-for state type (solve-for state could be CartesianState or KeplerianState)
    GmatState               initialEstimationStateS;
-
-   /// Estimation status
-   Integer                 estimationStatus;
 
 
    /// The information matrix, $\Lambda$
    Rmatrix                 information;
+   /// The inverse of the information matrix
+   Rmatrix                 informationInverse;
 
    /// The residual vector, N in Tapley, Schutz and Born
    Rvector                 residuals;
    /// The a priori state, \bar x_0 in Tapley, Schutz and Born
    Rvector                 x0bar;
-   /// The O-C value for each observation
-   RealArray               measurementResiduals;
-   /// The observation epochs
-   std::vector<GmatTime>   measurementEpochs;
-   /// The observation ID for the residual
-   IntegerArray            measurementResidualID;
 
-   std::vector<GmatTime>   measurementTimes;
-   // Index of an element in BatchEstimator::stationAndType array. 
-   // It is used to specified ground station and data type associated with measurementResiduals. 
-   IntegerArray            KeyIndex;
-
-
-   IntegerArray            observationID;
-   /// List of residual vector (each element is a residual vector = O_vector - C_vector)
-   std::vector<RealArray>  measurementResVectors;
-
-
+   /// Flag set to wait writing Measurement residuals until after estimation
+   bool                    writeMeasurmentsAtEnd;
    /// Flag set to show all residuals during processing
    bool                    showAllResiduals;
    /// Flag used to only display a specific set of residuals
@@ -302,17 +325,6 @@ protected:
    /// Flag indicating is an Event is currently being located
    bool                    locatingEvent;
 
-
-   /// Parameters for data sigma editting
-   Real maxResidualMult;
-   Real constMult;
-   Real additiveConst;
-   /// Flag to indicate to use weightedRMS or predictedRMS for OLSE
-   bool chooseRMSP;
-
-   /// Flag indicating to reset best RMS when estimation is diverged
-   bool resetBestRMSFlag;
-
    /// Number of removed observation data records
    std::map<std::string, UnsignedInt> numRemovedRecords;
 
@@ -320,6 +332,29 @@ protected:
    std::string linesBuff;
 
    std::string linesDataBuff;
+
+   /// particicpants column length. It is used for writing report file
+   Integer                 pcolumnLen;
+
+   /// The .mat DataWriter object used to write data for MATLAB
+   DataWriter              *matWriter;
+   /// Flag indicating is the .mat file should be written
+   bool                    writeMatFile;
+   /// .mat data file name
+   std::string             matFileName;
+   /// Data container used during accumulation
+   DataBucket              matData;
+   /// Data container used for observations
+   DataBucket              matObsData;
+   /// Data container for estimation config data
+   DataBucket              matConfigData;
+
+   /// Indexing for the .mat data elements
+   std::map<std::string, Integer> matIndex;
+   /// Indexing for the .mat observation elements
+   std::map<std::string, Integer> matObsIndex;
+   /// Indexing for the .mat estimation config elements
+   std::map<std::string, Integer> matConfigIndex;
 
    /// Solar system      // It needs to display information of central bodies in estimation report file
    SolarSystem *solarSystem;
@@ -338,23 +373,49 @@ protected:
    ObjectArray dataFilterObjs;
    IntegerArray editedRecords;             // flag indicating an observation data record used for calculating estimation
 
+   /// Time converter singleton
+   TimeSystemConverter *theTimeConverter;
+
+   // Statistics information for measurements
+   struct MeasurementInfoType
+   {
+      GmatTime    epoch;
+      UnsignedInt recNum;
+      Integer     modelSize;
+      Integer     editFlag;
+      bool        isCalculated;
+      std::string removedReason;
+      std::string station;
+      std::string type;
+      Integer     uniqueID;
+      Real        frequency;
+      Real        feasibilityValue;
+      RealArray   measValue;
+      RealArray   residual;
+      RealArray   weight;
+      std::vector<RealArray>  hAccum;
+      Real        tropoCorrectValue;
+      Real        ionoCorrectValue;
+   };
+
+   std::vector<MeasurementInfoType> measStats;
+
+   StringArray  stationsList;            // station
+   StringArray  measTypesList;           // measurement type
+
    /// Parameters associated with the Estimators
    enum
    {
       MEASUREMENTS  = SolverParamCount,
       SOLVEFORS,
-      ABSOLUTETOLERANCE,
-      RELATIVETOLERANCE,
       PROPAGATOR,
+      ESTIMATION_EPOCH_FORMAT,
+      ESTIMATION_EPOCH,
+      PREDICT_TIME_SPAN,
       SHOW_RESIDUALS,
       ADD_RESIDUAL_PLOT,
-      MAX_RESIDUAL_MULTIPLIER,
-      CONSTANT_MULTIPLIER,
-      ADDITIVE_CONSTANT,
-      USE_RMSP,
-      RESET_BEST_RMS,
       DATA_FILTERS,
-      CONVERGENT_STATUS,
+      MATLAB_OUTPUT_FILENAME,
       EstimatorParamCount
    };
 
@@ -366,6 +427,21 @@ protected:
                                PARAMETER_TYPE[EstimatorParamCount -
                                               SolverParamCount];
 
+   static const Integer NORMAL_FLAG;
+   static const Integer BLOCKED_FLAG;
+   static const Integer U_FLAG;
+   static const Integer RAMP_FLAG;
+   static const Integer IRMS_FLAG;
+   static const Integer OLSE_FLAG;
+   static const Integer USER_FLAG;
+   static const Integer ILSE_FLAG;
+
+   /// Conversion from ModJulian to MATLAB datenum
+   static const Real MATLAB_DATE_CONVERSION;
+
+   /// Tolerance for covariance matrix inversion
+   static const Real COV_INV_TOL;
+
    virtual Integer         TestForConvergence(std::string &reason);
 
    GmatTime                ConvertToGmatTimeEpoch(const std::string &theEpoch, 
@@ -375,7 +451,22 @@ protected:
                               const StringArray &measurementNames);
    virtual void            PlotResiduals();
    virtual void            EnhancePlot();
+   virtual void            CalculateResiduals(MeasurementInfoType &measStat);
+   virtual bool            OverwriteEditFlag(const std::string &editFlag);
+   virtual bool            WriteEditFlag();
+   virtual void            EstimationPartials(std::vector<RealArray> &hMeas);
+   virtual bool            DataFilter() = 0;
+   virtual void            BuildMeasurementLine(const MeasurementInfoType &measStat);
+   virtual void            WriteMeasurementLine(Integer recNum);
+   virtual void            AddMatlabData(const MeasurementInfoType &measStat);
+   virtual void            AddMatlabData(const MeasurementInfoType &measStat,
+                                         DataBucket &matData, IntegerMap &matIndex);
+   virtual void            AddMatlabIterationData();
+   virtual void            AddMatlabConfigData();
 
+   bool                    AddMatData(DataBucket &matData, Integer index = 0);
+   virtual bool            WriteMatData();
+   StringArray             GetMatDataDescription(DataBucket &data);
 
    virtual Integer         SetSolverResults(Real*, const std::string&,
                                             const std::string&);
@@ -384,10 +475,19 @@ protected:
    virtual ObservationData*
                            FilteringData(ObservationData* obsData, Integer obDataId, Integer& filterIndex);
 
-   virtual Integer         SumAcceptedRecords(Integer key); 
-   virtual Real            SumAllResidual(Integer key);
-   virtual Real            SumAllResidualDeviationSqr(Integer key, Real ave);
-   virtual Real            SumAllWeightedResidualSqr(Integer key);
+   /// Abstract method that performs the estimation in derived classes
+   virtual void            Estimate() = 0;
+
+   void                    Symmetrize(Covariance& mat);
+   void                    Symmetrize(Rmatrix& mat);
+   Covariance*             GetMeasurementCovariance();
+   Real                    GetMeasurementCovariance(const UnsignedInt r, const UnsignedInt c);
+   virtual Real            GetMeasurementWeight(const UnsignedInt index);
+   Real                    GetEpsilonConversion(const UnsignedInt stateIndex);
+   void                    CovarianceEpsilonConversion(Rmatrix& cov);
+
+   Real                    ObservationDataCorrection(Real cValue, Real oValue, Real moduloConstant);
+   void                    ValidateMediaCorrection(const MeasurementData* measData);
 
    /// Estimation status contains all status of an estimation
    enum EstimationStatus
@@ -401,6 +501,99 @@ protected:
       CONVERGING,
       DIVERGING,
    };
+
+   std::stringstream textFile0;
+   std::stringstream textFile1;
+   std::stringstream textFile1_1;
+   std::stringstream textFile2;
+   std::stringstream textFile3;
+   std::stringstream textFile4;
+   std::stringstream textFile5;
+
+   virtual void            WriteToTextFile(Solver::SolverState state =
+                                              Solver::UNDEFINED_STATE);
+
+   // Report File functions
+   virtual void           WriteReportFileHeaderPart1();
+   virtual void           WriteReportFileHeaderPart2();
+   virtual void           WriteReportFileHeaderPart2b();
+   virtual void           WriteReportFileHeaderPart2c();
+   virtual void           WriteReportFileHeaderPart3();
+   virtual void           WriteReportFileHeaderPart4_1();
+   virtual void           WriteReportFileHeaderPart4_2();
+   virtual void           WriteReportFileHeaderPart4_3();
+   virtual void           WriteReportFileHeaderPart4_4();
+   virtual void           WriteReportFileHeaderPart4();
+   virtual void           WriteReportFileHeaderPart5();
+   virtual void           WriteReportFileHeaderPart6() = 0; // Contains estimator-specific reporting
+   virtual void           WriteReportFileHeader();
+
+   virtual bool           IsIterative() = 0; // Estimator specific if it iterates
+
+   StringArray            ColumnBreak(std::string content, Integer colLenMax, StringArray seperators);
+
+   virtual void           WriteIterationHeader();
+   virtual void           WriteNotationHeader();
+   virtual void           WriteMeasurementHeader();
+   virtual void           WritePageHeader();
+   virtual std::string    GetHeaderName();
+   virtual std::string    CenterAndPadHeader(std::string text);
+
+   virtual void           WriteReportFileSummaryPart0(Solver::SolverState sState);
+   virtual void           WriteReportFileSummaryPart1(Solver::SolverState sState) = 0; // Contains estimator-specific reporting
+   virtual void           WriteReportFileSummaryPart2(Solver::SolverState sState);
+   virtual void           WriteReportFileSummaryPart3(Solver::SolverState sState);
+   virtual void           WriteReportFileSummaryPart4(Solver::SolverState sState);
+   virtual void           WriteReportFileSummaryPart5(Solver::SolverState sState);
+   virtual void           WriteReportFileSummary(Solver::SolverState sState);
+
+   std::string            GetElementName(ListItem* infor, bool isInternalCS,
+                                         std::string stateType = "", std::string anomalyType = "TA") const;
+   std::string            GetElementFullName(ListItem* infor, bool isInternalCS,
+                                             std::string stateType = "", std::string anomalyType = "TA") const;
+   std::string            GetElementFullNameID(ListItem* infor, bool isInternalCS,
+                                               std::string stateType = "", std::string anomalyType = "TA") const;
+
+   std::string            GetElementUnit(ListItem* infor, std::string stateType) const;
+   std::string            GetUnit(const std::string type) const;
+   Integer                GetElementPrecision(std::string unit) const;
+
+   enum ObsFilterType
+   {
+      ALL,
+      STATION,
+      DATATYPE,
+   };
+
+   std::string            WriteObservationSummary(ObsFilterType filter1 = ALL, ObsFilterType filter2 = ALL);
+   UnsignedIntArray       FilterObservations(std::string groundStation, std::string measType) const;
+   std::string            SummarizeObservationValues(UnsignedIntArray indicies) const;
+
+   std::string            WriteMatrixReport(const Rmatrix &matrix, bool scientific = false) const;
+
+   std::map<GmatBase*, Rvector6>
+                          CalculateCartesianStateMap(const std::vector<ListItem*> *map, GmatState state);
+   std::map<GmatBase*, Rvector6>
+                          CalculateKeplerianStateMap(const std::vector<ListItem*> *map, GmatState state);
+   std::map<GmatBase*, RealArray>
+                          CalculateAncillaryElements(const std::vector<ListItem*> *map, GmatState state);
+
+
+   std::string            GetFileCreateTime(std::string fileName);
+   std::string            CTime(const time_t* time);
+   std::string            GetGMATBuildDate();
+   std::string            GetDayOfWeek(Integer day, Integer month, Integer year);
+   std::string            GetOperatingSystemName();
+   std::string            GetOperatingSystemVersion();
+   std::string            GetHostName();
+   std::string            GetUserID();
+
+   void                   BuildSatPropMap();
+
+   virtual void           WriteStringArrayValue(Gmat::WriteMode mode,
+                                                std::string &prefix,
+                                                Integer id, bool writeQuotes,
+                                                std::stringstream &stream);
 
 private:
    bool      delayInitialization;

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -50,6 +50,7 @@
 #include <wx/filename.h>
 
 
+//#define DEBUG_PROP_PANEL_DISPLAY
 //#define DEBUG_PROP_PANEL_SETUP
 //#define DEBUG_PROP_PANEL_LOAD
 //#define DEBUG_PROP_PANEL_SAVE
@@ -59,6 +60,7 @@
 //#define DEBUG_PROP_INTEGRATOR
 //#define DEBUG_PROP_PROPAGATOR
 //#define DEBUG_PROP_PANEL_SAVE_SRP
+//#define DEBUG_PROP_DRAG
 
 
 // Hard coded drag enumeration replaced by dynamic version, so set NONE_DM here
@@ -93,6 +95,7 @@ BEGIN_EVENT_TABLE(PropagationConfigPanel, GmatPanel)
    EVT_COMBOBOX(ID_CB_TIDE, PropagationConfigPanel::OnTideModelComboBox)
    EVT_COMBOBOX(ID_CB_ATMOS, PropagationConfigPanel::OnAtmosphereModelComboBox)
    EVT_COMBOBOX(ID_CB_SRP_MODEL, PropagationConfigPanel::OnSRPModelComboBox)
+   EVT_COMBOBOX(ID_CB_DRAG_MODEL, PropagationConfigPanel::OnDragModelComboBox)
    EVT_CHECKBOX(ID_SRP_CHECKBOX, PropagationConfigPanel::OnSRPCheckBoxChange)
    EVT_CHECKBOX(ID_REL_CORRECTION_CHECKBOX, PropagationConfigPanel::OnRelativisticCorrectionCheckBoxChange)
    EVT_CHECKBOX(ID_STOP_CHECKBOX, PropagationConfigPanel::OnStopCheckBoxChange)
@@ -332,7 +335,7 @@ void PropagationConfigPanel::Create()
       ( this, ID_CB_PROP_EPOCHFORMAT, wxT(""), wxDefaultPosition, wxSize(150,-1), //0,
         emptyList, wxCB_DROPDOWN | wxCB_READONLY );
    propagatorEpochFormatComboBox->SetToolTip(pConfig->Read(_T("EpochFormatHint")));
-   StringArray reps = TimeConverterUtil::GetValidTimeRepresentations();
+   StringArray reps = TimeSystemConverter::Instance()->GetValidTimeRepresentations();
    for (unsigned int i = 0; i < reps.size(); i++)
       propagatorEpochFormatComboBox->Append(reps[i].c_str());
    startEpochStaticText =
@@ -659,11 +662,25 @@ void PropagationConfigPanel::Create()
                     wxDefaultPosition, wxDefaultSize, 0 );
    theDragSetupButton->SetToolTip(pConfig->Read(_T("ForceModelDragSetupHint")));
 
-   wxBoxSizer *atmosSizer = new wxBoxSizer( wxHORIZONTAL );
-   atmosSizer->Add( type2StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   atmosSizer->Add( theAtmosModelComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   atmosSizer->Add( theDragSetupButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   dragModelStaticText = new wxStaticText( this, ID_TEXT,
+                                          GUI_ACCEL_KEY"Drag Model",
+                                          wxDefaultPosition, wxDefaultSize, 0 );
+   theDragModelComboBox =
+      new wxComboBox( this, ID_CB_DRAG_MODEL, dragModelListArray[0],
+                     wxDefaultPosition, wxSize(100,-1),
+                     dragModelListArray, wxCB_DROPDOWN|wxCB_READONLY );
+   theDragModelComboBox->SetToolTip(pConfig->Read(_T("ForceModelDragModelHint")));
+   
 
+   wxFlexGridSizer *atmosSizer = new wxFlexGridSizer( 3, 0, 2 );
+//   wxBoxSizer *atmosSizer = new wxBoxSizer( wxHORIZONTAL );
+   atmosSizer->Add( type2StaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   atmosSizer->Add( theAtmosModelComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   atmosSizer->Add( theDragSetupButton, 0, wxALIGN_LEFT|wxALL, bsize);
+   atmosSizer->Add( dragModelStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   atmosSizer->Add( theDragModelComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   atmosSizer->Add( 20,20,0, wxGROW|wxALIGN_LEFT|wxALL, 5);
+   
    GmatStaticBoxSizer *atmosStaticSizer =
       new GmatStaticBoxSizer(wxVERTICAL, this, "Drag");
    atmosStaticSizer->Add( atmosSizer, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -835,6 +852,7 @@ void PropagationConfigPanel::Create()
    // initially disable components
    //-----------------------------------------------------------------
    theDragSetupButton->Enable(false);
+   theDragModelComboBox->Enable(false);
 
    #ifdef DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage("PropagationConfigPanel::Setup() exiting\n");
@@ -1226,6 +1244,8 @@ void PropagationConfigPanel::PopulateForces()
                paramId = theDragForce->GetParameterID("AtmosphereModel");
                atmosModelString =
                      theDragForce->GetStringParameter(paramId).c_str();
+               std::string theDragModel = theDragForce->GetStringParameter("DragModel");
+               dragModelName = theDragModel.c_str();
 
                currentBodyId = FindPrimaryBody(wxBodyName);
 //               primaryBodyList[currentBodyId]->bodyName = wxBodyName;
@@ -1246,6 +1266,7 @@ void PropagationConfigPanel::PopulateForces()
                dragStringBuffer[4] = theDragForce->GetStringParameter("SchattenErrorModel").c_str();
                dragStringBuffer[5] = theDragForce->GetStringParameter("SchattenTimingModel").c_str();
                dragBufferReady = true;
+               
 
                //Warn user about bodies already added as Primary body
                Integer pmSize = (Integer)pointMassBodyList.size();
@@ -1325,6 +1346,7 @@ void PropagationConfigPanel::SaveData()
    MessageInterface::ShowMessage("   isOriginChanged=%d\n", isOriginChanged);
    MessageInterface::ShowMessage("   isErrControlChanged=%d\n", isErrControlChanged);
    MessageInterface::ShowMessage("   isSRPModelChanged=%d\n", isSRPModelChanged);
+   MessageInterface::ShowMessage("   isDragModelChanged=%d\n", isDragModelChanged);
    #endif
 
    canClose = true;
@@ -1609,6 +1631,7 @@ void PropagationConfigPanel::SaveData()
                   }
 
                   theDragForce->SetInternalAtmosphereModel(theAtmosphereModel);
+                  theDragForce->SetStringParameter("DragModel", dragModelName.c_str());
 
                   #ifdef DEBUG_PROP_PANEL_SAVE
                   ShowForceList("theDragForce->SetInternalAtmosphereModel(theAtmosphereModel);");
@@ -2044,6 +2067,8 @@ void PropagationConfigPanel::Initialize()
    isSpkBodyChanged     = false;
    isSpkEpFormatChanged = false;
    isSpkEpochChanged    = false;
+   isSRPModelChanged    = false;
+   isDragModelChanged   = false;
 
    //Note: All the settings should match enum types in the header.
 
@@ -2062,6 +2087,13 @@ void PropagationConfigPanel::Initialize()
    StringArray models = theGuiInterpreter->GetListOfFactoryItems(Gmat::ATMOSPHERE, "Earth");
    for (UnsignedInt i = 0; i < models.size(); ++i)
       dragModelArray.Add(models[i].c_str());
+   
+   // initialize SRP Model type array
+   dragModelListArray.Add("Spherical");
+   dragModelListArray.Add("SPADFile");
+   
+   dragModelName = "Spherical";
+   
 
 //   dragModelArray.Add("MSISE90");
 //   dragModelArray.Add("JacchiaRoberts");
@@ -2601,9 +2633,11 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
    #ifdef DEBUG_PROP_PANEL_DISPLAY
    MessageInterface::ShowMessage
       ("DisplayAtmosphereModelData() currentBodyName=%s\n", // dragType=%s\n",
-       currentBodyName.c_str()
+       currentBodyName.WX_TO_C_STRING);
        //, primaryBodyList[currentBodyId]->dragType.c_str()
-       );
+   MessageInterface::ShowMessage
+      ("DisplayAtmosphereModelData() dragModelName=%s\n", // dragType=%s\n",
+       dragModelName.WX_TO_C_STRING);
    #endif
 
    // Enable atmosphere model only for bodies that have models
@@ -2613,6 +2647,8 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
    StringArray models = theGuiInterpreter->
          GetListOfFactoryItems(Gmat::ATMOSPHERE, currentBodyName.c_str());
 
+   theDragModelComboBox->SetValue(dragModelName);
+   
    if (models.size() > 0)
    {
       for (UnsignedInt i = 0; i < models.size(); ++i)
@@ -2624,6 +2660,13 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
       theAtmosModelComboBox->SetValue(atmosModelString); //dragModelArray[0]);
       theAtmosModelComboBox->Enable(true);
 
+      theDragModelComboBox->Enable(true);
+      
+#ifdef DEBUG_PROP_PANEL_DISPLAY
+      MessageInterface::ShowMessage
+      ("DisplayAtmosphereModelData() models size > 0\n");
+#endif
+
       // Current code always enables Setup for any model; disabled for "None"
 //      if (currentBodyName == "Earth")
       if (currentBodyName == "Mars")
@@ -2633,10 +2676,15 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
    }
    else
    {
+#ifdef DEBUG_PROP_PANEL_DISPLAY
+      MessageInterface::ShowMessage
+      ("DisplayAtmosphereModelData() models size <= 0\n");
+#endif
       theAtmosModelComboBox->Clear();
       theAtmosModelComboBox->Append("None");
       theAtmosModelComboBox->Enable(false);
       theDragSetupButton->Enable(false);
+      theDragModelComboBox->Enable(false);
    }
 
    // Set current drag force pointer
@@ -2646,20 +2694,35 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
 //   if (primaryBodyList[currentBodyId]->dragType == dragModelArray[NONE_DM])
    if (primaryBodyData->dragType == dragModelArray[NONE_DM])
    {
+#ifdef DEBUG_PROP_PANEL_DISPLAY
+      MessageInterface::ShowMessage
+      ("DisplayAtmosphereModelData() NONE\n");
+#endif
       theAtmosModelComboBox->SetSelection(NONE_DM);
       theDragSetupButton->Enable(false);
+      theDragModelComboBox->Enable(false);
    }
    else
    {
+#ifdef DEBUG_PROP_PANEL_DISPLAY
+      MessageInterface::ShowMessage
+      ("DisplayAtmosphereModelData() NOT NONE\n");
+#endif
       Integer set = 0;
       for (UnsignedInt i = 0; i < dragModelArray.size(); ++i)
          if (primaryBodyData->dragType == dragModelArray[i])
             set = i;
       theAtmosModelComboBox->SetSelection(set);
       if (primaryBodyData->bodyName == "Mars")
+      {
          theDragSetupButton->Enable(false);
+//         theDragModelComboBox->Enable(false);
+      }
       else
+      {
          theDragSetupButton->Enable(true);
+//         theDragModelComboBox->Enable(true);
+      }
    }
 }
 
@@ -2787,16 +2850,19 @@ void PropagationConfigPanel::EnablePrimaryBodyItems(bool enable, bool clear)
              ))
          {
             theDragSetupButton->Enable(false);
+            theDragModelComboBox->Enable(false);
          }
          else
          {
             theDragSetupButton->Enable(true);
+            theDragModelComboBox->Enable(true);
          }
       }
       else
       {
          theAtmosModelComboBox->Enable(false);
          theDragSetupButton->Enable(false);
+         theDragModelComboBox->Enable(false);
       }
 
       //theMagfModelComboBox->Enable(true);
@@ -2832,6 +2898,7 @@ void PropagationConfigPanel::EnablePrimaryBodyItems(bool enable, bool clear)
       theGravModelSearchButton->Enable(false);
       theTideModelSearchButton->Enable(false);
       theAtmosModelComboBox->Enable(false);
+      theDragModelComboBox->Enable(false);
       theDragSetupButton->Enable(false);
       //theMagfModelComboBox->Enable(false);
       //theSrpCheckBox->Enable(false);
@@ -2842,6 +2909,7 @@ void PropagationConfigPanel::EnablePrimaryBodyItems(bool enable, bool clear)
    {
       theAtmosModelComboBox->Enable(false);
       theDragSetupButton->Enable(false);
+      theDragModelComboBox->Enable(false);
    }
    if (primaryBodyString == "Mars")
       theDragSetupButton->Enable(false);
@@ -2979,12 +3047,12 @@ bool PropagationConfigPanel::ValidatePropEpochComboBoxes()
          #endif
          std::string prevFmt = spkEpFormat.WX_TO_STD_STRING;
          std::string prevVal = startEpochValue.WX_TO_STD_STRING;
-         TimeConverterUtil::ValidateTimeFormat(prevFmt,prevVal, true);
+         TimeSystemConverter::Instance()->ValidateTimeFormat(prevFmt,prevVal, true);
 
          if (spkEpFormat.Find("ModJulian") == wxNOT_FOUND)
          {
             fromVal = -999.999;
-            TimeConverterUtil::Convert(spkEpFormat.c_str(), fromVal,
+            TimeSystemConverter::Instance()->Convert(spkEpFormat.c_str(), fromVal,
                   startEpochValue.c_str(), "A1ModJulian", toVal,
                   newStr);
             retval = true;
@@ -3186,7 +3254,7 @@ bool PropagationConfigPanel::SavePropagatorData()
       std::string prevVal = startEpochCombobox->GetValue().WX_TO_STD_STRING;
 
       if (startEpochChoices.Index(prevVal.c_str()) == wxNOT_FOUND)
-         TimeConverterUtil::ValidateTimeFormat(prevFmt, prevVal, true);
+         TimeSystemConverter::Instance()->ValidateTimeFormat(prevFmt, prevVal, true);
 
       wxString startEpochValue = startEpochCombobox->GetValue();
 
@@ -3278,7 +3346,7 @@ bool PropagationConfigPanel::SaveDegOrder()
       wxString bodyName = thePrimaryBodyComboBox->GetValue();
 
       #ifdef DEBUG_PROP_PANEL_SAVE
-      MessageInterface::ShowMessage("   bodyName=%s\n", bodyName.c_str());
+      MessageInterface::ShowMessage("   bodyName=%s\n", bodyName.WX_TO_C_STRING);
       #endif
 
       // find gravity force pointer
@@ -3715,6 +3783,7 @@ void PropagationConfigPanel::OnOriginComboBox(wxCommandEvent &event)
    {
       theAtmosModelComboBox->Enable(false);
       theDragSetupButton->Enable(false);
+      theDragModelComboBox->Enable(false);
    }
    if (thePrimaryBodyComboBox->GetValue() == "Mars")
       theDragSetupButton->Enable(false);
@@ -4005,7 +4074,7 @@ void PropagationConfigPanel::OnPropEpochComboBox(wxCommandEvent &)
 
                std::string prevFmt = spkEpFormat.WX_TO_STD_STRING;
                std::string prevVal = spkEpoch.WX_TO_STD_STRING;
-               TimeConverterUtil::ValidateTimeFormat(prevFmt,prevVal, true);
+               TimeSystemConverter::Instance()->ValidateTimeFormat(prevFmt,prevVal, true);
 
                if (spkEpFormat.Find("ModJulian") == wxNOT_FOUND)
                   fromVal = -999.999;
@@ -4014,7 +4083,7 @@ void PropagationConfigPanel::OnPropEpochComboBox(wxCommandEvent &)
                   spkEpoch.ToDouble(&fromVal);
                }
 
-               TimeConverterUtil::Convert(spkEpFormat.c_str(), fromVal, spkEpoch.c_str(),
+               TimeSystemConverter::Instance()->Convert(spkEpFormat.c_str(), fromVal, spkEpoch.c_str(),
                      epochSelection.c_str(), toVal, newStr);
             }
             catch (BaseException &e)
@@ -4082,7 +4151,7 @@ void PropagationConfigPanel::OnStartEpochComboBox(wxCommandEvent &)
 
             std::string prevFmt = spkEpFormat.WX_TO_STD_STRING;
             std::string prevVal = spkEpoch.WX_TO_STD_STRING;
-            TimeConverterUtil::ValidateTimeFormat(prevFmt,prevVal, true);
+            TimeSystemConverter::Instance()->ValidateTimeFormat(prevFmt,prevVal, true);
 
             if (spkEpFormat.Find("ModJulian") == wxNOT_FOUND)
                fromVal = -999.999;
@@ -4091,7 +4160,7 @@ void PropagationConfigPanel::OnStartEpochComboBox(wxCommandEvent &)
                spkEpoch.ToDouble(&fromVal);
             }
 
-            TimeConverterUtil::Convert(spkEpFormat.c_str(), fromVal,
+            TimeSystemConverter::Instance()->Convert(spkEpFormat.c_str(), fromVal,
                   spkEpoch.c_str(), epochSelection.c_str(), toVal, newStr);
          }
          catch (BaseException &e)
@@ -4126,18 +4195,45 @@ void PropagationConfigPanel::OnStartEpochComboBox(wxCommandEvent &)
 // void OnSRPModelComboBox(wxCommandEvent &)
 //------------------------------------------------------------------------------
 /**
- * Tells the GUI that the start epoch combobox has changed
+ * Tells the GUI that the SRP model combobox has changed
  */
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnSRPModelComboBox(wxCommandEvent &)
 {
    wxString modelSelection = theSRPModelComboBox->GetStringSelection();
-
+   
    if (!srpModelName.IsSameAs(modelSelection))
    {
       isSRPModelChanged   = true;
       isForceModelChanged = true;
       srpModelName        = theSRPModelComboBox->GetValue();
+      EnableUpdate(true);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnDragModelComboBox(wxCommandEvent &)
+//------------------------------------------------------------------------------
+/**
+ * Tells the GUI that the drag model combobox has changed
+ */
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::OnDragModelComboBox(wxCommandEvent &)
+{
+   wxString modelSelection = theDragModelComboBox->GetStringSelection();
+   
+   #ifdef DEBUG_PROP_DRAG
+      MessageInterface::ShowMessage("OnDragModelComboBox: selection = %s\n"
+                                    "                     dragModelName = %s\n",
+                                    modelSelection.WX_TO_C_STRING,
+                                    dragModelName.WX_TO_C_STRING);
+   #endif
+   
+   if (!dragModelName.IsSameAs(modelSelection))
+   {
+      isDragModelChanged   = true;
+      isForceModelChanged  = true;
+      dragModelName        = theDragModelComboBox->GetValue();
       EnableUpdate(true);
    }
 }
@@ -4245,8 +4341,15 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
 {
-   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
-      _T("Gravity files (*.cof;*.grv;*.gfc;*.tab)|*.cof;*.grv;*.gfc;*.tab|All files (*.*)|*.*"));
+   wxString fileFormats;
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+
+   if (runmode == GmatGlobal::TESTING || runmode == GmatGlobal::TESTING_NO_PLOTS)
+      fileFormats = _T("Gravity files (*.cof;*.grv;*.gfc;*.tab)|*.cof;*.grv;*.gfc;*.tab|All files (*.*)|*.*");
+   else
+      fileFormats = _T("Gravity files (*.cof;*.grv)|*.cof;*.grv|All files (*.*)|*.*");
+
+   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), fileFormats);
 
    if (dialog.ShowModal() == wxID_OK)
       {

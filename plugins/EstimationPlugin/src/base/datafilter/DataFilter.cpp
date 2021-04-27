@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -108,8 +108,8 @@ DataFilter::DataFilter(const std::string &ofType, const std::string name) :
    trackers.push_back("All");
    dataTypes.push_back("All");
 
-   depTypeMap["Range_RU"]   = "DSN_SeqRange";
-   depTypeMap["Doppler_HZ"] = "DSN_TCP";
+//   depTypeMap["Range_RU"]   = "DSN_SeqRange";
+//   depTypeMap["Doppler_HZ"] = "DSN_TCP";
 }
 
 
@@ -122,6 +122,20 @@ DataFilter::DataFilter(const std::string &ofType, const std::string name) :
 //------------------------------------------------------------------------------
 DataFilter::~DataFilter()
 {
+   // clean up StringArray fileNames;
+   fileNames.clear();
+   // clean up StringArray observers;
+   observers.clear();
+   // clean up ObjectArray observerObjects;
+   observerObjects.clear();
+   // clean up StringArray trackers;
+   trackers.clear();
+   // clean up ObjectArray trackerObjects;
+   trackerObjects.clear();
+   // clean up StringArray dataTypes;
+   dataTypes.clear();
+   // clean up StringArray strands;
+   strands.clear();
 }
 
 
@@ -484,15 +498,15 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == EPOCH_FORMAT)
    {
-      if (TimeConverterUtil::IsValidTimeSystem(value) == false)
+      if (TimeSystemConverter::Instance()->IsValidTimeSystem(value) == false)
          throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".EpochFormat parameter is invalid.\n");
 
       epochFormat = value;
       isEpochFormatSet = true;
 
       //Real t1;
-      //TimeConverterUtil::Convert("A1ModJulian", epochStart, "", value, t1, initialEpoch);
-      //TimeConverterUtil::Convert("A1ModJulian", epochEnd, "", value, t1, finalEpoch);
+      //TimeSystemConverter::Convert("A1ModJulian", epochStart, "", value, t1, initialEpoch);
+      //TimeSystemConverter::Convert("A1ModJulian", epochEnd, "", value, t1, finalEpoch);
       
       return true;
    }
@@ -600,19 +614,19 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
          //   allDataType = true;
          //else
          //{
-            // Check for deprecation
-            std::map<std::string,std::string> typeMap = GetDeprecatedTypeMap();
-            for (std::map<std::string, std::string>::iterator i = typeMap.begin(); i != typeMap.end(); ++i)
-            {
-               if ((*i).first == name)
-               {
-                  MessageInterface::ShowMessage("Warning: '" + GetName() + ".DataTypes name + '" 
-                     + name + "' is deprecated and will be removed in a future release. Use '"
-                     + (*i).second + "' instead.\n");
-                  name = (*i).second;
-                  break;
-               }
-            }
+            //// Check for deprecation
+            //std::map<std::string,std::string> typeMap = GetDeprecatedTypeMap();
+            //for (std::map<std::string, std::string>::iterator i = typeMap.begin(); i != typeMap.end(); ++i)
+            //{
+            //   if ((*i).first == name)
+            //   {
+            //      MessageInterface::ShowMessage("Warning: '" + GetName() + ".DataTypes name + '" 
+            //         + name + "' is deprecated and will be removed in a future release. Use '"
+            //         + (*i).second + "' instead.\n");
+            //      name = (*i).second;
+            //      break;
+            //   }
+            //}
 
             // Check for valid measurement type
             ObservationData obData;
@@ -883,18 +897,18 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
       {
          // Check for deprecation
          std::string name = value;
-         std::map<std::string, std::string> typeMap = GetDeprecatedTypeMap();
-         for (std::map<std::string, std::string>::iterator i = typeMap.begin(); i != typeMap.end(); ++i)
-         {
-            if ((*i).first == name)
-            {
-               MessageInterface::ShowMessage("Warning: " + GetName() + ".DataTypes name '" 
-                  + name + "' is deprecated and will be removed in a future release. Use '"
-                  + (*i).second + "' instead.\n");
-               name = (*i).second;
-               break;
-            }
-         }
+         //std::map<std::string, std::string> typeMap = GetDeprecatedTypeMap();
+         //for (std::map<std::string, std::string>::iterator i = typeMap.begin(); i != typeMap.end(); ++i)
+         //{
+         //   if ((*i).first == name)
+         //   {
+         //      MessageInterface::ShowMessage("Warning: " + GetName() + ".DataTypes name '" 
+         //         + name + "' is deprecated and will be removed in a future release. Use '"
+         //         + (*i).second + "' instead.\n");
+         //      name = (*i).second;
+         //      break;
+         //   }
+         //}
 
          // Check for valid measurement type
          StringArray nameList = GetListOfMeasurementTypes();
@@ -1388,7 +1402,7 @@ Real DataFilter::ConvertToRealEpoch(const std::string &theEpoch,
    Real retval = -999.999;
    std::string outStr;
 
-   TimeConverterUtil::Convert(theFormat, fromMjd, theEpoch, "A1ModJulian",
+   TimeSystemConverter::Instance()->Convert(theFormat, fromMjd, theEpoch, "A1ModJulian",
          retval, outStr);
 
    if (retval == -999.999)
@@ -1421,10 +1435,20 @@ StringArray DataFilter::GetListOfMeasurementTypes()
    typeList.push_back("Range");
    //typeList.push_back("Doppler_RangeRate");
    typeList.push_back("RangeRate");
+   typeList.push_back("Azimuth");
+   typeList.push_back("Elevation");
+   typeList.push_back("XEast");
+   typeList.push_back("YNorth");
+   typeList.push_back("XSouth");
+   typeList.push_back("YEast");
+   //typeList.push_back("RightAscension");                          // made changes by TUAN NGUYEN
+   //typeList.push_back("Declination");                             // made changes by TUAN NGUYEN
 
    Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
    if (runmode == GmatGlobal::TESTING)
    {
+      typeList.push_back("RightAscension");                         // made changes by TUAN NGUYEN
+      typeList.push_back("Declination");                            // made changes by TUAN NGUYEN
       typeList.push_back("SN_Range");
       //typeList.push_back("TDRSDoppler_HZ");
       typeList.push_back("SN_Doppler");
@@ -1728,7 +1752,7 @@ bool DataFilter::IsInTimeWindow(ObservationData* dataObject)
 {
    bool isIn = true;
    
-   GmatEpoch currentEpoch = TimeConverterUtil::Convert(dataObject->epoch, dataObject->epochSystem, TimeConverterUtil::A1MJD);
+   GmatEpoch currentEpoch = TimeSystemConverter::Instance()->Convert(dataObject->epoch, dataObject->epochSystem, TimeSystemConverter::A1MJD);
    Real epsilon = 1.0e-12;
    //if ((currentEpoch < (epochStart- TIME_EPSILON))||(currentEpoch > (epochEnd + TIME_EPSILON)))
    if (((currentEpoch - epochStart)/currentEpoch < - epsilon) || ((currentEpoch - epochEnd)/currentEpoch  > epsilon))

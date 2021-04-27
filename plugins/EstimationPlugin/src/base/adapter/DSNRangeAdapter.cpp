@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -481,6 +481,10 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
       cMeasurement.uplinkBand = freqBand;
       cMeasurement.rangeModulo = rangeModulo;
 
+      // Update media corrections
+      cMeasurement.ionoCorrectValue = multiplier*GetIonoCorrection()/lightspeed;
+      cMeasurement.tropoCorrectValue = multiplier*GetTropoCorrection()/lightspeed;
+
 
       #ifdef DEBUG_RANGE_CALCULATION
          MessageInterface::ShowMessage("===================================================================\n");
@@ -847,9 +851,9 @@ Real DSNRangeAdapter::IntegralRampedFrequency(GmatTime t1, Real delta_t, Integer
       GmatTime t1TAI, tminTAI;
       std::string tais;
       GmatTime a1Time = t1;
-      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", t1TAI, tais);
+      theTimeConverter->Convert("A1ModJulian", a1Time, "", "TAIModJulian", t1TAI, tais);
       a1Time = time_min;
-      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
+      theTimeConverter->Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
 
       // Generate error message
       char s[200];
@@ -866,9 +870,9 @@ Real DSNRangeAdapter::IntegralRampedFrequency(GmatTime t1, Real delta_t, Integer
       GmatTime t0TAI, tminTAI;
       std::string tais;
       GmatTime a1Time = t0;
-      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", t0TAI, tais);
+      theTimeConverter->Convert("A1ModJulian", a1Time, "", "TAIModJulian", t0TAI, tais);
       a1Time = time_min;
-      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
+      theTimeConverter->Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
 
       // Generate error message
       char s[200];

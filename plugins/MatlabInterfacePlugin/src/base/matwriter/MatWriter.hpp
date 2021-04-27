@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2016 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -61,7 +61,8 @@ public:
    virtual bool OpenFile();
    virtual bool WriteData(const std::string &obj_name);
    virtual bool CloseFile();
-   virtual bool DescribeData (const StringArray &variableList);
+   virtual bool DescribeData (const StringArray &variableList, UnsignedInt size = 1U);
+   virtual bool ClearData();
 
 private:
    /// handle to .mat file
@@ -71,7 +72,9 @@ private:
     *  a single file, by setting a new mat_struct array. */
    mxArray *mat_struct;
    
-   void SetMxArray(const StringArray &variable_list);
+   void SetMxArray(const StringArray &variable_list, mwSize size = 1U);
+
+   void UnsetMxArray();
 
 }; 
 

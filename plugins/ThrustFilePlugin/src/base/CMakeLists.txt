@@ -16,9 +16,6 @@ MESSAGE("GMAT ThrustFile Plugin setup " ${VERSION})
 
 SET(TargetName ThrustFile)
 
-# Add Preproccessor Definitions
-ADD_DEFINITIONS("-DTHRUSTFILE_EXPORTS")
-
 # ====================================================================
 # list of directories containing source/header files
 SET(PLUGIN_DIRS command datareader factory forcemodel include plugin)
@@ -41,6 +38,9 @@ SET(PLUGIN_SRCS
 # ====================================================================
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
+
+# Rename DLL export preproccessor definition
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEFINE_SYMBOL "THRUSTFILE_EXPORTS")
 
 # ====================================================================
 # Additional link libraries

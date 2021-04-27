@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -286,9 +286,9 @@ void EphemWriterCCSDS::Copy(const EphemerisWriter* orig)
 //--------------------------------------
 
 //------------------------------------------------------------------------------
-// void BufferOrbitData(Real epochInDays, const Real state[6])
+// void BufferOrbitData(Real epochInDays, const Real state[6], const Real cov[21])
 //------------------------------------------------------------------------------
-void EphemWriterCCSDS::BufferOrbitData(Real epochInDays, const Real state[6])
+void EphemWriterCCSDS::BufferOrbitData(Real epochInDays, const Real state[6], const Real cov[21])
 {
    #ifdef DEBUG_EPHEMFILE_BUFFER
    MessageInterface::ShowMessage
@@ -363,11 +363,12 @@ void EphemWriterCCSDS::InitializeData(bool saveEpochInfo)
 
 //------------------------------------------------------------------------------
 // void CreateEphemerisFile(bool useDefaultFileName, const std::string &stType,
-//                          const std::string &outFormat)
+//                          const std::string &outFormat, const std::string &covFormat)
 //------------------------------------------------------------------------------
 void EphemWriterCCSDS::CreateEphemerisFile(bool useDefaultFileName,
                                            const std::string &stType,
-                                           const std::string &outFormat)
+                                           const std::string &outFormat,
+                                           const std::string &covFormat)
 {
    #ifdef DEBUG_EPHEMFILE_OPEN
    MessageInterface::ShowMessage
@@ -376,7 +377,7 @@ void EphemWriterCCSDS::CreateEphemerisFile(bool useDefaultFileName,
        outFormat.c_str(), fullPathFileName.c_str());
    #endif
    
-   EphemerisWriter::CreateEphemerisFile(useDefaultFileName, stType, outFormat);
+   EphemerisWriter::CreateEphemerisFile(useDefaultFileName, stType, outFormat, covFormat);
    
    // If default file name is used, write informational message about the file location (LOJ: 2014.06.24)
    if (useDefaultFileName)
@@ -520,7 +521,7 @@ void EphemWriterCCSDS::HandleOrbitData()
    #endif
    
    // Check if it is time to write
-   bool timeToWrite = IsTimeToWrite(currEpochInSecs, currState);
+   bool timeToWrite = IsTimeToWrite(currEpochInSecs, currState, currCov);
    
    #ifdef DEBUG_EPHEMFILE_DATA
    MessageInterface::ShowMessage

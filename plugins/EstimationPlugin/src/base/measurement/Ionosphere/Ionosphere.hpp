@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -46,6 +46,11 @@ typedef int logical;
 
 #ifndef ftnlen
 typedef int ftnlen;
+#endif
+
+// SWIG has an internal max() function, so turn off the f2c macro
+#ifdef max
+#undef max
 #endif
 
 #endif

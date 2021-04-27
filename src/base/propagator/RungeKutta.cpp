@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -221,12 +221,12 @@ bool RungeKutta::Initialize()
         isInitialized = false;
         return isInitialized;
     }
-    else
-    {
-       // allocate memmory for each row for matrix bij
-       for (UnsignedInt i = 0; i < stages; ++i)
-          bij[i] = new Real[stages];
-    }
+//    else
+//    {
+//       // allocate memory for each row for matrix bij
+//       for (UnsignedInt i = 0; i < stages; ++i)
+//          bij[i] = new Real[stages];
+//    }
 
     if ((cj = new Real [stages]) == NULL)
     {
@@ -238,17 +238,18 @@ bool RungeKutta::Initialize()
     if ((ki = new Real*[stages]) == NULL)
     {
         delete [] ai;
+        // Note: If we reach this point, the following is a leak
         delete [] bij;
         delete [] cj;
         isInitialized = false;
         return isInitialized;
     }
-    else
-    {
-       // allocate memmory for each row for matrix ki
-       for (UnsignedInt i = 0; i < stages; ++i)
-          ki[i] = new Real[stages];
-    }
+//    else
+//    {
+//       // allocate memory for each row for matrix ki
+//       for (UnsignedInt i = 0; i < stages; ++i)
+//          ki[i] = new Real[stages];
+//    }
 
     if ((ee = new Real [stages]) == NULL)
     {
@@ -315,10 +316,37 @@ bool RungeKutta::Step()
        return false;
     }
 
-    if ((fabs(stepSize) < minimumStep) && !finalStep)
+    if ((fabs(stepSize) < minimumStep) && !finalStep && !followUpStep)
         stepSize = ((stepSize > 0.0) ? minimumStep : -minimumStep);
     if (fabs(stepSize) > maximumStep)
         stepSize = ((stepSize > 0.0) ? maximumStep : -maximumStep);
+
+    // Store the original time and step data in case it needs to be restored
+    Real originalTime = physicalModel->GetTime();
+    Real originalStep = stepSize;
+
+    bool stepLimited = false; // Is the step limited by the force model?
+
+    // Get the maximum step size allowed by the force models
+    Real forceMaxStep = physicalModel->GetForceMaxStep(stepSize > 0.0);
+    while (fabs(stepSize) > fabs(forceMaxStep))
+    {
+       // Make sure forceMaxStep is not smaller than the precision
+       Real stepPrecision = physicalModel->GetStepPrecision(forceMaxStep);
+       if (GmatMathUtil::Abs(forceMaxStep) < GmatMathUtil::Abs(stepPrecision))
+       {
+          // If the forceMaxStep is smaller than the elapsedTime precision,
+          // increase the elapsedTime to the next floating point representation
+          // and check the forceMaxStep again
+          physicalModel->SetTime(physicalModel->GetTime() + stepPrecision);
+          forceMaxStep = physicalModel->GetForceMaxStep(stepSize > 0.0);
+       }
+       else
+       {
+          stepLimited = true;
+          stepSize = forceMaxStep;
+       }
+    }
 
     bool goodStepTaken = false;
     Real maxerror;
@@ -359,6 +387,39 @@ bool RungeKutta::Step()
     }
 
     physicalModel->IncrementTime(stepTaken);
+
+    if (stepLimited)
+    {
+       if (maxerror == 0.0)
+       {
+          // Finish and restore fixed step if it's size is limited by a force
+          bool ret = true;
+
+          // If the step size was limited by a force, complete the remainder of the step
+          followUpStep = true;
+          stepSize = originalStep - stepSize;
+          if (stepSize != 0.0)
+             ret = Step();
+
+          // Restore the original values and report the correct step taken
+          stepSize = stepSizeBuffer;
+          stepTaken = originalStep;
+
+          // This is necessary to have the correct value of prevElapsedTime
+          physicalModel->SetTime(originalTime);
+          physicalModel->IncrementTime(stepTaken);
+
+          followUpStep = false;
+          return ret;
+       }
+       else
+       {
+          // Restore originial variable step size if the forceMaxStep was used
+          if (stepTaken == forceMaxStep)
+            stepSize = originalStep;
+       }
+    }
+
     return true;
 }
 
@@ -414,6 +475,14 @@ bool RungeKutta::RawStep()
                stageState[k] += bij[i][j] * ki[j][k];
          }
       }
+
+      Real direction = 0.0;
+      if (stepSize > 0.0)
+         direction = 1.0;
+      else if (stepSize < 0.0)
+         direction = -1.0;
+
+      physicalModel->SetDirection(direction);
 
       if (!physicalModel->GetDerivatives(stageState, stepSize * ai[i]))
       {

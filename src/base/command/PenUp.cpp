@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -136,24 +136,22 @@ bool PenUp::Initialize()
    
    for (unsigned int ii = 0; ii < plotNameList.size(); ii++)
    {
-      if ((sub = FindObject(plotNameList.at(ii))) != NULL) 
+      if ((sub = FindObject(plotNameList.at(ii))) != NULL)
       {
-         if (sub->GetTypeName() == "XYPlot" ||
-             sub->GetTypeName() == "OrbitView" ||
-             sub->GetTypeName() == "GroundTrackPlot")
+         if (sub->IsOfType(Gmat::SUBSCRIBER))
             thePlotList.push_back((Subscriber*) sub);
          else
             throw CommandException(
                "Object named \"" + plotNameList.at(ii) +
-               "\" should be an XYPlot, OrbitView or GroundTrackPlot to use the "
-               "PenUp command for this object, but it is a " + 
-               sub->GetTypeName());      
+               "\" should be an Output object to use the "
+               "PenUp command, but it is a " +
+               sub->GetTypeName());
       }
       else 
       {
          MessageInterface::ShowMessage
-            ("PenUp command cannot find Plot \"%s\"; command has no effect."
-            "\n", (plotNameList.at(ii)).c_str());
+            ("PenUp command cannot find an object named \"%s\"; command has no "
+                  "effect.\n", (plotNameList.at(ii)).c_str());
          return false;
       }
    }
@@ -180,7 +178,10 @@ bool PenUp::Execute()
    for (unsigned int ii = 0; ii < thePlotList.size(); ii++)
    {
       if (thePlotList.at(ii))
-         if (!(thePlotList.at(ii)->TakeAction("PenUp"))) return false;
+         if (!(thePlotList.at(ii)->TakeAction("PenUp")))
+         {
+            return false;
+         }
    }
    
    // Build command summary

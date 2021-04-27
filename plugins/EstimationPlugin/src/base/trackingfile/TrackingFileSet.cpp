@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,6 +35,16 @@
 #include "PointRangeRateAdapterKps.hpp"
 #include "GPSAdapter.hpp"
 #include "GPSPointMeasureModel.hpp"
+#include "AzimuthAdapter.hpp"
+#include "ElevationAdapter.hpp"
+#include "XEastAdapter.hpp"
+#include "YNorthAdapter.hpp"
+#include "XSouthAdapter.hpp"
+#include "YEastAdapter.hpp"
+#include "RightAscAdapter.hpp"
+#include "DeclinationAdapter.hpp"
+#include "RangeSkinAdapter.hpp"
+#include "PropSetup.hpp"
 
 //#define DEBUG_CONSTRUCTION
 //#define DEBUG_INITIALIZATION
@@ -56,6 +66,7 @@ const std::string TrackingFileSet::PARAMETER_TEXT[
    "UseLightTime",                  // USELIGHTTIME
    "UseRelativityCorrection",       // USE_RELATIVITY
    "UseETminusTAI",                 // USE_ETMINUSTAI
+   "AberrationCorrection",          // ABERRATION_CORRECTION
    "SimRangeModuloConstant",        // RANGE_MODULO
    "SimDopplerCountInterval",       // DOPPLER_COUNT_INTERVAL
    "SimTDRSServiceAccessList",      // TDRS_SERVICE_ACCESS
@@ -64,6 +75,9 @@ const std::string TrackingFileSet::PARAMETER_TEXT[
    "SimTDRSSmarId",                 // TDSR_SMAR_ID
    "SimTDRSDataFlag",               // TDRS_DATA_FLAG
    "DataFilters",                   // DATA_FILTERS
+   // Additions to allow exposure to the API via a GmatBase pointer
+   "ApiGetConfigCount",             // API_TRACKINGCONFIGCOUNT,
+   "ApiGetCalculated",              // API_GET_C_VALUE,
 };
 
 /// Types of the BatchEstimator parameters
@@ -76,6 +90,7 @@ const Gmat::ParameterType TrackingFileSet::PARAMETER_TYPE[
    Gmat::BOOLEAN_TYPE,              // USELIGHTTIME
    Gmat::BOOLEAN_TYPE,              // USE_RELATIVITY
    Gmat::BOOLEAN_TYPE,              // USE_ETMINUSTAI
+   Gmat::STRING_TYPE,               // ABERRATION_CORRECTION
    Gmat::REAL_TYPE,                 // RANGE_MODULO
    Gmat::REAL_TYPE,                 // DOPPLER_COUNT_INTERVAL
    Gmat::STRINGARRAY_TYPE,          // TDRS_SERVICE_ACCESS
@@ -84,6 +99,9 @@ const Gmat::ParameterType TrackingFileSet::PARAMETER_TYPE[
    Gmat::INTEGER_TYPE,              // TDRS_SMAR_ID
    Gmat::INTEGER_TYPE,              // TDRS_DATA_FLAG
    Gmat::OBJECTARRAY_TYPE,          // DATA_FILLTERS
+   // Additions to allow exposure to the API via a GmatBase pointer
+   Gmat::INTEGER_TYPE,              // API_TRACKINGCONFIGCOUNT,
+   Gmat::REAL_TYPE,                 // API_GET_C_VALUE,
 };
 
 
@@ -100,9 +118,11 @@ TrackingFileSet::TrackingFileSet(const std::string &name) :
    MeasurementModelBase      (name, "TrackingFileSet"),
    useLighttime              (true),
    solarsystem               (NULL),
-   thePropagator             (NULL),
+   thePropagators            (NULL),
+   satPropagatorMap          (NULL),
    useRelativityCorrection   (false),
    useETminusTAICorrection   (false),
+   aberrationCorrection      ("None"),
    rangeModulo               (1.0e18),
    dopplerCountInterval      (1.0),
    tdrsNode4Frequency        (2000.0),              // unit: MHz
@@ -130,32 +150,51 @@ TrackingFileSet::TrackingFileSet(const std::string &name) :
 //------------------------------------------------------------------------------
 TrackingFileSet::~TrackingFileSet()
 {
-   // remove all created measurements
-   for(UnsignedInt i = 0; i < measurements.size(); ++i)
-   {
-      if (measurements[i])
-         delete measurements[i];
-   }
-
-   // remove all data filter objects
-   for(UnsignedInt i = 0; i < dataFilters.size(); ++i)
-   {
-      if (dataFilters[i])
-         delete dataFilters[i];
-   }
-   dataFilters.clear();
-
-   // clear tracking configs
-   trackingConfigs.clear();
-
-   // clear file names and ramp table names
    filenames.clear();
    rampedTablenames.clear();
-
-   // clear TDRS service access list
    tdrsServiceAccessList.clear();
-}
+   dataFilterNames.clear();
+   mesg.clear();
 
+   // clean up std::vector<MeasurementDefinition> trackingConfigs;
+   for (Integer i = 0; i < trackingConfigs.size(); ++i)
+   {
+      for (Integer j = 0; j < trackingConfigs[i].strands.size(); ++j)
+         trackingConfigs[i].strands[j].clear();
+      trackingConfigs[i].strands.clear();
+
+      for (Integer j = 0; j < trackingConfigs[i].sensors.size(); ++j)
+         trackingConfigs[i].sensors[j].clear();
+      trackingConfigs[i].sensors.clear();
+
+      trackingConfigs[i].types.clear();
+
+   }
+   trackingConfigs.clear();
+
+   // clean up std::vector<TrackingDataAdapter*> measurements;
+   // the delete of TrackingDataADapter objects in measurements is handled by the delete of createdObjects
+   //for (Integer i = 0; i < measurements.size(); ++i)
+   //{
+   //   if (measurements[i])
+   //      delete measurements[i];            // It deletes TrackingDataAdapter objects for this TrackingFileSet
+   //}
+   measurements.clear();
+   
+   // clean up ObjectArray dataFilters;
+   // the delete of DataFilter objects is handled by the delete of createdObjects
+   dataFilters.clear();
+   
+   // clean up ObjectArray references;
+   //for (Integer i = 0; i < references.size(); ++i)
+   //{
+   //   if (references[i])
+   //      delete references[i];                            // It cannot delete these objects because they waere not created in this class
+   //}
+   references.clear();
+
+   ionosphereCache.clear();
+}
 
 //------------------------------------------------------------------------------
 // TrackingFileSet(const TrackingFileSet& tfs)
@@ -172,10 +211,12 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    rampedTablenames          (tfs.rampedTablenames),
    useLighttime              (tfs.useLighttime),
    solarsystem               (tfs.solarsystem),
-   thePropagator             (tfs.thePropagator),
+   thePropagators            (tfs.thePropagators),
+   satPropagatorMap          (tfs.satPropagatorMap),
    references                (tfs.references),
    useRelativityCorrection   (tfs.useRelativityCorrection),
    useETminusTAICorrection   (tfs.useETminusTAICorrection),
+   aberrationCorrection      (tfs.aberrationCorrection),
    rangeModulo               (tfs.rangeModulo),
    dopplerCountInterval      (tfs.dopplerCountInterval),
    tdrsServiceAccessList     (tfs.tdrsServiceAccessList),
@@ -199,7 +240,11 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    for (UnsignedInt i = 0; i < tfs.dataFilters.size(); ++i)
    {
       if (tfs.dataFilters[i])
-         dataFilters.push_back(tfs.dataFilters[i]->Clone());
+      {
+         GmatBase* cloneObj = tfs.dataFilters[i]->Clone();                                   // made changes by TUAN NGUYEN
+         dataFilters.push_back(cloneObj);                                                    // made changes by TUAN NGUYEN
+         createdObjects.push_back(cloneObj);        // It needs to bookkeeping for delete    // made changes by TUAN NGUYEN
+      }
    }
 
    isInitialized = false;
@@ -227,6 +272,7 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
    {
       MeasurementModelBase::operator=(tfs);
 
+      // clean up TrackingDataAdapter objects
       for (UnsignedInt i = 0; i < measurements.size(); ++i)
       {
          if (measurements[i])
@@ -234,6 +280,19 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
       }
       measurements.clear();
 
+      // clean up trackingConfigs
+      for (Integer i = 0; i < trackingConfigs.size(); ++i)
+      {
+         for (Integer j = 0; j < trackingConfigs[i].strands.size(); ++j)
+            trackingConfigs[i].strands[j].clear();
+         trackingConfigs[i].strands.clear();
+
+         for (Integer j = 0; j < trackingConfigs[i].sensors.size(); ++j)
+            trackingConfigs[i].sensors[j].clear();
+         trackingConfigs[i].sensors.clear();
+
+         trackingConfigs[i].types.clear();
+      }
       trackingConfigs.clear();
 
       for (UnsignedInt i = 0; i < tfs.trackingConfigs.size(); ++i)
@@ -243,10 +302,12 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
       rampedTablenames        = tfs.rampedTablenames;
       useLighttime            = tfs.useLighttime;
       solarsystem             = tfs.solarsystem;
-      thePropagator           = tfs.thePropagator;
+      thePropagators          = tfs.thePropagators;
+      satPropagatorMap        = tfs.satPropagatorMap;
       references              = tfs.references;
       useRelativityCorrection = tfs.useRelativityCorrection;
       useETminusTAICorrection = tfs.useETminusTAICorrection;
+      aberrationCorrection    = tfs.aberrationCorrection;
       rangeModulo             = tfs.rangeModulo;
       dopplerCountInterval    = tfs.dopplerCountInterval;
       tdrsServiceAccessList   = tfs.tdrsServiceAccessList;
@@ -257,18 +318,22 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
       dataFilterNames         = tfs.dataFilterNames;
 
       // Remove all dataFilters
-      for(UnsignedInt i = 0; i < dataFilters.size(); ++i)
-      {
-         if (dataFilters[i])
-            delete dataFilters[i];
-      }
+      //for(UnsignedInt i = 0; i < dataFilters.size(); ++i)           // made changes by TUAN NGUYEN
+      //{                                                             // made changes by TUAN NGUYEN
+      //   if (dataFilters[i])                                        // made changes by TUAN NGUYEN
+      //      delete dataFilters[i];                                  // made changes by TUAN NGUYEN
+      //}                                                             // made changes by TUAN NGUYEN
       dataFilters.clear();
 
       // Create clones of data filters
       for(UnsignedInt i = 0; i < tfs.dataFilters.size(); ++i)
       {
          if (tfs.dataFilters[i])
-            dataFilters.push_back(tfs.dataFilters[i]->Clone());
+         {
+            GmatBase* clonedObj = tfs.dataFilters[i]->Clone();        // made changes by TUAN NGUYEN
+            dataFilters.push_back(clonedObj);                         // made changes by TUAN NGUYEN
+            createdObjects.push_back(clonedObj);                      // made changes by TUAN NGUYEN
+         }
       }
 
       isInitialized = false;
@@ -397,6 +462,41 @@ std::string TrackingFileSet::GetParameterTypeString(const Integer id) const
    return PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
+//------------------------------------------------------------------------------
+// bool TrackingFileSet::IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Determines if a parameter field is part of the read/write scripting
+ *
+ * @param id Field ID value
+ *
+ * @return false for read/write fields, true if not part of the scripting
+ */
+//------------------------------------------------------------------------------
+bool TrackingFileSet::IsParameterReadOnly(const Integer id) const
+{
+   if ((id == API_TRACKINGCONFIGCOUNT) || (id == API_GET_C_VALUE))
+      return true;
+
+   return MeasurementModelBase::IsParameterReadOnly(id);
+}
+
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Determines if a parameter field is part of the read/write scripting
+ *
+ * @param label Script value for the field
+ *
+ * @return false for read/write fields, true if not part of the scripting
+ */
+//------------------------------------------------------------------------------
+bool TrackingFileSet::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
 
 //------------------------------------------------------------------------------
 // std::string GetIntegerParameter(const Integer id) const
@@ -417,6 +517,9 @@ Integer TrackingFileSet::GetIntegerParameter(const Integer id) const
       return tdrsSMARID;
    if (id == TDRS_DATA_FLAG)
       return tdrsDataFlag;
+
+   if (id == API_TRACKINGCONFIGCOUNT)
+      return measurements.size();
 
    return MeasurementModelBase::GetIntegerParameter(id);
 }
@@ -527,6 +630,50 @@ Real TrackingFileSet::GetRealParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the value of a Real parameter from an array of such data
+ *
+ * Used here in API calls to evaluate measurement C values
+ *
+ * @param id ID for the field
+ * @param index Index into the array.  For measurements, this identifies which
+ *              measurement needs to be calculated
+ *
+ * @return The field value
+ */
+//------------------------------------------------------------------------------
+Real TrackingFileSet::GetRealParameter(const Integer id, const Integer index) const
+{
+   if (id == API_GET_C_VALUE)
+   {
+      Real retval = -987654321.012345;
+
+      if ((index >= 0) && (index < measurements.size()))
+      {
+         try
+         {
+            MeasurementData md = measurements[index]->CalculateMeasurement();
+            if (md.isFeasible)
+               retval = md.value[0];
+            else
+               retval = 0.0;
+         }
+         catch (...)
+         {
+            retval = -1.0;
+         }
+      }
+
+      return retval;     // Temporary retval for flow
+   }
+
+   return MeasurementModelBase::GetRealParameter(id, index);
+}
+
+
+//------------------------------------------------------------------------------
 // Real SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 /**
@@ -591,6 +738,28 @@ Real TrackingFileSet::GetRealParameter(const std::string & label) const
 
 
 //------------------------------------------------------------------------------
+// Real GetRealParameter(const std::string &label, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the value of a Real parameter from an array of such data
+ *
+ * Used here in API calls to evaluate measurement C values
+ *
+ * @param label Script value for the field
+ * @param index Index into the array.  For measurements, this identifies which
+ *              measurement needs to be calculated
+ *
+ * @return The field value
+ */
+//------------------------------------------------------------------------------
+Real TrackingFileSet::GetRealParameter(const std::string &label,
+      const Integer index) const
+{
+   return GetRealParameter(GetParameterID(label), index);
+}
+
+
+//------------------------------------------------------------------------------
 // Real SetRealParameter(const std::string & label, const Real value)
 //------------------------------------------------------------------------------
 /**
@@ -624,6 +793,11 @@ Real TrackingFileSet::SetRealParameter(const std::string & label,
 //------------------------------------------------------------------------------
 std::string TrackingFileSet::GetStringParameter(const Integer id) const
 {
+   if (id == ABERRATION_CORRECTION)
+   {
+      return aberrationCorrection;
+   }
+
    return MeasurementModelBase::GetStringParameter(id);
 }
 
@@ -702,6 +876,15 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
    }
 
+   if (id == ABERRATION_CORRECTION)
+   {
+      if (value != "None" && value != "Annual" && value != "Diurnal" && value != "AnnualAndDiurnal")
+         throw MeasurementException("Error: TrackingFileSet's AberrationCorrection value must be Annual, "
+            "Diurnal, AnnualAndDiurnal, or None.  '" + value + "' is not a valid value.\n");
+      aberrationCorrection = value;
+      return true;
+   }
+   
    if (id == DATA_FILTERS)
    {
       // if it is an empty list, then set clear the list
@@ -768,6 +951,11 @@ std::string TrackingFileSet::GetStringParameter(const Integer id,
                "a ramp table file name");
    }
 
+   if (id == ABERRATION_CORRECTION)
+   {
+      return aberrationCorrection;
+   }
+   
    if (id == DATA_FILTERS)
    {
       if (((Integer)dataFilterNames.size() > index) && (index >= 0))
@@ -829,6 +1017,7 @@ bool TrackingFileSet::AddToSignalPath(std::string participantName, Integer confi
    StringArray names = GmatStringUtil::ParseName(participantName);
    trackingConfigs[configIndex].strands[strandIndex].push_back(names[0]);
    trackingConfigs[configIndex].sensors[strandIndex].push_back(names[1]);
+   names.clear();                                                         // made changes by TUAN NGUYEN
 
    return true;
 }
@@ -848,35 +1037,35 @@ bool TrackingFileSet::AddToSignalPath(std::string participantName, Integer confi
 * @return               true if no syntax error, false otherwise
 */
 //------------------------------------------------------------------------------
-std::string TrackingFileSet::CheckTypeDeprecation(const std::string datatype)
-{
-   std::map<std::string, std::string> depTypeMap;
-   TFSMagicNumbers *mn = TFSMagicNumbers::Instance();
-   depTypeMap = mn->GetDeprecatedTypeMap();
-
-   std::string typeName = datatype;
-   for (std::map<std::string, std::string>::iterator i = depTypeMap.begin();
-      i != depTypeMap.end(); ++i)
-   {
-      if ((*i).first == datatype)
-      {
-         std::stringstream ss;
-         ss << "Warning: " << GetName() << ".AddTrackingConfig type name '" 
-            << datatype << "' is deprecated and will be removed in a future release. Use '" 
-            << (*i).second << "' instead.\n";
-
-         if (find(mesg.begin(), mesg.end(), ss.str()) == mesg.end())
-         {
-            MessageInterface::ShowMessage(ss.str());
-            mesg.push_back(ss.str());
-         }
-         typeName = (*i).second;
-         break;
-      }
-   }
-
-   return typeName;
-}
+//std::string TrackingFileSet::CheckTypeDeprecation(const std::string datatype)
+//{
+//   std::map<std::string, std::string> depTypeMap;
+//   TFSMagicNumbers *mn = TFSMagicNumbers::Instance();
+//   depTypeMap = mn->GetDeprecatedTypeMap();
+//
+//   std::string typeName = datatype;
+//   for (std::map<std::string, std::string>::iterator i = depTypeMap.begin();
+//      i != depTypeMap.end(); ++i)
+//   {
+//      if ((*i).first == datatype)
+//      {
+//         std::stringstream ss;
+//         ss << "Warning: " << GetName() << ".AddTrackingConfig type name '" 
+//            << datatype << "' is deprecated and will be removed in a future release. Use '" 
+//            << (*i).second << "' instead.\n";
+//
+//         if (find(mesg.begin(), mesg.end(), ss.str()) == mesg.end())
+//         {
+//            MessageInterface::ShowMessage(ss.str());
+//            mesg.push_back(ss.str());
+//         }
+//         typeName = (*i).second;
+//         break;
+//      }
+//   }
+//
+//   return typeName;
+//}
 
 
 bool TrackingFileSet::ParseTrackingConfig(std::string value, Integer& configIndex, bool& start)
@@ -891,7 +1080,6 @@ bool TrackingFileSet::ParseTrackingConfig(std::string value, Integer& configInde
    // Get all known measurement types
    StringArray knownTypes;                                                                  // GMT-5701
    TFSMagicNumbers *mn = TFSMagicNumbers::Instance();                                       // GMT-5701
-   //knownTypes = mn->GetKnownTypes();                                                      // GMT-5701
    knownTypes = mn->GetAvailableTypes();                                                    // GMT-5701
 
    // Remove opened and closed curly brackets at the begin and end of string
@@ -920,6 +1108,10 @@ bool TrackingFileSet::ParseTrackingConfig(std::string value, Integer& configInde
             trackingConfigs[configIndex].sensors.push_back(sensorList);
             Integer strandIndex = trackingConfigs[configIndex].strands.size() - 1;
 
+            // clean up                                // made changes by TUAN NGUYEN
+            trackList.clear();                         // made changes by TUAN NGUYEN
+            sensorList.clear();                        // made changes by TUAN NGUYEN
+
             // Parse the strand
             retval = ParseStrand(strand, configIndex, strandIndex);
             if (retval == false)
@@ -941,8 +1133,8 @@ bool TrackingFileSet::ParseTrackingConfig(std::string value, Integer& configInde
          // Get data type
          datatype = value1.substr(0, pos);
          
-         // Check deprecated types
-         datatype = CheckTypeDeprecation(datatype);
+         //// Check deprecated types
+         //datatype = CheckTypeDeprecation(datatype);
 
          // Validate and add data type to data type array
          if (find(knownTypes.begin(), knownTypes.end(), datatype) == knownTypes.end())
@@ -977,8 +1169,8 @@ bool TrackingFileSet::ParseTrackingConfig(std::string value, Integer& configInde
       // Add the last data type to data type array
       datatype = value1;
 
-      // Check deplicated types
-      datatype = CheckTypeDeprecation(datatype);
+      //// Check deplicated types
+      //datatype = CheckTypeDeprecation(datatype);
 
       if (find(knownTypes.begin(), knownTypes.end(), datatype) == knownTypes.end())
       {
@@ -1016,9 +1208,16 @@ bool TrackingFileSet::ParseTrackingConfig(std::string value, Integer& configInde
       trackingConfigs[configIndex].sensors.push_back(sensorList);
       Integer strandIndex = trackingConfigs[configIndex].strands.size() - 1;
 
+      // clean up                                     // made changes by TUAN NGUYEN
+      trackList.clear();                              // made changes by TUAN NGUYEN
+      sensorList.clear();                             // made changes by TUAN NGUYEN
+
       // Parse the strand
       return ParseStrand(value, configIndex, strandIndex);
    }
+   
+   // clean up                                        // made changes by TUAN NGUYEN
+   knownTypes.clear();                                // made changes by TUAN NGUYEN
 
    return retval;
 }
@@ -1080,7 +1279,6 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
       // Get all known measurement types
       StringArray knownTypes;                                                                  // GMT-5701
       TFSMagicNumbers *mn = TFSMagicNumbers::Instance();                                       // GMT-5701
-      //knownTypes = mn->GetKnownTypes();                                                      // GMT-5701
       knownTypes = mn->GetAvailableTypes();                                                    // GMT-5701
 
 
@@ -1138,6 +1336,10 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
             Integer strandIndex = trackingConfigs[defIndex].strands.size() - 1;
             AddToSignalPath(rawName, defIndex, strandIndex);
 
+            // clean up                           // made changes by TUAN NGUYEN
+            trackList.clear();                    // made changes by TUAN NGUYEN        
+            sensorList.clear();                   // made changes by TUAN NGUYEN
+
             return true;
          }
 
@@ -1166,8 +1368,8 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
          }
 
          // case 6:
-         // Check deplicated types
-         rawName = CheckTypeDeprecation(rawName);
+         //// Check deplicated types
+         //rawName = CheckTypeDeprecation(rawName);
 
          if (find(knownTypes.begin(), knownTypes.end(), rawName) == knownTypes.end())
          {
@@ -1195,6 +1397,8 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
          }
       }
 
+      // clean up                                   // made changes by TUAN NGUYEN
+      knownTypes.clear();                           // made changes by TUAN NGUYEN
 
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("%d members in config:\n",
@@ -1993,7 +2197,9 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const UnsignedInt type,
          #ifdef DEBUG_INITIALIZATION
             MessageInterface::ShowMessage("Adding data filter %s\n", name.c_str());
          #endif
-            dataFilters.push_back(obj->Clone());                                     // It needs to clone in order to avoid error when deleting dataFilters in destructor
+            GmatBase* clonedObj = obj->Clone();               // made changes by TUAN NGUYEN
+            dataFilters.push_back(clonedObj);                 // made changes by TUAN NGUYEN
+            createdObjects.push_back(clonedObj);              // made changes by TUAN NGUYEN
             return true;
       }
    }
@@ -2041,7 +2247,14 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const UnsignedInt type,
    {
       if ((index < (Integer)dataFilters.size()) && (index >= 0))
       {
-         dataFilters[index] = obj;
+         // The delete of DataFilter objects is handled when delete createdObjects
+         //if (dataFilters[index])
+         //   delete dataFilters[index];
+
+         // The new one has to be cloned object to avoid error in destructor
+         GmatBase* clonedObj = obj->Clone();                    // made changes by TUAN NGUYEN
+         dataFilters[index] = clonedObj;                        // made changes by TUAN NGUYEN
+         createdObjects.push_back(clonedObj);                   // made changes by TUAN NGUYEN
          retval = true;
       }
    }
@@ -2131,16 +2344,101 @@ void TrackingFileSet::SetSolarSystem(SolarSystem* ss)
 /**
  * Sets the propagator pointer used for light time computations
  *
+ * This is a method provided for API users that need to configure tracking
+ * file sets without a driving Simulator or Estimator.  GMAT Application coders
+ * should not call into this method.
+ *
  * @param ps The propagator
  *
  * @todo: Generalize for multiple propagators once that support is implemented
  */
 //------------------------------------------------------------------------------
-void TrackingFileSet::SetPropagator(PropSetup* ps)
+void TrackingFileSet::SetPropagator(PropSetup *ps)
 {
-   MessageInterface::ShowMessage("Setting propagator in the tracking file set "
-         "%s to <%p>\n", instanceName.c_str(), ps);
-   thePropagator = ps;
+   if (thePropagators == NULL)
+   {
+      if (propvec.size() == 0)
+      {
+         propvec.push_back(ps);
+         // Add an empty sat list to the API prop-sat map
+         StringArray sats;
+         spm[ps->GetName()] = sats;
+      }
+      else
+         propvec[0] = ps;
+   }
+   else
+   {
+      throw MeasurementException("SetPropagator should only be called when "
+            "there is no Solver supplying propagator data");
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetPropagator(PropSetup* ps, const std::string &forSpacecraft)
+//------------------------------------------------------------------------------
+/**
+ * Sets the propagator used for light time iterations for a specific spacecraft
+ *
+ * This is a method provided for API users that need to configure tracking
+ * file sets without a driving Simulator or Estimator.  GMAT Application coders
+ * should not call into this method.
+ *
+ * @param ps The propagator
+ * @param forSpacecraft The spacecraft that uses this propagator
+ *
+ * @todo: Generalize for multiple propagators once that support is implemented
+ */
+//------------------------------------------------------------------------------
+void TrackingFileSet::SetPropagator(PropSetup *ps, const std::string &forSpacecraft)
+{
+   if (thePropagators == NULL)
+   {
+      if (find(propvec.begin(), propvec.end(), ps) == propvec.end())
+         propvec.push_back(ps);
+
+      std::string propName = ps->GetName();
+      if (spm.find(propName) == spm.end())
+      {
+         StringArray sats;
+         spm[propName] = sats;
+      }
+
+      if (forSpacecraft != "")
+      {
+         if (find(spm[propName].begin(), spm[propName].end(), forSpacecraft) == spm[propName].end())
+            spm[propName].push_back(forSpacecraft);
+      }
+   }
+   else
+   {
+      throw MeasurementException("SetPropagator should only be called when "
+            "there is no Solver supplying propagator data");
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetPropagator(PropSetup* ps)
+//------------------------------------------------------------------------------
+/**
+ * Sets the propagator pointer used for light time computations
+ *
+ * @param ps The propagator
+ *
+ * @todo: Generalize for multiple propagators once that support is implemented
+ */
+//------------------------------------------------------------------------------
+void TrackingFileSet::SetPropagators(std::vector<PropSetup*> *ps,
+      std::map<std::string, StringArray> *spMap)
+{
+   #ifdef DEBUG_PROPAGATORS
+      MessageInterface::ShowMessage("Setting propagator in the tracking file set "
+            "%s to <%p>\n", instanceName.c_str(), ps);
+   #endif
+   thePropagators = ps;
+   satPropagatorMap = spMap;
 }
 
 
@@ -2211,8 +2509,10 @@ bool TrackingFileSet::Initialize()
 
             // Build a tracking data adapter for a given tracking configuration
             TrackingDataAdapter *tda =
-                  BuildAdapter(trackingConfigs[i].strands[0],
+                  BuildAdapter(trackingConfigs[i].strands[0], 
+                        trackingConfigs[i].sensors[0],                   // made changes by TUAN NGUYEN
                         trackingConfigs[i].types[j], i);
+            createdObjects.push_back((GmatBase*)tda);                    // made changes by TUAN NGUYEN
             
             if (tda == NULL)
             {
@@ -2258,6 +2558,9 @@ bool TrackingFileSet::Initialize()
                      "tracking file set " + instanceName);
             }
          }
+
+         // clean up memory                                // made changes by TUAN NGUYEN
+         refObjects.clear();                               // made changes by TUAN NGUYEN
       }
 
       retval = true;
@@ -2266,14 +2569,19 @@ bool TrackingFileSet::Initialize()
       for (UnsignedInt i = 0; i < measurements.size(); ++i)
       {
          measurements[i]->SetSolarSystem(solarsystem);
-         if (thePropagator)
-            measurements[i]->SetPropagator(thePropagator);
+         if (thePropagators)
+            measurements[i]->SetPropagators(thePropagators, satPropagatorMap);
+         else if (propvec.size() > 0)
+            measurements[i]->SetPropagators(&propvec, &spm);
 
          // Set measurement corrections to TrackingDataAdapter
          if (useRelativityCorrection)
             measurements[i]->SetCorrection("Moyer","Relativity");
          if (useETminusTAICorrection)
             measurements[i]->SetCorrection("Moyer","ET-TAI");
+         measurements[i]->SetCorrection("Aberration", "Aberration-" + aberrationCorrection);
+
+         std::string measType = measurements[i]->GetStringParameter("MeasurementType");
 
          // Set ramped frequency tables to TrackingDataAdapter
          for (UnsignedInt k = 0; k < rampedTablenames.size(); ++k)
@@ -2281,7 +2589,6 @@ bool TrackingFileSet::Initialize()
             measurements[i]->SetStringParameter("RampTables", rampedTablenames[k], k);
          }
 
-         std::string measType = measurements[i]->GetStringParameter("MeasurementType");
          // Set range modulo constant for DSN_SeqRange
          if (measType == "DSN_SeqRange")
          {
@@ -2319,7 +2626,6 @@ bool TrackingFileSet::Initialize()
          //   measurements[i]->SetRealParameter("DopplerInterval", dopplerCountInterval);      // unit: second
          //}
 
-         //if (measType == "ECFVec")
          if (measType == "GPS_PosVec")
          {
             // set value to parameters for GPS position vector measurement
@@ -2351,6 +2657,10 @@ bool TrackingFileSet::Initialize()
             throw MeasurementException("Error: GMAT object with name '" + objName + "' was not defined in script.\n");
          }
       }
+
+      // clean up                         // made changes by TUAN NGUYEN
+      nameList.clear();                   // made changes by TUAN NGUYEN
+      objList.clear();                    // made changes by TUAN NGUYEN
 
       isInitialized = true;
    }
@@ -2384,7 +2694,6 @@ const StringArray& TrackingFileSet::GetParticipants() const
 
    static StringArray tconfigs;
    tconfigs.clear();
-   //StringArray tconfigs;
 
    for (UnsignedInt i = 0; i < trackingConfigs.size(); ++i)
       for (UnsignedInt j = 0; j < trackingConfigs[i].strands.size(); ++j)
@@ -2394,6 +2703,23 @@ const StringArray& TrackingFileSet::GetParticipants() const
                tconfigs.push_back(trackingConfigs[i].strands[j][k]);
 
    return tconfigs;
+}
+
+
+//------------------------------------------------------------------------------
+// TrackingDataAdapter* GetAdapter(Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the tracking data adapters specified in the tracking file set
+ *
+ * @return The adapters, in an std::vector
+ */
+//------------------------------------------------------------------------------
+TrackingDataAdapter *TrackingFileSet::GetAdapter(Integer index)
+{
+   if ((index < measurements.size()) && (index >= 0))
+      return measurements[index];
+   return NULL;
 }
 
 
@@ -2419,17 +2745,19 @@ std::vector<TrackingDataAdapter*> *TrackingFileSet::GetAdapters()
 /**
  * Builds a tracking data adapter for the tracking file set
  *
- * @param strand The ordered list of nodes in the strands used in the adapter
- * @param type The type of adapter needed
+ * @param strand          The ordered list of nodes in the strands used in the adapter
+ * @param sensors         The ordered list of sensors associated to spacecrafts  
+ *                           (using for GPS Point Solution)
+ * @param type            The type of adapter needed
  *
- * @return The adapter
+ * @return                The adapter
  *
  * @todo This implementation is not the final code.  The adapter should be built
  *       in a Factory so that users can add new models without changing core nav
  *       code.  In addition, it is currently coded for only one strand.
  */
 //------------------------------------------------------------------------------
-TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
+TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand, const StringArray& sensors,       // This change is for GPS Point Solution      // made changes by TUAN NGUYEN
       const std::string& type, Integer configIndex)
 {
 #ifdef DEBUG_BUILD_ADAPTER
@@ -2444,6 +2772,9 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    std::stringstream designator;
    // Counts for spacecraft and stations identified in GEODYN format
    Integer sCount = 0, tCount = 0;
+
+   // Use for signals that should omit spacecraft transponder delays
+   bool passiveMeasureModel = false;
 
    /// @todo: Check to see if this code works for multi-strand measurements.
    ///        Original code assumed a single strand, so it may need modification
@@ -2521,12 +2852,22 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    ss << "}_" << type;
    std::string adapterName = ss.str();          // tracking adapter name contains TrackingFileSet name following tracking configuration index and type 
    //MessageInterface::ShowMessage("Adapter name: <%s>\n", adapterName.c_str());
-   
+
    //if (type == "Range_KM")                                    // It is GN (or USN) Range
    if (type == "Range")                                    // It is GN (or USN) Range
    {
       //retval = new RangeAdapterKm(adapterName);
       retval = new GNRangeAdapter(adapterName);
+      if (retval)
+      {
+         retval->UsesLightTime(useLighttime);
+         retval->SetStringParameter("MeasurementType", type);
+      }
+   }
+   else if (type == "Range_Skin")
+   {
+      retval = new RangeSkinAdapter(adapterName);
+      passiveMeasureModel = true;
       if (retval)
       {
          retval->UsesLightTime(useLighttime);
@@ -2557,8 +2898,7 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       retval = new DopplerAdapter(adapterName);
       if (retval)
       {
-         //((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);
-         ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range", configIndex);
+         ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, sensors, "Range", configIndex);    // made changes by TUAN NGUYEN
          retval->UsesLightTime(useLighttime);
          retval->SetStringParameter("MeasurementType", type);
       }
@@ -2568,8 +2908,7 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       retval = new GNDopplerAdapter(adapterName);
       if (retval)
       {
-         //((GNDopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);
-         ((GNDopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range", configIndex);
+         ((GNDopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, sensors, "Range", configIndex);  // made changes by TUAN NGUYEN
          retval->UsesLightTime(useLighttime);
          retval->SetStringParameter("MeasurementType", type);
       }
@@ -2584,18 +2923,21 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
 
          // Add code to specify short strand here
          StringArray shortStrand;
+         StringArray shortSensors;                           // made changes by TUAN NGUYEN
          if (strand.size() != 5)
             throw MeasurementException("Error: Signal path does not contain 5 participants.\n");
          shortStrand.push_back(strand[0]);
          shortStrand.push_back(strand[3]);
          shortStrand.push_back(strand[4]);
+         shortSensors.push_back(sensors[0]);                 // made changes by TUAN NGUYEN
+         shortSensors.push_back(sensors[3]);                 // made changes by TUAN NGUYEN
+         shortSensors.push_back(sensors[4]);                 // made changes by TUAN NGUYEN
+         ((TDRSDopplerAdapter*)retval)->adapterES = (RangeAdapterKm*)BuildAdapter(shortStrand, shortSensors, "Range", configIndex);    // made changes by TUAN NGUYEN
+         ((TDRSDopplerAdapter*)retval)->adapterSL = (RangeAdapterKm*)BuildAdapter(strand, sensors, "Range", configIndex);              // made changes by TUAN NGUYEN
+         ((TDRSDopplerAdapter*)retval)->adapterSS = (RangeAdapterKm*)BuildAdapter(shortStrand, shortSensors, "Range", configIndex);    // made changes by TUAN NGUYEN
 
-         //((TDRSDopplerAdapter*)retval)->adapterES = (RangeAdapterKm*)BuildAdapter(shortStrand, "Range_KM", configIndex);
-         //((TDRSDopplerAdapter*)retval)->adapterSL = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);
-         //((TDRSDopplerAdapter*)retval)->adapterSS = (RangeAdapterKm*)BuildAdapter(shortStrand, "Range_KM", configIndex);
-         ((TDRSDopplerAdapter*)retval)->adapterES = (RangeAdapterKm*)BuildAdapter(shortStrand, "Range", configIndex);
-         ((TDRSDopplerAdapter*)retval)->adapterSL = (RangeAdapterKm*)BuildAdapter(strand, "Range", configIndex);
-         ((TDRSDopplerAdapter*)retval)->adapterSS = (RangeAdapterKm*)BuildAdapter(shortStrand, "Range", configIndex);
+         // clean up                             // made changes by TUAN NGUYEN
+         shortStrand.clear();                    // made changes by TUAN NGUYEN
       }
    }
    /// Calcalation of GN Doppler (km/s) is in GNRangeAdapter class. RangeRateAdapterKps is no longer in use
@@ -2624,6 +2966,79 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       {
          retval->UsesLightTime(false);                        // GPS position vector measurement does not apply light time solution
          retval->SetStringParameter("MeasurementType", type);
+         ((GPSAdapter*)retval)->SetGPSReceiverName(strand[0] + "." + sensors[0]);         // made changes by TUAN NGUYEN
+      }
+   }
+   else if (type == "Azimuth")                                // It is Azimuth angle
+   {
+      retval = new AzimuthAdapter(adapterName);
+      if (retval)
+      {
+         retval->UsesLightTime(useLighttime);
+         retval->SetStringParameter("MeasurementType", type);
+      }
+   }
+   else if (type == "Elevation")                              // It is Elevation angle
+   {
+      retval = new ElevationAdapter(adapterName);
+      if (retval)
+      {
+         retval->UsesLightTime(useLighttime);
+         retval->SetStringParameter("MeasurementType", type);
+      }
+   }
+   else if (type == "XEast")                                  // It is XEast angle
+   {
+      retval = new XEastAdapter(adapterName);
+      if (retval)
+      {
+         retval->UsesLightTime(useLighttime);
+         retval->SetStringParameter("MeasurementType", type);
+      }
+   }
+   else if (type == "YNorth")                                 // It is YNorth angle
+   {
+      retval = new YNorthAdapter(adapterName);
+      if (retval)
+      {
+         retval->UsesLightTime(useLighttime);
+         retval->SetStringParameter("MeasurementType", type);
+      }
+   }
+   else if (type == "XSouth")                                 // It is XSouth angle
+   {
+      retval = new XSouthAdapter(adapterName);
+      if (retval)
+      {
+         retval->UsesLightTime(useLighttime);
+         retval->SetStringParameter("MeasurementType", type);
+      }
+   }
+   else if (type == "YEast")                                  // It is YEast angle
+   {
+      retval = new YEastAdapter(adapterName);
+      if (retval)
+      {
+         retval->UsesLightTime(useLighttime);
+         retval->SetStringParameter("MeasurementType", type);
+      }
+   }
+   else if (type == "RightAscension")                         // It is RightAscension angle
+   {
+      retval = new RightAscAdapter(adapterName);
+      if (retval)
+      {
+         retval->UsesLightTime(useLighttime);
+         retval->SetStringParameter("MeasurementType", type);
+      }
+   }
+   else if (type == "Declination")                            // It is Declination angle
+   {
+      retval = new DeclinationAdapter(adapterName);
+      if (retval)
+      {
+         retval->UsesLightTime(useLighttime);
+         retval->SetStringParameter("MeasurementType", type);
       }
    }
    else                                                               
@@ -2639,12 +3054,13 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       if (type == "GPS_PosVec")
          mm = (MeasureModel*)(new GPSPointMeasureModel(adapterName + "Measurement"));
       else
-         mm = new MeasureModel(adapterName + "Measurement");
+         mm = new MeasureModel(adapterName + "Measurement", passiveMeasureModel);
 
       retval->SetMeasurement(mm);
       Integer magicNumber = mn->GetMagicNumber(nodelist, type);
       Real multiplier = mn->GetMNMultiplier(magicNumber);
       retval->SetModelTypeID(magicNumber, type, multiplier);
+      retval->SetIonosphereCache(&ionosphereCache);
 
       // Pass in the signal paths
       std::string theStrand;
@@ -2657,6 +3073,15 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       retval->SetStringParameter("SignalPath", theStrand);
       //MessageInterface::ShowMessage("Add signal path <%s> to %s adapter\n", theStrand.c_str(), retval->GetName().c_str());
    }
+
+   // clean up                                   // made changes by TUAN NGUYEN
+   for (Integer i = 0; i < nodelist.size(); ++i) // made changes by TUAN NGUYEN
+      nodelist[i].clear();                       // made changes by TUAN NGUYEN
+   nodelist.clear();                             // made changes by TUAN NGUYEN
+   currentStrand.clear();                        // made changes by TUAN NGUYEN
+   designators.clear();                          // made changes by TUAN NGUYEN
+   designator.clear();                           // made changes by TUAN NGUYEN
+
 
 #ifdef DEBUG_BUILD_ADAPTER
    MessageInterface::ShowMessage("TrackingFileSet::BuildAdapter(, type = <%s>, configIndex = %d)   exit\n", type.c_str(), configIndex);
@@ -2671,7 +3096,6 @@ bool TrackingFileSet::GenerateTrackingConfigs(std::vector<StringArray> strandsLi
    if (strandsList.empty())
       return true;
 
-
    // Generate a list of tracking configs
    MessageInterface::ShowMessage("Total of %d tracking configurations are generated for tracking file set %s:\n", strandsList.size(), GetName().c_str());
    for(UnsignedInt i = 0; i < strandsList.size(); ++i)
@@ -2680,12 +3104,33 @@ bool TrackingFileSet::GenerateTrackingConfigs(std::vector<StringArray> strandsLi
       md.SetDefinitionString(strandsList[i], sensorsList[i], typesList[i]);
       trackingConfigs.push_back(md);
       trackingConfigs[i].GetDefinitionString();
-      MessageInterface::ShowMessage("   Tracking config %d: %s\n", i, md.GetDefinitionString().c_str());
+      
+      std::string measType = typesList[i];
+      std::string trackingConfigLog = md.GetDefinitionString();
+      
+      // if non-DSN and ramped table supplied then it will be ignored
+      if ((measType != "DSN_SeqRange" && measType != "DSN_TCP") && rampedTablenames.size() > 0) {
+         trackingConfigLog += " (Ramp table will be ignored for this strand)";
+      }
+
+      MessageInterface::ShowMessage("   Tracking config %d: %s\n", i, trackingConfigLog.c_str());
    }
 
    isInitialized = false;
    
    return Initialize();
+}
+
+//------------------------------------------------------------------------------
+// ClearIonosphereCache()
+//------------------------------------------------------------------------------
+/**
+ * Clears the ionosphere cache
+ */
+ //------------------------------------------------------------------------------
+void TrackingFileSet::ClearIonosphereCache()
+{
+   ionosphereCache.clear();
 }
 
 
@@ -2738,14 +3183,16 @@ TrackingFileSet::MeasurementDefinition::MeasurementDefinition(
 {
    for (UnsignedInt i = 0; i < md.strands.size(); ++i)
    {
-      StringArray strand = md.strands[i];
-      strands.push_back(strand);
+      //StringArray strand = md.strands[i];              // made changes by TUAN NGUYEN
+      //strands.push_back(strand);                       // made changes by TUAN NGUYEN
+      strands.push_back(md.strands[i]);                  // made changes by TUAN NGUYEN
    }
 
    for (UnsignedInt i = 0; i < md.sensors.size(); ++i)
    {
-      StringArray sensor = md.sensors[i];
-      sensors.push_back(sensor);
+      //StringArray sensor = md.sensors[i];              // made changes by TUAN NGUYEN
+      //sensors.push_back(sensor);                       // made changes by TUAN NGUYEN
+      sensors.push_back(md.sensors[i]);                  // made changes by TUAN NGUYEN
    }
 }
 
@@ -2773,15 +3220,17 @@ TrackingFileSet::MeasurementDefinition&
       strands.clear();
       for (UnsignedInt i = 0; i < md.strands.size(); ++i)
       {
-         StringArray strand = md.strands[i];
-         strands.push_back(strand);
+         //StringArray strand = md.strands[i];              // made changes by TUAN NGUYEN
+         //strands.push_back(strand);                       // made changes by TUAN NGUYEN
+         strands.push_back(md.strands[i]);                  // made changes by TUAN NGUYEN
       }
 
       sensors.clear();
       for (UnsignedInt i = 0; i < md.sensors.size(); ++i)
       {
-         StringArray sensor = md.sensors[i];
-         strands.push_back(sensor);
+         //StringArray sensor = md.sensors[i];              // made changes by TUAN NGUYEN
+         //strands.push_back(sensor);                       // made changes by TUAN NGUYEN
+         strands.push_back(md.sensors[i]);                  // made changes by TUAN NGUYEN
       }
    }
 

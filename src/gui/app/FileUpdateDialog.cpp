@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -17,7 +17,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
 // express or implied.   See the License for the specific language
 // governing permissions and limitations under the License.
-// $Copyright$
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc.
 //

@@ -1,15 +1,25 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Spacecraft Attitude</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="Spacecraft.html" title="Spacecraft"><link rel="next" href="SpacecraftBallisticMass.html" title="Spacecraft Ballistic/Mass Properties"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Spacecraft Attitude</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Spacecraft.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="SpacecraftBallisticMass.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="SpacecraftAttitude"></a><div class="titlepage"></div><a name="N1DEDD" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Spacecraft Attitude</span></h2><p>Spacecraft Attitude &mdash; The spacecraft attitude model</p></div><div class="refsection"><a name="N1DEEE"></a><h2>Description</h2><p>GMAT models the orientation and rate of rotation of a spacecraft
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Spacecraft Attitude</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ch16.html#N1516B" title="Resources"><link rel="prev" href="Spacecraft.html" title="Spacecraft"><link rel="next" href="SpacecraftBallisticMass.html" title="Spacecraft Ballistic/Mass Properties"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Spacecraft Attitude</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Spacecraft.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="SpacecraftBallisticMass.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="SpacecraftAttitude"></a><div class="titlepage"></div><a name="N1B69B" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Spacecraft Attitude</span></h2><p>Spacecraft Attitude &mdash; The spacecraft attitude model</p></div><div class="refsection"><a name="N1B6AC"></a><h2>Description</h2><p>GMAT models the orientation and rate of rotation of a spacecraft
     using several different mathematical models. Currently, GMAT assumes that
     a <span class="guilabel">Spacecraft</span> is a rigid body. The currently supported
     attitude models are <span class="guilabel">Spinner</span>,
-    <span class="guilabel">CoordinateSystemFixed</span>, and
-    <span class="guilabel">SpiceAttitude</span>. The <span class="guilabel">Spinner</span> model
-    is a simple, inertially fixed spin axis model. The
+    <span class="guilabel">PrecessingSpinner</span>,
+    <span class="guilabel">CoordinateSystemFixed</span>,
+    <span class="guilabel">NadirPointing</span>,
+    <span class="guilabel">ThreeAxisKinematic</span>, <span class="guilabel">CCSDS-AEM</span>
+    and <span class="guilabel">SpiceAttitude</span>. The <span class="guilabel">Spinner</span>
+    model is a simple, inertially fixed spin axis model. The
+    <span class="guilabel">PrecessingSpinner</span> model adds models for precession
+    and nutation of the spin axis. The
     <span class="guilabel">CoordinateSystemFixed</span> model allows you to use any
     <span class="guilabel">CoordinateSystem</span> supported by GMAT as the attitude of
-    a <span class="guilabel">Spacecraft</span>. The <span class="guilabel">SpiceAttitude</span>
-    model allows you to define the <span class="guilabel">Spacecraft</span> attitude
-    based on SPICE attitude kernels.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a></p></div><div class="refsection"><a name="N1DF18"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AngularVelocityX</span></td><td><p>The x-component of <span class="guilabel">Spacecraft</span>
+    a <span class="guilabel">Spacecraft</span>. The <span class="guilabel">NadirPointing</span>
+    model constructs a coordinate system based on spacecraft position and
+    velocity vectors. The <span class="guilabel">SpiceAttitude</span> model allows you
+    to define the <span class="guilabel">Spacecraft</span> attitude based on SPICE
+    attitude kernels. The <span class="guilabel">ThreeAxisKinematic</span> model
+    propagates the attitude quaternion from angular velocity inputs; it was
+    originally designed for an animation application where attitude was
+    propagated every 25 msec.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a></p></div><div class="refsection"><a name="N1B6EB"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AngularVelocityX</span></td><td><p>The x-component of <span class="guilabel">Spacecraft</span>
             body angular velocity expressed in the inertial frame.
             <span class="guilabel">AngularVelocityX</span> is used for the following
             Attitude models: <span class="guilabel">Spinner</span>.</p>
@@ -201,12 +211,13 @@
             of this type on the <span class="guilabel">Spacecraft</span>.</p>
             <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Array of .tsc file names</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>empty array</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SpinRate</span></td><td><p>The attitude spin rate. <span class="guilabel">SpinRate</span>
             is used for the following attitude models:
-            <span class="guilabel">PrecessingSpinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>10</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg./s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1EA40"></a><h2>Remarks</h2><div class="refsection"><a name="N1EA43"></a><h3>Overview of Availble Attitude Models</h3><p>GMAT supports many attitude models including the following:
-      <span class="guilabel">CoordinateSystemFixed,</span>
+            <span class="guilabel">PrecessingSpinner</span>.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; Real &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>10</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>deg./s</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1C213"></a><h2>Remarks</h2><div class="refsection"><a name="N1C216"></a><h3>Overview of Available Attitude Models</h3><p>GMAT supports many attitude models including the following:
+      <span class="guilabel">CoordinateSystemFixed</span>,
       <span class="guilabel">SpiceAttitude</span>, <span class="guilabel">NadirPointing</span>,
       <span class="guilabel">CCSDS-AEM</span>, <span class="guilabel">PrecessingSpinner</span>,
-      and <span class="guilabel">Spinner</span> (we recommend using thew new
-      PrecessingSpinner model instead of Spinner). Different attitude models
+      <span class="guilabel">ThreeAxisKinematic</span> and <span class="guilabel">Spinner</span>
+      (we recommend using the new <span class="guilabel">PrecessingSpinner</span> model
+      instead of <span class="guilabel">Spinner</span>). Different attitude models
       require different information to fully configure the model. For example,
       when you select the <span class="guilabel">CoordinateSystemFixed</span> model,
       the attitude and body rates are entirely determined by the
@@ -214,7 +225,7 @@
       angular velocity components are not required and have no effect. The
       reference tables above, and the detailed examples for each model type
       below, describe which fields are used for each model.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>GMAT attitude parameterizations such as the DCM rotate from
-        inertial to body.</p></div></div><div class="refsection"><a name="N1EA63"></a><h3>Overview of State Representations</h3><div class="refsection"><a name="N1EA66"></a><h4>Quaternion</h4><p>The quaternion is a four element, non-singular attitude
+        inertial to body.</p></div></div><div class="refsection"><a name="N1C23F"></a><h3>Overview of State Representations</h3><div class="refsection"><a name="N1C242"></a><h4>Quaternion</h4><p>The quaternion is a four element, non-singular attitude
         representation. GMAT&rsquo;s quaternion representation includes the three
         &ldquo;vector&rdquo; components as the first three elements in the quaternion and
         the &ldquo;rotation&rdquo; component as the last element in the quaternion. In
@@ -226,7 +237,7 @@ aSpacecraft.Q4 = 0.5        </code>        </pre><p>or simultaneously set the en
 </pre><p>GMAT normalizes the quaternion before use. In command mode, you
         must enter the entire quaternion as a single vector to avoid scaling
         components of the quaternion before the entire quaternion is
-        set.</p></div><div class="refsection"><a name="N1EA77"></a><h4>DirectionCosineMatrix (DCM)</h4><p>The Direction Cosine Matrix is a 3x3 array that contains cosines
+        set.</p></div><div class="refsection"><a name="N1C253"></a><h4>DirectionCosineMatrix (DCM)</h4><p>The Direction Cosine Matrix is a 3x3 array that contains cosines
         of the angles that rotate from the x, y, and z inertial axes to the x,
         y, and z body axes. The direction cosine matrix must be ortho-normal
         and you define the DCM element by element. Here is an example that
@@ -238,7 +249,7 @@ aSpacecraft.DCM22 = 1
 aSpacecraft.DCM23 = 0
 aSpacecraft.DCM31 = 0
 aSpacecraft.DCM32 = 0
-aSpacecraft.DCM33 = 1</code>        </pre></div><div class="refsection"><a name="N1EA80"></a><h4>Euler Angles</h4><p>Euler angles are a sequence of three rotations about coordinate
+aSpacecraft.DCM33 = 1</code>        </pre></div><div class="refsection"><a name="N1C25C"></a><h4>Euler Angles</h4><p>Euler angles are a sequence of three rotations about coordinate
         axes to transform from one system to another system. GMAT supports all
         12 Euler angle sequences. Here is an example setting attitude using a
         &ldquo;321&rdquo; sequence.</p><pre class="programlisting"><code class="code">aSpacecraft.EulerAngleSequence = '321'
@@ -246,23 +257,23 @@ aSpacecraft.EulerAngle1 = 45
 aSpacecraft.EulerAngle2 = 45
 aSpacecraft.EulerAngle3 = 90</code>      </pre><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>Caution: The Euler angles have singularities that can cause
           issues during modeling. We recommend using other representations for
-          this reason.</p></div></div><div class="refsection"><a name="N1EA8C"></a><h4>Modified Rogriques parameters</h4><p>The modified Rodgriques parameters are a modification of the
-        Euer Axis/Angle representation. Specifically, the MRP vector is equal
+          this reason.</p></div></div><div class="refsection"><a name="N1C268"></a><h4>Modified Rodrigues parameters</h4><p>The modified Rodrigues parameters are a modification of the
+        Euler Axis/Angle representation. Specifically, the MRP vector is equal
         to nhat* tan(Euler Angle/4) where nhat is the unitized Euler
         Axis.</p><pre class="programlisting"><code class="code">aSpacecraft.MRP1 = 0.2928932188134525
 aSpacecraft.MRP2 = 0.2928932188134524
-aSpacecraft.MRP3 = 1.149673585146546e-017</code></pre></div><div class="refsection"><a name="N1EA94"></a><h4>Euler Angles Rates</h4><p>The Euler angle rates are the first time derivative of the Euler
+aSpacecraft.MRP3 = 1.149673585146546e-017</code></pre></div><div class="refsection"><a name="N1C270"></a><h4>Euler Angles Rates</h4><p>The Euler angle rates are the first time derivative of the Euler
         angles and can be used to define the body rates. Euler angle rates use
         the same sequence as the EulerAngles. The example below shows how to
         define the Euler angle rates for a spacecraft.</p><pre class="programlisting"><code class="code">aSpacecraft.EulerAngleSequence = '321'
 aSpacecraft.EulerAngleRate1 = -5
 aSpacecraft.EulerAngleRate2 = 20
-aSpacecraft.EulerAngleRate3 = 30      </code></pre></div><div class="refsection"><a name="N1EA9C"></a><h4>Angular Velocity</h4><p>The angular velocity is the angular velocity of the spacecraft
+aSpacecraft.EulerAngleRate3 = 30      </code></pre></div><div class="refsection"><a name="N1C278"></a><h4>Angular Velocity</h4><p>The angular velocity is the angular velocity of the spacecraft
         body with respect to the inertial frame, expressed in the inertial
         frame. The example below shows how to define the angular velocity for
         a spacecraft.</p><pre class="programlisting"><code class="code">aSpacecraft.AngularVelocityX = 5;
 aSpacecraft.AngularVelocityY = 10;
-aSpacecraft.AngularVelocityZ = 5;</code></pre></div></div><div class="refsection"><a name="N1EAA4"></a><h3>Coordinate System Fixed Attitude Model</h3><p>The <span class="guilabel">CoordinateSystemFixed</span> model allows you to
+aSpacecraft.AngularVelocityZ = 5;</code></pre></div></div><div class="refsection"><a name="N1C280"></a><h3>Coordinate System Fixed Attitude Model</h3><p>The <span class="guilabel">CoordinateSystemFixed</span> model allows you to
       use any existing <span class="guilabel">CoordinateSystem</span> to define the
       attitude of a <span class="guilabel">Spacecraft</span>. The attitude uses the
       axes defined on the <span class="guilabel">CoordinateSystem</span> to compute the
@@ -302,7 +313,7 @@ OrbitView1.ViewPointVector    = [ 30000 0 0 ]
 
 BeginMissionSequence
 
-Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0}</code></pre></div><div class="refsection"><a name="N1EADB"></a><h3>Spinner Attitude Model</h3><p>The <span class="guilabel">Spinner</span> attitude model propagates the
+Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0}</code></pre></div><div class="refsection"><a name="N1C2B7"></a><h3>Spinner Attitude Model</h3><p>The <span class="guilabel">Spinner</span> attitude model propagates the
       attitude assuming the spin axis direction is fixed in inertial space. We
       recommend using the newer PrecessingSpinner model instead of Spinner,
       and this model is maintained primarily for backwards compatibility. You
@@ -342,7 +353,7 @@ OrbitView1.ViewPointVector    = [ 30000 0 0 ]
 
 BeginMissionSequence
 
-Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0}</code></pre></div><div class="refsection"><a name="N1EB00"></a><h3>SPK Attitude Model</h3><p>The <span class="guilabel">SpiceAttitude</span> model propagates the
+Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0}</code></pre></div><div class="refsection"><a name="N1C2DC"></a><h3>SPK Attitude Model</h3><p>The <span class="guilabel">SpiceAttitude</span> model propagates the
       attitude using attitude SPICE kernels. To configure a
       <span class="guilabel">Spacecraft</span> to use SPICE kernels select
       <span class="guilabel">SpiceAttitude</span> for the <span class="guilabel">Attitude</span>
@@ -750,4 +761,39 @@ aProp.MaxStep = 10
 BeginMissionSequence
 
 Propagate aProp(aSat) {aSat.ElapsedSecs = 12000.0}
-</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Spacecraft.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="SpacecraftBallisticMass.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Spacecraft&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Spacecraft Ballistic/Mass Properties</td></tr></table></div></body></html>
+</code></pre></div><div class="refsection"><a name="AttitudeThreeAxisKinematic"></a><h3>Three Axis Kinematic Model</h3><p>The <span class="guilabel">ThreeAxisKinematic</span> attitude model
+      propagates the attitude state using a function of the attitude
+      quaternion and the angular velocity. It does not include any modeling of
+      torques. The quaternion kinematic algorithm was used for onboard
+      attitude computations before rad hard processors were powerful enough to
+      support numeric integration. Mathematically it produces the same result
+      as the <span class="guilabel">Spinner</span> model; operationally there is no
+      assumption that the spin axis is fixed &ndash; its first use was for a Lunar
+      Catalyst project in which a new angular velocity would be read from
+      telemetry every second. The initial attitude can be specified with any
+      of DCM, quaternion, Euler angles, or Modified Rodrigues parameters; the
+      initial rates can be specified with either angular velocity or Euler
+      rates. When working with Euler rates, the rotation sequence is
+      determined by the <span class="guilabel">EulerAngleSequence</span> field.</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>Caution: If you are working in the script, setting the
+        <span class="guilabel">CoordinateSystem</span> for the
+        <span class="guilabel">ThreeAxisKinematic</span> attitude model has no
+        effect.</p></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftAttitude_GUI_Three_Axis_Kinematic.png" align="middle" height="525"></td></tr></table></div></div><p>The example below configures a spacecraft to roll at 3
+      degrees/second.</p><pre class="programlisting"><code class="code">Create Spacecraft aSat;
+aSat.Attitude = ThreeAxisKinematic;
+
+Create ForceModel Propagator1_ForceModel;
+Create Propagator Propagator1;
+Propagator1.FM = Propagator1_ForceModel;
+
+aSat.Q1 = 0.0
+aSat.Q2 = 0.0
+aSat.Q3 = 0.0
+aSat.Q4 = 1.0;
+GMAT DefaultSC.AngularVelocityX = 3; % deg/sec
+GMAT DefaultSC.AngularVelocityY = 0
+GMAT DefaultSC.AngularVelocityZ = 0;
+
+BeginMissionSequence
+
+Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0}
+</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Spacecraft.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ch16.html#N1516B">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="SpacecraftBallisticMass.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Spacecraft&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Spacecraft Ballistic/Mass Properties</td></tr></table></div></body></html>

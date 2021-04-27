@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -880,7 +880,7 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurementAtOffset(
          // accumulate all range corrections for signal path ith
          for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
          {
-            if (current->useCorrection[j])
+            if (current->useCorrection[j] && current->correctionTypes[j] == "Range")
                values[0] += current->corrections[j];
          }// for j loop
 

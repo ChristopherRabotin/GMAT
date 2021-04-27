@@ -1,18 +1,20 @@
 #!/bin/bash
 # Sets up the environment for GMAT, then runs the executable.
 #
-#  Copyright (c) 2002-2018 United States Government as represented by the
+#  Copyright (c) 2002 - 2020 United States Government as represented by the
 #  Administrator of The National Aeronautics and Space Administration.
 #  All Other Rights Reserved.
 #
-# This assumes that the user has set the MATLAB_APP_PATH in her/his
-# MATLABConfigure.txt file and that this file resides in the
-# bin folder where the GMAT.app bundle resides.
-# MATLAB_APP_PATH should point to the MATLAB app in the directory where MATLAB
-# has been installed, e.g.
-#     /Applications/MATLAB_R2017b.app
+# This assumes that the user has set the following MATLAB_APP_PATH in her/his
+# MacConfigure.txt file and that this MacConfigure.txt file resides in the
+# bin folder where the GMAT.app bundle resides:
+# MATLAB_APP_PATH - should point to the MATLAB app in the directory where MATLAB
+#                   has been installed, e.g. /Applications/MATLAB_R2019b.app
+# SNOPT_LIB_PATH  - should point to where you have installed your snopt dylibs
+# GFORTRAN_LIB_PATH  - should point to where you have your gfortran installation
+#
 # NOTE that currently, we are running 64-bit GUI versions of GMAT and therefore,
-# we need to use 64-bit version(s) of MATLAB here.
+# we need to use 64-bit version(s) of all libraries here.
 #
 # To debug errors, set the debugit flag to 'yesdoit'.  By default, debug is
 # written to a file inside the bundle in the directory from which this script is
@@ -47,8 +49,8 @@ else
    echo "CANNOT find GMAT executable!!!" >> "$debugfile"
    exit 1
 fi
-# Where is the MATLAB config file?  It has to be in the bin directory for now
-FILE="$here/../../../MATLABConfigure.txt"
+# Where is the Mac config file?  It has to be in the bin directory for now
+FILE="$here/../../../MacConfigure.txt"
 
 # begin debugging
 if [ "$debugit" = 'yesdoit' ]
@@ -70,21 +72,48 @@ fi
 # turn ON extended globbing
 shopt -s extglob
 
-keyword="MATLAB_APP_PATH" 
-keylen=${#keyword}
+keywordmatlab="MATLAB_APP_PATH"
+keylenmatlab=${#keywordmatlab}
 
-# read until we find the matlab location keyword
+keywordsnopt="SNOPT_LIB_PATH"
+keylensnopt=${#keywordsnopt}
+
+keywordfortran="GFORTRAN_LIB_PATH"
+keylenfortran=${#keywordfortran}
+
+# read until we find the location keyword(s)
 # then strip off leading blanks, the equal sign,
 # leading blanks (again), then trailing blanks
 while read line
    do
+      # skip commented-out lines
+      if [[ ${line:0:1} == "#" ]]; then continue
+      fi
       case "$line" in
-      ${keyword}*)
-         value=${line:$keylen}
-         matlabloc=${value##+([[:space:]])}
+      ${keywordmatlab}*)
+         valuematlab=${line:$keylenmatlab}
+         matlabloc=${valuematlab##+([[:space:]])}
          matlabloc=${matlabloc#=}
          matlabloc=${matlabloc##+([[:space:]])}
          matlabloc=${matlabloc%%+([[:space:]])}
+      ;;
+      esac
+      case "$line" in
+      ${keywordsnopt}*)
+         valuesnopt=${line:$keylensnopt}
+         snoptloc=${valuesnopt##+([[:space:]])}
+         snoptloc=${snoptloc#=}
+         snoptloc=${snoptloc##+([[:space:]])}
+         snoptloc=${snoptloc%%+([[:space:]])}
+      ;;
+      esac
+      case "$line" in
+      ${keywordfortran}*)
+         valuefortran=${line:$keylenfortran}
+         fortranloc=${valuefortran##+([[:space:]])}
+         fortranloc=${fortranloc#=}
+         fortranloc=${fortranloc##+([[:space:]])}
+         fortranloc=${fortranloc%%+([[:space:]])}
       ;;
       esac
    done < "$FILE"
@@ -92,8 +121,9 @@ while read line
 # begin debugging
 if [ "$debugit" = 'yesdoit' ]
 then
-   echo "value is |$value|"  >> "$debugfile"
-   echo "setting matlab location to |$matlabloc|"  >> "$debugfile"
+   echo "valuematlab is |$valuematlab|"  >> "$debugfile"
+   echo "valuesnopt is |$valuesnopt|"  >> "$debugfile"
+   echo "valuefortran is |$valuefortran|"  >> "$debugfile"
 fi
 # end debugging
 
@@ -101,10 +131,48 @@ if [ -n "$matlabloc" ]
 then
    if [ -d "$matlabloc" ]
    then
+      # begin debugging
+      if [ "$debugit" = 'yesdoit' ]
+      then
+         echo "setting matlab location to |$matlabloc|"  >> "$debugfile"
+      fi
+      # end debugging
       export DYLD_LIBRARY_PATH="$matlabloc/bin/maci64:$matlabloc/sys/os/maci64:$DYLD_LIBRARY_PATH"
       export PATH="$matlabloc/bin:$PATH"
    fi
 fi
+
+if [ -n "$snoptloc" ]
+then
+   if [ -d "$snoptloc" ]
+   then
+      # begin debugging
+      if [ "$debugit" = 'yesdoit' ]
+      then
+         echo "setting snopt location to |$snoptloc|"  >> "$debugfile"
+      fi
+      # end debugging
+      export DYLD_LIBRARY_PATH="$snoptloc:$DYLD_LIBRARY_PATH"
+   fi
+fi
+
+
+if [ -n "$fortranloc" ]
+then
+   if [ -d "$fortranloc" ]
+   then
+      # begin debugging
+      if [ "$debugit" = 'yesdoit' ]
+      then
+         echo "setting gfortran location to |$fortranloc|"  >> "$debugfile"
+      fi
+      # end debugging
+      export DYLD_LIBRARY_PATH="$fortranloc:$DYLD_LIBRARY_PATH"
+   fi
+fi
+
+# we need to point to the correct version of gfortran
+# export DYLD_LIBRARY_PATH="$here/../Frameworks:$DYLD_LIBRARY_PATH"
 
 
 # turn OFF extended globbing

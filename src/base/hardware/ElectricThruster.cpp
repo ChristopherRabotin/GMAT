@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -816,15 +816,23 @@ bool ElectricThruster::CalculateThrustAndIsp()
       if (tanks.empty())
          throw HardwareException("ElectricThruster \"" + instanceName +
                                  "\" does not have a fuel tank");
+      impulse = isp;
 
-      impulse = isp;   // CORRECT?
       if (thrustModel == "ThrustMassPolynomial")
       {
          thrust = ((thrustCoeff[4] * powerToUse4) +
                    (thrustCoeff[3] * powerToUse3) +
                    (thrustCoeff[2] * powerToUse2) +
                    (thrustCoeff[1] * powerToUse)  +
-                   thrustCoeff[0]) / 1.0e3; // 1.0e6;
+                   thrustCoeff[0]) / 1.0e3;
+
+         Real mdot = ((massFlowCoeff[4] * powerToUse4) +
+                      (massFlowCoeff[3] * powerToUse3) +
+                      (massFlowCoeff[2] * powerToUse2) +
+                      (massFlowCoeff[1] * powerToUse) +
+                       massFlowCoeff[0]) / 1.0e6;
+
+         impulse = thrust / (mdot * gravityAccel);
       }
       else if (thrustModel == "ConstantThrustAndIsp")
       {
@@ -841,7 +849,7 @@ bool ElectricThruster::CalculateThrustAndIsp()
    // Value of appliedThrustMag will be returned when ThrustMagnitude Parameter
    // gets evaluated
    appliedThrustMag = thrustScaleFactor * dutyCycle * thrust;
-   
+
    return true;
 }
 

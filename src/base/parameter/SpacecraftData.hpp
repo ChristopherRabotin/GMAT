@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -51,7 +51,7 @@ public:
    virtual bool ValidateRefObjects(GmatBase *param);
    virtual const std::string* GetValidObjectList() const;
    
-   const static Real BALLISTIC_REAL_UNDEFINED;
+   static const Real BALLISTIC_REAL_UNDEFINED;
    
 protected:
 
@@ -69,6 +69,8 @@ protected:
       DRAG_AREA,
       SRP_AREA,
       TOTAL_MASS,
+      SPAD_DRAG_COEFF,                        // made changes by TUAN NGUYEN
+      SPAD_REFLECT_COEFF,                     // made changes by TUAN NGUYEN
       
       // for Spacecraft owned FuelTank
       FUEL_MASS,

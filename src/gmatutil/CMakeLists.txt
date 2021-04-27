@@ -17,7 +17,6 @@ SET(TargetName GmatUtil)
 
 # Add preprocessor definitions
 ADD_DEFINITIONS("-D_DYNAMICLINK")
-ADD_DEFINITIONS("-DGMATUTIL_EXPORTS")
 ADD_DEFINITIONS("-DEXP_STL")
 
 # ====================================================================
@@ -52,6 +51,7 @@ SET(UTIL_SRCS
     util/CCSDSOEMWriter.cpp
     util/Code500EphemerisFile.cpp
     util/ColorDatabase.cpp
+    util/CubicSpline.cpp
     util/Date.cpp
     util/DateUtil.cpp
     util/ElapsedTime.cpp
@@ -69,6 +69,8 @@ SET(UTIL_SRCS
     util/MemoryTracker.cpp
     util/MessageInterface.cpp
     util/MessageReceiver.cpp
+    util/NumericJacobian.cpp
+    util/NPlateHistoryFileReader.cpp
     util/RandomNumber.cpp
     util/RealUtilities.cpp
     util/RgbColor.cpp
@@ -122,9 +124,13 @@ FILE(GLOB_RECURSE UTIL_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
 
 # Create GmatUtil as a shared library
 ADD_LIBRARY(${TargetName} SHARED ${UTIL_SRCS} ${UTIL_HEADERS})
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEFINE_SYMBOL "GMATUTIL_EXPORTS")
 
 # Add necessary include directories
 TARGET_INCLUDE_DIRECTORIES(${TargetName} PUBLIC ${UTIL_DIRS})
+IF(GMAT_USE_BOOST_VARIANT)
+  TARGET_INCLUDE_DIRECTORIES(${TargetName} PUBLIC ${Boost_INCLUDE_DIR})
+ENDIF()
 
 # Library name should start with "lib"
 # This is always true for Mac/Linux, but needs to be specified for Windows

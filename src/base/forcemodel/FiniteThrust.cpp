@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -64,6 +64,7 @@ FiniteThrust::FiniteThrust(const std::string &name) :
 {
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
    objectTypeNames.push_back("FiniteThrust");
+   isConservative = false;
 }
 
 
@@ -716,8 +717,9 @@ bool FiniteThrust::GetDerivatives(Real * state, Real dt, Integer order,
             for (std::vector <FiniteBurn*>::iterator fb = burns.begin();
                  fb != burns.end(); ++fb)
             {
+               // Setting the spacecraft here makes the setting too late for parameters evaluated at maneuver start
                (*fb)->SetSpacecraftToManeuver((Spacecraft*)sat);
-               Real now = epoch + dt / GmatTimeConstants::SECS_PER_DAY;
+               Real now = epoch + (elapsedTime + dt) / GmatTimeConstants::SECS_PER_DAY;
                if ((*fb)->Fire(burnData, now)) 
                {
                   #ifdef DEBUG_FINITETHRUST_EXE

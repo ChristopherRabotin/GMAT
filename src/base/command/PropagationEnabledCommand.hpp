@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -87,6 +87,13 @@ protected:
    std::vector<StringArray>      propObjectNames;
    /// The objects that are propagated; one PropObjectArray per PropSetup
    std::vector<PropObjectArray*> propObjects;
+
+   /// Flag to indicate that it needs to reset spacecrafts' STM to identity matrix.                                     // made changes by TUAN NGUYEN
+   //  Spacecrafts' STM needs to reset when running RunSimulation or RunEstimation commands.                            // made changes by TUAN NGUYEN
+   //  But for Propagation command, it does not need.                                                                   // made changes by TUAN NGUYEN
+   //@todo: In Propate command, we should have option to reset or keep the current value of STM in the script syntax    // made changes by TUAN NGUYEN
+   bool needToResetSTM;                                                                                                 // made changes by TUAN NGUYEN
+
    /// The complete set of spacecraft and formations that are propagated
    ObjectArray                   sats;
 
@@ -140,7 +147,7 @@ protected:
    /// Flag used to turn off publishing during event location
    bool                 publishOnStep;
 
-   bool                 PrepareToPropagate();
+   bool                 PrepareToPropagate(bool preparePublisher = true);
    bool                 AssemblePropagators();
    bool                 Step(Real dt);
    virtual bool         TakeAStep(Real propStep = 0.0);

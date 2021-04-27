@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -40,6 +40,7 @@
 #include "ObservationData.hpp"
 ///// TBD: Determine if there is a more generic way to add these
 #include "RampTableData.hpp"
+#include "TimeSystemConverter.hpp"   // for the TimeSystemConverter singleton
 
 
 /**
@@ -95,6 +96,9 @@ protected:
    bool              openForRead;
    /// Flag used to indicate of the stream should open for writing
    bool              openForWrite;
+
+   /// Time converter singleton
+   TimeSystemConverter *theTimeConverter;
 };
 
 #endif /* ObType_hpp */

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -65,8 +65,12 @@
 #include "PropagationStateManager.hpp"
 #include "TimeTypes.hpp"
 
+#include "SolarRadiationPressure.hpp"      // made changes by TUAN NGUYEN
+#include "DragForce.hpp"                   // made changes by TUAN NGUYEN
+
 #include "GravityField.hpp"
 #include "FormationInterface.hpp"
+#include "StringUtil.hpp"
 
 #include <string.h> 
 #include <algorithm>    // for find()
@@ -101,6 +105,10 @@
 //#define DEBUG_NAN_CONDITIONS
 //#define DEBUG_AMATRIX
 //#define DEBUG_RANGECHECK_TOGGLES
+//#define DEBUG_TIME_ADDITION
+//#define DEBUG_MASS_JACOBIAN
+//#define DEBUG_TIME_JACOBIAN
+
 
  
 //#define DUMP_ERROR_ESTIMATE_DATA
@@ -284,14 +292,17 @@ ODEModel::ODEModel(const std::string &modelName, const std::string typeName) :
    warnedOnceForParameters (false),
    j2kBodyName       ("Earth"),
    j2kBody           (NULL),
-   transientCount    (0)
+   transientCount    (0),
+   finiteDifferencingTimeJac (false),
+   nonAnalyticTimeDerivs (NULL)
 {
-#ifdef DEBUG_ODEMODEL
-	MessageInterface::ShowMessage("ODEModel default construction <'%s',%p>\n", GetName().c_str(), this);
-#endif
+   #ifdef DEBUG_ODEMODEL
+      MessageInterface::ShowMessage("ODEModel default construction <'%s',%p>\n",
+            GetName().c_str(), this);
+   #endif
    satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
-   satIds[5] = satIds[6] = -1;
-   
+   //satIds[5] = satIds[6] = -1;                                   // made changes by TUAN NGUYEN
+   satIds[5] = satIds[6] = satIds[7] = satIds[8] = -1;             // made changes by TUAN NGUYEN
    objectTypes.push_back(Gmat::ODE_MODEL);
    objectTypeNames.push_back("ODEModel");
    objectTypeNames.push_back("ForceModel"); // For backwards compatibility
@@ -328,6 +339,9 @@ ODEModel::~ODEModel()
    
 //   if (previousState)
 //      delete [] previousState;
+
+   if (nonAnalyticTimeDerivs)
+      delete [] nonAnalyticTimeDerivs;
    
    // Delete the owned objects
    ClearForceList();
@@ -345,6 +359,7 @@ ODEModel::~ODEModel()
                                  forceList.size());
    #endif
 }
+
 
 //------------------------------------------------------------------------------
 // ODEModel(const ODEModel& fdf)
@@ -382,14 +397,17 @@ ODEModel::ODEModel(const ODEModel& fdf) :
    /// @note: Since the next three are global objects or reset by the Sandbox, 
    ///assignment works
    j2kBody                    (fdf.j2kBody),
-   transientCount             (fdf.transientCount)
+   transientCount             (fdf.transientCount),
+   finiteDifferencingTimeJac  (fdf.finiteDifferencingTimeJac),
+   nonAnalyticTimeDerivs      (NULL)
 {
    #ifdef DEBUG_ODEMODEL
    MessageInterface::ShowMessage("ODEModel copy constructor (from <'%s',%p> to <'%s',%p>) entered\n", fdf.GetName().c_str(), &fdf, GetName().c_str(), &(*this));
    #endif
    
    satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
-   satIds[5] = satIds[6] = -1;
+   //satIds[5] = satIds[6] = -1;                                    // made changes by TUAN NGUYEN
+   satIds[5] = satIds[6] = satIds[7] = satIds[8] = -1;              // made changes by TUAN NGUYEN
 
    numForces           = fdf.numForces;
    stateSize           = fdf.stateSize;
@@ -403,7 +421,10 @@ ODEModel::ODEModel(const ODEModel& fdf) :
    parameterCount = ODEModelParamCount;
    
 //   spacecraft.clear();
-   forceList.clear();
+
+   // forceList is always an empty list in copy contrustor       // made changes by TUAN NGUYEN
+   // forceList.clear();                                         // made changes by TUAN NGUYEN
+
    internalCoordinateSystems.clear();
    muMap.clear();
    
@@ -424,6 +445,19 @@ ODEModel::ODEModel(const ODEModel& fdf) :
          (newPm, newPm->GetName(), "ODEModel::ODEModel(copy)",
           "*newPm = (*pm)->Clone()", this);
       #endif
+   }
+
+   nomDerivs.clear();
+   for (Integer i = 0; i < fdf.nomDerivs.size(); ++i)
+      nomDerivs.push_back(fdf.nomDerivs.at(i));
+
+   if (fdf.nonAnalyticTimeDerivs != NULL) 
+   {
+      nonAnalyticTimeDerivs = new Real[dimension];
+      if (nonAnalyticTimeDerivs != NULL)
+         memcpy(nonAnalyticTimeDerivs, fdf.nonAnalyticTimeDerivs, dimension * sizeof(Real));
+      else
+         isInitialized = false;
    }
 
    #ifdef DEBUG_ODEMODEL
@@ -456,7 +490,8 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
    PhysicalModel::operator=(fdf);
 
    satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
-   satIds[5] = satIds[6] = -1;
+   //satIds[5] = satIds[6] = -1;                                    // made changes by TUAN NGUYEN
+   satIds[5] = satIds[6] = satIds[7] = satIds[8] = -1;              // made changes by TUAN NGUYEN
    
    state = NULL;
    satCount = 0;
@@ -497,11 +532,20 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
    forceMembersNotInitialized = fdf.forceMembersNotInitialized;
    transientCount      = fdf.transientCount;
 
+   finiteDifferencingTimeJac = fdf.finiteDifferencingTimeJac;
+
    // Clear owned objects before clone
    ClearForceList();
    ClearInternalCoordinateSystems();
    
 //   spacecraft.clear();
+
+   // Clean up forceList
+   for (Integer i = 0; i < forceList.size(); ++i)              // made changes by TUAN NGUYEN
+   {                                                           // made changes by TUAN NGUYEN
+      if (forceList[i] && forceList[i]->AllowODEDelete())      // made changes by TUAN NGUYEN
+         delete forceList[i];                                  // made changes by TUAN NGUYEN
+   }                                                           // made changes by TUAN NGUYEN
    forceList.clear();
    
    // Copy the forces.  May not work -- the copy constructors need to be checked
@@ -518,6 +562,34 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
    }
    muMap = fdf.muMap;
    
+   nomDerivs.clear();
+   for (Integer i = 0; i < fdf.nomDerivs.size(); ++i)
+      nomDerivs.push_back(fdf.nomDerivs.at(i));
+
+   if (fdf.nonAnalyticTimeDerivs)
+   {
+      if (nonAnalyticTimeDerivs)
+      {
+         delete[] nonAnalyticTimeDerivs;
+         nonAnalyticTimeDerivs = NULL;
+      }
+
+      nonAnalyticTimeDerivs = new Real[dimension];
+
+      if (nonAnalyticTimeDerivs != NULL)
+         memcpy(nonAnalyticTimeDerivs, fdf.nonAnalyticTimeDerivs, dimension * sizeof(Real));
+      else
+         isInitialized = false;
+   }
+   else
+   {
+      if (nonAnalyticTimeDerivs)
+      {
+         delete[] nonAnalyticTimeDerivs;
+         nonAnalyticTimeDerivs = NULL;
+      }
+   }
+
    return *this;
 }
 
@@ -577,8 +649,6 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
    
    // Handle the name issues
    std::string pmType = pPhysicalModel->GetTypeName();
-   if (pmType == "DragForce")
-      pPhysicalModel->SetName("Drag");
 
    std::string forceBody = pPhysicalModel->GetBodyName();
 
@@ -679,7 +749,9 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
                   pPhysicalModel->SetRealParameter(toBeReplaced->GetParameterID("MagneticIndex"),
                         toBeReplaced->GetRealParameter(toBeReplaced->GetParameterID("MagneticIndex")));
                }
-               delete toBeReplaced;
+
+               if (toBeReplaced->AllowODEDelete())
+                  delete toBeReplaced;
                break;
             }
          }
@@ -729,7 +801,12 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
          }
 
          if (!skipAdd)
+         {
             ++transientCount;
+            if (psm != NULL)
+               pPhysicalModel->SetPropStateManager(psm);
+         }
+
 
          // Temporary code: prevent multiple finite burns in single force model
 //         if (transientCount > 1)
@@ -751,6 +828,15 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
    
    // Update owned object count
    ownedObjectCount = numForces;
+
+   // ODE Model supports a mass Jacobian if an added force does
+   hasMassJacobian = hasMassJacobian || pPhysicalModel->HasMassJacobian();
+
+   #ifdef DEBUG_MASS_JACOBIAN
+      MessageInterface::ShowMessage("%s %s a mass Jacobian\n",
+            instanceName.c_str(), (hasMassJacobian ? "has" : "does not have"));
+   #endif
+
 
    #ifdef DEBUG_ODEMODEL_INIT
       MessageInterface::ShowMessage("Leaving ODEModel::AddForce()\n");
@@ -784,12 +870,15 @@ void ODEModel::DeleteForce(const std::string &name)
          
          if (!pm->IsTransient())
          {
-            #ifdef DEBUG_MEMORY
-            MemoryTracker::Instance()->Remove
-               (pm, pm->GetName(), "ODEModel::DeleteForce()",
-                "deleting non-transient force of " + pm->GetTypeName(), this);
-            #endif
-            delete pm;
+            if (pm->AllowODEDelete())
+            {
+               #ifdef DEBUG_MEMORY
+               MemoryTracker::Instance()->Remove
+                  (pm, pm->GetName(), "ODEModel::DeleteForce()",
+                   "deleting non-transient force of " + pm->GetTypeName(), this);
+               #endif
+               delete pm;
+            }
          }
          else
             --transientCount;
@@ -828,12 +917,15 @@ void ODEModel::DeleteForce(PhysicalModel *pPhysicalModel)
          
          if (!pm->IsTransient())
          {
-            #ifdef DEBUG_MEMORY
-            MemoryTracker::Instance()->Remove
-               (pm, pm->GetName(), "ODEModel::DeleteForce()",
-                "deleting non-transient force of " + pm->GetTypeName(), this);
-            #endif
-            delete pm;
+            if (pm->AllowODEDelete())
+            {
+               #ifdef DEBUG_MEMORY
+               MemoryTracker::Instance()->Remove
+                  (pm, pm->GetName(), "ODEModel::DeleteForce()",
+                   "deleting non-transient force of " + pm->GetTypeName(), this);
+               #endif
+               delete pm;
+            }
          }
          else
             --transientCount;
@@ -1193,6 +1285,15 @@ void ODEModel::RevertSpaceObject()
           prevElapsedTime, elapsedTime);
    #endif
 
+   Real dt = prevElapsedTime - elapsedTime;
+   for (std::vector<PhysicalModel*>::iterator i = forceList.begin();
+      i != forceList.end(); ++i)
+   {
+      Real time = (*i)->GetTime();
+      time += dt;
+      (*i)->SetTime(time);
+   }
+
    elapsedTime = prevElapsedTime;
 
    memcpy(rawState, previousState.GetState(), dimension*sizeof(Real));
@@ -1279,9 +1380,52 @@ bool ODEModel::BuildModelFromMap()
    applyErrorControl.clear();
    bool ecActive = true;
 
+   // Get SRP shape model from SolarRadiationPressure force
+   std::string srpShapeModel = "Spherical";
+   for (Integer i = 0; i < forceList.size(); ++i)
+   {
+      if (forceList[i]->IsOfType("SolarRadiationPressure"))
+      {
+         srpShapeModel = ((SolarRadiationPressure*)forceList[i])->GetStringParameter("SRPModel");
+         break;
+      }
+   }
+   
+   // Get DragForce shape model from DragForce
+   std::string dragShapeModel = "Spherical";
+   for (Integer i = 0; i < forceList.size(); ++i)
+   {
+      if (forceList[i]->IsOfType("DragForce"))
+      {
+         dragShapeModel = ((DragForce*)forceList[i])->GetStringParameter("DragModel");
+         break;
+      }
+   }
+
+
    for (UnsignedInt index = 0; index < map->size(); ++index)
    {
-      if ((*map)[index]->dynamicObjectProperty)
+		////MessageInterface::ShowMessage("map[%d] = {\n"
+		////	                           "           object = <%p>, \n"
+		////	                           "           objectName = <%s>, \n"
+		////	                           "           associateName = <%s>, \n"
+		////	                           "           elementID = %d, \n"
+		////	                           "           elementName = <%s>, \n"
+		////	                           "           parameterID = %d, \n"
+		////	                           "           parameterType = %d, \n"
+		////	                           "           subelement = %d }\n",
+		////	index,
+		////	(*map)[index]->object,
+		////	(*map)[index]->objectName.c_str(),
+		////	(*map)[index]->associateName.c_str(),
+		////	(*map)[index]->elementID,
+		////	(*map)[index]->elementName.c_str(),
+		////	(*map)[index]->parameterID,
+		////	(*map)[index]->parameterType,
+		////	(*map)[index]->subelement);
+      
+		
+		if ((*map)[index]->dynamicObjectProperty)
       {
          dynamicProperties = true;
 
@@ -1297,8 +1441,10 @@ bool ODEModel::BuildModelFromMap()
          if (objectCount > 0)
          {
             // Build the derivative model piece for this element
-            retval = BuildModelElement(id, start, objectCount,
-                  (index - start) / objectCount);
+            //////retval = BuildModelElement(id, start, objectCount,             // made changes by TUAN NGUYEN
+            //////      (index - start) / objectCount);                          // made changes by TUAN NGUYEN
+				retval = BuildModelElement(id, start, objectCount, index - start);   // made changes by TUAN NGUYEN
+
             if (retval == false)
             {
 //               throw ODEModelException(
@@ -1327,6 +1473,12 @@ bool ODEModel::BuildModelFromMap()
          throw ODEModelException(
                "ODEModel::BuildModelFromMap(): Error in map\n");
 
+      // Set SRP and Drag shape models to spacecrafts
+      if (indexObj->IsOfType(Gmat::SPACECRAFT))
+      {
+         ((Spacecraft*)indexObj)->SetSRPShapeModel(srpShapeModel);
+         ((Spacecraft*)indexObj)->SetDragShapeModel(dragShapeModel);
+      }
 
       // Increment the count for each new object
       if (currentObject != indexObj)
@@ -1347,9 +1499,10 @@ bool ODEModel::BuildModelFromMap()
    // Catch the last element
    if (objectCount > 0)
    {
-      retval = BuildModelElement(id, start, objectCount,
-            (map->size() - start) / objectCount);
-      if (retval == false)
+//      retval = BuildModelElement(id, start, objectCount,                           // made changes by TUAN NGUYEN
+//            (map->size() - start) / objectCount);                                  // made changes by TUAN NGUYEN
+      retval = BuildModelElement(id, start, objectCount, map->size() - start);       // made changes by TUAN NGUYEN
+		if (retval == false)
       {
          // throw ODEModelException(
          MessageInterface::ShowMessage(
@@ -1407,21 +1560,23 @@ bool ODEModel::BuildModelFromMap()
  * @param id      The integer ID for the element that is being registered
  * @param start   The index for the first element in the state vector
  * @param objectCount The number of objects that need the derivative data
+ * @param totalSize   Sum of all size of STMs                                  // made changes by TUAN NGUYEN
  *
  * @return true if the derivative was set successfully for at least one
  *         PhysicalModel, false if it failed.
  */
 //------------------------------------------------------------------------------
 bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
-      Integer objectCount, Integer size)
+//      Integer objectCount, Integer size)                                     // made changes by TUAN NGUYEN
+        Integer objectCount, Integer totalSize)                                // made changes by TUAN NGUYEN
 {
    bool retval = false, tf;
    Integer modelsUsed = 0;
 
    #ifdef DEBUG_BUILDING_MODELS
       MessageInterface::ShowMessage("Building ODEModel element; id = %d, "
-            "index = %d, count = %d; force list has %d elements\n", id, start,
-            objectCount, forceList.size());
+            "index = %d, count = %d, totalSize = %d; force list has %d elements\n", id, start,
+            objectCount, totalSize, forceList.size());
    #endif
 
    // Loop through the PhysicalModels, checking to see if any support the
@@ -1435,7 +1590,8 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
    {
       if ((*i)->SupportsDerivative(id))
       {
-         tf = (*i)->SetStart(id, start, objectCount, size);
+         //tf = (*i)->SetStart(id, start, objectCount, size);                      // made changes by TUAN NGUYEN
+			tf = (*i)->SetStart(id, start, objectCount, totalSize);                   // made changes by TUAN NGUYEN
          if (tf == false)
             MessageInterface::ShowMessage("PhysicalModel %s was not set, even "
                   "though it registered support for derivatives of type %d\n",
@@ -1470,7 +1626,7 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
       if (stmStart == -1)
          stmStart = start;
       stmCount = objectCount;
-      stmRowCount = Integer(sqrt((Real)size));
+		totalSTMSize = totalSize;                                              // made changes by TUAN NGUYEN
    }
 
    if (id == Gmat::ORBIT_A_MATRIX)
@@ -1479,16 +1635,15 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
       if (aMatrixStart == -1)
          aMatrixStart = start;
       ++aMatrixCount;
-      stmRowCount = Integer(sqrt((Real)size));
-   }
+		totalSTMSize = totalSize;                                              // made changes by TUAN NGUYEN
+	}
 
    #ifdef DEBUG_BUILDING_MODELS
       MessageInterface::ShowMessage(
             "ODEModel is using %d components for element %d\n", modelsUsed, id);
       if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
       {
-         MessageInterface::ShowMessage("STM row count(s):\n");
-         MessageInterface::ShowMessage("   %d rows\n", stmRowCount);
+         MessageInterface::ShowMessage("sum of all STM sizes: %d \n", totalSTMSize);    // made changes by TUAN NGUYEN
       }
    #endif
    
@@ -1553,6 +1708,14 @@ bool ODEModel::Initialize()
 //   Integer satCount = 1;
 //   std::vector<SpaceObject *>::iterator sat;
    
+   #ifdef DEBUG_MASS_JACOBIAN
+      fillMassJacobian = true;
+   #endif
+
+   #ifdef DEBUG_TIME_JACOBIAN
+      fillTimeJacobian = true;
+   #endif
+
    if (!solarSystem)
       throw ODEModelException(
          "Cannot initialize force model; no solar system on '" + 
@@ -1602,6 +1765,8 @@ bool ODEModel::Initialize()
    #endif
 
    // rawState deallocated in PhysicalModel::Initialize() method so reallocate
+   if ((rawState)&&(rawState != modelState))          // made changes by TUAN NGUYEN
+      delete rawState;                                // made changes by TUAN NGUYEN
    rawState = new Real[dimension];
    #ifdef DEBUG_MEMORY
    MemoryTracker::Instance()->Add
@@ -1664,7 +1829,8 @@ bool ODEModel::Initialize()
       #endif
       
       (*current)->SetDimension(dimension);
-      (*current)->SetState(state);
+      (*current)->ComputeMassJacobian(fillMassJacobian);
+      (*current)->ComputeTimeJacobian(fillTimeJacobian);
 
       // Only initialize the spacecraft independent pieces once
       if (forceMembersNotInitialized)
@@ -1710,7 +1876,8 @@ bool ODEModel::Initialize()
          #endif
          muMap[itsName] = itsMu;
       }
-      (*current)->SetState(modelState);
+
+      (*current)->SetState(state);
    }
 
    for (std::vector<PhysicalModel *>::iterator current = forceList.begin();
@@ -1764,6 +1931,20 @@ bool ODEModel::Initialize()
    if (forceList.size() == 0)
       throw ODEModelException("The ODE model " + instanceName +
             " is empty, so it cannot be used for propagation.");
+
+   nomDerivs.resize(dimension);
+
+   if (nonAnalyticTimeDerivs)
+   {
+      delete [] nonAnalyticTimeDerivs;
+      nonAnalyticTimeDerivs = NULL;
+   }
+   nonAnalyticTimeDerivs = new Real[dimension];
+   for (Integer i = 0; i < dimension; ++i)
+      nonAnalyticTimeDerivs[i] = 0.0;
+
+   if (!nonAnalyticTimeDerivs)
+      return false;
 
    isInitialized = true;
 
@@ -1840,17 +2021,23 @@ void ODEModel::ClearForceList(bool deleteTransient)
 
       if (!pm->IsTransient()) // || (deleteTransient && pm->IsTransient()))
       {
-         #ifdef DEBUG_MEMORY
-            MemoryTracker::Instance()->Remove
-               (pm, pm->GetName(), "ODEModel::~ODEModel()",
-                "deleting non-transient \"" + pm->GetTypeName() +
-                "\" PhysicalModel", this);
-         #endif
-         delete pm;
+         if (pm->AllowODEDelete())
+         {
+            #ifdef DEBUG_MEMORY
+               MemoryTracker::Instance()->Remove
+                  (pm, pm->GetName(), "ODEModel::~ODEModel()",
+                   "deleting non-transient \"" + pm->GetTypeName() +
+                   "\" PhysicalModel", this);
+            #endif
+            delete pm;
+         }
       }
       ppm = forceList.begin();
    }
    
+   #ifdef DEBUG_ODEMODEL_CLEAR
+      MessageInterface::ShowMessage("ODEModel::ClearForceList() exit\n");
+   #endif
 }
 
 
@@ -1931,7 +2118,7 @@ void ODEModel::SetInternalCoordinateSystem(const std::string csId,
             throw ODEModelException("Trying to create a local coordinate "
                   "system, but the solar system pointer is NULL");
 
-         SpacePoint *earthPtr = solarSystem->GetBody(SolarSystem::EARTH_NAME);
+         SpacePoint *earthPtr = solarSystem->GetBody(GmatSolarSystemDefaults::EARTH_NAME);
          cs = CoordinateSystem::CreateLocalCoordinateSystem(csName,
                axisString, earthPtr, NULL, NULL, j2kBody, solarSystem);
          
@@ -2039,6 +2226,102 @@ std::string ODEModel::BuildPropertyName(GmatBase *ownedObj)
 }
 
 
+//-------------------------------------------------------------------------
+// Integer HasParameterCovariances(Integer parameterId)
+//-------------------------------------------------------------------------
+/**
+* This function is used to verify whether a parameter (with ID specified by
+* parameterId) having a covariance or not.
+*
+* @param parameterId      ID of a parameter
+* @return                 size of covariance matrix associated with the parameter
+*                         return -1 when the parameter has no covariance
+*/
+//-------------------------------------------------------------------------
+Integer ODEModel::HasParameterCovariances(Integer parameterId)
+{
+   // Handler for force based solve-for parameters
+   if (parameterId >= ODEModelParamCount)
+   {
+      Integer sfid = parameterId - ODEModelParamCount;
+      if (sfid < solveForNames.size())
+      {
+         std::string name = solveForNames[sfid];
+         std::map<std::string, SolveForData>::const_iterator it = solveForMap.find(name);
+         return it->second.solveForHolder->HasParameterCovariances(it->second.solveForId);
+      }
+   }
+
+   return GmatBase::HasParameterCovariances(parameterId);
+}
+
+
+//------------------------------------------------------------------------------
+// Rmatrix* GetParameterCovariances(Integer parameterId)
+//------------------------------------------------------------------------------
+/**
+* Get covariance of a given ODEModel's parameter
+*
+* @param paramId     The Id of an ODEModel's parameter
+*
+* @return            Covariance matrix of the parameter specified by the
+*                    parameter Id
+*/
+//------------------------------------------------------------------------------
+Rmatrix* ODEModel::GetParameterCovariances(Integer parameterId)
+{
+   if (isInitialized)
+      return covariance.GetCovariance(parameterId);
+   else
+      throw GmatBaseException("Error: cannot get " + GetName() + " ODEModel's covariance when it is not initialized.\n");
+   return NULL;
+}
+
+
+//------------------------------------------------------------------------------
+// Covariance* GetCovariance()
+//------------------------------------------------------------------------------
+Covariance* ODEModel::GetCovariance()
+{
+   std::vector<Rmatrix> covVector;
+   covarianceSizes.clear();
+
+   for (UnsignedInt ii = 0; ii < forceList.size(); ii++)
+   {
+      Integer covDim = forceList[ii]->GetCovariance()->GetDimension();
+
+      if (covDim > 0)
+      {
+         StringArray sa = forceList[ii]->GetSolveForList();
+         for (UnsignedInt jj = 0; jj < sa.size(); jj++)
+         {
+            std::string paramName = GetParameterNameForEstimationParameter(sa[jj]);
+            Integer id = forceList[ii]->GetParameterID(paramName);
+            Integer covSize = forceList[ii]->HasParameterCovariances(id);
+
+            if (covSize > 0)
+            {
+               covariance.AddCovarianceElement(paramName, this);
+
+               covVector.push_back(*(forceList[ii]->GetCovariance()->GetCovariance(id)));
+               covarianceSizes.push_back(covSize);
+            }
+         }
+      }
+   }
+
+   UnsignedInt covIndex = 0;
+
+   for (UnsignedInt ii = 0; ii < covarianceSizes.size(); ii++)
+   {
+      covariance.ConstructRHS(covVector[ii], covIndex);
+      covIndex += covarianceSizes[ii];
+   }
+
+   return &covariance;
+}
+
+
 //------------------------------------------------------------------------------
 // void UpdateInitialData()
 //------------------------------------------------------------------------------
@@ -2046,7 +2329,7 @@ std::string ODEModel::BuildPropertyName(GmatBase *ownedObj)
  * Updates model and all contained models to catch changes in Spacecraft, etc.
  */
 //------------------------------------------------------------------------------
-void ODEModel::UpdateInitialData(bool dynamicOnly)
+void ODEModel::UpdateInitialData(bool dynamicOnly, bool updateEpoch)
 {
    #ifdef DEBUG_SATELLITE_PARAMETER_UPDATES
       MessageInterface::ShowMessage("ODEModel::UpdateInitialData(%s): \n",
@@ -2055,16 +2338,19 @@ void ODEModel::UpdateInitialData(bool dynamicOnly)
 
    PhysicalModel *current; // = forceList[cf];  // waw: added 06/04/04
 
+   if (psm == NULL)
+      throw ODEModelException("ODEModel::UpdateInitialData():  Cannot "
+         "update the model " + instanceName + ": PropStateManager is NULL");
+
    // Variables used to set spacecraft parameters
    std::string parmName, stringParm;
    std::vector<SpaceObject *>::iterator sat;
-
    for (std::vector<PhysicalModel*>::iterator i = forceList.begin();
         i != forceList.end(); ++i)
    {
       stateObjects.clear();
       psm->GetStateObjects(stateObjects, Gmat::SPACEOBJECT);
-      
+		
       if (dynamicOnly)
       {
          UpdateDynamicSpacecraftData(&stateObjects, 0);
@@ -2077,12 +2363,13 @@ void ODEModel::UpdateInitialData(bool dynamicOnly)
             current->ClearSatelliteParameters();
          }
 
-         SetupSpacecraftData(&stateObjects, 0);
+         SetupSpacecraftData(&stateObjects, 0, updateEpoch);
       }
    }
+	
    if (!dynamicOnly)
       psm->MapObjectsToVector();
-
+	
    parametersSetOnce = true;
 }
 
@@ -2161,21 +2448,52 @@ void ODEModel::UpdateTransientForces()
 }
 
 
+std::string ODEModel::GetShapeModel(std::string forcetype)
+{
+   /// Get shape model from Force object
+   std::string shapeModel = "Spherical";
+   if (forcetype == "SolarRadiationPressure")
+   {
+      for (Integer i = 0; i < forceList.size(); ++i)
+      {
+         if (forceList[i]->IsOfType("SolarRadiationPressure"))
+         {
+            shapeModel = forceList[i]->GetStringParameter("SRPModel");
+            break;
+         }
+      }
+   }
+   else if (forcetype == "DragForce")
+   {
+      for (Integer i = 0; i < forceList.size(); ++i)
+      {
+         if (forceList[i]->IsOfType("DragForce"))
+         {
+            shapeModel = forceList[i]->GetStringParameter("DragModel");
+            break;
+         }
+      }
+   }
+
+   return shapeModel;
+}
+
+
 //------------------------------------------------------------------------------
 // Integer SetupSpacecraftData(GmatBase *sat, PhysicalModel *pm, Integer i)
 //------------------------------------------------------------------------------
 /**
  * Passes spacecraft parameters into the force model.
- * 
+ *
  * @param <sat>   The SpaceObject that supplies the parameters.
  * @param <pm>    The PhysicalModel receiving the data.
  * @param <i>     The index of the SpaceObject in the physical model.
- * 
+ *
  * @return For Spacecraft, the corresponding index; for formations, a count of
  *         the number of spacecraft in the formation.
  */
 //------------------------------------------------------------------------------
-Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
+Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i, bool updateEpoch)
 {
    #ifdef DEBUG_SPACECRAFT_PROPERTIES
       MessageInterface::ShowMessage("ODEModel::SetupSpacecraftData(*, %d) "
@@ -2183,6 +2501,7 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
    #endif
 
    Real parm;
+
    std::string stringParm;
 
    GmatBase* sat;
@@ -2191,6 +2510,12 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
    for (ObjectArray::iterator j = sats->begin(); 
         j != sats->end(); ++j)
    {
+      // Get SRP and DragForce shape models                                // made changes by TUAN NGUYEN
+      std::string srpShapeModel = GetShapeModel("SolarRadiationPressure"); // made changes by TUAN NGUYEN
+      /// Get DragForce shape model from DragForce object                  // made changes by TUAN NGUYEN
+      std::string dragShapeModel = GetShapeModel("DragForce");             // made changes by TUAN NGUYEN
+
+
       sat = *j;
 
       #ifdef DEBUG_SPACECRAFT_PROPERTIES
@@ -2215,10 +2540,20 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
             throw ODEModelException("TotalMass parameter undefined on object " +
                                     sat->GetName());
          
-         satIds[3] = sat->GetParameterID("Cd");
-         if (satIds[3] < 0)
-            throw ODEModelException("Cd parameter undefined on object " +
+         if (dragShapeModel == "Spherical")                          // made changes by TUAN NGUYEN
+         {                                                           // made changes by TUAN NGUYEN
+            satIds[3] = sat->GetParameterID("Cd");
+            if (satIds[3] < 0)
+               throw ODEModelException("Cd parameter undefined on object " +
                                     sat->GetName());
+         }                                                           // made changes by TUAN NGUYEN
+         else if (dragShapeModel == "SPADFile")                      // made changes by TUAN NGUYEN
+         {                                                           // made changes by TUAN NGUYEN
+            satIds[3] = sat->GetParameterID("SPADDragScaleFactor");  // made changes by TUAN NGUYEN
+            if (satIds[3] < 0)                                       // made changes by TUAN NGUYEN
+               throw ODEModelException("SPADDragScaleFactor parameter undefined on object " +                 // made changes by TUAN NGUYEN
+               sat->GetName());                                      // made changes by TUAN NGUYEN
+         }                                                           // made changes by TUAN NGUYEN
          
          satIds[4] = sat->GetParameterID("DragArea");
          if (satIds[4] < 0)
@@ -2230,22 +2565,48 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
             throw ODEModelException("SRP Area parameter undefined on object " +
                                     sat->GetName());
          
-         satIds[6] = sat->GetParameterID("Cr");
-         if (satIds[6] < 0)
-            throw ODEModelException("Cr parameter undefined on object " +
+         if (srpShapeModel == "Spherical")                                   // made changes by TUAN NGUYEN
+         {                                                                   // made changes by TUAN NGUYEN
+            satIds[6] = sat->GetParameterID("Cr");
+            if (satIds[6] < 0)
+               throw ODEModelException("Cr parameter undefined on object " +
                                     sat->GetName());
+         }                                                                   // made changes by TUAN NGUYEN
+         else if (srpShapeModel == "SPADFile")                               // made changes by TUAN NGUYEN
+         {                                                                   // made changes by TUAN NGUYEN
+            satIds[6] = sat->GetParameterID("SPADSRPScaleFactor");           // made changes by TUAN NGUYEN
+            if (satIds[6] < 0)                                               // made changes by TUAN NGUYEN
+               throw ODEModelException("SPADSRPScaleFactor parameter undefined on object " +  // made changes by TUAN NGUYEN
+               sat->GetName());                                              // made changes by TUAN NGUYEN
+         }                                                                   // made changes by TUAN NGUYEN
+			else if (srpShapeModel == "NPlate")                                 // made changes by TUAN NGUYEN
+			{                                                                   // made changes by TUAN NGUYEN
+				// It does nothing with Cr for NPlate case
+				satIds[6] = sat->GetParameterID("Cr");                           // made changes by TUAN NGUYEN
+				if (satIds[6] < 0)                                               // made changes by TUAN NGUYEN
+					throw ODEModelException("Cr parameter undefined on object " +
+						sat->GetName());                                           // made changes by TUAN NGUYEN
+			}                                                                   // made changes by TUAN NGUYEN
          
+         satIds[7] = sat->GetParameterID("Cd_Epsilon");                      // made changes by TUAN NGUYEN
+         satIds[8] = sat->GetParameterID("Cr_Epsilon");                      // made changes by TUAN NGUYEN
+
          stateStart = sat->GetParameterID("CartesianX");
          stateEnd   = sat->GetParameterID("CartesianVZ");
 
          #ifdef DEBUG_SATELLITE_PARAMETERS
+         //MessageInterface::ShowMessage(                                            // made changes by TUAN NGUYEN
+         //   "Parameter ID Array: [%d %d %d %d %d %d %d]; PMepoch id  = %d\n",      // made changes by TUAN NGUYEN
+         //   satIds[0], satIds[1], satIds[2], satIds[3], satIds[4], satIds[5],      // made changes by TUAN NGUYEN
+         //      satIds[6], PhysicalModel::EPOCH);                                   // made changes by TUAN NGUYEN
          MessageInterface::ShowMessage(
-            "Parameter ID Array: [%d %d %d %d %d %d %d]; PMepoch id  = %d\n",
-            satIds[0], satIds[1], satIds[2], satIds[3], satIds[4], satIds[5], 
-               satIds[6], PhysicalModel::EPOCH);
+            "Parameter ID Array: [%d %d %d %d %d %d %d %d %d]; PMepoch id  = %d\n",  // made changes by TUAN NGUYEN
+            satIds[0], satIds[1], satIds[2], satIds[3], satIds[4], satIds[5],        // made changes by TUAN NGUYEN
+            satIds[6], satIds[7], satIds[8], PhysicalModel::EPOCH);                  // made changes by TUAN NGUYEN
          #endif
       }
       
+
       PhysicalModel *pm;
       for (std::vector<PhysicalModel *>::iterator current = forceList.begin();
            current != forceList.end(); ++current)
@@ -2258,6 +2619,10 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
                MessageInterface::ShowMessage("Working on Spacecraft %s",
                      sat->GetName().c_str());
             #endif
+
+				// pass the actual satellite pointer first          // made changes by TUAN NGUYEN
+            pm->SetSpaceObject(i, sat);                         // made changes by TUAN NGUYEN
+				this->SetSpaceObject(i, sat);                       // made changes by TUAN NGUYEN
 
             #ifdef DEBUG_SATELLITE_PARAMETERS
                MessageInterface::ShowMessage(
@@ -2272,12 +2637,17 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
             // Manage the epoch ...
             parm = sat->GetRealParameter(satIds[0]);
             // Update local value for epoch
-            epoch = parm;
+            if (updateEpoch)
+            {
+               epoch = parm;
+               elapsedTime = 0.0;
+            }
             pm->SetRealParameter(PhysicalModel::EPOCH, parm);
             if (hasPrecisionTime)
             {
                GmatTime parmGT = sat->GetGmatTimeParameter(satIds[0]);
-               epochGT = parmGT;
+               if (updateEpoch)
+                  epochGT = parmGT;
                pm->SetGmatTimeParameter(PhysicalModel::EPOCH, parmGT);
             }
 
@@ -2294,10 +2664,9 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
                      "Setting parameters for %s using data from %s\n",
                      pm->GetTypeName().c_str(), sat->GetName().c_str());
                #endif
-               // pass the actual satellite pointer first
-               // (currently only needed by SRP)
-               pm->SetSpaceObject(i, sat);
-
+               //////// pass the actual satellite pointer first          // made changes by TUAN NGUYEN
+               //////// (currently only needed by SRP)                   // made changes by TUAN NGUYEN
+					//////pm->SetSpaceObject(i, sat);                         // made changes by TUAN NGUYEN
                
                // ... Coordinate System ...
                stringParm = sat->GetStringParameter(satIds[1]);
@@ -2335,7 +2704,10 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
                   throw ODEModelException("Drag coefficient (Cd) is less than zero for Spacecraft \"" +
                                     sat->GetName() + "\"" +  " used by Forcemodel \"" + instanceName + "\"");
 #endif
-               pm->SetSatelliteParameter(i, "Cd", parm, satIds[3]);
+               if (dragShapeModel == "Spherical")                                // made changes by TUAN NGUYEN
+                  pm->SetSatelliteParameter(i, "Cd", parm, satIds[3]);
+               else if (dragShapeModel == "SPADFile")                            // made changes by TUAN NGUYEN
+                  pm->SetSatelliteParameter(i, "SPADDragScaleFactor", parm, satIds[3]);  // made changes by TUAN NGUYEN
                
                // ... Drag area ...
                parm = sat->GetRealParameter(satIds[4]);
@@ -2352,14 +2724,34 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
                pm->SetSatelliteParameter(i, "SRPArea", parm, satIds[5]);
                
                // ... and Coefficient of reflectivity
-               parm = sat->GetRealParameter(satIds[6]);
+			      if ((srpShapeModel == "Spherical") || (srpShapeModel == "SPADFile") || (srpShapeModel == "NPlate"))    // made changes by TUAN NGUYEN
+			      {
+				      parm = sat->GetRealParameter(satIds[6]);
+			      }
+
 #ifndef TEMPORARILY_DISABLE_CR_RANGE_CHECK
-               if ((parm < 0) && constrainCr)
+               if (((parm < 0) && constrainCr)&&
+				   (((srpShapeModel == "Spherical") || (srpShapeModel == "SPADFile"))))
                   throw ODEModelException("SRP coefficient (Cr) is less than zero for Spacecraft \"" +
                                     sat->GetName() + "\"" +  " used by Forcemodel \"" + instanceName + "\"");
 #endif
-               pm->SetSatelliteParameter(i, "Cr", parm, satIds[6]);
-               
+
+			      if (srpShapeModel == "Spherical")                                           // made changes by TUAN NGUYEN
+				      pm->SetSatelliteParameter(i, "Cr", parm, satIds[6]);                     // made changes by TUAN NGUYEN
+			      else if (srpShapeModel == "SPADFile")                                       // made changes by TUAN NGUYEN
+				      pm->SetSatelliteParameter(i, "SPADSRPScaleFactor", parm, satIds[6]);     // made changes by TUAN NGUYEN
+					else if (srpShapeModel == "NPlate")                                         // made changes by TUAN NGUYEN
+					{
+						// It onlt sets value to Cr but does not use it                          // made changes by TUAN NGUYEN
+						pm->SetSatelliteParameter(i, "Cr", parm, satIds[6]);                     // made changes by TUAN NGUYEN
+					}
+
+               // ... Cd_Epsilon and Cr_Epsilon
+               parm = sat->GetRealParameter(satIds[7]);
+               pm->SetSatelliteParameter(i, "Cd_Epsilon", parm, satIds[7]);
+               parm = sat->GetRealParameter(satIds[8]);
+               pm->SetSatelliteParameter(i, "Cr_Epsilon", parm, satIds[8]);
+
                ((SpaceObject*)sat)->ParametersHaveChanged(false);
             }
             increment = 1;
@@ -2382,7 +2774,7 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
                   throw ODEModelException("Object \"" + sat->GetName() +
                                           "\" is not a SpaceObject.");
             }
-            increment = SetupSpacecraftData(&formSats, i) - i;
+            increment = SetupSpacecraftData(&formSats, i, updateEpoch) - i;
          }
          else
             throw ODEModelException("Setting SpaceObject parameters on unknown "
@@ -2406,6 +2798,8 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
 Integer ODEModel::UpdateDynamicSpacecraftData(ObjectArray *sats, Integer i)
 {
    Real parm;
+   Rvector parmVec;                           // made changes by TUAN NGUYEN
+
    std::string stringParm;
 
    GmatBase* sat;
@@ -2479,6 +2873,13 @@ Integer ODEModel::UpdateDynamicSpacecraftData(ObjectArray *sats, Integer i)
             }
 #endif
             pm->SetSatelliteParameter(i, satIds[6], parm);
+
+            // ... Cd_Epsilon and Cr_Epsilon                        // made changes by TUAN NGUYEN
+            parm = sat->GetRealParameter(satIds[7]);                // made changes by TUAN NGUYEN
+            pm->SetSatelliteParameter(i, satIds[7], parm);          // made changes by TUAN NGUYEN
+            parm = sat->GetRealParameter(satIds[8]);                // made changes by TUAN NGUYEN
+            pm->SetSatelliteParameter(i, satIds[8], parm);          // made changes by TUAN NGUYEN
+
          }
          else if (sat->GetType() == Gmat::FORMATION)
          {
@@ -2561,6 +2962,11 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
 
    // Temporary code: prevent multiple spacecraft in finite burn PropSetup
    stateObjects.clear();
+
+   if (psm == NULL)
+      throw ODEModelException("ODEModel::GetDerivatives():  Cannot "
+         "get derivatives for " + instanceName + ": PropStateManager is NULL");
+
    psm->GetStateObjects(stateObjects, Gmat::SPACEOBJECT);
    if ((transientCount > 0) && (stateObjects.size() > 1))
       throw ODEModelException("Multiple Spacecraft are not allowed in "
@@ -2583,7 +2989,7 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
 	   throw ODEModelException("Second order integrators cannot be used when "
 			   "propagating the Orbit State Transition Matrix (STM); please "
 			   "use a different integrator.");
-
+	
    if (dynamicProperties)
    {
       for (UnsignedInt i = 0; i < dynamicsIndex.size(); ++i)
@@ -2601,10 +3007,19 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
                objBody = ((SpaceObject*)(dynamicObjects[i]))->GetOrigin();
             if (objBody != NULL)
             {
-//               Rvector6 offset = objBody->GetMJ2000State(((SpaceObject*)
-               Rvector6 offset = forceOrigin->GetMJ2000State(((SpaceObject*)
-                     (dynamicObjects[i]))->GetEpoch() + dt /
-                     GmatTimeConstants::SECS_PER_DAY);
+               Rvector6 offset;
+               if (hasPrecisionTime)
+               {
+                  GmatTime nowGT = epochGT;
+                  nowGT.AddSeconds(elapsedTime);
+                  nowGT.AddSeconds(dt);
+                  offset = forceOrigin->GetMJ2000State(nowGT);
+               }
+               else
+               {
+                  Real now = epoch + (elapsedTime + dt) / GmatTimeConstants::SECS_PER_DAY;
+                  offset = forceOrigin->GetMJ2000State(now);
+               }
 
                #ifdef DEBUG_DYNAMIC_FORCES
                   MessageInterface::ShowMessage("Dynamics: resetting %s.%s "
@@ -2630,8 +3045,9 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       }
 //      UpdateInitialData(true);
    }
+	
    UpdateInitialData(true);
-
+	
    #ifdef DEBUG_ODEMODEL_EXE
       MessageInterface::ShowMessage("Initializing derivative array\n");
    #endif
@@ -2646,7 +3062,6 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
    #endif
   
    PrepareDerivativeArray();
-
    const Real* ddt;
 
    #ifdef DEBUG_ODEMODEL_EXE
@@ -2658,6 +3073,10 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       debugFile << "Forces:";
    #endif
 
+   #ifdef DEBUG_TIME_ADDITION
+      MessageInterface::ShowMessage("\nODE epoch, elapsed, dt: %.12lf, %lf, %lf ", epoch, elapsedTime, dt);
+   #endif
+   
    // Apply superposition of forces/derivatives
    for (std::vector<PhysicalModel *>::iterator i = forceList.begin();
          i != forceList.end(); ++i)
@@ -2686,7 +3105,7 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       for (Integer j = 0; j < dimension; ++j)
          MessageInterface::ShowMessage("  ddt(%s[%s])[%d] = %le\n",
             ((*i)->GetTypeName().c_str()),
-            ((*i)->GetStringParameter((*i)->GetParameterID("BodyName"))).c_str(),
+            "",  //((*i)->GetStringParameter((*i)->GetParameterID("BodyName"))).c_str(),
             j, ddt[j]);
       #endif
       
@@ -2695,13 +3114,11 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       #endif
       for (Integer j = 0; j < dimension; ++j)
       {
-         #ifdef DEBUG_NAN_CONDITIONS
-            if (GmatMathUtil::IsNaN(ddt[j]))
-               MessageInterface::ShowMessage("NAN found in derivative for %s "
-                     "force element %d, Value is %lf\n",
-                     (*i)->GetTypeName().c_str(), j, ddt[j]);
-
-         #endif
+         // This message needs to show up when the derivative is NaN                    // made changes by TUAN NGUYEN
+         if (GmatMathUtil::IsNaN(ddt[j]))                                               // made changes by TUAN NGUYEN
+            MessageInterface::ShowMessage("NAN found in derivative for %s "             // made changes by TUAN NGUYEN
+                     "force element %d, Value is %lf\n",                                // made changes by TUAN NGUYEN
+                     (*i)->GetTypeName().c_str(), j, ddt[j]);                           // made changes by TUAN NGUYEN
 
          deriv[j] += ddt[j];
          #ifdef DEBUG_ODEMODEL_EXE
@@ -2724,7 +3141,46 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
                ddt[0], ddt[1], ddt[2], ddt[3], ddt[4], ddt[5]);
          }
       #endif
+
+      if (fillTimeJacobian)
+      {
+         if ((*i)->HasTimeJacobian() && !finiteDifferencingTimeJac)
+         {
+            const Real *forceTimeJac = (*i)->GetTimeJacobian();
+            if (forceTimeJac)
+            {
+               for (UnsignedInt j = 0; j < stmRowCount; ++j)
+                  timeJacobian[j] += forceTimeJac[j];
+            }
+         }
+         else if (!(*i)->HasTimeJacobian())
+         {
+            for (Integer j = 0; j < dimension; ++j)
+               nonAnalyticTimeDerivs[j] += ddt[j];
+         }
+      }
+
+      if (fillMassJacobian && !finiteDifferencingTimeJac)
+      {
+         const Real *forceMassJac = (*i)->GetMassJacobian();
+         if (forceMassJac)
+         {
+            for (UnsignedInt j = 0; j < stmRowCount; ++j)
+               massJacobian[j] += forceMassJac[j];
+         }
+      }
    }
+
+   #ifdef DEBUG_MASS_JACOBIAN
+      MessageInterface::ShowMessage("Epoch %.12lf Mass Jacobian: [", epoch + dt / 86400.0);
+      for (Integer i = 0; i < stmRowCount; ++i)
+      {
+         if (i != 0)
+            MessageInterface::ShowMessage(", ");
+         MessageInterface::ShowMessage("%.8le", massJacobian[i]);
+      }
+      MessageInterface::ShowMessage("]\n");
+   #endif
 
    #ifdef DEBUG_FOR_CINTERFACE
       debugFile << "\n";
@@ -2742,9 +3198,25 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
          }
       }
    }
-
+	
    if (psm->RequiresCompletion())
       CompleteDerivativeCalculations(state);
+
+   // Calculate time Jacobian
+   if (fillTimeJacobian && !finiteDifferencingTimeJac)
+      FiniteDiffTimeJacobian(state, dt, order);
+
+   #ifdef DEBUG_TIME_JACOBIAN
+      if (!finiteDifferencingTimeJac)
+      {
+         MessageInterface::ShowMessage("Epoch %.12lf Time Jacobian: \n", epoch + dt / 86400.0);
+         for (Integer i = 0; i < stmRowCount; ++i)
+         {
+            MessageInterface::ShowMessage("%.8le\n", timeJacobian[i]);
+         }
+         MessageInterface::ShowMessage("\n");
+      }
+   #endif
 
    #ifdef DEBUG_ODEMODEL_EXE
       MessageInterface::ShowMessage("  ===============================\n");
@@ -2830,8 +3302,7 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
    {
       if (GmatMathUtil::IsNaN(deriv[index]))
          throw ODEModelException("The ForceModel " + instanceName +
-               " generated a derivative that is not a number");
-
+            " generated a derivative that is not a number");
       if (GmatMathUtil::IsInf(deriv[index]))
          throw ODEModelException("The ForceModel " + instanceName +
                " generated a derivative that is infinite");
@@ -2873,9 +3344,29 @@ bool ODEModel::PrepareDerivativeArray()
       if ((*smap)[i]->nonzeroInit)
       {
          deriv[i] = (*smap)[i]->initialValue;
+         nonAnalyticTimeDerivs[i] = (*smap)[i]->initialValue;
       }
       else
+      {
          deriv[i] = 0.0;
+         nonAnalyticTimeDerivs[i] = 0.0;
+      }
+   }
+
+   if (!finiteDifferencingTimeJac)
+   {
+      if (hasMassJacobian && fillMassJacobian)
+         for (UnsignedInt j = 0; j < stmRowCount; ++j)
+            massJacobian[j] = 0.0;
+
+      if (fillTimeJacobian)
+      {
+         for (UnsignedInt j = 0; j < stmRowCount; ++j)
+            timeJacobian[j] = 0.0;
+
+         for (UnsignedInt j = 0; j < dimension; ++j)
+            nomDerivs[j] = 0.0;
+      }
    }
 
    #ifdef DEBUG_STM_AMATRIX_DERIVS
@@ -2930,35 +3421,37 @@ bool ODEModel::CompleteDerivativeCalculations(Real *state)
 
    bool retval = true;
 
-   Integer stmRows = stmRowCount;
-   Integer stmDim = stmRows*stmRows;
-
+	Integer i6 = stmStart;
    for (Integer i = 0; i < stmCount; ++i)
    {
       /// @todo Add handling for multiple STMs of varying sizes
-      Integer i6 = stmStart + i * stmDim;
+      ////Integer i6 = stmStart + i * stmDim;                                       // made changes by TUAN NGUYEN
 
-      // Build aTilde
-      Integer stmSize = stmRowCount * stmRowCount;
-      Real *aTilde;
-      aTilde = new Real[stmSize];
-//MessageInterface::ShowMessage("STM_Size = %d...", stmSize);
-      for (Integer m = 0; m < stmDim; ++m)
+		// Get Spacecraft object
+		Spacecraft* sc = (Spacecraft*)scObjs[i];
+
+		// Create aTilde matrix
+		Integer stmRows = sc->GetIntegerParameter("FullSTMRowCount");
+		Integer stmSize = stmRows * stmRows;                                          // made changes by TUAN NGUYEN
+      Real *aTilde = new Real[stmSize];
+      
+      ////for (Integer m = 0; m < stmDim; ++m)                                      // made changes by TUAN NGUYEN
+	   for (Integer m = 0; m < stmSize; ++m)                                         // made changes by TUAN NGUYEN
          aTilde[m] = deriv[i6+m];
 
       #ifdef DEBUG_AMATRIX
-         MessageInterface::ShowMessage("A matrix last column: [");
-         for (Integer j = 0; j < stmRowCount; ++j)
-            MessageInterface::ShowMessage("%15lf", aTilde[i6 + j*stmRows + stmRowCount - 1]);
-         MessageInterface::ShowMessage("]^T\n");
+			MessageInterface::ShowMessage("A matrix last column: [");
+			for (Integer j = 0; j < stmRows; ++j)
+				MessageInterface::ShowMessage("%.15le   ", aTilde[j*stmRows + stmRows - 1]);
+			MessageInterface::ShowMessage("]^T\n");
       #endif
 
       #ifdef SHOW_AMATRIX
          MessageInterface::ShowMessage("ODE Model A matrix:\n");
-         for (Integer j = 0; j < stmRowCount; ++j)
+         for (Integer j = 0; j < stmRows; ++j)
          {
             MessageInterface::ShowMessage("%3d   [", j);
-            for (Integer k = 0; k < stmRowCount; ++k)
+            for (Integer k = 0; k < stmRows; ++k)
                MessageInterface::ShowMessage(" %15le ", aTilde[j*stmRows + k]);
             MessageInterface::ShowMessage("]\n");
          }
@@ -2980,15 +3473,52 @@ bool ODEModel::CompleteDerivativeCalculations(Real *state)
                }
             }
          }
-      }
+		}
 
-//      MessageInterface::ShowMessage("   Deleting...\n");
       delete [] aTilde;
-//      MessageInterface::ShowMessage("   Deleted!\n");
+		// Handling for multiple STMs of varying sizes                    // made changes by TUAN NGUYEN
+		i6 = i6 + stmSize;                                                // made changes by TUAN NGUYEN
    }
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// void FiniteDiffTimeJacobian(Real * state, Real dt, Integer order)
+//------------------------------------------------------------------------------
+/**
+* Finite differences the time Jacobian for derivatives that do not already have
+* an analytical time Jacobian
+*
+* @param    state   The current state vector
+* @param    dt      The current time interval from epoch
+* @param    order   Order of the derivative to be taken
+*/
+//------------------------------------------------------------------------------
+void ODEModel::FiniteDiffTimeJacobian(Real * state, Real dt, Integer order)
+{
+   finiteDifferencingTimeJac = true;
+   Real timePert = 1.0;
+   Rvector nomDerivs(dimension);
+   Rvector nomTimeDerivs(dimension);
+   for (UnsignedInt j = 0; j < dimension; ++j)
+   {
+      nomDerivs[j] = deriv[j];
+      nomTimeDerivs[j] = nonAnalyticTimeDerivs[j];
+   }
+
+   GetDerivatives(state, dt + timePert, order);
+   finiteDifferencingTimeJac = false;
+
+   for (UnsignedInt j = 0; j < stmRowCount; ++j)
+   {
+      timeJacobian[j] +=
+         (nonAnalyticTimeDerivs[j] - nomTimeDerivs[j]) / timePert;
+   }
+
+   // Reset derivative values to nominal run
+   for (UnsignedInt j = 0; j < dimension; ++j)
+      deriv[j] = nomDerivs[j];
+}
 
 //------------------------------------------------------------------------------
 // Real ODEModel::EstimateError(Real *diffs, Real *answer) const
@@ -3136,7 +3666,7 @@ Real ODEModel::EstimateError(Real *diffs, Real *answer) const
       }
 
       #ifdef DEBUG_ERROR_ESTIMATE
-         MessageInterface::ShowMessage("   {%d EstErr = %le} ", i, err);
+         MessageInterface::ShowMessage("   {%d EstErr = %le}\n", i, err);
       #endif
 
       if (err > retval)
@@ -3203,16 +3733,19 @@ bool ODEModel::TakeAction(const std::string &action, const std::string &actionDa
          PhysicalModel *oldForce = *oldIter;
          forceList.erase(oldIter);
          
-         #ifdef DEBUG_DEFAULT_FORCE
-         MessageInterface::ShowMessage
-            ("ODEModel::TakeAction() deleting default force <%p>\n", oldForce);
-         #endif
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Remove
-            (oldForce, oldForce->GetName(), "ODEModel::DeleteForce()",
-             "deleting non-transient force of " + oldForce->GetTypeName(), this);
-         #endif
-         delete oldForce;
+         if (oldForce->AllowODEDelete())
+         {
+            #ifdef DEBUG_DEFAULT_FORCE
+            MessageInterface::ShowMessage
+               ("ODEModel::TakeAction() deleting default force <%p>\n", oldForce);
+            #endif
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Remove
+               (oldForce, oldForce->GetName(), "ODEModel::DeleteForce()",
+                "deleting non-transient force of " + oldForce->GetTypeName(), this);
+            #endif
+            delete oldForce;
+         }
       }
    }
    
@@ -3243,7 +3776,8 @@ bool ODEModel::TakeAction(const std::string &action, const std::string &actionDa
          if (item != forceList.end())
             forceList.erase(item);
          // deleting it
-         delete deleteList[i];
+         if (deleteList[i]->AllowODEDelete())
+            delete deleteList[i];
       }
    }
 
@@ -3286,6 +3820,10 @@ bool ODEModel::TakeAction(const std::string &action, const std::string &actionDa
 //------------------------------------------------------------------------------
 Rvector6 ODEModel::GetDerivativesForSpacecraft(Spacecraft *sc)
 {
+   if (sc == NULL)
+      throw ODEModelException("Derivative information cannot be computed; the "
+            "Spacecraft in the call to GetDerivativesForSpacecraft() is NULL");
+
    if (!isInitializedForParameters)
    {
       #ifdef DEBUG_PARAMETER_INITIALIZATION
@@ -3307,10 +3845,6 @@ Rvector6 ODEModel::GetDerivativesForSpacecraft(Spacecraft *sc)
    dv[1] = sc->GetRealParameter("CartesianVY");
    dv[2] = sc->GetRealParameter("CartesianVZ");
    dv[3] = dv[4] = dv[5] = 0.0;
-
-   if (sc == NULL)
-      throw ODEModelException("Derivative information cannot be computed; the "
-            "Spacecraft in the call to GetDerivativesForSpacecraft() is NULL");
 
    // Apply superposition of forces/derivatives
    Integer warningsIssued = 0;
@@ -3786,6 +4320,8 @@ std::string ODEModel::GetParameterText(const Integer id) const
 {
    if (id >= PhysicalModelParamCount && id < ODEModelParamCount)
       return PARAMETER_TEXT[id - PhysicalModelParamCount];
+   else if ((id >= ODEModelParamCount) && (id < ODEModelParamCount + solveForNames.size()))
+      return solveForNames[id - ODEModelParamCount];
    else
       return PhysicalModel::GetParameterText(id);
 }
@@ -3810,6 +4346,14 @@ Integer ODEModel::GetParameterID(const std::string &str) const
       }
    }
    
+   if (std::find(solveForNames.begin(), solveForNames.end(), str) != solveForNames.end())
+      for (UnsignedInt i = 0; i < solveForNames.size(); ++i)
+      {
+         //MessageInterface::ShowMessage("Checking %s\n", solveForNames[i].c_str());
+         if (solveForNames[i] == str)
+            return ODEModelParamCount + i;
+      }
+
    return PhysicalModel::GetParameterID(str);
 }
 
@@ -3818,6 +4362,9 @@ Integer ODEModel::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType ODEModel::GetParameterType(const Integer id) const
 {
+   if (id >= ODEModelParamCount && id < ODEModelParamCount + solveForNames.size())
+      return Gmat::REAL_TYPE;
+
    if (id >= PhysicalModelParamCount && id < ODEModelParamCount)
       return PARAMETER_TYPE[id - PhysicalModelParamCount];
    else
@@ -3834,6 +4381,17 @@ std::string ODEModel::GetParameterTypeString(const Integer id) const
    else
       return PhysicalModel::GetParameterTypeString(id);
 }
+
+std::string ODEModel::GetParameterNameForEstimationParameter(const std::string &parmName)
+{
+    if (GmatStringUtil::EndsWith(parmName, ".ThrustScaleFactor")) {       // <segmentName>.ThrustScaleFactor
+       StringArray parts = GmatStringUtil::SeparateBy(parmName, ".");
+       return parts.at(0) + ".TSF_Epsilon";
+    }
+
+    return PhysicalModel::GetParameterNameForEstimationParameter(parmName);
+}
+
 
 //------------------------------------------------------------------------------
 // bool IsParameterReadOnly(const Integer id) const
@@ -3884,6 +4442,18 @@ Real ODEModel::GetRealParameter(const Integer id) const
       return pm->GetRealParameter(id);
    }
 
+   // Handler for force based solve-for parameters
+   if (id >= ODEModelParamCount)
+   {
+      Integer sfid = id - ODEModelParamCount;
+      if (sfid < solveForNames.size())
+      {
+         std::string name = solveForNames[sfid];
+         std::map<std::string,SolveForData>::const_iterator it = solveForMap.find(name);
+         return it->second.solveForHolder->GetRealParameter(it->second.solveForId);
+      }
+   }
+
    return PhysicalModel::GetRealParameter(id);
 }
 
@@ -3922,6 +4492,18 @@ Real ODEModel::SetRealParameter(const Integer id, const Real value)
       // Get the atmosphere model from the drag force
       Integer id = pm->GetParameterID("BodyDensity");
       return pm->SetRealParameter(id, value);
+   }
+
+   // Handler for force based solve-for parameters
+   if (id >= ODEModelParamCount)
+   {
+      Integer sfid = id - ODEModelParamCount;
+      if (sfid < solveForNames.size())
+      {
+         std::string name = solveForNames[sfid];
+         std::map<std::string,SolveForData>::const_iterator it = solveForMap.find(name);
+         return it->second.solveForHolder->SetRealParameter(it->second.solveForId, value);
+      }
    }
 
    return PhysicalModel::SetRealParameter(id, value);
@@ -4803,7 +5385,7 @@ void ODEModel::MoveToOrigin(Real newEpoch)
    if (centralBodyName != j2kBodyName)
    {
       Rvector6 cbState, j2kState, delta;
-      Real now = ((newEpoch < 0.0) ? epoch : newEpoch);
+      Real now = ((newEpoch < 0.0) ? epoch + elapsedTime/GmatTimeConstants::SECS_PER_DAY : newEpoch);
       cbState = forceOrigin->GetState(now);
       j2kState = j2kBody->GetState(now);
 
@@ -4881,7 +5463,9 @@ void ODEModel::MoveToOriginGT(GmatTime newEpoch)
    if (centralBodyName != j2kBodyName)
    {
       Rvector6 cbState, j2kState, delta;
-      GmatTime now = ((newEpoch < 0.0) ? epochGT : newEpoch);
+      GmatTime theEpochGT = epochGT;
+      theEpochGT.AddSeconds(elapsedTime);
+      GmatTime now = ((newEpoch < 0.0) ? theEpochGT : newEpoch);
       cbState = forceOrigin->GetState(now);
       j2kState = j2kBody->GetState(now);
 
@@ -4947,7 +5531,7 @@ void ODEModel::ReturnFromOrigin(Real newEpoch)
    if (centralBodyName != j2kBodyName)
    {
       Rvector6 cbState, j2kState, delta;
-      Real now = ((newEpoch < 0.0) ? epoch : newEpoch);
+      Real now = ((newEpoch < 0.0) ? epoch + elapsedTime/GmatTimeConstants::SECS_PER_DAY : newEpoch);
       cbState = forceOrigin->GetState(now);
       j2kState = j2kBody->GetState(now);
 
@@ -4991,7 +5575,9 @@ void ODEModel::ReturnFromOriginGT(GmatTime newEpoch)
    if (centralBodyName != j2kBodyName)
    {
       Rvector6 cbState, j2kState, delta;
-      GmatTime now = ((newEpoch < 0.0) ? epochGT : newEpoch);
+      GmatTime theEpochGT = epochGT;
+      theEpochGT.AddSeconds(elapsedTime);
+      GmatTime now = ((newEpoch < 0.0) ? theEpochGT : newEpoch);
       cbState = forceOrigin->GetState(now);
       j2kState = j2kBody->GetState(now);
 
@@ -5095,6 +5681,126 @@ void ODEModel::SetState(GmatState *gms)
    #endif
 }
 
+//------------------------------------------------------------------------------
+// void PhysicalModel::IncrementTime(Real dt)
+//------------------------------------------------------------------------------
+/**
+ * Used to increment the internal time counter
+ *
+ * @param dt    Amount of time to increment by (usually in seconds)
+ */
+//------------------------------------------------------------------------------
+void ODEModel::IncrementTime(Real dt)
+{
+   PhysicalModel::IncrementTime(dt);
+
+   for (std::vector<PhysicalModel*>::iterator i = forceList.begin();
+      i != forceList.end(); ++i)
+   {
+      (*i)->IncrementTime(dt);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void ODEModel::SetTime(Real dt)
+//------------------------------------------------------------------------------
+/**
+ * Write accessor for the total time elapsed 
+ * Use this method to set time for the model
+ */
+//------------------------------------------------------------------------------
+void ODEModel::SetTime(Real t)
+{
+   Real dt = t - elapsedTime;
+   for (std::vector<PhysicalModel*>::iterator i = forceList.begin();
+      i != forceList.end(); ++i)
+   {
+      Real time = (*i)->GetTime();
+      time += dt;
+      (*i)->SetTime(time);
+   }
+
+   PhysicalModel::SetTime(t);
+}
+
+//------------------------------------------------------------------------------
+// void ODEModel::SetDirection(Real dir)
+//------------------------------------------------------------------------------
+/**
+ * Write accessor for the direction of the step
+ */
+ //------------------------------------------------------------------------------
+void ODEModel::SetDirection(Real dir)
+{
+   for (std::vector<PhysicalModel*>::iterator i = forceList.begin();
+      i != forceList.end(); ++i)
+      (*i)->SetDirection(dir);
+
+   PhysicalModel::SetDirection(dir);
+}
+
+
+//------------------------------------------------------------------------------
+// Real PhysicalModel::GetStepPrecision(Real stepSize)
+//------------------------------------------------------------------------------
+/**
+ * Gets the precision of the step based on the value of the step size and the
+ * value of elasedTime
+ *
+ * @param stepSize Size of the step to take
+ *
+ * @return The smallest precision that can be accurately represented for a step
+ */
+ //------------------------------------------------------------------------------
+Real ODEModel::GetStepPrecision(Real stepSize)
+{
+   Real stepPrecision = PhysicalModel::GetStepPrecision(stepSize);
+
+   // Get the precision of the elapsedTime from the forceList
+   Real stepSign = GmatMathUtil::SignOf(stepSize);
+   for (std::vector<PhysicalModel*>::iterator i = forceList.begin();
+      i != forceList.end(); ++i)
+   {
+      Real forceStepPrecision = (*i)->GetStepPrecision(stepSize);
+      if (GmatMathUtil::Abs(forceStepPrecision) > GmatMathUtil::Abs(stepPrecision))
+         stepPrecision = forceStepPrecision;
+   }
+
+   return stepPrecision;
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetForceMaxStep(bool forward = true)
+//------------------------------------------------------------------------------
+/**
+ * Gets the max step size allowed by this ODEModel
+ *
+ * @param forward Flag to indicate which direction in time to travel
+ *
+ * @return The max step size in seconds, returns +/- REAL_MAX if the step size
+ *         is not limited
+ */
+//------------------------------------------------------------------------------
+Real ODEModel::GetForceMaxStep(bool forward)
+{
+   // Get default values
+   Real dt = PhysicalModel::GetForceMaxStep(forward);
+
+   for (std::vector<PhysicalModel*>::iterator i = forceList.begin();
+      i != forceList.end(); ++i)
+   {
+      Real dtForce = (*i)->GetForceMaxStep(forward);
+
+      if (forward)
+         dt = GmatMathUtil::Min(dt, dtForce);
+      else
+         dt = GmatMathUtil::Max(dt, dtForce);
+   }
+
+   return dt;
+}
+
 
 //---------------------------------
 // private methods
@@ -5151,3 +5857,182 @@ Integer ODEModel::GetOwnedObjectId(Integer id, GmatBase **owner) const
 }
 
 
+//------------------------------------------------------------------------------
+// StringArray GetSolveForList()
+//------------------------------------------------------------------------------
+/**
+ * Returns the solve-for fist from the forec model
+ *
+ * This method overrides the default return list, parsing through the force
+ * model and building the list for the individual forces.
+ *
+ * @return The list of solve-for parameters in the force model
+ */
+//------------------------------------------------------------------------------
+StringArray ODEModel::GetSolveForList()
+{
+   solveForList.clear();
+   solveForNames.clear();
+   solveForMap.clear();
+
+   for (UnsignedInt i = 0; i < forceList.size(); ++i)
+   {
+      StringArray sfors = forceList[i]->GetSolveForList();
+      #ifdef DEBUG_SOLVEFORS
+         MessageInterface::ShowMessage("--> %s has %d solve-fors\n",
+               forceList[i]->GetTypeName().c_str(), sfors.size());
+      #endif
+      for (UnsignedInt j = 0; j < sfors.size(); ++j)
+      {
+         #ifdef DEBUG_SOLVEFORS
+            MessageInterface::ShowMessage("   -----> Processing %s\n", sfors[j].c_str());
+         #endif
+         solveForList.push_back(sfors[j]);
+         solveForNames.push_back(sfors[j]);
+         SolveForData sfd;
+         sfd.solveForHolder = forceList[i];
+         sfd.solveForId     = forceList[i]->GetParameterID(sfors[j]);
+         solveForMap[sfors[j]] = sfd;
+
+         if (GmatStringUtil::EndsWith(sfors[j], ".ThrustScaleFactor")) {
+             StringArray parts = GmatStringUtil::SeparateBy(sfors[j], ".");
+             std::string epsName = parts.at(0) + ".TSF_Epsilon";
+             solveForNames.push_back(epsName);
+             SolveForData sfd1;
+             sfd1.solveForHolder = forceList[i];
+             sfd1.solveForId = forceList[i]->GetParameterID(epsName);
+             solveForMap[epsName] = sfd1;
+         }
+      }
+   }
+   return solveForList;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ODEModel::IsEstimationParameterValid(const Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if the parameter is a valid solve-for
+ *
+ * @param item The estimation ID for the parameter
+ *
+ * @return true if a valid solve for in this run
+ */
+//------------------------------------------------------------------------------
+bool ODEModel::IsEstimationParameterValid(const Integer item)
+{
+   /// @todo Figure this part out
+
+//   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;
+//
+//   if (solveForList.size() == 0)
+      return true;
+//
+//   // ODEModel solve-fors are PhysicalModel parameters, mapped through ODEModel
+//   if (id >= 0 && type < solveForList.size())
+//      return true;
+//
+//   return false;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetEstimationParameterID(const std::string &param)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the estimation parameter ID
+ *
+ * @param Name of the parameter
+ *
+ * @return The ID
+ */
+//------------------------------------------------------------------------------
+Integer ODEModel::GetEstimationParameterID(const std::string &param)
+{
+   Integer retval = -1;
+
+   std::string lookupName = param;
+   if (GmatStringUtil::EndsWith(param, ".ThrustScaleFactor")) {
+      StringArray parts = GmatStringUtil::SeparateBy(param, ".");
+      lookupName = parts.at(0) + ".TSF_Epsilon";
+   }
+
+   for (UnsignedInt i = 0; i < solveForNames.size(); ++i)
+      if (solveForNames[i] == lookupName) {
+         retval = type * ESTIMATION_TYPE_ALLOCATION + ODEModelParamCount + i;
+         break;
+      }
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer SetEstimationParameter(const std::string &param)
+//------------------------------------------------------------------------------
+/**
+ * Sets the new parameter value
+ *
+ * @param param Name of the estimation parameter
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
+Integer ODEModel::SetEstimationParameter(const std::string &param)
+{
+   return 1;
+}
+
+
+//------------------------------------------------------------------------------
+// Real* GetEstimationParameterValue(const Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the estimation parameter value
+ *
+ * @param item Estimation ID for the solve-for parameter
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
+Real* ODEModel::GetEstimationParameterValue(const Integer item)
+{
+   Real* retval = NULL;
+
+   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION - ODEModelParamCount;
+
+   if (id >= 0 && id < solveForNames.size())
+   {
+      Integer sfid = id;
+      if (sfid < solveForNames.size())
+      {
+         std::string name = solveForNames[sfid];
+         std::map<std::string,SolveForData>::iterator it = solveForMap.find(name);
+
+         it->second.value = it->second.solveForHolder->GetRealParameter(it->second.solveForId);
+
+         #ifdef DEBUG_STM_AMATRIX_DERIVS
+            MessageInterface::ShowMessage("Estimation ID %d has value[0] %lf\n", item,
+                  it->second.value);
+         #endif
+
+         return &(it->second.value);
+      }
+   }
+   else
+      retval = GmatBase::GetEstimationParameterValue(item);
+
+   return retval;
+}
+
+
+GmatBase* ODEModel::GetStmObject(const std::string &rowName)
+{
+   GmatBase *retval = NULL;
+
+   if (solveForMap.find(rowName) != solveForMap.end())
+      retval = solveForMap[rowName].solveForHolder->
+                     GetRefObject(Gmat::SPACECRAFT, "");
+
+   return retval;
+}

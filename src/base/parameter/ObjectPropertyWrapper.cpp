@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -190,6 +190,11 @@ std::string ObjectPropertyWrapper::ToString()
    {
       Rvector rvec = EvaluateRvector();
       retval = rvec.ToString(16);
+      break;
+   }
+   case Gmat::EQUATION_TYPE:
+   {
+      retval = EquationToString();
       break;
    }
    case Gmat::STRING_TYPE:
@@ -919,6 +924,23 @@ bool ObjectPropertyWrapper::SetObject(GmatBase *obj)
          ("ObjectPropertyWrapper::SetObject() method not valid for wrapper of non-Object type.\n");
    
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string EquationToString() const
+//------------------------------------------------------------------------------
+/**
+ * Fires an equation parameter and generates the resulting string representation
+ *
+ * @return The string results
+ */
+//------------------------------------------------------------------------------
+std::string ObjectPropertyWrapper::EquationToString() const
+{
+   Real results = object->GetRealParameter(propID);
+   std::string value = GmatStringUtil::ToString(results);
+   return value;
 }
 
 

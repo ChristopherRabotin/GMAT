@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -527,9 +527,9 @@ Rmatrix33 SkewSymmetric(const Rvector3& v)
 
 //------------------------------------------------------------------------------
 //  <friend>
-//  Rmatrix33 TransposeTimesRmatrix(const Rmatrix33& m1,  const Rmatrix33& m2)
+//  Rmatrix33 TransposeTimesMatrix(const Rmatrix33& m1,  const Rmatrix33& m2)
 //------------------------------------------------------------------------------
-Rmatrix33 TransposeTimesRmatrix(const Rmatrix33& m1, const Rmatrix33& m2) 
+Rmatrix33 TransposeTimesMatrix(const Rmatrix33& m1, const Rmatrix33& m2)
 {
     return Rmatrix33(m1(0,0)*m2(0,0) + m1(1,0)*m2(1,0) + m1(2,0)*m2(2,0),
                      m1(0,0)*m2(0,1) + m1(1,0)*m2(1,1) + m1(2,0)*m2(2,1),

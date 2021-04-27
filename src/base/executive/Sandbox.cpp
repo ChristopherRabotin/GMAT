@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -32,6 +32,8 @@
 #include "Sandbox.hpp"
 #include "Moderator.hpp"
 #include "SandboxException.hpp"
+#include "EquationInitializer.hpp"
+#include "MathTree.hpp"
 #include "Parameter.hpp"
 #include "FiniteThrust.hpp"
 #include "Function.hpp"
@@ -100,6 +102,7 @@ Sandbox::Sandbox() :
 //   cloneUpdateStyle  (SKIP_UPDATES)
    cloneUpdateStyle  (PASS_TO_ALL),
    errorInPreviousFcs (false),
+   warnPyInterface   (0),
    pCreateWidget     (NULL)
 {
 }
@@ -182,7 +185,7 @@ GmatBase* Sandbox::AddObject(GmatBase *obj)
    
    #ifdef DEBUG_SANDBOX_OBJ_ADD
       MessageInterface::ShowMessage
-         ("Sandbox::AddObject() objTypeName=%s, objName=%s\n",
+         ("Sandbox::AddObject() objTypeName=%s, objName=%s",
           obj->GetTypeName().c_str(), obj->GetName().c_str());
    #endif
       
@@ -243,6 +246,11 @@ GmatBase* Sandbox::AddObject(GmatBase *obj)
             AddOwnedSubscriber((Subscriber*)oo);
          }
       }
+
+      #ifdef DEBUG_SANDBOX_OBJ_ADD
+         MessageInterface::ShowMessage(";  Original:  %p    Sandbox:  %p",
+               obj, cloned);
+      #endif
    }
    else
    {
@@ -250,6 +258,10 @@ GmatBase* Sandbox::AddObject(GmatBase *obj)
          ("in Sandbox::AddObject() %s is already in the map\n", name.c_str());
    }
    
+   #ifdef DEBUG_SANDBOX_OBJ_ADD
+      MessageInterface::ShowMessage("\n");
+   #endif
+
    return cloned;
 }
 
@@ -526,12 +538,24 @@ GmatBase* Sandbox::GetInternalObject(std::string name, UnsignedInt type)
 /**
 * This function is used to get object map 
 *
+* @return The map of locally defined objects
 */
 //------------------------------------------------------------------------------
 std::map<std::string, GmatBase *> Sandbox::GetObjectMap()
 {
    return objectMap;
 }
+
+
+//------------------------------------------------------------------------------
+// std::map<std::string, GmatBase *> GetGlobalObjectMap()
+//------------------------------------------------------------------------------
+/**
+ * Accessor for the global object map
+ *
+ * @return The map of globally defined objects
+ */
+//------------------------------------------------------------------------------
 std::map<std::string, GmatBase *> Sandbox::GetGlobalObjectMap()
 {
    return globalObjectMap;
@@ -584,7 +608,7 @@ bool Sandbox::Initialize()
             ((Parameter*)obj)->SetTransientForces(&transientForces);
       }
    }
-   // Set transient force vector on Parameters that need it
+   // Set transient force vector on Parameters in the GOM that need it
    for (std::map<std::string,GmatBase*>::iterator i = globalObjectMap.begin();
          i != globalObjectMap.end(); ++i)
    {
@@ -758,6 +782,41 @@ bool Sandbox::Initialize()
    StringArray exceptions;
    IntegerArray exceptionTypes;
    UnsignedInt exceptionCount = 0;
+
+   // Construct equations inside of resources -- move up so globals are set?
+   for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
+   {
+      if (omi->second->HasEquation())
+      {
+         obj = omi->second;
+         obj->SetupEquation(&objectMap);
+
+         std::vector<RHSEquation*> equations;
+         obj->GetEquations(equations);
+         for (Integer j = 0; j < equations.size(); ++j)
+         {
+            std::string equationString;
+            RHSEquation *equation = equations[j];
+            Validator::Instance()->ValidateEquation(equation);
+            equation->GetMathTree(false)->SetObjectMap(&objectMap);
+            equation->GetMathTree(false)->SetGlobalObjectMap(&globalObjectMap);
+
+//            // Reset object pointers to the Sandbox clones
+//            StringArray references = equation->GetWrapperObjectNames();
+//            for (UnsignedInt i = 0; i < references.size(); ++i)
+//            {
+//               GmatBase *obj = GetObject(references[i]);
+//               if (obj)
+//                  equation->
+//            }
+         }
+
+         if (!obj->InitializeEquations(&objectMap, &globalObjectMap))
+            MessageInterface::ShowMessage("Equation initialization failed "
+                  "for %s\n", obj->GetName().c_str());
+      }
+   }
+
    
    // Set the EventLocators
    for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
@@ -801,6 +860,7 @@ bool Sandbox::Initialize()
    #endif
    
    // Initialize commands
+   warnPyInterface = 0;
    while (current)
    {
       try
@@ -907,13 +967,26 @@ bool Sandbox::Initialize()
       }
       catch (BaseException &be)
       {
-         ++exceptionCount;
-         exceptionTypes.push_back(be.GetMessageType());
-         exceptions.push_back(be.GetFullMessage());
+         // Added trap for the Python exception so it only fires one time
+         if (ReportError(be))
+         {
+            ++exceptionCount;
+            exceptionTypes.push_back(be.GetMessageType());
+            exceptions.push_back(be.GetFullMessage());
+         }
       }
       current = current->GetNext();
    }
    
+   // Initialize equations found in the object stores
+   EquationInitializer eqInitializer(solarSys, &objectMap, &globalObjectMap,
+         internalCoordSys);
+   if (!eqInitializer.PrepareEquationsForMapObjects())
+   {
+      // Add equation exceptions here; for now, just set
+      rv = false;
+   }
+
    if (exceptionCount > 0)
    {
       for (UnsignedInt i = 0; i < exceptionCount; ++i)
@@ -991,6 +1064,7 @@ bool Sandbox::Execute()
             
             if (state == PAUSED)
             {
+               publisher->Ping();
                continue;
             }
             else
@@ -1309,6 +1383,11 @@ void Sandbox::Clear()
          #endif
          delete omi->second;
          omi->second = NULL;
+
+         #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+         MessageInterface::ShowMessage("   Deleting completed\n");
+         #endif
+
          // Commented out since this causes crash when re-run or exit GMAT (LOJ: 2015.03.26)
          //objectMap.erase(omi++);
       }
@@ -2210,3 +2289,32 @@ void Sandbox::UpdateAndInitializeCloneOwner(GmatBase *theClone,
       }
    }
 }
+
+
+//----------------------------------------------------------------------------
+// bool ReportError(BaseException &be)
+//----------------------------------------------------------------------------
+/**
+ * Method used to suppress multiple warnings
+ *
+ * @note The current implementation only traps multiple Python iinitialization
+ * failures.
+ *
+ * @param be The exception checked for suppression
+ *
+ * @retval true to report the exception, false to suppress it
+ */
+ //----------------------------------------------------------------------------
+bool Sandbox::ReportError(BaseException &be)
+{
+   bool retval = true;
+
+   if (be.GetDetails().find("The Pythoninterface cannot be accessed") != std::string::npos)
+      ++warnPyInterface;
+
+   if (warnPyInterface > 1)
+      retval = false;
+
+   return retval;
+}
+

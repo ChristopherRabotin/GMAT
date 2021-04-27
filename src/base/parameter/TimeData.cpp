@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -32,7 +32,6 @@
 #include "gmatdefs.hpp"
 #include "TimeData.hpp"
 #include "ParameterException.hpp"
-#include "TimeSystemConverter.hpp"
 #include "TimeTypes.hpp"
 #include "Linear.hpp"               // for GmatRealUtil::ToString()
 #include "GmatConstants.hpp"
@@ -84,6 +83,8 @@ TimeData::TimeData(const std::string &name, const std::string &typeName,
    mSpacePoint = NULL;
    
    handleLeapSecond = false;
+   theTimeConverter = TimeSystemConverter::Instance();
+
    #ifdef DEBUG_CONSTRUCTOR
    MessageInterface::ShowMessage
       ("TimeData::TimeData(default) <%p>'%s' leaving, mInitialEpoch=%f, "
@@ -117,6 +118,7 @@ TimeData::TimeData(const TimeData &copy)
    mSpacePoint        = copy.mSpacePoint;
    
    handleLeapSecond   = copy.handleLeapSecond;
+   theTimeConverter   = TimeSystemConverter::Instance();
    
    #ifdef DEBUG_CONSTRUCTOR
    MessageInterface::ShowMessage
@@ -271,25 +273,25 @@ Real TimeData::GetTimeReal(Integer id)
       time = a1Mjd;
       break;
    case TAI:
-      time = TimeConverterUtil::Convert(a1Mjd, TimeConverterUtil::A1MJD,
-                                        TimeConverterUtil::TAIMJD,
+      time = theTimeConverter->Convert(a1Mjd, TimeSystemConverter::A1MJD,
+                                        TimeSystemConverter::TAIMJD,
                                         GmatTimeConstants::JD_JAN_5_1941);
       break;
    case TT:
-      time = TimeConverterUtil::Convert(a1Mjd, TimeConverterUtil::A1MJD,
-                                        TimeConverterUtil::TTMJD,
+      time = theTimeConverter->Convert(a1Mjd, TimeSystemConverter::A1MJD,
+                                        TimeSystemConverter::TTMJD,
                                         GmatTimeConstants::JD_JAN_5_1941);
       break;
    case TDB:
-      time = TimeConverterUtil::Convert(a1Mjd, TimeConverterUtil::A1MJD,
-                                        TimeConverterUtil::TDBMJD,
+      time = theTimeConverter->Convert(a1Mjd, TimeSystemConverter::A1MJD,
+                                        TimeSystemConverter::TDBMJD,
                                         GmatTimeConstants::JD_JAN_5_1941);
       break;
    case UTC:
-      time = TimeConverterUtil::Convert(a1Mjd, TimeConverterUtil::A1MJD,
-                                        TimeConverterUtil::UTCMJD,
-                                        GmatTimeConstants::JD_JAN_5_1941);
-      handleLeapSecond = TimeConverterUtil::HandleLeapSecond();
+      time = theTimeConverter->Convert(a1Mjd, TimeSystemConverter::A1MJD,
+                                        TimeSystemConverter::UTCMJD,
+                                        GmatTimeConstants::JD_JAN_5_1941,
+                                        &handleLeapSecond);
       break;
    default:
       throw ParameterException("TimeData::GetTimeReal() Unknown parameter id: " +
@@ -338,31 +340,27 @@ void TimeData::SetTimeReal(Integer id, Real value)
       mSpacePoint->SetRealParameter(epochId, value);
       break;
    case TAI:
-      a1Mjd = TimeConverterUtil::Convert(value, TimeConverterUtil::TAIMJD,
-                                         TimeConverterUtil::A1MJD,
+      a1Mjd = theTimeConverter->Convert(value, TimeSystemConverter::TAIMJD,
+                                         TimeSystemConverter::A1MJD,
                                          GmatTimeConstants::JD_JAN_5_1941);
-//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
       mSpacePoint->SetRealParameter(epochId, a1Mjd);
       break;
    case TT:
-      a1Mjd = TimeConverterUtil::Convert(value, TimeConverterUtil::TTMJD,
-                                         TimeConverterUtil::A1MJD,
+      a1Mjd = theTimeConverter->Convert(value, TimeSystemConverter::TTMJD,
+                                         TimeSystemConverter::A1MJD,
                                          GmatTimeConstants::JD_JAN_5_1941);
-//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
       mSpacePoint->SetRealParameter(epochId, a1Mjd);
       break;
    case TDB:
-      a1Mjd = TimeConverterUtil::Convert(value, TimeConverterUtil::TDBMJD,
-                                         TimeConverterUtil::A1MJD,
+      a1Mjd = theTimeConverter->Convert(value, TimeSystemConverter::TDBMJD,
+                                         TimeSystemConverter::A1MJD,
                                          GmatTimeConstants::JD_JAN_5_1941);
-//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
       mSpacePoint->SetRealParameter(epochId, a1Mjd);
       break;
    case UTC:
-      a1Mjd = TimeConverterUtil::Convert(value, TimeConverterUtil::UTCMJD,
-                                         TimeConverterUtil::A1MJD,
+      a1Mjd = theTimeConverter->Convert(value, TimeSystemConverter::UTCMJD,
+                                         TimeSystemConverter::A1MJD,
                                          GmatTimeConstants::JD_JAN_5_1941);
-//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
       mSpacePoint->SetRealParameter(epochId, a1Mjd);
      break;
    default:
@@ -405,9 +403,9 @@ std::string TimeData::GetTimeString(Integer id)
       #ifdef DEBUG_TIMEDATA
       MessageInterface::ShowMessage
          ("TimeData::GetTimeString() id=%d, timeStr = %s\n", id,
-          TimeConverterUtil::ConvertMjdToGregorian(time, isUTC).c_str());
+          TimeSystemConverter::ConvertMjdToGregorian(time, isUTC).c_str());
       #endif
-      return TimeConverterUtil::ConvertMjdToGregorian(time, (isUTC && handleLeapSecond));// need toUTC
+      return theTimeConverter->ConvertMjdToGregorian(time, (isUTC && handleLeapSecond));// need toUTC
    default:
       throw ParameterException("TimeData::GetTimeString() Unknown parameter id: " +
                                GmatRealUtil::ToString(id));
@@ -444,33 +442,28 @@ void TimeData::SetTimeString(Integer id, const std::string &value)
    switch (id)
    {
    case A1:
-      TimeConverterUtil::Convert("A1Gregorian", fromMjd, value, 
+      theTimeConverter->Convert("A1Gregorian", fromMjd, value,
                                  "A1ModJulian", a1Mjd, a1MjdString);
-//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
       mSpacePoint->SetRealParameter(epochId, a1Mjd);
       break;
    case TAI:
-      TimeConverterUtil::Convert("TAIGregorian", fromMjd, value, 
+      theTimeConverter->Convert("TAIGregorian", fromMjd, value,
                                  "A1ModJulian", a1Mjd, a1MjdString);
-//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
       mSpacePoint->SetRealParameter(epochId, a1Mjd);
       break;
    case TT:
-      TimeConverterUtil::Convert("TTGregorian", fromMjd, value, 
+      theTimeConverter->Convert("TTGregorian", fromMjd, value,
                                  "A1ModJulian", a1Mjd, a1MjdString);
-//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
       mSpacePoint->SetRealParameter(epochId, a1Mjd);
       break;
    case TDB:
-      TimeConverterUtil::Convert("TDBGregorian", fromMjd, value, 
+      theTimeConverter->Convert("TDBGregorian", fromMjd, value,
                                  "A1ModJulian", a1Mjd, a1MjdString);
-//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
       mSpacePoint->SetRealParameter(epochId, a1Mjd);
       break;
    case UTC:
-      TimeConverterUtil::Convert("UTCGregorian", fromMjd, value, 
+      theTimeConverter->Convert("UTCGregorian", fromMjd, value,
                                  "A1ModJulian", a1Mjd, a1MjdString);
-//      mSpacecraft->SetRealParameter(epochId, a1Mjd);
       mSpacePoint->SetRealParameter(epochId, a1Mjd);
      break;
    default:

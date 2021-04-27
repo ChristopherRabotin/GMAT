@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -42,49 +42,60 @@
 
 #include "GmatTime.hpp"
 
-// struct TimeSystemConverterExceptions
-// {
-   class GMATUTIL_API UnimplementedException : public BaseException
-   {
-      public:
-         UnimplementedException(const std::string &message =
-         "TimeSystemConverter: Conversion not implemented: ")
-         : BaseException(message) {};
-   };
-   class GMATUTIL_API TimeFileException : public BaseException
-   {
-      public:
-         TimeFileException(const std::string &message =
-         "TimeSystemConverter: File is unknown: ")
-         : BaseException(message) {};
-   };
-   class GMATUTIL_API TimeFormatException : public BaseException
-   {
-      public:
-         TimeFormatException(const std::string &message =
-         "TimeSystemConverter: Requested format not implemented: ")
-         : BaseException(message) {};
-   };
-   class GMATUTIL_API InvalidTimeException : public BaseException
-   {
-      public:
-         InvalidTimeException(const std::string &message =
-         "TimeSystemConverter: Requested time is invalid: ")
-         : BaseException(message) {};
-   };
-// };
-
-namespace TimeConverterUtil
+class GMATUTIL_API UnimplementedException : public BaseException
 {
+   public:
+      UnimplementedException(const std::string &message =
+      "TimeSystemConverter: Conversion not implemented: ")
+      : BaseException(message) {};
+};
+class GMATUTIL_API TimeFileException : public BaseException
+{
+   public:
+      TimeFileException(const std::string &message =
+      "TimeSystemConverter: File is unknown: ")
+      : BaseException(message) {};
+};
+class GMATUTIL_API TimeFormatException : public BaseException
+{
+   public:
+      TimeFormatException(const std::string &message =
+      "TimeSystemConverter: Requested format not implemented: ")
+      : BaseException(message) {};
+};
+class GMATUTIL_API InvalidTimeException : public BaseException
+{
+   public:
+      InvalidTimeException(const std::string &message =
+      "TimeSystemConverter: Requested time is invalid: ")
+      : BaseException(message) {};
+};
+
+
+
+/**
+ * \ingroup API
+ * @brief Time system conversion routines
+ *
+ * GMAT supports time representations in several different time systems.  This
+ * class provides routimes to convert between these time systems, and to 
+ * show hte time as either a real modified Julian number or as a Gregorian date. 
+ */
+class GMATUTIL_API TimeSystemConverter
+{
+public:
+   // Most of the time, GMAT uses the singleton
+   static TimeSystemConverter *Instance();
+
    // Specified in Math Spec section 2.3
-   static const Real TDB_COEFF1                    = 0.001658;
-   static const Real TDB_COEFF2                    = 0.00001385;
-   static const Real M_E_OFFSET                    = 357.5277233;
-   static const Real M_E_COEFF1                    = 35999.05034;
-   static const Real T_TT_OFFSET                   = GmatTimeConstants::JD_OF_J2000;
-   static const Real T_TT_COEFF1                   = GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;
-   static const Real L_B                           = 1.550505e-8;
-   static const Real NUM_SECS                      = GmatTimeConstants::SECS_PER_DAY;
+   const Real TDB_COEFF1;                  //  = 0.001658;
+   const Real TDB_COEFF2;                  //  = 0.00001385;
+   const Real M_E_OFFSET;                  //  = 357.5277233;
+   const Real M_E_COEFF1;                  //  = 35999.05034;
+   const Real T_TT_OFFSET;                 //  = GmatTimeConstants::JD_OF_J2000;
+   const Real T_TT_COEFF1;                 //  = GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;
+   const Real L_B;                         //  = 1.550505e-8;
+   const Real NUM_SECS;                    //  = GmatTimeConstants::SECS_PER_DAY;
 
    enum TimeSystemTypes
    {
@@ -103,105 +114,101 @@ namespace TimeConverterUtil
       TimeSystemCount
    };
 
-   static const std::string TIME_SYSTEM_TEXT[TimeSystemCount] =
-   {
-      "A1Mjd",
-      "TaiMjd",
-      "UtcMjd",
-      "Ut1Mjd",
-      "TdbMjd",
-      "TtMjd",
-      // New entries added by DJC
-      "A1",
-      "TAI",
-      "UTC",
-      "UT1",
-      "TDB",
-      "TT",
-   };
-
-/*   Real Convert(const Real origValue,
-                      const std::string &fromType,
-                      const std::string &toType,
-                      Real refJd = GmatTimeConstants::JD_NOV_17_1858);
-
-   Real ConvertToTaiMjd(std::string fromType, Real origValue,
-      Real refJd= GmatTimeConstants::JD_NOV_17_1858);
-   Real ConvertFromTaiMjd(std::string toType, Real origValue,
-      Real refJd= GmatTimeConstants::JD_NOV_17_1858);
- */
+   static const std::string TIME_SYSTEM_TEXT[TimeSystemCount];
    
-   Integer GMATUTIL_API GetTimeTypeID(std::string &str);
+   Integer     GetTimeTypeID(const std::string &str);
    
-   Real GMATUTIL_API Convert(const Real origValue,
+   Real        Convert(const Real origValue,
                          const Integer fromType,
                          const Integer toType,
-                         Real refJd = GmatTimeConstants::JD_JAN_5_1941);
-   Real GMATUTIL_API ConvertToTaiMjd(Integer fromType, Real origValue,
-                         Real refJd = GmatTimeConstants::JD_NOV_17_1858);
-   Real GMATUTIL_API ConvertFromTaiMjd(Integer toType, Real origValue,
-                         Real refJd = GmatTimeConstants::JD_NOV_17_1858);
+                         Real refJd = GmatTimeConstants::JD_JAN_5_1941,
+                         bool *insideLeapSec = NULL);
+   Real        ConvertToTaiMjd(Integer fromType, Real origValue,
+                         Real refJd = GmatTimeConstants::JD_NOV_17_1858,
+                         bool *insideLeapSec = NULL);
+   Real        ConvertFromTaiMjd(Integer toType, Real origValue,
+                         Real refJd = GmatTimeConstants::JD_NOV_17_1858,
+                         bool *insideLeapSec = NULL);
 
-
-   GmatTime GMATUTIL_API Convert(const GmatTime origValue, 
+   GmatTime    Convert(const GmatTime &origValue, 
                          const Integer fromType, 
                          const Integer toType, 
-                         Real refJd = GmatTimeConstants::JD_JAN_5_1941);
-   GmatTime GMATUTIL_API ConvertToTaiMjd(Integer fromType, GmatTime origValue, 
-                         Real refJd = GmatTimeConstants::JD_NOV_17_1858);
-   GmatTime GMATUTIL_API ConvertFromTaiMjd(Integer toType, GmatTime origValue, 
-                         Real refJd = GmatTimeConstants::JD_NOV_17_1858);
+                         Real refJd = GmatTimeConstants::JD_JAN_5_1941,
+                         bool *insideLeapSec = NULL);
+   GmatTime    ConvertToTaiMjd(Integer fromType, const GmatTime &origValue, 
+                         Real refJd = GmatTimeConstants::JD_NOV_17_1858,
+                         bool *insideLeapSec = NULL);
+   GmatTime    ConvertFromTaiMjd(Integer toType, const GmatTime &origValue,
+                         Real refJd = GmatTimeConstants::JD_NOV_17_1858,
+                         bool *insideLeapSec = NULL);
 
-   Real GMATUTIL_API NumberOfLeapSecondsFrom(Real utcMjd,
+   Real        NumberOfLeapSecondsFrom(Real utcMjd,
                          Real jdOfMjdRef = GmatTimeConstants::JD_JAN_5_1941);
-   Real GMATUTIL_API GetFirstLeapSecondMJD(Real fromUtcMjd, Real toUtcMjd,
+   Real        GetFirstLeapSecondMJD(Real fromUtcMjd, Real toUtcMjd,
                          Real jdOfMjdRef = GmatTimeConstants::JD_JAN_5_1941);
    
-   void GMATUTIL_API SetEopFile(EopFile *eopFile);
-   void GMATUTIL_API SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader);
+   void        SetEopFile(EopFile *eopFile);
+   void        SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader);
    
-   void GMATUTIL_API GetTimeSystemAndFormat(const std::string &type, std::string &system,
+   void        GetTimeSystemAndFormat(const std::string &type, std::string &system,
                          std::string &format);
    
-   std::string GMATUTIL_API ConvertMjdToGregorian(const Real mjd, bool handleLeapSecond = false,
+   std::string ConvertMjdToGregorian(const Real mjd, bool handleLeapSecond = false,
                                               Integer format = 1);
-   Real GMATUTIL_API ConvertGregorianToMjd(const std::string &greg);
-   GmatTime GMATUTIL_API ConvertGregorianToMjdGT(const std::string &greg);
+   Real        ConvertGregorianToMjd(const std::string &greg);
+   GmatTime    ConvertGregorianToMjdGT(const std::string &greg);
    
-   void GMATUTIL_API Convert(const char *fromType, Real fromMjd,
+   void        Convert(const char *fromType, Real fromMjd,
                          const char *fromStr, const char *toType,
-                         Real &toMjd, std::string &toStr, Integer format = 1);
-   void GMATUTIL_API Convert(const char *fromType, Real fromMjd,
+                         Real &toMjd, std::string &toStr, Integer format = 1,
+                         bool *insideLeapSec = NULL);
+   void        Convert(const char *fromType, Real fromMjd,
                          const std::string &fromStr, const std::string &toType,
-                         Real &toMjd, std::string &toStr, Integer format = 1);
-   void GMATUTIL_API Convert(const std::string &fromType, Real fromMjd,
+                         Real &toMjd, std::string &toStr, Integer format = 1,
+                         bool *insideLeapSec = NULL);
+   void        Convert(const std::string &fromType, Real fromMjd,
                          const std::string &fromStr, const std::string &toType,
-                         Real &toMjd, std::string &toStr, Integer format = 1);
-   
-   void GMATUTIL_API Convert(const char *fromType, GmatTime fromMjd, 
-                         const char *fromStr, const char *toType, 
-                         GmatTime &toMjd, std::string &toStr, Integer format = 1);
-   void GMATUTIL_API Convert(const char *fromType, GmatTime fromMjd, 
-                         const std::string &fromStr, const std::string &toType, 
-                         GmatTime &toMjd, std::string &toStr, Integer format = 1);
-   void GMATUTIL_API Convert(const std::string &fromType, GmatTime fromMjd, 
-                         const std::string &fromStr, const std::string &toType, 
-                         GmatTime &toMjd, std::string &toStr, Integer format = 1);
+                         Real &toMjd, std::string &toStr, Integer format = 1,
+                         bool *insideLeapSec = NULL);
 
-   bool GMATUTIL_API ValidateTimeSystem(std::string sys);   
-   bool GMATUTIL_API ValidateTimeFormat(const std::string &format, const std::string &value,
+   void        Convert(const char *fromType, const GmatTime &fromMjd, 
+                         const char *fromStr, const char *toType, 
+                         GmatTime &toMjd, std::string &toStr, Integer format = 1,
+                         bool *insideLeapSec = NULL);
+   void        Convert(const char *fromType, const GmatTime &fromMjd,
+                         const std::string &fromStr, const std::string &toType, 
+                         GmatTime &toMjd, std::string &toStr, Integer format = 1,
+                         bool *insideLeapSec = NULL);
+   void        Convert(const std::string &fromType, const GmatTime &fromMjd,
+                         const std::string &fromStr, const std::string &toType, 
+                         GmatTime &toMjd, std::string &toStr, Integer format = 1,
+                         bool *insideLeapSec = NULL);
+
+   bool        ValidateTimeSystem(std::string sys);   
+   bool        ValidateTimeFormat(const std::string &format, const std::string &value,
                                     bool checkValue = true);
-   StringArray GMATUTIL_API GetValidTimeRepresentations();
+   StringArray GetValidTimeRepresentations();
    
-   bool GMATUTIL_API IsValidTimeSystem(const std::string& system);
+   bool        IsValidTimeSystem(const std::string& system);
    
-   bool GMATUTIL_API IsInLeapSecond(Real theTaiMjd);
-   bool GMATUTIL_API IsInLeapSecond(GmatTime theTaiMjd);
+protected:
+
+   bool        IsInLeapSecond(Real theTaiMjd);
+   bool        IsInLeapSecond(const GmatTime &theTaiMjd);
    
-   bool GMATUTIL_API HandleLeapSecond();
+//   bool        HandleLeapSecond();
    
-   static bool isInLeapSecond;
-   
-}
+
+//bool isInLeapSecond;
+   EopFile              *theEopFile;
+   LeapSecsFileReader   *theLeapSecsFileReader;
+
+
+   TimeSystemConverter();
+   TimeSystemConverter(const TimeSystemConverter &tcu);
+
+   // The singleton
+   static TimeSystemConverter *theTimeConverter;
+};
 
 #endif // TimeSystemConverter_hpp

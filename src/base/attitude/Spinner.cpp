@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -69,6 +69,8 @@ Spinner::Spinner(const std::string &itsName) :
    objectTypeNames.push_back("Spinner");
    attitudeModelName     = "Spinner";
    modifyCoordSysAllowed = false;
+   initialwMag           = angVel.GetMagnitude();
+
    // Reserve spaces to handle attribute comments for owned object
    // LOJ: 2013.03.01 for GMT-3353 FIX
    FinalizeCreation();
@@ -85,11 +87,15 @@ Spinner::Spinner(const std::string &itsName) :
  */
 //------------------------------------------------------------------------------
 Spinner::Spinner(const Spinner& att) :
-   Kinematic(att)
+   Kinematic(att),
+   initialwMag  (att.initialwMag)
 {
    #ifdef DEBUG_SPINNER_INIT
    MessageInterface::ShowMessage("------- Entering Spinner (copy constructor)\n");
    #endif
+   
+   RB0I         = att.RB0I;
+   initialeAxis = att.initialeAxis;
 }
  
 //------------------------------------------------------------------------------
@@ -107,6 +113,11 @@ Spinner::Spinner(const Spinner& att) :
 Spinner& Spinner::operator=(const Spinner& att)
 {
    Kinematic::operator=(att);
+   
+   initialwMag  = att.initialwMag;
+   RB0I         = att.RB0I;
+   initialeAxis = att.initialeAxis;
+   
    return *this;
 }
 
@@ -240,6 +251,13 @@ void Spinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    #endif
 }
 
+
+// made changes by TUAN NGUYEN
+void Spinner::ComputeCosineMatrixAndAngularVelocity(GmatTime &atTime)
+{
+   ///@todo: it needs to add code for a high precision of time
+   ComputeCosineMatrixAndAngularVelocity(atTime.GetMjd());
+}
 
 //------------------------------------------------------------------------------
 //  private methods

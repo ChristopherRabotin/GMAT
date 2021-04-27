@@ -1,17 +1,12 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>AcceptFilter</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="Resources.html" title="Resources"><link rel="next" href="Antenna.html" title="Antenna"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">AcceptFilter</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Resources.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Antenna.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="AcceptFilter"></a><div class="titlepage"></div><a name="N15196" class="indexterm"></a><a name="N15199" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">AcceptFilter</span></h2><p>AcceptFilter &mdash; Allows selection of data subsets for processing by the batch
-    least squares estimator.</p></div><div class="refsection"><a name="N151AA"></a><h2>Description</h2><p>Starting with the R2017A release of GMAT, the
-    <span class="guilabel">AcceptFilter</span> resource replaces the
-    <span class="guilabel">StatisticsAcceptFilter</span> resource. The
-    <span class="guilabel">StatisticsAcceptFilter</span> resource is still available in
-    this release but it is deprecated and will be removed in a future
-    release.</p><p>The <span class="guilabel">AcceptFilter</span> object is used to create
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>AcceptFilter</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ch19.html#N24EB6" title="Resources"><link rel="prev" href="ch19.html" title="Chapter&nbsp;19.&nbsp;Orbit Determination"><link rel="next" href="Antenna.html" title="Antenna"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">AcceptFilter</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ch19.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Antenna.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="AcceptFilter"></a><div class="titlepage"></div><a name="N24EBD" class="indexterm"></a><a name="N24EC0" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">AcceptFilter</span></h2><p>AcceptFilter &mdash; Allows selection of data subsets for processing by the batch
+    least squares estimator.</p></div><div class="refsection"><a name="N24ED3"></a><h2>Description</h2><p>The <span class="guilabel">AcceptFilter</span> object is used to create
     criteria for the inclusion of subsets of the available data in the
     estimation process based on observation frequency, tracker, measurement
     type, record number, or time. Instances of
     <span class="guilabel">AcceptFilter</span> are specified for use on the
     <span class="guilabel">DataFilters</span> field of a
     <span class="guibutton">TrackingFileSet</span> or
-    <span class="guilabel">BatchEstimatorInv</span> object.</p><p>GMAT implements two levels of data editing for estimation.
+    <span class="guilabel">BatchEstimator</span> object.</p><p>GMAT implements two levels of data editing for estimation.
     First-level editing criteria are specified on the
     <span class="guilabel">DataFilters</span> field of the
     <span class="guilabel">TrackingFileSet</span> instance. At this level, the user may
@@ -20,22 +15,22 @@
     level will be immediately discarded and not available to the estimation
     process.</p><p>Second-level data editing is specified on the
     <span class="guilabel">DataFilters</span> field of the
-    <span class="guilabel">BatchEstimatorInv</span> instance. At this level, the user
-    may choose what data is used in the estimation state update. Residuals
-    will be computed for any observations admitted through first-level
-    editing, but any data excluded at the estimator level will be flagged as
-    user edited, and will not affect the computation of the state correction.
-    This allows the user to evaluate the quality of untrusted data against a
-    solution computed using a trusted set of measurements.</p><p>A single <span class="guilabel">AcceptFilter</span> may employ multiple
+    <span class="guilabel">BatchEstimator</span> instance. At this level, the user may
+    choose what data is used in the estimation state update. Residuals will be
+    computed for any observations admitted through first-level editing, but
+    any data excluded at the estimator level will be flagged as user edited,
+    and will not affect the computation of the state correction. This allows
+    the user to evaluate the quality of untrusted data against a solution
+    computed using a trusted set of measurements.</p><p>A single <span class="guilabel">AcceptFilter</span> may employ multiple
     selection criteria (for example simultaneously thinning different stations
     or data types by differing intervals). Multiple criteria on a single
     filter are considered in an AND sense. When multiple criteria are
     specified on a single filter, an observation must meet all specified
     criteria to be accepted.</p><p>Multiple <span class="guilabel">AcceptFilters</span> with different selection
     criteria may be specified on a single <span class="guilabel">TrackingFileSet</span>
-    or <span class="guilabel">BatchEstimatorInv</span>. When multiple filters are
+    or <span class="guilabel">BatchEstimator</span>. When multiple filters are
     specified, these act in an OR sense. Data meeting criteria for any of the
-    specified filters will be accepted.</p><p>See Also <a class="xref" href="RejectFilter.html" title="RejectFilter"><span class="refentrytitle">RejectFilter</span></a>, <a class="xref" href="TrackingFileSet.html" title="TrackingFileSet"><span class="refentrytitle">TrackingFileSet</span></a>, <a class="xref" href="BatchEstimatorInv.html" title="BatchEstimatorInv"><span class="refentrytitle">BatchEstimatorInv</span></a></p></div><div class="refsection"><a name="N151F3"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">DataTypes</span></td><td><p>List of data types</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>A set of any supported GMAT measurement types, or
+    specified filters will be accepted.</p><p>See Also <a class="xref" href="RejectFilter.html" title="RejectFilter"><span class="refentrytitle">RejectFilter</span></a>, <a class="xref" href="TrackingFileSet.html" title="TrackingFileSet"><span class="refentrytitle">TrackingFileSet</span></a>, <a class="xref" href="BatchEstimator.html" title="BatchEstimator"><span class="refentrytitle">BatchEstimator</span></a></p></div><div class="refsection"><a name="N24F11"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">DataTypes</span></td><td><p>List of data types</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>A set of any supported GMAT measurement types, or
                     'All'</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <span class="guilabel">{All}</span>
                     </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EpochFormat</span></td><td><p>Allows user to select format of the epoch</p>
@@ -97,7 +92,7 @@
             <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Object Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>any valid user-created Tracker object (e.g.,
                     <span class="guilabel">GroundStation</span>) or 'All'</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <span class="guilabel">{All}</span>
-                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1541E"></a><h2>Remarks</h2><p>Some fields of <span class="guilabel">AcceptFilter</span> are not applicable
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N2513C"></a><h2>Remarks</h2><p>Some fields of <span class="guilabel">AcceptFilter</span> are not applicable
     at either the first-level (tracking file set) or second-level (estimator)
     editing stages. The <span class="guilabel">RecordNumbers</span> field has no
     functionality when applied to an accept filter at the tracking file set
@@ -106,7 +101,7 @@
     fields have no functionality when applied to an accept filter at the
     estimator level.</p><p>Use of combinations of instances of
     <span class="guilabel">AcceptFilter</span> and <span class="guilabel">RejectFilter</span> at
-    both levels is permitted.</p></div><div class="refsection"><a name="N1543A"></a><h2>Examples</h2><div class="refsection"><a name="N1543D"></a><h3>First-level (TrackingFileSet) Data Editing</h3><p>The following examples illustrate use of an
+    both levels is permitted.</p></div><div class="refsection"><a name="N25158"></a><h2>Examples</h2><div class="refsection"><a name="N2515B"></a><h3>First-level (TrackingFileSet) Data Editing</h3><p>The following examples illustrate use of an
       <span class="guilabel">AcceptFilter</span> for first-level data editing. At this
       level, the <span class="guilabel">AcceptFilter</span> instance should be assigned
       to the <span class="guilabel">DataFilters</span> field of a
@@ -149,11 +144,11 @@ Create TrackingFileSet estData;
  
 estData.DataFilters = {af};
 
-BeginMissionSequence;</pre></div></div><div class="refsection"><a name="N1546C"></a><h3>Second-level (estimator) Data Editing</h3><p>The following examples illustrate use of an
+BeginMissionSequence;</pre></div></div><div class="refsection"><a name="N2518A"></a><h3>Second-level (estimator) Data Editing</h3><p>The following examples illustrate use of an
       <span class="guilabel">AcceptFilter</span> for second-level data editing. At this
       level, the <span class="guilabel">AcceptFilter</span> instance should be assigned
       to the <span class="guilabel">DataFilters</span> field of a
-      <span class="guilabel">BatchEstimatorInv</span>. In these examples, only data
+      <span class="guilabel">BatchEstimator</span>. In these examples, only data
       meeting the criteria specified by the accept filter will be used in the
       estimation state update. Residuals will be computed for all available
       data (all data admitted at the first level), but data not accepted at
@@ -163,7 +158,7 @@ BeginMissionSequence;</pre></div></div><div class="refsection"><a name="N1546C">
   
 af.RecordNumbers = {10, 11, 20-150, 155-300};
 
-Create BatchEstimatorInv bls;
+Create BatchEstimator bls;
 
 bls.DataFilters = {af};
 
@@ -178,7 +173,7 @@ af.EpochFormat  = UTCGregorian;
 af.InitialEpoch = '10 Jun 2012 02:56:00.000';
 af.FinalEpoch   = '10 Jun 2012 13:59:00.000';
 
-Create BatchEstimatorInv bls;
+Create BatchEstimator bls;
 
 bls.DataFilters = {af};
 
@@ -191,8 +186,8 @@ af1.Trackers         = {'MAD'};
 af2.Trackers         = {'CAN'};
 af2.DataTypes        = {'Range'};
  
-Create BatchEstimatorInv bls;
+Create BatchEstimator bls;
  
 bls.DataFilters = {af1, af2};
 
-BeginMissionSequence;</pre></div></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Resources.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Antenna.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Resources&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Antenna</td></tr></table></div></body></html>
+BeginMissionSequence;</pre></div></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ch19.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ch19.html#N24EB6">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Antenna.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;19.&nbsp;Orbit Determination&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Antenna</td></tr></table></div></body></html>

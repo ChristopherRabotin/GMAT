@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -74,7 +74,8 @@
  * (default constructor).
  */
 //---------------------------------------------------------------------------
-CoordinateConverter::CoordinateConverter()
+CoordinateConverter::CoordinateConverter():
+	specifyRotMatrixDeriv (false)
 {
 }
 
@@ -89,7 +90,8 @@ CoordinateConverter::CoordinateConverter()
  *                  instance.
  */
 //---------------------------------------------------------------------------
-CoordinateConverter::CoordinateConverter(const CoordinateConverter &coordCvt)
+CoordinateConverter::CoordinateConverter(const CoordinateConverter &coordCvt):
+   specifyRotMatrixDeriv  (coordCvt.specifyRotMatrixDeriv)
 {
 }
 
@@ -109,7 +111,8 @@ const CoordinateConverter& CoordinateConverter::operator=(
 {
    if (&coordCvt == this)
       return *this;
-   
+
+	specifyRotMatrixDeriv = coordCvt.specifyRotMatrixDeriv;
    return *this;
 }
 //---------------------------------------------------------------------------
@@ -138,6 +141,15 @@ void CoordinateConverter::Initialize()
    #ifdef DEBUG_FIRST_CALL
       firstCallFired = false;
    #endif
+}
+
+
+// made changes by TUAN NGUYEN
+bool CoordinateConverter::SetToCalculateRotMatrixDeriv(bool turnOn)
+{
+	bool prevFlag = specifyRotMatrixDeriv;
+	specifyRotMatrixDeriv = turnOn;
+	return prevFlag;
 }
 
 
@@ -249,6 +261,9 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
    if ((!inCoord) || (!outCoord))
       throw CoordinateSystemException(
          "Undefined coordinate system - conversion not performed.");
+
+	bool inCoordPrevFlag = inCoord->SetCalculateRotMatrixDeriv(specifyRotMatrixDeriv);          // made changes by TUAN NGUYEN
+	bool outCoordPrevFlag = outCoord->SetCalculateRotMatrixDeriv(specifyRotMatrixDeriv);        // made changes by TUAN NGUYEN
    
    #ifdef DEBUG_TO_FROM
       MessageInterface::ShowMessage
@@ -387,7 +402,6 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
    // R1*R2Dot + R1dot*R2
    Real R1dot[9];
    Real R2dot[9];
-
    inCoord->GetLastRotationDotMatrix(R1dot);
    outCoord->GetLastRotationDotMatrix(R2dot);
 
@@ -427,7 +441,29 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Real *inState,
                         R2dotTR1[1][0] + R2TR1dot[1][0],   R2dotTR1[1][1] + R2TR1dot[1][1],   R2dotTR1[1][2] + R2TR1dot[1][2],
                         R2dotTR1[2][0] + R2TR1dot[2][0],   R2dotTR1[2][1] + R2TR1dot[2][1],   R2dotTR1[2][2] + R2TR1dot[2][2]);
 
-   #ifdef DEBUG_FIRST_CALL
+
+	if (specifyRotMatrixDeriv)                                                              // made changes by TUAN NGUYEN
+	{                                                                                       // made changes by TUAN NGUYEN
+		// Specify derivative of last rotation matrix w.r.t. spacecraft state                // made changes by TUAN NGUYEN
+	   Rmatrix33 matrixR1(R1[0], R1[1], R1[2], R1[3], R1[4], R1[5], R1[6], R1[7], R1[8]);   // made changes by TUAN NGUYEN
+	   Rmatrix33 matrixR2(R2[0], R2[1], R2[2], R2[3], R2[4], R2[5], R2[6], R2[7], R2[8]);   // made changes by TUAN NGUYEN
+	   std::vector<Rmatrix33> dR1 = inCoord->GetDerivativeOfLastRotationMatrix();           // made changes by TUAN NGUYEN
+	   std::vector<Rmatrix33> dR2 = outCoord->GetDerivativeOfLastRotationMatrix();          // made changes by TUAN NGUYEN
+
+		// (d/dX)(R2T * R1) = [d(R2T)/dX]*R1 + R2T*[dR1/dX]                                  // made changes by TUAN NGUYEN
+		lastRotMatrixDeriv.clear();                                                          // made changes by TUAN NGUYEN
+		for (Integer stateIndex = 0; stateIndex < dR1.size(); ++stateIndex)                  // made changes by TUAN NGUYEN
+		{                                                                                    // made changes by TUAN NGUYEN
+			Rmatrix33 val = dR2[stateIndex].Transpose()*matrixR1                              // made changes by TUAN NGUYEN
+				             + matrixR2.Transpose()*dR1[stateIndex];                           // made changes by TUAN NGUYEN
+			lastRotMatrixDeriv.push_back(val);                                                // made changes by TUAN NGUYEN
+		}                                                                                    // made changes by TUAN NGUYEN
+	}                                                                                       // made changes by TUAN NGUYEN
+
+	inCoord->SetCalculateRotMatrixDeriv(inCoordPrevFlag);                                   // made changes by TUAN NGUYEN
+	outCoord->SetCalculateRotMatrixDeriv(outCoordPrevFlag);                                 // made changes by TUAN NGUYEN
+
+#ifdef DEBUG_FIRST_CALL
       if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
       {
          MessageInterface::ShowMessage(
@@ -454,6 +490,9 @@ bool CoordinateConverter::Convert(const GmatTime &epoch, const Real *inState,
    if ((!inCoord) || (!outCoord))
       throw CoordinateSystemException(
       "Undefined coordinate system - conversion not performed.");
+
+	bool inCoordPrevFlag = inCoord->SetCalculateRotMatrixDeriv(specifyRotMatrixDeriv);        // made changes by TUAN NGUYEN
+	bool outCoordPrevFlag = outCoord->SetCalculateRotMatrixDeriv(specifyRotMatrixDeriv);      // made changes by TUAN NGUYEN
 
 #ifdef DEBUG_TO_FROM
    MessageInterface::ShowMessage
@@ -548,7 +587,7 @@ bool CoordinateConverter::Convert(const GmatTime &epoch, const Real *inState,
       baseState[3], baseState[4], baseState[5]);
    MessageInterface::ShowMessage(" ... about to call outCoord->FromBaseSystem ... outCoord is %sNULL\n",
       (outCoord ? "NOT " : ""));
-   MessageInterface::ShowMessage("epoch = %le, coincident = %s, forceComputation = %s\n", epoch.Get(),
+   MessageInterface::ShowMessage("epoch = %le, coincident = %s, forceComputation = %s\n", epoch.GetMjd(),
       (coincident ? "true" : "false"), (forceComputation ? "true" : "false"));
 #endif
 
@@ -632,8 +671,30 @@ bool CoordinateConverter::Convert(const GmatTime &epoch, const Real *inState,
       R2dotTR1[1][0] + R2TR1dot[1][0], R2dotTR1[1][1] + R2TR1dot[1][1], R2dotTR1[1][2] + R2TR1dot[1][2],
       R2dotTR1[2][0] + R2TR1dot[2][0], R2dotTR1[2][1] + R2TR1dot[2][1], R2dotTR1[2][2] + R2TR1dot[2][2]);
 
+
+	if (specifyRotMatrixDeriv)                                                              // made changes by TUAN NGUYEN
+	{                                                                                       // made changes by TUAN NGUYEN
+																														 // Specify derivative of last rotation matrix w.r.t. spacecraft state                // made changes by TUAN NGUYEN
+		Rmatrix33 matrixR1(R1[0], R1[1], R1[2], R1[3], R1[4], R1[5], R1[6], R1[7], R1[8]);   // made changes by TUAN NGUYEN
+		Rmatrix33 matrixR2(R2[0], R2[1], R2[2], R2[3], R2[4], R2[5], R2[6], R2[7], R2[8]);   // made changes by TUAN NGUYEN
+		std::vector<Rmatrix33> dR1 = inCoord->GetDerivativeOfLastRotationMatrix();           // made changes by TUAN NGUYEN
+		std::vector<Rmatrix33> dR2 = outCoord->GetDerivativeOfLastRotationMatrix();          // made changes by TUAN NGUYEN
+
+																														 // (d/dX)(R2T * R1) = [d(R2T)/dX]*R1 + R2T*[dR1/dX]                                  // made changes by TUAN NGUYEN
+		lastRotMatrixDeriv.clear();                                                          // made changes by TUAN NGUYEN
+		for (Integer stateIndex = 0; stateIndex < dR1.size(); ++stateIndex)                  // made changes by TUAN NGUYEN
+		{                                                                                    // made changes by TUAN NGUYEN
+			Rmatrix33 val = dR2[stateIndex].Transpose()*matrixR1                              // made changes by TUAN NGUYEN
+                         + matrixR2.Transpose()*dR1[stateIndex];                           // made changes by TUAN NGUYEN
+			lastRotMatrixDeriv.push_back(val);                                                // made changes by TUAN NGUYEN
+		}                                                                                    // made changes by TUAN NGUYEN
+	}                                                                                       // made changes by TUAN NGUYEN
+
+	inCoord->SetCalculateRotMatrixDeriv(inCoordPrevFlag);                                   // made changes by TUAN NGUYEN
+	outCoord->SetCalculateRotMatrixDeriv(outCoordPrevFlag);                                 // made changes by TUAN NGUYEN
+
 #ifdef DEBUG_FIRST_CALL
-   if ((firstCallFired == false) || (epoch.Get() == GmatTimeConstants::MJD_OF_J2000))
+   if ((firstCallFired == false) || (epoch.GetMjd() == GmatTimeConstants::MJD_OF_J2000))
    {
       MessageInterface::ShowMessage(
          "   internal State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
@@ -687,6 +748,24 @@ Rmatrix33 CoordinateConverter::GetRotationMatrixFromICRFToFK5(const A1Mjd &atEpo
 	RotationMatrixFromICRFToFK5(atEpoch);
 	return icrfToFK5; 
 }
+
+
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// Rmatrix33 CoordinateConverter::GetLastRotationMatrixDerivative() const
+//------------------------------------------------------------------------------
+/**
+* This method returns the last-computed rotation matrix derivative, the matrix from
+* the input coordinate system to its base system.
+*
+* @return last-computed rotation matrix derivative
+*/
+//------------------------------------------------------------------------------
+std::vector<Rmatrix33> CoordinateConverter::GetLastRotationMatrixDerivative() const
+{
+	return lastRotMatrixDeriv;
+}
+
 
 //------------------------------------------------------------------------------
 // bool CoordinateConverter::ConvertFromBaseToBase(const A1Mjd &epoch,

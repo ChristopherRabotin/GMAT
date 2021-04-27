@@ -16,9 +16,6 @@ MESSAGE("GMAT DataCallback Plugin setup " ${VERSION})
 
 SET(TargetName DataCallback)
 
-# Add Preproccessor Definitions
-ADD_DEFINITIONS("-DDATACALLBACK_EXPORTS")
-
 # ====================================================================
 # list of directories containing source/header files
 SET(PLUGIN_DIRS factory include plugin subscriber)
@@ -36,6 +33,9 @@ SET(PLUGIN_SRCS
 
 # FORCE the plugin to install directly into bin
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" bin FORCE)
+
+# Rename DLL export preproccessor definition
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEFINE_SYMBOL "DATACALLBACK_EXPORTS")
 
 # Set RPATH to find shared libraries in default locations on Mac/Linux
 if(UNIX)

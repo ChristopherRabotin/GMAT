@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -86,9 +86,9 @@ std::string EclipseEvent::GetReportString()
    Real        resultMjd;
    std::string blanks       = "    ";
 
-   TimeConverterUtil::Convert("A1ModJulian", start, "",
+   TimeSystemConverter::Instance()->Convert("A1ModJulian", start, "",
                               outputFormat, resultMjd, startGregorian);
-   TimeConverterUtil::Convert("A1ModJulian", end, "",
+   TimeSystemConverter::Instance()->Convert("A1ModJulian", end, "",
                               outputFormat, resultMjd, endGregorian);
 
    #ifdef DEBUG_REPORT_STRING

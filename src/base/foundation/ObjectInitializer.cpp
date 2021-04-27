@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,6 +35,7 @@
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
 #include "GmatConstants.hpp"
+#include "GmatGlobal.hpp"
 #include "Moderator.hpp"
 #include "ObjectInitializer.hpp"
 #include "SolarSystem.hpp"
@@ -42,7 +43,12 @@
 #include "GmatBaseException.hpp"
 #include "SubscriberException.hpp"
 #include "Publisher.hpp"
-#include <algorithm>               // for find()
+#include "RHSEquation.hpp"
+#include "MathTree.hpp"
+#include "Validator.hpp"            // For equation wrapper setup
+#include "RealUtilities.hpp"
+
+#include <algorithm>                // for find()
 
 //#define DEBUG_OBJECT_INITIALIZER
 //#define DEBUG_OBJECT_INITIALIZER_DETAILED
@@ -53,6 +59,7 @@
 //#define DEBUG_FIND_OBJ
 //#define DEBUG_OBJECT_MAP
 //#define DEBUG_Z_ORDER
+//#define DEBUG_BASE_EPOCH
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -66,6 +73,13 @@
 #endif
 #ifdef DEBUG_TRACE
 #include <ctime>                 // for clock()
+#endif
+
+//#define API_DEBUG
+
+#ifdef API_DEBUG
+   #include <iostream>
+   using namespace std;
 #endif
 
 //------------------------------------------------------------------------------
@@ -207,27 +221,48 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    ShowObjectMaps("In ObjectInitializer::InitializeObjects()");
    #endif
    
+#ifdef API_DEBUG
+   cout << "Entered ObjectInitializer::InitializeObjects() with "
+        << LOS->size() << " objects to init\n";
+#endif
+
    // First check for NULL object pointer in the map to avoid crash down the road
    std::map<std::string, GmatBase *>::iterator iter;
-   for (iter = LOS->begin(); iter != LOS->end(); ++iter)
+
+   if (LOS)
    {
-      if (iter->second == NULL)
-         throw GmatBaseException
-            ("ObjectInitializer::InitializeObjects() cannot continue "
-             "due to \"" + iter->first + "\" has NULL object pointer in LOS");
+      for (iter = LOS->begin(); iter != LOS->end(); ++iter)
+      {
+#ifdef API_DEBUG
+   cout << "   Checking pointer for "
+        << iter->first << "\n";
+#endif
+            if (iter->second == NULL)
+               throw GmatBaseException
+                  ("ObjectInitializer::InitializeObjects() cannot continue "
+                   "due to \"" + iter->first + "\" has NULL object pointer in LOS");
+      }
    }
-   for (iter = GOS->begin(); iter != GOS->end(); ++iter)
+
+   if (GOS)
    {
-      if (iter->second == NULL)
-         throw GmatBaseException
-            ("ObjectInitializer::InitializeObjects() cannot continue "
-             "due to \"" + iter->first + "\" has NULL object pointer in GOS");
+      for (iter = GOS->begin(); iter != GOS->end(); ++iter)
+      {
+         if (iter->second == NULL)
+            throw GmatBaseException
+               ("ObjectInitializer::InitializeObjects() cannot continue "
+                "due to \"" + iter->first + "\" has NULL object pointer in GOS");
+      }
    }
    
    registerSubscribers =  registerSubs;
    std::map<std::string, GmatBase *>::iterator omi;
    std::string oName;
    std::string j2kName;
+
+#ifdef API_DEBUG
+   cout << "Beginning object initialization" << endl;
+#endif
    
    if (objType == Gmat::UNKNOWN_OBJECT)
    {
@@ -235,6 +270,9 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       MessageInterface::ShowMessage("About to Initialize Internal Objects ...\n");
       #endif
       
+#ifdef API_DEBUG
+   cout << "   Internal object initialization\n";
+#endif
       InitializeInternalObjects();
       
       #ifdef DEBUG_OBJECT_INITIALIZER
@@ -258,6 +296,9 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
                (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
    #endif
       
+#ifdef API_DEBUG
+   cout << "   Setting J2K body\n";
+#endif
    SetObjectJ2000Body(LOS);
    
    if (includeGOS)
@@ -282,6 +323,9 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    //  8. Subscribers
    //  9. Remaining Objects
       
+#ifdef API_DEBUG
+   cout << "   CoordinateSystem Init\n";
+#endif
    // Coordinate Systems
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::COORDINATE_SYSTEM)
    {
@@ -299,6 +343,9 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       }
    }
    
+#ifdef API_DEBUG
+   cout << "   Calculated point Init\n";
+#endif
    // Calculated Points
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::CALCULATED_POINT)
    {
@@ -316,6 +363,28 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       }
    }
    
+   // made changes by TUAN NGUYEN
+   // Plate
+   // Handle Plate objects
+   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::PLATE)
+   {
+#ifdef DEBUG_INITIALIZE_OBJ
+      MessageInterface::ShowMessage("--- Initialize Plate in LOS\n");
+#endif
+      InitializeObjectsInTheMap(LOS, Gmat::PLATE);
+
+      if (includeGOS)
+      {
+#ifdef DEBUG_INITIALIZE_OBJ
+         MessageInterface::ShowMessage("--- Initialize Plate in GOS\n");
+#endif
+         InitializeObjectsInTheMap(GOS, Gmat::PLATE);
+      }
+   }
+
+#ifdef API_DEBUG
+   cout << "   Burn Init\n";
+#endif
    // Burns
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::BURN)
    {
@@ -333,25 +402,95 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       }
    }
    
-   // Spacecrafts
+#ifdef API_DEBUG
+   cout << "   Spacecraft Init\n";
+#endif
+   // Spacecraft
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::SPACECRAFT ||
        objType == Gmat::GROUND_STATION)
    {
       #ifdef DEBUG_INITIALIZE_OBJ
-      MessageInterface::ShowMessage("--- Initialize Spacecrafts in LOS\n");
+      MessageInterface::ShowMessage("--- Initialize Spacecraft in LOS\n");
       #endif
       InitializeObjectsInTheMap(LOS, Gmat::SPACECRAFT);
       InitializeObjectsInTheMap(LOS, Gmat::GROUND_STATION);
       if (includeGOS)
       {
          #ifdef DEBUG_INITIALIZE_OBJ
-         MessageInterface::ShowMessage("--- Initialize Spacecrafts in GOS\n");
+         MessageInterface::ShowMessage("--- Initialize Spacecraft in GOS\n");
          #endif
          InitializeObjectsInTheMap(GOS, Gmat::SPACECRAFT);
          InitializeObjectsInTheMap(GOS, Gmat::GROUND_STATION);
       }
    }
 
+   // Find and set the baseline epoch data
+   GmatEpoch earliest    = 1000000.0;   // Start too large
+   GmatEpoch baseDefault = 21545.000000397937;
+   Real      epochTol    = 0.0000004;
+   for (omi = LOS->begin(); omi != LOS->end(); ++omi)
+   {
+      GmatBase *obj = omi->second;
+      if (obj->IsOfType(Gmat::SPACECRAFT))
+      {
+         GmatEpoch ep = ((Spacecraft*)(obj))->GetEpoch();
+         #ifdef DEBUG_BASE_EPOCH
+            MessageInterface::ShowMessage("--- (LOS) earliest is %.12lf\n",
+                                          earliest);
+            MessageInterface::ShowMessage("--- (LOS) ep is %.12lf\n", ep);
+         #endif
+         // Find the earliest Spacecraft time but omit the standard default epoch
+         if ((ep < earliest) && !(GmatMathUtil::IsEqual(ep, baseDefault, epochTol)))
+            earliest = ep;
+      }
+   }
+   if (includeGOS)
+   {
+      for (omi = GOS->begin(); omi != GOS->end(); ++omi)
+      {
+         GmatBase *obj = omi->second;
+         if (obj->IsOfType(Gmat::SPACECRAFT))
+         {
+            GmatEpoch ep = ((Spacecraft*)(obj))->GetEpoch();
+            #ifdef DEBUG_BASE_EPOCH
+               MessageInterface::ShowMessage("--- (GOS) earliest is %.12lf\n",
+                                             earliest);
+               MessageInterface::ShowMessage("--- (GOS) ep is %.12lf\n", ep);
+            #endif
+            // Find the earliest Spacecraft time but omit the standard default epoch
+            if ((ep < earliest) && !(GmatMathUtil::IsEqual(ep, baseDefault, epochTol)))
+               earliest = ep;
+         }
+      }
+   }
+
+   if (earliest != 1000000.0)
+   {
+      #ifdef DEBUG_BASE_EPOCH
+         MessageInterface::ShowMessage(
+                         "------ Setting Base epoch to earliest = %.12lf\n",
+                         earliest);
+      #endif
+      GmatGlobal::Instance()->SetBaseEpoch(earliest);
+   }
+   else
+   {
+      #ifdef DEBUG_BASE_EPOCH
+         MessageInterface::ShowMessage(
+                         "------ Setting Base epoch to baseDefault (%12.10f)\n",
+                                       baseDefault);
+      #endif
+      GmatGlobal::Instance()->SetBaseEpoch(baseDefault);
+   }
+   #ifdef DEBUG_BASE_EPOCH
+      MessageInterface::ShowMessage("Earliest is %.12lf\n", earliest);
+      MessageInterface::ShowMessage("Base epoch is %.12lf\n",
+            GmatGlobal::Instance()->GetBaseEpoch());
+   #endif
+
+#ifdef API_DEBUG
+   cout << "   Nav Init: Error Models\n";
+#endif
    // ErrorModel
    // Handle ErrorModel objects
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::ERROR_MODEL)
@@ -370,6 +509,9 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       }
    }
 
+#ifdef API_DEBUG
+   cout << "   Nav Init: Data Filters\n";
+#endif
    // DataFilter
    // Handle DataFilter objects
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::DATA_FILTER)
@@ -388,6 +530,9 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       }
    }
 
+#ifdef API_DEBUG
+   cout << "   Nav Init: Measurement Models\n";
+#endif
    // MeasurementModel
    // Measurement Models must init before the Estimators/Simulator, so do next
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::MEASUREMENT_MODEL)
@@ -406,41 +551,44 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       }
    }
    
-   // Like Measurement Models, TrackingData objects must init before the
-   // Estimators/Simulator, so do next
-   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::TRACKING_DATA)
-   {
-      #ifdef DEBUG_INITIALIZE_OBJ
-      MessageInterface::ShowMessage("--- Initialize TrackingData in LOS\n");
-      #endif
-      InitializeObjectsInTheMap(LOS, Gmat::TRACKING_DATA);
+   //// Like Measurement Models, TrackingData objects must init before the
+   //// Estimators/Simulator, so do next
+   //if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::TRACKING_DATA)
+   //{
+   //   #ifdef DEBUG_INITIALIZE_OBJ
+   //   MessageInterface::ShowMessage("--- Initialize TrackingData in LOS\n");
+   //   #endif
+   //   InitializeObjectsInTheMap(LOS, Gmat::TRACKING_DATA);
 
-      if (includeGOS)
-      {
-         #ifdef DEBUG_INITIALIZE_OBJ
-         MessageInterface::ShowMessage("--- Initialize TrackingData in GOS\n");
-         #endif
-         InitializeObjectsInTheMap(GOS, Gmat::TRACKING_DATA);
-      }
-   }
+   //   if (includeGOS)
+   //   {
+   //      #ifdef DEBUG_INITIALIZE_OBJ
+   //      MessageInterface::ShowMessage("--- Initialize TrackingData in GOS\n");
+   //      #endif
+   //      InitializeObjectsInTheMap(GOS, Gmat::TRACKING_DATA);
+   //   }
+   //}
 
-   // Handle TrackingSystem objects before the Estimators/Simulator as well
-   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::TRACKING_SYSTEM)
-   {
-      #ifdef DEBUG_INITIALIZE_OBJ
-      MessageInterface::ShowMessage("--- Initialize TrackingSystem in LOS\n");
-      #endif
-      InitializeObjectsInTheMap(LOS, Gmat::TRACKING_SYSTEM);
+   //// Handle TrackingSystem objects before the Estimators/Simulator as well
+   //if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::TRACKING_SYSTEM)
+   //{
+   //   #ifdef DEBUG_INITIALIZE_OBJ
+   //   MessageInterface::ShowMessage("--- Initialize TrackingSystem in LOS\n");
+   //   #endif
+   //   InitializeObjectsInTheMap(LOS, Gmat::TRACKING_SYSTEM);
 
-      if (includeGOS)
-      {
-         #ifdef DEBUG_INITIALIZE_OBJ
-         MessageInterface::ShowMessage("--- Initialize TrackingSystem in GOS\n");
-         #endif
-         InitializeObjectsInTheMap(GOS, Gmat::TRACKING_SYSTEM);
-      }
-   }
+   //   if (includeGOS)
+   //   {
+   //      #ifdef DEBUG_INITIALIZE_OBJ
+   //      MessageInterface::ShowMessage("--- Initialize TrackingSystem in GOS\n");
+   //      #endif
+   //      InitializeObjectsInTheMap(GOS, Gmat::TRACKING_SYSTEM);
+   //   }
+   //}
 
+#ifdef API_DEBUG
+   cout << "   System Parameters\n";
+#endif
    // System Parameters, such as sat.X
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::PARAMETER)
    {
@@ -458,6 +606,9 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       }
    }
    
+#ifdef API_DEBUG
+   cout << "   Variables\n";
+#endif
    // Variables
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::VARIABLE )
    {
@@ -475,6 +626,9 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       }
    }
    
+#ifdef API_DEBUG
+   cout << "   Strings\n";
+#endif
    // Strings
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::STRING)
    {
@@ -492,6 +646,9 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       }
    }
    
+#ifdef API_DEBUG
+   cout << "   Subscribers\n";
+#endif
    // Subscribers
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::SUBSCRIBER)
    {
@@ -509,6 +666,9 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       }
    }
    
+#ifdef API_DEBUG
+   cout << "   Everything else\n";
+#endif
    // All other objects
    if (objType == Gmat::UNKNOWN_OBJECT)
    {
@@ -1133,10 +1293,16 @@ void ObjectInitializer::BuildReferencesAndInitialize(GmatBase *obj)
       }
    }
 
+   /// @todo: Create separate EquationInitializer?
+   // Setup equations if the object has any
+   if (obj->HasEquation())
+      SetupEquation(obj);
+
    #ifdef DEBUG_INITIALIZE_OBJ
    MessageInterface::ShowMessage("--- Calling '%s'->Initialize()\n", obj->GetName().c_str());
 	#endif
 	
+   /// @todo Fix so that failed initialization (return == false) is handled
    obj->Initialize();
    
    #ifdef DEBUG_INITIALIZE_OBJ
@@ -1210,27 +1376,35 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
          {
             CoordinateSystem *fixedCS = NULL;
 
-            if (LOS->find(*i) != LOS->end())
+            if (LOS)
             {
-               GmatBase *ref = (*LOS)[*i];
-               if (ref->IsOfType("CoordinateSystem") == false)
-                  throw GmatBaseException("Object named " + (*i) +
-                     " was expected to be a Coordinate System, but it has type " +
-                     ref->GetTypeName());
-               fixedCS = (CoordinateSystem*)ref;
-               fm->SetRefObject(fixedCS, fixedCS->GetType(), *i);
+               if (LOS->find(*i) != LOS->end())
+               {
+                  GmatBase *ref = (*LOS)[*i];
+                  if (ref->IsOfType("CoordinateSystem") == false)
+                     throw GmatBaseException("Object named " + (*i) +
+                        " was expected to be a Coordinate System, but it has type " +
+                        ref->GetTypeName());
+                  fixedCS = (CoordinateSystem*)ref;
+                  fm->SetRefObject(fixedCS, fixedCS->GetType(), *i);
+               }
             }
-            else if (GOS->find(*i) != GOS->end())
+
+            if (GOS && (fixedCS == NULL))
             {
-               GmatBase *ref = (*GOS)[*i];
-               if (ref->IsOfType("CoordinateSystem") == false)
-                  throw GmatBaseException("Object named " + (*i) +
-                     " was expected to be a Coordinate System, but it has type " +
-                     ref->GetTypeName());
-               fixedCS = (CoordinateSystem*)ref;
-               fm->SetRefObject(fixedCS, fixedCS->GetType(), *i);
+               if(GOS->find(*i) != GOS->end())
+               {
+                  GmatBase *ref = (*GOS)[*i];
+                  if (ref->IsOfType("CoordinateSystem") == false)
+                     throw GmatBaseException("Object named " + (*i) +
+                        " was expected to be a Coordinate System, but it has type " +
+                        ref->GetTypeName());
+                  fixedCS = (CoordinateSystem*)ref;
+                  fm->SetRefObject(fixedCS, fixedCS->GetType(), *i);
+               }
             }
-            else
+
+            if (fixedCS == NULL)
             {
                //MessageInterface::ShowMessage("===> create BodyFixed here\n");
                fixedCS = mod->CreateCoordinateSystem("", false);
@@ -1258,12 +1432,16 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
                   ("--- The object <%p>[%s]'%s' initialized\n",  internalCS,
                    internalCS->GetTypeName().c_str(), internalCS->GetName().c_str());
                #endif
+               Integer gosSize = 0;
+               if (GOS)
+                  gosSize = GOS->size();
                // if things have already been moved to the globalObjectStore, put it there
-               if ((GOS->size() > 0) && (fixedCS->IsGlobal()))
+               if ((gosSize > 0) && (fixedCS->IsGlobal()))
                   (*GOS)[*i] = fixedCS;
                // otherwise, put it in the Sandbox object map - it will be moved to the GOS later
                else
-                  (*LOS)[*i] = fixedCS;
+                  if (LOS)
+                     (*LOS)[*i] = fixedCS;
 
                #ifdef DEBUG_OBJECT_INITIALIZER
                   MessageInterface::ShowMessage(
@@ -1489,6 +1667,52 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
 	MessageInterface::ShowMessage
 		("Exiting BuildReferences for object type '%s'\n", obj->GetTypeName().c_str());
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetupEquation(GmatBase* obj)
+//------------------------------------------------------------------------------
+/**
+ * Sets the objects on an object's equation fields
+ *
+ * @param obj The object that is setup
+ *
+ * @return true is no errors were encountered
+ */
+//------------------------------------------------------------------------------
+bool ObjectInitializer::SetupEquation(GmatBase* obj)
+{
+   bool retval = true;
+
+   std::vector<RHSEquation*> equations;
+   obj->GetEquations(equations);
+   for (UnsignedInt j = 0; j < equations.size(); ++j)
+   {
+      std::string equationString;
+      RHSEquation *equation = equations[j];
+
+      #ifdef DEBUG_EQUATION_PARAMETERS
+         MessageInterface::ShowMessage("There is an equation on %s "
+               "at %p\n", obj->GetName().c_str(), equation);
+      #endif
+
+      ObjectMap theObjectMap = (*LOS);
+      // Append the GOS
+      for (ObjectMap::iterator it = LOS->begin(); it != LOS->end(); ++it)
+         theObjectMap[it->first] = it->second;
+
+      retval &= equation->BuildExpression(equationString, &theObjectMap);
+      if (retval)
+      {
+         retval = Validator::Instance()->ValidateEquation(equation);
+         equation->SetMathWrappers();
+         equation->GetMathTree(false)->SetObjectMap(LOS);
+         equation->GetMathTree(false)->SetGlobalObjectMap(GOS);
+      }
+   }
+
+   return retval;
 }
 
 

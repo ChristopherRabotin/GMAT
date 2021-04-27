@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -37,6 +37,7 @@
 #include "FunctionSetupPanel.hpp"
 #include "FindReplaceDialog.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"
 #include <wx/filename.h>           // for wxFileName
 #include <wx/numdlg.h>             // for wxGetNumberFromUser
 
@@ -91,6 +92,7 @@ BEGIN_EVENT_TABLE (ScriptEditor, wxStyledTextCtrl)
    EVT_STC_MARGINCLICK (wxID_ANY,     ScriptEditor::OnMarginClick)
    EVT_STC_CHANGE      (wxID_ANY,     ScriptEditor::OnTextChange)
    EVT_STC_CHARADDED   (wxID_ANY,     ScriptEditor::OnCharAdded)
+   EVT_STC_STYLENEEDED (wxID_ANY,     ScriptEditor::OnStyleNeeded)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -134,6 +136,12 @@ ScriptEditor::ScriptEditor(wxWindow *parent, bool notifyChange, wxWindowID id,
    mPrevLineNumber = 1;
    mLastSelectPos = -1;
    mLastFindPos = -1;
+
+   mInitializeHighlights = true;
+   mIsStringBlock = false;
+   mStringBlockLines = 0;
+
+   mPrevLineCount = GetNumberOfLines();
    
    // initialize language
    mLanguage = NULL;
@@ -197,6 +205,10 @@ ScriptEditor::ScriptEditor(wxWindow *parent, bool notifyChange, wxWindowID id,
    mGmatCommandTypes = cmdCreatables.c_str();
    std::string keywords = objCreatables + cmdCreatables;
    wxString gmatKeyWords = keywords.c_str();
+
+   mObjCreatablesArray = guiInterpreter->GetListOfAllFactoryItemsExcept(excList);
+   mObjCreatablesArray.push_back("Propagator");
+   mCmdCreatablesArray = guiInterpreter->GetListOfFactoryItems(Gmat::COMMAND);
    
    #ifdef DEBUG_GMAT_KEYWORDS
    MessageInterface::ShowMessage
@@ -1274,6 +1286,128 @@ void ScriptEditor::OnCharAdded (wxStyledTextEvent &event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnStyleNeeded(wxStyledTextEvent &event)
+//------------------------------------------------------------------------------
+/**
+* Event handler for when the editor needs a style for a line
+*
+* @param event		command event originated by the control
+*/
+//------------------------------------------------------------------------------
+void ScriptEditor::OnStyleNeeded(wxStyledTextEvent &event)
+{
+   int endStyled = GetEndStyled();
+   int startLine = 0;
+   int lineCount = GetNumberOfLines();
+   int lastPos = GetLastPosition();
+   // If this is the first highlighting run, style entire document
+   if (mInitializeHighlights)
+   {
+      while (startLine < lineCount - 1)
+      {
+         startLine = LineFromPosition(GetEndStyled() + 2);
+
+         int startPos = PositionFromLine(startLine);
+         int endPos = GetLineEndPosition(startLine);
+
+         // If this is a blank line, set default style and move on
+         if (startPos == endPos)
+         {
+            StartStyling(startPos, 255);
+            SetStyling(0, 0);
+            endStyled = GetEndStyled();
+            continue;
+         }
+
+         ApplySyntaxHighlight(startPos, endPos);
+         ApplyFoldLevels(startLine, false);
+      }
+      mInitializeHighlights = false;
+   }
+   // Style only the required lines
+   else
+   {
+      int endStyled = GetEndStyled();
+      startLine = LineFromPosition(GetEndStyled());
+      int selectedLine = LineFromPosition(GetCurrentPos());
+      int startPos = PositionFromLine(startLine);
+      int endPos = GetLineEndPosition(startLine);
+
+      if (startPos == endPos)
+      {
+         StartStyling(startPos, 255);
+         SetStyling(0, 0);
+         endStyled = GetEndStyled();
+         ApplyFoldLevels(startLine, true);
+      }
+      // If multiple lines need to be styles (i.e. when pasting in text) go
+      // through all the necessary lines up to the currently selected line
+      else if (selectedLine > startLine)
+      {
+         endPos = GetLineEndPosition(selectedLine);
+         ApplySyntaxHighlight(startPos, endPos);
+         for (int i = startLine; i <= selectedLine; ++i)
+            ApplyFoldLevels(i, true);
+      }
+      // Only style one line
+      else
+      {
+         ApplySyntaxHighlight(startPos, endPos);
+         ApplyFoldLevels(startLine, true);
+      }
+
+      // If a string block was shortened, reset the styles of the text
+      // previously within the block
+      while (GetStyleAt(PositionFromLine(startLine + 1)) == 5 ||
+         GetLine(startLine + 1) == "\r\n")
+      {
+         startLine = LineFromPosition(GetEndStyled() + 2);
+
+         int startPos = PositionFromLine(startLine);
+         int endPos = GetLineEndPosition(startLine);
+         if (startPos == endPos)
+         {
+            StartStyling(startPos, 255);
+            SetStyling(0, 0);
+            endStyled = GetEndStyled();
+            continue;
+         }
+
+         ApplySyntaxHighlight(startPos, endPos);
+      }
+
+      // If a string block is created, set all text within the block to the
+      // string style (can include multiple lines)
+      while (mIsStringBlock)
+      {
+         startLine = LineFromPosition(GetEndStyled() + 2);
+
+         int startPos = PositionFromLine(startLine);
+         int endPos = GetLineEndPosition(startLine);
+         if (startPos == lastPos)
+         {
+            mIsStringBlock = false;
+            break;
+         }
+         if (startPos == endPos)
+         {
+            StartStyling(startPos, 255);
+            SetStyling(0, 0);
+            endStyled = GetEndStyled();
+            continue;
+         }
+
+         ApplySyntaxHighlight(startPos, endPos);
+         mStringBlockLines++;
+      }
+
+      StartStyling(GetEndStyled(), 255);
+      SetStyling(2, 0);
+   }
+   return;
+}
+
 //----------------------------
 // private methods
 //----------------------------
@@ -1412,7 +1546,14 @@ bool ScriptEditor::InitializePrefs(const wxString &name)
          StyleSetFont(index, font);
          
          if (curType.foreground)
-            StyleSetForeground(index, wxColour(curType.foreground));
+         {
+            // Check if a custom RGB value was used
+            std::string customName = "Custom";
+            if (curType.foreground != customName)
+               StyleSetForeground(index, wxColour(curType.foreground));
+            else
+               StyleSetForeground(index, wxColour(curType.foregroundRGB));
+         }
          
          if (curType.background)
             StyleSetBackground(index, wxColour(curType.background));
@@ -1431,6 +1572,7 @@ bool ScriptEditor::InitializePrefs(const wxString &name)
                ("==> styleType = %d, keywordIndex = %d, styles[%d].words = '%s'\n",
                 styleType, keywordIndex, index, svalue);
             #endif
+
             SetKeyWords(keywordIndex, svalue);
             //SetKeyWords(index, svalue);
             keywordIndex += 1;
@@ -1501,6 +1643,568 @@ bool ScriptEditor::InitializePrefs(const wxString &name)
    return true;
 }
 
+//------------------------------------------------------------------------------
+// void ApplySyntaxHighlight(int fromPos, int toPos)
+//------------------------------------------------------------------------------
+/**
+* Apply syntax highilighting to keywords and special characters
+*
+* @param fromPos  The starting position of the current line
+* @param toPos    The position of the end of the current line
+*/
+//------------------------------------------------------------------------------
+void ScriptEditor::ApplySyntaxHighlight(int fromPos, int toPos)
+{
+   int previousPos = fromPos;
+   int currentPos = fromPos;
+   std::string currentCharSet;
+
+   // Clear the current style and set it to the default style
+   StartStyling(fromPos, 255);
+   SetStyling(toPos - fromPos, 0);
+   int lastPos = GetLastPosition();
+   bool isCurrCharNum = false;
+   bool isCharSetNumber = false;
+   bool endOfString = false;
+
+   while (currentPos < toPos)
+   {
+      for (int i = currentPos; i <= toPos; ++i)
+      {
+         char currentChar = GetCharAt(i);
+         if (currentChar < 0)
+         {
+            currentCharSet += currentChar;
+            currentPos = i + 1;
+            previousPos = i;
+            break;
+         }
+         std::stringstream charToString;
+         std::string currentString;
+         charToString << currentChar;
+         charToString >> currentString;
+         isCurrCharNum = GmatStringUtil::IsNumber(currentString);
+         char prevChar;
+         if (i > fromPos)
+            prevChar = GetCharAt(i - 1);
+         if (mIsStringBlock)
+         {
+            currentCharSet += currentChar;
+            currentPos = i + 1;
+            if (currentChar == '\'' || currentPos == lastPos)
+            {
+               endOfString = true;
+               break;
+            }
+         }
+         else if (currentChar == '%')
+         {
+            currentPos = GetLineEndPosition(LineFromPosition(i));
+            previousPos = i;
+            currentCharSet = currentChar;
+            break;
+         }
+         else if (currentChar == '=')
+         {
+            currentCharSet = currentChar;
+            currentPos = i + 1;
+            break;
+         }
+         else if (currentChar == '\'' && currentCharSet.size() == 0 &&
+            prevChar != ')' && prevChar != '}'  && prevChar != ']')
+         {
+            currentCharSet += currentChar;
+            currentPos = i + 1;
+            mIsStringBlock = true;
+            endOfString = false;
+         }
+         else if (isCharSetNumber && (isCurrCharNum ||
+            currentChar == 'e' || currentChar == '.' ||
+            (currentChar == '+' && currentCharSet.back() == 'e') ||
+            (currentChar == '-' && currentCharSet.back() == 'e')))
+         {
+            currentCharSet += currentChar;
+            currentPos = i + 1;
+         }
+         else if (isCurrCharNum && (currentCharSet[0] == '.' ||
+            currentCharSet.size() == 0))
+         {
+            currentCharSet += currentChar;
+            currentPos = i + 1;
+            isCharSetNumber = true;
+         }
+         else if (!isalpha(currentChar) && currentChar != '.' &&
+            currentChar != '_' && !isCurrCharNum)
+         {
+            currentPos = i + 1;
+            break;
+         }
+         else
+         {
+            if (isCharSetNumber)
+            {
+               currentPos = i;
+               break;
+            }
+            currentCharSet += currentChar;
+         }
+      }
+
+      // Check for a keyword to highlight
+      bool styleFound = false;
+      int currentStyle = 0;
+      if (currentCharSet == "%")
+      {
+         styleFound = true;
+         currentStyle = 1;
+      }
+      if (!styleFound && mIsStringBlock)
+      {
+         styleFound = true;
+         currentStyle = 5;
+         if (endOfString)
+            mIsStringBlock = false;
+      }
+      if (!styleFound && isCharSetNumber)
+      {
+         styleFound = true;
+         currentStyle = 3;
+         isCharSetNumber = false;
+      }
+      if (!styleFound)
+      {
+         for (int i = 0; i < mCmdCreatablesArray.size(); ++i)
+         {
+            if (currentCharSet == mCmdCreatablesArray[i])
+            {
+               currentStyle = 2;
+               styleFound = true;
+               break;
+            }
+         }
+      }
+      if (!styleFound)
+      {
+         for (int i = 0; i < mObjCreatablesArray.size(); ++i)
+         {
+            if (currentCharSet == mObjCreatablesArray[i])
+            {
+               currentStyle = 4;
+               styleFound = true;
+               break;
+            }
+         }
+      }
+
+      StartStyling(previousPos, 255);
+      if (currentStyle == 1)
+         SetStyling(currentPos - previousPos + 1, currentStyle);
+      else
+         SetStyling(currentCharSet.length(), currentStyle);
+      previousPos = currentPos;
+      currentCharSet = "";
+   }
+
+   if (currentPos == toPos)
+   {
+      StartStyling(currentPos, 255);
+      SetStyling(0, 0);
+   }
+
+   if (mIsStringBlock)
+   {
+      if (LineFromPosition(currentPos) == GetNumberOfLines() - 1)
+         mIsStringBlock = false;
+   }
+}
+
+//------------------------------------------------------------------------------
+// void ApplyFoldLevels(int fromLine, bool checkForEnds)
+//------------------------------------------------------------------------------
+/**
+* Set folding levels for the script
+*
+* @param fromLine Line to start fold checking from
+* @param checkForEnds Boolean of whether or not to check the current line for a
+*        new end statement for a fold
+*/
+//------------------------------------------------------------------------------
+void ScriptEditor::ApplyFoldLevels(int fromLine, bool checkForEnds)
+{
+   int currLine = fromLine;
+   IntegerArray startFoldRemoval;
+   IntegerArray endFoldRemoval;
+   bool checkCurrentFoldSegments = false;
+
+   // Check if new lines were added or removed and adjust the fold locations
+   // accordingly
+   int locationToSkip = -1;
+   if (mPrevLineCount < GetNumberOfLines())
+   {
+      checkCurrentFoldSegments = true;
+      int numLinesAdded = GetNumberOfLines() - mPrevLineCount;
+      mPrevLineCount = GetNumberOfLines();
+      for (int foldIdx = 0; foldIdx < mFoldLocations.size(); ++foldIdx)
+      {
+         if (currLine < mFoldLocations[foldIdx][0])
+         {
+            mFoldLocations[foldIdx][0] += numLinesAdded;
+            locationToSkip = foldIdx;
+         }
+         if (currLine < mFoldLocations[foldIdx][1])
+         {
+            mFoldLocations[foldIdx][1] += numLinesAdded;
+            locationToSkip = foldIdx;
+         }
+      }
+   }
+   else if (mPrevLineCount > GetNumberOfLines())
+   {
+      checkCurrentFoldSegments = true;
+      int numLinesRemoved = mPrevLineCount - GetNumberOfLines();
+      mPrevLineCount = GetNumberOfLines();
+      for (int foldIdx = 0; foldIdx < mFoldLocations.size(); ++foldIdx)
+      {
+         if (currLine < mFoldLocations[foldIdx][0])
+         {
+            if (currLine + numLinesRemoved >= mFoldLocations[foldIdx][0])
+               mFoldLocations[foldIdx][0] = currLine;
+            else
+               mFoldLocations[foldIdx][0] -= numLinesRemoved;
+            locationToSkip = foldIdx;
+         }
+         if (currLine < mFoldLocations[foldIdx][1])
+         {
+            if (currLine + numLinesRemoved >= mFoldLocations[foldIdx][1])
+               mFoldLocations[foldIdx][1] = currLine;
+            else
+               mFoldLocations[foldIdx][1] -= numLinesRemoved;
+            locationToSkip = foldIdx;
+         }
+      }
+   }
+
+   std::string currCommand = "";
+   std::string currCommand2 = "";
+   std::string currText = "";
+
+   // Check if the current fold locations have lost the start or end of the
+   // section and, if so, remove the fold levels
+   int currSelectedLine = LineFromPosition(GetCurrentPos());
+   for (int i = 0; i < mFoldLocations.size(); ++i)
+   {
+      if (mFoldLocations[i][0] == currSelectedLine ||
+         (checkCurrentFoldSegments && mFoldLocations[i][0] != -1))
+      {
+         currCommand = "";
+         currText = GetLine(mFoldLocations[i][0]);
+         for (int j = 0; j < currText.size(); ++j)
+         {
+            char currChar = currText[j];
+            if (currCommand == "")
+            {
+               if (currChar == ' ' || currChar == '\t')
+                  continue;
+               else
+                  currCommand += currChar;
+            }
+            else
+            {
+               if (currChar == ' ' || currChar == '\t' || currChar == '\n' ||
+                  currChar == '\r' || currChar == ';')
+               {
+                  break;
+               }
+               else
+                  currCommand += currChar;
+            }
+         }
+
+         if (currCommand == "BeginScript")
+            currCommand = "Script";
+
+         if (currCommand != mFoldTypes[i] && mFoldLocations[i][1] != -1)
+         {
+            startFoldRemoval.push_back(mFoldLocations[i][0]);
+            endFoldRemoval.push_back(mFoldLocations[i][1]);
+            mFoldLocations[i][0] = -1;
+         }
+         else if (currCommand != mFoldTypes[i] &&
+            mFoldLocations[i][1] == -1)
+         {
+            mFoldLocations.erase(mFoldLocations.begin() + i);
+            mFoldTypes.erase(mFoldTypes.begin() + i);
+            --i;
+            continue;
+         }
+      }
+
+      if (mFoldLocations[i][1] == currSelectedLine ||
+         (checkCurrentFoldSegments && mFoldLocations[i][1] != -1))
+      {
+         currCommand2 = "";
+         currText = GetLine(mFoldLocations[i][1]);
+         for (int j = 0; j < currText.size(); ++j)
+         {
+            char currChar = currText[j];
+            if (currCommand2 == "")
+            {
+               if (currChar == ' ' || currChar == '\t')
+                  continue;
+               else
+                  currCommand2 += currChar;
+            }
+            else
+            {
+               if (currChar == ' ' || currChar == '\t' || currChar == '\n' ||
+                  currChar == '\r' || currChar == ';')
+               {
+                  break;
+               }
+               else
+                  currCommand2 += currChar;
+            }
+         }
+
+         if (currCommand2 != "End" + mFoldTypes[i] &&
+            mFoldLocations[i][0] != -1)
+         {
+            startFoldRemoval.push_back(mFoldLocations[i][0]);
+            endFoldRemoval.push_back(mFoldLocations[i][1]);
+            mFoldLocations[i][1] = -1;
+         }
+         else if (currCommand2 != "End" + mFoldTypes[i] &&
+            mFoldLocations[i][0] == -1)
+         {
+            if (endFoldRemoval.size() > 0)
+            {
+               if (endFoldRemoval.back() == mFoldLocations[i][1])
+               {
+                  startFoldRemoval.pop_back();
+                  endFoldRemoval.pop_back();
+               }
+            }
+            mFoldLocations.erase(mFoldLocations.begin() + i);
+            mFoldTypes.erase(mFoldTypes.begin() + i);
+            --i;
+         }
+      }
+   }
+
+   // Build a string containing the command of the current line to be used
+   // to check for a new start or end of a fold section
+   currCommand = "";
+   currText = GetLine(fromLine);
+   for (int i = 0; i < currText.size(); ++i)
+   {
+      char currChar = currText[i];
+      if (currCommand == "")
+      {
+         if (currChar == ' ' || currChar == '\t')
+            continue;
+         else
+            currCommand += currChar;
+      }
+      else
+      {
+         if (currChar == ' ' || currChar == '\t' || currChar == '\n' ||
+            currChar == '\r' || currChar == ';')
+         {
+            break;
+         }
+         else
+            currCommand += currChar;
+      }
+   }
+
+   // If there is no longer the start or end of a fold where it used to be,
+   // reduce the fold level of the lines in this section by one
+   if (startFoldRemoval.size() > 0)
+   {
+      for (int removeIdx = 0; removeIdx < startFoldRemoval.size(); ++removeIdx)
+      {
+         for (int lineIdx = startFoldRemoval[removeIdx] + 1;
+            lineIdx <= endFoldRemoval[removeIdx]; ++lineIdx)
+         {
+            int testLevel = GetFoldLevel(lineIdx);
+            SetFoldLevel(lineIdx, GetFoldLevel(lineIdx) - 1);
+         }
+      }
+   }
+
+   // Check for a new start or end of a fold section
+   int startLine = currLine;
+   int endLine = GetNumberOfLines();
+   int endFoldLine = 0;
+   bool endFound = false;
+   int foldDistTest = INT_MAX;
+   int minDistIdx = -1;
+   int testFoldLevelMultiple = -1;
+
+   if (currCommand == "If" || currCommand == "For" ||
+      currCommand == "While" || currCommand == "Target" ||
+      currCommand == "Optimize")
+   {
+      int currFoldLevel = GetFoldLevel(startLine);
+      SetFoldLevel(startLine, currFoldLevel | wxSTC_FOLDLEVELHEADERFLAG);
+      int newFoldLevel = currFoldLevel + 1;
+      int testFoldLevel = GetFoldLevel(startLine + 1);
+
+      // Search for a valid ending statement that needs a header statement,
+      // if one isn't found, add this header as a new possible fold location
+      // and do not modify fold levels
+      for (int i = 0; i < mFoldLocations.size(); ++i)
+      {
+         if (mFoldLocations[i][0] == -1)
+         {
+            // Fold levels will sometimes be automatically set to multiples
+            // of the base fold level 1024 (for example, 1024 can be
+            // represented as 9216, so then 1026 would be 9218), so check that
+            // the possible end statement divided by the base value has the
+            // same remainder as the header
+            if (mFoldLocations[i][1] - startLine > 0 &&
+               mFoldLocations[i][1] - startLine < foldDistTest &&
+               mFoldTypes[i] == currCommand &&
+               testFoldLevel % 1024 ==
+               GetFoldLevel(mFoldLocations[i][1]) % 1024)
+            {
+               foldDistTest = startLine - mFoldLocations[i][0];
+               minDistIdx = i;
+               endFound = true;
+            }
+         }
+         else if (mFoldLocations[i][0] == startLine)
+            return;
+      }
+
+      if (!endFound)
+      {
+         mFoldLocations.resize(mFoldLocations.size() + 1);
+         mFoldLocations[mFoldLocations.size() - 1].push_back(startLine);
+         mFoldLocations[mFoldLocations.size() - 1].push_back(-1);
+         mFoldTypes.push_back(currCommand);
+      }
+      else
+      {
+         mFoldLocations[minDistIdx][0] = startLine;
+         endFoldLine = mFoldLocations[minDistIdx][1];
+         int compareFold = GetFoldLevel(endFoldLine);
+
+         for (int i = startLine + 1; i <= endFoldLine; ++i)
+         {
+            SetFoldLevel(i, GetFoldLevel(i) + 1);
+         }
+      }
+   }
+   else if (currCommand == "BeginScript")
+   {
+      int currFoldLevel = GetFoldLevel(startLine);
+      SetFoldLevel(startLine, currFoldLevel | wxSTC_FOLDLEVELHEADERFLAG);
+      int newFoldLevel = currFoldLevel + 1;
+      int testFoldLevel = GetFoldLevel(startLine + 1);
+
+      // Search for a valid ending statement that needs a header statement,
+      // if one isn't found, add this header as a new possible fold location
+      // and do not modify fold levels
+      for (int i = 0; i < mFoldLocations.size(); ++i)
+      {
+         if (mFoldLocations[i][0] == -1)
+         {
+            // Fold levels will sometimes be automatically set to multiples
+            // of the base fold level 1024 (for example, 1024 can be
+            // represented as 9216, so then 1026 would be 9218), so check that
+            // the possible end statement divided by the base value has the
+            // same remainder as the header
+            if (mFoldLocations[i][1] - startLine > 0 &&
+               mFoldLocations[i][1] - startLine < foldDistTest &&
+               mFoldTypes[i] == "Script" &&
+               testFoldLevel % 1024 ==
+               GetFoldLevel(mFoldLocations[i][1]) % 1024)
+            {
+               foldDistTest = startLine - mFoldLocations[i][0];
+               minDistIdx = i;
+               endFound = true;
+            }
+         }
+         else if (mFoldLocations[i][0] == startLine)
+            return;
+      }
+
+      if (!endFound)
+      {
+         mFoldLocations.resize(mFoldLocations.size() + 1);
+         mFoldLocations[mFoldLocations.size() - 1].push_back(startLine);
+         mFoldLocations[mFoldLocations.size() - 1].push_back(-1);
+         mFoldTypes.push_back("Script");
+      }
+      else
+      {
+         mFoldLocations[minDistIdx][0] = startLine;
+         endFoldLine = mFoldLocations[minDistIdx][1];
+
+         for (int i = startLine + 1; i <= endFoldLine; ++i)
+         {
+            SetFoldLevel(i, GetFoldLevel(i) + 1);
+         }
+      }
+   }
+   else if (currCommand == "EndIf" || currCommand == "EndFor" ||
+      currCommand == "EndWhile" || currCommand == "EndTarget" ||
+      currCommand == "EndOptimize" || currCommand == "EndScript")
+   {
+      int currFoldLevel = GetFoldLevel(startLine);
+      int newFoldLevel = currFoldLevel + 1;
+      int testFoldLevel = GetFoldLevel(startLine);
+
+      std::string commandName = currCommand;
+      commandName.erase(0, 3);
+
+      // Search for a valid header statement that needs an ending statement,
+      // if one isn't found, add this ending as a new possible fold location
+      // and do not modify fold levels
+      for (int i = 0; i < mFoldLocations.size(); ++i)
+      {
+         if (mFoldLocations[i][1] == -1)
+         {
+            // Fold levels will sometimes be automatically set to multiples
+            // of the base fold level 1024 (for example, 1024 can be
+            // represented as 9216, so then 1026 would be 9218), so check that
+            // the possible header statement divided by the base value has the
+            // same remainder as the end statement
+            if (startLine - mFoldLocations[i][0] > 0 &&
+               startLine - mFoldLocations[i][0] < foldDistTest &&
+               mFoldTypes[i] == commandName &&
+               testFoldLevel % 1024 ==
+               GetFoldLevel(mFoldLocations[i][0] + 1) % 1024)
+            {
+               foldDistTest = startLine - mFoldLocations[i][0];
+               minDistIdx = i;
+               endFound = true;
+            }
+         }
+         else if (mFoldLocations[i][1] == startLine)
+            return;
+      }
+
+      if (!endFound)
+      {
+         mFoldLocations.resize(mFoldLocations.size() + 1);
+         mFoldLocations[mFoldLocations.size() - 1].push_back(-1);
+         mFoldLocations[mFoldLocations.size() - 1].push_back(startLine);
+         mFoldTypes.push_back(commandName);
+      }
+      else
+      {
+         mFoldLocations[minDistIdx][1] = startLine;
+         endFoldLine = mFoldLocations[minDistIdx][0];
+
+         for (int i = startLine; i > endFoldLine; --i)
+         {
+            SetFoldLevel(i, GetFoldLevel(i) + 1);
+         }
+      }
+   }
+}
 
 //------------------------------------------------------------------------------
 // wxString GetLine(int lineNumber)

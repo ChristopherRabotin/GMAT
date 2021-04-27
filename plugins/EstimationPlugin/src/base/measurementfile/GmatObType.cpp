@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -68,9 +68,9 @@ GmatObType::GmatObType(const std::string withName) :
 
    header = "% GMAT Internal Measurement Data File\n\n";
 
-   // Define deprecated type map
-   depTypeMap["DSNRange"] = "DSN_SeqRange";
-   depTypeMap["Doppler"]  = "DSN_TCP";
+   //// Define deprecated type map
+   //depTypeMap["DSNRange"] = "DSN_SeqRange";
+   //depTypeMap["Doppler"]  = "DSN_TCP";
 }
 
 //-----------------------------------------------------------------------------
@@ -315,8 +315,8 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
 
    if (md->epochGT.GetMjd() <= 0.0)
    {
-      Real taiEpoch = (md->epochSystem == TimeConverterUtil::TAIMJD ? md->epoch :
-         TimeConverterUtil::ConvertToTaiMjd(md->epochSystem, md->epoch,
+      Real taiEpoch = (md->epochSystem == TimeSystemConverter::TAIMJD ? md->epoch :
+         theTimeConverter->ConvertToTaiMjd(md->epochSystem, md->epoch,
          GmatTimeConstants::JD_NOV_17_1858));
 
       char epochbuffer[200];
@@ -325,8 +325,8 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
    }
    else
    {
-      GmatTime taiEpoch = (md->epochSystem == TimeConverterUtil::TAIMJD ? md->epochGT :
-         TimeConverterUtil::ConvertToTaiMjd(md->epochSystem, md->epochGT,
+      GmatTime taiEpoch = (md->epochSystem == TimeSystemConverter::TAIMJD ? md->epochGT :
+         theTimeConverter->ConvertToTaiMjd(md->epochSystem, md->epochGT,
          GmatTimeConstants::JD_NOV_17_1858));
       
       dataLine << taiEpoch.ToString();
@@ -453,7 +453,7 @@ ObservationData* GmatObType::ReadObservation()
       return NULL;
 
    // Read a line when it is not end of file
-   std::getline (theStream, str);
+   std::getline(theStream, str);
    
    // Skip header and comment lines or empty lines
    while ((str[0] == '%') || (GmatStringUtil::RemoveAllBlanks(str) == "") ||
@@ -480,21 +480,21 @@ ObservationData* GmatObType::ReadObservation()
    theLine1 >> taiEpochStr;
    GmatTime  taiEpochGT(0.0);
    taiEpochGT.SetMjdString(taiEpochStr);
-   currentObs.epochGT = (currentObs.epochSystem == TimeConverterUtil::TAIMJD ?
+   currentObs.epochGT = (currentObs.epochSystem == TimeSystemConverter::TAIMJD ?
             taiEpochGT :
-            TimeConverterUtil::ConvertFromTaiMjd(currentObs.epochSystem, taiEpochGT,
+            theTimeConverter->ConvertFromTaiMjd(currentObs.epochSystem, taiEpochGT,
             GmatTimeConstants::JD_NOV_17_1858));
 
    GmatEpoch taiEpoch;
    theLine >> taiEpoch;
-   currentObs.epoch = (currentObs.epochSystem == TimeConverterUtil::TAIMJD ?
+   currentObs.epoch = (currentObs.epochSystem == TimeSystemConverter::TAIMJD ?
          taiEpoch :
-         TimeConverterUtil::ConvertFromTaiMjd(currentObs.epochSystem, taiEpoch,
+         theTimeConverter->ConvertFromTaiMjd(currentObs.epochSystem, taiEpoch,
                GmatTimeConstants::JD_NOV_17_1858));
 
    theLine >> currentObs.typeName;
-   // Check type deprecation
-   currentObs.typeName = CheckTypeDeprecation(currentObs.typeName);
+   //// Check type deprecation
+   //currentObs.typeName = CheckTypeDeprecation(currentObs.typeName);
 
    Integer type;
    theLine >> type;
@@ -567,12 +567,14 @@ ObservationData* GmatObType::ReadObservation()
       }
 #endif
 
-      //if ((currentObs.typeName == "Range_KM") || (currentObs.typeName == "DSN_SeqRange")
-      //   || (currentObs.typeName == "Doppler_RangeRate") || (currentObs.typeName == "DSN_TCP")
-      //   || (currentObs.typeName == "TDRSDoppler_HZ"))
       if ((currentObs.typeName == "Range") || (currentObs.typeName == "DSN_SeqRange")
          || (currentObs.typeName == "RangeRate") || (currentObs.typeName == "DSN_TCP")
-         || (currentObs.typeName == "SN_Doppler") || (currentObs.typeName == "SN_Range"))
+         || (currentObs.typeName == "SN_Doppler") || (currentObs.typeName == "SN_Range")
+         || (currentObs.typeName == "Azimuth") || (currentObs.typeName == "Elevation")
+         || (currentObs.typeName == "XEast") || (currentObs.typeName == "YNorth")
+         || (currentObs.typeName == "XSouth") || (currentObs.typeName == "YEast")
+         || (currentObs.typeName == "RightAscension") || (currentObs.typeName == "Declination")
+         || (currentObs.typeName == "Range_Skin"))
       {
          dataSize = 1;
       }
@@ -634,7 +636,8 @@ ObservationData* GmatObType::ReadObservation()
 
 
    //if ((currentObs.typeName == "Range_KM") || (currentObs.typeName == "GPS_PosVec"))
-   if ((currentObs.typeName == "Range") || (currentObs.typeName == "SN_Range") || (currentObs.typeName == "GPS_PosVec"))
+   if ((currentObs.typeName == "Range") || (currentObs.typeName == "SN_Range") 
+      || (currentObs.typeName == "GPS_PosVec") || (currentObs.typeName == "Range_Skin"))
    {
       currentObs.unit = "km";
    }
@@ -659,6 +662,13 @@ ObservationData* GmatObType::ReadObservation()
       theLine >> currentObs.tdrsSMARID;               // TDRS SMAR id
       theLine >> currentObs.dopplerCountInterval;
       currentObs.unit = "Hz";
+   }
+   else if ((currentObs.typeName == "Azimuth") || (currentObs.typeName == "Elevation")
+      || (currentObs.typeName == "XEast") || (currentObs.typeName == "YNorth")
+      || (currentObs.typeName == "XSouth") || (currentObs.typeName == "YEast")
+      || (currentObs.typeName == "RightAscension") || (currentObs.typeName == "Declination"))
+   {
+      currentObs.unit = "deg";
    }
 
    for (Integer i = 0; i < dataSize; ++i)
@@ -844,29 +854,29 @@ bool GmatObType::ProcessSignals(const std::string str, Integer& participantSize,
 }
 
 
-std::string GmatObType::CheckTypeDeprecation(const std::string datatype)
-{
-   std::string typeName = datatype;
-   for (std::map<std::string, std::string>::iterator i = depTypeMap.begin();
-      i != depTypeMap.end(); ++i)
-   {
-      if ((*i).first == datatype)
-      {
-         std::stringstream ss;
-         ss << "Warning: measurement type name '" << datatype << 
-            "' in .gmd data file is deprecated and will be removed in a future release. Use '" <<
-            (*i).second << "' instead.\n";
-         
-         if (find(mesg.begin(), mesg.end(), ss.str()) == mesg.end())
-         {
-            MessageInterface::ShowMessage(ss.str());
-            mesg.push_back(ss.str());
-         }
-         typeName = (*i).second;
-         break;
-      }
-   }
-
-   return typeName;
-}
+//std::string GmatObType::CheckTypeDeprecation(const std::string datatype)
+//{
+//   std::string typeName = datatype;
+//   for (std::map<std::string, std::string>::iterator i = depTypeMap.begin();
+//      i != depTypeMap.end(); ++i)
+//   {
+//      if ((*i).first == datatype)
+//      {
+//         std::stringstream ss;
+//         ss << "Warning: measurement type name '" << datatype << 
+//            "' in .gmd data file is deprecated and will be removed in a future release. Use '" <<
+//            (*i).second << "' instead.\n";
+//         
+//         if (find(mesg.begin(), mesg.end(), ss.str()) == mesg.end())
+//         {
+//            MessageInterface::ShowMessage(ss.str());
+//            mesg.push_back(ss.str());
+//         }
+//         typeName = (*i).second;
+//         break;
+//      }
+//   }
+//
+//   return typeName;
+//}
 

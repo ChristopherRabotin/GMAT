@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -232,7 +232,7 @@ bool EventModel::GetDerivatives(Real *state, Real dt, Integer order, const Integ
 
    for (UnsignedInt i = 0; i < events->size(); ++i)
    {
-      GmatEpoch now = theState->GetEpoch() + dt/GmatTimeConstants::SECS_PER_DAY;
+      GmatEpoch now = epoch + (elapsedTime + dt)/GmatTimeConstants::SECS_PER_DAY;
       Real *data = events->at(i)->Evaluate(now, state);
       for (Integer j = 0; j < functionCounts[i]; ++j)
       {

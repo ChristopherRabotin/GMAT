@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -98,9 +98,12 @@ DragForce::PARAMETER_TEXT[DragForceParamCount - PhysicalModelParamCount] =
    "MagneticIndex",                 // MAGNETIC_INDEX
    "SchattenErrorModel",            // SCHATTEN_ERROR_MODEL
    "SchattenTimingModel",           // SCHATTEN_TIMING_MODEL
+   "DragModel",                     // Drag Model - Spherical or SPADFile
    "FixedCoordinateSystem",         // FIXED_COORD_SYSTEM  (Read-only parameter)
    "AngularMomentumUpdateInterval", // W_UPDATE_INTERVAL (in days, Read-only)
    "KpToApMethod",                  // KP2AP_METHOD (Read-only)
+   "DensityModel",                  // DENSITY_MODEL         used for MarsGRAM2005                     // made changes by TUAN NGUYEN
+   "InputFile",                     // INPUTFILE             used for MarsGRAM2005                     // made changes by TUAN NGUYEN
 };
 
 const Gmat::ParameterType
@@ -118,9 +121,12 @@ DragForce::PARAMETER_TYPE[DragForceParamCount - PhysicalModelParamCount] =
    Gmat::REAL_TYPE,     // "MagneticIndex",
    Gmat::STRING_TYPE,   // "SchattenError",
    Gmat::STRING_TYPE,   // "SchattenTiming",
+   Gmat::STRING_TYPE,   // "DragModel",
    Gmat::STRING_TYPE,   // "FixedCoordinateSystem"
    Gmat::REAL_TYPE,     // "AngularMomentumUpdateInterval"
    Gmat::INTEGER_TYPE,  // "KpToApMethod"
+   Gmat::STRING_TYPE,   // "DensityModel"                                         // made changes by TUAN NGUYEN
+   Gmat::STRING_TYPE,   // "InputFile"                                            // made changes by TUAN NGUYEN
 };
 
 //------------------------------------------------------------------------------
@@ -160,9 +166,9 @@ DragForce::DragForce(const std::string &name) :
    KPID                    (-1),
    cssiWFileID             (-1),
    schattenWFileID         (-1),
-   estimatingCd            (false),
+   //estimatingCd            (false),                      // made changes by TUAN NGUYEN
    cdEpsilonID             (-1),
-   cdEpsilonRow            (-1),
+   //cdEpsilonRow            (-1),                         // made changes by TUAN NGUYEN
    useCentralDifferences   (false),
    finiteDifferenceDv      (true),
    dataType                ("Constant"),
@@ -174,10 +180,11 @@ DragForce::DragForce(const std::string &name) :
    schattenErrorModel      ("Nominal"),
    schattenTimingModel     ("NominalCycle"),
    cartIndex               (0),
-   fillCartesian           (false),
    cbFixed                 (NULL),
    internalCoordSystem     (NULL),
-   kpApConversion          (0)
+   kpApConversion          (0),
+   dragShapeModel          ("Spherical"),                             // made changes by TUAN NGUYEN
+   dragShapeModelIndex     (ShapeModel::SPHERICAL_MODEL)              // made changes by TUAN NGUYEN
 {
    #ifdef DEBUG_CONSTRUCTION
       MessageInterface::ShowMessage("DragForce default construction "
@@ -198,8 +205,6 @@ DragForce::DragForce(const std::string &name) :
    cbLoc[1]  = 0.0;
    cbLoc[2]  = 0.0;
    
-   density = new Real[1];
-
    FileManager *fm = FileManager::Instance();
    fluxPath = fm->GetAbsPathname("ATMOSPHERE_PATH");
    cssiWFile = fm->GetFilename("CSSI_FLUX_FILE");
@@ -208,6 +213,8 @@ DragForce::DragForce(const std::string &name) :
    ap = CalculateAp(kp);
    
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
+   isConservative = false;
+   hasMassJacobian = true;
    
    #ifdef DEBUG_DRAGFORCE_DENSITY
        dragdata.open("DragData.csv");
@@ -225,8 +232,8 @@ DragForce::DragForce(const std::string &name) :
 //------------------------------------------------------------------------------
 DragForce::~DragForce()
 {
-   //if (!useExternalAtmosphere && atmos)
-   //   delete atmos;
+   // Do not delete atmos due to it is not created in DragForce class
+
    if (internalAtmos)
    {
       #ifdef DEBUG_MEMORY
@@ -235,9 +242,8 @@ DragForce::~DragForce()
           "deleting internal atmosphere model", this);
       #endif
       delete internalAtmos;
-      internalAtmos = NULL;
    }
-   
+
    if (density)
    {
       #ifdef DEBUG_MEMORY
@@ -247,7 +253,7 @@ DragForce::~DragForce()
       #endif
       delete [] density;
    }
-   
+
    if (dragState)
    {
       #ifdef DEBUG_MEMORY
@@ -257,7 +263,7 @@ DragForce::~DragForce()
       #endif
       delete [] dragState;
    }
-   
+
    if (prefactor)
    {
       #ifdef DEBUG_MEMORY
@@ -313,11 +319,10 @@ DragForce::DragForce(const DragForce& df) :
    KPID                    (df.KPID),
    cssiWFileID             (df.cssiWFileID),
    schattenWFileID         (df.schattenWFileID),
-   estimatingCd            (df.estimatingCd),
+   //estimatingCd            (df.estimatingCd),                     // made changes by TUAN NGUYEN
    cdEpsilonID             (df.cdEpsilonID),
-   cdEpsilonRow            (df.cdEpsilonRow),
+   //cdEpsilonRow            (df.cdEpsilonRow),                     // made changes by TUAN NGUYEN
    cdEpsilon               (df.cdEpsilon),
-   cdInitial               (df.cdInitial),
    useCentralDifferences   (df.useCentralDifferences),
    finiteDifferenceDv      (df.finiteDifferenceDv),
    dataType                (df.dataType),
@@ -332,14 +337,16 @@ DragForce::DragForce(const DragForce& df) :
    schattenErrorModel      (df.schattenErrorModel),
    schattenTimingModel     (df.schattenTimingModel),
    cartIndex               (df.cartIndex),
-   fillCartesian           (df.fillCartesian),
    cbFixed                 (NULL),
    internalCoordSystem     (NULL),
-   kpApConversion          (df.kpApConversion)
+   kpApConversion          (df.kpApConversion),
+   dragShapeModel          (df.dragShapeModel),           // made changes by TUAN NGUYEN
+   dragShapeModelIndex     (df.dragShapeModelIndex)       // made changes by TUAN NGUYEN
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DragForce copy construction from <'%s',%p> to <'%s',%p>   enetered\n", df.GetName().c_str(), &df, GetName().c_str(), &(*this));
 #endif
+
    internalAtmos = NULL;
    if (df.internalAtmos)
    {
@@ -379,15 +386,15 @@ DragForce::DragForce(const DragForce& df) :
    mass.clear();
    dragCoeff.clear();
 
-   if (internalAtmos != NULL)													            // made changes for GMT-4299
-   {																			                  // made changes for GMT-4299
-	   try																		               // made changes for GMT-4299
-	   {																		                  // made changes for GMT-4299
-	      densityModel = internalAtmos->GetStringParameter("DensityModel");		// made changes for GMT-4299
-		  inputFile    = internalAtmos->GetStringParameter("InputFile");		   // made changes for GMT-4299
-	   }																		                  // made changes for GMT-4299
-	   catch(...){};															               // made changes for GMT-4299
-   }																			                  // made changes for GMT-4299
+   //if (internalAtmos != NULL)													            // made changes for GMT-4299          //made changes by TUAN NGUYEN 
+   //{																			                  // made changes for GMT-4299          //made changes by TUAN NGUYEN
+	  // try																		               // made changes for GMT-4299             //made changes by TUAN NGUYEN
+	  // {																		                  // made changes for GMT-4299          //made changes by TUAN NGUYEN
+	  //    densityModel = internalAtmos->GetStringParameter("DensityModel");		// made changes for GMT-4299          //made changes by TUAN NGUYEN
+		 //  inputFile    = internalAtmos->GetStringParameter("InputFile");		   // made changes for GMT-4299          //made changes by TUAN NGUYEN
+	  // }																		                  // made changes for GMT-4299          //made changes by TUAN NGUYEN
+	  // catch(...){};															               // made changes for GMT-4299          //made changes by TUAN NGUYEN
+   //}																			                  // made changes for GMT-4299          //made changes by TUAN NGUYEN
    
 #ifdef DEBUG_CONSTRUCTION
    if (df.atmos == NULL)
@@ -445,11 +452,10 @@ DragForce& DragForce::operator=(const DragForce& df)
    cssiWFileID           = df.cssiWFileID;
    schattenWFileID       = df.schattenWFileID;
    
-   estimatingCd          = df.estimatingCd;
+   //estimatingCd          = df.estimatingCd;                 // made changes by TUAN NGUYEN
    cdEpsilonID           = df.cdEpsilonID;
-   cdEpsilonRow          = df.cdEpsilonRow;
+   //cdEpsilonRow          = df.cdEpsilonRow;                 // made changes by TUAN NGUYEN
    cdEpsilon             = df.cdEpsilon;
-   cdInitial             = df.cdInitial;
    useCentralDifferences = df.useCentralDifferences;
    finiteDifferenceDv    = df.finiteDifferenceDv;
 
@@ -464,9 +470,9 @@ DragForce& DragForce::operator=(const DragForce& df)
          atmos = NULL;
       delete internalAtmos;
    }
-   
    internalAtmos = NULL;
-   
+   atmos = NULL;
+
    if (df.internalAtmos)
    {
       internalAtmos = (AtmosphereModel*)df.internalAtmos->Clone();
@@ -487,7 +493,6 @@ DragForce& DragForce::operator=(const DragForce& df)
    cbFixed               = df.cbFixed;                           // made changes for bug GMT-5282
    internalCoordSystem   = df.internalCoordSystem;               // made changes for bug GMT-5282
 
-   atmos                 = NULL;
    angVel                = NULL;
 //   density               = NULL;
    //density = new Real[1];
@@ -501,7 +506,8 @@ DragForce& DragForce::operator=(const DragForce& df)
    //bodyName              = df.bodyName;
    satCount              = df.satCount;
    dragBody              = df.dragBody;
-   dragState             = df.dragState;
+   //scObjs                = df.scObjs;                       // made changes by TUAN NGUYEN 
+   dragState             = NULL; //df.dragState;
    wUpdateInterval       = df.wUpdateInterval;
    wUpdateEpoch          = df.wUpdateEpoch;
    dataType              = df.dataType;
@@ -539,6 +545,9 @@ DragForce& DragForce::operator=(const DragForce& df)
 
    densityModel = df.densityModel;							// made changes for GMT-4299
    inputFile    = df.inputFile;								// made changes for GMT-4299
+   
+   dragShapeModel      = df.dragShapeModel;                        // made changes by TUAN NGUYEN
+   dragShapeModelIndex = df.dragShapeModelIndex;                   // made changes by TUAN NGUYEN
 
    return *this;
 }
@@ -622,7 +631,7 @@ void DragForce::SetSatelliteParameter(const Integer i,
                                       const Real parm,
                                       const Integer parmID)
 {
-   unsigned parmNumber = (unsigned)(i+1);
+   unsigned parmNumber = (unsigned)(i);              // made changes by TUAN NGUYEN
 
    #ifdef DEBUG_DRAGFORCE_DENSITY
       dragdata << "Setting satellite parameter " << parmName
@@ -638,22 +647,37 @@ void DragForce::SetSatelliteParameter(const Integer i,
       if (parmID >= 0)
          massID = parmID;
    }
+   
    if (parmName == "Cd")
    {
-      if (parmNumber < dragCoeff.size())
-      {
-         dragCoeff[i] = parm;
-         if (cdInitial[i] == -99999999.9999)
-            cdInitial[i] = parm;
-      }
-      else
-      {
-         dragCoeff.push_back(parm);
-         cdInitial.push_back(parm);
-      }
-      if (parmID >= 0)
-         cdID = parmID;
+      // if (dragShapeModel == "Spherical")                                     // made changes by TUAN NGUYEN
+      if (dragShapeModelIndex == ShapeModel::SPHERICAL_MODEL)                   // made changes by TUAN NGUYEN
+      {                                                    // made changes by TUAN NGUYEN
+         if (parmNumber < dragCoeff.size())
+            dragCoeff[i] = parm;
+         else
+            dragCoeff.push_back(parm);
+
+         if (parmID >= 0)
+            cdID = parmID;
+      }                                                    // made changes by TUAN NGUYEN
    }
+
+   if (parmName == "SPADDragScaleFactor")                  // made changes by TUAN NGUYEN
+   {                                                       // made changes by TUAN NGUYEN
+      // if (dragShapeModel == "SPADFile")                                       // made changes by TUAN NGUYEN
+      if (dragShapeModelIndex == ShapeModel::SPAD_FILE_MODEL)                    // made changes by TUAN NGUYEN
+      {                                                    // made changes by TUAN NGUYEN
+         if (parmNumber < dragCoeff.size())                // made changes by TUAN NGUYEN
+            dragCoeff[i] = parm;                           // made changes by TUAN NGUYEN
+         else                                              // made changes by TUAN NGUYEN
+            dragCoeff.push_back(parm);                     // made changes by TUAN NGUYEN
+
+         if (parmID >= 0)                                  // made changes by TUAN NGUYEN
+            cdID = parmID;                                 // made changes by TUAN NGUYEN
+      }                                                    // made changes by TUAN NGUYEN
+   }                                                       // made changes by TUAN NGUYEN
+
    if (parmName == "DragArea")
    {
       if (parmNumber < area.size())
@@ -663,7 +687,7 @@ void DragForce::SetSatelliteParameter(const Integer i,
       if (parmID >= 0)
          areaID = parmID;
    }
-   if (parmName == "CdEpsilon")
+   if (parmName == "Cd_Epsilon")                            // made changes by TUAN NGUYEN
    {
        if (parmNumber < cdEpsilon.size())
           cdEpsilon[i] = parm;
@@ -693,8 +717,7 @@ void DragForce::SetSatelliteParameter(const Integer i,
                                       const Integer parmID,
                                       const Real parm)
 {
-   unsigned parmNumber = (unsigned)(i+1);
-
+   unsigned parmNumber = (unsigned)(i);                   // made changes by TUAN NGUYEN
    #ifdef DEBUG_DRAGFORCE_DENSITY
       dragdata << "Setting satellite parameter ID " << parmID
                << " for Spacecraft " << i << " to " << parm << "\n";
@@ -748,11 +771,10 @@ void DragForce::SetSatelliteParameter(const Integer i,
 void DragForce::SetSatelliteParameter(const Integer i, 
       const std::string parmName, const std::string parm)
 {
-   unsigned parmNumber = (unsigned)(i+1);
-
+   unsigned parmNumber = (unsigned)(i);             // made changes by TUAN NGUYEN
    if (parmName == "ReferenceBody")
    {
-      if (parmNumber < mass.size())
+      if (parmNumber < dragBody.size())             // made changes by TUAN NGUYEN
          dragBody[i] = parm;
       else
          dragBody.push_back(parm);
@@ -774,17 +796,52 @@ void DragForce::ClearSatelliteParameters(const std::string parmName)
 {
    if ((parmName == "Mass") || (parmName == ""))
       mass.clear();
-   if ((parmName == "Cd") || (parmName == ""))
-   {
+   if ((parmName == "Cd") || (parmName == "SPADDragScaleFactor") || (parmName == ""))
       dragCoeff.clear();
-      cdInitial.clear();
-   }
-   if ((parmName == "CdEpsilon") || (parmName == ""))
+
+   if ((parmName == "Cd_Epsilon") || (parmName == ""))
       cdEpsilon.clear();
    if ((parmName == "DragArea") || (parmName == ""))
       area.clear();
+   if ((parmName == "scObjs")  || (parmName == ""))
+      scObjs.clear();
 }
 
+////////------------------------------------------------------------------------------
+//////// void PhysicalModel::SetSpaceObject(const Integer i, GmatBase *obj)
+////////------------------------------------------------------------------------------
+///////**
+////// * Passes spacecraft pointers to the force model.
+////// *
+////// * @param i   ID for the spacecraft
+////// * @param obj pointer to the Spacecraft
+////// */
+////////------------------------------------------------------------------------------
+//////void DragForce::SetSpaceObject(const Integer i, GmatBase *obj)
+//////{
+//////   unsigned parmNumber = (unsigned)(i);
+//////   
+//////   if (parmNumber < scObjs.size())
+//////      scObjs[i] = obj;
+//////   else
+//////      scObjs.push_back(obj);
+//////}
+
+//------------------------------------------------------------------------------
+// bool DragForce::AttitudeAffectsDynamics()
+//------------------------------------------------------------------------------
+/**
+ * Detects if a the DragForce is dependant on its attitude
+ *
+ * @return true if the model's dynamics are affected by its attitude,
+ *         false if it does not
+ */
+//------------------------------------------------------------------------------
+bool DragForce::AttitudeAffectsDynamics()
+{
+   // return (dragShapeModel == "SPADFile");                              // made changes by TUAN NGUYEN
+   return (dragShapeModelIndex == ShapeModel::SPAD_FILE_MODEL);           // made changes by TUAN NGUYEN
+}
 
 //------------------------------------------------------------------------------
 // void Initialize()
@@ -840,6 +897,7 @@ bool DragForce::Initialize()
              "deleting density[satCount]", this);
          #endif
          delete [] density;
+         density = NULL;
       }
       
       if (prefactor)
@@ -850,6 +908,7 @@ bool DragForce::Initialize()
              "deleting prefactor[satCount]", this);
          #endif
          delete [] prefactor;
+         prefactor = NULL;
       }
       
       // Set up density even if only used for a parameter
@@ -857,8 +916,12 @@ bool DragForce::Initialize()
          density   = new Real[satCount];
       else
          density   = new Real[1];
-      prefactor = new Real[satCount];
       
+      if (satCount > 0)
+         prefactor = new Real[satCount];
+      else
+         prefactor = new Real[1];
+
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Add
          (density, "density", "DragForce::Initialize()",
@@ -871,7 +934,7 @@ bool DragForce::Initialize()
       // Set the atmosphere model
       if (solarSystem)
       {
-         sun = solarSystem->GetBody(SolarSystem::SUN_NAME);
+         sun = solarSystem->GetBody(GmatSolarSystemDefaults::SUN_NAME);
          if (!sun)
             throw ODEModelException("The Sun is not in solar system");
            
@@ -898,43 +961,55 @@ bool DragForce::Initialize()
          if (!centralBody)
             throw ODEModelException(
                "Central body (for Drag) not in solar system");
+
+         // If central body's atmosphere is not defined, then set central body's atmosphere to be internal atmosphere  // made changes by tUAN NGUYEN
+         std::string modelBodyIsUsing = centralBody->GetAtmosphereModelType();                                         // made changes by tUAN NGUYEN 
+         if (modelBodyIsUsing == "Undefined")                                                                          // made changes by tUAN NGUYEN
+         {                                                                                                             // made changes by tUAN NGUYEN
+            if (internalAtmos)                                                                                         // made changes by tUAN NGUYEN
+            {                                                                                                          // made changes by tUAN NGUYEN
+               AtmosphereModel *amCloned = (AtmosphereModel*)internalAtmos->Clone();                                   // made changes by tUAN NGUYEN
+               centralBody->SetAtmosphereModelType(atmosphereType);                                                    // made changes by tUAN NGUYEN  
+               centralBody->SetAtmosphereModel(amCloned);                                                              // made changes by tUAN NGUYEN
+            }                                                                                                          // made changes by tUAN NGUYEN
+         }                                                                                                             // made changes by tUAN NGUYEN
+
+         // Set value for atmos
          if (useExternalAtmosphere)
          {
             atmos = centralBody->GetAtmosphereModel();
          }
          else
          {
-            std::string modelBodyIsUsing =
-               centralBody->GetAtmosphereModelType();
-            
-			// Density from the body
-            if (modelBodyIsUsing == "Undefined")
-            {
-               #ifdef DEBUG_DRAGFORCE_DENSITY
-               MessageInterface::ShowMessage
-                  ("   Setting atmosphereType<%p><%s>'%s' to body '%s'\n",
-                   internalAtmos, internalAtmos ? internalAtmos->GetTypeName().c_str() :
-                   "NULL", internalAtmos ? internalAtmos->GetName().c_str() : "NULL",
-                   centralBody->GetName().c_str());
-               #endif
-               
-               if (internalAtmos)
-               {
-                  AtmosphereModel *amCloned =
-                        (AtmosphereModel*)internalAtmos->Clone();
-                  #ifdef DEBUG_MEMORY
-                  MemoryTracker::Instance()->Add
-                     (amCloned, amCloned->GetName(), "DragForce::Initialize()",
-                      "amCloned = (AtmosphereModel*)internalAtmos->Clone()", this);
-                  #endif
-                  
-                  centralBody->SetAtmosphereModelType(atmosphereType);
-                  centralBody->SetAtmosphereModel(amCloned);
-               }
-            }
-            
-//            if ((atmosphereType == "BodyDefault") ||
-//                (atmosphereType == modelBodyIsUsing))
+      ////      std::string modelBodyIsUsing =
+      ////         centralBody->GetAtmosphereModelType();
+      ////      
+			   ////// Density from the body
+      ////      if (modelBodyIsUsing == "Undefined")
+      ////      {
+      ////         #ifdef DEBUG_DRAGFORCE_DENSITY
+      ////         MessageInterface::ShowMessage
+      ////            ("   Setting atmosphereType<%p><%s>'%s' to body '%s'\n",
+      ////             internalAtmos, internalAtmos ? internalAtmos->GetTypeName().c_str() :
+      ////             "NULL", internalAtmos ? internalAtmos->GetName().c_str() : "NULL",
+      ////             centralBody->GetName().c_str());
+      ////         #endif
+      ////         
+      ////         if (internalAtmos)
+      ////         {
+      ////            AtmosphereModel *amCloned =
+      ////                  (AtmosphereModel*)internalAtmos->Clone();
+      ////            #ifdef DEBUG_MEMORY
+      ////            MemoryTracker::Instance()->Add
+      ////               (amCloned, amCloned->GetName(), "DragForce::Initialize()",
+      ////                "amCloned = (AtmosphereModel*)internalAtmos->Clone()", this);
+      ////            #endif
+      ////            
+      ////            centralBody->SetAtmosphereModelType(atmosphereType);
+      ////            centralBody->SetAtmosphereModel(amCloned);
+      ////         }
+      ////      }
+      ////      
             if ((atmosphereType == "BodyDefault") || (atmosphereType == "MarsGRAM2005"))
                atmos = centralBody->GetAtmosphereModel();
             else
@@ -1026,7 +1101,7 @@ bool DragForce::Initialize()
 //				   MessageInterface::ShowMessage("Set densitymodel and inputfile from DragForce <'%s',%p> to atmosphere object <'%s',%p>\n",GetName().c_str(), this, atmos->GetName().c_str(), atmos); 
 			      atmos->SetStringParameter("DensityModel", densityModel);	// made changes for GMT-4299
 			      atmos->SetStringParameter("InputFile", inputFile);		   // made changes for GMT-4299
-               } catch (...){}
+            } catch (...){}
 
 
 			   atmos->Initialize();										// Note: it needs to initialize before use. Fixed bug GMT-4124
@@ -1060,12 +1135,13 @@ bool DragForce::Initialize()
 	MessageInterface::ShowMessage("End DragForce::Initialize():  drag force <%p,'%s'>\n\n", this, GetName().c_str());
 #endif
    
+   isInitialized = retval;
    return retval;
 }
 
 
 //------------------------------------------------------------------------------
-// void BuildPrefactors() 
+// void BuildPrefactors(const std::string &forModel = "Spherical")
 //------------------------------------------------------------------------------
 /**
  * Builds drag prefactors prior to modeling the force.
@@ -1080,7 +1156,7 @@ bool DragForce::Initialize()
  * expressed in units of m^2, and the mass is in kg.
  */
 //------------------------------------------------------------------------------
-void DragForce::BuildPrefactors() 
+void DragForce::BuildPrefactors(const std::string &forModel)
 {
    #ifdef DEBUG_DRAGFORCE_DENSITY
       dragdata << "Building prefactors for " << satCount <<" Spacecraft\n";
@@ -1102,9 +1178,16 @@ void DragForce::BuildPrefactors()
          errorMsg += " has non-physical mass; Drag modeling cannot be used.";
          throw ODEModelException(errorMsg);
       }
-        
-      // Note: Prefactor is scaled to account for density in kg / m^3
-      prefactor[i] = -500.0 * dragCoeff[i] * area[i] / mass[i];
+      if (forModel == "Spherical")
+      {
+         // Note: Prefactor is scaled to account for density in kg / m^3 (*1000/2)
+         prefactor[i] = -500.0 * dragCoeff[i] * area[i] / mass[i];
+      }
+      else // SPAD
+      {
+         // Note: Prefactor is scaled to account for density in kg / m^3 (*1000/2)
+         prefactor[i] = -500.0 / mass[i];
+      }
 
       #ifdef DEBUG_DRAGFORCE_DENSITY
          dragdata << "Prefactor data\n   Spacecraft "
@@ -1195,11 +1278,19 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
       dragdata << "Entered DragForce::GetDerivatives()\n";
    #endif
 
+   if ((Integer)scObjs.size() != satCount)
+   {
+      std::stringstream msg;
+      msg << "Mismatch between satellite count (" << satCount
+      << ") and object count (" << scObjs.size() << ")";
+      throw ODEModelException(msg.str());
+   }
+
    Integer i, i6, ix, j6;
    Real vRelative[3], vRelMag, factor;
 
    if (mass.size() > 0)
-      BuildPrefactors();
+      BuildPrefactors(dragShapeModel);          // made changes by TUAN NGUYEN
    else
    {
       if (mass.size() == 0)
@@ -1219,17 +1310,13 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
       }
    }
 
-   Integer index = psm->GetSTMIndex(cdID);
-   if (index >= 0)
-   {
-      estimatingCd = true;
-      cdEpsilonRow = index;
-   }
+   //Integer index = psm->GetSTMIndex(cdID);                    // made changes by TUAN NGUYEN
 
-   #ifdef DEBUG_INITIALIZE
-      MessageInterface::ShowMessage("STM row count %d ==> %sestimating Cd\n",
-            stmRowCount, (estimatingCd ? "" : "NOT "));
-   #endif
+   //if (index >= 0)                                            // made changes by TUAN NGUYEN
+   //{                                                          // made changes by TUAN NGUYEN
+   //   estimatingCd = true;                                    // made changes by TUAN NGUYEN
+   //   cdEpsilonRow = index;                                   // made changes by TUAN NGUYEN
+   //}                                                          // made changes by TUAN NGUYEN
 
    firedOnce = true;
     
@@ -1256,6 +1343,8 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
    #endif
    GetDensity(dragState, now);
    Real wind[6];
+   
+   Rvector3 spadArea;
 
    #ifdef DUMP_DENSITY
       bool writeDensity = true;
@@ -1323,6 +1412,7 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
                            vRelative[2]*vRelative[2]);
          }
 
+         // Add density to the prefactor computation 
          factor = prefactor[i] * density[i];
    
          #ifdef DEBUG_DERIVATIVES_FOR_SPACECRAFT
@@ -1330,26 +1420,50 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
                "density = %.12le\n", prefactor[i], density[i]);
          #endif
 
-         if (order == 1)
+         // if (dragShapeModel == "Spherical")                           // made changes by TUAN NGUYEN
+         if (dragShapeModelIndex == ShapeModel::SPHERICAL_MODEL)         // made changes by TUAN NGUYEN
          {
-            // Do dv/dt first, in case deriv = state
-            deriv[3+j6] = factor * vRelMag * vRelative[0];// - a_indirect[0];
-            deriv[4+j6] = factor * vRelMag * vRelative[1];// - a_indirect[1];
-            deriv[5+j6] = factor * vRelMag * vRelative[2];// - a_indirect[2];
+            if (order == 1)
+            {
+               // Do dv/dt first, in case deriv = state
+               deriv[3+j6] = factor * vRelMag * vRelative[0];// - a_indirect[0];
+               deriv[4+j6] = factor * vRelMag * vRelative[1];// - a_indirect[1];
+               deriv[5+j6] = factor * vRelMag * vRelative[2];// - a_indirect[2];
 
-            // dr/dt = v term not built from drag force
-            deriv[j6]   = 
-            deriv[1+j6] = 
-            deriv[2+j6] = 0.0;
-   
-            #ifdef DEBUG_DRAGFORCE_DENSITY
-//               for (Integer m = 0; m < satCount; ++m)
-//                  dragdata << "   Drag Accel: "
-//                           << deriv[3+i6] << "  "
-//                           << deriv[4+i6] << "  "
-//                           << deriv[5+i6] << "\n";
-               for (Integer m = 0; m < satCount; ++m)
+               // dr/dt = v term not built from drag force
+               deriv[j6]   = 
+               deriv[1+j6] = 
+               deriv[2+j6] = 0.0;
+      
+               #ifdef DEBUG_DRAGFORCE_DENSITY
+   //               for (Integer m = 0; m < satCount; ++m)
+   //                  dragdata << "   Drag Accel: "
+   //                           << deriv[3+i6] << "  "
+   //                           << deriv[4+i6] << "  "
+   //                           << deriv[5+i6] << "\n";
+                  for (Integer m = 0; m < satCount; ++m)
+                  {
+                     MessageInterface::ShowMessage(
+                        "   Position:   %16.9le  %16.9le  %16.9le\n",
+                        state[i6], state[i6+1], state[i6+2]);
+                     MessageInterface::ShowMessage(
+                        "   Velocity:   %16.9le  %16.9le  %16.9le\n",
+                        state[i6+3], state[i6+4], state[i6+5]);
+                     MessageInterface::ShowMessage(
+                        "   Drag Accel: %16.9le  %16.9le  %16.9le\n",
+                        deriv[3+i6], deriv[4+i6], deriv[5+i6]);
+                     MessageInterface::ShowMessage(
+                        "   Density:    %16.9le\n", density[i]);
+                  }
+               #endif
+
+            #ifdef DEBUG_NAN_CONDITIONS
+               for (Integer j = 0; j < 6; ++j)
+               if (GmatMathUtil::IsNaN(deriv[j6+j]))
                {
+                  MessageInterface::ShowMessage("NAN found in drag force"
+                        " element %d, Value is %lf at epoch %.12lf\n", j,
+                        deriv[j], now);
                   MessageInterface::ShowMessage(
                      "   Position:   %16.9le  %16.9le  %16.9le\n",
                      state[i6], state[i6+1], state[i6+2]);
@@ -1364,59 +1478,77 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
                }
             #endif
 
-         #ifdef DEBUG_NAN_CONDITIONS
-            for (Integer j = 0; j < 6; ++j)
-            if (GmatMathUtil::IsNaN(deriv[j6+j]))
-            {
-               MessageInterface::ShowMessage("NAN found in drag force"
-                     " element %d, Value is %lf at epoch %.12lf\n", j,
-                     deriv[j], now);
-               MessageInterface::ShowMessage(
-                  "   Position:   %16.9le  %16.9le  %16.9le\n",
-                  state[i6], state[i6+1], state[i6+2]);
-               MessageInterface::ShowMessage(
-                  "   Velocity:   %16.9le  %16.9le  %16.9le\n",
-                  state[i6+3], state[i6+4], state[i6+5]);
-               MessageInterface::ShowMessage(
-                  "   Drag Accel: %16.9le  %16.9le  %16.9le\n",
-                  deriv[3+i6], deriv[4+i6], deriv[5+i6]);
-               MessageInterface::ShowMessage(
-                  "   Density:    %16.9le\n", density[i]);
             }
-         #endif
-
-         }
-         else
+            else
+            {
+               // Feed accelerations to corresponding components directly for RKN
+               deriv[ j6 ] = factor * vRelMag * vRelative[0];// - a_indirect[0];
+               deriv[1+j6] = factor * vRelMag * vRelative[1];// - a_indirect[1];
+               deriv[2+j6] = factor * vRelMag * vRelative[2];// - a_indirect[2];
+               deriv[3+j6] = 0.0;
+               deriv[4+j6] = 0.0;
+               deriv[5+j6] = 0.0;
+      
+               #ifdef DEBUG_DRAGFORCE_DENSITY
+                  for (Integer m = 0; m < satCount; ++m)
+                     dragdata << "   Accel: "
+                              << deriv[i6] << "  "
+                              << deriv[1+i6] << "  "
+                              << deriv[2+i6] << "\n";
+                  for (Integer m = 0; m < satCount; ++m)
+                  {
+                     MessageInterface::ShowMessage(
+                        "   Position:   %16.9le  %16.9le  %16.9le\n",
+                        state[i6], state[i6+1], state[i6+2]);
+                     MessageInterface::ShowMessage(
+                        "    Velocity:   %16.9le  %16.9le  %16.9le\n",
+                        state[i6+3], state[i6+4], state[i6+5]);
+                     MessageInterface::ShowMessage(
+                        "   Drag Accel: %16.9le  %16.9le  %16.9le\n",
+                        deriv[i6], deriv[1+i6], deriv[2+i6]);
+                     MessageInterface::ShowMessage("   Density:    %16.9le\n",
+                        density[i]);
+                  }
+               #endif
+            }
+         } // if Spherical
+         // else if (dragShapeModel == "SPADFile")                           // "SPAD"        // made changes by TUAN NGUYEN
+         else if (dragShapeModelIndex == ShapeModel::SPAD_FILE_MODEL)        // "SPAD"        // made changes by TUAN NGUYEN
          {
-            // Feed accelerations to corresponding components directly for RKN
-            deriv[ j6 ] = factor * vRelMag * vRelative[0];// - a_indirect[0];
-            deriv[1+j6] = factor * vRelMag * vRelative[1];// - a_indirect[1];
-            deriv[2+j6] = factor * vRelMag * vRelative[2];// - a_indirect[2];
-            deriv[3+j6] = 0.0;
-            deriv[4+j6] = 0.0;
-            deriv[5+j6] = 0.0;
-   
-            #ifdef DEBUG_DRAGFORCE_DENSITY
-               for (Integer m = 0; m < satCount; ++m)
-                  dragdata << "   Accel: "
-                           << deriv[i6] << "  "
-                           << deriv[1+i6] << "  "
-                           << deriv[2+i6] << "\n";
-               for (Integer m = 0; m < satCount; ++m)
-               {
-                  MessageInterface::ShowMessage(
-                     "   Position:   %16.9le  %16.9le  %16.9le\n",
-                     state[i6], state[i6+1], state[i6+2]);
-                  MessageInterface::ShowMessage(
-                     "    Velocity:   %16.9le  %16.9le  %16.9le\n",
-                     state[i6+3], state[i6+4], state[i6+5]);
-                  MessageInterface::ShowMessage(
-                     "   Drag Accel: %16.9le  %16.9le  %16.9le\n",
-                     deriv[i6], deriv[1+i6], deriv[2+i6]);
-                  MessageInterface::ShowMessage("   Density:    %16.9le\n",
-                     density[i]);
-               }
-            #endif
+            if (!scObjs.at(i)->IsOfType("Spacecraft"))
+            {
+               std::stringstream msg;
+               msg << "Satellite " << scObjs.at(i)->GetName();
+               msg << " is not of type Spacecraft.  SPAD Drag area cannot ";
+               msg << "be obtained.\n";
+               throw ODEModelException(msg.str());
+            }
+            Rvector3 velVec(vRelative[0], vRelative[1], vRelative[2]);
+            spadArea = ((Spacecraft*) scObjs.at(i))->GetSPADDragArea(now, velVec);
+            if (order == 1)
+            {  // @TODO - do I need to convert to KM here???
+               // Do dv/dt first, in case deriv = state
+               deriv[3+j6] = factor * spadArea[0] * vRelMag * vRelMag;
+               deriv[4+j6] = factor * spadArea[1] * vRelMag * vRelMag;
+               deriv[5+j6] = factor * spadArea[2] * vRelMag * vRelMag;
+               
+               // dr/dt = v term not built from drag force
+               deriv[j6]   =
+               deriv[1+j6] =
+               deriv[2+j6] = 0.0;
+               
+            }
+            else
+            {  // @TODO - do I need to convert to KM here???
+               // Feed accelerations to corresponding components directly for RKN
+               deriv[ j6 ] = factor * spadArea[0] * vRelMag * vRelMag;
+               deriv[1+j6] = factor * spadArea[1] * vRelMag * vRelMag;
+               deriv[2+j6] = factor * spadArea[2] * vRelMag * vRelMag;
+               deriv[3+j6] = 0.0;
+               deriv[4+j6] = 0.0;
+               deriv[5+j6] = 0.0;
+               
+            }
          }
       }
 
@@ -1428,14 +1560,36 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
 
    if (fillSTM || fillAMatrix)
    {
-
-      Real *aTilde;
-      Integer stmSize = stmRowCount * stmRowCount;
-      aTilde = new Real[stmSize];
-
+      Integer iStart = (fillSTM ? stmStart : aMatrixStart);                           // made changes by TUAN NGUYEN
+      stmRowCount = 0;                             // made changes by TUAN NGUYEN
       for (i = 0; i < satCount; ++i)
       {
-         for (Integer j = 0; j < stmRowCount; ++j)
+			Integer cdEpsilonRow = psm->GetSTMIndex(cdID, scObjs[i]) - stmRowCount;   // made changes by TUAN NGUYEN
+
+			StringArray sfs = scObjs[i]->GetStringArrayParameter("SolveFors");        // made changes by TUAN NGUYEN
+			bool estimatingCd = false;                                                // made changes by TUAN NGUYEN
+			for (Integer j = 0; j < sfs.size(); ++j)                                  // made changes by TUAN NGUYEN
+			{                                                                         // made changes by TUAN NGUYEN
+            //if (GmatGlobal::Instance()->GetDebug())
+            //   MessageInterface::ShowMessage("sfs[%d] = <%s>\n", j, sfs[j].c_str());
+				if ((sfs[j] == "Cd")|| (sfs[j] == "SPADDragScaleFactor"))              // made changes by TUAN NGUYEN
+				{                                                                      // made changes by TUAN NGUYEN
+					estimatingCd = true;                                                // made changes by TUAN NGUYEN
+					break;                                                              // made changes by TUAN NGUYEN
+				}                                                                      // made changes by TUAN NGUYEN
+			}                                                                         // made changes by TUAN NGUYEN
+
+			// Get spacecraft object
+			Spacecraft* sc = (Spacecraft*)scObjs[i];
+
+			// Create aTilde matrix
+			stmRowCount = sc->GetIntegerParameter("FullSTMRowCount");
+         //if (GmatGlobal::Instance()->GetDebug())
+         //   MessageInterface::ShowMessage("stmRowCount = %d   estimatingCd = %s\n", stmRowCount, (estimatingCd?"true":"false"));
+
+			Integer stmSize = stmRowCount * stmRowCount;
+			Real *aTilde = new Real[stmSize];
+			for (Integer j = 0; j < stmRowCount; ++j)
          {
             ix = j * stmRowCount;
             for (Integer k = 0; k < stmRowCount; ++k)
@@ -1443,7 +1597,7 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
          }
 
          // Build the base acceleration
-         Rvector3 accel = Accelerate(&state[i*6], now, prefactor[0]);
+         Rvector3 accel = Accelerate(i, &state[i*6], now, prefactor[0]);
 
          Rvector3 daccel, daccelm;
          Real pert = 1.0e-2;
@@ -1454,13 +1608,13 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
          {
             val = state[i*6 + j];
             state[i*6 + j] += pert;
-            daccel = Accelerate(&state[i*6], now, prefactor[0]);
+            daccel = Accelerate(i, &state[i*6], now, prefactor[0]);
             ix = stmRowCount * 3 + j;
 
             if (useCentralDifferences)
             {
                state[i*6 + j] -= 2.0 * pert;
-               daccelm = Accelerate(&state[i*6], now, prefactor[0]);
+               daccelm = Accelerate(i, &state[i*6], now, prefactor[0]);
 
                #ifdef DEBUG_FINITEDIFF
                   MessageInterface::ShowMessage("R: [%le  %le  %le] - [%le  %le  %le] ==> ",
@@ -1506,13 +1660,13 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
             {
                val = state[i*6 + j+3];
                state[i*6 + j+3] += pert;
-               daccel = Accelerate(&state[i*6], now, prefactor[0]);
+               daccel = Accelerate(i, &state[i*6], now, prefactor[0]);
                ix = stmRowCount * 3 + j+3;
 
                if (useCentralDifferences)
                {
                   state[i*6 + j+3] -= 2.0 * pert;
-                  daccelm = Accelerate(&state[i*6], now, prefactor[0]);
+                  daccelm = Accelerate(i, &state[i*6], now, prefactor[0]);
 
                   #ifdef DEBUG_FINITEDIFF
                      MessageInterface::ShowMessage("V: [%le  %le  %le] - [%le  %le  %le] ==> ",
@@ -1560,8 +1714,7 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
             for (UnsignedInt j = 0; j < 3; ++j)
             {
                ix = stmRowCount * (3 + j);
-               aTilde[ix+cdEpsilonRow] = deriv[i*6 + 3+j] * cdInitial[i] / dragCoeff[i];
-
+               aTilde[ix + cdEpsilonRow] = deriv[i * 6 + 3 + j] / (1 + cdEpsilon[i]);        // made changes by TUAN NGUYEN
                #ifdef DEBUG_A_MATRIX
                   MessageInterface::ShowMessage("Cd deriv %d: %.12le\n", j,
                         aTilde[ix+cdEpsilonRow]);
@@ -1570,7 +1723,6 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
          }
 
 
-         Integer iStart = stmStart + i * stmSize;
          Integer element;
          for (Integer j = 0; j < stmRowCount; ++j)
          {
@@ -1612,15 +1764,26 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
                   MessageInterface::ShowMessage(";\n              ");
                for (q = 0; q < stmRowCount; ++q)
                {
-                  MessageInterface::ShowMessage(" %le ", deriv[6+p*stmRowCount+q]);
+                  MessageInterface::ShowMessage(" %le ", deriv[iStart + p*stmRowCount+q]);
                }
             }
             MessageInterface::ShowMessage("]\n\n");
          #endif
-
+			
+         delete[] aTilde;
+			// Handle varied size of STMs
+			iStart = iStart + stmSize;
       }
+   }
 
-      delete [] aTilde;
+   if (fillMassJacobian)
+   {
+      for (Integer i = 0; i < satCount; ++i)
+      {
+         i6 = i * 6;
+         for (Integer k = 0; k < 6; ++k)
+            massJacobian[i6+k] = -deriv[i6+k] / mass[i];
+      }
    }
 
    #ifdef DEBUG_SHOW_Force
@@ -1659,8 +1822,18 @@ Rvector6 DragForce::GetDerivativesForSpacecraft(Spacecraft* sc)
    cd   = sc->GetRealParameter("Cd");
    area = sc->GetRealParameter("DragArea");
 
-   // Note: Prefactor is scaled to account for density in kg / m^3
-   Real prefactor = -500.0 * cd * area / mass;
+   Real prefactor = 1;
+   // if (dragShapeModel == "Spherical")                                    // made changes by TUAN NGUYEN
+   if (dragShapeModelIndex == ShapeModel::SPHERICAL_MODEL)                  // made changes by TUAN NGUYEN
+   {
+      // Note: Prefactor is scaled to account for density in kg / m^3
+      prefactor = -500.0 * cd * area / mass;
+   }
+   //else if (dragShapeModel == "SPADFile")                        // SPAD                    // made changes by TUAN NGUYEN
+   else if (dragShapeModelIndex == ShapeModel::SPAD_FILE_MODEL)    // SPAD                    // made changes by TUAN NGUYEN
+   {
+      prefactor = -500.0 / mass;  // area and Cd are from file
+   }
 
    // First translate to the drag body from the force model origin
    Real *j2kState = sc->GetState().GetState();
@@ -1723,15 +1896,34 @@ Rvector6 DragForce::GetDerivativesForSpacecraft(Spacecraft* sc)
          "density = %.12le\n", prefactor, dens);
    #endif
 
-   // Do dv/dt first, in case deriv = state
-   dv[3] = factor * vRelMag * vRelative[0];// - a_indirect[0];
-   dv[4] = factor * vRelMag * vRelative[1];// - a_indirect[1];
-   dv[5] = factor * vRelMag * vRelative[2];// - a_indirect[2];
+   // if (dragShapeModel == "Spherical")                              // made changes by TUAN NGUYEN
+   if (dragShapeModelIndex == ShapeModel::SPHERICAL_MODEL)            // made changes by TUAN NGUYEN
+   {
+      // Do dv/dt first, in case deriv = state
+      dv[3] = factor * vRelMag * vRelative[0];// - a_indirect[0];
+      dv[4] = factor * vRelMag * vRelative[1];// - a_indirect[1];
+      dv[5] = factor * vRelMag * vRelative[2];// - a_indirect[2];
 
-   // dr/dt = v term not built from drag force
-   dv[0] =
-   dv[1] =
-   dv[2] = 0.0;
+      // dr/dt = v term not built from drag force
+      dv[0] =
+      dv[1] =
+      dv[2] = 0.0;
+   }
+   //else if (dragShapeModel == "SPADFile")                       // SPAD               // made changes by TUAN NGUYEN
+   else if (dragShapeModelIndex == ShapeModel::SPAD_FILE_MODEL)   // SPAD               // made changes by TUAN NGUYEN
+   {
+      Rvector3 velVec(vRelative[0], vRelative[1], vRelative[2]);
+      Rvector3 spadArea = sc->GetSPADDragArea(now, velVec);
+      
+      dv[3] = factor * spadArea[0] * vRelMag * vRelative[0];
+      dv[4] = factor * spadArea[1] * vRelMag * vRelative[1];
+      dv[5] = factor * spadArea[2] * vRelMag * vRelative[2];
+
+      // dr/dt = v term not built from drag force
+      dv[0] =
+      dv[1] =
+      dv[2] = 0.0;
+   }
 
    #ifdef DEBUG_FIRST_CALL
       if (!firstCallFired)
@@ -2096,7 +2288,16 @@ std::string DragForce::GetStringParameter(const Integer id) const
 
    if (id == SCHATTEN_TIMING_MODEL)
       return schattenTimingModel;
-    
+   
+   if (id == DRAG_MODEL)
+      return dragShapeModel;                // made changes by TUAN NGUYEN
+   
+   if (id == INPUT_FILE)                    // made changes by TUAN NGUYEN
+      return inputFile;                     // made changes by TUAN NGUYEN
+
+   if (id == DENSITY_MODEL)                 // made changes by TUAN NGUYEN
+      return densityModel;                  // made changes by TUAN NGUYEN
+
    if (id == FIXED_COORD_SYSTEM)
       return bodyName + "Fixed";
 
@@ -2151,15 +2352,16 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
          useExternalAtmosphere = true;
       else
       {
-         if (!useExternalAtmosphere && atmos != NULL)
-         {
-            #ifdef DEBUG_MEMORY
-            MemoryTracker::Instance()->Remove
-               (atmos, atmos->GetName(), "DragForce::SetStringParameter()",
-                "deleting atmosphere model");
-            #endif
-            delete atmos;
-         }
+         /// atmos is not created inside DragForce, therefore it does not allow to delete    // made changes by TUAN NGUYEN
+         //if (!useExternalAtmosphere && atmos != NULL)                                      // made changes by TUAN NGUYEN
+         //{                                                                                 // made changes by TUAN NGUYEN
+         //   #ifdef DEBUG_MEMORY                                                            // made changes by TUAN NGUYEN
+         //   MemoryTracker::Instance()->Remove                                              // made changes by TUAN NGUYEN
+         //      (atmos, atmos->GetName(), "DragForce::SetStringParameter()",                // made changes by TUAN NGUYEN
+         //       "deleting atmosphere model");                                              // made changes by TUAN NGUYEN
+         //   #endif                                                                         // made changes by TUAN NGUYEN
+         //   delete atmos;                                                                  // made changes by TUAN NGUYEN
+         //}                                                                                 // made changes by TUAN NGUYEN
          atmos = NULL;
          useExternalAtmosphere = false;
       }
@@ -2278,19 +2480,79 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
    {
       if (atmosphereType == "Exponential")
          return false;
-
+      
       if ((value == "NominalCycle") || (value == "EarlyCycle") ||
           (value == "LateCycle"))
       {
          schattenTimingModel = value;
          return true;
       }
-
+      
       ODEModelException badVal("");
       badVal.SetDetails(errorMessageFormat.c_str(), value.c_str(),
-            GetParameterText(id).c_str(),
-            "'NominalCycle', 'EarlyCycle, 'LateCycle'");
+                        GetParameterText(id).c_str(),
+                        "'NominalCycle', 'EarlyCycle, 'LateCycle'");
       throw badVal;
+   }
+   
+   if (id == DRAG_MODEL)
+   {
+      //if ((value == "Spherical") || (value == "SPADFile"))                     // made changes by TUAN NGUYEN
+      //{                                                                        // made changes by TUAN NGUYEN
+      //   dragShapeModel = value;                                               // made changes by TUAN NGUYEN
+      //   return true;                                                          // made changes by TUAN NGUYEN
+      //}                                                                        // made changes by TUAN NGUYEN
+
+      if (value == "Spherical")                                                   // made changes by TUAN NGUYEN
+      {                                                                           // made changes by TUAN NGUYEN
+         dragShapeModel = value;                                                  // made changes by TUAN NGUYEN
+         dragShapeModelIndex = ShapeModel::SPHERICAL_MODEL;                       // made changes by TUAN NGUYEN
+         return true;                                                             // made changes by TUAN NGUYEN
+      }                                                                           // made changes by TUAN NGUYEN
+      else if (value == "SPADFile")                                               // made changes by TUAN NGUYEN
+      {                                                                           // made changes by TUAN NGUYEN
+         dragShapeModel = value;                                                  // made changes by TUAN NGUYEN
+         dragShapeModelIndex = ShapeModel::SPAD_FILE_MODEL;                       // made changes by TUAN NGUYEN
+         return true;                                                             // made changes by TUAN NGUYEN
+      }                                                                           // made changes by TUAN NGUYEN
+
+      ODEModelException odee("");
+      odee.SetDetails(errorMessageFormat.c_str(),
+                      value.c_str(),
+                      "DragModel", "\"Spherical\" or \"SPADFile\"");
+      throw odee;
+
+      return false;
+   }
+   
+   if (id == DENSITY_MODEL)
+   {
+      densityModel = value;
+      try
+      {
+         if (atmos != NULL)
+            return atmos->SetStringParameter("DensityModel", densityModel);
+      }
+      catch (...)
+      {
+
+      }
+      return true;
+   }
+
+   if (id == INPUT_FILE)
+   {
+      inputFile = value;
+      try
+      {
+         if (atmos != NULL)
+            return atmos->SetStringParameter("InputFile", inputFile);
+      }
+      catch (...)
+      {
+
+      }
+      return true;
    }
 
    return PhysicalModel::SetStringParameter(id, value);
@@ -2319,6 +2581,32 @@ bool DragForce::SetStringParameter(const std::string &label,
 #endif
    
    return SetStringParameter(GetParameterID(label), value);
+}
+
+//---------------------------------------------------------------------------
+// const StringArray& GetPropertyEnumStrings(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves eumeration symbols of parameter of given id.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return list of enumeration symbols
+ */
+//---------------------------------------------------------------------------
+const StringArray& DragForce::GetPropertyEnumStrings(const Integer id) const
+{
+   static StringArray enumStrings;
+   switch (id)
+   {
+      case DRAG_MODEL:
+         enumStrings.clear();
+         enumStrings.push_back("Spherical");
+         enumStrings.push_back("SPADFile");
+         return enumStrings;
+      default:
+         return PhysicalModel::GetPropertyEnumStrings(id);
+   }
 }
 
 
@@ -2444,8 +2732,18 @@ bool DragForce::SetRefObject(GmatBase *obj, const UnsignedInt type,
    {
       if (obj->GetType() != Gmat::ATMOSPHERE)
          throw ODEModelException("DragForce::SetRefObject: AtmosphereModel "
-                                   "type set incorrectly.");      
+                                   "type set incorrectly.");
       SetInternalAtmosphereModel((AtmosphereModel*)obj);
+
+      if (obj != NULL)                                                                  //made changes by TUAN NGUYEN 
+      {					                                                                   //made changes by TUAN NGUYEN
+         if (obj->IsOfType("MarsGRAM2005"))			                                     //made changes by TUAN NGUYEN
+         {																		                         //made changes by TUAN NGUYEN
+            densityModel = internalAtmos->GetStringParameter("DensityModel");	          //made changes by TUAN NGUYEN
+            inputFile = internalAtmos->GetStringParameter("InputFile");		             //made changes by TUAN NGUYEN
+         }                                                                              //made changes by TUAN NGUYEN
+      }                                                                                 //made changes by TUAN NGUYEN
+
       return true;
    }
 
@@ -2797,15 +3095,16 @@ bool DragForce::SupportsDerivative(Gmat::StateElementId id)
  * vector, so that the derivative information can be placed in the correct place 
  * in the derivative vector.
  * 
- * @param id State Element ID for the derivative type
- * @param index Starting index in the state vector for this type of derivative
- * @param quantity Number of objects that supply this type of data
+ * @param id          State Element ID for the derivative type
+ * @param index       Starting index in the state vector for this type of derivative
+ * @param quantity    Number of objects that supply this type of data
+ * @param totalSize   Total of all STMs' size                              // made changes by TUAN NGUYEN           
  * 
  * @return true if the type is supported, false otherwise. 
  */
 //------------------------------------------------------------------------------
 bool DragForce::SetStart(Gmat::StateElementId id, Integer index, 
-                      Integer quantity, Integer sizeOfType)
+                      Integer quantity, Integer totalSize)                 // made changes by TUAN NGUYEN
 {
    #ifdef DEBUG_REGISTRATION
       MessageInterface::ShowMessage("DragForce setting start data for id = %d"
@@ -2828,7 +3127,7 @@ bool DragForce::SetStart(Gmat::StateElementId id, Integer index,
          stmCount = quantity;
          stmStart = index;
          fillSTM = true;
-         stmRowCount = Integer(sqrt((Real)sizeOfType));
+			totalSTMSize = totalSize;                   // made changes by TUAN NGUYEN
          retval = true;
          break;
 
@@ -2836,7 +3135,7 @@ bool DragForce::SetStart(Gmat::StateElementId id, Integer index,
          aMatrixCount = quantity;
          aMatrixStart = index;
          fillAMatrix = true;
-         stmRowCount = Integer(sqrt((Real)sizeOfType));
+			totalSTMSize = totalSize;                   // made changes by TUAN NGUYEN
          retval = true;
          break;
          
@@ -2845,7 +3144,7 @@ bool DragForce::SetStart(Gmat::StateElementId id, Integer index,
    }
    
    #ifdef DEBUG_INITIALIZE
-      MessageInterface::ShowMessage("SetStart: STM Row count %d\n", stmRowCount);
+      MessageInterface::ShowMessage("SetStart: total STM size = %d\n", totalSTMSize);
    #endif
 
    return retval;
@@ -2921,6 +3220,28 @@ Real DragForce::GetDensity(Real *state, Real when, Integer count)
    #ifdef DEBUG_DRAGFORCE_DENSITY
       dragdata << "Leaving DragForce::GetDensity()\n";
    #endif
+
+   // Sanity check the results
+   if (GmatMathUtil::IsNaN(density[0]))
+   {
+      std::stringstream epdata;
+      epdata << when;
+      throw ODEModelException("The drag force generated an atmospheric density "
+            "that is not a number for the model " + atmosphereType +
+            " at MJD " + epdata.str() + ".  Check the input data files for "
+            "values that are unphysical.");
+   }
+
+   if (GmatMathUtil::IsInf(density[0]))
+   {
+      std::stringstream epdata;
+      epdata << when;
+      throw ODEModelException("The drag force generated an atmospheric density "
+            "that is infinite for the model " + atmosphereType +
+            " at MJD " + epdata.str() + ".  Check the input data files for "
+            "values that are unphysical.");
+   }
+
    return density[0];
 }
 
@@ -2945,7 +3266,7 @@ bool DragForce::IsUnique(const std::string& forBody)
 
 
 //------------------------------------------------------------------------------
-// Rvector3 Accelerate(Real *theState, GmatEpoch &theEpoch)
+// Rvector3 Accelerate(Integer scID, Real *theState, GmatEpoch &theEpoch)
 //------------------------------------------------------------------------------
 /**
  * Computed the drag acceleration at the input state and epoch
@@ -2959,7 +3280,7 @@ bool DragForce::IsUnique(const std::string& forBody)
  * @return The resulting acceleration, as a 3-vector
  */
 //------------------------------------------------------------------------------
-Rvector3 DragForce::Accelerate(Real *theState, GmatEpoch &theEpoch, Real prefactor)
+Rvector3 DragForce::Accelerate(Integer scID, Real *theState, GmatEpoch &theEpoch, Real prefactor)
 {
    Real vRelative[3], vRelMag, factor;
    Rvector3 accel;
@@ -2991,11 +3312,27 @@ Rvector3 DragForce::Accelerate(Real *theState, GmatEpoch &theEpoch, Real prefact
                      vRelative[2]*vRelative[2]);
    }
 
+   // prefactor will include appropriate data for Spherical or SPAD
    factor = prefactor * theDensity;
+   
+   // Just check for SPAD or Spherical here???
+   // if (dragShapeModel == "Spherical")                                  // made changes by TUAN NGUYEN
+   if (dragShapeModelIndex == ShapeModel::SPHERICAL_MODEL)                // made changes by TUAN NGUYEN
+   {
+      accel[0] = factor * vRelMag * vRelative[0];
+      accel[1] = factor * vRelMag * vRelative[1];
+      accel[2] = factor * vRelMag * vRelative[2];
+   }
+   else if (dragShapeModelIndex == ShapeModel::SPAD_FILE_MODEL)        // SPAD    // made changes by TUAN NGUYEN
+   {
+      Rvector3 velVec(vRelative[0], vRelative[1], vRelative[2]);
+      Rvector3 spadArea = ((Spacecraft*) scObjs.at(scID))->GetSPADDragArea(
+                                                           theEpoch, velVec);
 
-   accel[0] = factor * vRelMag * vRelative[0];
-   accel[1] = factor * vRelMag * vRelative[1];
-   accel[2] = factor * vRelMag * vRelative[2];
+      accel[0] = factor * spadArea[0] * vRelMag * vRelMag;
+      accel[1] = factor * spadArea[1] * vRelMag * vRelMag;
+      accel[2] = factor * spadArea[2] * vRelMag * vRelMag;
+   }
 
    return accel;
 }

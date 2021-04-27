@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -227,9 +227,9 @@ void EphemWriterSTK::Copy(const EphemerisWriter* orig)
 //--------------------------------------
 
 //------------------------------------------------------------------------------
-// void BufferOrbitData(Real epochInDays, const Real state[6])
+// void BufferOrbitData(Real epochInDays, const Real state[6], const Real cov[21])
 //------------------------------------------------------------------------------
-void EphemWriterSTK::BufferOrbitData(Real epochInDays, const Real state[6])
+void EphemWriterSTK::BufferOrbitData(Real epochInDays, const Real state[6], const Real cov[21])
 {
    #ifdef DEBUG_EPHEMFILE_BUFFER
    MessageInterface::ShowMessage
@@ -245,8 +245,11 @@ void EphemWriterSTK::BufferOrbitData(Real epochInDays, const Real state[6])
    // Add new data point
    A1Mjd *a1mjd = new A1Mjd(epochInDays);
    Rvector6 *rv6 = new Rvector6(state);
+   Rvector *rv = new Rvector(21);
+   rv->Set((Real *)cov, 21);
    a1MjdArray.push_back(a1mjd);
    stateArray.push_back(rv6);
+   covArray.push_back(rv);
    
    #ifdef DEBUG_EPHEMFILE_BUFFER
    MessageInterface::ShowMessage
@@ -258,7 +261,7 @@ void EphemWriterSTK::BufferOrbitData(Real epochInDays, const Real state[6])
 
 //------------------------------------------------------------------------------
 // void CreateEphemerisFile(bool useDefaultFileName, const std::string &stType,
-//                          const std::string &outFormat))
+//                          const std::string &outFormat, const std::string &covFormat)
 //------------------------------------------------------------------------------
 /**
  * Creates ephemeris file writer.
@@ -266,9 +269,10 @@ void EphemWriterSTK::BufferOrbitData(Real epochInDays, const Real state[6])
 //------------------------------------------------------------------------------
 void EphemWriterSTK::CreateEphemerisFile(bool useDefaultFileName,
                                          const std::string &stType,
-                                         const std::string &outFormat)
+                                         const std::string &outFormat,
+                                         const std::string &covFormat)
 {
-   EphemerisWriter::CreateEphemerisFile(useDefaultFileName, stType, outFormat);
+   EphemerisWriter::CreateEphemerisFile(useDefaultFileName, stType, outFormat, covFormat);
    CreateSTKEphemerisFile();
    isEphemFileOpened = true;
 }
@@ -313,6 +317,13 @@ void EphemWriterSTK::CreateSTKEphemerisFile()
       csTypeName = "J2000";
    else if (axisTypeName == "BodyFixed")
       csTypeName = "Fixed";
+
+   // Determine what covariance to write
+   std::string ephemCovType = "";
+   if (covarianceFormat == "Position")
+      ephemCovType = "TimePos";
+   else if (covarianceFormat == "PositionAndVelocity")
+      ephemCovType = "TimePosVel";
    
    #ifdef DEBUG_EPHEMFILE_CREATE
    MessageInterface::ShowMessage
@@ -332,7 +343,7 @@ void EphemWriterSTK::CreateSTKEphemerisFile()
          ("   Retrieved the following distanceUnit: %s", distanceUnit.c_str());
       #endif
 
-      if (stkEphemFile->OpenForWrite(fullPathFileName, "TimePosVel"))
+      if (stkEphemFile->OpenForWrite(fullPathFileName, "TimePosVel", ephemCovType))
       {
          stkEphemFile->SetVersion(stkVersion);
          if (useFixedStepSize)
@@ -419,7 +430,7 @@ void EphemWriterSTK::HandleOrbitData()
    #endif
    
    // Check if it is time to write
-   bool timeToWrite = IsTimeToWrite(currEpochInSecs, currState);
+   bool timeToWrite = IsTimeToWrite(currEpochInSecs, currState, currCov);
    
    #if DBGLVL_EPHEMFILE_DATA > 0
    MessageInterface::ShowMessage
@@ -751,7 +762,7 @@ void EphemWriterSTK::WriteSTKOrbitDataSegment(bool canFinish)
          #endif
          // Check if STK ephemeris file can be finalized (GMT-4060 fix)
          bool finalize = isEndOfRun && canFinish;
-         stkEphemFile->WriteDataSegment(a1MjdArray, stateArray, finalize);
+         stkEphemFile->WriteDataSegment(a1MjdArray, stateArray, covArray, finalize);
          ClearOrbitData();
       }
       catch (BaseException &e)

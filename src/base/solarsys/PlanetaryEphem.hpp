@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,6 +35,7 @@
 #include "gmatdefs.hpp"
 #include "A1Mjd.hpp"
 #include "GmatTime.hpp"
+#include "TimeSystemConverter.hpp"   // for the TimeSystemConverter singleton
 
 namespace Gmat
 {
@@ -77,7 +78,7 @@ public:
    /**
     * Returns the body ID number for the specified body.
     *
-    * @param <bodyName> body whose ID is requested.
+    * @param bodyName body whose ID is requested.
     *
     * @return the body ID number for the specified body.
     */
@@ -154,6 +155,9 @@ protected:
 
    // file data type
    dcb_type g_pef_dcb;
+
+   /// Time converter singleton
+   TimeSystemConverter *theTimeConverter;
 
 private:
 

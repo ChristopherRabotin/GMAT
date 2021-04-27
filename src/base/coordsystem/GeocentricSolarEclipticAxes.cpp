@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -79,8 +79,8 @@ using namespace GmatTimeConstants;      // for JD offsets, etc.
 GeocentricSolarEclipticAxes::GeocentricSolarEclipticAxes(const std::string &itsName) :
 ObjectReferencedAxes("GSE",itsName)
 {
-   primaryName   = SolarSystem::EARTH_NAME;
-   secondaryName = SolarSystem::SUN_NAME;
+   primaryName   = GmatSolarSystemDefaults::EARTH_NAME;
+   secondaryName = GmatSolarSystemDefaults::SUN_NAME;
    objectTypeNames.push_back("GSE");
    parameterCount = GeocentricSolarEclipticAxesParamCount;
 

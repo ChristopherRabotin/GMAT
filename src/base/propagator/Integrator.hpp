@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -89,13 +89,13 @@
  * order differential equations.  The basic equations that are solved must
  * have the form
  *
- * \f[{{dr^i}\over{dt}} = f(t,r)\f]
+ * \f[ {{dr^i}\over{dt}} = f(t,r) \f]
  *
- * The right hand side of this equation, \f$f(t,r)\f$, is provided by the 
+ * The right hand side of this equation, \f$ f(t,r) \f$, is provided by the 
  * PhysicalModel class instance that is passed to the Integrator.  Given this 
  * instance, the Integrator classes solve the equation above for 
- * \f$r^i(t+\delta t)\f$, given \f$r^i(t)\f$ and an integration step 
- * \f$\delta t\f$.  
+ * \f$ r^i(t+\delta t) \f$, given \f$ r^i(t) \f$ and an integration step 
+ * \f$ \delta t \f$.  
  *  
  * Most Integrators provide the capability to estimate the accuracy of the 
  * integration and adapt the stepsize accordingly.  The member variable 

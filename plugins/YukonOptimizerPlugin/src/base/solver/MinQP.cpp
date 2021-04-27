@@ -41,7 +41,7 @@
 //  and Optimization, "  Addison Wesley Publishing Company, Redwood City,
 //  CA, 1991.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -2022,7 +2022,7 @@ void MinQP::TestForLinearlyDependentCons(bool checkForDuplicateCons)
       bool changeBounds = true;
       Integer numChangedCons = 0;
       for (Integer i = 0; i < depCount; ++i)
-         removeConIdxs[i] = switchedRowIdxs[depInd[i]];
+         removeConIdxs[i] = switchedRowIdxs[(Integer)depInd[i]];
 
       if (numChangedCons < depCount)
       {

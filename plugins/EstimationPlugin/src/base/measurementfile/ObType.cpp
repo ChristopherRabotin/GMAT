@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -62,6 +62,8 @@ ObType::ObType(const std::string &obType, const std::string &name) :
    objectTypes.push_back(Gmat::OBTYPE);
    objectTypeNames.push_back("ObType");
    objectTypeNames.push_back(obType);
+
+   theTimeConverter = TimeSystemConverter::Instance();
 }
 
 
@@ -96,6 +98,8 @@ ObType::ObType(const ObType& ot) :
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("ObType cop constructor from <%s,%p> to <%s,%p>\n", ot.GetName().c_str(), &ot, GetName().c_str(), this);
 #endif
+
+	theTimeConverter = TimeSystemConverter::Instance();
 }
 
 

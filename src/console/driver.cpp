@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -601,6 +601,9 @@ int main(int argc, char *argv[])
          exit(EXIT_FAILURE);
 //         return 1;
       }
+
+      // Make sure the parameter database is populated
+      mod->CreateDefaultParameters();
 
       if (argc < 2)    // interactive mode
       {

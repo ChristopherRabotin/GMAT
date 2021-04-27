@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -82,10 +82,10 @@ public:
    const Rvector6& operator/=(Real s);
    
    friend class Rmatrix66;
-   Rvector6 operator*(const Rmatrix66 &m) const; 
-   const Rvector6& operator*=(const Rmatrix66 &m);
-   Rvector6 operator/(const Rmatrix66 &m) const;
-   const Rvector6& operator/=(const Rmatrix66 &m);
+//   Rvector6 operator*(const Rmatrix66 &m) const;
+//   const Rvector6& operator*=(const Rmatrix66 &m);
+//   Rvector6 operator/(const Rmatrix66 &m) const;
+//   const Rvector6& operator/=(const Rmatrix66 &m);
    
    Integer GetNumData() const;
    const std::string* GetDataDescriptions() const;

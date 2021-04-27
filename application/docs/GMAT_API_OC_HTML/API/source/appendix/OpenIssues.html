@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Open issues &#8212; GMAT Tools and Extensions R2020a documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Review Responses" href="ReviewActions.html" />
+    <link rel="prev" title="Review and Prototype Information" href="ReviewInfo.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="ReviewActions.html" title="Review Responses"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ReviewInfo.html" title="Review and Prototype Information"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GMAT Tools and Extensions R2020a documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../apiIndex.html" >DRAFT GMAT API Design and User’s Guide</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ReviewInfo.html" accesskey="U">Review and Prototype Information</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="open-issues">
+<h1>Open issues<a class="headerlink" href="#open-issues" title="Permalink to this headline">¶</a></h1>
+<ul>
+<li><p>Should the util library be wrapped separately from the base library?</p>
+<p><strong>Resolution</strong>: The util code is included in the core GMAT API packaging.</p>
+</li>
+<li><p>When will base be made into smaller components?</p>
+<ul class="simple">
+<li><p>May be useful for on board project</p></li>
+<li><p>Helps ensure modularity</p></li>
+</ul>
+<p><strong>Resolution</strong>: There is no repackaging plan at this</p>
+</li>
+<li><p>The CMake files need some work, so that the wrappers are written into the
+build folder (application/bin by default).</p>
+<p><strong>Resolution</strong>: The current best practice is to build a GMAT release to get
+the API package set.</p>
+</li>
+<li><p>Is there a tie-in between GMAT/CSALT on board and the GMAT API?</p>
+<p><strong>Resolution</strong>: Not at this time.</p>
+</li>
+<li><p>Are there export issues between the languages?  (e.g. Java supports x but not
+Python)</p>
+<p><strong>Resolution</strong>: Language differences are addressed in this document.</p>
+</li>
+<li><p>Is there a way to identify “approved” API features from those not yet tested?</p>
+<ul class="simple">
+<li><p>Tell SWIG to expose only some pieces of a class without a lot of hand edits?</p></li>
+<li><p>Tell Doxygen to make an API specific build?</p></li>
+<li><p>Identify API pieces in the full Doxygen build?</p></li>
+</ul>
+<p><strong>Resolution</strong>: This item is still under consideration.  There is no API
+marking of features at this time.</p>
+</li>
+<li><p>GMAT already has a <code class="docutils literal notranslate"><span class="pre">Create</span></code> object, producing a name conflict with the API
+<code class="docutils literal notranslate"><span class="pre">Create</span></code> function.  For now, I’m using <code class="docutils literal notranslate"><span class="pre">Construct</span></code>.</p>
+<p><strong>Resolution</strong>: Construct is the API creation mechanism.</p>
+</li>
+<li><p>We need to report when things fail. Example: Setup(“ThisIsntAStartupFile.txt”)
+fails to initialize the Moderator.</p>
+<p><strong>Resolution</strong>: This is currently ad hoc: issues GMAT encountered that throw
+exceptions are reported, but general failures are not.</p>
+</li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ReviewInfo.html"
+                        title="previous chapter">Review and Prototype Information</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ReviewActions.html"
+                        title="next chapter">Review Responses</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/API/source/appendix/OpenIssues.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="ReviewActions.html" title="Review Responses"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ReviewInfo.html" title="Review and Prototype Information"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GMAT Tools and Extensions R2020a documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../apiIndex.html" >DRAFT GMAT API Design and User’s Guide</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ReviewInfo.html" >Review and Prototype Information</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018-2020, United States Government as represented by the Administrator of the National Aeronautics and Space Administration..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,7 +35,11 @@
 #include "MessageInterface.hpp"
 
 // Modify this line to match your factory list:
+#include "EKFCommandFactory.hpp"
 #include "ExtendedKalmanFilterFactory.hpp"
+#include "ProcessNoiseModelFactory.hpp"
+#include "ProcessNoiseFactory.hpp"
+#include "SmootherFactory.hpp"
 
 extern "C"
 {
@@ -51,7 +55,7 @@ extern "C"
    Integer GetFactoryCount()
    {
       // Update this line with the total number of factories you support:
-      return 1;
+      return 5;
    }
    
    //------------------------------------------------------------------------------
@@ -74,6 +78,18 @@ extern "C"
       {
          case 0:
             factory = new ExtendedKalmanFilterFactory;
+            break;
+         case 1:
+            factory = new ProcessNoiseModelFactory;
+            break;
+         case 2:
+            factory = new ProcessNoiseFactory;
+            break;
+         case 3:
+            factory = new SmootherFactory;
+            break;
+         case 4:
+            factory = new EKFCommandFactory;
             break;
             
          default:

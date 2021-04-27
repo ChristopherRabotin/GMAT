@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,6 +38,7 @@
 #include "StringTokenizer.hpp"    // for StringTokenizer()
 #include "GmatGlobal.hpp"         // for SetTestingMode()
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <iomanip>
 
@@ -69,6 +70,7 @@
 //#define DEBUG_FIND_INPUT_PATH
 //#define DEBUG_FIND_OUTPUT_PATH
 //#define DEBUG_REFRESH_FILES
+//#define DEBUG_WORKING_DIR
 
 //---------------------------------
 // static data
@@ -246,7 +248,8 @@ bool FileManager::SetBinDirectory(const std::string &appName, const std::string 
       if (appFullPath[0] != '.')
       {
          std::string appPath = GmatFileUtil::ParsePathName(appFullPath);
-         std::string newPath = appPath + appName;
+         std::string newPath = appPath + appName; // HAS Windows name!!!
+
          if (GmatFileUtil::DoesFileExist(newPath))
          {
             mAbsBinDir = appPath;
@@ -306,6 +309,10 @@ std::string FileManager::GetGmatWorkingDirectory()
 //------------------------------------------------------------------------------
 bool FileManager::SetGmatWorkingDirectory(const std::string &newDir)
 {
+#ifdef DEBUG_WORKING_DIR
+   MessageInterface::ShowMessage("Entering SetGmatWorkingDirectory with '%s'\n",
+                                 newDir.c_str());
+#endif
    // Allow resetting on purpose
    if (newDir == "")
    {
@@ -315,6 +322,9 @@ bool FileManager::SetGmatWorkingDirectory(const std::string &newDir)
    {
       if (DoesDirectoryExist(newDir))
       {
+#ifdef DEBUG_WORKING_DIR
+         MessageInterface::ShowMessage("In SetGmatWorkingDirectory - it DOES exist\n");
+#endif
          mGmatWorkingDir = newDir;
          AddGmatIncludePath(newDir);
          // Add GMAT working directory to MATLAB search path so that this directory
@@ -327,7 +337,12 @@ bool FileManager::SetGmatWorkingDirectory(const std::string &newDir)
 //         AddPythonModulePath(newDir);
       }
       else
+      {
+#ifdef DEBUG_WORKING_DIR
+         MessageInterface::ShowMessage("In SetGmatWorkingDirectory - it DOES NOT exist\n");
+#endif
          return false;
+      }
    }
    
    return true;
@@ -437,20 +452,20 @@ std::string FileManager::FindPath(const std::string &fileName, const FileType ty
 std::string FileManager::FindPath(const std::string &fileName, const std::string &fileType,
                                   bool forInput, bool writeWarning, bool writeInfo,
                                   const std::string &objName)
-{   
-   #ifdef DEBUG_FIND_PATH
+{
+#ifdef DEBUG_FIND_PATH
    MessageInterface::ShowMessage
-      ("FileManager::FindPath() entered\n   fileName = '%s'\n   fileType = '%s', forInput = %d, "
-       "writeWarning = %d, writeInfo = %d, objName = '%s'\n", fileName.c_str(), fileType.c_str(),
-       forInput, writeWarning, writeInfo, objName.c_str());
-   #endif
-
+   ("FileManager::FindPath() entered\n   fileName = '%s'\n   fileType = '%s', forInput = %d, "
+    "writeWarning = %d, writeInfo = %d, objName = '%s'\n", fileName.c_str(), fileType.c_str(),
+    forInput, writeWarning, writeInfo, objName.c_str());
+#endif
+   
    mLastFilePathMessage = "";
    std::string fullname = fileName;
    bool writeFilePathInfo = GmatGlobal::Instance()->IsWritingFilePathInfo();
-   #ifdef DEBUG_FIND_PATH
+#ifdef DEBUG_FIND_PATH
    MessageInterface::ShowMessage("   writeFilePathInfo = %d\n", writeFilePathInfo);
-   #endif
+#endif
    
    // If input filename is blank, get default name using type
    try
@@ -460,19 +475,19 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
    }
    catch (BaseException &be)
    {
-      #ifdef DEBUG_FIND_PATH
+#ifdef DEBUG_FIND_PATH
       MessageInterface::ShowMessage(be.GetFullMessage());
-      #endif
+#endif
    }
    
    // Cannot handle blank, return blank
    if (fullname == "")
    {
-      #ifdef DEBUG_FIND_PATH
+#ifdef DEBUG_FIND_PATH
       MessageInterface::ShowMessage
-         ("FileManager::FindPath() cannot find default filename for type '%s', "
-          "so just returning blank\n", fileType.c_str());
-      #endif
+      ("FileManager::FindPath() cannot find default filename for type '%s', "
+       "so just returning blank\n", fileType.c_str());
+#endif
       return "";
    }
    
@@ -489,16 +504,16 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
    }
    catch (BaseException &be)
    {
-      #ifdef DEBUG_FIND_PATH
+#ifdef DEBUG_FIND_PATH
       MessageInterface::ShowMessage("*** WARNING *** %s\n", be.GetFullMessage().c_str());
-      #endif
+#endif
       // If *_POT_PATH, try OTHER_POT_PATH
       std::string::size_type potLoc = fileType.find("_POT_PATH");
       if (potLoc != fileType.npos)
       {
-         #ifdef DEBUG_FIND_PATH
+#ifdef DEBUG_FIND_PATH
          MessageInterface::ShowMessage("Trying OTHER_POT_PATH\n");
-         #endif
+#endif
          std::string oldPot = fileType.substr(0, potLoc+1);
          std::string newPotPath = GmatStringUtil::Replace(fileType, oldPot, "OTHER_");
          defaultPath = GmatFileUtil::ConvertToOsFileName(GetPathname(newPotPath));
@@ -508,18 +523,18 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
    std::string tempPath1, tempPath2;
    std::string pathToReturn;
    
-   #ifdef DEBUG_FIND_PATH
+#ifdef DEBUG_FIND_PATH
    MessageInterface::ShowMessage
-      ("   fullname = '%s'\n   pathOnly = '%s'\n   fileOnly = '%s'\n   gmatpath = '%s'\n"
-       "   defaultpath = '%s'\n", fullname.c_str(), pathOnly.c_str(), fileOnly.c_str(),
-       gmatPath.c_str(), defaultPath.c_str());
-   #endif
+   ("   fullname = '%s'\n   pathOnly = '%s'\n   fileOnly = '%s'\n   gmatpath = '%s'\n"
+    "   defaultpath = '%s'\n", fullname.c_str(), pathOnly.c_str(), fileOnly.c_str(),
+    gmatPath.c_str(), defaultPath.c_str());
+#endif
    
    if (GmatFileUtil::IsPathAbsolute(fullname))
    {
-      #ifdef DEBUG_FIND_PATH
+#ifdef DEBUG_FIND_PATH
       MessageInterface::ShowMessage("   The filename has absolute path\n");
-      #endif
+#endif
       
       if (GmatFileUtil::DoesFileExist(fullname))
       {
@@ -527,30 +542,30 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
       }
       else
       {
-         #ifdef DEBUG_FIND_PATH
+#ifdef DEBUG_FIND_PATH
          MessageInterface::ShowMessage("   The filename does not exist\n");
-         #endif
+#endif
          if (forInput)
          {
             pathToReturn = "";
             if (writeWarning && gmatPath != "" && writeFilePathInfo)
             {
                MessageInterface::ShowMessage
-                  ("The input file '%s' does not exist\n", fullname.c_str());
+               ("The input file '%s' does not exist\n", fullname.c_str());
             }
          }
          else // for output
          {
-            #ifdef DEBUG_FIND_PATH
+#ifdef DEBUG_FIND_PATH
             MessageInterface::ShowMessage
-               ("   It is for output, so checking if directory '%s' exist\n",
-                pathOnly.c_str());
-            #endif
+            ("   It is for output, so checking if directory '%s' exist\n",
+             pathOnly.c_str());
+#endif
             if (DoesDirectoryExist(pathOnly, false))
             {
-               #ifdef DEBUG_FIND_PATH
+#ifdef DEBUG_FIND_PATH
                MessageInterface::ShowMessage("   The directory exist\n");
-               #endif
+#endif
                pathToReturn = fullname;
             }
             else
@@ -559,7 +574,7 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
                if (writeWarning && gmatPath != "" && writeFilePathInfo)
                {
                   mLastFilePathMessage = "Cannot open output file '" + fullname +
-                     "', the path '" + pathOnly + "' does not exist.";
+                  "', the path '" + pathOnly + "' does not exist.";
                   MessageInterface::ShowMessage(mLastFilePathMessage + "\n");
                }
             }
@@ -569,7 +584,7 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
    else // filename without absolute path
    {
       #ifdef DEBUG_FIND_PATH
-      MessageInterface::ShowMessage("   The filename does not have absolute path\n");
+         MessageInterface::ShowMessage("   The filename does not have absolute path\n");
       #endif
       
       if (forInput)
@@ -582,7 +597,7 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
             tempPath1 = gmatPath + fullname;
          
          #ifdef DEBUG_FIND_INPUT_PATH
-         MessageInterface::ShowMessage("   => first search Path = '%s'\n", tempPath1.c_str());
+            MessageInterface::ShowMessage("   => first search Path = '%s'\n", tempPath1.c_str());
          #endif
          
          if (GmatFileUtil::DoesFileExist(tempPath1))
@@ -592,30 +607,46 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
          else
          {
             #ifdef DEBUG_FIND_INPUT_PATH
-            MessageInterface::ShowMessage
+               MessageInterface::ShowMessage
                ("   '%s' does not exist, so search in default path\n", tempPath1.c_str());
-            MessageInterface::ShowMessage
+               MessageInterface::ShowMessage
                ("   BinDirectory            = '%s'\n", mAbsBinDir.c_str());
-            MessageInterface::ShowMessage
+               MessageInterface::ShowMessage
                ("   CurrentWorkingDirectory = '%s'\n", GetCurrentWorkingDirectory().c_str());
+               MessageInterface::ShowMessage
+               ("   ApplicationPath = '%s'\n", GmatFileUtil::GetApplicationPath().c_str());
             #endif
             
             if (GmatFileUtil::IsPathRelative(fullname))
+            {
+               // Check relative to script directory first
+               // Then check relative to bin directory
                tempPath2 = mAbsBinDir + fullname;
+               #ifdef DEBUG_FIND_INPUT_PATH
+                  MessageInterface::ShowMessage
+                              ("LOOKING relative to bin directory\n");
+               #endif
+            }
             else
+            {
                tempPath2 = defaultPath + fullname;
+               #ifdef DEBUG_FIND_INPUT_PATH
+                  MessageInterface::ShowMessage
+                              ("LOOKING relative to DEFAULT path for type\n");
+               #endif
+            }
             
             #ifdef DEBUG_FIND_INPUT_PATH
-            MessageInterface::ShowMessage
-               ("   => next search path = '%s' \n", tempPath2.c_str());
+               MessageInterface::ShowMessage
+                     ("   => next search path = '%s' \n", tempPath2.c_str());
             #endif
             
             if (writeWarning && gmatPath != "" && writeFilePathInfo)
                MessageInterface::ShowMessage
-                  ("The input file '%s' does not exist in GMAT "
-                   "working directory\n   '%s', so trying default path from the "
-                   "startup file\n   '%s'\n", fullname.c_str(), tempPath1.c_str(),
-                   tempPath2.c_str());
+               ("The input file '%s' does not exist in GMAT "
+                "working directory\n   '%s', so trying default path from the "
+                "startup file\n   '%s'\n", fullname.c_str(), tempPath1.c_str(),
+                tempPath2.c_str());
             
             if (GmatFileUtil::DoesFileExist(tempPath2))
             {
@@ -626,8 +657,8 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
                pathToReturn = "";
                if (writeWarning && gmatPath != "" && writeFilePathInfo)
                   MessageInterface::ShowMessage
-                     ("*** WARNING *** The input file '%s' does not exist in default "
-                      "path from the startup file '%s'\n", fullname.c_str(), tempPath2.c_str());
+                  ("*** WARNING *** The input file '%s' does not exist in default "
+                   "path from the startup file '%s'\n", fullname.c_str(), tempPath2.c_str());
             }
          }
       }
@@ -636,7 +667,7 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
          if (GmatFileUtil::IsPathRelative(fullname))
          {
             #ifdef DEBUG_FIND_OUTPUT_PATH
-            MessageInterface::ShowMessage("   The output filename has relative path\n");
+               MessageInterface::ShowMessage("   The output filename has relative path\n");
             #endif
             
             // Check GMAT working (script) directory
@@ -644,7 +675,8 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
             std::string outPath1 = GmatFileUtil::ParsePathName(tempPath);
             
             #ifdef DEBUG_FIND_OUTPUT_PATH
-            MessageInterface::ShowMessage("   Checking if '%s' exist...\n", outPath1.c_str());
+               MessageInterface::ShowMessage("   Checking if '%s' exist...\n",
+                                             outPath1.c_str());
             #endif
             
             if (DoesDirectoryExist(outPath1, false))
@@ -657,24 +689,47 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
                std::string outPath2 = GmatFileUtil::ParsePathName(tempPath);
                
                #ifdef DEBUG_FIND_OUTPUT_PATH
-               MessageInterface::ShowMessage
+                  MessageInterface::ShowMessage
                   ("   '%s' does not exist.\n   So checking if '%s' exist ...\n",
-                   outPath1.c_str(), outPath2.c_str());
+                  outPath1.c_str(), outPath2.c_str());
                #endif
                
                if (DoesDirectoryExist(outPath2, false))
                {
                   pathToReturn = tempPath;
                }
+//               // Check the default path for the filetype
+//               if (DoesDirectoryExist(defaultPath, false))
+//                  pathToReturn = defaultPath + fullname;
                else
                {
-                  pathToReturn = mAbsBinDir + fileOnly;
-                  #ifdef DEBUG_FIND_OUTPUT_PATH
-                  MessageInterface::ShowMessage
-                     ("   '%s' does not exist.\n   So set to use bin directory '%s'\n",
-                      outPath2.c_str(), mAbsBinDir.c_str());
-                  #endif
+                  std::string errmsg = "Error finding relative path for file \"";
+                  errmsg += fullname + "\" - ";
+                  errmsg += "specified path does not exist.\n";
+                  throw UtilityException(errmsg);
                }
+               //               tempPath = defaultPath + fullname;
+               //               std::string outPath2 = GmatFileUtil::ParsePathName(tempPath);
+               //
+               //               #ifdef DEBUG_FIND_OUTPUT_PATH
+               //               MessageInterface::ShowMessage
+               //                  ("   '%s' does not exist.\n   So checking if '%s' exist ...\n",
+               //                   outPath1.c_str(), outPath2.c_str());
+               //               #endif
+               //
+               //               if (DoesDirectoryExist(outPath2, false))
+               //               {
+               //                  pathToReturn = tempPath;
+               //               }
+               //               else
+               //               {
+               //                  pathToReturn = mAbsBinDir + fileOnly;
+               //                  #ifdef DEBUG_FIND_OUTPUT_PATH
+               //                  MessageInterface::ShowMessage
+               //                     ("   '%s' does not exist.\n   So set to use bin directory '%s'\n",
+               //                      outPath2.c_str(), mAbsBinDir.c_str());
+               //                  #endif
+               //               }
             }
          }
          else // filename without any path
@@ -712,25 +767,26 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
    {
       if (writeFilePathInfo)
          MessageInterface::ShowMessage
-            ("*** The %s %sfile '%s'%s will be %s \n                    '%s'\n",
-             ioType.c_str(), fType.c_str(), fullname.c_str(), oName.c_str(),
-             rwType.c_str(), pathToReturn.c_str());
+         ("*** The %s %sfile '%s'%s will be %s \n                    '%s'\n",
+          ioType.c_str(), fType.c_str(), fullname.c_str(), oName.c_str(),
+          rwType.c_str(), pathToReturn.c_str());
    }
    else
    {
       mLastFilePathMessage = "Cannot open " + ioType + " " + fType +
-         "'" + fullname + "'";
+      "'" + fullname + "'";
       if (writeFilePathInfo)
          MessageInterface::ShowMessage(mLastFilePathMessage + "\n");
    }
    
    #ifdef DEBUG_FIND_PATH
-   MessageInterface::ShowMessage
+      MessageInterface::ShowMessage
       ("FileManager::FindPath() returning '%s'\n", pathToReturn.c_str());
    #endif
    
    return pathToReturn;
 } // FindPath()
+
 
 
 //------------------------------------------------------------------------------
@@ -2018,7 +2074,7 @@ bool FileManager::GetBody3dModelFile(const std::string &inFileName, const std::s
    bool retval = true;
    std::string actualFile = inFileName;
    std::string fullPath;
-   std::string modelFileType = GmatStringUtil::ToUpper(bodyName) + "3D_MODEL_FILE";
+   std::string modelFileType = GmatStringUtil::ToUpper(bodyName) + "_3D_MODEL_FILE";
    mLastFilePathMessage = "";
    bool writeInfo = false;
    
@@ -3209,7 +3265,7 @@ std::string FileManager::GetGmatPath(GmatPathType type,
          #ifdef DEBUG_GMAT_PATH
          MessageInterface::ShowMessage
             ("FileManager::GetGmatPath(%s) returning '%s'\n", name.c_str(),
-             path.c_str());
+             blankPath.c_str());
          #endif
          return blankPath;
       }

@@ -97,7 +97,7 @@ OPTION(PLUGIN_EVENTLOCATOR "EventLocator Plugin" ON)
 OPTION(PLUGIN_EXTRAPROPAGATORS "ExtraPropagators Plugin" ON)
 OPTION(PLUGIN_FMINCONOPTIMIZER "FminconOptimizer Plugin" OFF)
 OPTION(PLUGIN_FORMATION "Formation Plugin" ON)
-OPTION(PLUGIN_GEOMETRICMEASUREMENT "GeometricMeasurement Plugin" ON)
+OPTION(PLUGIN_GEOMETRICMEASUREMENT "GeometricMeasurement Plugin" OFF)
 OPTION(PLUGIN_GMATFUNCTION "GmatFunction Plugin" ON)
 OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plugin" ON)
 OPTION(PLUGIN_NEWPARAMETERS "NewParameter Plugin" ON)
@@ -312,7 +312,6 @@ if (PLUGIN_THRUSTFILE)
   SET(PluginTargets ${PluginTargets} ${tmp})
 endif()
 
-
 # ====================================================================
 # YukonOptimizer Plugin
 if (PLUGIN_YUKONOPTIMIZER)
@@ -323,8 +322,28 @@ if (PLUGIN_YUKONOPTIMIZER)
 endif()
 
 # ====================================================================
-# Proprietary plugins
+# Add built-in plugins to a common folder for IDE-based projects
+SET_TARGET_PROPERTIES(${PluginTargets} PROPERTIES FOLDER "GMAT Plugins")
 
+# ====================================================================
+# SWIG Libraries for Plugins
+if (GMAT_INCLUDE_API)
+   # Station Plugin
+   if (PLUGIN_STATION)
+      SET(PLUGINDIR "StationPlugin/swig")
+      ADD_SUBDIRECTORY(${PLUGINDIR})
+   endif()
+
+   # Navigation Plugin
+   if (PLUGIN_ESTIMATION)
+      SET(PLUGINDIR "EstimationPlugin/swig")
+      ADD_SUBDIRECTORY(${PLUGINDIR})
+   endif()
+endif()
+
+# ====================================================================
+# Proprietary plugins
+#
 # Search for proprietary plugin folder in default paths
 # User can change this via CMake GUI or command line
 FIND_PATH(GMAT_PROPRIETARYPLUGINS_PATH
@@ -342,34 +361,64 @@ if(GMAT_PROPRIETARYPLUGINS_PATH)
   ADD_SUBDIRECTORY(${PLUGINDIR} "${CMAKE_CURRENT_BINARY_DIR}/proprietary")
   GET_DIRECTORY_PROPERTY(ProprietaryTargets DIRECTORY ${PLUGINDIR} DEFINITION PluginTargets)
   SET(PluginTargets ${PluginTargets} ${ProprietaryTargets})
+  SET_TARGET_PROPERTIES(${ProprietaryTargets} PROPERTIES FOLDER "GMAT Plugins/Proprietary")
 endif()
 
 # ====================================================================
 # Plugins from Other Sources
 #
-# Add Additional Vendor or Internal Plugins to the GMAT_EXTRA_PLUGINS file
-find_file(GMAT_EXTRA_PLUGINS "ListOfPluginCollections.txt"
-          DOC "Path to third party plugin list (containing group names, if any)")
-if (GMAT_EXTRA_PLUGINS)
-   FILE(READ ${GMAT_EXTRA_PLUGINS} OtherPluginSources)
-   STRING(REGEX REPLACE ";" "\\\\;" OtherPluginSources "${OtherPluginSources}")
-   STRING(REGEX REPLACE "\n" ";" OtherPluginSources "${OtherPluginSources}")
-
-   foreach(folder ${OtherPluginSources})
-      # Search for plugin folder in the folder containing the GMAT repo
-      FIND_PATH(GMAT_ADDITIONAL_PLUGINS_${folder}
-        NAMES CMakeLists.txt
-        PATHS
-          ${PROJECT_SOURCE_DIR}/../${folder}
-        DOC "Path to additional plugin ${folder}"
-        NO_DEFAULT_PATH
-        )
+# Add Additional Vendor or Internal Plugins to the GMAT_ADDITIONAL_PLUGINS file
+# The file should contain one plugin name or name=value pair per line
+#   Line format: PluginName[=PluginDirectory]
+FIND_FILE(GMAT_ADDITIONAL_PLUGINS "ListOfAdditionalPlugins.txt"
+   PATHS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}
+   DOC "Path to file that lists third-party plugins, with file contents: PluginName [= PluginDirectory]"
+   NO_DEFAULT_PATH)
    
-      if(GMAT_ADDITIONAL_PLUGINS_${folder})
-        SET(PLUGINDIR "${GMAT_ADDITIONAL_PLUGINS_${folder}}")
-        ADD_SUBDIRECTORY(${PLUGINDIR} "${CMAKE_CURRENT_BINARY_DIR}/${folder}")
-        GET_DIRECTORY_PROPERTY(ExtraTargets DIRECTORY ${PLUGINDIR} DEFINITION PluginTargets)
-        SET(PluginTargets ${PluginTargets} ${ExtraTargets})
+if (GMAT_ADDITIONAL_PLUGINS)
+   FILE(STRINGS ${GMAT_ADDITIONAL_PLUGINS} AdditionalPluginsNVP)
+
+   foreach(CurrPluginNVP ${AdditionalPluginsNVP})
+      # Extract plugin name and directory (if provided)
+      STRING(STRIP ${CurrPluginNVP} CurrPluginNVP) # Strip leading/trailing spaces
+      STRING(REGEX MATCH "^[^=]+" CurrPluginName ${CurrPluginNVP}) # Get plugin name
+      if(CurrPluginName STREQUAL CurrPluginNVP) # No directory provided
+         SET(CurrPluginDir "")
+      else()
+         STRING(REPLACE "${CurrPluginName}=" "" CurrPluginDir ${CurrPluginNVP}) # Get plugin directory
+      endif()
+      
+      # Strip leading/trailing space from plugin name and directory
+      STRING(STRIP ${CurrPluginName} CurrPluginName)
+      STRING(STRIP "${CurrPluginDir}" CurrPluginDir)
+
+      # Assemble search paths based on specified plugin directory
+      if(NOT CurrPluginDir)
+         # No directory provided -> search for plugin next to GMAT directory
+         SET(CurrSearchPaths "${PROJECT_SOURCE_DIR}/../${CurrPluginName}")
+      elseif(IS_ABSOLUTE ${CurrPluginDir})
+         # Absolute directory path provided -> only search there
+         SET(CurrSearchPaths ${CurrPluginDir})
+      else()
+         # Relative directory path provided -> search relative to provided additional plugins file
+         GET_FILENAME_COMPONENT(AdditionalPluginsFileDir ${GMAT_ADDITIONAL_PLUGINS} DIRECTORY)
+         SET(CurrSearchPaths "${AdditionalPluginsFileDir}/${CurrPluginDir}")
+      endif()
+                  
+      # Search for plugin folder
+      FIND_PATH(GMAT_ADDITIONAL_PLUGINS_${CurrPluginName}
+         NAMES CMakeLists.txt
+         PATHS ${CurrSearchPaths}
+         DOC "Path to additional plugin ${CurrPluginName}"
+         NO_DEFAULT_PATH
+      )
+   
+      if(GMAT_ADDITIONAL_PLUGINS_${CurrPluginName})
+        SET(PLUGINDIR "${GMAT_ADDITIONAL_PLUGINS_${CurrPluginName}}")
+        ADD_SUBDIRECTORY(${PLUGINDIR} "${CMAKE_CURRENT_BINARY_DIR}/${CurrPluginName}")
+        GET_DIRECTORY_PROPERTY(AdditionalTargets DIRECTORY ${PLUGINDIR} DEFINITION PluginTargets)
+        SET_TARGET_PROPERTIES(${AdditionalTargets} PROPERTIES FOLDER "GMAT Plugins/Additional")
+        SET(PluginTargets ${PluginTargets} ${AdditionalTargets})
       endif()
    endforeach()
 endif()

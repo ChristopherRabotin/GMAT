@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -34,6 +34,7 @@
 #include "EstimatorException.hpp"
 #include "MessageInterface.hpp"
 #include "ODEModel.hpp"
+#include "Plate.hpp"                          // made changes by TUAN NGUYEN
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_EXECUTION
@@ -51,8 +52,8 @@
  * Default constructor
  */
 //------------------------------------------------------------------------------
-RunEstimator::RunEstimator() :
-   RunSolver               ("RunEstimator"),
+RunEstimator::RunEstimator(const std::string &typeStr) :
+   RunSolver               (typeStr),
    theEstimator            (NULL),
    commandRunning          (false),
    commandComplete         (false),
@@ -63,7 +64,10 @@ RunEstimator::RunEstimator() :
    eventProcessComplete    (false),
    eventMan                (NULL)
 {
+   needToResetSTM = true;                           // made changes by TUAN NGUYEN
+
    overridePropInit = true;
+   publishOnStep = false;
    delayInitialization = true;
 
    hasPrecisionTime = true;
@@ -81,6 +85,16 @@ RunEstimator::~RunEstimator()
 {
    if (theEstimator)
       delete theEstimator;
+
+   // clean up ObjectArray eventList;
+   // eventList contains a list of pointers which point to objects in MeasurementManager. The task to delete those objects have to be handled by MeasurementManager
+   eventList.clear();
+
+   // clean up Event *currentEvent;
+   currentEvent = NULL;                  // This class does not create Event object, so it does not to delete it.
+   // clean up EventManager *eventMan;
+   eventMan = NULL;                      // This class does not create EventManager object, so it does not to delete it.
+
 }
 
 
@@ -106,6 +120,7 @@ RunEstimator::RunEstimator(const RunEstimator & rs) :
    eventMan                (NULL)
 {
    overridePropInit = true;
+   publishOnStep = false;
    delayInitialization = true;
 }
 
@@ -126,16 +141,27 @@ RunEstimator& RunEstimator::operator=(const RunEstimator & rs)
    {
       RunSolver::operator=(rs);
 
-      theEstimator     = NULL;
+      if (theEstimator)
+      {
+         delete theEstimator;
+         theEstimator = NULL;                 // made changes by TUAN NGUYEN
+      }
+
       commandRunning   = false;
       commandComplete  = false;
       overridePropInit = true;
+      publishOnStep    = false;
       propPrepared     = false;
       estimationOffset = rs.estimationOffset;
       bufferFilled     = false;
       currentEvent     = NULL;
       eventProcessComplete = false;
-      eventMan         = NULL;
+
+      if (eventMan)
+      {
+         eventMan->CleanUp();
+         // use delete eventMan causes a crash
+      }
    }
 
    return *this;
@@ -183,6 +209,38 @@ std::string RunEstimator::GetRefObjectName(const UnsignedInt type) const
    }
 
    return RunSolver::GetRefObjectName(type);
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string & name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a pointer to a referenced object of a given type and name
+ *
+ * @param type The object's type
+ * @param name The object's name
+ *
+ * @return The pointer to the associated object
+ */
+ //------------------------------------------------------------------------------
+GmatBase* RunEstimator::GetRefObject(const UnsignedInt type,
+   const std::string & name)
+{
+   switch (type)
+   {
+      case Gmat::SOLVER:
+         #ifdef DEBUG_RUN_Estimator
+            MessageInterface::ShowMessage
+               ("Getting RunEstimator reference solver\n");
+         #endif
+         return theEstimator;
+
+      default:
+         ;
+   }
+
+   return RunSolver::GetRefObject(type, name);
 }
 
 
@@ -313,7 +371,7 @@ bool RunEstimator::Initialize()
       return true;
    }
 
-   // if it is initizlized, does not need to do it again
+   // if it is initialized, does not need to do it again
    if (isInitialized)
       return true;
 
@@ -326,7 +384,10 @@ bool RunEstimator::Initialize()
 
    // Clear the old clone if it was set
    if (theEstimator != NULL)
+   {
       delete theEstimator;
+      theEstimator = NULL;            // made changes by TUAN NGUYEN
+   }
 
    GmatBase *estObj = FindObject(solverName);
    if (estObj == NULL)
@@ -341,12 +402,12 @@ bool RunEstimator::Initialize()
       MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1: create an Estimator and set value to the Estimator\n"); 
    #endif
    theEstimator = (Estimator*)(estObj->Clone());
-
+   
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1.1: reset delay flag\n"); 
    #endif
    theEstimator->SetDelayInitialization(false);
-
+   
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1.2: initialize the Estimator\n"); 
    #endif
@@ -427,31 +488,81 @@ bool RunEstimator::Initialize()
 //--------------------------------------------------------------------------------
 void RunEstimator::LoadSolveForsToESM()
 {
-#ifdef DEBUG_LOAD_SOLVEFORS
-   MessageInterface::ShowMessage("RunEstimator::LoadSolveForsToEMS()  enter\n");
-#endif
+   #ifdef DEBUG_LOAD_SOLVEFORS
+      MessageInterface::ShowMessage("RunEstimator::LoadSolveForsToEMS()  enter\n");
+   #endif
 
    EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
 
    // Set solve-for for all participants used in this estimator only. Solve-fors for participants in other estimator and similator are not set to ESM 
    StringArray names = theEstimator->GetMeasurementManager()->GetParticipantList();
 
+   #ifdef DEBUG_LOAD_SOLVEFORS
+      for (UnsignedInt j = 0; j < names.size(); ++j)
+         MessageInterface::ShowMessage("RunEstimator::LoadSolveForsToEMS() "
+               "Participants   %s\n", names[j].c_str());
+   #endif
+
    ObjectMap objectmap = GetConfiguredObjectMap();
 
-   for (ObjectMap::iterator i = objectmap.begin(); i != objectmap.end(); ++i)
+   for (UnsignedInt i = 0; i < names.size(); ++i)
    {
-      if (find(names.begin(), names.end(), (*i).first) != names.end())
+      GmatBase *obj = FindObject(names[i]);
+      if (obj != NULL)
+         esm->SetProperty(obj);
+   }
+
+   // Need to test extensively with this change
+//   for (ObjectMap::iterator i = objectmap.begin(); i != objectmap.end(); ++i)
+//   {
+//      if (find(names.begin(), names.end(), (*i).first) != names.end())
+//      {
+//         #ifdef DEBUG_LOAD_SOLVEFORS
+//            MessageInterface::ShowMessage("   Loading %s solve-fors\n",
+//                  i->first.c_str());
+//         #endif
+//         // Set solve-for for all participants. If participant does not have solve-for defined in it,
+//         // esm->SetProperty rejects the set request and return false otherwise return true
+//         esm->SetProperty(i->second);
+//      }
+//   }
+
+   // Scan the force model for solve-for parameters
+   if (fm.size() > 0)
+   {
+      for (UnsignedInt i = 0; i < fm.size(); ++i)
       {
-         // Set solve-for for all participants. If participant does not have solve-for defined in it, 
-         // esm->SetProperty rejects the set request and return false otherwise return true
-         esm->SetProperty((*i).second);
+         #ifdef DEBUG_LOAD_SOLVEFORS
+            MessageInterface::ShowMessage("   Scanning the force model %s <%p> for "
+                  "solve-fors\n", fm[i]->GetName().c_str(), fm[i]);
+         #endif
+
+         if (fm[i])
+         {
+            StringArray solforNames = fm[i]->GetSolveForList();
+            if (solforNames.size() > 0)
+            {
+               #ifdef DEBUG_LOAD_SOLVEFORS
+                  MessageInterface::ShowMessage("   %s has %d solve-fors:\n",
+                         fm[i]->GetName().c_str(), solforNames.size());
+               #endif
+
+               for (UnsignedInt j = 0; j < solforNames.size(); ++j)
+               {
+                  #ifdef DEBUG_LOAD_SOLVEFORS
+                     MessageInterface::ShowMessage("      %s\n",
+                           solforNames[j].c_str());
+                  #endif
+                  esm->SetProperty(solforNames[j], fm[i]);
+               }
+            }
+         }
       }
    }
 
-#ifdef DEBUG_LOAD_SOLVEFORS
-   MessageInterface::ShowMessage("RunEstimator::LoadSolveForsToEMS()  exit\n");
-#endif
-
+   #ifdef DEBUG_LOAD_SOLVEFORS
+      MessageInterface::ShowMessage("RunEstimator::LoadSolveForsToEMS()  exit\n");
+   #endif
 }
 
 
@@ -510,65 +621,8 @@ bool RunEstimator::PreExecution()
 #endif
       retval = theEstimator->Reinitialize();
 
-      MeasurementManager *measman = theEstimator->GetMeasurementManager();
-      EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
-      StringArray participants = measman->GetParticipantList();
-
 #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("PreExecution(): Step 3: load participant names to EstimationStateManager\n");
-#endif
-      // Load participant names to estimation state manager 
-      esm->SetParticipantList(participants);
-      
-#ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("PreExecution(): Step 4: load solve-fors to EstimationStateManager\n");
-#endif
-      // Load solve for objects to esm
-      LoadSolveForsToESM();
-
-#ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("PreExecution(): Step 5: set solver-for objects to EstimationStateManager\n");
-#endif
-      // Pass in the objects
-      StringArray objList = esm->GetObjectList("");
-      for (UnsignedInt i = 0; i < objList.size(); ++i)
-      {
-         std::string propName = objList[i];
-         std::string objName = propName;
-         std::string refObjectName = "";
-         size_t loc = propName.find('.');              // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
-         if (loc != propName.npos)
-         {
-            objName = propName.substr(0, loc);
-            refObjectName = propName.substr(loc+1);
-         }
-
-         GmatBase* obj = FindObject(objName);
-         // if referent object is used, set referent object to be solve-for object 
-         // ex: propName = "CAN.ErrorModel1". Referent object is "ErrorModel1". It needs to set object ErrorModel1 to estimation state mananger   
-         if (refObjectName != "")
-         { 
-            GmatBase* refObj = obj->GetRefObject(Gmat::UNKNOWN_OBJECT, propName);
-            obj = refObj;
-         }
-
-         if (obj != NULL)
-         {
-#ifdef DEBUG_INITIALIZATION
-            MessageInterface::ShowMessage("PreExecution(): object <%s,%p> set to EstimationStateManager\n", obj->GetName().c_str(), obj);
-#endif
-            esm->SetObject(obj);
-         }
-      }
-
-#ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("PreExecution(): Step 6: build state in EstimationStateManager\n");
-#endif
-      esm->BuildState();
-
-
-#ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("PreExecution(): Step 7: set up event manager\n");
+      MessageInterface::ShowMessage("PreExecution(): Step 3: set up event manager\n");
 #endif
       // Find the event manager and store its pointer
       if (triggerManagers == NULL)
@@ -598,65 +652,247 @@ bool RunEstimator::PreExecution()
 
 
 #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("PreExecution(): Step 8: set up Propagator\n");
+      MessageInterface::ShowMessage("PreExecution(): Step 4: set up Propagator\n");
 #endif
-      // Next comes the propagator
-      PropSetup *obj = theEstimator->GetPropagator();
-      obj->SetPrecisionTimeFlag(true);
+      // Load participant names to estimation state manager
+      MeasurementManager *measman = theEstimator->GetMeasurementManager();
+      EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
 
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("Propagator at address %p ", obj);
-         if (obj != NULL)
-            MessageInterface::ShowMessage("is named %s\n",
-               obj->GetName().c_str());
-         else
-            MessageInterface::ShowMessage("is not yet set\n");
-      #endif
-
-      if (obj != NULL)
+      // Next comes the propagators
+      // Clear old ones
+      if (propagators.size() > 0)
       {
-         if (obj->IsOfType(Gmat::PROP_SETUP))
+         for (std::vector<PropSetup*>::iterator pp = propagators.begin();
+            pp != propagators.end(); ++pp)
          {
-            PropSetup *ps = (PropSetup*)obj->Clone();
+            delete (*pp);
+         }
+         propagators.clear();
+         p.clear();
+         fm.clear();
+      }
 
-            // RunEstimator only manages one PropSetup.  If that changes, so
-            // does this code
-            if (propagators.size() > 0)
+      propObjectNames.clear();
+
+      std::map<PropSetup*, StringArray> satList;
+      std::map<std::string, PropSetup*> knownProps;
+      
+      // Setup new ones
+      StringArray participants = measman->GetParticipantList();
+      for (UnsignedInt i = 0; i < participants.size(); ++i)
+      {
+         GmatBase *sc = FindObject(participants[i]);
+         if ((sc) && (sc->IsOfType("Spacecraft")))
+         {
+            
+            ((Spacecraft*)(sc))->SetRunningCommandFlag(3);    // input value 3 for running estimation command        // made changes by TUAN NGUYEN
+
+            PropSetup *prop = theEstimator->GetPropagator(participants[i]);
+            if (prop == nullptr)
+               throw CommandException("Cannot initialize RunEstimator command; the "
+                     "propagator pointer requested from the Estimator " +
+                     theEstimator->GetName() + " for the spacecraft " + participants[i] +
+                     " is NULL.");
+
+            std::string propName = prop->GetName();
+            PropSetup *ps = nullptr;
+
+            if (knownProps.find(propName) == knownProps.end())
             {
-               for (std::vector<PropSetup*>::iterator pp = propagators.begin();
-                  pp != propagators.end(); ++pp)
+               ps = (PropSetup*)prop->Clone();
+               ps->SetPrecisionTimeFlag(true);
+               propagators.push_back(ps);
+
+               StringArray satNames;
+               satNames.push_back(participants[i]);
+               satList[ps] = satNames;
+               knownProps[propName] = ps;
+
+               p.push_back(ps->GetPropagator());
+               fm.push_back(ps->GetODEModel());
+               eventMan->SetObject(ps);
+
+               retval = true;
+            }
+            else
+            {
+               // One Ephem Prop per spacecraft
+               if (prop->GetPropagator()->IsOfType("EphemerisPropagator"))
                {
-                  delete (*pp);
+                  ps = (PropSetup*)prop->Clone();
+                  ps->SetPrecisionTimeFlag(true);
+                  propagators.push_back(ps);
+
+                  StringArray satNames;
+                  satNames.push_back(participants[i]);
+                  satList[ps] = satNames;
+                  knownProps[propName] = ps;
+
+                  p.push_back(ps->GetPropagator());
+                  fm.push_back(ps->GetODEModel());
+                  eventMan->SetObject(ps);
+
+                  retval = true;
                }
-               propagators.clear();
-               p.clear();
-               fm.clear();
+               else
+               {
+                  ps = knownProps[propName];
+                  StringArray satNames = satList[ps];
+                  if (find(satNames.begin(), satNames.end(), participants[i]) == satNames.end())
+                     (satList[ps]).push_back(participants[i]);
+               }
             }
 
-            propagators.push_back(ps);
-            p.push_back(ps->GetPropagator());
-            fm.push_back(ps->GetODEModel());
-            eventMan->SetObject(ps);
+            if (ps->GetPropagator()->UsesODEModel())
+               sc->TakeAction("UseSTM");
+            else
+               sc->TakeAction("SkipSTM");
 
-            //retval = true;
          }
       }
-      else
-         throw CommandException("Cannot initialize RunEstimator command; the "
-            "propagator pointer in the Estimator " +
-            theEstimator->GetName() + " is NULL.");
 
-      #ifdef DEBUG_INITIALIZATION
+      for (UnsignedInt i = 0; i < propagators.size(); ++i)
+         propObjectNames.push_back(satList[propagators[i]]);
+
+      propPrepared = false;
+
+      measman->SetTransientForces(transientForces);
+      theEstimator->SetTransientForces(transientForces);
+
+#ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("PreExecution(): Step 5: call AddExternalStmSetting("", NULL, -1) on participant spacecrafts\n");
+#endif
+      #ifdef DEBUG_LOAD_SOLVEFORS
+         MessageInterface::ShowMessage("Marching through the %d entry "
+               "transient list\n", transientForces->size());
+      #endif
+      // Build spacecraft list and clear external STM settings
+      std::vector<Spacecraft*> scs;
+      for (UnsignedInt k = 0; k < participants.size(); ++k)
+      {
+         GmatBase *party = FindObject(participants[k]);
+         if (party != NULL)
+         {
+            if (party->IsOfType(Gmat::SPACECRAFT))
+            {
+               scs.push_back((Spacecraft*)party);
+
+               // made changes by TUAN NGUYEN
+               //scs[scs.size()-1]->AddExternalStmSetting("", NULL, -1);                     // It causes error due to erase all prevous setting for external STM
+            }
+         }
+      }
+
+#ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("PreExecution(): Step 6: call AddExternalStmSetting(<solveForName>, <transientForce>, <parmID>) on participant spacecrafts\n");
+#endif
+      // March through transient forces and load up SC STM with their entries
+      for (UnsignedInt i = 0; i < transientForces->size(); ++i)
+      {
+         StringArray sfl = transientForces->at(i)->GetSolveForList();
+         #ifdef DEBUG_LOAD_SOLVEFORS
+            MessageInterface::ShowMessage("   transientForces[%d] with name <%s> has %d solve-fors\n", i, transientForces->at(i)->GetName().c_str(),
+                  sfl.size());
+         #endif
+         for (UnsignedInt j = 0; j < sfl.size(); ++j)
+         {
+            // Tell the spacecraft about STM entries needed for the STM
+            #ifdef DEBUG_LOAD_SOLVEFORS
+               MessageInterface::ShowMessage("      Adding %s to %d "
+                     "paricipants\n", sfl[j].c_str(), participants.size());
+            #endif
+            for (UnsignedInt k = 0; k < scs.size(); ++k)
+            {
+               #ifdef DEBUG_LOAD_SOLVEFORS
+                  MessageInterface::ShowMessage("         Adding to %s\n",
+                        scs[k]->GetName().c_str());
+               #endif
+               Integer paramID = transientForces->at(i)->GetParameterID(sfl[j]);
+               Integer id = scs[k]->AddExternalStmSetting(
+                               sfl[j], transientForces->at(i),
+                               paramID);
+
+               // Add size of external entries to STM                                     // made changes by TUAN NGUYEN
+               Integer size = transientForces->at(i)->GetEstimationParameterSize(id);     // made changes by TUAN NGUYEN
+               scs[k]->SetIntegerParameter("FullSTMRowCount",                             // made changes by TUAN NGUYEN
+                  scs[k]->GetIntegerParameter("FullSTMRowCount") + size);                 // made changes by TUAN NGUYEN
+
+               transientForces->at(i)->SetStmIndex(id, paramID);
+            }
+         }
+      }
+
+      // Tell the spacecraft about STM entries needed for the STM
+      for (UnsignedInt i = 0; i < scs.size(); ++i)
+      {
+         #ifdef DEBUG_LOAD_SOLVEFORS
+            MessageInterface::ShowMessage("  Set STM external entries for Spacecraft %s\n",
+               scs[i]->GetName().c_str());
+         #endif
+         // processing all plates on the spacecraft
+         Spacecraft* sc = scs[i];
+         std::vector<StringArray> constraints = sc->GetEqualConstrains();
+         ObjectArray plates = sc->GetRefObjectArray("Plate");
+         for (Integer j = 0; j < plates.size(); ++j)
+         {
+            // Resize STM for adding plate's solve-for variables
+            Plate* pl = (Plate*)plates[j];                   // fix this bug. Index j is used for plates
+            StringArray sfList = pl->GetStringArrayParameter("SolveFors");
+            for (Integer k = 0; k < sfList.size(); ++k)
+            {
+               // Only add external entries and size to STM when solve-for is on the first entry in the constraint list
+               std::string sfFullName = pl->GetName() + "." + sfList[k];
+               bool addToList = true;
+               for (Integer k1 = 0; k1 < constraints.size(); ++k1)
+               {
+                  for (Integer k2 = 1; k2 < constraints[k1].size(); ++k2)
+                  {
+                     if (sfFullName == constraints[k1][k2])
+                     {
+                        addToList = false;
+                        break;
+                     }
+                  }
+
+                  if (addToList == false)
+                     break;
+               }
+
+               if (addToList)
+               {
+                  // Add external STM setting
+                  Integer id = pl->GetParameterID(sfList[k]);
+                  sc->AddExternalStmSetting(
+                     sfFullName,                // Full name: ex: set solve-for "Plate1.DiffuseFraction" to external STM list in the spacecraft
+                     pl, id);
+
+                  // Add size of external entries to STM                            // made changes by TUAN NGUYEN
+                  Integer size = pl->GetEstimationParameterSize(id);                // made changes by TUAN NGUYEN
+                  sc->SetIntegerParameter("FullSTMRowCount",                        // made changes by TUAN NGUYEN
+                     sc->GetIntegerParameter("FullSTMRowCount") + size);            // made changes by TUAN NGUYEN
+               }
+            }
+         }
+      }
+
+
+#ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("RunEstimator command found %d "
             "participants\n", participants.size());
       #endif
 
-      propObjectNames.clear();
-      propObjectNames.push_back(participants);
-      propPrepared = false;
+#ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("PreExecution(): Step 7: load participant names to EstimationStateManager\n");
+#endif
+#ifdef DEBUG_LOAD_SOLVEFORS
+      for (UnsignedInt j = 0; j < participants.size(); ++j)
+        MessageInterface::ShowMessage("RunEstimator::PreExecution() Participants   %s\n", participants[j].c_str());
+#endif
+      // Load participant names to estimation state manager
+      esm->SetParticipantList(participants);
 
 #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("PreExecution(): Step 9: initialize RunSolver\n");
+      MessageInterface::ShowMessage("PreExecution(): Step 8: initialize RunSolver\n");
 #endif
       // Now we can initialize the propagation subsystem by calling up the
       // inheritance tree.
@@ -728,8 +964,11 @@ bool RunEstimator::Execute()
    // Respond to the state in the state machine
    Solver::SolverState state = theEstimator->GetState();
    
-   // Set run state to SOLVING here (for fixing GMT-5101 LOJ: 2015.06.16)
-   publisher->SetRunState(Gmat::SOLVING);
+   // Set run state here (for fixing GMT-5101 LOJ: 2015.06.16)
+   if(theEstimator->IsFinalPass())
+      publisher->SetRunState(Gmat::SOLVEDPASS);
+   else
+      publisher->SetRunState(Gmat::SOLVING);
    
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("\nEstimator state is %d\n", state);
@@ -743,7 +982,81 @@ bool RunEstimator::Execute()
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Entered RunEstimator::Execute(): INITIALIZING state\n");
          #endif
+			
          PrepareToEstimate();
+         {
+            EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
+#ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Execute(): Solver::INITIALIZING: load solve-fors to EstimationStateManager\n");
+#endif
+            // Load solve for objects to esm
+            LoadSolveForsToESM();
+
+            // Reset the propagation state vector because the STM may have resized
+            // TBD: Do we need to do this?
+            // From HERE --------------------------------------
+            hasFired = false;
+            for (UnsignedInt i = 0; i < p.size(); ++i)
+            {
+               p[i]->Initialize();
+               psm[i]->MapObjectsToVector();
+               p[i]->Update(true);
+            }
+            // To HERE --------------------------------------
+
+#ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Execute(): Solver::INITIALIZING: set solver-for objects to EstimationStateManager\n");
+#endif
+            // Pass in the objects
+            StringArray objList = esm->GetObjectList("");
+            for (UnsignedInt i = 0; i < objList.size(); ++i)
+            {
+               std::string propName = objList[i];
+               std::string objName = propName;
+               std::string refObjectName = "";
+               size_t loc = propName.find('.');              // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
+               if (loc != propName.npos)
+               {
+                  objName = propName.substr(0, loc);
+                  refObjectName = propName.substr(loc+1);
+               }
+
+               GmatBase* obj = FindObject(objName);
+               // if referent object is used, set referent object to be solve-for object
+               // ex: propName = "CAN.ErrorModel1". Referent object is "ErrorModel1". It needs to set object ErrorModel1 to estimation state mananger
+               if (refObjectName != "")
+               {
+                  GmatBase* refObj = obj->GetRefObject(Gmat::UNKNOWN_OBJECT, propName);
+                  obj = refObj;
+               }
+
+               if (obj != NULL)
+               {
+                  if (obj->IsOfType(Gmat::ODE_MODEL))
+                  {
+                     // Use the internal ODEModel
+                     obj = fm[0];
+                     // Refresh its solvefor buffer
+                     fm[0]->GetSolveForList();
+                  }
+#ifdef DEBUG_INITIALIZATION
+            MessageInterface::ShowMessage("Execute(): Solver::INITIALIZING: object <%s,%p> set to EstimationStateManager\n", obj->GetName().c_str(), obj);
+#endif
+                  esm->SetObject(obj);
+               }
+            }
+
+#ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Execute(): Solver::INITIALIZING: build state in EstimationStateManager\n");
+#endif
+            esm->BuildState();
+            esm->MapObjectsToVector();
+
+            UpdateInitialConditions();
+
+            PublishState();
+         }
+			
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Exit RunEstimator::Execute(): INITIALIZING state\n");
          #endif
@@ -754,6 +1067,7 @@ bool RunEstimator::Execute()
             MessageInterface::ShowMessage("Entered RunEstimator::Execute(): PROPAGATING state\n");
          #endif
          Propagate();
+
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Exit RunEstimator::Execute(): PROPAGATING state\n");
          #endif
@@ -765,6 +1079,7 @@ bool RunEstimator::Execute()
             MessageInterface::ShowMessage("Entered RunEstimator::Execute(): CALCULATING state\n");
          #endif
          Calculate();
+			
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Exit RunEstimator::Execute(): CALCULATING state\n");
          #endif
@@ -776,6 +1091,7 @@ bool RunEstimator::Execute()
             MessageInterface::ShowMessage("Entered RunEstimator::Execute(): LOCATING state\n");
          #endif
          LocateEvent();
+			
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Exit RunEstimator::Execute(): LOCATING state\n");
          #endif
@@ -786,6 +1102,7 @@ bool RunEstimator::Execute()
             MessageInterface::ShowMessage("Entered RunEstimator::Execute(): ACCUMULATING state\n");
          #endif
          Accumulate();
+			
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Exit RunEstimator::Execute(): ACCUMULATING state\n");
          #endif
@@ -819,8 +1136,25 @@ bool RunEstimator::Execute()
          // Set run state to SOLVEDPASS here (for fixing GMT-5101 LOJ: 2015.06.16)
          publisher->SetRunState(Gmat::SOLVEDPASS);
 
+         for (UnsignedInt i = 0; i < fm.size(); ++i)
+         {
+            if (fm[i])
+            {
+               fm[i]->UpdateFromSpaceObject();
+               fm[i]->TakeAction("UpdateSpacecraftParameters");
+            }
+            else
+            {
+               p[i]->UpdateFromSpaceObject();
+               p[i]->TakeAction("UpdateSpacecraftParameters");
+            }
+         }
+
+         // Publish the final state
+         PublishState();
+
          // Why is Finalize commented out???  There is no command summary because of this change.
-//         Finalize();
+         // Finalize();
          // Adding in for now.
          BuildCommandSummary(true);
          #ifdef DEBUG_STATE
@@ -879,6 +1213,36 @@ void RunEstimator::RunComplete()
 
    overridePropInit = true;                         // Fix bug GMT-5818 Batch estimation stop and start error
    delayInitialization = true;                      // Fix bug GMT-5818 Batch estimation stop and start error
+
+   try
+   {
+      if (eventMan)                                  // made changes by TUAN NGUYEN
+      {                                              // made changes by TUAN NGUYEN
+         eventMan->CleanUp();                        // made changes by TUAN NGUYEN
+
+         // This causes crash. Use CleanUp() instead // made changes by TUAN NGUYEN
+         //delete eventMan;                          // made changes by TUAN NGUYEN
+         //eventMan = NULL;                          // made changes by TUAN NGUYEN
+      }                                              // made changes by TUAN NGUYEN
+   }
+   catch (...)
+   {
+      MessageInterface::PopupMessage(Gmat::WARNING_, "Error: EventManager::CleanUp() has error.\n");
+   }
+
+   
+   try
+   {
+      if (theEstimator)                              // made changes by TUAN NGUYEN
+      {                                              // made changes by TUAN NGUYEN
+         delete theEstimator;                        // made changes by TUAN NGUYEN
+         theEstimator = NULL;                        // made changes by TUAN NGUYEN
+      }                                              // made changes by TUAN NGUYEN
+   }
+   catch (...)
+   {
+      MessageInterface::PopupMessage(Gmat::WARNING_, "Error: ~Estimator() has error.\n");
+   }
 
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("Exit RunEstimator::RunComplete()\n");
@@ -993,17 +1357,103 @@ void RunEstimator::PrepareToEstimate()
 
    if (!propPrepared)
    {
-      PrepareToPropagate();  // ?? Test return value here?
+      // Re-register publisher now that STM is added to ForceModel
+      publisher->UnregisterPublishedData(this);
+      streamID = -1;
+
+      StringArray owners, elements;
+      /// @todo Check to see if All and All.Epoch belong for all modes.
+      owners.push_back("All");
+      elements.push_back("All.epoch");
+
+      for (UnsignedInt ii = 0U; ii < sats.size(); ii++)
+         if (sats[ii]->GetType() != Gmat::FORMATION)
+            SetNames(sats[ii]->GetName(), owners, elements);
+
+      streamID = publisher->RegisterPublishedData(this, streamID, owners, elements);
+
+      PrepareToPropagate(false);  // ?? Test return value here?
+
+      // Prepare to publish state
+      if (pubdata)
+         delete[] pubdata;
+      pubdata = new Real[dim + 21 + 1];
+
       commandRunning  = true;
       commandComplete = false;
       propPrepared    = true;
+
+      // Warn that the attitude is not updated at each propagation intermediate step [GMT-4398]
+      // FIXME: Fix this when PropagationEnabledCommand is refactored
+      // Check if the attitude affects the dynamics of any force model
+      bool attAffectDyn = false;
+      for (UnsignedInt n = 0U; n < propagators.size(); n++)
+      {
+         ODEModel *odem = propagators[n]->GetODEModel();
+         if (odem)
+         {
+            for (UnsignedInt ii = 0U; ii < odem->GetNumForces(); ii++)
+            {
+               PhysicalModel* f = odem->GetForce(ii);
+
+               if (f->AttitudeAffectsDynamics())
+               {
+                  attAffectDyn = true;
+                  break;
+               }
+            }
+         }
+
+         if (attAffectDyn)
+            break;
+      }
+
+      // If the attitude of the Spacecraft affects the force model,
+      // check if the Spacecraft uses an ObjectReferencedAxes
+      bool objRefAxes = false;
+      if (attAffectDyn)
+      {
+         for (std::vector<GmatBase *>::const_iterator obj = sats.begin();
+            obj != sats.end(); ++obj)
+         {
+            if ((*obj)->IsOfType("Spacecraft"))
+            {
+               GmatBase* att = (*obj)->GetRefObject(Gmat::ATTITUDE, "");
+
+               if (att->IsOfType("NadirPointing"))
+               {
+                  objRefAxes = true;
+               }
+               else
+               {
+                  std::string refCSName = att->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+                  CoordinateSystem* cs = (CoordinateSystem*) att->GetRefObject(Gmat::COORDINATE_SYSTEM, refCSName);
+                  AxisSystem* ax = cs->GetAxisSystem();
+
+                  if (ax->IsOfType("ObjectReferencedAxes"))
+                     objRefAxes = true;
+               }
+            }
+         }
+      }
+
+      if (objRefAxes)
+         MessageInterface::ShowMessage("Warning: A Spacecraft in the Estimator is using NadirPointing or "
+            "an ObjectReferenced axes for its attitude with a force model that has dynamics affected by the attitude. "
+            "The attitude is not updated at intermediate steps in the integrator, so the result may be inaccurate.\n");
+      // End PropagationEnabledCommand FIXME
    }
 
-   estimationOffset = fm[0]->GetTime();
-
-   // @todo Temporary -- Turn off range check for Cr.  This needs to be made conditional,
-   // and only active is Cr is a solve-for
-   fm[0]->TakeAction("SolveForCr");
+   for (UnsignedInt i = 0; i < fm.size(); ++i)
+   {
+      if (fm[i])
+      {
+         estimationOffset = fm[i]->GetTime();
+         // @todo Temporary -- Turn off range check for Cr.  This needs to be made conditional,
+         // and only active if Cr is a solve-for
+         fm[i]->TakeAction("SolveForCr");
+      }
+   }
 
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage(
@@ -1032,6 +1482,17 @@ void RunEstimator::PrepareToEstimate()
                      poa->at(j)->GetRealParameter("VX"),
                      poa->at(j)->GetRealParameter("VY"),
                      poa->at(j)->GetRealParameter("VZ"));
+               
+               
+               Rmatrix stm = poa->at(j)->GetRmatrixParameter("STM");
+               MessageInterface::ShowMessage("STM = [\n");
+               for (Integer row = 0; row < stm.GetNumRows(); ++row)
+               {
+                  for (Integer col = 0; col < stm.GetNumColumns(); ++col)
+                     MessageInterface::ShowMessage("%.15le   ", stm(row,col));
+                  MessageInterface::ShowMessage("]\n");
+               }
+               MessageInterface::ShowMessage("]\n");
             }
             else
                MessageInterface::ShowMessage("      Not a SpaceObject\n");
@@ -1069,6 +1530,9 @@ void RunEstimator::Propagate()
       
       fm[0]->UpdateFromSpaceObject();
       fm[0]->TakeAction("UpdateSpacecraftParameters");
+
+      // Publish the new state
+      PublishState();
       
       #ifdef DEBUG_STATE_RESETS
          Real* newState = fm[0]->GetState();
@@ -1080,9 +1544,21 @@ void RunEstimator::Propagate()
    // reload prop vector and reset the epoch information
    if (startNewPass == true)
    {
-      fm[0]->UpdateFromSpaceObject();
-      fm[0]->SetTime(estimationOffset);
-      fm[0]->TakeAction("UpdateSpacecraftParameters");
+      for (UnsignedInt i = 0; i < fm.size(); ++i)
+      {
+         if (fm[i])
+         {
+            fm[i]->UpdateFromSpaceObject();
+            fm[i]->SetTime(estimationOffset);
+            fm[i]->TakeAction("UpdateSpacecraftParameters");
+         }
+         else
+         {
+            p[i]->UpdateFromSpaceObject();
+            p[i]->SetTime(estimationOffset);
+            p[i]->TakeAction("UpdateSpacecraftParameters");
+         }
+      }
       startNewPass = false;
    }
    
@@ -1103,18 +1579,18 @@ void RunEstimator::Propagate()
    #endif
 
    #ifdef DEBUG_INITIAL_STATE
-      MessageInterface::ShowMessage("Stepping by %.12lf seconds\n", dt);
+      MessageInterface::ShowMessage("Stepping by %.12le seconds\n", dt);
    #endif
 
    #ifdef DEBUG_EVENT_STATE
       dim = fm[0]->GetDimension();
       Real *b4State = fm[0]->GetState();
 
-      MessageInterface::ShowMessage("State before prop:\n  ");
+		MessageInterface::ShowMessage("State before prop: dim = %d   fm[0]->GetState() = <%p>\n  ", dim, b4State);
       fm[0]->ReportEpochData();
       MessageInterface::ShowMessage("  ");
       for (Integer i = 0; i < dim; ++i)
-         MessageInterface::ShowMessage("   %.12lf", b4State[i]);
+         MessageInterface::ShowMessage("   %.12le", b4State[i]);
       MessageInterface::ShowMessage("\n");
    #endif
 
@@ -1131,11 +1607,11 @@ void RunEstimator::Propagate()
       dim = fm[0]->GetDimension();
       Real *odeState = fm[0]->GetState();
 
-      MessageInterface::ShowMessage("State after prop: epoch = %s\n", currEpochGT[0].ToString().c_str());
+		MessageInterface::ShowMessage("State after prop: epoch = %s   fm[0]->GetState() = <%p>\n", currEpochGT[0].ToString().c_str(), fm[0]->GetState());
       fm[0]->ReportEpochData();
       MessageInterface::ShowMessage("  ");
       for (Integer i = 0; i < dim; ++i)
-         MessageInterface::ShowMessage("   %.12lf", odeState[i]);
+         MessageInterface::ShowMessage("   %.12le", odeState[i]);
       MessageInterface::ShowMessage("\n");
    #endif
 
@@ -1183,7 +1659,11 @@ void RunEstimator::LocateEvent()
    // First time through, buffer the objects that get propagated
    if (!bufferFilled)
    {
-      dt = fm[0]->GetTime();
+      if (fm[0])
+         dt = fm[0]->GetTime();
+      else
+         dt = p[0]->GetTime();
+
       #ifdef DEBUG_EVENT_STATE
          Integer dim = fm[0]->GetDimension();
          Real *odeState = fm[0]->GetState();
@@ -1382,6 +1862,10 @@ void RunEstimator::Estimate()
 
    CleanUpEvents();
 
+   PublishState();
+   publisher->FlushBuffers(true);
+   publisher->SetSpacecraftPropertyChanged(this, currEpochGT[0].GetMjd(), sats[0]->GetName(), "RunEstimator");
+
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("Exit RunEstimator::Estimate()\n");
    #endif
@@ -1422,16 +1906,14 @@ void RunEstimator::Finalize()
             "epoch = %.12lf\n", currEpoch[0]);
    #endif
 
-   // Do cleanup here
-
    // Finalize the Estimator
    if (theEstimator->Finalize() == false)
       MessageInterface::ShowMessage(
             "The Estimator %s reported a problem completing processing\n",
             theEstimator->GetName().c_str());
-
+   
    BuildCommandSummary(true);
-
+   
    commandComplete = true;
    commandRunning  = false;
    propPrepared    = false;
@@ -1478,5 +1960,162 @@ void RunEstimator::CleanUpEvents()
             MessageInterface::ShowMessage("   %.12lf", odeState[i]);
          MessageInterface::ShowMessage("\n");
       #endif
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void PublishState()
+//------------------------------------------------------------------------------
+/**
+ * Publishes the state to the publisher if ready.
+ */
+ //------------------------------------------------------------------------------
+void RunEstimator::PublishState()
+{
+   EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
+
+   if (theEstimator->IsOfType("SeqEstimator") && esm->HasStateOffset())
+   {
+      // Include the state offset in the subscribers
+      esm->MapObjectsToVector();
+      esm->MapFullVectorToObjects();
+      fm[0]->UpdateFromSpaceObject();
+   }
+
+   pubdata[0] = currEpochGT[0].GetMjd();
+   Integer index = 1, theDim;
+   for (UnsignedInt i = 0; i < fm.size(); ++i)
+   {
+      if (fm[i])
+      {
+         j2kState = fm[i]->GetJ2KState();
+         theDim = fm[i]->GetDimension();
+      }
+      else
+      {
+         j2kState = p[i]->GetJ2KState();
+         theDim = p[i]->GetDimension();
+      }
+      memcpy(&pubdata[index], j2kState, theDim * sizeof(Real));
+      index += theDim;
+   }
+
+   Covariance *stateCovariance = esm->GetCovariance();
+   Rmatrix cov = *(stateCovariance->GetCovariance());
+   Rmatrix dX_dS = esm->CartToSolveForStateConversionDerivativeMatrix();
+   Rmatrix covCart = dX_dS * cov * dX_dS.Transpose();
+
+   UnsignedInt idx = 0;
+   for (UnsignedInt ii = 0; ii < 6; ii++)
+   {
+      for (UnsignedInt jj = 0; jj <= ii; jj++)
+      {
+         pubdata[dim + 1 + idx] = covCart(ii, jj);
+         idx++;
+      }
+   }
+
+   publisher->Publish(this, streamID, pubdata, dim + 21 + 1, direction);
+
+   if (theEstimator->IsOfType("SeqEstimator") && esm->HasStateOffset())
+   {
+      // Remove the state offset from the reference trajectory
+      esm->MapVectorToObjects();
+      fm[0]->UpdateFromSpaceObject();
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetNames(const std::string& name, StringArray& owners,
+//               StringArray& elements)
+//------------------------------------------------------------------------------
+/**
+ * Sets the parameter names used when publishing Spacecraft data.
+ *
+ * @param <name>     Name of the Spacecraft that is referenced.
+ * @param <owners>   Array of published data identifiers.
+ * @param <elements> Individual elements of the published data.
+ */
+ //------------------------------------------------------------------------------
+void RunEstimator::SetNames(const std::string& name, StringArray& owners,
+   StringArray& elements)
+{
+   // Need the size of elements StringArray before the states are added
+   Integer initElementSize = elements.size();
+
+   // Populate X, Y, Z, Vx, Vy, Vz
+   RunSolver::SetNames(name, owners, elements);
+
+   // Buffer for additional states (e.g. STM) in the forcemodel
+   Integer fdim;
+   if (fm[0])
+      fdim = fm[0]->GetDimension();
+   else
+      fdim = p[0]->GetDimension();
+
+   Integer startdim = elements.size();
+   startdim -= initElementSize;
+
+   for (Integer i = startdim; i < fdim; ++i)
+   {
+      owners.push_back(name);
+      elements.push_back(name + ".");
+   }
+
+   std::string names[6] = { "X", "Y", "Z", "Vx", "Vy", "Vz" };
+
+   for (UnsignedInt ii = 0; ii < 6; ii++)
+   {
+      for (UnsignedInt jj = 0; jj <= ii; jj++)
+      {
+         owners.push_back(name);
+         std::string elementName = name + ".C" + names[ii] + names[jj];
+         elements.push_back(elementName);
+      }
+   }
+
+#ifdef DEBUG_PUBLISH_DATA
+   MessageInterface::ShowMessage
+   ("RunEstimator::SetNames() Setting data labels:\n");
+   for (unsigned int i = 0; i < elements.size(); i++)
+      MessageInterface::ShowMessage("%s ", elements[i].c_str());
+   MessageInterface::ShowMessage("\n");
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateInitialConditions()
+//------------------------------------------------------------------------------
+/**
+ * Publishes the state to the publisher if ready.
+ */
+ //------------------------------------------------------------------------------
+void RunEstimator::UpdateInitialConditions()
+{
+   if (theEstimator->UpdateInitialConditions())
+   {
+      EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
+      GmatTime epochGT = esm->GetEstimationEpochGT();
+
+      for (UnsignedInt i = 0; i < fm.size(); ++i)
+      {
+         baseEpochGT[i] = epochGT;
+         elapsedTime[i] = 0.0;
+         currEpochGT[i] = epochGT;
+
+         if (fm[i])
+         {
+            fm[i]->UpdateFromSpaceObject();
+            fm[i]->TakeAction("UpdateSpacecraftParameters");
+         }
+         else
+         {
+            p[i]->UpdateFromSpaceObject();
+            p[i]->TakeAction("UpdateSpacecraftParameters");
+         }
+      }
    }
 }

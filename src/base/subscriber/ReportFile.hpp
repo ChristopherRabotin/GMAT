@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -205,7 +205,7 @@ protected:
       DELIMITER,
       COL_WIDTH,
       WRITE_REPORT,
-      ReportFileParamCount  /// Count of the parameters for this class
+      ReportFileParamCount  ///< Count of the parameters for this class
    };
 
 private:

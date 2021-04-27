@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -152,5 +152,48 @@ public:
 protected:
 
 };
+
+
+// made changes by TUAN NGUYEN
+class GMAT_API  SpadDragScaleFactor: public BallisticMassReal
+{
+public:
+
+   SpadDragScaleFactor(const std::string &name = "", GmatBase *obj = NULL);
+   SpadDragScaleFactor(const SpadDragScaleFactor &copy);
+   SpadDragScaleFactor& operator=(const SpadDragScaleFactor &right);
+   virtual ~SpadDragScaleFactor();
+
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone() const;
+
+protected:
+
+};
+
+
+// made changes by TUAN NGUYEN
+class GMAT_API SpadSRPScaleFactor : public BallisticMassReal
+{
+public:
+
+   SpadSRPScaleFactor(const std::string &name = "", GmatBase *obj = NULL);
+   SpadSRPScaleFactor(const SpadSRPScaleFactor &copy);
+   SpadSRPScaleFactor& operator=(const SpadSRPScaleFactor &right);
+   virtual ~SpadSRPScaleFactor();
+
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone() const;
+
+protected:
+
+};
+
 
 #endif //BallisticMassParameters_hpp

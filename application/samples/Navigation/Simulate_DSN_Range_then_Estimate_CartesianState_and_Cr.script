@@ -218,7 +218,7 @@ simmer.FinalEpoch = '23 Jul 2012 00:00:00.000';
 simmer.MeasurementTimeStep = 600;
 simmer.AddNoise = On;
 
-Create BatchEstimatorInv bat;
+Create BatchEstimator bat;
 bat.ShowProgress = true;
 bat.ReportFile = 'TrkFile_SimEst_DSN_DS_WorkingFile.report';
 bat.MaximumIterations = 4;

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -51,7 +51,7 @@
 class ESTIMATION_API RunEstimator : public RunSolver
 {
 public:
-   RunEstimator();
+   RunEstimator(const std::string &typeStr = "RunEstimator");
    virtual ~RunEstimator();
    RunEstimator(const RunEstimator& rs);
    RunEstimator& operator=(const RunEstimator& rs);
@@ -59,6 +59,8 @@ public:
    virtual GmatBase* Clone() const;
 
    virtual std::string GetRefObjectName(const UnsignedInt type) const;
+   virtual GmatBase* GetRefObject(const UnsignedInt type,
+         const std::string &name);
    virtual bool SetRefObjectName(const UnsignedInt type,
          const std::string &name);
    virtual bool RenameRefObject(const UnsignedInt type,
@@ -67,7 +69,7 @@ public:
          const std::string &prefix, const std::string &useName);
 
    virtual bool Initialize();
-   bool         PreExecution();
+   virtual bool PreExecution();
    virtual bool Execute();
    virtual void RunComplete();
    virtual bool TakeAction(const std::string &action,
@@ -113,11 +115,11 @@ protected:
    Real dt;
 
    // Methods called by specific states of the finite state machine
-   void PrepareToEstimate();
-   void Propagate();
+   virtual void PrepareToEstimate();
+   virtual void Propagate();
    void Calculate();
    void LocateEvent();
-   void Estimate();
+   virtual void Estimate();
    void Accumulate();
    void CheckConvergence();
    void Finalize();
@@ -125,6 +127,13 @@ protected:
    // Helper methods
    virtual void SetPropagationProperties(PropagationStateManager *psm);
    virtual void CleanUpEvents();
+
+   virtual void PublishState();
+
+   virtual void SetNames(const std::string& name,
+      StringArray& owners, StringArray& elements);
+
+   virtual void UpdateInitialConditions();
 
 private:
    bool delayInitialization;

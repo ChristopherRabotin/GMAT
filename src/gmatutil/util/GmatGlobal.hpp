@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -41,55 +41,60 @@ class GMATUTIL_API GmatGlobal
 {
 public:
 
-   enum RunMode
-   {
-      NORMAL = 10,
-      EXIT_AFTER_RUN,
-      TESTING,
-      TESTING_NO_PLOTS,
-   };
-   
-   enum GuiMode
-   {
-      NORMAL_GUI = 20,
-      MINIMIZED_GUI,
-   };
-   
-   enum PlotMode
-   {
-      NORMAL_PLOT = 25,
-      TILED_PLOT,
-      CASCADED_PLOT,
-   };
-   
-   ///@note MatlabInterface uses the same enum
-   enum MatlabMode
-   {
-      SINGLE_USE = 30,
-      SHARED,
-      NO_MATLAB,  // MATLAB is not installed
-   };
-   
-   enum LogfileSource
-   {
-      CMD_LINE = 35,
-      SCRIPT,
-      STARTUP,
-   };
-   
-   static GmatGlobal* Instance();
-   
+	enum RunMode
+	{
+		NORMAL = 10,
+		EXIT_AFTER_RUN,
+		TESTING,
+		TESTING_NO_PLOTS,
+	};
+
+	enum GuiMode
+	{
+		NORMAL_GUI = 20,
+		MINIMIZED_GUI,
+	};
+
+	enum PlotMode
+	{
+		NORMAL_PLOT = 25,
+		TILED_PLOT,
+		CASCADED_PLOT,
+	};
+
+	///@note MatlabInterface uses the same enum
+	enum MatlabMode
+	{
+		SINGLE_USE = 30,
+		SHARED,
+		NO_MATLAB,  // MATLAB is not installed
+	};
+
+	enum LogfileSource
+	{
+		CMD_LINE = 35,
+		SCRIPT,
+		STARTUP,
+	};
+
+	static GmatGlobal* Instance();
+
+	//void SetDebug(bool flag) { debug = flag; };
+	//bool GetDebug(){return debug;};
+	//bool debug;
+
    // GMAT version
    std::string GetGmatVersion();
    bool IsGmatCompiledIn64Bit();
    
    // Real to string conversion precison
-   static const Integer DATA_PRECISION;
-   static const Integer TIME_PRECISION;
-   static const Integer DATA_WIDTH;
-   static const Integer TIME_WIDTH;
-   static const Integer INTEGER_WIDTH;
-   
+   static const Integer DATA_PRECISION = 16;
+   static const Integer TIME_PRECISION = 16;
+   static const Integer DATA_WIDTH = 16;
+   static const Integer TIME_WIDTH = 16;
+   static const Integer INTEGER_WIDTH = 4;
+
+public:
    Integer GetDataPrecision();
    Integer GetTimePrecision();
    Integer GetDataWidth();
@@ -121,6 +126,9 @@ public:
    Gmat::RunState GetDetailedRunState();
    void SetDetailedRunState(Gmat::RunState drs);
    Integer GetRunMode();
+
+   void SetBaseEpoch(const GmatEpoch theEpoch);
+   GmatEpoch GetBaseEpoch();
 
    Integer GetRunModeStartUp(){return (isTesting? GmatGlobal::TESTING: runMode);};     // It is a temporary fix in order to run gression test with runmode = TESTING. 
                                                                                        // It needs to improve in the next GMAT release
@@ -280,16 +288,16 @@ private:
          mBinaryOut = binaryOut;
       };
       
-      bool mScientific;    /// format using scientific notation
-      bool mShowPoint;     /// format using ios::showpoint
-      Integer mPrecision;  /// the number of digits of precision
-      Integer mWidth;      /// the field width
-      bool mHorizontal;    /// format horizontally if true. Default is false
-      Integer mSpacing;    /// determines number of spaces in between each element
-      bool mBinaryIn;      /// read in binary if true. Default is false
-      bool mBinaryOut;     /// print in binary if true. Default is false
-      std::string mPrefix; /// prefix to be used for vertical formatting
-      bool mAppendEol ;    /// appends eol if true. Default is true
+      bool mScientific;    ///< format using scientific notation
+      bool mShowPoint;     ///< format using ios::showpoint
+      Integer mPrecision;  ///< the number of digits of precision
+      Integer mWidth;      ///< the field width
+      bool mHorizontal;    ///< format horizontally if true. Default is false
+      Integer mSpacing;    ///< determines number of spaces in between each element
+      bool mBinaryIn;      ///< read in binary if true. Default is false
+      bool mBinaryOut;     ///< print in binary if true. Default is false
+      std::string mPrefix; ///< prefix to be used for vertical formatting
+      bool mAppendEol ;    ///< appends eol if true. Default is true
    };
    
    std::string gmatVersion;
@@ -326,6 +334,7 @@ private:
    IoFormat defaultFormat;
    IoFormat currentFormat;
    IoFormat actualFormat;
+   GmatEpoch baseEpoch;
    
    std::string matlabExt;
 

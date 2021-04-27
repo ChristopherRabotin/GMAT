@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General MiHeaderssion Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -114,7 +114,9 @@ const std::string GmatCommand::MISSION_CHANGE_MESSAGE =
          "******  Changes made to the mission will not be reflected ******\n"
          "******  in the data displayed until the mission is rerun  ******\n\n";
 const std::string GmatCommand::UNDEFINED_KEPLERIAN_ELEMENTS =
-         "        ******  Warning: some or all of the Keplerian elements are undefined ******\n";
+"        ******  Warning: some or all of the Keplerian elements are undefined ******\n";
+const std::string GmatCommand::UNDEFINED_SPHERICAL_ELEMENTS =
+"        ******  Warning: some or all of the Spherical elements are undefined ******\n";
 
 
 Integer GmatCommand::satEpochID = -1;
@@ -126,7 +128,8 @@ Integer GmatCommand::satTankID;
 Integer GmatCommand::satThrusterID;
 Integer GmatCommand::satDryMassID;
 Integer GmatCommand::satTotalMassID;
-
+Integer GmatCommand::satSPADDragScaleFactorID;          // made changes by TUAN NGUYEN
+Integer GmatCommand::satSPADSRPScaleFactorID;           // made changes by TUAN NGUYEN
 
 //---------------------------------
 //  public methods
@@ -921,7 +924,9 @@ void GmatCommand::SetupSummary(const std::string &csName, bool entireMission,
 {
    #ifdef DEBUG_COMMAND_SET
    MessageInterface::ShowMessage
-      ("GmatCommand::SetupSummary() entered, cs=<%s>\n", csName.c_str());
+      ("GmatCommand::SetupSummary() entered, cs=<%s>, entireMission = %d, "
+       "physicsOnly = %d\n",
+       csName.c_str(), entireMission, physicsOnly);
    #endif
 
    summaryCoordSysName     = csName;
@@ -956,7 +961,8 @@ void GmatCommand::SetSummaryName(const std::string &sumName)
 {
    summaryName = sumName;
    #ifdef DEBUG_CMD_SUMMARY
-      MessageInterface::ShowMessage("Setting summary name for command \"%s\" (type %s) to \"%s\"\n",
+      MessageInterface::ShowMessage("Setting summary name for command \"%s\" "
+                                    "(type %s) to \"%s\"\n",
             instanceName.c_str(), typeName.c_str(), summaryName.c_str());
    #endif
 }
@@ -981,8 +987,8 @@ std::string GmatCommand::GetSummaryName()
 //  void SetObjectMap(ObjectMap *objMap)
 //------------------------------------------------------------------------------
 /**
- * Called by the Interpre to set the local resource store used by the GmatCommand
- * for InterpretAction()
+ * Called by the Interpreter to set the local resource store used by the
+ * GmatCommand for InterpretAction()
  * 
  * @param map Pointer to the local object map
  */
@@ -1608,7 +1614,8 @@ bool GmatCommand::Initialize()
    #if DEBUG_COMMAND_INIT
    MessageInterface::ShowMessage
       ("GmatCommand::Initialize() %s entering\n   epochData=%p, stateData=%p, "
-       "parmData=%p, fuelMassData = %p, satVector.size()=%d\n", GetTypeName().c_str(), epochData,
+       "parmData=%p, fuelMassData = %p, satVector.size()=%d\n",
+       GetTypeName().c_str(), epochData,
        stateData, parmData, fuelMassData, satVector.size());
    #endif
    
@@ -1686,7 +1693,8 @@ bool GmatCommand::Initialize()
    #if DEBUG_COMMAND_INIT
    MessageInterface::ShowMessage
       ("GmatCommand::Initialize() %s leaving\n   epochData=%p, stateData=%p, "
-       "parmData=%p, fuelMassData = %p, satVector.size()=%d\n", GetTypeName().c_str(), epochData,
+       "parmData=%p, fuelMassData = %p, satVector.size()=%d\n",
+       GetTypeName().c_str(), epochData,
        stateData, parmData, fuelMassData, satVector.size());
    #endif
    
@@ -1831,7 +1839,8 @@ bool GmatCommand::Append(GmatCommand *cmd)
       if (!current->IsOfType("BranchEnd"))
       {
          #ifdef DEBUG_COMMAND_APPEND
-         ShowCommand("GmatCommand::", " Setting previous of ", cmd, " to ", this);
+         ShowCommand("GmatCommand::", " Setting previous of ", cmd,
+                     " to ", this);
          #endif
 
          cmd->previous = current;
@@ -1981,7 +1990,8 @@ GmatCommand* GmatCommand::Remove(GmatCommand *cmd)
       GmatCommand *temp = next;
       
       #ifdef DEBUG_COMMAND_REMOVE
-      ShowCommand("GmatCommand::", " Setting next of ", this, " to ", next->GetNext());
+      ShowCommand("GmatCommand::", " Setting next of ", this, " to ",
+                  next->GetNext());
       #endif
       
       next = next->GetNext();
@@ -1990,7 +2000,8 @@ GmatCommand* GmatCommand::Remove(GmatCommand *cmd)
       if (next != NULL)
       {
          #ifdef DEBUG_COMMAND_REMOVE
-         ShowCommand("GmatCommand::", " Setting previous of ", next, " to ", this);
+         ShowCommand("GmatCommand::", " Setting previous of ", next,
+                     " to ", this);
          #endif
          
          next->previous = this;
@@ -2290,9 +2301,12 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
    #if DEBUG_BUILD_CMD_SUMMARY
    MessageInterface::ShowMessage
       ("GmatCommand::BuildCommandSummary() %s, commandCompleted=%d, "
-       "objectMap=%p, globalObjectMap=%p\n    epochData=%p, stateData=%p, parmData=%p, "
-       "fuelMassData=%p, satVector.size()=%d\n", GetTypeName().c_str(), commandCompleted, objectMap,
-       globalObjectMap, epochData, stateData, parmData, fuelMassData, satVector.size());
+       "objectMap=%p, globalObjectMap=%p\n    epochData=%p, "
+       "stateData=%p, parmData=%p, "
+       "fuelMassData=%p, satVector.size()=%d\n", GetTypeName().c_str(),
+       commandCompleted, objectMap,
+       globalObjectMap, epochData, stateData, parmData, fuelMassData,
+       satVector.size());
    #endif
    
    if (epochData == NULL)
@@ -2327,6 +2341,8 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
                   satThrusterID = obj->GetParameterID("Thrusters");
                   satDryMassID = obj->GetParameterID("DryMass");
                   satTotalMassID = obj->GetParameterID("TotalMass");
+                  satSPADDragScaleFactorID = obj->GetParameterID("SPADDragScaleFactor");    // made changes by TUAN NGUYEN
+                  satSPADSRPScaleFactorID = obj->GetParameterID("SPADSRPScaleFactor");      // made changes by TUAN NGUYEN
                }
 
                ++satsInMaps;
@@ -2362,6 +2378,8 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
                   satThrusterID = obj->GetParameterID("Thrusters");
                   satDryMassID = obj->GetParameterID("DryMass");
                   satTotalMassID = obj->GetParameterID("TotalMass");
+                  satSPADDragScaleFactorID = obj->GetParameterID("SPADDragScaleFactor");    // made changes by TUAN NGUYEN
+                  satSPADSRPScaleFactorID = obj->GetParameterID("SPADSRPScaleFactor");      // made changes by TUAN NGUYEN
                }
 
                ++satsInMaps;
@@ -2411,7 +2429,10 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
 
          epochData = new Real[satsInMaps];
          stateData = new Real[6*satsInMaps];
-         parmData  = new Real[7*satsInMaps];
+
+         // parmData  = new Real[7*satsInMaps];                                                                         // made changes by TUAN NGUYEN
+         parmData = new Real[9 * satsInMaps];      // add 2 more parameters: SPADDragScaleFactor and SPADSRPScelFactor  // made changes by TUAN NGUYEN
+
 
          fuelMassData = new Real[MAX_NUM_TANKS*satsInMaps];
          tankNames.resize(MAX_NUM_TANKS * satsInMaps, "");
@@ -2440,7 +2461,8 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
        satVector.size());
    #endif
    
-   Integer i6, i7;
+   Integer i6;       //, i7;                    // made changes by TUAN NGUYEN
+   Integer i9;                                  // made changes by TUAN NGUYEN
    for (Integer i = 0; i < satsInMaps; ++i)
    {
       // Save epoch and state data
@@ -2450,17 +2472,30 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
             6*sizeof(Real));
 
       // Save parameter and fuel tank data
-      i7 = i * 7;
-      StringArray tanks = satVector[i]->GetStringArrayParameter(satTankID);
-      parmData[i7]      = satVector[i]->GetRealParameter(satCdID);
-      parmData[i7+1]    = satVector[i]->GetRealParameter(satDragAreaID);
-      parmData[i7+2]    = satVector[i]->GetRealParameter(satCrID);
-      parmData[i7+3]    = satVector[i]->GetRealParameter(satSRPAreaID);
-      parmData[i7+4]    = satVector[i]->GetRealParameter(satDryMassID);
-      parmData[i7+5]    = satVector[i]->GetRealParameter(satTotalMassID);
-      parmData[i7+6]    = (Real) tanks.size();
+      // i7 = i * 7;                                                                      // made changes by TUAN NGUYEN
+      i9 = i * 9;    // add 2 more parameters: SPADDragScaleFactor and SPADSRPScelFactor  // made changes by TUAN NGUYEN
 
-      for (Integer ii = 0; ii < parmData[i7+6]; ii++)
+      StringArray tanks = satVector[i]->GetStringArrayParameter(satTankID);
+      //parmData[i7]      = satVector[i]->GetRealParameter(satCdID);                      // made changes by TUAN NGUYEN
+      //parmData[i7+1]    = satVector[i]->GetRealParameter(satDragAreaID);                // made changes by TUAN NGUYEN
+      //parmData[i7+2]    = satVector[i]->GetRealParameter(satCrID);                      // made changes by TUAN NGUYEN
+      //parmData[i7+3]    = satVector[i]->GetRealParameter(satSRPAreaID);                 // made changes by TUAN NGUYEN
+      //parmData[i7+4]    = satVector[i]->GetRealParameter(satDryMassID);                 // made changes by TUAN NGUYEN
+      //parmData[i7+5]    = satVector[i]->GetRealParameter(satTotalMassID);               // made changes by TUAN NGUYEN
+      //parmData[i7+6]    = (Real) tanks.size();                                          // made changes by TUAN NGUYEN
+
+      parmData[i9] = satVector[i]->GetRealParameter(satCdID);                             // made changes by TUAN NGUYEN
+      parmData[i9 + 1] = satVector[i]->GetRealParameter(satDragAreaID);                   // made changes by TUAN NGUYEN
+      parmData[i9 + 2] = satVector[i]->GetRealParameter(satCrID);                         // made changes by TUAN NGUYEN
+      parmData[i9 + 3] = satVector[i]->GetRealParameter(satSRPAreaID);                    // made changes by TUAN NGUYEN
+      parmData[i9 + 4] = satVector[i]->GetRealParameter(satDryMassID);                    // made changes by TUAN NGUYEN
+      parmData[i9 + 5] = satVector[i]->GetRealParameter(satTotalMassID);                  // made changes by TUAN NGUYEN
+      parmData[i9 + 6] = satVector[i]->GetRealParameter(satSPADDragScaleFactorID);        // made changes by TUAN NGUYEN
+      parmData[i9 + 7] = satVector[i]->GetRealParameter(satSPADSRPScaleFactorID);         // made changes by TUAN NGUYEN
+      parmData[i9 + 8] = (Real)tanks.size();                                              // made changes by TUAN NGUYEN
+
+      //for (Integer ii = 0; ii < parmData[i7 + 6]; ii++)                                 // made changes by TUAN NGUYEN
+      for (Integer ii = 0; ii < parmData[i9 + 8]; ii++)                                   // made changes by TUAN NGUYEN
       {
          tankNames.at(MAX_NUM_TANKS*i + ii) = tanks.at(ii);
          fuelMassData[MAX_NUM_TANKS*i + ii] = satVector[i]->GetRefObject(Gmat::HARDWARE, tanks.at(ii))->GetRealParameter("FuelMass");
@@ -2492,6 +2527,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             "   Now entering BuildCommandSummaryString with commandCompleted = %s, summaryForEntireMission = %s, missionPhysicsBasedOnly = %s, for command %s of type %s which is %s a physics-based command.\n",
             (commandCompleted? "true" : "false"),(summaryForEntireMission? "true" : "false"), (missionPhysicsBasedOnly? "true" : "false"), summaryName.c_str(), typeName.c_str(),
             (physicsBasedCommand? "DEFINITELY" :"NOT"));
+      MessageInterface::ShowMessage(" --- command = %s\n", GetGeneratingString().c_str());
    #endif
    std::stringstream data;
 
@@ -2557,6 +2593,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
          bool       isEccentric, isHyperbolic, originIsCelestialBody;
          bool       displayAll = true;
          bool       keplerianUndefined = false;
+         bool       sphericalUndefined = false;
          SpacePoint *objOrigin       = NULL;
          SpacePoint *cmdOrigin       = NULL;
          Real       originEqRad      = 0.0;
@@ -2606,14 +2643,15 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             rawState                 = &stateData[i*6];  // assumes in internalCoordSystem
             cartStateInternal        = rawState;
             // First convert the cartesian state to the summaryCoordSys
+            cc.Convert(a1, cartStateInternal, internalCoordSys, cartState, summaryCoordSys);
             #ifdef DEBUG_COMMAND_SUMMARY_STATE
-               MessageInterface::ShowMessage("Now converting from %s to %s coordinate system.\n",
+               MessageInterface::ShowMessage("Now converted from %s to %s coordinate system.\n",
                      internalCoordSys->GetName().c_str(), summaryCoordSys->GetName().c_str());
                MessageInterface::ShowMessage("epoch = %12.10f\n", a1.Get());
                MessageInterface::ShowMessage("cart state from array    = %s\n", cartStateInternal.ToString().c_str());
                MessageInterface::ShowMessage("cart state in summary CS = %s\n", cartState.ToString().c_str());
+               MessageInterface::ShowMessage("originIsCelestialBody = %d\n", originIsCelestialBody);
             #endif
-            cc.Convert(a1, cartStateInternal, internalCoordSys, cartState, summaryCoordSys);
             // Need to convert state to all representations
             if (originIsCelestialBody)
             {
@@ -2622,23 +2660,47 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                   kepState        = StateConversionUtil::CartesianToKeplerian(originMu, cartState);
                   modKepState     = StateConversionUtil::Convert(cartState, "Cartesian", "ModifiedKeplerian",
                                     originMu, originFlattening, originEqRad);
+                  #ifdef DEBUG_COMMAND_SUMMARY_STATE
+                     MessageInterface::ShowMessage("keplerian state in summary CS = %s\n", kepState.ToString().c_str());
+                     MessageInterface::ShowMessage("modKepState state in summary CS = %s\n", modKepState.ToString().c_str());
+                  #endif
+                  keplerianUndefined = false;  // it's OK
                }
                catch (BaseException &be)
                {
                   // if the state cannot be converted to Keplerian, display a limited set
                   // of data
+                  #ifdef DEBUG_COMMAND_SUMMARY_STATE
+                     MessageInterface::ShowMessage("CANNOT be converted to Keplerian or ModKeplerian!!\n");
+                  #endif
                   displayAll         = false;
                   keplerianUndefined = true;
                }
             }
-            sphStateAZFPA   = StateConversionUtil::Convert(cartState, "Cartesian", "SphericalAZFPA",
-                              originMu, originFlattening, originEqRad);
-            sphStateRADEC   = StateConversionUtil::Convert(cartState, "Cartesian", "SphericalRADEC",
-                              originMu, originFlattening, originEqRad);
+            try
+            {
+               sphStateAZFPA   = StateConversionUtil::Convert(cartState, "Cartesian", "SphericalAZFPA",
+                                 originMu, originFlattening, originEqRad);
+               sphStateRADEC   = StateConversionUtil::Convert(cartState, "Cartesian", "SphericalRADEC",
+                                 originMu, originFlattening, originEqRad);
 
-            #ifdef DEBUG_COMMAND_SUMMARY_STATE
-               MessageInterface::ShowMessage("keplerian state in summary CS = %s\n", kepState.ToString().c_str());
-            #endif
+               #ifdef DEBUG_COMMAND_SUMMARY_STATE
+                  MessageInterface::ShowMessage("sphStateAZFPA state in summary CS = %s\n", sphStateAZFPA.ToString().c_str());
+                  MessageInterface::ShowMessage("sphStateRADEC state in summary CS = %s\n", sphStateRADEC.ToString().c_str());
+               #endif
+               sphericalUndefined = false;  // it's OK
+            }
+            catch (BaseException &be)
+            {
+               // if the state cannot be converted to spherical, display a limited set
+               // of data
+               #ifdef DEBUG_COMMAND_SUMMARY_STATE
+                  MessageInterface::ShowMessage("CANNOT be converted to Spherical!!\n");
+               #endif
+               displayAll         = false;
+               sphericalUndefined = true;
+            }
+
 
             isEccentric      = false;
             isHyperbolic     = false;
@@ -2665,9 +2727,9 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
 
                // Compute the origin-to-sun unit vector
                Rvector3 originToSun(0.0,0.0,0.0);
-               if (cmdOrigin->GetName() != SolarSystem::SUN_NAME)
+               if (cmdOrigin->GetName() != GmatSolarSystemDefaults::SUN_NAME)
                {
-                  Rvector3 sunPos      = (solarSys->GetBody(SolarSystem::SUN_NAME))->GetMJ2000Position(a1);
+                  Rvector3 sunPos      = (solarSys->GetBody(GmatSolarSystemDefaults::SUN_NAME))->GetMJ2000Position(a1);
                   Rvector3 originPos   = cmdOrigin->GetMJ2000Position(a1);
                   originToSun = sunPos - originPos;
                   originToSun.Normalize();
@@ -2680,7 +2742,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                #endif
 
                Rvector6 relativeState = cartState;
-               if (cmdOrigin->GetName() != SolarSystem::EARTH_NAME)
+               if (cmdOrigin->GetName() != GmatSolarSystemDefaults::EARTH_NAME)
                {
                   Rvector6 originState = cmdOrigin->GetMJ2000State(a1);
                   relativeState       -= originState;
@@ -2710,8 +2772,13 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                   MessageInterface::ShowMessage("----> Now creating BodyFixed cs and passing into PlanetData objects.\n");
                #endif
                // Need a origin-centered BodyFixed coordinate system here
-                  CoordinateSystem *originBF = CoordinateSystem::CreateLocalCoordinateSystem("OriginBodyFixed", "BodyFixed",
-                                               cmdOrigin, NULL, NULL, ((SpacePoint*)obj)->GetJ2000Body(), solarSys);
+                  CoordinateSystem *originBF = CoordinateSystem::CreateLocalCoordinateSystem(
+                                               "OriginBodyFixed", "BodyFixed",
+                                               cmdOrigin, NULL, NULL,
+                                               ((SpacePoint*)obj)->GetJ2000Body(), solarSys);
+               #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+               MessageInterface::ShowMessage("----> CREATED BodyFixed cs.\n");
+               #endif
                if (!originBF)
                {
                   std::string errmsg = "Error creating BodyFixed Coordinate System for origin ";
@@ -2723,11 +2790,17 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                cc.Convert(a1, cartStateInternal, internalCoordSys, cartBodyFixed, originBF);
 
 
+               #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+               MessageInterface::ShowMessage("----> CONVERTED to fixed and passing in ...\n");
+               #endif
                lst                = GmatCalcUtil::CalculatePlanetData("LST", cartBodyFixed, originEqRad, originFlattening, originHourAngle);
                mha                = GmatCalcUtil::CalculatePlanetData("MHA", cartBodyFixed, originEqRad, originFlattening, originHourAngle);
                latitude           = GmatCalcUtil::CalculatePlanetData("Latitude", cartBodyFixed, originEqRad, originFlattening, originHourAngle);
                longitude          = GmatCalcUtil::CalculatePlanetData("Longitude", cartBodyFixed, originEqRad, originFlattening, originHourAngle);
                altitude           = GmatCalcUtil::CalculatePlanetData("Altitude", cartBodyFixed, originEqRad, originFlattening, originHourAngle);
+               #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+               MessageInterface::ShowMessage("----> PASSED in ..., isHyperbolic = %d\n", isHyperbolic);
+               #endif
                if (isHyperbolic)
                {
                   try
@@ -2738,6 +2811,9 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                      bVectorMag       = GmatCalcUtil::CalculateBPlaneData("BVectorMag", cartState, originMu);
                      dla              = GmatCalcUtil::CalculateAngularData("DLA", cartState, originMu, originToSun);
                      rla              = GmatCalcUtil::CalculateAngularData("RLA", cartState, originMu, originToSun);
+                     #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+                     MessageInterface::ShowMessage("----> COMPUTED oBPlane and Angular\n");
+                     #endif
                   }
                   catch (BaseException& be)
                   {
@@ -2779,29 +2855,39 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                rla                = 0.0;
             }
 
-            //TimeConverterUtil::Convert
-            Real utcModJulEpoch     = TimeConverterUtil::Convert(epochData[i],
-                                      TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
+            //theTimeConverter->Convert
+            TimeSystemConverter *theTimeConverter = TimeSystemConverter::Instance();
+
+            bool handleLeapSecond   = false;
+
+            #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+            MessageInterface::ShowMessage("----> About to do time conversions\n");
+            #endif
+            Real utcModJulEpoch     = theTimeConverter->Convert(epochData[i],
+                                      TimeSystemConverter::A1MJD, TimeSystemConverter::UTCMJD,
+                                      GmatTimeConstants::JD_JAN_5_1941, &handleLeapSecond);
+//            bool handleLeapSecond   = TimeSystemConverter::HandleLeapSecond();
+            Real taiModJulEpoch     = theTimeConverter->Convert(epochData[i],
+                                      TimeSystemConverter::A1MJD, TimeSystemConverter::TAIMJD,
                                       GmatTimeConstants::JD_JAN_5_1941);
-            bool handleLeapSecond   = TimeConverterUtil::HandleLeapSecond();
-            Real taiModJulEpoch     = TimeConverterUtil::Convert(epochData[i],
-                                      TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
+            Real ttModJulEpoch      = theTimeConverter->Convert(epochData[i],
+                                      TimeSystemConverter::A1MJD, TimeSystemConverter::TTMJD,
                                       GmatTimeConstants::JD_JAN_5_1941);
-            Real ttModJulEpoch      = TimeConverterUtil::Convert(epochData[i],
-                                      TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
+            Real tdbModJulEpoch     = theTimeConverter->Convert(epochData[i],
+                                      TimeSystemConverter::A1MJD, TimeSystemConverter::TDBMJD,
                                       GmatTimeConstants::JD_JAN_5_1941);
-            Real tdbModJulEpoch     = TimeConverterUtil::Convert(epochData[i],
-                                      TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD,
-                                      GmatTimeConstants::JD_JAN_5_1941);
-            std::string utcString   = TimeConverterUtil::ConvertMjdToGregorian(utcModJulEpoch, handleLeapSecond);
-            std::string taiString   = TimeConverterUtil::ConvertMjdToGregorian(taiModJulEpoch);
-            std::string ttString    = TimeConverterUtil::ConvertMjdToGregorian(ttModJulEpoch);
-            std::string tdbString   = TimeConverterUtil::ConvertMjdToGregorian(tdbModJulEpoch);
+            std::string utcString   = theTimeConverter->ConvertMjdToGregorian(utcModJulEpoch, handleLeapSecond);
+            std::string taiString   = theTimeConverter->ConvertMjdToGregorian(taiModJulEpoch);
+            std::string ttString    = theTimeConverter->ConvertMjdToGregorian(ttModJulEpoch);
+            std::string tdbString   = theTimeConverter->ConvertMjdToGregorian(tdbModJulEpoch);
             data.flags(std::ios::left);
             data.precision(10);
             data.setf(std::ios::fixed,std::ios::floatfield);
             data.fill('0');
             data.width(20);
+            #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+            MessageInterface::ShowMessage("----> DONE with time conversions\n");
+            #endif
 
             // Add a between-spacecraft break
             if (i > 0)
@@ -2810,6 +2896,8 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
 
             if (keplerianUndefined)
                data << UNDEFINED_KEPLERIAN_ELEMENTS;
+            if (sphericalUndefined)
+               data << UNDEFINED_SPHERICAL_ELEMENTS;
 
             //  Write the epoch data
             data << "        Spacecraft       : " << obj->GetName() << "\n"
@@ -2828,6 +2916,9 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             data.unsetf(std::ios::floatfield);
             data.precision(15);
             data.width(20);
+            #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+            MessageInterface::ShowMessage("----> BEFORE displayAll\n");
+            #endif
 
             if (displayAll)
             {
@@ -2849,6 +2940,9 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                     << "        TA   = " << GmatStringUtil::BuildNumber(kepState[5])   << " deg\n"
                     << "                                      "
                     << "        MA   = " << GmatStringUtil::BuildNumber(ma) << " deg\n";
+               #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+               MessageInterface::ShowMessage("----> BEFORE isEccentric = %d\n", isEccentric);
+               #endif
                if (isEccentric)
                {
                   data << "                                      "
@@ -2859,6 +2953,9 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                   data << "                                      "
                        << "        HA   = " << GmatStringUtil::BuildNumber(ha) << " deg\n";
                }
+               #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+               MessageInterface::ShowMessage("----> BEFORE sphericalState\n");
+               #endif
                data << "\n        Spherical State                       "
                     << "Other Orbit Data\n"
                     << "        ---------------------------           "
@@ -2879,6 +2976,9 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                     << "        Periapsis Altitude = " << GmatStringUtil::BuildNumber(periAltitude, false)        << " km   \n"
                     << "        DECV = "               << GmatStringUtil::BuildNumber(sphStateRADEC[5])           << " deg  "
                     << "        VelPeriapsis       = " << GmatStringUtil::BuildNumber(velPeriapsis, false)        << " km/s\n";
+               #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+               MessageInterface::ShowMessage("----> BEFORE isEccentric (again)\n");
+               #endif
                if (isEccentric)
                {
                   data << "                                       "
@@ -2888,6 +2988,9 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                }
                // add planetodetic parameters, if the origin is a Celestial Body
                // and include hyperbolic parameters, if appropriate
+               #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+               MessageInterface::ShowMessage("----> BEFORE isHyperbolic (again)\n");
+               #endif
                if (isHyperbolic)
                {
                   data << "\n        Planetodetic Properties               "
@@ -2918,55 +3021,95 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                        << "        Altitude  = " << GmatStringUtil::BuildNumber(altitude, false)      << " km\n";
                }
             }
-            else  // origin is NOT a celestial body
+            else  // !displayAll
             {
-               data << "        Cartesian State                       "
-                    << "Spherical State\n"
-                                         << "        ---------------------------           "
-                                         << "-------------------------------- \n"
-                    << "        X  = "   << GmatStringUtil::BuildNumber(cartState[0])      << " km     "
-                    << "        RMAG = " << GmatStringUtil::BuildNumber(sphStateAZFPA[0])  << " km   \n"
-                    << "        Y  = "   << GmatStringUtil::BuildNumber(cartState[1])      << " km     "
-                    << "        RA   = " << GmatStringUtil::BuildNumber(sphStateAZFPA[1])  << " deg  \n"
-                    << "        Z  = "   << GmatStringUtil::BuildNumber(cartState[2])      << " km     "
-                    << "        DEC  = " << GmatStringUtil::BuildNumber(sphStateAZFPA[2])  << " deg  \n"
-                    << "        VX = "   << GmatStringUtil::BuildNumber(cartState[3])      << " km/sec "
-                    << "        VMAG = " << GmatStringUtil::BuildNumber(sphStateAZFPA[3])  << " km/s \n"
-                    << "        VY = "   << GmatStringUtil::BuildNumber(cartState[4])      << " km/sec "
-                    << "        AZI  = " << GmatStringUtil::BuildNumber(sphStateAZFPA[4])  << " deg  \n"
-                    << "        VZ = "   << GmatStringUtil::BuildNumber(cartState[5])      << " km/sec "
-                    << "        VFPA = " << GmatStringUtil::BuildNumber(sphStateAZFPA[5])  << " deg  \n"
-                    << "                                      "
-                    << "        RAV  = " << GmatStringUtil::BuildNumber(sphStateRADEC[4])  << " deg  \n"
-                    << "                                      "
-                    << "        DECV = " << GmatStringUtil::BuildNumber(sphStateRADEC[5])  << " deg  \n";
+               if (!sphericalUndefined)
+               {
+                  data << "        Cartesian State                       "
+                       << "Spherical State\n"
+                                            << "        ---------------------------           "
+                                            << "-------------------------------- \n"
+                       << "        X  = "   << GmatStringUtil::BuildNumber(cartState[0])      << " km     "
+                       << "        RMAG = " << GmatStringUtil::BuildNumber(sphStateAZFPA[0])  << " km   \n"
+                       << "        Y  = "   << GmatStringUtil::BuildNumber(cartState[1])      << " km     "
+                       << "        RA   = " << GmatStringUtil::BuildNumber(sphStateAZFPA[1])  << " deg  \n"
+                       << "        Z  = "   << GmatStringUtil::BuildNumber(cartState[2])      << " km     "
+                       << "        DEC  = " << GmatStringUtil::BuildNumber(sphStateAZFPA[2])  << " deg  \n"
+                       << "        VX = "   << GmatStringUtil::BuildNumber(cartState[3])      << " km/sec "
+                       << "        VMAG = " << GmatStringUtil::BuildNumber(sphStateAZFPA[3])  << " km/s \n"
+                       << "        VY = "   << GmatStringUtil::BuildNumber(cartState[4])      << " km/sec "
+                       << "        AZI  = " << GmatStringUtil::BuildNumber(sphStateAZFPA[4])  << " deg  \n"
+                       << "        VZ = "   << GmatStringUtil::BuildNumber(cartState[5])      << " km/sec "
+                       << "        VFPA = " << GmatStringUtil::BuildNumber(sphStateAZFPA[5])  << " deg  \n"
+                       << "                                      "
+                       << "        RAV  = " << GmatStringUtil::BuildNumber(sphStateRADEC[4])  << " deg  \n"
+                       << "                                      "
+                       << "        DECV = " << GmatStringUtil::BuildNumber(sphStateRADEC[5])  << " deg  \n";
+               }
             }
 
+
+            #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+            MessageInterface::ShowMessage("----> Data stuff\n");
+            #endif
+            // made changes by TUAN NGUYEN
             data << "\n\n        Spacecraft Properties \n"
                  << "        ------------------------------\n"
-                 << "        Cd                    = " << GmatStringUtil::BuildNumber(parmData[i*7],   false, 10) << "\n"
-                 << "        Drag area             = " << GmatStringUtil::BuildNumber(parmData[i*7+1], false, 10) << " m^2\n"
-                 << "        Cr                    = " << GmatStringUtil::BuildNumber(parmData[i*7+2], false, 10) << "\n"
-                 << "        Reflective (SRP) area = " << GmatStringUtil::BuildNumber(parmData[i*7+3], false, 10) << " m^2\n";
+                 //<< "        Cd                    = " << GmatStringUtil::BuildNumber(parmData[i*7],   false, 10) << "\n"
+                 //<< "        Drag area             = " << GmatStringUtil::BuildNumber(parmData[i*7+1], false, 10) << " m^2\n"
+                 //<< "        Cr                    = " << GmatStringUtil::BuildNumber(parmData[i*7+2], false, 10) << "\n"
+                 //<< "        Reflective (SRP) area = " << GmatStringUtil::BuildNumber(parmData[i*7+3], false, 10) << " m^2\n";
+                 << "        Cd                    = " << GmatStringUtil::BuildNumber(parmData[i * 9], false, 10) << "\n"
+                 << "        Drag area             = " << GmatStringUtil::BuildNumber(parmData[i * 9 + 1], false, 10) << " m^2\n"
+                 << "        Cr                    = " << GmatStringUtil::BuildNumber(parmData[i * 9 + 2], false, 10) << "\n"
+                 << "        Reflective (SRP) area = " << GmatStringUtil::BuildNumber(parmData[i * 9 + 3], false, 10) << " m^2\n";
 
-            data << "        Dry mass              = " << GmatStringUtil::BuildNumber(parmData[i*7+4])            << " kg\n";
-            data << "        Total mass            = " << GmatStringUtil::BuildNumber(parmData[i*7+5])            << " kg\n";
+            //data << "        Dry mass              = " << GmatStringUtil::BuildNumber(parmData[i*7+4])            << " kg\n";
+            //data << "        Total mass            = " << GmatStringUtil::BuildNumber(parmData[i*7+5])            << " kg\n";
+            data << "        Dry mass              = " << GmatStringUtil::BuildNumber(parmData[i * 9 + 4]) << " kg\n";
+            data << "        Total mass            = " << GmatStringUtil::BuildNumber(parmData[i * 9 + 5]) << " kg\n";
+            data << "        SPADDragScaleFactor   = " << GmatStringUtil::BuildNumber(parmData[i * 9 + 6], false, 10) << "\n";
+            data << "        SPADSRPScaleFactor    = " << GmatStringUtil::BuildNumber(parmData[i * 9 + 7], false, 10) << "\n";
 
-            Integer numTanks = (Integer) parmData[i*7+6];
+            #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+            MessageInterface::ShowMessage("----> BEFORE TANKS\n");
+            #endif
+//            Integer numTanks = (Integer) parmData[i*7+6];
+            Integer numTanks = (Integer) parmData[i*9+8];
             if (numTanks > 0)  data << "\n        Tank masses:\n";
 
+            #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+            MessageInterface::ShowMessage(
+                        "----> Looping over TANKS (%d), satsInMaps = %d\n",
+                        numTanks, satsInMaps);
+            #endif
             for (Integer kk = 0; kk < numTanks; kk++)
             {
+               #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+               MessageInterface::ShowMessage("----> tankname (%d) = %s\n",
+                           kk, (tankNames.at(MAX_NUM_TANKS*i + kk).c_str()));
+               MessageInterface::ShowMessage(
+                                 "----> trying to access fuelMassData[%d]\n",
+                                 (MAX_NUM_TANKS*i+kk));
+               #endif
                Integer nameSize = (tankNames.at(kk)).length();
                data << "           " << tankNames.at(MAX_NUM_TANKS*i + kk) << ": ";
                for (Integer mm = 0; mm < 19-nameSize; mm++)  data << " " ;
-               data << GmatStringUtil::BuildNumber(fuelMassData[MAX_NUM_TANKS*i+kk]) << " kg\n";
+               data << GmatStringUtil::BuildNumber(
+                                 fuelMassData[MAX_NUM_TANKS*i+kk]) << " kg\n";
+               #ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+               MessageInterface::ShowMessage("----> BUILT the number (%d)\n",
+                                             kk);
+               #endif
             }
            data << "\n";
          }    // for i 0 -> satsInMaps
       }
    }
 
+#ifdef DEBUG_COMMAND_SUMMARY_REF_DATA
+   MessageInterface::ShowMessage("----> RETURNING command summary\n");
+#endif
    commandSummary = data.str();
 }
 

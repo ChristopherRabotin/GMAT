@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -85,6 +85,9 @@ FuelTank::FuelTank(const std::string &typeStr, const std::string &nomme) :
    
    parameterCount = FuelTankParamCount;
    blockCommandModeAssignment = false;
+
+   for (Integer i = HardwareParamCount; i < FuelTankParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 
@@ -119,6 +122,9 @@ FuelTank::FuelTank(const FuelTank& ft) :
 {
    parameterCount = ft.parameterCount;
    isInitialized  = Initialize();
+
+   for (Integer i = HardwareParamCount; i < FuelTankParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 
@@ -271,9 +277,6 @@ std::string FuelTank::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool FuelTank::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == DIRECTION_X) || (id == DIRECTION_Y) || (id == DIRECTION_Z))
-      return true;
-   
    return Hardware::IsParameterReadOnly(id);
 }
 

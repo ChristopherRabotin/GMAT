@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -41,16 +41,19 @@
 #include "MeasurementData.hpp"
 #include "ObservationData.hpp"
 #include "Rmatrix.hpp"
-#include "MeasurementModel.hpp"
+//#include "MeasurementModel.hpp"
 #include "MeasurementModelBase.hpp"
-#include "TrackingSystem.hpp"
+//#include "TrackingSystem.hpp"
 
-#include "CoreMeasurement.hpp"
+//#include "CoreMeasurement.hpp"
 #include "DataFile.hpp"
 
 // Extensions for tracking data adapters
 #include "TrackingFileSet.hpp"
 #include "TrackingDataAdapter.hpp"
+#include "Event.hpp"
+
+#include "SignalDataCache.hpp"
 
 class PropSetup;
 
@@ -60,10 +63,12 @@ class ESTIMATION_API MeasurementManager
 public:
    MeasurementManager();
    virtual ~MeasurementManager();
+   virtual void CleanUp();                                   // made changes by TUAN NGUYEN
    MeasurementManager(const MeasurementManager &mm);
    MeasurementManager& operator=(const MeasurementManager &mm);
 
-   bool                    SetPropagator(PropSetup *ps);
+   bool                    SetPropagators(std::vector<PropSetup*> *props,
+                                 std::map<std::string, StringArray> *satPropMap);
    bool                    Initialize();
    bool                    PrepareForProcessing(bool simulating = false);
    bool                    ProcessingComplete();
@@ -80,8 +85,6 @@ public:
    bool                    ProcessEvent(Event *locatedEvent);
    bool                    WriteMeasurements();
 
-   Integer                 AddMeasurement(MeasurementModel *meas);
-   Integer                 AddMeasurement(TrackingSystem *system);
    Integer                 AddMeasurement(TrackingDataAdapter *adapter);  // Needed?
    Integer                 AddMeasurement(TrackingFileSet* tfs);
    void                    AddMeasurementName(std::string measName);
@@ -92,6 +95,7 @@ public:
    std::vector<StringArray> GetSignalPathList();
    Integer                 Calculate(const Integer measurementToCalc,
                                      bool withEvents = false);
+   Integer                 CountFeasibleMeasurements(const Integer measurementToCalc) const;
    const MeasurementData*  GetMeasurement(const Integer measurementToGet);
    MeasurementModelBase*   GetMeasurementObject(const Integer measurementToGet);
    Integer                 GetEventCount(const Integer forMeasurement = -1);
@@ -107,17 +111,16 @@ public:
 
    // Observation reader methods needed for estimation
    UnsignedInt             LoadObservations();
-//   UnsignedInt             LoadObservationsOld();                 // This function will be removed after the new one working OK
 
 ///// TBD: Do we want something more generic here?
    // Ramp tables reader method needed for simulator
    void                    LoadRampTables();
 
-   const std::vector<MeasurementModel*>& GetAllMeasurementModels();
-   const std::vector<TrackingSystem*>&   GetAllTrackingSystems();
    const std::vector<TrackingFileSet*>&  GetAllTrackingFileSets();
    const std::vector<TrackingDataAdapter*>& GetAllTrackingDataAdapters();
+   virtual void            SetTransientForces(std::vector<PhysicalModel*> *tf);
 
+   UnsignedInt             GetMeasurementSize();
    UnsignedInt             GetCurrentRecordNumber();
    
    GmatTime                GetEpochGT();
@@ -126,7 +129,10 @@ public:
    const ObservationData * GetObsData(const Integer observationToGet = -1);
    ObservationData*        GetObsDataObject(const Integer observationToGet = -1);
    bool                    AdvanceObservation();                                    // made changes for Bug 8 in ticket GMT-4314
+   bool                    RemoveObservation(const Integer observationToRemove = -1);
    void                    Reset();
+   void                    SetDirection(bool forwards);
+   bool                    IsForward();
    
    std::vector<ObservationData>* GetObservationDataList();
 
@@ -139,25 +145,25 @@ public:
 
    ObjectArray             GetStatisticsDataFilters(TrackingFileSet* tfs = NULL);
 
+   void                    ClearIonosphereCache();
 protected:
    /// List of the managed measurement models
    StringArray                      modelNames;
    /// List of all participants referenced in the measurement models
    StringArray                      participants;
    /// Pointers to the measurements
-   std::vector<MeasurementModel*>   models;
-   /// Pointers to the tracking systems
-   std::vector<TrackingSystem*>     systems;
-   /// Pointers to the measurements
    std::vector<TrackingFileSet*>    trackingSets;
    /// Mapping from TrackingFileSets to Adapter names
    std::map<TrackingFileSet*,StringArray> adapterFromTFSMap;
    /// Pointers to the measurements
    std::vector<TrackingDataAdapter*> adapters;
-   /// @todo: Adjust this code when multiple propagators are supported
-   /// Propagator used by adapters for light time solution
-   PropSetup                        *thePropagator;
+   /// transient forces to pass to the MeasureModels
+   std::vector<PhysicalModel *>     *transientForces;
 
+   /// Propagators used by adapters for light time solution
+   std::vector<PropSetup*>          *thePropagators;
+   /// Mapping for propagator overrides for specific spacecraft
+   std::map<std::string, StringArray> *satPropagatorMap;
 
 
    /// Current measurement epoch, ignoring event searching
@@ -170,9 +176,8 @@ protected:
 
    /// Observation data from all of the input observation data files
    std::vector<ObservationData>     observations;
-   /// The current observation from the vector of observations
-   std::vector<ObservationData>::iterator
-                                    currentObs;
+   /// The index of the current observation from the vector of observations
+   Integer                          obsIndex;
 
    /// Measurement derivatives
    std::vector<Rmatrix>             derivatives;
@@ -196,9 +201,9 @@ protected:
 
    /// Temporary element used to manage events that are ready for processing
    ObjectArray                      activeEvents;
-   /// Association between Events and the MeasurementModels that provided them
-   std::map<Event*,MeasurementModel*>
-                                    eventMap;
+   ///// Association between Events and the MeasurementModels that provided them
+   //std::map<Event*,MeasurementModel*>
+   //                                 eventMap;
 
    /// Starting ID for measurement models; used to provide unique IDs in a run
    Integer                          idBase;
@@ -214,6 +219,8 @@ protected:
    Integer                          eventCount;
    /// Flag to indicate simulation mode
    bool                             inSimulationMode;
+   /// Flag to indicate direction of measurements
+   bool                             isForward;
 
    Integer                          FindModelForObservation();
 
@@ -222,6 +229,8 @@ private:
    std::map<UnsignedInt, StringArray> trackingConfigsMap;
 
    void UpdateObservationContent(ObservationData* odPointer);
+
+   std::vector<RampTableData>* GetRampTableForAdapter(TrackingDataAdapter& adapter);
 
 };
 

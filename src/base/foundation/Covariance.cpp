@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -113,11 +113,29 @@ Real Covariance::operator()(const Integer r, const Integer c) const
 void Covariance::AddCovarianceElement(const std::string &name,
       GmatBase* owner)
 {
-   Integer parmID = owner->GetParameterID(name);
-   Integer covSize = owner->HasParameterCovariances(parmID);
+   Integer parmID;
+   Integer covSize;
+
+   //size_t pos = name.find_last_of('.');
+   //if (pos != name.npos)
+   //{
+   //   std::string childObjFullName = owner->GetName() + "." + name.substr(0, pos);
+   //   std::string paramName = name.substr(pos + 1);
+   //   GmatBase* childObj = owner->GetRefObject(Gmat::UNKNOWN_OBJECT, childObjFullName);
+   //   if (childObj == NULL)
+   //      throw GmatBaseException("Error: Object with name '" + childObjFullName + "' was not defined in script.");
+
+   //   parmID = childObj->GetParameterID(paramName);
+   //   covSize = childObj->HasParameterCovariances(parmID);
+   //}
+   //else
+   //{
+      parmID = owner->GetParameterID(name);
+      covSize = owner->HasParameterCovariances(parmID);
+   //}
 
    #ifdef DEBUG_CONSTRUCTION
-      MessageInterface::ShowMessage("Adding covariance element %s with id %d"
+      MessageInterface::ShowMessage("Adding covariance element %s with id %d "
             "to object named %s\n", name.c_str(), owner->GetParameterID(name),
             owner->GetName().c_str());
    #endif
@@ -149,7 +167,20 @@ void Covariance::AddCovarianceElement(const std::string &name,
          dimension += covSize;
 
          // It needs to set dimension for Rmatrix before using it
-         theCovariance.SetSize(dimension, dimension, true);
+         if (theCovariance.GetNumRows() != 0)                                                                     // made changes by TUAN NGUYEN
+         {                                                                                                        // made changes by TUAN NGUYEN
+            Rmatrix temp = theCovariance;                                                                         // made changes by TUAN NGUYEN
+            theCovariance.SetSize(dimension, dimension, true);                                                    // made changes by TUAN NGUYEN
+            for (Integer row = 0; row < temp.GetNumRows(); ++row)                                                 // made changes by TUAN NGUYEN
+            {                                                                                                     // made changes by TUAN NGUYEN
+               for (Integer col = 0; col < temp.GetNumColumns(); ++col)                                           // made changes by TUAN NGUYEN
+               {                                                                                                  // made changes by TUAN NGUYEN
+                  theCovariance(row, col) = temp(row, col);                                                       // made changes by TUAN NGUYEN
+               }                                                                                                  // made changes by TUAN NGUYEN
+            }                                                                                                     // made changes by TUAN NGUYEN
+         }                                                                                                        // made changes by TUAN NGUYEN
+         else                                                                                                     // made changes by TUAN NGUYEN
+            theCovariance.SetSize(dimension, dimension, true);
       }
    }
    else
@@ -311,6 +342,111 @@ Rmatrix *Covariance::GetCovariance()
 }
 
 
+// made changes by TUAN NGUYEN
+//--------------------------------------------------------------------------
+// Integer GetElementIndex(std::string elementName)
+//--------------------------------------------------------------------------
+/**
+* This function is used to get the index associated to an element
+*
+* @param elementName    name of a given element 
+*
+* @return               index of the element when it found. 
+*                       return -1 for case the element is not found.
+*/
+//--------------------------------------------------------------------------
+Integer Covariance::GetElementIndex(std::string elementName)
+{
+   Integer index = -1;
+   for (Integer i = 0; i < elementNames.size(); ++i)
+   {
+      if (elementNames[i] == elementName)
+      {
+         index = i;
+      }
+   }
+
+   return index;
+}
+
+
+// made changes by TUAN NGUYEN
+//--------------------------------------------------------------------------
+// Integer GetElementID(std::string elementName)
+//--------------------------------------------------------------------------
+/**
+* This function is used to get parameterID associated to an element
+*
+* @param elementName    name of a given element
+*
+* @return               parameterID of the element when it found.
+*                       return -1 for case the element is not found.
+*/
+//--------------------------------------------------------------------------
+Integer Covariance::GetElementID(std::string elementName)
+{
+   Integer parameterID = -1;
+   for (Integer i = 0; i < elementNames.size(); ++i)
+   {
+      if (elementNames[i] == elementName)
+      {
+         parameterID = elementIndices[i];
+      }
+   }
+
+   return parameterID;
+}
+
+
+// made changes by TUAN NGUYEN
+//--------------------------------------------------------------------------
+// Integer Covariance::GetElementSize(std::string elementName)
+//--------------------------------------------------------------------------
+/**
+* This function is used to get size of covariance associated to the input
+* element
+*
+* @param elementName    name of a given element
+*
+* @return               size of covariance associated to the element.
+*                       return -1 if element not found
+*/
+//--------------------------------------------------------------------------
+Integer Covariance::GetElementSize(std::string elementName)
+{
+   Integer index = GetElementIndex(elementName);
+   Integer size = -1;
+   if (index != -1)
+      size = elementSizes[index];
+
+   return size;
+}
+
+
+// made changes by TUAN NGUYEN
+//--------------------------------------------------------------------------
+// Integer Covariance::GetElementOwner(std::string elementName)
+//--------------------------------------------------------------------------
+/**
+* This function is used to get owned object of the element
+*
+* @param elementName    name of a given element
+*
+* @return               the owned object of the element.
+*                       return NULL if element not found
+*/
+//--------------------------------------------------------------------------
+GmatBase* Covariance::GetElementOwner(std::string elementName)
+{
+   Integer index = GetElementIndex(elementName);
+   GmatBase* owner = NULL;
+   if (index != -1)
+      owner = elementOwners[index];
+
+   return owner;
+}
+
+
 //----------------------------------------------------------------------------
 // Integer GetSubMatrixLocationStart(Integer forParameterID)
 //----------------------------------------------------------------------------
@@ -429,4 +565,29 @@ void Covariance::PrepareMatrix()
    for (Integer i = 0; i < dimension; ++i)
       for (Integer j = 0; j < dimension; ++j)
          theCovariance(i, j) = (i == j ? 1.0 : 0.0);
+}
+
+
+// made changes by TUAN NGUYEN
+void Covariance::ShowContent()
+{
+   MessageInterface::ShowMessage("Covariance owner = <%p,%s>\n", covarianceOwner, (covarianceOwner==NULL?"":covarianceOwner->GetName().c_str()));
+   MessageInterface::ShowMessage("Covariance dimesion = %d\n", dimension);
+   MessageInterface::ShowMessage("Number of elements = %d\n", elementNames.size());
+   for (Integer i = 0; i < elementNames.size(); ++i)
+   {
+      MessageInterface::ShowMessage("%d: ElementName = <%s>   ElementID = %d  ElementOwner = <%p,%s> ElementSize = %d\n", i, elementNames[i].c_str(), elementIndices[i], elementOwners[i], elementOwners[i]->GetName().c_str(), elementSizes[i]);
+   }
+
+   MessageInterface::ShowMessage("Covariance matrix = [\n");
+   for (Integer row = 0; row < theCovariance.GetNumRows(); ++row)
+   {
+      for (Integer col = 0; col < theCovariance.GetNumColumns(); ++col)
+      {
+         MessageInterface::ShowMessage("%.15le   ", theCovariance(row,col));
+      }
+      MessageInterface::ShowMessage("\n");
+   }
+   MessageInterface::ShowMessage("]\n");
+
 }

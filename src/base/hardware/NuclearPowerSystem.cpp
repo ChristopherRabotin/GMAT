@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -57,6 +57,9 @@ PowerSystem          ("NuclearPowerSystem",nomme)
    objectTypeNames.push_back("NuclearPowerSystem");
 
    parameterCount = NuclearPowerSystemParamCount;
+
+   for (Integer i = PowerSystemParamCount; i < NuclearPowerSystemParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 
@@ -87,6 +90,8 @@ NuclearPowerSystem::NuclearPowerSystem(const NuclearPowerSystem& copy) :
    PowerSystem             (copy)
 {
    parameterCount = copy.parameterCount;
+   for (Integer i = PowerSystemParamCount; i < NuclearPowerSystemParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -67,6 +67,7 @@
 //#define DEBUG_BODYFIXED_STATE
 //#define DEBUG_BODYFIXED_SET_REAL
 //#define DEBUG_BFP_SPICE
+//#define DEBUG_FK_SPICE
 
 
 //---------------------------------
@@ -282,6 +283,7 @@ BodyFixedPoint& BodyFixedPoint::operator=(const BodyFixedPoint& bfp)
    {
       SpacePoint::operator=(bfp);
 
+      cBodyName            = bfp.cBodyName;
       theBody              = bfp.theBody;
       meanEquatorialRadius = bfp.meanEquatorialRadius;
       flattening           = bfp.flattening;
@@ -344,10 +346,17 @@ bool BodyFixedPoint::Initialize()
       theBody = solarSystem->GetBody(cBodyName);
       if (!theBody)
       {
-         throw AssetException("Unable to initialize ground station " +
-               instanceName + "; its origin is not set\n");
+         std::string errmsg = "Unable to initialize ground station ";
+         errmsg += instanceName + "; its central body \"";
+         errmsg += cBodyName + "\" has not been set or is invalid.  ";
+         errmsg += "The allowed values are: [valid SpacePoint] \n";
+         throw AssetException(errmsg);
       }
    }
+   #ifdef DEBUG_INIT
+      MessageInterface::ShowMessage("...BodyFixedPoint now has body %s\n",
+                                    cBodyName.c_str());
+   #endif
 
    // Get required data from the body
    flattening            = theBody->GetRealParameter("Flattening");
@@ -365,11 +374,21 @@ bool BodyFixedPoint::Initialize()
    //if (mj2kcs)   delete mj2kcs;
    //if (bfcs)     delete bfcs;
    if (!mj2kcs)
-      mj2kcs  = CoordinateSystem::CreateLocalCoordinateSystem("mj2kcs", "MJ2000Eq", theBody,
-                                                           NULL, NULL, theBody->GetJ2000Body(), solarSystem);
+   {
+      mj2kcsName = "mj2kcs";
+      // This needs to be relative to the J2000Body in order for this to work
+      // for non-Earth bodies
+      mj2kcs     = CoordinateSystem::CreateLocalCoordinateSystem(mj2kcsName,
+                   "MJ2000Eq", theBody->GetJ2000Body(), //theBody,
+                   NULL, NULL, theBody->GetJ2000Body(), solarSystem);
+   }
    if (!bfcs)
-      bfcs    = CoordinateSystem::CreateLocalCoordinateSystem("bfcs", "BodyFixed", theBody,
-                                                           NULL, NULL, theBody->GetJ2000Body(), solarSystem);
+   {
+      bfcsName = "bfcs";
+      bfcs     = CoordinateSystem::CreateLocalCoordinateSystem(bfcsName,
+                 "BodyFixed", theBody,
+                 NULL, NULL, theBody->GetJ2000Body(), solarSystem);
+   }
 
    // Calculate the body-fixed Cartesian position
    // If it was input in Cartesian, we're done
@@ -716,7 +735,7 @@ std::string BodyFixedPoint::GetStringParameter(const Integer id) const
  */
 //------------------------------------------------------------------------------
 bool BodyFixedPoint::SetStringParameter(const Integer id,
-                                       const std::string &value)
+                                        const std::string &value)
 {
    if (IsParameterReadOnly(id))
        return false;
@@ -730,14 +749,14 @@ bool BodyFixedPoint::SetStringParameter(const Integer id,
 
    if (id == CENTRAL_BODY)
    {
-      if (value != SolarSystem::EARTH_NAME)
-      {
-         std::string errmsg =
-            "The value of \"" + value + "\" for field \"CentralBody\""
-            " on object \"" + instanceName + "\" is not an allowed value.\n"
-            "The allowed values are: [ " + SolarSystem::EARTH_NAME + " ]. ";
-         throw AssetException(errmsg);
-      }
+//      if (value != SolarSystem::EARTH_NAME)
+//      {
+//         std::string errmsg =
+//            "The value of \"" + value + "\" for field \"CentralBody\""
+//            " on object \"" + instanceName + "\" is not an allowed value.\n"
+//            "The allowed values are: [ " + SolarSystem::EARTH_NAME + " ]. ";
+//         throw AssetException(errmsg);
+//      }
       if (theBody)
          theBody = NULL;
       cBodyName = value;
@@ -785,8 +804,9 @@ bool BodyFixedPoint::SetStringParameter(const Integer id,
          if (currentStateType != stateType)
          {
             Rvector3 locIn(location[0], location[1], location[2]);
-            Rvector3 locOut = BodyFixedStateConverterUtil::Convert(locIn, currentStateType, horizon, stateType, horizon,
-                                                           flattening, meanEquatorialRadius);
+            Rvector3 locOut = BodyFixedStateConverterUtil::Convert(locIn,
+                              currentStateType, horizon, stateType, horizon,
+                              flattening, meanEquatorialRadius);
             location[0] = locOut[0];
             location[1] = locOut[1];
             location[2] = locOut[2];
@@ -810,8 +830,9 @@ bool BodyFixedPoint::SetStringParameter(const Integer id,
          if (currentHorizon != horizon)
          {
             Rvector3 locIn(location[0], location[1], location[2]);
-            Rvector3 locOut = BodyFixedStateConverterUtil::Convert(locIn, stateType, currentHorizon, stateType, horizon,
-                                                       flattening, meanEquatorialRadius);
+            Rvector3 locOut = BodyFixedStateConverterUtil::Convert(locIn,
+                              stateType, currentHorizon, stateType, horizon,
+                              flattening, meanEquatorialRadius);
             location[0] = locOut[0];
             location[1] = locOut[1];
             location[2] = locOut[2];
@@ -1004,7 +1025,7 @@ Real BodyFixedPoint::SetRealParameter(const Integer id,
       }
       else // longitude (0-360)
          location[id-LOCATION_1] = (GmatMathUtil::Mod(value,360)) * GmatMathConstants::RAD_PER_DEG;
-      return location[id-LOCATION_1];
+      return value;
    }
    else if ((id >= LOCATION_1) && (id <= LOCATION_3)) // not Spherical
    {
@@ -1177,7 +1198,7 @@ bool BodyFixedPoint::HasRefObjectTypeArray()
 
 
 //------------------------------------------------------------------------------
-//
+// std::string GetRefObjectName(const UnsignedInt type) const
 //------------------------------------------------------------------------------
 /**
  */
@@ -1187,6 +1208,12 @@ std::string BodyFixedPoint::GetRefObjectName(const UnsignedInt type) const
    return cBodyName;
 }
 
+//------------------------------------------------------------------------------
+// const StringArray&  GetRefObjectNameArray(const UnsignedInt type) const
+//------------------------------------------------------------------------------
+/**
+ */
+//------------------------------------------------------------------------------
 const StringArray& BodyFixedPoint::GetRefObjectNameArray(const UnsignedInt type)
 {
    #ifdef DEBUG_BF_REF
@@ -1194,11 +1221,17 @@ const StringArray& BodyFixedPoint::GetRefObjectNameArray(const UnsignedInt type)
             (Integer) type, (GmatBase::OBJECT_TYPE_STRING[type]).c_str());
    #endif
 
-   static StringArray csNames;
-
-   csNames.clear();
-
-   return csNames;
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT ||
+       type == Gmat::CELESTIAL_BODY)
+   {
+      static StringArray refs;
+      refs.clear();
+      refs.push_back(cBodyName);
+      return refs;
+   }
+   
+   // Not handled here -- invoke the next higher GetRefObjectNameArray call
+   return SpacePoint::GetRefObjectNameArray(type);
 }
 
 //------------------------------------------------------------------------------
@@ -1214,6 +1247,8 @@ const StringArray& BodyFixedPoint::GetRefObjectNameArray(const UnsignedInt type)
 const ObjectTypeArray& BodyFixedPoint::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
+//   refObjectTypes.push_back(Gmat::CELESTIAL_BODY);
+   refObjectTypes.push_back(Gmat::SPACE_POINT);
    return refObjectTypes;
 }
 
@@ -1402,6 +1437,51 @@ const Rvector3 BodyFixedPoint::GetBodyFixedLocation(const A1Mjd &atTime)
 
    return locBodyFixed;
 }
+
+
+//------------------------------------------------------------------------------
+//  bool GetSphericalLocation(const A1Mjd &atTime)
+//------------------------------------------------------------------------------
+/**
+* Method returning the latitude, longitude, and height of the BodyFixedPoint
+* at the time atTime.
+*
+* @param <atTime> Time for which the location is requested.
+*
+* @return location of the BodyFixedPoint at time atTime.
+*
+* @note This method may be moved to an intermediate BodyFixedPoint
+* class, if/when appropriate.
+* @note time is ignored as the body-fixed-point is assumed not to move
+*/
+//------------------------------------------------------------------------------
+const Rvector3 BodyFixedPoint::GetSphericalLocation(const A1Mjd &atTime)
+{
+   Rvector3 latLongHeight;
+
+   if (stateType == "Cartesian")
+   {
+      Rvector3 bfLocation(location[0], location[1], location[2]);
+
+      latLongHeight = BodyFixedStateConverterUtil::CartesianToSphericalEllipsoid(
+         bfLocation, flattening, meanEquatorialRadius);
+   }
+   else if (stateType == "Spherical")
+   {
+      latLongHeight[0] = location[0];
+      latLongHeight[1] = location[1];
+      latLongHeight[2] = location[2];
+   }
+   else
+   {
+      throw AssetException("Unable to compute spherical location for BodyFixedPoint \"" +
+         instanceName + "\"; state type is not a recognized type (known "
+         "types are either \"Cartesian\" or \"Spherical\")");
+   }
+
+   return latLongHeight;
+}
+
 
 //------------------------------------------------------------------------------
 //  CoordinateSystem* GetBodyFixedCoordinateSystem() const
@@ -1624,6 +1704,8 @@ bool BodyFixedPoint::WriteSPK(bool deleteFile)
 
       #ifdef DEBUG_BFP_SPICE
          MessageInterface::ShowMessage("In WriteSPK, about to write SPK ...\n");
+         MessageInterface::ShowMessage("spiceId = %d, spiceCentral = %d\n",
+                                       naifId, bodyNaif);
       #endif
       spkw08_c(handle, spiceId, spiceCentral, bFrame, first, last, segId, 1, 2,
             stateArray, epoch1, step);
@@ -1665,6 +1747,11 @@ bool BodyFixedPoint::WriteFK(bool deleteFile)
       std::string    centralNaifStr   = GmatStringUtil::Trim(GmatStringUtil::ToString(bodyNaif));
       std::string    centralBodyFrame = theBody->GetStringParameter("SpiceFrameId");
 
+      #ifdef DEBUG_FK_SPICE
+         MessageInterface::ShowMessage("In WriteFK, about to write FK ...\n");
+         MessageInterface::ShowMessage("bodyNaif = %d, centralNaifStr = %s, centralBodyFrame = %s\n",
+                                       bodyNaif, centralNaifStr.c_str(), centralBodyFrame.c_str());
+      #endif
       Rvector topo = GetTopocentricConversion(centralNaifStr);
       /// Write the text FK kernel
       std::ofstream fkStream(fkName.c_str(), std::ios::out);

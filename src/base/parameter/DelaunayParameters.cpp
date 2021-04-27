@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,7 +39,7 @@
 // To use preset colors, uncomment this line:
 //#define USE_PREDEFINED_COLORS
 
-Delal::Delal(const std::string &name, GmatBase *obj)
+Dela_l::Dela_l(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Delaunayl", obj, "Delaunay MA", "deg", GmatParam::COORD_SYS, DEL_DELA_SL, true)
 { 
    mDepObjectName = "EarthMJ2000Eq";
@@ -50,12 +50,12 @@ Delal::Delal(const std::string &name, GmatBase *obj)
    #endif
 }
 
-Delal::Delal(const Delal &copy)
+Dela_l::Dela_l(const Dela_l &copy)
    : OrbitReal(copy)
 {
 }
 
-Delal& Delal::operator=(const Delal&right)
+Dela_l& Dela_l::operator=(const Dela_l&right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
@@ -63,11 +63,11 @@ Delal& Delal::operator=(const Delal&right)
    return *this;
 }
 
-Delal::~Delal()
+Dela_l::~Dela_l()
 {
 }
 
-bool Delal::Evaluate()
+bool Dela_l::Evaluate()
 {
    mRealValue = OrbitData::GetDelaReal(DEL_DELA_SL);
    
@@ -77,14 +77,14 @@ bool Delal::Evaluate()
       return true;
 }
 
-GmatBase* Delal::Clone(void) const
+GmatBase* Dela_l::Clone(void) const
 {
-   return new Delal(*this);
+   return new Dela_l(*this);
 }
 
 
 
-Delag::Delag(const std::string &name, GmatBase *obj)
+Dela_g::Dela_g(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Delaunayg", obj, "Delaunay AOP", "deg", GmatParam::COORD_SYS, DEL_DELA_SG, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
@@ -95,12 +95,12 @@ Delag::Delag(const std::string &name, GmatBase *obj)
    #endif
 }
 
-Delag::Delag(const Delag&copy)
+Dela_g::Dela_g(const Dela_g&copy)
    : OrbitReal(copy)
 {
 }
 
-Delag& Delag::operator=(const Delag&right)
+Dela_g& Dela_g::operator=(const Dela_g&right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
@@ -108,11 +108,11 @@ Delag& Delag::operator=(const Delag&right)
    return *this;
 }
 
-Delag::~Delag()
+Dela_g::~Dela_g()
 {
 }
 
-bool Delag::Evaluate()
+bool Dela_g::Evaluate()
 {
    mRealValue = OrbitData::GetDelaReal(DEL_DELA_SG);
     
@@ -122,14 +122,14 @@ bool Delag::Evaluate()
       return true;
 }
 
-GmatBase* Delag::Clone(void) const
+GmatBase* Dela_g::Clone(void) const
 {
-   return new Delag(*this);
+   return new Dela_g(*this);
 }
 
 
 
-Delah::Delah(const std::string &name, GmatBase *obj)
+Dela_h::Dela_h(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Delaunayh", obj, "Delaunay RAAN", "deg", GmatParam::COORD_SYS, DEL_DELA_SH, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
@@ -140,12 +140,12 @@ Delah::Delah(const std::string &name, GmatBase *obj)
    #endif
 }
 
-Delah::Delah(const Delah &copy)
+Dela_h::Dela_h(const Dela_h &copy)
    : OrbitReal(copy)
 {
 }
 
-Delah& Delah::operator=(const Delah&right)
+Dela_h& Dela_h::operator=(const Dela_h&right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
@@ -153,11 +153,11 @@ Delah& Delah::operator=(const Delah&right)
    return *this;
 }
 
-Delah::~Delah()
+Dela_h::~Dela_h()
 {
 }
 
-bool Delah::Evaluate()
+bool Dela_h::Evaluate()
 {
    mRealValue = OrbitData::GetDelaReal(DEL_DELA_SH);
     
@@ -167,9 +167,9 @@ bool Delah::Evaluate()
       return true;
 }
 
-GmatBase* Delah::Clone(void) const
+GmatBase* Dela_h::Clone(void) const
 {
-   return new Delah(*this);
+   return new Dela_h(*this);
 }
 
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -94,11 +94,13 @@ public:
    void                 SetPropagator(Propagator *propagator,
                                       bool fromGUI = false);
    void                 SetODEModel(ODEModel *odeModel);
-   void                 SetUseDrag(bool flag);
    
    void                 AddForce(PhysicalModel *force);
    PhysicalModel*       GetForce(Integer index);
    Integer              GetNumForces();
+
+   void                 AddPropObject(GmatBase* sat);
+   void                 PrepareInternals();
    
    // inherited from GmatBase
    virtual bool         RenameRefObject(const UnsignedInt type,

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -45,9 +45,20 @@
 const std::string
 Hardware::PARAMETER_TEXT[HardwareParamCount - GmatBaseParamCount] =
 {
-   "X_Direction",
-   "Y_Direction", 
-   "Z_Direction"
+   "FieldOfView",
+   "DirectionX",
+   "DirectionY",
+   "DirectionZ",
+   "SecondDirectionX",
+   "SecondDirectionY",
+   "SecondDirectionZ",
+   
+   "HWOriginInBCSX",
+   "HWOriginInBCSY",
+   "HWOriginInBCSZ",
+   
+   "MaskConeAngles",
+   "MaskClockAngles",
 };
 
 
@@ -55,9 +66,21 @@ Hardware::PARAMETER_TEXT[HardwareParamCount - GmatBaseParamCount] =
 const Gmat::ParameterType
 Hardware::PARAMETER_TYPE[HardwareParamCount - GmatBaseParamCount] =
 {
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE
+   Gmat::OBJECT_TYPE,    // FieldOfView
+   Gmat::REAL_TYPE,      // DirectionX
+   Gmat::REAL_TYPE,      // DirectionY
+   Gmat::REAL_TYPE,      // DirectionZ
+   
+   Gmat::REAL_TYPE,      // SecondDirectionX
+   Gmat::REAL_TYPE,      // SecondDirectionY
+   Gmat::REAL_TYPE,      // SecondDirectionZ
+   
+   Gmat::REAL_TYPE,      // HWOriginInBCSX
+   Gmat::REAL_TYPE,      // HWOriginInBCSY
+   Gmat::REAL_TYPE,      // HWOriginInBCSZ
+   
+   Gmat::RVECTOR_TYPE,   // MaskConeAngles
+   Gmat::RVECTOR_TYPE,   // MaskClockAngles
 };
 
 
@@ -76,11 +99,25 @@ Hardware::PARAMETER_TYPE[HardwareParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 Hardware::Hardware(UnsignedInt typeId, const std::string &typeStr,
                    const std::string &nomme) :
-   GmatBase(typeId, typeStr, nomme)
+   GmatBase     (typeId, typeStr, nomme),
+   fovIsModeled (false),
+   fov          (NULL),
+   fovName      (""),
+   R_SB         (Rmatrix33(true)) // sets value to identity
+   // ultimately Initialize() will construct from 2 vectors, e.g, like VNB frame
 {
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage("Entering Hardware constructor\n");
+      MessageInterface::ShowMessage("object name='%s', pointer=<%p>\n",
+                                 GetName().c_str(),this);
+   #endif   
    objectTypes.push_back(Gmat::HARDWARE);
    objectTypeNames.push_back("Hardware");
+   parameterCount = HardwareParamCount;
 
+   // need to add a "needs initialization flag" set false at construction
+   // set true if parameter changes for direction or secondDirection, and tested
+   // when matrix is requested or used internally to Hardware class.
    direction[0] = 1.0;
    direction[1] = 0.0;
    direction[2] = 0.0;
@@ -89,9 +126,43 @@ Hardware::Hardware(UnsignedInt typeId, const std::string &typeStr,
    secondDirection[1] = 1.0;
    secondDirection[2] = 0.0;
 
+   // default offset of zero means hardware frame shares origin with
+   // s/c body frame. *** offset computation not yet implemented ***
    location[0] = 0.0;
    location[1] = 0.0;
    location[2] = 0.0;
+   
+   for (Integer i = GmatBaseParamCount; i < HardwareParamCount; ++i)
+         parameterWriteOrder.push_back(i);
+
+   #ifdef DEBUG_HW_SET
+   // print out initial conditions, first body to sensor DCM
+   MessageInterface::ShowMessage("Body to sensor DCM in HW constructor =\n");
+   for (int i=0; i < 3; i++)
+   {
+      MessageInterface::ShowMessage(R_SB.ToRowString(i,3,6) );
+      MessageInterface::ShowMessage("\n");
+   }
+   
+   // and then direction & offset vectors
+   Rvector3 d1(direction[0], direction[1],direction[2]);
+   Rvector3 d2(secondDirection[0],
+               secondDirection[1],
+               secondDirection[2]);
+   Rvector3 offset(location[0], location[1], location[2]);
+   MessageInterface::ShowMessage("\n");
+   MessageInterface::ShowMessage("input vectors in HW constructor:\n");
+   MessageInterface::ShowMessage("Primary Direction =\n");
+   MessageInterface::ShowMessage(d1.ToString(3));
+   MessageInterface::ShowMessage("\n");
+   MessageInterface::ShowMessage("Secondary Direction =\n");
+   MessageInterface::ShowMessage(d2.ToString(3));
+   MessageInterface::ShowMessage("\n");
+   MessageInterface::ShowMessage("HW frame origin offset =\n");
+   MessageInterface::ShowMessage(offset.ToString(3));
+   MessageInterface::ShowMessage("\n\n");
+   MessageInterface::ShowMessage ("Exiting Hardware Constructor\n\n");
+  #endif
 }
 
 
@@ -116,8 +187,14 @@ Hardware::~Hardware()
  */
 //------------------------------------------------------------------------------
 Hardware::Hardware(const Hardware& hw) :
-   GmatBase(hw)
+   GmatBase(hw),
+   fov (NULL)
 {
+#ifdef DEBUG_HW_SET
+   MessageInterface::ShowMessage("Entering Hardware copy constructor\n");
+   MessageInterface::ShowMessage("object name='%s', pointer=<%p>\n",
+                                 GetName().c_str(),this);
+#endif
    direction[0] = hw.direction[0];
    direction[1] = hw.direction[1];
    direction[2] = hw.direction[2];
@@ -129,6 +206,19 @@ Hardware::Hardware(const Hardware& hw) :
    location[0] = hw.location[0];
    location[1] = hw.location[1];
    location[2] = hw.location[2];
+   
+   //fov          = (FieldOfView *) hw.fov->Clone();
+   
+   R_SB         = hw.R_SB;
+   fovName      = hw.fovName;
+   fovIsModeled = hw.fovIsModeled;
+
+   for (Integer i = GmatBaseParamCount; i < HardwareParamCount; ++i)
+         parameterWriteOrder.push_back(i);
+
+#ifdef DEBUG_HW_SET
+   MessageInterface::ShowMessage ("Exiting Hardware copy constructor\n\n");
+#endif
 }
 
 
@@ -162,9 +252,143 @@ Hardware& Hardware::operator=(const Hardware& hw)
    location[1] = hw.location[1];
    location[2] = hw.location[2];
    
+   fov          = hw.fov ? ((FieldOfView *) hw.fov->Clone()) : nullptr;
+   R_SB         = hw.R_SB;
+   fovName      = hw.fovName;
+   fovIsModeled = hw.fovIsModeled;
+
    return *this;
 }
 
+// Field of view operations
+
+//------------------------------------------------------------------------------
+//  bool HasFOV()
+//------------------------------------------------------------------------------
+/**
+ * This method determines if FOV is being modeled
+ *
+ * @return boolean is true if this hardware object includes a field of view
+ *
+ */
+//------------------------------------------------------------------------------
+bool Hardware::HasFOV()
+{
+   return (!(fov == NULL));
+}
+
+//------------------------------------------------------------------------------
+//  Rmatrix33& GetRotationMatrix() const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve the value for the DCM representing s/c body to hardware frame
+ * rotation.
+ *
+ * @return The parameter's value.
+ */
+//------------------------------------------------------------------------------
+Rmatrix33& Hardware::GetRotationMatrix()
+{
+   return R_SB;
+}
+
+//------------------------------------------------------------------------------
+//  bool CheckTargetVisibility(const Rvector3 &target)
+//------------------------------------------------------------------------------
+/**
+ * This method determines if FOV is being modeled
+ *
+ * @param <target> is a unit vector in the spacecraft body frame
+ *
+ * @return boolean is true if the target vector points inside the FOV.
+ *
+ */
+//------------------------------------------------------------------------------
+bool Hardware::CheckTargetVisibility(const Rvector3 &target)
+{
+   // may add use of location offset later; for now just rotation
+   return fov->CheckTargetVisibility(R_SB*target);
+   
+}
+
+//------------------------------------------------------------------------------
+//  Rvector GetMaskConeAngles() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns cone angle(s)  for field of view
+ * Note: see specifications for how each FOV class uses the vectors
+ *
+ * @return Rvector -- returns cone angle(s) for field of view
+ *
+ */
+//------------------------------------------------------------------------------
+
+Rvector Hardware::GetMaskConeAngles() const
+{
+   static Rvector result;
+   if (fov)
+      return fov->GetMaskConeAngles();
+   else
+   {
+      // @todo write message
+      result.SetSize(0);
+      return result;
+   }
+}
+
+//------------------------------------------------------------------------------
+//  Rvector GetMaskClockAngles() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns clock angle(s)  for field of view. This vector is empty
+ * if the FOV is object in class ConicalFOV.
+ * Note: see specifications for how each FOV class uses the vectors
+ *
+ * @return Rvector -- returns clock angle(s for field of view
+ *
+ */
+//------------------------------------------------------------------------------
+
+Rvector Hardware::GetMaskClockAngles() const
+{
+   static Rvector result;
+   if (fov)
+      return fov->GetMaskClockAngles();
+   else
+   {
+      // @todo write message
+      result.SetSize(0);
+      return result;
+   }
+}
+//-------------------------------------------------------
+// needs header
+Rvector3 Hardware::GetLocation() const
+{
+   return Rvector3(location[0],
+                   location[1],
+                   location[2]);
+}
+
+// needs header
+Rvector3 Hardware::GetDirection() const
+{
+   return Rvector3(direction[0],
+                   direction[1],
+                   direction[2]);
+}
+
+// needs header
+Rvector3 Hardware::GetSecondDirection() const
+{
+   return Rvector3(secondDirection[0],
+                   secondDirection[1],
+                   secondDirection[2]);
+}
+
+//--------------------------------------------------------
+// Parameter operations
+//--------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
@@ -248,6 +472,196 @@ std::string Hardware::GetParameterTypeString(const Integer id) const
 }
 
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false if not,
+ */
+//---------------------------------------------------------------------------
+bool Hardware::IsParameterReadOnly(const Integer id) const
+{
+   if (id == MASK_CONE_ANGLES)
+   {
+      return true;
+   }
+   if (id == MASK_CLOCK_ANGLES)
+   {
+      return true;
+   }
+   if ((id == FOV_MODEL)          || (id == DIRECTION_X)        ||
+       (id == DIRECTION_Y)        || (id == DIRECTION_Z)        ||
+       (id == SECOND_DIRECTION_X) || (id == SECOND_DIRECTION_Y) ||
+       (id == SECOND_DIRECTION_Z) || (id == HW_ORIGIN_BCS_X)    ||
+       (id == HW_ORIGIN_BCS_Y)    || (id == HW_ORIGIN_BCS_Z))
+      return true;
+
+   return GmatBase::IsParameterReadOnly(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <label> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not.
+ */
+//---------------------------------------------------------------------------
+bool Hardware::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
+
+//---------------------------------------------------------------------------
+// bool IsParameterVisible(const Integer id) const
+//---------------------------------------------------------------------------
+bool Hardware::IsParameterVisible(const Integer id) const
+{
+   if ((id == FOV_MODEL)          || (id == DIRECTION_X)        ||
+       (id == DIRECTION_Y)        || (id == DIRECTION_Z)        ||
+       (id == SECOND_DIRECTION_X) || (id == SECOND_DIRECTION_Y) ||
+       (id == SECOND_DIRECTION_Z) || (id == HW_ORIGIN_BCS_X)    ||
+       (id == HW_ORIGIN_BCS_Y)    || (id == HW_ORIGIN_BCS_Z))
+      return false;
+   
+   return GmatBase::IsParameterVisible(id);
+}
+
+// string parameter operations
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+std::string Hardware::GetStringParameter(const Integer id) const
+{
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage
+      ("Hardware::GetStringParameter() entered for parameter '%s', id=%d\n",
+      GetParameterText(id).c_str(), id);
+   #endif
+   std::string name;
+   switch (id)
+   {
+      case FOV_MODEL:
+         if (fov) // != NULL
+            name = fov->GetName();
+         else
+            name = fovName;
+//            name = "UndefinedFieldOfView";
+         #ifdef DEBUG_HW_SET
+            MessageInterface::ShowMessage
+               ("Hardware::GetStringParameter() '%s' object name is '%s'\n",
+                GetParameterText(id).c_str(), name.c_str());
+            MessageInterface::ShowMessage(
+               "Exiting Hardware::GetStringParameter()\n\n");
+         #endif
+         return name;
+         // break;
+      
+      default:
+         #ifdef DEBUG_HW_SET
+            MessageInterface::ShowMessage(
+               "Parameter is not for HW class, call GmatBase");
+            MessageInterface::ShowMessage(
+               "Exiting Hardware::GetStringParameter()\n\n");
+         #endif
+         return GmatBase::GetStringParameter(id);
+   }
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage
+         ("Hardware::GetStringParameter() '%s' object name is '%s'\n",
+          GetParameterText(id).c_str(), name.c_str());
+   MessageInterface::ShowMessage("Code should not get here\n");
+   MessageInterface::ShowMessage("Exiting Hardware::GetStringParameter()\n\n");
+   #endif
+   return name;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+std::string Hardware::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool Hardware::SetStringParameter(const Integer id, const std::string &value)
+{
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage
+         ("Hardware::SetStringParameter() '%s', id=%d, value='%s'\n",
+           GetName().c_str(), id, value.c_str());
+   #endif
+   
+   switch (id)
+   {
+      case FOV_MODEL:
+      {
+         fovIsModeled = true;
+         fovName = value;
+         #ifdef DEBUG_HW_SET
+            MessageInterface::ShowMessage
+               ("Hardware::SetStringParameter() '%s' object name is '%s'\n",
+                GetParameterText(id).c_str(), fovName.c_str());
+            MessageInterface::ShowMessage(
+               "Exiting Hardware::SetStringParameter()\n\n");
+         #endif
+         return true;
+      }
+      
+      default:
+         #ifdef DEBUG_HW_SET
+            MessageInterface::ShowMessage(
+               "Calling GmatBase fromHardware::SetStringParameter() '%s' ",
+               GetParameterText(id).c_str());
+            MessageInterface::ShowMessage("object name is '%s'\n",
+                                          fovName.c_str());
+            MessageInterface::ShowMessage(
+               "Exiting Hardware::SetStringParameter()\n\n");
+         #endif
+         return GmatBase::SetStringParameter(id, value);
+   }
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool Hardware::SetStringParameter(const std::string &label,
+                                   const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+
+// real parameter with id as argument
 //------------------------------------------------------------------------------
 //  Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
@@ -261,7 +675,13 @@ std::string Hardware::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 Real Hardware::GetRealParameter(const Integer id) const
 {
-   switch (id) {
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage
+         ("Hardware::GetRealParameter() id name is '%s'\n",
+          GetParameterText(id).c_str());
+   #endif
+   switch (id)
+   {
       case DIRECTION_X:
          return direction[0];
          
@@ -270,6 +690,24 @@ Real Hardware::GetRealParameter(const Integer id) const
          
       case DIRECTION_Z:
          return direction[2];
+         
+      case SECOND_DIRECTION_X:
+         return secondDirection[0];
+         
+      case SECOND_DIRECTION_Y:
+         return secondDirection[1];
+         
+      case SECOND_DIRECTION_Z:
+         return secondDirection[2];
+         
+      case HW_ORIGIN_BCS_X:
+         return location[0];
+         
+      case HW_ORIGIN_BCS_Y:
+         return location[1];
+         
+      case HW_ORIGIN_BCS_Z:
+         return location[2];
          
       default:
          break;   // Default just drops through
@@ -294,8 +732,9 @@ Real Hardware::GetRealParameter(const Integer id) const
 Real Hardware::SetRealParameter(const Integer id, const Real value)
 {
    #ifdef DEBUG_HW_SET
-      MessageInterface::ShowMessage("In HW::SetReal, id = %d (%s), value = %12.10f\n",
-            id, GetParameterText(id).c_str(), value);
+      MessageInterface::ShowMessage(
+         "In HW::SetReal, id = %d (%s), value = %12.10f\n",
+          id, GetParameterText(id).c_str(), value);
    #endif
    switch (id)
    {
@@ -306,10 +745,36 @@ Real Hardware::SetRealParameter(const Integer id, const Real value)
          return direction[1] = value;
          
       case DIRECTION_Z:
-//         if (value < 0) {
-//            throw HardwareException("Z_Direction must be >= 0"); 
-//         }
+//       if (value < 0)
+//       {
+//          throw HardwareException("Z_Direction must be >= 0");
+//       }
          return direction[2] = value;
+         
+      case SECOND_DIRECTION_X:
+         return secondDirection[0] = value;
+         
+      case SECOND_DIRECTION_Y:
+         return secondDirection[1] = value;
+         
+      case SECOND_DIRECTION_Z:
+         //         if (value < 0) {
+         //            throw HardwareException("Z_Direction must be >= 0");
+         //         }
+         return secondDirection[2] = value;
+         
+      case HW_ORIGIN_BCS_X:
+         return location[0] = value;
+         
+      case HW_ORIGIN_BCS_Y:
+         return location[1] = value;
+         
+      case HW_ORIGIN_BCS_Z:
+         //         if (value < 0) {
+         //            throw HardwareException("Z_Direction must be >= 0");
+         //         }
+         return location[2] = value;
+      
       default:
          break;   // Default just drops through
    }
@@ -317,11 +782,9 @@ Real Hardware::SetRealParameter(const Integer id, const Real value)
    return GmatBase::SetRealParameter(id, value);
 }
 
-
-// Required so derived classes work correctly:
-
+// real parameter with parameter string label as argument
 //------------------------------------------------------------------------------
-//  Real GetRealParameter(const Integer id) const
+//  Real GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 /**
  * Retrieve the value for a Real parameter.
@@ -336,9 +799,8 @@ Real Hardware::GetRealParameter(const std::string &label) const
    return GetRealParameter(GetParameterID(label));
 }
 
-
 //------------------------------------------------------------------------------
-//  Real SetRealParameter(const Integer id, const Real value)
+//  Real SetRealParameter(const std::string &label, const Real value)
 //------------------------------------------------------------------------------
 /**
  * Set the value for a Real parameter.
@@ -355,39 +817,75 @@ Real Hardware::SetRealParameter(const std::string &label, const Real value)
    return SetRealParameter(GetParameterID(label), value);
 }
 
-
+///////////////////////////////////////////////////////////////////
+// Real parameters with indices, used by subclasses as passthroughs
 Real Hardware::GetRealParameter(const Integer id,
-                                      const Integer index) const
+                                const Integer index) const
 {
+   if (id == MASK_CONE_ANGLES)
+   {
+      Rvector result = GetMaskConeAngles();
+      if ((index < 0) || (index >= result.GetSize()))
+         throw HardwareException("Index out-of-range for MaskConeAngles\n");
+      return result[index];
+   }
+   if (id == MASK_CLOCK_ANGLES)
+   {
+      Rvector result = GetMaskClockAngles();
+      if ((index < 0) || (index >= result.GetSize()))
+         throw HardwareException("Index out-of-range for MaskClockAngles\n");
+      return result[index];
+   }
    return GmatBase::GetRealParameter(id, index);
 }
 
 Real Hardware::SetRealParameter(const Integer id, const Real value,
-                                      const Integer index)
+                                const Integer index)
 {
    return GmatBase::SetRealParameter(id, value, index);
 }
 
 Real Hardware::GetRealParameter(const std::string &label,
-                                      const Integer index) const
+                                const Integer index) const
 {
    return GetRealParameter(GetParameterID(label), index);
 }
 
 Real Hardware::SetRealParameter(const std::string &label,
-                                      const Real value,
-                                      const Integer index)
+                                const Real value,
+                                const Integer index)
 {
    return SetRealParameter(GetParameterID(label), value, index);
 }
 
-const Rvector& Hardware::GetRvectorParameter(const Integer id) const
+// passthroughs of Rvector parameter calls for subclasses to use
+ const Rvector& Hardware::GetRvectorParameter(const Integer id) const
 {
+   static Rvector result;
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage
+         ("Hardware::GetRvectorParameter() id name is '%s'\n",
+          GetParameterText(id).c_str());
+   #endif
+   if (id == MASK_CONE_ANGLES)  // retrieved from fov; cannot be set
+   {
+      Rvector angles = GetMaskConeAngles();
+      result.SetSize(angles.GetSize());
+      result = angles;
+      return result;
+   }
+   if (id == MASK_CLOCK_ANGLES) // retrieved from fov; cannot be set
+   {
+      Rvector angles = GetMaskClockAngles();
+      result.SetSize(angles.GetSize());
+      result = angles;
+      return result;
+   }
    return GmatBase::GetRvectorParameter(id);
 }
 
 const Rvector& Hardware::SetRvectorParameter(const Integer id,
-                                         const Rvector &value)
+                                             const Rvector &value)
 {
    return GmatBase::SetRvectorParameter(id, value);
 }
@@ -398,9 +896,350 @@ const Rvector& Hardware::GetRvectorParameter(const std::string &label) const
 }
 
 const Rvector& Hardware::SetRvectorParameter(const std::string &label,
-                                         const Rvector &value)
+                                             const Rvector &value)
 {
    return SetRvectorParameter(GetParameterID(label), value);
+}
+
+// pass throughs of string parameter calls for subclasses to use
+
+//---------------------------------------------------------------------------
+//  std::string GetStringParameter(const Integer id, const Integer index) const
+//---------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+std::string Hardware::GetStringParameter(const Integer id,
+                                         const Integer index) const
+{
+   return GmatBase::GetStringParameter(id, index);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const std::string &value,
+//                          const Integer index)
+//---------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool Hardware::SetStringParameter(const Integer id, const std::string &value,
+                                  const Integer index)
+{
+   return GmatBase::SetStringParameter(id, value, index);
+}
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+//--------------------------------------------------------
+// Reference object functions
+//--------------------------------------------------------
+
+//---------------------------------------------------------------------------
+//  std::string GetRefObjectName(const UnsignedInt type) const
+//---------------------------------------------------------------------------
+/**
+ * Returns the name of the reference object. (Derived classes should implement
+ * this as needed.)
+ *
+ * @param <type> reference object type.
+ *
+ * @return The name of the reference object.
+ */
+//------------------------------------------------------------------------------
+std::string  Hardware::GetRefObjectName(const UnsignedInt type) const
+{
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage("Entering Hardware::GetRefObjectName() ");
+      MessageInterface::ShowMessage("for object '%s'\n", GetName().c_str());
+      if (type == Gmat::FIELD_OF_VIEW)
+         MessageInterface::ShowMessage("type == FIELD_OF_FIEW\n");
+      if (type == Gmat::CONICAL_FOV)
+         MessageInterface::ShowMessage("type == CONICAL_FOV\n");
+
+   #endif
+   if (type == Gmat::FIELD_OF_VIEW)
+   {
+      #ifdef DEBUG_HW_SET
+         MessageInterface::ShowMessage("Exiting Hardware::GetRefObjectName()");
+         MessageInterface::ShowMessage("Ref Object Name = '%s'\n\n",
+                                       fovName.c_str());
+      #endif
+      return fovName;
+   }
+   
+   // kick it up the chain for all other types
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage("Exiting Hardware::GetRefObjectName(), ");
+      MessageInterface::ShowMessage("Calling GmatBase\n\n");
+   #endif
+   return GmatBase::GetRefObjectName(type);
+}
+
+//------------------------------------------------------------------------------
+// virtual bool HasRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool Hardware::HasRefObjectTypeArray()
+{
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of reference object types used by this class.
+ *
+ * @return the list of object types.
+ *
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& Hardware::GetRefObjectTypeArray()
+{
+   #ifdef DEBUG_HW_SET
+   MessageInterface::ShowMessage("Entering Hardware::GetRefObjectTypeArray");
+      MessageInterface::ShowMessage("() for object '%s'\n", GetName().c_str());
+   #endif   
+
+   // refObjectTypes is defined in GmatBase
+   refObjectTypes.clear();
+   if (fovIsModeled)
+      refObjectTypes.push_back(Gmat::FIELD_OF_VIEW);
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage(
+      "Exiting Hardware::GetRefObjectTypeArray()\n\n");
+   #endif
+   return refObjectTypes;
+}
+
+//------------------------------------------------------------------------------
+//  const StringArray& GetRefObjectNameArray(const UnsignedInt type)
+//------------------------------------------------------------------------------
+/**
+ * This method returns an array with the names of the referenced objects.
+ *
+ * @return a vector with the names of objects of the requested type.
+ */
+//------------------------------------------------------------------------------
+const StringArray&
+Hardware::GetRefObjectNameArray(const UnsignedInt type)
+{
+#ifdef DEBUG_HW_SET
+   MessageInterface::ShowMessage
+   ("Hardware::GetRefObjectNameArray():\n");
+   MessageInterface::ShowMessage("for object=<%p> '%s' entered, input type='%s'\n",
+    this, GetName().c_str(), GmatBase::GetObjectTypeString(type).c_str());
+#endif
+   
+   static StringArray fullList;  // Maintain scope if the full list is requested
+   fullList.clear();
+   
+   // If type is UNKNOWN_OBJECT, add fovName anyway.
+   if ( (type == Gmat::UNKNOWN_OBJECT) || (type ==Gmat::FIELD_OF_VIEW) )
+   {
+      // Put in the FieldOfView object name
+      if (fovIsModeled)
+      {
+         fullList.push_back(fovName);
+         #ifdef DEBUG_HW_SET
+           MessageInterface::ShowMessage("pushed name '%s' onto list\n",
+                                       fovName.c_str());
+         #endif
+      }
+      #ifdef DEBUG_HW_SET
+         MessageInterface::ShowMessage(
+            "Exiting Hardware::GetRefObjectNameArray()\n\n");
+      #endif
+      return fullList;
+   }
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage(
+         "Returning GmatBase::GetRefObjectNameArray()\n\n");
+   #endif
+
+   return GmatBase::GetRefObjectNameArray(type);
+}
+
+//---------------------------------------------------------------------------
+// GmatBase* GetRefObject(const UnsignedInt type, const std::string &name)
+//---------------------------------------------------------------------------
+/**
+ * Returns the reference object pointer.  (Derived classes should implement
+ * this method as needed.)
+ *
+ * @param type type of the reference object.
+ * @param name name of the reference object.
+ *
+ * @return reference object pointer.
+ */
+//------------------------------------------------------------------------------
+GmatBase*    Hardware::GetRefObject(const UnsignedInt type,
+                                    const std::string &name)
+{
+   if ((type == Gmat::FIELD_OF_VIEW) && (name == fovName))
+      return (GmatBase*) fov;
+   
+   // kick it up the chain for all other types
+   return GmatBase::GetRefObject(type, name);
+}
+
+//---------------------------------------------------------------------------
+//  bool SetRefObjectName(const UnsignedInt type, const std::string &name)
+//---------------------------------------------------------------------------
+/**
+ * Sets the name of the reference object.  (Derived classes should implement
+ * this as needed.)
+ *
+ * @param <type> type of the reference object.
+ * @param <name> name of the reference object.
+ *
+ * @return success of the operation.
+ */
+//--------------------------------------------------------
+bool Hardware::SetRefObjectName(const UnsignedInt type,
+                                const std::string &name)
+{
+   if (type == Gmat::FIELD_OF_VIEW)
+   {
+      fovName = name;
+      #ifdef DEBUG_HW_SET
+         MessageInterface::ShowMessage("Exiting Hardware::SetRefObjectName(),");
+         MessageInterface::ShowMessage(" fovname = '%s'\n\n");
+      #endif
+      return true;
+   }
+   
+   // kick it up the chain for all other types
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage("Exiting Hardware::SetRefObjectName(), ");
+      MessageInterface::ShowMessage("type != Field_Of_View, call GmatBase\n\n");
+   #endif
+  
+   return GmatBase::SetRefObjectName(type,name);
+}
+
+//---------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
+//                   const std::string &name)
+//---------------------------------------------------------------------------
+/**
+ * Sets the reference object.  (Derived classes should implement
+ * this method as needed.)
+ *
+ * @param <obj> reference object pointer.
+ * @param <type> type of the reference object.
+ * @param <name> name of the reference object.
+ *
+ * @return success of the operation.
+ */
+//--------------------------------------------------------
+bool Hardware::SetRefObject(GmatBase *obj, const UnsignedInt type,
+                            const std::string &name)
+{
+#ifdef DEBUG_HW_SET
+   MessageInterface::ShowMessage("Entering Hardware::SetRefObject()\n");
+   MessageInterface::ShowMessage("(this, input type & name =<%p> '%s' '%d'\n",
+                                 this, GetName().c_str(), type);
+   MessageInterface::ShowMessage("Ref: ptr,type & name = <%p> '%s' '%s'\n",
+                                 obj,
+                                 obj->GetTypeName().c_str(),
+                                 obj->GetName().c_str());
+#endif
+   
+   if (obj == NULL)
+   {
+      #ifdef DEBUG_HW_SET
+         MessageInterface::ShowMessage("Reference to NULL, return false");
+         MessageInterface::ShowMessage("Hardware::SetRefObject <%p> '%s'\n",
+                                    this, GetName().c_str());
+         MessageInterface::ShowMessage("Exiting Hardware::SetRefObject()\n\n");
+      #endif
+      return false;
+
+   }
+#ifdef DEBUG_HW_SET
+   MessageInterface::ShowMessage("fovname = '%s'\n", fovName.c_str());
+   MessageInterface::ShowMessage("type    = %d\n",type);
+   MessageInterface::ShowMessage("gmat::FIELD_OF_VIEW = '%d'\n",
+                                 Gmat::FIELD_OF_VIEW);
+#endif
+   
+   if ( (obj->IsOfType(Gmat::FIELD_OF_VIEW)) &&
+        (fovName == name)  )
+   {
+      fov = (FieldOfView*) obj;
+      #ifdef DEBUG_HW_SET
+         MessageInterface::ShowMessage ("fov reference set");
+         MessageInterface::ShowMessage ("fov =<%p>, fov name = '%s'\n", fov,
+                                        fov ? fov->GetName().c_str() : "NULL");
+         MessageInterface::ShowMessage("Exiting Hardware::SetRefObject()\n\n");
+      #endif
+      return true;
+   }
+   
+   // kick it up the chain for all other types
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage("Exiting Hardware::SetRefObject <%p> '%s', ",
+                                    this, GetName().c_str());
+      MessageInterface::ShowMessage("calling GmatBase\n\n");
+   #endif
+   return GmatBase::SetRefObject(obj,type,name);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const UnsignedInt type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/**
+ * Interface used to support user actions.
+ *
+ * @param <type> reference object type.
+ * @param <oldName> object name to be renamed.
+ * @param <newName> new object name.
+ *
+ * @return true if object name changed, false if not.
+ */
+//--------------------------------------------------------
+bool Hardware::RenameRefObject(const UnsignedInt type,
+                               const std::string &oldName,
+                               const std::string &newName)
+{
+   if ((type == Gmat::FIELD_OF_VIEW) && (fovName == oldName))
+   {
+      fovName = newName;
+      return true;
+   }
+   
+   // only reaches here if name is not found
+   return false;
+   
+}
+////////////////////////////////////////////////////////////////////////
+// pass throughs of calls by subclasses (ref parameters with indices)
+
+GmatBase* Hardware::GetRefObject(const UnsignedInt type,
+                                 const std::string &name,
+                                 const Integer index)
+{
+   return GmatBase::GetRefObject(type,name,index);
+}
+
+
+bool      Hardware::SetRefObject(GmatBase *obj, const UnsignedInt type,
+                                 const std::string &name,
+                                 const Integer index)
+{
+   return GmatBase::SetRefObject(obj,type,name,index);
 }
 
 
@@ -415,3 +1254,117 @@ bool Hardware::VerifyRefObject(std::string subTypeName, GmatBase* obj)
 	return true;
 }
 */
+
+//------------------------------------------------------------------------------
+//  bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Initializes the body to sensor rotation matrix; only parameter computed
+ * from user inputs
+ *
+ * @return true unless initialization fails.
+ */
+//------------------------------------------------------------------------------
+bool Hardware::Initialize()
+{
+   // compute R_SB from direction and second direction
+   // default settings for R_SB are primary direction along +Z of spacecraft
+   // body coordinate system (BCS), the secondary direction along -Y. The +Z of
+   // the HW coordinate system in this default aligns with the +Z of BCS. The
+   // other two axes of the default HW system are +X assigned to the normal and
+   // +Y computed as Z x X.
+   //
+   // The location variable will be used in an upgrade to allow for translation
+   // of the origin within the BCS frame.
+   //
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage("Entering Hardware::Initialize for ");
+      MessageInterface::ShowMessage("object='%s', pointer=<%p>\n",
+                                    GetName().c_str(),this);
+      MessageInterface::ShowMessage("References FieldOfView object '%s'\n ",
+                                    fovName.c_str());
+      if (fov == NULL)
+         MessageInterface::ShowMessage("No FOV, no FOV initialization needed\n");
+      else
+         MessageInterface::ShowMessage("FOV pointer is set to <%p>/n",fov);
+   
+   
+   #endif
+   
+   if (fov)
+      fov->Initialize();
+   
+   Rvector3 zhat(direction[0], direction[1], direction[2]);
+   Rvector3 vhat(secondDirection[0], secondDirection[1], secondDirection[2]);
+
+#ifdef DEBUG_HW_SET
+   MessageInterface::ShowMessage("Parameter vectors in Initialize():\n");
+   MessageInterface::ShowMessage("Primary Direction =\n");
+   MessageInterface::ShowMessage(zhat.ToString(3));
+   MessageInterface::ShowMessage("\n");
+   MessageInterface::ShowMessage("Secondary Direction =\n");
+   MessageInterface::ShowMessage(vhat.ToString(3));
+   MessageInterface::ShowMessage("\n");
+   MessageInterface::ShowMessage("HW frame origin offset =\n");
+   Rvector3 offset(location[0], location[1], location[2]);
+   MessageInterface::ShowMessage(offset.ToString(3));
+   MessageInterface::ShowMessage("\n\n");
+#endif
+   if (zhat.IsZeroVector() || vhat.IsZeroVector())
+   {
+      #ifdef DEBUG_HW_SET
+         MessageInterface::ShowMessage(
+                                       "At least one direction is set to zero vector, using default I33\n");//
+         MessageInterface::ShowMessage("   for body to sensor rotation\n\n");
+         MessageInterface::ShowMessage("Exiting Initialize()\n\n");
+      #endif
+      return true;
+   }
+      
+
+
+   
+   zhat = zhat.Normalize();
+   vhat = vhat.Normalize();
+   Rvector3 normal = Cross (zhat,vhat);
+   
+   Real mag = normal.GetMagnitude();
+   if (mag < 1.0e-05)
+   {
+      MessageInterface::ShowMessage(
+         "Two direction vectors are collinear in hardware initialization, ");
+      MessageInterface::ShowMessage("  magnitude of normal is %12.7f\n",mag);
+      MessageInterface::ShowMessage("  Exiting Initialize()\n\n");
+      return false; // is exception raised here?
+   }
+   Rvector3 xhat = normal/mag;
+   Rvector3 yhat = Cross (zhat,xhat);
+   
+   // form body to sensor rotation matrix R_SB
+   R_SB(0,0) = xhat(0);
+   R_SB(0,1) = xhat(1);
+   R_SB(0,2) = xhat(2);
+   R_SB(1,0) = yhat(0);
+   R_SB(1,1) = yhat(1);
+   R_SB(1,2) = yhat(2);
+   R_SB(2,0) = zhat(0);
+   R_SB(2,1) = zhat(1);
+   R_SB(2,2) = zhat(2);
+   
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage("Body to sensor rotation in Initialize()\n");
+      for (int i=0; i < 3; i++)
+      {
+         MessageInterface::ShowMessage(R_SB.ToRowString(i,3,6) );
+         MessageInterface::ShowMessage("\n");
+      }
+
+   #endif
+
+
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage("Exiting Initialize()\n\n");
+   #endif
+   return true;
+
+}

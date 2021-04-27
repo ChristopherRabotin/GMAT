@@ -1,0 +1,19 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>RunSmoother</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ch19s02.html" title="Commands"><link rel="prev" href="RunSimulator.html" title="RunSimulator"><link rel="next" href="ch19s03.html" title="System"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">RunSmoother</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="RunSimulator.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ch19s03.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="RunSmoother"></a><div class="titlepage"></div><a name="N27C50" class="indexterm"></a><a name="N27C53" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">RunSmoother</span></h2><p>RunSmoother &mdash; Runs a sequential smoother estimator.</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis">RunSmoother Smoother_InstanceName </pre></div><div class="refsection"><a name="N27C6B"></a><h2>Description</h2><p>The <span class="guilabel">RunSmoother</span> command ingests navigation
+    measurements and generates an estimated state vector according to the
+    specifications of the input <span class="guilabel">Smoother</span> resource.</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p><span class="guilabel">Smoother</span> is an alpha-level resource and
+      should not be used for operational support. Access to this resource is
+      disabled by default. To enable access to the Smoother resource,
+      comment-in the <span class="guilabel">libEKF</span> plug-in in the GMAT
+      <code class="literal">gmat_startup_file.txt</code> file.</p></div><p><span class="ref_seealso">See Also</span>: <a class="xref" href="ExtendedKalmanFilter.html" title="ExtendedKalmanFilter"><span class="refentrytitle">ExtendedKalmanFilter</span></a>, <a class="xref" href="Smoother.html" title="Smoother"><span class="refentrytitle">Smoother</span></a></p></div><div class="refsection"><a name="N27C8B"></a><h2>Remarks</h2><p>GMAT currently implements only one type of smoother, using the
+    Fraser-Potter algorithm. This algorithm runs a backwards filter starting
+    from the last measurement processed by the forward ExtendedKalmanFilter
+    estimator and then generates an improved state estimate by weighted
+    average of the forward and reverse sequential filters.</p><p>You must run an ExtendedKalmanFilter estimator (using the
+    <span class="guilabel">RunEstimator</span> command) prior to running the
+    smoother.</p></div><div class="refsection"><a name="N27C95"></a><h2>Examples</h2><div class="informalexample"><p>Run a filter and smoother estimator.</p><pre class="programlisting"><code class="code">Create ExtendedKalmanFilter myEKF
+Create Smoother myFPSmoother
+
+BeginMissionSequence
+
+RunEstimator myEKF
+RunSmoother myFPSmoother</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="RunSimulator.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ch19s02.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ch19s03.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">RunSimulator&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;System</td></tr></table></div></body></html>

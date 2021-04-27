@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -33,6 +33,7 @@
 #include "gmatdefs.hpp"
 #include "SpacePoint.hpp"
 #include "SolarSystem.hpp"
+#include "TimeSystemConverter.hpp"   // for the TimeSystemConverter singleton
 
 // Declare forward reference since Spacecraft owns PowerSystem
 class Spacecraft;
@@ -127,6 +128,9 @@ protected:
    SpacePoint          *scOrigin;
    /// Radius of the sun
    Real                sunRadius;
+
+   /// Time converter singleton
+   TimeSystemConverter *theTimeConverter;
 
    /// Published parameters for all power systems
    enum

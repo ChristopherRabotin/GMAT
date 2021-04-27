@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -277,7 +277,7 @@ void FloatAttUtil::ToQuat(float q[4], float p1x, float p1y, float p2x, float p2y
 void FloatAttUtil::ToQuat(float q[4], float mat[16])
 { 
    float a[4][4];
-   const static float ACCURACY = (float)(1.19209290E-07);
+   static const float ACCURACY = (float)(1.19209290E-07);
 
    for (int i=0; i<4; i++)
       for (int j=0; j<4; j++)

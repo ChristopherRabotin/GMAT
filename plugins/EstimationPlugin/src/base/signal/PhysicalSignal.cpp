@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -28,7 +28,9 @@
 #include "Transmitter.hpp"
 #include "Transponder.hpp"
 #include "Receiver.hpp"
-#include "ODEModel.hpp"
+#include "ODEModel.hpp"                              // made changes by TUAN NGUYEN
+#include "Propagator.hpp"
+#include "StringUtil.hpp"
 
 #include <sstream>                  // For stringstream
 
@@ -45,6 +47,13 @@
 //#define DEBUG_TROPOSPHERE_MEDIA_CORRECTION
 //#define DEBUG_RELATIVITY_CORRECTION
 //#define DEBUG_RANGE_CALCULATION
+//#define DEBUG_API
+
+#ifdef DEBUG_API
+   #include <fstream>
+   std::ofstream apipsFile;
+   bool apipsFileOpen = false;
+#endif
 
 
 
@@ -73,6 +82,16 @@ PhysicalSignal::PhysicalSignal(const std::string &typeStr,
    rampTable = NULL;
    beginIndex = 0;
    endIndex = 0;
+
+#ifdef DEBUG_API
+   if (!apipsFileOpen)
+   {
+      apipsFile.open("PhysicalSignal_API.txt");
+      apipsFileOpen = true;
+   }
+   apipsFile << "Physical Signal class debug for the API\n" << std::endl;
+#endif
+
 }
 
 
@@ -88,12 +107,12 @@ PhysicalSignal::~PhysicalSignal()
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("PhysicalSignal:: destruction\n");
 #endif
-
+   
    if (troposphere != NULL)
       delete troposphere;
-
-   if (ionosphere != NULL)
-      delete ionosphere;
+   
+//   if (ionosphere != NULL)
+//      delete ionosphere;
 }
 
 
@@ -140,7 +159,9 @@ PhysicalSignal& PhysicalSignal::operator=(const PhysicalSignal& ps)
 
    if (this != &ps)
    {
-      GmatBase::operator=(ps);
+      //GmatBase::operator=(ps);                // made changes by TUAN NGUYEN
+      SignalBase::operator=(ps);                // made changes by TUAN NGUYEN
+
       physicalSignalInitialized = false;
       useRelativity             = ps.useRelativity;
 
@@ -228,6 +249,16 @@ void PhysicalSignal::InitializeSignal(bool chainForwards)
 //------------------------------------------------------------------------------
 bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool forSimulation, bool epochAtReceive)
 {
+#ifdef DEBUG_API
+   if (apipsFileOpen)
+   {
+      GmatTime aep = atEpoch;
+      apipsFile << "Entered PhysicalSignal::ModelSignal(" << (aep.GetMjd())
+                << ", " << epochAtReceive << ") for path "
+                << GetPathDescription(false) << std::endl;
+   }
+#endif
+
    bool retval = false;
    
    //satPrecEpoch = atEpoch;
@@ -283,7 +314,8 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool forSimulation, boo
    #ifdef DEBUG_RANGE_CALCULATION 
       GmatTime tm = atEpoch;
       MessageInterface::ShowMessage("   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-      MessageInterface::ShowMessage("   ++++   Range, relativity correction, and ET-TAI correction calculation for leg from %s to %s at fixed time %s A1Mjd:\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str(), tm.ToString().c_str());
+      MessageInterface::ShowMessage("   ++++   Range, relativity correction, and ET-TAI correction calculation for leg from %s to %s at fixed time %s A1Mjd:\n",
+         theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str(), tm.ToString().c_str());
       MessageInterface::ShowMessage("   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
    #endif
    
@@ -301,15 +333,42 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool forSimulation, boo
          MessageInterface::ShowMessage("   Signal initialized; Computing data\n");
       #endif
       
+#ifdef DEBUG_API
+   if (apipsFileOpen)
+   {
+      GmatTime aep = atEpoch;
+      apipsFile << "   Moving to epoch " << satPrecEpoch.GetMjd() << std::endl;
+   }
+#endif
       // 1. First make sure we start at the desired epoch
       MoveToEpoch(satPrecEpoch, epochAtReceive, true);
+#ifdef DEBUG_API
+   if (apipsFileOpen)
+   {
+      apipsFile << "   Calculating Range" << std::endl;
+   }
+#endif
       CalculateRangeVectorInertial();
       Real geoRange = theData.rangeVecInertial.GetMagnitude();
+#ifdef DEBUG_API
+   if (apipsFileOpen)
+   {
+      apipsFile << "   Range is " << geoRange << std::endl;
+   }
+#endif
 
 
       // Build the other data vectors
       CalculateRangeVectorObs();
       CalculateRangeRateVectorObs();
+
+#ifdef DEBUG_API
+   if (apipsFileOpen)
+   {
+      apipsFile << "   Additional Range vectors calculated" << std::endl;
+   }
+#endif
+
 
       #ifdef DEBUG_RANGE_CALCULATION 
          MessageInterface::ShowMessage("   1. Compute Range Vector before light time correction for the Leg from <TNode = %s> to <RNode = %s>:\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
@@ -335,7 +394,13 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool forSimulation, boo
       #endif
       
       // 2. Compute light time solution if it is needed and solve for range vector
-      if (includeLightTime)
+#ifdef DEBUG_API
+   if (apipsFileOpen)
+   {
+      apipsFile << "   Mucking with light time (should be skipped)" << std::endl;
+   }
+#endif
+     if (includeLightTime)
       {
          GenerateLightTimeData(satPrecEpoch, epochAtReceive);
       }
@@ -364,6 +429,13 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool forSimulation, boo
          MessageInterface::ShowMessage("                            (%.12lf   %.12lf   %.12lf)\n", R_Obs_j2k(2,0), R_Obs_j2k(2,1), R_Obs_j2k(2,2));
       #endif
       
+
+#ifdef DEBUG_API
+   if (apipsFileOpen)
+   {
+      apipsFile << "   Mucking with ET-TAI (should be skipped)" << std::endl;
+   }
+#endif
       // 3. Calculate ET-TAI correction for this signal leg
       if (useETTAI)
       {
@@ -382,6 +454,12 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool forSimulation, boo
          theData.corrections[i] = ettaiCorrection;                                                         // unit: km
       }
           
+#ifdef DEBUG_API
+   if (apipsFileOpen)
+   {
+      apipsFile << "   Checking feasibility" << std::endl;
+   }
+#endif
       // 4. Perform feasibility check
       if (theData.stationParticipant)
       {
@@ -460,6 +538,12 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool forSimulation, boo
          MessageInterface::ShowMessage("      . Feasibility           = %s\n\n", (signalIsFeasible?"true":"false"));
       #endif
 
+#ifdef DEBUG_API
+   if (apipsFileOpen)
+   {
+      apipsFile << "   Reporting raw data: navLog = " << navLog << std::endl;
+   }
+#endif
       
       // 5. Report raw data
       if (navLog)
@@ -536,7 +620,14 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool forSimulation, boo
      
       retval = nodePassed;
    }
-   
+
+#ifdef DEBUG_API
+   if (apipsFileOpen)
+   {
+      apipsFile << "   That should do it; returning " << retval << std::endl;
+   }
+#endif
+
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("ModelSignal(%s, %s) exit\n", satPrecEpoch.ToString().c_str(),
             epochAtReceive ? "with fixed Receiver" : "with fixed Transmitter");
@@ -561,11 +652,22 @@ bool PhysicalSignal::TestSignalBlockedBetweenTwoParticipants(Integer selection)
    StringArray bodyNameList1;
    if (theData.tNode->IsOfType(Gmat::SPACECRAFT))
    {
+      std::string cbName;
+      StringArray bodyNames1;
+      StringArray bodyNames2;
+
       // 1.1. Get names of all celestial bodies in force model used to propagate transmitted spacecraft
-      ODEModel* ode = theData.tPropagator->GetODEModel();
-      std::string cbName = ode->GetStringParameter("CentralBody");
-      StringArray bodyNames1 = ode->GetStringArrayParameter("PrimaryBodies");
-      StringArray bodyNames2 = ode->GetStringArrayParameter("PointMasses");
+      if (theData.tPropagator->GetPropagator()->UsesODEModel())
+      {
+         ODEModel* ode = theData.tPropagator->GetODEModel();
+         cbName = ode->GetStringParameter("CentralBody");
+         bodyNames1 = ode->GetStringArrayParameter("PrimaryBodies");
+         bodyNames2 = ode->GetStringArrayParameter("PointMasses");
+      }
+      else
+      {
+         cbName = theData.tPropagator->GetPropagator()->GetPropOriginName();
+      }
 
       if (selection & SELECT_CENTRAL_BODY)
          bodyNameList1.push_back(cbName);
@@ -586,10 +688,23 @@ bool PhysicalSignal::TestSignalBlockedBetweenTwoParticipants(Integer selection)
    // 1.2. Get names of all celestial bodies in force model used to propagate received spacecraft
    if (theData.rNode->IsOfType(Gmat::SPACECRAFT))
    {
-      ODEModel*ode = theData.rPropagator->GetODEModel();
-      std::string cbName = ode->GetStringParameter("CentralBody");
-      StringArray bodyNames1 = ode->GetStringArrayParameter("PrimaryBodies");
-      StringArray bodyNames2 = ode->GetStringArrayParameter("PointMasses");
+      std::string cbName;
+      StringArray bodyNames1;
+      StringArray bodyNames2;
+
+      // 1.1. Get names of all celestial bodies in force model used to propagate transmitted spacecraft
+      if (theData.rPropagator->GetPropagator()->UsesODEModel())
+      {
+         ODEModel* ode = theData.rPropagator->GetODEModel();
+         cbName = ode->GetStringParameter("CentralBody");
+         bodyNames1 = ode->GetStringArrayParameter("PrimaryBodies");
+         bodyNames2 = ode->GetStringArrayParameter("PointMasses");
+      }
+      else
+      {
+         cbName = theData.rPropagator->GetPropagator()->GetPropOriginName();
+      }
+
 
       if (selection & SELECT_CENTRAL_BODY)
          bodyNameList1.push_back(cbName);
@@ -611,15 +726,11 @@ bool PhysicalSignal::TestSignalBlockedBetweenTwoParticipants(Integer selection)
    StringArray bodyNameList;
    for (UnsignedInt i = 0; i < bodyNameList1.size(); ++i)
    {
-      // Remove Earth from the list
-      if (bodyNameList1[i] == "Earth")
-         continue;
-
       // Check for unique name
       bool found = false;
       for (UnsignedInt j = 0; j < bodyNameList.size(); ++j)
       {
-         if (bodyNameList[j] == bodyNameList[i])
+         if (bodyNameList[j] == bodyNameList1[i])
          {
             found = true;
             break;
@@ -654,7 +765,7 @@ bool PhysicalSignal::TestSignalBlockedBetweenTwoParticipants(Integer selection)
    }
 
    // 2. Test for obstructing bodies at time t
-   // 2.1. Sepcify location of 2 participants in SSB coordinate system at time t
+   // 2.1. Specify location of 2 participants in SSB coordinate system at time t
    Rvector3 tSSB = theData.tLoc + theData.tOStateSSB.GetR();
    Rvector3 rSSB = theData.rLoc + theData.rOStateSSB.GetR();
 
@@ -706,6 +817,8 @@ bool PhysicalSignal::TestSignalBlockedByBody(CelestialBody* body,
      Rvector3 tRSSB, Rvector3 rRSSB, GmatTime tTime, GmatTime rTime)
 {
    static const Real distanceTolerance = 1.0e-6;            // 1 mm
+   static const Integer maxIterations = 10;
+   static bool firstWarningMaxIter = true;
    
    // Let: O      : the center of celestial body
    //      R : the radius of celestial body
@@ -725,8 +838,13 @@ bool PhysicalSignal::TestSignalBlockedByBody(CelestialBody* body,
    Rvector3 pointO = body->GetMJ2000PrecPosition(t) - ssb->GetMJ2000PrecPosition(t);
 
    // Specify length from point A to point N at time t
-   Real AO = (pointO - pointA).GetMagnitude();
-   Real AN = GmatMathUtil::Sqrt(AO*AO - R*R);
+   Rvector3 ABvec = pointB - pointA;
+   Rvector3 AOvec = pointO - pointA;
+   Rvector3 ABunit = ABvec.GetUnitVector();
+   Rvector3 AOunit = AOvec.GetUnitVector();
+   Real AO = AOvec.GetMagnitude();
+   Real cos_angleA = ABunit*AOunit;
+   Real AN = AO * cos_angleA;
 
    // Calculate travel length of the signal from time tTime to time t
    Real travelTime = (t - tTime).GetTimeInSec();
@@ -736,7 +854,8 @@ bool PhysicalSignal::TestSignalBlockedByBody(CelestialBody* body,
    Real distanceDiff = AN - travelLen;                                                  // unit: Km
 
    // Specify location of point O  
-   while (GmatMathUtil::Abs(distanceDiff) < distanceTolerance)
+   Integer loopCount = 0;
+   while ((GmatMathUtil::Abs(distanceDiff) > distanceTolerance) && (loopCount < maxIterations))
    {
       GmatTime dt;
       dt.SetTimeInSec(distanceDiff*1000/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM);
@@ -746,8 +865,11 @@ bool PhysicalSignal::TestSignalBlockedByBody(CelestialBody* body,
       pointO = body->GetMJ2000PrecPosition(t) - ssb->GetMJ2000PrecPosition(t);
 
       // Specify length from point A to point N at time t
-      AO = (pointO - pointA).GetMagnitude();
-      AN = GmatMathUtil::Sqrt(AO*AO - R*R);
+      AOvec = pointO - pointA;
+      AOunit = AOvec.GetUnitVector();
+      AO = AOvec.GetMagnitude();
+      cos_angleA = ABunit*AOunit;
+      AN = AO * cos_angleA;
 
       // Calculate travel length of the signal from time tTime to time t
       travelTime = (t - tTime).GetTimeInSec();
@@ -755,14 +877,20 @@ bool PhysicalSignal::TestSignalBlockedByBody(CelestialBody* body,
 
       // Caluclate distance from signal to point N
       distanceDiff = AN - travelLen;                                                  // unit: Km
+      loopCount++;
+   }
+
+   if (loopCount >= maxIterations && firstWarningMaxIter)
+   {
+      MessageInterface::ShowMessage("*** WARNING *** The light time calculation "
+         "for celestial body occultation failed to converge in %d iterations. "
+         "The convergance tolerance is %g, while the difference on the last iteration was %g \n",
+         maxIterations, distanceTolerance, GmatMathUtil::Abs(distanceDiff));
+      firstWarningMaxIter = false;
    }
 
    // Check for obstruction:
    /// Let:   M is a project of point O on line AB
-   Rvector3 ABvec = pointB - pointA;
-   Rvector3 AOvec = pointO - pointA;
-   Rvector3 ABunit = ABvec.GetUnitVector();
-
    Rvector3 OMvec = (AOvec[0]*ABunit[0] + AOvec[1]*ABunit[1] + AOvec[2]*ABunit[2])*ABunit  - AOvec;
    Rvector3 AMvec = AOvec + OMvec;
 
@@ -802,10 +930,6 @@ bool PhysicalSignal::TestSignalBlockedByBody(CelestialBody* body,
 const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
       GmatBase* obj, Integer forId)
 {
-   #ifdef DEBUG_DERIVATIVES
-   MessageInterface::ShowMessage("PhysicalSignal::ModelSignalDerivative(%s, %d) called for signal leg <%s %s>\n", obj->GetName().c_str(), forId, theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
-   #endif
-
    // Verify valid input
    if (obj == NULL)
       throw MeasurementException("Error: a NULL object inputs to PhysicalSignal::ModelSignalDerivative() function\n");
@@ -817,9 +941,6 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
    else
       parameterID = forId;
    std::string paramName = obj->GetParameterText(parameterID);
-   #ifdef DEBUG_DERIVATIVES
-   MessageInterface::ShowMessage("Solve-for parameter: %s.%s\n", obj->GetName().c_str(), obj->GetParameterText(parameterID).c_str());
-   #endif
 
    // Verify initialization
    if (!isInitialized)
@@ -839,7 +960,7 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
             << GetPathDescription(false) << " Signal" << "\n";
       navLog->WriteData(msg.str());
    }
-   
+
    Integer size = obj->GetEstimationParameterSize(forId);
    if (next)
    {
@@ -863,6 +984,10 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
    }
    
    // Check to see if obj is a participant
+#ifdef DEBUG_DERIVATIVES
+	MessageInterface::ShowMessage("PhysicalSignal::ModelSignalDerivative(%s, %d) called for signal leg <%s %s>\n", obj->GetName().c_str(), forId, theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
+	MessageInterface::ShowMessage("Solve-for parameter: %s.%s\n", obj->GetFullName().c_str(), obj->GetParameterText(parameterID).c_str());
+#endif
    GmatBase *objPtr = NULL;
    if (theData.tNode == obj)
       objPtr = theData.tNode;
@@ -938,6 +1063,27 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
    }
    else         // Derivative object is not a participant (neither a GroundStation nor a Spacecraft): such as ErrorModel object
    {
+      if (obj->IsOfType("Plate"))                                                         
+      {
+         // Get Spacecraft object having that plate
+         std::string plateFullName = obj->GetFullName();
+         size_t pos = plateFullName.find_last_of('.');
+         std::string scName = "";
+         if (pos == plateFullName.npos)
+            throw GmatBaseException("Error: Plate '" + plateFullName + "' has no associated spacecraft.\n");
+         else
+            scName = plateFullName.substr(0, pos);
+
+         if (scName == theData.tNode->GetName())
+            objPtr = theData.tNode;
+         else if (scName == theData.rNode->GetName())
+            objPtr = theData.rNode;
+
+         Real result = GetParamDerivative(obj, paramName, objPtr);
+         theDataDerivatives[0][0] += result;
+      }
+      else
+      {
          if (paramName == "Bias")
          {
             if (previous == NULL)
@@ -945,9 +1091,9 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
                SignalBase* firstleg = this;
                // Get last signal leg
                SignalBase* lastleg = this;
-               while (lastleg->GetNext() !=NULL)
+               while (lastleg->GetNext() != NULL)
                   lastleg = lastleg->GetNext();
-               
+
                if ((firstleg->GetSignalDataObject()->tNode->IsOfType(Gmat::GROUND_STATION)) && (lastleg->GetSignalDataObject()->rNode->IsOfType(Gmat::GROUND_STATION) == false))
                {
                   // if ground station is only at first transmit node in signal path, take derivative w.r.t the bias associate to ground station's error mode, otherwise keep default value 0
@@ -957,11 +1103,11 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
 
                   // Get names of all error models defined in the ground station
                   GroundstationInterface* gs = (GroundstationInterface*)this->GetSignalDataObject()->tNode;
-                  std::map<std::string,ObjectArray> errmodelMap = gs->GetErrorModelMap();
+                  std::map<std::string, ObjectArray> errmodelMap = gs->GetErrorModelMap();
 
                   // Search for error model
                   bool found = false;
-                  for (std::map<std::string,ObjectArray>::iterator mapIndex = errmodelMap.begin(); 
+                  for (std::map<std::string, ObjectArray>::iterator mapIndex = errmodelMap.begin();
                      mapIndex != errmodelMap.end(); ++mapIndex)
                   {
                      for (UnsignedInt j = 0; j < mapIndex->second.size(); ++j)
@@ -994,11 +1140,11 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
 
                   // Get names of all error models defined in the ground station
                   GroundstationInterface* gs = (GroundstationInterface*)this->GetSignalDataObject()->rNode;
-                  std::map<std::string,ObjectArray> errmodelMap = gs->GetErrorModelMap();
+                  std::map<std::string, ObjectArray> errmodelMap = gs->GetErrorModelMap();
 
                   // Search for error model
                   bool found = false;
-                  for (std::map<std::string,ObjectArray>::iterator mapIndex = errmodelMap.begin(); 
+                  for (std::map<std::string, ObjectArray>::iterator mapIndex = errmodelMap.begin();
                      mapIndex != errmodelMap.end(); ++mapIndex)
                   {
                      for (UnsignedInt j = 0; j < (mapIndex)->second.size(); ++j)
@@ -1021,22 +1167,59 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
                }
             }
 
-            #ifdef DEBUG_DERIVATIVES
+#ifdef DEBUG_DERIVATIVES
             MessageInterface::ShowMessage("   Deriv is w.r.t. %s  it value %lf\n", paramName.c_str(), theDataDerivatives[0][0]);
-            #endif
+#endif
+         }
+         // Thrust Scale Factor Solve For
+         else if (GmatStringUtil::EndsWith(paramName, ".TSF_Epsilon"))
+         {
+            // find S/C
+            GmatBase *forObj = NULL;
+            ODEModel *odeModel = (ODEModel *)obj;
+            int numForces = odeModel->GetNumForces();
+            for (int forceIndex = 0; forceIndex < numForces; forceIndex++) {   // for each force
+               PhysicalModel *physMod = odeModel->GetForce(forceIndex);
+               if (physMod->GetTypeName() == "FileThrust") {   // is is a FileThrust force?
+                  // does this FileThrust contain our parameter?
+                  Integer id = physMod->GetParameterID(paramName);
+                  if (id > -1) {
+                     StringArray scNames = physMod->GetRefObjectNameArray(Gmat::SPACECRAFT);
+
+                     if (theData.tNode != NULL && theData.tNode->GetType() == Gmat::SPACECRAFT) {
+                        std::string name = theData.tNode->GetName();
+                        if (find(scNames.begin(), scNames.end(), name) != scNames.end()) {
+                           forObj = theData.tNode;
+                           break;
+                        }
+                     }
+                     if (theData.rNode != NULL && theData.rNode->GetType() == Gmat::SPACECRAFT) {
+                        std::string name = theData.rNode->GetName();
+                        if (find(scNames.begin(), scNames.end(), name) != scNames.end()) {
+                           forObj = theData.rNode;
+                           break;
+                        }
+                     }
+                  }
+               }
+            }
+            if (forObj != NULL) {
+               Real result = GetTSFDerivative(forObj, paramName);
+               theDataDerivatives[0][0] += result;
+            }
          }
          else
          {
-         #ifdef DEBUG_DERIVATIVES
+#ifdef DEBUG_DERIVATIVES
             MessageInterface::ShowMessage("   Deriv is w.r.t. something "
-                     "independent, so zero\n");
-         #endif
+               "independent, so zero\n");
+#endif
             // Set 0 to all elements (number of elements is specified by size)
             for (UnsignedInt i = 0; i < size; ++i)
                theDataDerivatives[0][i] += 0.0;
          }
+      }
    }
-   
 
    if ((parameterID >= 0) && (logLevel < 2))
    {
@@ -1167,7 +1350,7 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatTime atEpoch,
          deltaT = (epochAtReceive ? -1.0 : 1.0) * deltaR /
                      (GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / 1000.0);
          #ifdef DEBUG_LIGHTTIME
-            MessageInterface::ShowMessage("Ligh Time range       = %.12lf km\n", lightTimeRange);  
+            MessageInterface::ShowMessage("Light Time range       = %.12lf km\n", lightTimeRange);  
             MessageInterface::ShowMessage("Relativity correction = %.12lf km\n", relCorrection);
             MessageInterface::ShowMessage("      ===> dEpoch = %.12le second, dR = "
                   "%.8lf km, dT = %.12le second, trigger = %le second\n", deltaE, deltaR, deltaT,
@@ -1596,6 +1779,7 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
    if (i == theData.correctionIDs.size())
    {
       theData.correctionIDs.push_back("Troposphere");
+      theData.correctionTypes.push_back("Range");
       theData.useCorrection.push_back(true);
       theData.corrections.push_back(0.0);
    }
@@ -1609,11 +1793,30 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
    {
       if (troposphere == NULL)
          troposphere = new Troposphere(gs->GetName()+"_Troposphere");
-      theData.useCorrection.push_back(true);
+      theData.useCorrection[i] = true;
       troposphere->SetModelTypeName(troposphereModel);
    }
    else
-      theData.useCorrection.push_back(false);
+      theData.useCorrection[i] = false;
+
+   bool useTroposphere = theData.useCorrection[i];
+   UnsignedInt ij = 0;
+   for (; ij < theData.correctionIDs.size(); ++ij)
+   if (theData.correctionIDs[ij] == "Troposphere-Elev")
+      break;
+   if (ij == theData.correctionIDs.size())
+   {
+      theData.correctionIDs.push_back("Troposphere-Elev");
+      theData.correctionTypes.push_back("Elevation");
+      theData.useCorrection.push_back(useTroposphere);
+      theData.corrections.push_back(0.0);
+   }
+   else
+   {
+      theData.useCorrection[ij] = useTroposphere;
+      theData.corrections[ij] = 0.0;
+   }
+
 
    UnsignedInt i1 = 0;
    for (; i1 < theData.correctionIDs.size(); ++i1)
@@ -1622,6 +1825,7 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
    if (i1 == theData.correctionIDs.size())
    {
       theData.correctionIDs.push_back("Ionosphere");
+      theData.correctionTypes.push_back("Range");
       theData.useCorrection.push_back(true);
       theData.corrections.push_back(0.0);
    }
@@ -1637,10 +1841,28 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
       {
          ionosphere = IonosphereCorrectionModel::Instance()->GetIonosphereInstance();
       }
-      theData.useCorrection.push_back(true);
+      theData.useCorrection[i1] = true;
    }
    else
-      theData.useCorrection.push_back(false);
+      theData.useCorrection[i1] = false;
+
+   bool useIonosphere = theData.useCorrection[i1];
+   UnsignedInt ij1 = 0;
+   for (; ij1 < theData.correctionIDs.size(); ++ij1)
+   if (theData.correctionIDs[ij1] == "Ionosphere-Elev")
+      break;
+   if (ij1 == theData.correctionIDs.size())
+   {
+      theData.correctionIDs.push_back("Ionosphere-Elev");
+      theData.correctionTypes.push_back("Elevation");
+      theData.useCorrection.push_back(useIonosphere);
+      theData.corrections.push_back(0.0);
+   }
+   else
+   {
+      theData.useCorrection[ij1] = useIonosphere;
+      theData.corrections[ij1] = 0.0;
+   }
 
 
    if ((troposphere == NULL)&&(ionosphere == NULL))
@@ -1685,15 +1907,29 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
          break;
    }
    if (theData.useCorrection[i])
-      MessageInterface::ShowMessage("     .Troposphere correction : %.12lf\n", theData.corrections[i]);
+      MessageInterface::ShowMessage("     .Troposphere range correction : %.12lf m\n", theData.corrections[i]);
+   for (i = 0; i < theData.correctionIDs.size(); ++i)
+   {
+      if (theData.correctionIDs[i] == "Troposphere-Elev")
+         break;
+   }
+   if (theData.useCorrection[i])
+      MessageInterface::ShowMessage("     .Troposphere elevation correction : %.12lf rad\n", theData.corrections[i]);
    for(i = 0; i < theData.correctionIDs.size(); ++i)
    {
       if (theData.correctionIDs[i] == "Ionosphere")
          break;
    }
    if (theData.useCorrection[i])
-      MessageInterface::ShowMessage("     .Ionosphere correction : %.12lf\n", theData.corrections[i]);
-   
+      MessageInterface::ShowMessage("     .Ionosphere range correction : %.12lf m\n", theData.corrections[i]);
+   for (i = 0; i < theData.correctionIDs.size(); ++i)
+   {
+      if (theData.correctionIDs[i] == "Ionosphere-Elev")
+         break;
+   }
+   if (theData.useCorrection[i])
+      MessageInterface::ShowMessage("     .Ionosphere elevation correction : %.12lf rad\n", theData.corrections[i]);
+
 #endif
    retval = true;
 
@@ -1733,6 +1969,7 @@ void PhysicalSignal::AddCorrection(const std::string& modelName,
       if (i == theData.correctionIDs.size())
       {
           theData.correctionIDs.push_back("Relativity");
+          theData.correctionTypes.push_back("Range");
           theData.useCorrection.push_back(true);
           theData.corrections.push_back(0.0);
       }
@@ -1753,6 +1990,7 @@ void PhysicalSignal::AddCorrection(const std::string& modelName,
       if (i == theData.correctionIDs.size())
       {
           theData.correctionIDs.push_back("ET-TAI");
+          theData.correctionTypes.push_back("Range");
           theData.useCorrection.push_back(true);
           theData.corrections.push_back(0.0);
       }
@@ -1938,7 +2176,10 @@ Real PhysicalSignal::ETminusTAI(Real tA1MJD, SpacePoint* participant)
    }
 
    if (emb)
+   {
       delete emb;
+      emb = NULL;                     // made changes by TUAN NGUYEN
+   }
 
    return ET_TAI;               // unit: second
 }
@@ -1959,7 +2200,7 @@ Real PhysicalSignal::ETminusTAI(Real tA1MJD, SpacePoint* participant)
  * @param minElevationANgle      Minimum elevation angle (unit: degree) at which 
  *                               signal can send or receive at ground station
  *
- * return         An array containing results of media correction
+ * return         An array containing results of media correction (units: (m, rad, s))
  */
 //----------------------------------------------------------------------------
 RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, 
@@ -1970,17 +2211,17 @@ RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B,
    #endif
    Real epsilon = 1.0e-8;
 
-   RealArray tropoCorrection;
+   RealArray tropoCorrection;                // units: (m, rad, s)
    tropoCorrection.push_back(0.0);
    tropoCorrection.push_back(0.0);
    tropoCorrection.push_back(0.0);
    
-   RealArray ionoCorrection;
+   RealArray ionoCorrection;                // units: (m, rad, s)
    ionoCorrection.push_back(0.0);
    ionoCorrection.push_back(0.0);
    ionoCorrection.push_back(0.0);
 
-   RealArray mediaCorrection;
+   RealArray mediaCorrection;               // units: (m, rad, s)
    mediaCorrection.push_back(0.0);
    mediaCorrection.push_back(0.0);
    mediaCorrection.push_back(0.0);
@@ -2001,7 +2242,8 @@ RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B,
       #endif
 
       mediaCorrection[0] = tropoCorrection[0];         // unit: m
-      mediaCorrection[1] = tropoCorrection[1];
+      //mediaCorrection[1] = tropoCorrection[1] * GmatMathConstants::DEG_PER_ARCSEC * GmatMathConstants::RAD_PER_DEG;     // made changes by TUAN NGUYEN
+      mediaCorrection[1] = tropoCorrection[1];         // unit: rad                                                       // made changes by TUAN NGUYEN
       mediaCorrection[2] = tropoCorrection[2];         // unit: second
    }
    // Update value of theData.corrections and theData.useCorrection
@@ -2011,7 +2253,15 @@ RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B,
       if (theData.correctionIDs[i] == "Troposphere")
          break;
    }
-   theData.corrections[i] = mediaCorrection[0]*GmatMathConstants::M_TO_KM;
+   theData.corrections[i] = mediaCorrection[0]*GmatMathConstants::M_TO_KM;            // unit: km
+   theData.useCorrection[i] = (troposphere != NULL);
+
+   for (i = 0; i < theData.correctionIDs.size(); ++i)
+   {
+      if (theData.correctionIDs[i] == "Troposphere-Elev")
+         break;
+   }
+   theData.corrections[i] = mediaCorrection[1];                                       // unit: rad
    theData.useCorrection[i] = (troposphere != NULL);
 
    
@@ -2020,16 +2270,35 @@ RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B,
    if (elevationAngle > epsilon)
 //   if (elevationAngle > minElevationAngle*GmatMathConstants::RAD_PER_DEG)
    {
-      ionoCorrection = IonosphereCorrection(freq, r1B, r2B, epoch1, epoch2);
+      SignalDataCache::CacheKey cacheKey(strandId, freq, epoch1, epoch2);
+      SignalDataCache::SimpleSignalDataCacheIter cachedEntry;
+      bool cacheFound = false;
+
+      if (ionosphereCache) {
+         cachedEntry = ionosphereCache->find(cacheKey);
+         cacheFound = (cachedEntry != ionosphereCache->end());
+      }
+
+      if (cacheFound) {
+         ionoCorrection = cachedEntry->second.ionoCorrection;
+      }
+      else {
+         ionoCorrection = IonosphereCorrection(freq, r1B, r2B, epoch1, epoch2);
+
+         if (ionosphereCache) {
+            ionosphereCache->insert({ cacheKey, SignalDataCache::CacheValue(theData, ionoCorrection) });
+         }
+      }
+
       #ifdef DEBUG_MEASUREMENT_CORRECTION
          MessageInterface::ShowMessage(" frequency = %le MHz, epoch1 = %lf,  r1B = ('%.8lf   %.8lf   %.8lf')km\n", freq, epoch1, r1B[0], r1B[1], r1B[2]);
          MessageInterface::ShowMessage("                      epoch2 = %lf,  r2B = ('%.8lf   %.8lf   %.8lf')km\n", epoch2, r2B[0], r2B[1], r2B[2]);
-         MessageInterface::ShowMessage(" IonoshereCorrection = (%lf m,  %lf arcsec,   %le s)\n", ionoCorrection[0], ionoCorrection[1], ionoCorrection[2]);
+         MessageInterface::ShowMessage(" IonoshereCorrection = (%lf m,  %lf rad,   %le s)\n", ionoCorrection[0], ionoCorrection[1], ionoCorrection[2]);
       #endif
 
       // 3. Combine effects:
       mediaCorrection[0] += ionoCorrection[0];               // unit: m
-      mediaCorrection[1] += ionoCorrection[1];
+      mediaCorrection[1] += ionoCorrection[1];               // unit: rad
       mediaCorrection[2] += ionoCorrection[2];               // unit: second
    }
 
@@ -2040,7 +2309,15 @@ RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B,
    }
    theData.corrections[i] = ionoCorrection[0]*GmatMathConstants::M_TO_KM;        // convert unit from m to km
    theData.useCorrection[i] = (ionosphere != NULL);
-   
+
+   for (i = 0; i < theData.correctionIDs.size(); ++i)
+   {
+      if (theData.correctionIDs[i] == "Ionosphere-Elev")
+         break;
+   }
+   theData.corrections[i] = ionoCorrection[1];                // unit: rad
+   theData.useCorrection[i] = (ionosphere != NULL);
+
    
    #ifdef DEBUG_MEASUREMENT_CORRECTION
       MessageInterface::ShowMessage("exit PhysicalMeasurement::MediaCorrection()\n");
@@ -2061,7 +2338,7 @@ RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B,
  * @param elevationAngle  The elevation angle from ground station to spacecraft (unit: radian)
  * @param epoch  Time at which the signal is transmitted or received at ground station      (unit: Julian day)
  *                 
- * return Troposphere correction vector
+ * return Troposphere correction vector                                         (units: (m, rad, s))
  */
 //------------------------------------------------------------------------
 RealArray PhysicalSignal::TroposphereCorrection(Real freq, Real distance, Real elevationAngle, Real epoch)
@@ -2107,7 +2384,7 @@ RealArray PhysicalSignal::TroposphereCorrection(Real freq, Real distance, Real e
          troposphere->SetLatitude(lla[0]);
          troposphere->SetLongitude(lla[1]);
          troposphere->SetTime(epoch);
-         tropoCorrection = troposphere->Correction();
+         tropoCorrection = troposphere->Correction();                            // units: (m, rad, s)
          //Real rangeCorrection = tropoCorrection[0]/GmatMathConstants::KM_TO_M;
      }
      else
@@ -2148,7 +2425,7 @@ RealArray PhysicalSignal::TroposphereCorrection(Real freq, Real distance, Real e
  * @param r2B     Position of spacecraft in SSBMJMJ2000Eq     (unit: km)
  * @param epoch1  Time at which the signal is transmitted or received at ground station      (unit: Julian day)
  * @param epoch2  Time at which the signal is transmitted or received at spacecraft          (unit: Julian day)
- * return         An array containing results of Ionosphere correction
+ * return         An array containing results of Ionosphere correction   (units: m, rad, s)
  */
 //------------------------------------------------------------------------
 RealArray PhysicalSignal::IonosphereCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2)
@@ -2225,13 +2502,14 @@ RealArray PhysicalSignal::IonosphereCorrection(Real freq, Rvector3 r1B, Rvector3
          #endif
 
          // 5. Run ionosphere correction:
-         ionoCorrection = ionosphere->Correction();             // ionoCorrection[0] unit: m 
+         ionoCorrection = ionosphere->Correction();             // ionoCorrection units: (m, rad, s) 
 
          // 6. Clean up
          if (cv)
             delete cv;
          if (fk5cs)
             delete fk5cs;
+         cv = NULL; fk5cs = NULL;                     // made changes by TUAN NGUYEN
 
          #ifdef DEBUG_IONOSPHERE_MEDIA_CORRECTION
            //   MessageInterface::ShowMessage("      *Ionosphere media correction result:\n");
@@ -2415,6 +2693,7 @@ Integer PhysicalSignal::GetFrequencyBandFromRampTable(Real t, std::vector<RampTa
 Integer PhysicalSignal::FrequencyBand(Real frequency)
 {
    Integer freqBand = 0;
+   bool isCBand = false;
 
    // S-band
    if ((frequency >= 2000000000.0) && (frequency <= 4000000000.0))
@@ -2424,10 +2703,14 @@ Integer PhysicalSignal::FrequencyBand(Real frequency)
    if ((frequency >= 7000000000.0) && (frequency <= 8400000000.0))
       freqBand = 2;               // 2 for X-band
 
-   if (freqBand == 0)
+   // C-band
+   if ((frequency > 4000000000.0) && (frequency < 7000000000.0))
+      isCBand = true;
+
+   if (!isCBand && freqBand == 0)
    {
       std::stringstream strs;
-      strs << "Error in PhysicalMeasurement::FrequencyBand():  GMAT cannot specify frequency band for frequency = " << frequency <<" Hz\n";
+      strs << "Error in PhysicalMeasurement::FrequencyBand():  GMAT cannot specify frequency band for frequency = " << frequency << " Hz\n";
       throw MeasurementException(strs.str());
    }
 

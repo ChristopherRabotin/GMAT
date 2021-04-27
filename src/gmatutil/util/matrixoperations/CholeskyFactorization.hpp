@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -44,15 +44,17 @@ public:
    CholeskyFactorization& operator=(const CholeskyFactorization
                                     &choleskyfactorization);
 
-   virtual void Factor(const Rmatrix inputMatrix, Rmatrix &R,
+   virtual void Factor(const Rmatrix &inputMatrix, Rmatrix &R,
                        Rmatrix &blankMatrix);
+   virtual void Factor(const Rmatrix &inputMatrix, Rmatrix &R);
    virtual void Invert(Rmatrix &inputMatrix);
+   virtual Integer Invert(Real* sum1, Integer array_size);
 
 private:
    /// Number of rows in input matrix
    Integer rowCount;
    /// Various indexes used in arrays along with error counters
-   Integer i, i1, i2, i3, ist, iERowCount, iError, il, il1, il2;
+   Integer i, i1, i2, i3, ist, iERowCount, il, il1, il2;
    /// Various indexes used in arrays along with an index for pivot positions
    Integer j, k, k1, kl, iLeRowCount, rowCountIf, iPivot;
    /// Pointer used to store the input matrix in packed upper triangular form

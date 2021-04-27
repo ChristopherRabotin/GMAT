@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -106,26 +106,31 @@ public:
 
 
    /// static values for the IDs for each celestial body, as used on the DE files.
-   static const Integer SUN_ID;
-   static const Integer MERCURY_ID;
-   static const Integer VENUS_ID;
-   static const Integer EARTH_ID;
-   static const Integer MOON_ID;
-   static const Integer MARS_ID;
-   static const Integer JUPITER_ID;
-   static const Integer SATURN_ID;
-   static const Integer URANUS_ID;
-   static const Integer NEPTUNE_ID;
-   static const Integer PLUTO_ID;
-   static const Integer SS_BARY_ID;
-   static const Integer EM_BARY_ID;
-   static const Integer NUTATIONS_ID;
-   static const Integer LIBRATIONS_ID;
+   static const Integer SUN_ID              = 10;
+   static const Integer MERCURY_ID          = 0;
+   static const Integer VENUS_ID            = 1;
+   static const Integer EARTH_ID            = 2;
+   static const Integer MOON_ID             = 9;
+   static const Integer MARS_ID             = 3;
+   static const Integer JUPITER_ID          = 4;
+   static const Integer SATURN_ID           = 5;
+   static const Integer URANUS_ID           = 6;
+   static const Integer NEPTUNE_ID          = 7;
+   static const Integer PLUTO_ID            = 8;
+   static const Integer SS_BARY_ID          = 11;
+   static const Integer EM_BARY_ID          = 12;
+   static const Integer NUTATIONS_ID        = 13;
+   static const Integer LIBRATIONS_ID       = 14;
 
-   static const Real    JD_MJD_OFFSET;// = GmatTimeConstants::JD_JAN_5_1941;
+protected:
+   
+   // We cannot initialize const Real here
+   static const Real    JD_MJD_OFFSET; // = GmatTimeConstants::JD_JAN_5_1941;
    /// seconds offset to get from A1 to TDT (TT)
-   static const Real    TT_OFFSET;    // = 32.184;
+   static const Real    TT_OFFSET;     // = GmatTimeConstants::TT_TAI_OFFSET;
 
+public:
+   
    static const Integer ARRAY_SIZE_200 = 826;
    static const Integer ARRAY_SIZE_405 = 1018;
    static const Integer ARRAY_SIZE_421 = 1018;

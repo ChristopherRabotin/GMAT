@@ -41,14 +41,33 @@ GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${SRCDIR} DEFINITION TargetName)
 SET(SrcTargets ${SrcTargets} ${tmp})
 
 # ====================================================================
+# CSALT library and tester
+if (GMAT_INCLUDE_CSALT)
+   SET(SRCDIR "csalt")
+   ADD_SUBDIRECTORY(${SRCDIR})
+   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${SRCDIR} DEFINITION TargetName)
+   SET(SrcTargets ${SrcTargets} ${tmp})
+
+   if(GMAT_INCLUDE_CSALT_TESTPROGRAM)   
+      SET(SRCDIR "csaltTester")
+      ADD_SUBDIRECTORY(${SRCDIR})
+      GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${SRCDIR} DEFINITION TargetName)
+      SET(SrcTargets ${SrcTargets} ${tmp})
+   endif()
+endif()
+
+# ====================================================================
 # GUI binary
-SET(SRCDIR "gui")
-ADD_SUBDIRECTORY(${SRCDIR})
-GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${SRCDIR} DEFINITION TargetName)
-SET(SrcTargets ${SrcTargets} ${tmp})
+if(GMAT_INCLUDE_GUI)
+   SET(SRCDIR "gui")
+   ADD_SUBDIRECTORY(${SRCDIR})
+   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${SRCDIR} DEFINITION TargetName)
+   SET(SrcTargets ${SrcTargets} ${tmp})
+endif()
 
 # ====================================================================
 # Bulk changes to the src targets can be made here, using the
 # SET_TARGET_PROPERTIES(${SrcTargets} ...) function. This is cleaner
 # than applying the target properties at each subdirectory.
 SET_TARGET_PROPERTIES(${SrcTargets} PROPERTIES VERSION ${GMAT_VERSION})
+SET_TARGET_PROPERTIES(${SrcTargets} PROPERTIES FOLDER "GMAT Core")

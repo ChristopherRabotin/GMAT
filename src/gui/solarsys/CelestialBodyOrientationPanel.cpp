@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -557,8 +557,8 @@ void CelestialBodyOrientationPanel::Create()
 
    
    // sizers
-   if (theBody->GetName() == SolarSystem::EARTH_NAME) isEarth = true;
-   else if (theBody->GetName() == SolarSystem::MOON_NAME) isLuna = true;
+   if (theBody->GetName() == GmatSolarSystemDefaults::EARTH_NAME) isEarth = true;
+   else if (theBody->GetName() == GmatSolarSystemDefaults::MOON_NAME) isLuna = true;
 
    wxFlexGridSizer *oneFlexGridSizer = new wxFlexGridSizer(3,0,0);
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -112,6 +112,9 @@ SolarPowerSystem::SolarPowerSystem(const std::string &nomme) :
    // script (even if it's empty)
    writeEmptyStringArray = true;
    shadowState    = new ShadowState();
+
+   for (Integer i = PowerSystemParamCount; i < SolarPowerSystemParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 
@@ -172,6 +175,9 @@ SolarPowerSystem::SolarPowerSystem(const SolarPowerSystem& copy) :
    }
 
    shadowState    = new ShadowState();
+
+   for (Integer i = PowerSystemParamCount; i < SolarPowerSystemParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 
@@ -499,10 +505,10 @@ Real SolarPowerSystem::GetPowerGenerated() const
                   force[0], force[1], force[2]);
          #endif
 
-
+         Real appSunRad, appBodyRad, appDistFromSunToBody;
          percentSun  = shadowState->FindShadowState(lit, dark, "DualCone",
                state, bodySunVector,sunSat, force, sunRadius, bodyRadius,
-               psunrad);
+               psunrad, appSunRad, appBodyRad, appDistFromSunToBody);
 
          // Is there more than one occultation? -  we don't currently model that
          if (percentSun < 1.0)

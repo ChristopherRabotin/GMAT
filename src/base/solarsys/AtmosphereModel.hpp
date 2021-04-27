@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -36,6 +36,7 @@
 #include "SolarFluxReader.hpp"
 #include "AtmosphereException.hpp"
 #include "TimeTypes.hpp"
+#include "TimeSystemConverter.hpp"   // for the TimeSystemConverter singleton
 
 class SolarSystem;          // Forward reference
 class CelestialBody;
@@ -66,11 +67,11 @@ public:
     * The output array, density, must contain the density at the requested
     * locations, expressed in kg / m^3.
     *
-    * @param <position>  The input vector of spacecraft states, in MJ2000Eq
+    * @param position  The input vector of spacecraft states, in MJ2000Eq
     *                      coordinates.
-    * @param <density>   The array of output densities.
-    * @param <epoch>     The current TAI modified Julian epoch.
-    * @param <count>     The number of spacecraft contained in position.
+    * @param density   The array of output densities.
+    * @param epoch     The current TAI modified Julian epoch.
+    * @param count     The number of spacecraft contained in position.
     *
     * @return true on success, false if a problem is encountered.
     */
@@ -242,6 +243,8 @@ protected:
    /// Geomagnetic index (Ap, not Kp)
    Real                    ap[7];
 
+   /// Time converter singleton
+   TimeSystemConverter     *theTimeConverter;
 
    // Input method shared by all MSISE models
    void                    GetInputs(GmatEpoch epoch);

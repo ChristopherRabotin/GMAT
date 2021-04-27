@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -87,6 +87,7 @@ StringArray EphemerisFile::stateTypeList;
 StringArray EphemerisFile::writeEphemerisList;
 StringArray EphemerisFile::interpolatorTypeList;
 StringArray EphemerisFile::outputFormatList;
+StringArray EphemerisFile::covFormatList;
 StringArray EphemerisFile::distanceUnitList;
 StringArray EphemerisFile::eventBoundariesList;
 
@@ -106,6 +107,7 @@ EphemerisFile::PARAMETER_TEXT[EphemerisFileParamCount - SubscriberParamCount] =
    "StateType",             // STATE_TYPE
    "CoordinateSystem",      // COORDINATE_SYSTEM
    "OutputFormat",          // OUTPUT_FORMAT
+   "IncludeCovariance",     // INCLUDE_COVARIANCE
    "WriteEphemeris",        // WRITE_EPHEMERIS
    "FileName",              // FILE_NAME - deprecated
    "DistanceUnit",          // DISTANCE_UNIT
@@ -128,6 +130,7 @@ EphemerisFile::PARAMETER_TYPE[EphemerisFileParamCount - SubscriberParamCount] =
    Gmat::ENUMERATION_TYPE,  // STATE_TYPE
    Gmat::OBJECT_TYPE,       // COORDINATE_SYSTEM
    Gmat::ENUMERATION_TYPE,  // OUTPUT_FORMAT
+   Gmat::ENUMERATION_TYPE,  // INCLUDE_COVARIANCE
    Gmat::BOOLEAN_TYPE,      // WRITE_EPHEMERIS
    Gmat::STRING_TYPE,       // FILE_NAME - deprecated
    Gmat::ENUMERATION_TYPE,  // DISTANCE_UNIT
@@ -161,6 +164,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    stateType               ("Cartesian"),
    outCoordSystemName      ("EarthMJ2000Eq"),
    outputFormat            ("LittleEndian"),
+   covFormat                 ("None"),
    writeEphemeris          (true),
    usingDefaultFileName    (true),
    generateInBackground    (false),
@@ -261,6 +265,11 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    outputFormatList.push_back("LittleEndian");
    outputFormatList.push_back("BigEndian");
    
+   covFormatList.clear();
+   covFormatList.push_back("None");
+   covFormatList.push_back("Position");
+   covFormatList.push_back("PositionAndVelocity");
+   
    distanceUnitList.clear();
    distanceUnitList.push_back("Kilometers");
    distanceUnitList.push_back("Meters");
@@ -325,6 +334,7 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    stateType               (ef.stateType),
    outCoordSystemName      (ef.outCoordSystemName),
    outputFormat            (ef.outputFormat),
+   covFormat               (ef.covFormat),
    writeEphemeris          (ef.writeEphemeris),
    usingDefaultFileName    (ef.usingDefaultFileName),
    generateInBackground    (ef.generateInBackground),
@@ -397,6 +407,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    stateType            = ef.stateType;
    outCoordSystemName   = ef.outCoordSystemName;
    outputFormat         = ef.outputFormat;
+   covFormat            = ef.covFormat;
    writeEphemeris       = ef.writeEphemeris;
    usingDefaultFileName = ef.usingDefaultFileName;
    generateInBackground = ef.generateInBackground;
@@ -516,6 +527,11 @@ std::string EphemerisFile::GetProperFileName(const std::string &fName,
 //------------------------------------------------------------------------------
 void EphemerisFile::SetBackgroundGeneration(bool inBackground)
 {
+   #ifdef DEBUG_EPHEMFILE_INIT
+      MessageInterface::ShowMessage
+      ("EphemerisFile::SetBackgroundGeneration() entered, inBackground='%s', ephemWriter=<%p>\n",
+       (inBackground? "true" : "false"), ephemWriter);
+   #endif
    if (ephemWriter)
       ephemWriter->SetBackgroundGeneration(inBackground);
 }
@@ -968,6 +984,8 @@ const StringArray& EphemerisFile::GetPropertyEnumStrings(const Integer id) const
       return interpolatorTypeList;
    case OUTPUT_FORMAT:
       return outputFormatList;
+   case INCLUDE_COVARIANCE:
+      return covFormatList;
    case DISTANCE_UNIT:
       return distanceUnitList;
    default:
@@ -1108,6 +1126,8 @@ std::string EphemerisFile::GetStringParameter(const Integer id) const
       return outCoordSystemName;
    case OUTPUT_FORMAT:
       return outputFormat;
+   case INCLUDE_COVARIANCE:
+      return covFormat;
    case FILE_NAME:
       WriteDeprecatedMessage(id);
       return fileName;
@@ -1160,7 +1180,7 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
       #endif
       
       // Validate filename
-      if (!GmatFileUtil::IsValidFileName(value))
+      if (!GmatFileUtil::IsValidFileName(value, true))
       {
          std::string msg = GmatFileUtil::GetInvalidFileNameMessage(1);
          SubscriberException se;
@@ -1202,8 +1222,8 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
          GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "EPHEM_OUTPUT_FILE",
                                        false, ".eph", false, true);
       
-      // Check for directory name
-      std::string dirName = GmatFileUtil::ParsePathName(fileName);
+      // Check for directory name - MUST check for full path directory
+      std::string dirName = GmatFileUtil::ParsePathName(fullPathFileName);
       #ifdef DEBUG_EPHEMFILE_SET
       MessageInterface::ShowMessage("   dirName = '%s'\n", dirName.c_str());
       #endif
@@ -1390,6 +1410,17 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
       {
          HandleError(OUTPUT_FORMAT, value, outputFormatList);
       }
+   case INCLUDE_COVARIANCE:
+      if (find(covFormatList.begin(), covFormatList.end(), value) !=
+         covFormatList.end())
+      {
+         covFormat = value;
+         return true;
+      }
+      else
+      {
+         HandleError(INCLUDE_COVARIANCE, value, covFormatList);
+      }
    case FILE_NAME:
       WriteDeprecatedMessage(id);
       return SetStringParameter(FILENAME, value);
@@ -1528,12 +1559,12 @@ Real EphemerisFile::ConvertInitialAndFinalEpoch()
    
    // Convert initial epoch to A1Mjd
    if (initialEpochStr != "InitialSpacecraftEpoch")
-      TimeConverterUtil::Convert(epochFormat, dummyA1Mjd, initialEpochStr,
+      TimeSystemConverter::Instance()->Convert(epochFormat, dummyA1Mjd, initialEpochStr,
                                  "A1ModJulian", initialEpochA1Mjd, epochStr);
    
    // Convert final epoch to A1Mjd
    if (finalEpochStr != "FinalSpacecraftEpoch")
-      TimeConverterUtil::Convert(epochFormat, dummyA1Mjd, finalEpochStr,
+      TimeSystemConverter::Instance()->Convert(epochFormat, dummyA1Mjd, finalEpochStr,
                                  "A1ModJulian", finalEpochA1Mjd, epochStr);
    
    // Check if ephemeris initial epoch is before the spacecraft initial epoch
@@ -1772,7 +1803,7 @@ void EphemerisFile::CreateEphemerisFile()
    
    if (ephemWriter)
    {
-      ephemWriter->CreateEphemerisFile(usingDefaultFileName, stateType, outputFormat);
+      ephemWriter->CreateEphemerisFile(usingDefaultFileName, stateType, outputFormat, covFormat);
       isEphemFileOpened = ephemWriter->IsEphemFileOpened();
    }
    
@@ -2036,9 +2067,9 @@ bool EphemerisFile::SkipFunctionData()
 
 
 //------------------------------------------------------------------------------
-// bool RetrieveData(const Real *dat)
+// bool RetrieveData(const Real *dat, Integer len)
 //------------------------------------------------------------------------------
-bool EphemerisFile::RetrieveData(const Real *dat)
+bool EphemerisFile::RetrieveData(const Real *dat, Integer len)
 {
    StringArray dataLabels = theDataLabels[0];
    
@@ -2050,6 +2081,8 @@ bool EphemerisFile::RetrieveData(const Real *dat)
       MessageInterface::ShowMessage("%s ", dataLabels[j].c_str());
    MessageInterface::ShowMessage("\n");
    #endif
+
+   std::string names[6] = { "X", "Y", "Z", "Vx", "Vy", "Vz" };
    
    Integer idX, idY, idZ;
    Integer idVx, idVy, idVz;
@@ -2060,6 +2093,19 @@ bool EphemerisFile::RetrieveData(const Real *dat)
    idVx = FindIndexOfElement(dataLabels, spacecraftName + ".Vx");
    idVy = FindIndexOfElement(dataLabels, spacecraftName + ".Vy");
    idVz = FindIndexOfElement(dataLabels, spacecraftName + ".Vz");
+
+   Integer idCov[21];
+   UnsignedInt idx = 0;
+
+   for (UnsignedInt ii = 0; ii < 6; ii++)
+   {
+      for (UnsignedInt jj = 0; jj <= ii; jj++)
+      {
+         std::string elementName = spacecraftName + ".C" + names[ii] + names[jj];
+         idCov[idx] = FindIndexOfElement(dataLabels, elementName);
+         idx++;
+      }
+   }
    
    #ifdef DEBUG_EPHEMFILE_DATA_LABELS
    MessageInterface::ShowMessage
@@ -2093,6 +2139,14 @@ bool EphemerisFile::RetrieveData(const Real *dat)
    currState[3] = dat[idVx];
    currState[4] = dat[idVy];
    currState[5] = dat[idVz];
+
+   for (Integer ii = 0; ii < 21; ii++)
+   {
+      if (idCov[ii] != -1 && idCov[ii] < len)
+         currCov[ii] = dat[idCov[ii]];
+      else
+         currCov[ii] = 0.0;
+   }
 
    #ifdef DEBUG_EPHEMFILE_DATA_LABELS
    MessageInterface::ShowMessage
@@ -2274,7 +2328,7 @@ bool EphemerisFile::SetEpoch(Integer id, const std::string &value,
    
    try
    {
-      TimeConverterUtil::ValidateTimeFormat(epochFormat, value);
+      TimeSystemConverter::Instance()->ValidateTimeFormat(epochFormat, value);
    }
    catch (BaseException &)
    {
@@ -2421,7 +2475,7 @@ std::string EphemerisFile::GetBackwardPropWarning()
       ("   current time (%s> < previous time (%s)\n", currTimeStr.c_str(),
        prevTimeStr.c_str());
    MessageInterface::ShowMessage
-      ("EphemerisFile::GetBackwardPropWarning() returning '%s'\n", msg);
+      ("EphemerisFile::GetBackwardPropWarning() returning '%s'\n", msg.c_str());
    #endif
    
    return msg;
@@ -2529,7 +2583,7 @@ std::string EphemerisFile::ToUtcGregorian(Real epoch, bool inDays, Integer forma
       outFormat = "UTCGregorian";
    
    // Convert current epoch to specified format
-   TimeConverterUtil::Convert("A1ModJulian", epochInDays, "", outFormat,
+   TimeSystemConverter::Instance()->Convert("A1ModJulian", epochInDays, "", outFormat,
                               toMjd, epochStr, format);
    
    if (epochStr == "")
@@ -2693,6 +2747,10 @@ bool EphemerisFile::Distribute(const Real *dat, Integer len)
    #ifdef DEBUG_EPHEMFILE_DATA_MORE
    MessageInterface::ShowMessage("   fileName='%s'\n", fileName.c_str());
    #endif
+
+   // If end of run received, finishup writing
+   if (isEndOfRun)
+      return HandleEndOfRun();
    
    // If EphemerisFile was toggled off, start new segment (LOJ: 2010.09.30)
    if (!active)
@@ -2722,10 +2780,6 @@ bool EphemerisFile::Distribute(const Real *dat, Integer len)
       #endif
       CreateEphemerisFile();
    }
-   
-   // If end of run received, finishup writing
-   if (isEndOfRun)
-      return HandleEndOfRun();
    
    if (len == 0)
    {
@@ -2771,11 +2825,11 @@ bool EphemerisFile::Distribute(const Real *dat, Integer len)
    }
    
    // Retrieve data
-   if (!RetrieveData(dat))
+   if (!RetrieveData(dat, len))
       return true;
    
    // Set data to EphemerisWriter
-   ephemWriter->SetOrbitData(currEpochInDays, currState);
+   ephemWriter->SetOrbitData(currEpochInDays, currState, currCov);
    
    // To compute block time span for use in the error message (LOJ: 2014.04.30)
    // Save block begin time

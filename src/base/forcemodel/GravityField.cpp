@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -104,8 +104,6 @@ using namespace GmatMathUtil;
    static bool firstCallFired = false;
 #endif
 
-std::vector<HarmonicGravity*> GravityField::cache;
-
 const std::string
 GravityField::PARAMETER_TEXT[GravityFieldParamCount - HarmonicFieldParamCount] =
 {
@@ -194,9 +192,11 @@ GravityField::GravityField(const std::string &name, const std::string &forBodyNa
 //------------------------------------------------------------------------------
 GravityField::~GravityField()
 {
-   gravityModel = NULL;
+   if (gravityModel)
+      delete gravityModel;
    
-   delete j2k;
+   if (j2k)
+      delete j2k;
 }
 
 
@@ -224,7 +224,7 @@ GravityField::GravityField(const GravityField &gf) :
     orderTruncateReported  (gf.orderTruncateReported),
     degreeTruncateReported (gf.degreeTruncateReported),
     gravityModel           (NULL),
-    j2k                    (gf.j2k),
+    j2k                    (NULL),
     frv                    (gf.frv),
     trv                    (gf.trv),
     now                    (gf.now),
@@ -239,6 +239,8 @@ GravityField::GravityField(const GravityField &gf) :
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
    derivativeIds.push_back(Gmat::ORBIT_STATE_TRANSITION_MATRIX);
    derivativeIds.push_back(Gmat::ORBIT_A_MATRIX);
+
+   isInitialized = false;
 }
 
 
@@ -272,11 +274,14 @@ GravityField& GravityField::operator=(const GravityField &gf)
 //   if ((gravityModel) && (gravityModel->GetFilename() == "")) delete gravityModel;  // delete only Body ones
    gravityModel           = gf.gravityModel;
 //   gravityModel           = NULL;
-   j2k                    = gf.j2k;
+   j2k                    = NULL;
    frv                    = gf.frv;
    trv                    = gf.trv;
    now                    = gf.now;
    nowGT                  = gf.nowGT;
+
+   isInitialized = false;
+
    return *this;
 }
 
@@ -479,10 +484,12 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
 
    if (hasPrecisionTime)
    {
-      nowGT = epochGT; nowGT.AddSeconds(dt);
+      nowGT = epochGT;
+      nowGT.AddSeconds(elapsedTime);
+      nowGT.AddSeconds(dt);
    }
    else
-      now = epoch + dt/GmatTimeConstants::SECS_PER_DAY;
+      now = epoch + (elapsedTime + dt)/GmatTimeConstants::SECS_PER_DAY;
 
    #ifdef DEBUG_GRAV_COORD_SYSTEM
        MessageInterface::ShowMessage(
@@ -532,6 +539,8 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
 #endif
       }
 
+
+		Integer i6 = (fillSTM ? stmStart : aMatrixStart);
       for (Integer n = 0; n < cartesianCount; ++n)
       {
          nOffset = cartesianStart + n * stateSize;
@@ -576,24 +585,49 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
                break;
          }
 
+         for (Integer index = 0; index < 6; ++index)                                                        // made changes by TUAN NGUYEN
+         {                                                                                                  // made changes by TUAN NGUYEN
+
+            // This message needs to show up when the derivative is NaN                                     // made changes by TUAN NGUYEN
+            if (GmatMathUtil::IsNaN(deriv[nOffset + index]))                                                // made changes by TUAN NGUYEN
+            {                                                                                               // made changes by TUAN NGUYEN
+               std::string derivName = "acceleration";                                                      // made changes by TUAN NGUYEN
+               if ((dvorder == 1)&& (index < 3))                                                            // made changes by TUAN NGUYEN
+                  derivName = "velocity";                                                                   // made changes by TUAN NGUYEN
+
+               MessageInterface::ShowMessage("The force model \"%s\" "                                      // made changes by TUAN NGUYEN
+                  "returns a disallowed value for spacecraft \"%s\". "                                      // made changes by TUAN NGUYEN
+                  "The %s value is %lf for the position vector "                                            // made changes by TUAN NGUYEN
+                  "[%.12lf  %.12lf  %.12lf]km at epoch %.12lf A1Mjd.\n",                                    // made changes by TUAN NGUYEN
+                  GetTypeName().c_str(), scObjs[n]->GetName().c_str(),                                      // made changes by TUAN NGUYEN
+                  derivName.c_str(), deriv[nOffset + index],                                                // made changes by TUAN NGUYEN
+                  satState[0], satState[1], satState[2], (hasPrecisionTime ? epochGT.GetMjd() : epoch));    // made changes by TUAN NGUYEN
+            }                                                                                               // made changes by TUAN NGUYEN
+         }                                                                                                  // made changes by TUAN NGUYEN
+
+
 #ifdef DEBUG_DERIVATIVES
          for (Integer ii = 0 + nOffset; ii < 6+nOffset; ii++)
                      MessageInterface::ShowMessage("------ deriv[%d] = %12.10f\n", ii, deriv[ii]);
 #endif
          if (fillSTM)
          {
-            Integer stmSize = stmRowCount * stmRowCount;
-            Real *aTilde;
-            aTilde = new Real[stmSize];
-
             Integer element;
             // @todo Add the use of the GetAssociateIndex() method here to get index into state array
             //       (See assumption 1, above)
             if (n <= stmCount)
             {
-               Integer ix, i6 = stmStart + n * stmRowCount * stmRowCount;
+               //Integer ix, i6 = stmStart + n * stmRowCount * stmRowCount;         // made changes by TUAN NGUYEN
+					Integer ix;                                                          // made changes by TUAN NGUYEN
 
-               // Calculate A-tilde
+					// Get spacecraft object                                             // made changes by TUAN NGUYEN
+					Spacecraft* sc = (Spacecraft*)scObjs[n];                             // made changes by TUAN NGUYEN
+
+					//Create aTilde                                                      // made changes by TUAN NGUYEN
+					stmRowCount = sc->GetIntegerParameter("FullSTMRowCount");    // made changes by TUAN NGUYEN
+					Integer stmSize = stmRowCount * stmRowCount;                         // made changes by TUAN NGUYEN
+					Real *aTilde;                                                        // made changes by TUAN NGUYEN
+					aTilde = new Real[stmSize];                                          // made changes by TUAN NGUYEN
                for (Integer i = 0; i < stmRowCount; ++i)
                {
                   ix = i * stmRowCount;
@@ -601,7 +635,8 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
                      aTilde[ix+j] = 0.0;
                }
 
-               // fill in the lower left quadrant of the upper 6x6 with the calculated gradient values
+					// Calculate A-tilde
+					// fill in the lower left quadrant of the upper 6x6 with the calculated gradient values
                ix = stmRowCount * 3;
                aTilde[ix]   = gradnew(0,0);
                aTilde[ix+1] = gradnew(0,1);
@@ -626,25 +661,32 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
                      deriv[i6+element] = aTilde[element];
                   }
                }
+
+					delete[] aTilde;                             // made changes by TUAN NGUYEN
+					i6 = i6 + stmSize;                           // made changes by TUAN NGUYEN
             }
 
-			delete [] aTilde;
+			   //delete [] aTilde;                             // made changes by TUAN NGUYEN
          }
 
          if (fillAMatrix)
          {
-            Integer stmSize = stmRowCount * stmRowCount;
-            Real *aTilde;
-            aTilde = new Real[stmSize];
-
             Integer element;
             // @todo Add the use of the GetAssociateIndex() method here to get index into state array
             //       (See assumption 1, above)
             if (n <= aMatrixCount)
             {
-               Integer ix, i6 = aMatrixStart + n * stmRowCount * stmRowCount;
+               // Integer ix, i6 = aMatrixStart + n * stmRowCount * stmRowCount;    // made changes by TUAN NGUYEN
+					Integer ix;                                                          // made changes by TUAN NGUYEN
 
-               // Calculate A-tilde
+					// Get spacecraft object                                             // made changes by TUAN NGUYEN
+					Spacecraft* sc = (Spacecraft*)scObjs[n];                             // made changes by TUAN NGUYEN
+
+					//Create aTilde                                                      // made changes by TUAN NGUYEN
+					stmRowCount = sc->GetIntegerParameter("FullSTMRowCount");    // made changes by TUAN NGUYEN
+					Integer stmSize = stmRowCount * stmRowCount;                         // made changes by TUAN NGUYEN
+					Real *aTilde;                                                        // made changes by TUAN NGUYEN
+					aTilde = new Real[stmSize];                                          // made changes by TUAN NGUYEN
                for (Integer i = 0; i < stmRowCount; ++i)
                {
                   ix = i * stmRowCount;
@@ -652,7 +694,8 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
                      aTilde[ix+j] = 0.0;
                }
 
-               // fill in the lower left quadrant of the upper 6x6 with the calculated gradient values
+					// Calculate A-tilde
+					// fill in the lower left quadrant of the upper 6x6 with the calculated gradient values
                ix = stmRowCount * 3;
                aTilde[ix]   = gradnew(0,0);
                aTilde[ix+1] = gradnew(0,1);
@@ -677,9 +720,12 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
                      deriv[i6+element] = aTilde[element];
                   }
                }
-            }
 
-			delete [] aTilde;
+					delete[] aTilde;                               // made changes by TUAN NGUYEN
+					i6 = i6 + stmSize;                             // made changes by TUAN NGUYEN
+				}
+
+			   //delete [] aTilde;                               // made changes by TUAN NGUYEN
          }
 
       }  // end for
@@ -1100,18 +1146,21 @@ bool GravityField::SetStringParameter(const Integer id,
                                "Please see the GMAT User's Guide for more information.\n");
                        }
                        TideModel = value;
+                       delete gm;
                        return true;
                    }
                    else
                    {
                       if (value == "SolidAndPole")
                       {
+                         delete gm;
                          throw ODEModelException(
                             "The selected PrimaryBody does not support the \"" +
                             value + "\" tide option.");
                       }
                       else
                       {
+                         delete gm;
                          throw ODEModelException(
                             "The selected PrimaryBody or loaded tide model "
                             "does not support the \"" +value + "\" tide option.");
@@ -1119,6 +1168,7 @@ bool GravityField::SetStringParameter(const Integer id,
                    }
                }
            }
+           delete gm;
            throw ODEModelException("The selected tide option \"" +
                value + "\" is invalid.");
        }
@@ -1220,17 +1270,17 @@ bool GravityField::SupportsDerivative(Gmat::StateElementId id)
  * vector, so that the derivative information can be placed in the correct place
  * in the derivative vector.
  *
- * @param id State Element ID for the derivative type
- * @param index Starting index in the state vector for this type of derivative
- * @param quantity Number of objects that supply this type of data
- * @param sizeOfType For sizable types, the size to use.  For example, for STM,
- *                   this is the number of rows or columns in the STM
+ * @param id         State Element ID for the derivative type
+ * @param index      Starting index in the state vector for this type of derivative
+ * @param quantity   Number of objects that supply this type of data
+ * @param totalSize  For sizable types, the size to use.  For example, for STM,
+ *                   this is the number of STM's elements
  *
  * @return true if the type is supported, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool GravityField::SetStart(Gmat::StateElementId id, Integer index,
-                      Integer quantity, Integer sizeOfType)
+                      Integer quantity, Integer totalSize)
 {
    #ifdef DEBUG_REGISTRATION
       MessageInterface::ShowMessage("GravityFiels setting start data for id = "
@@ -1253,7 +1303,7 @@ bool GravityField::SetStart(Gmat::StateElementId id, Integer index,
          stmCount       = quantity;
          stmStart       = index;
          fillSTM        = true;
-         stmRowCount    = Integer(sqrt((Real)sizeOfType));
+			totalSTMSize   = totalSize;                      // made changes by TUAN NGUYEN
          retval         = true;
          break;
 
@@ -1261,7 +1311,7 @@ bool GravityField::SetStart(Gmat::StateElementId id, Integer index,
          aMatrixCount   = quantity;
          aMatrixStart   = index;
          fillAMatrix    = true;
-         stmRowCount    = Integer(sqrt((Real)sizeOfType));
+			totalSTMSize = totalSize;                      // made changes by TUAN NGUYEN
          retval         = true;
          break;
 
@@ -1381,14 +1431,15 @@ void GravityField::Calculate (Real dt, Real state[6],
    if (hasPrecisionTime)
    {
       jdayGT = epochGT + GmatTimeConstants::JD_JAN_5_1941;
+      jdayGT.AddSeconds(elapsedTime);
       jdayGT.AddSeconds(dt);
-      nowGT = epochGT; nowGT.AddSeconds(dt);
+      nowGT = epochGT; nowGT.AddSeconds(elapsedTime); nowGT.AddSeconds(dt);
    }
    else
    {
       jday = epoch + GmatTimeConstants::JD_JAN_5_1941 +
-         dt / GmatTimeConstants::SECS_PER_DAY;
-      now = epoch + dt / GmatTimeConstants::SECS_PER_DAY;
+         (elapsedTime + dt) / GmatTimeConstants::SECS_PER_DAY;
+      now = epoch + (elapsedTime + dt) / GmatTimeConstants::SECS_PER_DAY;
       jdayGT = jday;
       nowGT = now;
    }
@@ -1432,7 +1483,7 @@ void GravityField::Calculate (Real dt, Real state[6],
    if (tideLevel > 0)
       {
       // Always do Sun
-      GetTideData (dt,SolarSystem::SUN_NAME,sunpos,sunmukm);
+      GetTideData (dt,GmatSolarSystemDefaults::SUN_NAME,sunpos,sunmukm);
       // Other is central body for any moon, or Moon for Earth
       std::string cb = body->GetCentralBody();
       if (bodyName == GmatSolarSystemDefaults::EARTH_NAME) // We are Earth, do moon
@@ -1450,13 +1501,13 @@ void GravityField::Calculate (Real dt, Real state[6],
    GmatTime utcmjdGT;
    if (hasPrecisionTime)
    {
-      utcmjdGT = TimeConverterUtil::Convert(nowGT, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD, 
+      utcmjdGT = theTimeConverter->Convert(nowGT, TimeSystemConverter::A1MJD, TimeSystemConverter::UTCMJD,
          GmatTimeConstants::JD_JAN_5_1941);
       eop->GetPolarMotionAndLod(utcmjdGT, xp, yp, lod);
    }
    else
    {
-      utcmjd = TimeConverterUtil::Convert(now, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
+      utcmjd = theTimeConverter->Convert(now, TimeSystemConverter::A1MJD, TimeSystemConverter::UTCMJD,
          GmatTimeConstants::JD_JAN_5_1941);
       eop->GetPolarMotionAndLod(utcmjd, xp, yp, lod);
    }

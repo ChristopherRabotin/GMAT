@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -57,6 +57,7 @@ QRFactorization::QRFactorization(bool pivotOption)
 //------------------------------------------------------------------------------
 QRFactorization::QRFactorization(const QRFactorization &qrfactorizationgmat)
 {
+   usePivot = qrfactorizationgmat.usePivot;
 }
 
 
@@ -85,13 +86,15 @@ QRFactorization& QRFactorization::operator=(const QRFactorization
    {
       //Call base class method
       MatrixFactorization::operator=(qrfactorization);
+
+      usePivot = qrfactorization.usePivot;
    }
 
    return *this;
 }
 
 //------------------------------------------------------------------------------
-// void Factor(const Rmatrix A, Rmatrix &R, Rmatrix &Q)
+// void Factor(const Rmatrix &A, Rmatrix &R, Rmatrix &Q)
 //------------------------------------------------------------------------------
 /**
 * Method used to factor the matrix with QR factorization (A = QR) based off
@@ -105,7 +108,7 @@ QRFactorization& QRFactorization::operator=(const QRFactorization
 *        rows in A
 */
 //------------------------------------------------------------------------------
-void QRFactorization::Factor(const Rmatrix A, Rmatrix &R, Rmatrix &Q)
+void QRFactorization::Factor(const Rmatrix &A, Rmatrix &R, Rmatrix &Q)
 {
    m = A.GetNumRows();
    n = A.GetNumColumns();

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -97,9 +97,13 @@ protected:
    void InitializeAllOtherObjects(ObjectMap *objMap);
    void InitializeInternalObjects();
    void InitializeCoordinateSystem(GmatBase *obj);
+
+   void InitializePlate(GmatBase *obj);                          // made changes by TUAN NGUYEN
+   
    void BuildReferencesAndInitialize(GmatBase *obj);
 public:
    void BuildReferences(GmatBase *obj);
+   bool SetupEquation(GmatBase *obj);
 protected:
    void SetRefFromName(GmatBase *obj, const std::string &oName);
 public:

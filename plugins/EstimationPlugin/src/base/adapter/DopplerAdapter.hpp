@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -77,13 +77,15 @@ public:
                                      const Integer index);
 
    virtual bool         SetMeasurement(MeasureModel* meas);
-   virtual void         SetPropagator(PropSetup* ps);
+   virtual void         SetPropagators(std::vector<PropSetup*> *ps,
+                           std::map<std::string, StringArray> *spMap);
 
    virtual void         SetCorrection(const std::string& correctionName,
                                       const std::string& correctionType);
 
 
    virtual bool         Initialize();
+   virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
 
    // Preserve interfaces in the older measurement model code
    virtual const MeasurementData&

@@ -13,7 +13,7 @@
 // Modification History      : 5/20/2003 - D. Conway, Thinking Systems, Inc.
 //                             Original delivery
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -42,6 +42,19 @@
 #include <map>                  // For std::map
 #include <stack>                // for std::stack
 #include <list>                 // To fix VS DLL import/export issues
+
+// Includes and macros used to make generic argument passing via C++17 or Boost
+#ifdef GMAT_USE_BOOST_VARIANT
+   #include <boost/variant.hpp>
+   #define GmatVariant boost::variant
+   #define VarGet boost::get
+   #define VarIndex which
+#else
+   #include <variant>
+   #define GmatVariant std::variant
+   #define VarGet std::get
+   #define VarIndex index
+#endif
 
 
 #ifdef _WIN32  // Windows
@@ -119,6 +132,11 @@ typedef Real GmatEpoch;
 /// GMAT's Radians representation
 typedef Real Radians;
 
+// Generic container; Changes here require changes in GmatBase::GetGenericType()
+typedef GmatVariant<Real, Integer, std::string, RealArray, IntegerArray,
+                StringArray> Generic;
+typedef std::vector<Generic>                    GenericArray;
+
 
 namespace Gmat
 {
@@ -135,6 +153,7 @@ namespace Gmat
       UNSIGNED_INTARRAY_TYPE,
       INTARRAY_TYPE,
       REAL_TYPE,
+      REALARRAY_TYPE,
       REAL_ELEMENT_TYPE,
       STRING_TYPE,
       STRINGARRAY_TYPE,
@@ -150,6 +169,8 @@ namespace Gmat
       FILENAME_TYPE,
       COLOR_TYPE,
       GMATTIME_TYPE,
+      GENERIC_TYPE,
+      EQUATION_TYPE,
       TypeCount,
       UNKNOWN_PARAMETER_TYPE = -1,
       PARAMETER_REMOVED = -3,   // For parameters will be removed in the future
@@ -180,6 +201,7 @@ namespace Gmat
    enum WrapperDataType
    {
       NUMBER_WT,          // Real, Integer
+      VECTOR_WT,          // Rvector
       MATRIX_WT,          // Rmatrix
       STRING_WT,          // a raw text string
       STRING_OBJECT_WT,   // name of a String Object
@@ -192,6 +214,8 @@ namespace Gmat
       BOOLEAN_WT,
       INTEGER_WT,
       ON_OFF_WT,
+      EQUATION_WT,
+//      GENERIC_WT,
       UNKNOWN_WRAPPER_TYPE = -2
    };
 
@@ -201,129 +225,5 @@ typedef std::vector<UnsignedInt>           ObjectTypeArray;
 typedef std::vector<Gmat::WrapperDataType> WrapperTypeArray;
 typedef std::map<std::string, UnsignedInt> ObjectTypeMap;
 typedef std::map<UnsignedInt, StringArray> ObjectTypeArrayMap;
-
-#ifdef EXPORT_TEMPLATES
-
-   /**
-    * The following code cleans up template import/export issues between GMAT and 
-    * Visual Studio 2010.  These blocks of code might result in multiply defined
-    * structures when using plugin libraries, or when refactoring the base code 
-    * into separate libraries.  If that happens, they need to be moved into a
-    * .cpp file that is only built in the base library.
-    */
-
-    // Instantiate STL template classes used in GMAT  
-    // This does not create an object. It only forces the generation of all
-    // of the members of the listed classes. It exports them from the DLL 
-    // and imports them into the .exe file.
-
-    // This fixes std::string:
-    // Only do this if the export is not already in a different module (wx, I'm looking at you!)
-    #ifdef IMPEXP_STDSTRING
-        EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<char>;
-        EXPIMP_TEMPLATE template class DECLSPECIFIER std::basic_string<char, std::char_traits<char>, std::allocator<char>>;
-    #endif
-
-//    const std::basic_string::size_type std::basic_string<char, std::char_traits<char>, std::allocator<char>>::npos = size_t(-1); 
-//    EXPIMP_TEMPLATE template const typename DECLSPECIFIER std::basic_string<char, std::char_traits<char>, std::allocator<char>>::npos;
-
-
- //   template<class _Elem,
-	//class _Traits,
-	//class _Alloc>
-	//_PGLOBAL const typename basic_string<_Elem, _Traits, _Alloc>::size_type
-	//	basic_string<_Elem, _Traits, _Alloc>::npos =
-	//		(typename basic_string<_Elem, _Traits, _Alloc>::size_type)(-1);
-
-    // Fix StringArray:
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<std::string>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<std::string>;
-
-    // Fix vector of StringArray
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<StringArray>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<StringArray>;
-
-    // Fix ObjectArray
-    class GmatBase;     // forward reference
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<GmatBase*>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<GmatBase*>;
-
-    // Fix IntegerArray
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<Integer>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<Integer>;
-
-    // Fix RealArray
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<Real>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<Real>;
-
-    // Fix UnsignedIntArray
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<UnsignedInt>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<UnsignedInt>;
-
-    // Fix vector of bools
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<bool>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<bool>;
-
-    // Fix ObjectType vector
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<UnsignedInt>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<UnsignedInt>;
-
-    // Fix WrapperDataType
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<Gmat::WrapperDataType>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<Gmat::WrapperDataType>;
-
-    // Fix vector of IntegerArrays
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<IntegerArray>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<IntegerArray>;
-
-
-    // Maps -- still need to be addressed
-    //EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<std::string>;
-    //EXPIMP_TEMPLATE template struct DECLSPECIFIER std::less< std::string >;
-    //EXPIMP_TEMPLATE template struct DECLSPECIFIER std::pair< std::string,std::string >;
-    //EXPIMP_TEMPLATE template class  DECLSPECIFIER std::allocator<std::pair<const std::string,std::string> >;
-    //EXPIMP_TEMPLATE template class  DECLSPECIFIER std::_Tmap_traits<std::string,std::string,std::less<std::string>, std::allocator<std::pair<const std::string,std::string> >,false>;
-    //EXPIMP_TEMPLATE template class  DECLSPECIFIER std::_Tree_nod<std::_Tmap_traits<std::string,std::string,std::less<std::string>, std::allocator<std::pair<const std::string,std::string> >,false> >;
-    //EXPIMP_TEMPLATE template class  DECLSPECIFIER std::allocator<std::_Tree_nod<std::_Tmap_traits<std::string,std::string,std::less<std::string>, std::allocator<std::pair<const std::string,std::string> >,false> > >;
-    //EXPIMP_TEMPLATE template class  DECLSPECIFIER std::_Tree_val<std::_Tmap_traits<std::string,std::string,std::less<std::string>, std::allocator<std::pair<const std::string,std::string> >,false> >;
-    //EXPIMP_TEMPLATE template class  DECLSPECIFIER std::map<std::string, std::string, std::less< std::string >, std::allocator<std::pair<const std::string,std::string> > >;
-
-/*
-   #define EXPORT_STL_MAP( mapkey, mapvalue ) \
-     template struct DECLSPECIFIER std::pair< mapkey,mapvalue >; \
-     template class DECLSPECIFIER std::allocator< \
-       std::pair<const mapkey,mapvalue> >; \
-     template struct DECLSPECIFIER std::less< mapkey >; \
-     template class DECLSPECIFIER std::allocator< \
-       std::_Tree_ptr<std::_Tmap_traits<mapkey,mapvalue,std::less<mapkey>, \
-       std::allocator<std::pair<const mapkey,mapvalue> >,false> > >; \
-     template class DECLSPECIFIER std::allocator< \
-       std::_Tree_nod<std::_Tmap_traits<mapkey,mapvalue,std::less<mapkey>, \
-       std::allocator<std::pair<const mapkey,mapvalue> >,false> > >; \
-     template class DECLSPECIFIER std::_Tree_nod< \
-       std::_Tmap_traits<mapkey,mapvalue,std::less<mapkey>, \
-       std::allocator<std::pair<const mapkey,mapvalue> >,false> >; \
-     template class DECLSPECIFIER std::_Tree_ptr< \
-       std::_Tmap_traits<mapkey,mapvalue,std::less<mapkey>, \
-       std::allocator<std::pair<const mapkey,mapvalue> >,false> >; \
-     template class DECLSPECIFIER std::_Tree_val< \
-       std::_Tmap_traits<mapkey,mapvalue,std::less<mapkey>, \
-   	std::allocator<std::pair<const mapkey,mapvalue> >,false> >; \
-     template class DECLSPECIFIER std::map< \
-       mapkey, mapvalue, std::less< mapkey >, \
-       std::allocator<std::pair<const mapkey,mapvalue> > >;
-
-   EXPORT_STL_MAP(std::string, std::string)
-*/
-
-    // Here are lists of strings:
-    //EXPIMP_TEMPLATE template class DECLSPECIFIER std::list<std::string>;
-
-
-    // other examples:
-//    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<int>;
-//    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<char>;
-
-#endif
 
 #endif //UTILDEFS_HPP

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -24,6 +24,7 @@
 #include "MeasurementException.hpp"
 
 #include "PhysicalSignal.hpp"
+#include "PassivePhysicalSignal.hpp"
 //#include "SinglePointSignal.hpp"
 #include "ObservationData.hpp"
 
@@ -47,6 +48,16 @@
 //#define DEBUG_DERIVATIVE
 //#define DEBUG_CALCULATE_MEASUREMENT
 //#define DEBUG_OFFSET
+//#define DEBUG_API
+//#define DEBUG_TRANSIENT_FORCES
+
+#ifdef DEBUG_API
+   #include <fstream>
+   std::ofstream apimmFile;
+   bool apimmFileOpen = false;
+#endif
+
+
 
 //------------------------------------------------------------------------------
 // Static data
@@ -74,9 +85,10 @@ MeasureModel::PARAMETER_TYPE[MeasurementParamCount - GmatBaseParamCount] =
  * Constructor
  *
  * @param name The scripted name (when needed) for the measurement model
+   @param usesPassiveSignal flag that identifies the model as a passive signal if true
  */
 //------------------------------------------------------------------------------
-MeasureModel::MeasureModel(const std::string &name) :
+MeasureModel::MeasureModel(const std::string &name, const bool usesPassiveSignal) :
    GmatBase          (Gmat::MEASUREMENT_MODEL, "SignalBasedMeasurement", name),
    feasible          (false),
    withLighttime     (true),
@@ -86,14 +98,23 @@ MeasureModel::MeasureModel(const std::string &name) :
    epochIsAtEnd      (true),
    countInterval     (0.0),
    isPhysical        (true),
-   solarsys          (NULL)
+   isPassive         (usesPassiveSignal),
+   solarsys          (NULL),
+   transientForces   (NULL)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("MeasureModel default constructor  <%p>\n", this);
 #endif
-
+   
+   #ifdef DEBUG_API
+      if (!apimmFileOpen)
+      {
+         apimmFile.open("MeasureModel_API.txt");
+         apimmFile << "API Debug data for MeasureModel\n" << std::endl;
+         apimmFileOpen = true;
+      }
+   #endif
 }
-
 
 //------------------------------------------------------------------------------
 // ~MeasureModel()
@@ -107,16 +128,16 @@ MeasureModel::~MeasureModel()
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("MeasureModel default destructor  <%p>\n", this);
 #endif
-   // Delete all objects in propMap:
-   for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin(); i != propMap.end(); ++i)
-   {
-      if (i->second)
-         delete i->second;
-   }
-   propMap.clear();
 
-   // Delete all object in participantLists:
-   for (UnsignedInt i = 0 ; i < participantLists.size(); ++i)
+   CleanUp();
+}
+
+
+// made changes by TUAN NGUYEN
+void MeasureModel::CleanUp()
+{
+   // clean up std::vector<StringArray*> participantLists;
+   for (UnsignedInt i = 0; i < participantLists.size(); ++i)
    {
       if (participantLists[i])
       {
@@ -126,27 +147,27 @@ MeasureModel::~MeasureModel()
    }
    participantLists.clear();
 
-   // Delete all object in participants:
-   for (UnsignedInt i = 0 ; i < participants.size(); ++i)
+   // clean up std::vector<ObjectArray*> participants;
+   for (UnsignedInt i = 0; i < participants.size(); ++i)
    {
       if (participants[i])
       {
          participants[i]->clear();
-         delete participants[i];      // It does not need to delete all objects in object array participants[i]
+         delete participants[i];
       }
    }
    participants.clear();
-   candidates.clear();
 
-   // Delete all object in signalPaths:
-   for (UnsignedInt i = 0 ; i < signalPaths.size(); ++i)
-   {
-      if (signalPaths[i])
-         delete signalPaths[i];      // It deletes all legs in signal path ith
-   }
-   signalPaths.clear();
-   theData.clear();
+   // clean up std::map<SpacePoint*, PropSetup*> propMap;
+   // The step to delete PropSetup object is handled by the delete of createdObjects
+   //for (std::map<SpacePoint*, PropSetup*>::iterator i = propMap.begin(); i != propMap.end(); ++i)
+   //{
+   //   if (i->second)
+   //      delete i->second;
+   //}
+   propMap.clear();
 
+   // clean up std::vector<RealArray> theDataDerivatives;
    for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
    {
       theDataDerivatives[i].clear();
@@ -155,7 +176,30 @@ MeasureModel::~MeasureModel()
 
    correctionTypeList.clear();
    correctionModelList.clear();
+   navLog = NULL;
+   solarsys = NULL;
 
+   // clean up ObjectArray candidates;
+   candidates.clear();
+
+   // clean up std::vector<SignalBase*> signalPaths;
+   // The delete of SignalBase objects is handled by the delete of createdObjcects
+   signalPaths.clear();
+
+   // clean up std::vector<SignalData*> theData;         // theData[i] points to theData of the head of signalPaths[i]
+   // all SignalData objects in theData are declared in SignalBase objects. When SignalBase objects are deleted, SignalData objects will be deleted automatically as well.
+   theData.clear();
+
+   // clean up std::vector<PhysicalModel *> *transientForces;
+   transientForces = NULL;
+
+   #ifdef DEBUG_API
+      if (apimmFileOpen)
+      {
+         apimmFile.close();
+         apimmFileOpen = false;
+      }
+   #endif
 }
 
 
@@ -176,7 +220,9 @@ MeasureModel::MeasureModel(const MeasureModel& mm) :
    navLog            (mm.navLog),
    logLevel          (mm.logLevel),
    isPhysical        (mm.isPhysical),
+   isPassive         (mm.isPassive),
    solarsys          (mm.solarsys),
+   transientForces   (NULL),
    epochIsAtEnd      (mm.epochIsAtEnd),
    countInterval     (mm.countInterval),
    correctionTypeList(mm.correctionTypeList),
@@ -210,6 +256,7 @@ MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
    {
       GmatBase::operator=(mm);
 
+      // all SignalData objects in theData are declared in SignalBase objects. When SignalBase objects are deleted, SignalData objects will be deleted automatically as well.
       theData.clear();
 
       feasible            = false;
@@ -217,22 +264,25 @@ MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
       navLog              = mm.navLog;
       logLevel            = mm.logLevel;
       isPhysical          = mm.isPhysical;
+      isPassive           = mm.isPassive;
       solarsys            = mm.solarsys;
       epochIsAtEnd        = mm.epochIsAtEnd;
       countInterval       = mm.countInterval;
       correctionTypeList  = mm.correctionTypeList;
       correctionModelList = mm.correctionModelList;
+      transientForces     = NULL;
 
-      for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
-            i != propMap.end(); ++i)
-      {
-         if (i->second)
-         {
-            delete i->second;
-            i->second = NULL;
-         }
-      }
+      //for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();        // made changes by TUAN NGUYEN
+      //      i != propMap.end(); ++i)                                              // made changes by TUAN NGUYEN
+      //{                                                                           // made changes by TUAN NGUYEN
+      //   if (i->second)                                                           // made changes by TUAN NGUYEN
+      //   {                                                                        // made changes by TUAN NGUYEN
+      //      delete i->second;                                                     // made changes by TUAN NGUYEN
+      //      i->second = NULL;                                                     // made changes by TUAN NGUYEN
+      //   }                                                                        // made changes by TUAN NGUYEN
+      //}                                                                           // made changes by TUAN NGUYEN
       propMap.clear();
+
       propsNeedInit = false;
    }
 
@@ -761,7 +811,7 @@ bool MeasureModel::SetRefObject(GmatBase* obj, const UnsignedInt type,
             candidates.end())
       {
          #ifdef DEBUG_INITIALIZATION
-            MessageInterface::ShowMessage("Adding object %s to %s.cadidates\n",
+            MessageInterface::ShowMessage("Adding object %s to %s.candidates\n",
                   obj->GetName().c_str(), instanceName.c_str());
          #endif
          candidates.push_back(obj);
@@ -784,15 +834,37 @@ bool MeasureModel::SetRefObject(GmatBase* obj, const UnsignedInt type,
  * @todo: Extend this code to support multiple propagators
  */
 //------------------------------------------------------------------------------
-void MeasureModel::SetPropagator(PropSetup* ps)
+void MeasureModel::SetPropagators(std::vector<PropSetup*> *ps,
+      std::map<std::string, StringArray> *spMap)
 {
-#ifdef DEBUG_SET_PARAMETER
-   MessageInterface::ShowMessage("MeasureModel<%p>::SetPropagator(ps = <%p>)\n", this, ps);
-#else
-   #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("MeasureModel<%p>::SetPropagator(ps = <%p>)\n", this, ps);
+   #ifdef DEBUG_SET_PARAMETER
+      MessageInterface::ShowMessage("MeasureModel<%p>::SetPropagators(ps = <%p>)\n", this, ps);
+   #else
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("MeasureModel<%p>::SetPropagators(ps = <%p>)\n", this, ps);
+      #endif
    #endif
-#endif
+
+   std::string defaultPropName = (*ps)[0]->GetName();
+
+   // Invert the prop to (multiple) sat map
+   std::map<std::string, std::string> satToPropMap;
+   for (UnsignedInt i = 0; i < ps->size(); ++i)
+   {
+      std::string propName = (*ps)[i]->GetName();
+      StringArray satNames = (*spMap)[propName];
+
+      for (UnsignedInt j = 0; j < satNames.size(); ++j)
+      {
+         if (satToPropMap.find(satNames[j]) == satToPropMap.end())
+            satToPropMap[satNames[j]] = propName;
+         else
+            if (satToPropMap[satNames[j]] != propName)
+               throw MeasurementException("The spacecraft " + satNames[j] +
+                     " is set to propagate with more than one propagator, "
+                     "which is not allowed.");
+      }
+   }
    
    for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
          i != propMap.end(); ++i)
@@ -801,23 +873,67 @@ void MeasureModel::SetPropagator(PropSetup* ps)
 
       if (obj->IsOfType(Gmat::SPACEOBJECT))
       {
-         // Clone the propagator for each SpaceObject
-         PropSetup *propagator = (PropSetup*)ps->Clone();
-         if (propagator)
+         // Find the name of the propagator assigned to this spaceobject
+         std::string propToUse = spMap->begin()->first;
+         std::string scName = obj->GetName();
+
+         if (satToPropMap.find(scName) != satToPropMap.end())
+            propToUse = satToPropMap[scName];
+
+         // Locate it in the propsetup list
+         PropSetup *thePropagator = nullptr;
+         for (UnsignedInt i = 0; i < ps->size(); ++i)
          {
-            // Set flag to tell propagator using precision time
-            propagator->SetPrecisionTimeFlag(true);
-
-            propMap[obj] = propagator;
-            propsNeedInit = true;
-            for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
+            if ((*ps)[i]->GetName() == propToUse)
             {
-               signalPaths[i]->SetPropagator(propagator, obj);
+               thePropagator = (*ps)[i];
+               break;
+            }
+         }
 
+         if (thePropagator)
+         {
+            // Clone it, and manage the clone in GmatBase code
+            PropSetup *propagator = (PropSetup*)(thePropagator->Clone());
+            createdObjects.push_back(propagator);
+
+            if (propagator)
+            {
+               // Set flag to tell propagator using precision time
+               propagator->SetPrecisionTimeFlag(true);
+
+               propMap[obj] = propagator;
+               propsNeedInit = true;
+               for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
+               {
+                  signalPaths[i]->SetPropagator(propagator, obj);
+               }
             }
          }
       }
    }
+}
+
+
+//------------------------------------------------------------------------------
+//  void SetTransientForces(std::vector<PhysicalModel*> *tf)
+//------------------------------------------------------------------------------
+/**
+* Passes the transient force vector into the measure model
+*
+* The transient force vector is a set of models used in GMAT's ODEModel for
+* affects that are turned on and off over the course of a mission.  An example
+* of a transient force is a finite burn, which is toggled by the
+* BeginFiniteBurn and EndFiniteBurn commands.  These components are only used
+* by commands that need them.  Typical usage is found in the propagation
+* enabled commands.
+*
+* @param tf The vector of transient forces
+*/
+//------------------------------------------------------------------------------
+void MeasureModel::SetTransientForces(std::vector<PhysicalModel*> *tf)
+{
+    transientForces = tf;
 }
 
 
@@ -834,6 +950,13 @@ bool MeasureModel::Initialize()
 {
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("Start MeasurementModel<%s,%p>::Initialize()\n", GetName().c_str(), this);
+   #endif
+
+   #ifdef DEBUG_API
+      if (apimmFileOpen)
+      {
+         apimmFile << "   Calling MeasureModel::Initialize()" << std::endl;
+      }
    #endif
 
    bool retval = false;
@@ -861,16 +984,24 @@ bool MeasureModel::Initialize()
             delete participants[i];
          }
          participants.clear();
-         for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
-            delete signalPaths[i];
+
+         //for (UnsignedInt i = 0; i < signalPaths.size(); ++i)    // made changes by TUAN NGUYEN
+         //{                                                       // made changes by TUAN NGUYEN
+         //   if (signalPaths[i])                                  // made changes by TUAN NGUYEN
+         //      delete signalPaths[i];                            // made changes by TUAN NGUYEN
+         //}                                                       // made changes by TUAN NGUYEN
          signalPaths.clear();
+
+         // all SignalData objects in theData are declared in SignalBase objects. When SignalBase objects are deleted, SignalData objects will be deleted automatically as well.
          theData.clear();
 
          for (UnsignedInt i = 0; i < participantLists.size(); ++i)
          {
-            participants.push_back(new ObjectArray);
+            // participants.push_back(new ObjectArray);            // made changes by TUAN NGUYEN
             if (participantLists[i]->size() < 2)
                throw MeasurementException("Participant list size is too short");
+
+            participants.push_back(new ObjectArray);              // made changes by TUAN NGUYEN
          }
 
          // Put all participants in place for the model
@@ -904,12 +1035,20 @@ bool MeasureModel::Initialize()
             for (UnsignedInt i = 0; i < participantLists.size(); ++i)
             {
                SignalBase *head = NULL;
+               unsigned long strandId = SignalDataCache::StrandToHash(participantLists[i]);
+
                for (UnsignedInt j = 0; j < participantLists[i]->size()-1; ++j)
                {
                   // 1. Create a signal leg
                   SignalBase *sb = NULL;
-                  if (isPhysical)
-                     sb = new PhysicalSignal("");
+                  if (isPhysical && isPassive)
+                     sb = new PassivePhysicalSignal("");
+                  else if (isPhysical)
+                  {
+                     sb = new PhysicalSignal("Signal","");
+                     // It is used to book keeping all created objects in order to clean up    // made changes by TUAN NGUYEN
+                     createdObjects.push_back((GmatBase*)sb);                                  // made changes by TUAN NGUYEN
+                  }
                   else
                   {
                      // The signals are single point
@@ -926,6 +1065,7 @@ bool MeasureModel::Initialize()
                         sb->SetProgressReporter(navLog);
                      sb->SetSolarSystem(solarsys);
                      sb->UsesLighttime(withLighttime);
+                     sb->SetStrandId(strandId);
 
                      // Set name for transmit participant and receive participant 
                      if (sb->SetTransmitParticipantName(
@@ -973,7 +1113,6 @@ bool MeasureModel::Initialize()
                      {
                         signalPaths.push_back(sb);
                         head = sb;
-                        //theData.push_back(&(sb->GetSignalData()));
                         theData.push_back(sb->GetSignalDataObject());
                      }
                      else
@@ -997,27 +1136,37 @@ bool MeasureModel::Initialize()
                {
                   // clone all ErrorModel objects belonging to groundstation firstPart
                   std::string spacecraftName = "";
-                  if (participants[i]->at(1)->IsOfType(Gmat::SPACECRAFT))
-                     spacecraftName = participants[i]->at(1)->GetName();
+                  std::string spacecraftId = "";
+                  GmatBase* obj = participants[i]->at(1);
+                  if (obj->IsOfType(Gmat::SPACECRAFT))
+                  {
+                     spacecraftName = obj->GetName();
+                     spacecraftId = obj->GetStringParameter("Id");
+                  }
                   else
                      throw MeasurementException("Error: It has 2 ground stations (" + 
-                          firstPart->GetName() + ", " + participants[i]->at(1)->GetName() + 
+                          firstPart->GetName() + ", " + obj->GetName() +
                           ") next to each other in signal path.\n");
 
-                  ((GroundstationInterface*) firstPart)->CreateErrorModelForSignalPath(spacecraftName);
+                  ((GroundstationInterface*) firstPart)->CreateErrorModelForSignalPath(spacecraftName, spacecraftId);
                }
                else
                {
                   // clone all ErrorModel objects belonging to groundstation firstPart
                   std::string spacecraftName = "";
-                  if (participants[i]->at(participants[i]->size()-2)->IsOfType(Gmat::SPACECRAFT))
-                     spacecraftName = participants[i]->at(participants[i]->size()-2)->GetName();
+                  std::string spacecraftId = "";
+                  GmatBase* obj = participants[i]->at(participants[i]->size() - 2);
+                  if (obj->IsOfType(Gmat::SPACECRAFT))
+                  {
+                     spacecraftName = obj->GetName();
+                     spacecraftId = obj->GetStringParameter("Id");
+                  }
                   else
                      throw MeasurementException("Error: It has 2 ground stations (" + 
-                            participants[i]->at(participants[i]->size()-2)->GetName() + ", " + 
+                            obj->GetName() + ", " + 
                             lastPart->GetName() + ") next to each other in signal path.\n");
 
-                  ((GroundstationInterface*) lastPart)->CreateErrorModelForSignalPath(spacecraftName);
+                  ((GroundstationInterface*) lastPart)->CreateErrorModelForSignalPath(spacecraftName, spacecraftId);
                }
             }
 
@@ -1057,6 +1206,15 @@ bool MeasureModel::Initialize()
          throw MeasurementException("Measurement has no participants");
       }
    }
+
+   #ifdef DEBUG_API
+      if (apimmFileOpen)
+      {
+         apimmFile << "   Leaving " << (retval ? "successful" : "unsuccessful")
+                 << " call to MeasureModel::Initialize()" << std::endl;
+      }
+   #endif
+
 
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("End MeasurementModel<%s,%p>::Initialize()\n", GetName().c_str(), this);
@@ -1167,10 +1325,23 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
       MessageInterface::ShowMessage("Calculating Signal Data in MeasureModel\n");
    #endif
 
+   #ifdef DEBUG_API
+      if (apimmFileOpen)
+      {
+         apimmFile << "   Calling MeasureModel::CalculateMeasurement()" << std::endl;
+      }
+   #endif
+
    bool retval = false;
    feasible = true;
    
    // 1. Prepare the propagators
+#ifdef DEBUG_API
+   if (apimmFileOpen)
+   {
+      apimmFile << "   Prepping to prop" << std::endl;
+   }
+#endif
    #ifdef DEBUG_TIMING
       MessageInterface::ShowMessage("1. Prepare the propagators\n");
    #endif
@@ -1178,6 +1349,14 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
    //   PrepareToPropagate();
    PrepareToPropagate();
 
+   // 1.1. Save the states of the objects being propagated, as they can be changed during calculation of the measurement values
+   std::vector<bool> precTimeVec;
+   std::vector<GmatEpoch> epochVec;
+   std::vector<GmatTime> epochGTVec;
+   std::vector<Real> valsVec;
+   
+   SaveState(precTimeVec, epochVec, epochGTVec, valsVec);
+   
    ///// Clean up the assumption that epoch is at the end
    //bool epochIsAtEnd = true;
 
@@ -1185,6 +1364,13 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
    #ifdef DEBUG_TIMING
       MessageInterface::ShowMessage("2. Find the measurement epoch needed for the computation\n");
    #endif
+
+#ifdef DEBUG_API
+   if (apimmFileOpen)
+   {
+      apimmFile << "   Finding the epoch" << std::endl;
+   }
+#endif
 
    GmatTime forEpoch;
    if (forObservation)
@@ -1224,6 +1410,12 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
    #ifdef DEBUG_TIMING
       MessageInterface::ShowMessage("3. Synchronizing in MeasureModel at time = %s\n", forEpoch.ToString().c_str());
    #endif
+#ifdef DEBUG_API
+   if (apimmFileOpen)
+   {
+      apimmFile << "   Getting in sync" << std::endl;
+   }
+#endif
 
    for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
          i != propMap.end(); ++i)
@@ -1259,6 +1451,12 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
      
       MessageInterface::ShowMessage("*************************************************************\n");
    #endif
+#ifdef DEBUG_API
+   if (apimmFileOpen)
+   {
+      apimmFile << "   Running the numbers" << std::endl;
+   }
+#endif
    
    SignalBase *leg, *lastleg, *firstleg;
    for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
@@ -1286,13 +1484,32 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
       #ifdef DEBUG_TIMING
          MessageInterface::ShowMessage("4.1. Initialize all signal legs in signal path %d:\n", i);
       #endif
+#ifdef DEBUG_API
+   if (apimmFileOpen)
+   {
+      apimmFile << "      Initing signal paths" << std::endl;
+   }
+#endif
       leg = signalPaths[i];
+#ifdef DEBUG_API
+   if (apimmFileOpen)
+   {
+      apimmFile << "         Leg " << i << " named " << leg->GetName()
+                << " with type " << leg->GetTypeName() << std::endl;
+   }
+#endif
       leg->InitializeSignal(epochIsAtEnd);
 
       // 4.2. Compute hardware delay (in forward direction of signal path). It has to be specified before running ModelSignal 
       #ifdef DEBUG_TIMING
          MessageInterface::ShowMessage("4.2. Calculate hardware delays in signal path %d:\n", i);
       #endif
+#ifdef DEBUG_API
+   if (apimmFileOpen)
+   {
+      apimmFile << "      Managing hardware delays" << std::endl;
+   }
+#endif
       leg = firstleg = lastleg = signalPaths[i];
       while(leg != NULL)
       {
@@ -1319,6 +1536,12 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
       // 4.3. Sync transmitter and receiver epochs to forEpoch, and Spacecraft state
       // data to the state known in the PropSetup for the starting Signal
       leg = signalPaths[i];
+#ifdef DEBUG_API
+   if (apimmFileOpen)
+   {
+      apimmFile << "      Syncing transmitters and receivers" << std::endl;
+   }
+#endif
 
       /// @todo Adjust the following code for multiple spacecraft
 
@@ -1332,12 +1555,19 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
             // this spacecraft's state presents in MJ2000Eq with origin at ForceModel.CentralBody
             const Real* propState =
                propMap[sdObj->tNode]->GetPropagator()->AccessOutState();
-            Rvector6 state(propState);        // state of spacecrat presenting in MJ2000Eq coordinate system with origin at ForceModel.CentralBody
+            Rvector6 state(propState);        // state of spacecraft presenting in MJ2000Eq coordinate system with origin at ForceModel.CentralBody
 
             // This step is used to convert spacecraft's state to Spacecraft.CoordinateSystem                                                                          // fix bug GMT-5364
             SpacePoint* spacecraftOrigin = ((Spacecraft*)(sdObj->tNode))->GetOrigin();                 // the origin of the transmit spacecraft's cooridinate system   // fix bug GMT-5364
-            SpacePoint* forcemodelOrigin = propMap[sdObj->tNode]->GetODEModel()->GetForceOrigin();     // the origin of the coordinate system used in forcemodel       // fix bug GMT-5364
-            state = state + (forcemodelOrigin->GetMJ2000PrecState(sdObj->tPrecTime) - spacecraftOrigin->GetMJ2000PrecState(sdObj->tPrecTime));                         // fix bug GMT-5364
+
+
+            SpacePoint* propOrigin = nullptr;
+            if (propMap[sdObj->tNode]->GetPropagator()->UsesODEModel())
+               propOrigin = propMap[sdObj->tNode]->GetODEModel()->GetForceOrigin();     // the origin of the coordinate system used in forcemodel       // fix bug GMT-5364
+            else
+               propOrigin = propMap[sdObj->tNode]->GetPropagator()->GetPropOrigin();
+
+            state = state + (propOrigin->GetMJ2000PrecState(sdObj->tPrecTime) - spacecraftOrigin->GetMJ2000PrecState(sdObj->tPrecTime));                         // fix bug GMT-5364
             sdObj->tLoc = state.GetR();
             sdObj->tVel = state.GetV();
 
@@ -1373,14 +1603,25 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
          if (sdObj->rNode->IsOfType(Gmat::SPACECRAFT))
          {
             // this spacecraft's state presents in MJ2000Eq with origin at ForceModel.CentralBody
+
+            if (propMap[sdObj->rNode] == NULL)
+               throw MeasurementException("MeasureModel::CalculateMeasurement(): "
+                  "The propagator for " + sdObj->rNode->GetName() + " is not defined");
+
             const Real* propState =
                propMap[sdObj->rNode]->GetPropagator()->AccessOutState();
             Rvector6 state(propState);
 
             // This step is used to convert spacecraft's state to Spacecraft.CoordinateSystem                                                                          // fix bug GMT-5364
             SpacePoint* spacecraftOrigin = ((Spacecraft*)(sdObj->rNode))->GetOrigin();                 // the origin of the receive spacecraft's cooridinate system    // fix bug GMT-5364
-            SpacePoint* forcemodelOrigin = propMap[sdObj->rNode]->GetODEModel()->GetForceOrigin();     // the origin of the coordinate system used in forcemodel       // fix bug GMT-5364
-            state = state + (forcemodelOrigin->GetMJ2000PrecState(sdObj->rPrecTime) - spacecraftOrigin->GetMJ2000PrecState(sdObj->rPrecTime));                         // fix bug GMT-5364
+
+            SpacePoint* propOrigin = nullptr;
+            if (propMap[sdObj->rNode]->GetPropagator()->UsesODEModel())
+               propOrigin = propMap[sdObj->rNode]->GetODEModel()->GetForceOrigin();     // the origin of the coordinate system used in forcemodel    // fix bug GMT-5364
+            else
+               propOrigin = propMap[sdObj->rNode]->GetPropagator()->GetPropOrigin();
+
+            state = state + (propOrigin->GetMJ2000PrecState(sdObj->rPrecTime) - spacecraftOrigin->GetMJ2000PrecState(sdObj->rPrecTime));                         // fix bug GMT-5364
             sdObj->rLoc = state.GetR();
             sdObj->rVel = state.GetV();
 
@@ -1429,6 +1670,12 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
          MessageInterface::ShowMessage("4.5. Compute C-value:\n");
          MessageInterface::ShowMessage("4.5.1 Calculate range, relativity correction, and ET-TAI correction for signal path %d:\n", i);
       #endif
+#ifdef DEBUG_API
+   if (apimmFileOpen)
+   {
+      apimmFile << "      Let's see what value C has" << std::endl;
+   }
+#endif
       //if (epochIsAtEnd)
       //   forEpoch1 = forEpoch - lastleg->GetSignalData().rDelay/GmatTimeConstants::SECS_PER_DAY;
       //else
@@ -1436,6 +1683,12 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
 
       if (startSignal->ModelSignal(forEpoch, forSimulation, epochIsAtEnd) == false)
       {
+#ifdef DEBUG_API
+   if (apimmFileOpen)
+   {
+      apimmFile << "         ModelSignal failed" << std::endl;
+   }
+#endif
          throw MeasurementException("Signal modeling failed in model " +
                instanceName);
       }
@@ -1447,6 +1700,12 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
       leg = signalPaths[i];
       while(leg != NULL)
       {
+#ifdef DEBUG_API
+   if (apimmFileOpen)
+   {
+      apimmFile << "         Freq Calc for leg " << i << std::endl;
+   }
+#endif
          leg->SignalFrequencyCalculation(rampTB);          // calculate signal frequency on each signal leg
          leg = leg->GetNext();
       }
@@ -1460,6 +1719,12 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
          leg = signalPaths[i];
          while(leg != NULL)
          {
+#ifdef DEBUG_API
+   if (apimmFileOpen)
+   {
+      apimmFile << "         Media Calc for leg " << i << std::endl;
+   }
+#endif
             leg->MediaCorrectionCalculation(rampTB);          // calculate media corrections for signal leg
             leg = leg->GetNext();
          }
@@ -1467,6 +1732,12 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
 
 
       // 4.6. Reset value of hardware delay
+#ifdef DEBUG_API
+   if (apimmFileOpen)
+   {
+      apimmFile << "      Reverting hardware delays" << std::endl;
+   }
+#endif
       leg = firstleg = lastleg = signalPaths[i];
       while(leg != NULL)
       {
@@ -1542,11 +1813,22 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
       #ifdef DEBUG_TIMING
          MessageInterface::ShowMessage("4.3. Specify feasibility for signal path %d:\n", i);
       #endif
+
+#ifdef DEBUG_API
+   if (apimmFileOpen)
+   {
+      apimmFile << "      Feasible, or not" << std::endl;
+   }
+#endif
+
       feasible = feasible && signalPaths[i]->IsSignalFeasible();
 
       if (forStrand != -1)
          break;
    }
+   
+   // 5. Save the states of the objects being propagated, as they can be changed during calculation of the measurement values
+   RestoreState(precTimeVec, epochVec, epochGTVec, valsVec);
    
    retval = true;
 
@@ -1562,6 +1844,14 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage(" Exit MeasureModel::CalculateMeasurement(%s, <%p>, <%p>)\n", (withEvents?"true":"false"), forObservation, rampTB); 
    #endif
+
+#ifdef DEBUG_API
+   if (apimmFileOpen)
+   {
+      apimmFile << "   Leaving MeasureModel::CalculateMeasurement(); "
+            "wasn't that fun?" << std::endl;
+   }
+#endif
 
    return retval;
 }
@@ -1724,7 +2014,7 @@ const std::vector<RealArray>& MeasureModel::CalculateMeasurementDerivatives(
    #endif
 
    theDataDerivatives.clear();
-
+   
    // Collect the data from the signals
    if (forStrand == -1)
    {
@@ -1808,6 +2098,8 @@ void MeasureModel::PrepareToPropagate()
                   tProp->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
          #endif
 
+         //AddTransientForce(i->first, ode, psm);            // made changes by TUAN NGUYEN
+
          ObjectArray objects;
          objects.push_back(i->first);
 
@@ -1815,31 +2107,132 @@ void MeasureModel::PrepareToPropagate()
          psm->SetProperty("CartesianState");
          // For now, always propagate the STM.  Toggle off for simulation?
          psm->SetProperty("STM");
+         
+         // This command needs to move here after the line: psm->SetObject(i->first)    // made changes by TUAN NGUYEN
+         AddTransientForce(i->first, ode, psm);              // made changes by TUAN NGUYEN
+         
          psm->BuildState();
          psm->MapObjectsToVector();
 
-         ode->SetState(psm->GetState());
-         ode->SetSolarSystem(solarsys);
+         if (ode)
+         {
+            ode->SetState(psm->GetState());
+            ode->SetSolarSystem(solarsys);
          
-         prop->SetPhysicalModel(ode);
-         prop->Initialize();
+            prop->SetPhysicalModel(ode);
+            prop->SetSolarSystem(solarsys);
+            prop->Initialize();
+
+            ode->SetPropStateManager(psm);
+            if (ode->BuildModelFromMap() == false)
+               throw MeasurementException("MeasureModel::PrepareToPropagate(): "
+                     "Unable to assemble the ODE model for " + tProp->GetName());
+         }
+         else
+         {
+            prop->SetSolarSystem(solarsys);
+            prop->SetPropStateManager(psm);
+//            SpacePoint *sat = i->first;
+            prop->SetRefObject(i->first, i->first->GetType(), i->first->GetName());
+            prop->Initialize();
+         }
          
-         ode->SetPropStateManager(psm);
-         
-         if (ode->BuildModelFromMap() == false)
-            throw MeasurementException("Unable to assemble the ODE model for " +
-                  tProp->GetName());
          prop->Update(true);
          
-         if (ode->SetupSpacecraftData(&objects, 0) <= 0)
-            throw MeasurementException("Propagate::Initialize -- "
-                  "ODE model for Signal cannot set spacecraft parameters");
+         if (ode)
+         {
+            if (ode->SetupSpacecraftData(&objects, 0) <= 0)
+               throw MeasurementException("Propagate::Initialize -- "
+                     "ODE model for Signal cannot set spacecraft parameters");
+         }
       }
    }
 
    propsNeedInit = false;
 }
 
+
+void MeasureModel::SaveState(std::vector<bool>& precTimeVec, std::vector<GmatEpoch>& epochVec,
+   std::vector<GmatTime>& epochGTVec, std::vector<Real>& valsVec)
+{
+   // this will iterate in sorted order of the keys
+   for (std::map<SpacePoint*, PropSetup*>::iterator i = propMap.begin();
+      i != propMap.end(); ++i)
+   {
+      PropSetup *tProp = i->second;
+      if ((i->first->IsOfType(Gmat::SPACEOBJECT)) && (tProp != NULL))
+      {
+         // copy Object values to Vector
+         PropagationStateManager *psm1 = tProp->GetPropStateManager();
+         psm1->MapObjectsToVector();
+         
+         // copy Vector values to saved state values
+         GmatState *state1 = psm1->GetState();
+         bool hasPrecTime1 = state1->HasPrecisionTime();
+         GmatEpoch epoch1 = state1->GetEpoch();
+         GmatTime epochGT1 = state1->GetEpochGT();
+         Real *vals1 = state1->GetState();
+         int size1 = state1->GetSize();
+         
+         precTimeVec.push_back(hasPrecTime1);
+         epochVec.push_back(epoch1);
+         epochGTVec.push_back(epochGT1);
+         for (int j = 0; j < size1; j++)
+            valsVec.push_back(vals1[j]);
+      }
+   }
+}
+
+
+void MeasureModel::RestoreState(std::vector<bool>& precTimeVec, std::vector<GmatEpoch>& epochVec,
+   std::vector<GmatTime>& epochGTVec, std::vector<Real>& valsVec)
+{
+   int index = 0, valsIndex = 0;
+   
+   // this will iterate in sorted order of the keys
+   for (std::map<SpacePoint*, PropSetup*>::iterator i = propMap.begin();
+      i != propMap.end(); ++i)
+   {
+      PropSetup *tProp = i->second;
+      if ((i->first->IsOfType(Gmat::SPACEOBJECT)) && (tProp != NULL))
+      {
+         PropagationStateManager *psm1 = tProp->GetPropStateManager();
+         GmatState *state1 = psm1->GetState();
+         
+         // copy saved state values to Vector
+         state1->SetPrecisionTimeFlag(precTimeVec.at(index));
+         state1->SetEpoch(epochVec.at(index));
+         state1->SetEpochGT(epochGTVec.at(index));
+         
+         int size1 = state1->GetSize();
+         for (int j = 0; j < size1; j++, valsIndex++)
+            (*state1)[j] = valsVec.at(valsIndex);
+         
+         // copy Vector values to Objects
+         psm1->MapVectorToObjects();
+         
+         index++;
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+// void UseIonosphereCache(SignalDataCache::SimpleSignalDataCache* cache)
+//------------------------------------------------------------------------------
+/**
+ * Passes the ionosphere cache to the signal path
+ *
+ * @param cache The ionosphere cache
+ *
+ */
+ //------------------------------------------------------------------------------
+void MeasureModel::UseIonosphereCache(SignalDataCache::SimpleSignalDataCache* cache)
+{
+   for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
+   {
+      signalPaths[i]->SetIonosphereCache(cache);
+   }
+}
 
 //------------------------------------------------------------------------------
 // void SetCorrection(const std::string correctionName,
@@ -2177,4 +2570,106 @@ Integer MeasureModel::GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<
    }
 
    return freqBand;
+}
+
+
+//------------------------------------------------------------------------------
+// void AddTransientForce(GmatBase *spacePoint, ForceModel *odeModel,
+//       PropagationStateManager *propMan)
+//------------------------------------------------------------------------------
+/**
+* Passes transient forces into the ForceModel(s).
+*
+* @param spacePoint The satellite used in the ForceModel.
+* @param odeModel   The current ForceModel that is receiving the forces.
+* @param propMan    PropagationStateManager for this PropSetup
+*/
+//------------------------------------------------------------------------------
+void MeasureModel::AddTransientForce(GmatBase *spacePoint,
+    ODEModel *odeModel, PropagationStateManager *propMan)
+{
+#ifdef DEBUG_TRANSIENT_FORCES
+    MessageInterface::ShowMessage
+        ("MeasureModel::AddTransientForce() entered, ODEModel=<%p>,"
+        " transientForces=<%p>\n", odeModel, transientForces);
+#endif
+
+    // Find any transient force that is active and add it to the force model
+    StringArray satsThatManeuver, formationSatsThatManeuver, formsThatManeuver;
+    bool flagMultipleBurns = false;
+
+    if (transientForces)
+    {
+       for (std::vector<PhysicalModel*>::iterator i = transientForces->begin();
+           i != transientForces->end(); ++i)
+       {
+           StringArray tfSats = (*i)->GetRefObjectNameArray(Gmat::SPACECRAFT);
+
+           // See if the spacecraft that goes with the force model is in the spacecraft
+           // list for the current transient force
+           std::string satname = spacePoint->GetName();
+            
+           if (find(tfSats.begin(), tfSats.end(), satname) != tfSats.end())
+           {
+#ifdef DEBUG_TRANSIENT_FORCES
+            MessageInterface::ShowMessage
+                ("   Adding transientForce <%p>'%s' to ODEModel\n", *i,
+                (*i)->GetName().c_str());
+#endif
+               //            if (find(satsThatManeuver.begin(), satsThatManeuver.end(), satname) == satsThatManeuver.end())
+               odeModel->AddForce(*i);
+               //            else
+               //               flagMultipleBurns = true;
+               if (find(satsThatManeuver.begin(), satsThatManeuver.end(), satname) == satsThatManeuver.end())
+                   satsThatManeuver.push_back(satname);
+               if ((*i)->DepletesMass())
+               {
+                   propMan->SetProperty("MassFlow");
+               //      //               propMan->SetProperty("MassFlow",
+               //      //                     (*i)->GetRefObject(Gmat::SPACECRAFT, *current));
+#ifdef DEBUG_TRANSIENT_FORCES
+            //      MessageInterface::ShowMessage("   %s depletes mass\n",
+            //          (*i)->GetName().c_str());
+#endif
+               }
+               break;      // Avoid multiple adds
+           }
+           // if satname not found, PropagationEnabledCommand should have already checked whether it is a Formation
+       }
+    }
+
+#ifdef DEBUG_TRANSIENT_FORCES
+    MessageInterface::ShowMessage("MeasureModel: Found %d sats that maneuver (outside of "
+        "formations):\n", satsThatManeuver.size());
+    for (UnsignedInt i = 0; i < satsThatManeuver.size(); ++i)
+        MessageInterface::ShowMessage("   %s\n", satsThatManeuver[i].c_str());
+#endif
+
+    // the PropagationEnabledCommand should have already checked for multiple burns by the same S/C,
+    // if that check is being done
+
+//#ifdef DEBUG_TRANSIENT_FORCES
+//    ODEModel *fm;
+//    PhysicalModel *pm;
+//
+//    MessageInterface::ShowMessage(
+//        "MeasureModel::AddTransientForces completed; force details:\n");
+//    for (std::vector<PropSetup*>::iterator p = propagators.begin();
+//        p != propagators.end(); ++p)
+//    {
+//        fm = (*p)->GetODEModel();
+//        if (!fm)
+//            throw CommandException("ODEModel not set in PropSetup \"" +
+//            (*p)->GetName() + "\"");
+//        MessageInterface::ShowMessage(
+//            "   Forces in %s:\n", fm->GetName().c_str());
+//        for (Integer i = 0; i < fm->GetNumForces(); ++i)
+//        {
+//            pm = fm->GetForce(i);
+//            MessageInterface::ShowMessage(
+//                "      %15s   %s\n", pm->GetTypeName().c_str(),
+//                pm->GetName().c_str());
+//        }
+//    }
+//#endif
 }

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -382,6 +382,32 @@ void ConfigManager::AddSpacePoint(SpacePoint *sp)
 }
 
 
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// void AddPlate(Plate *pl)
+//------------------------------------------------------------------------------
+/**
+* Adds a Plate to the configuration.
+*
+* @param pl Pointer to the Plate instance.
+*/
+//------------------------------------------------------------------------------
+void ConfigManager::AddPlate(Plate *pl)
+{
+	if (pl == NULL)
+		throw ConfigManagerException("Cannot add NULL Plate object");
+
+	std::string name = pl->GetName();
+	if (name == "")
+		throw ConfigManagerException("Unnamed objects cannot be managed");
+
+	if (!pl->IsOfType(Gmat::PLATE))
+		throw ConfigManagerException(name + " is not a Plate");
+
+	AddObject(pl);
+}
+
+
 //------------------------------------------------------------------------------
 // void AddHardware(Hardware *hw)
 //------------------------------------------------------------------------------
@@ -395,15 +421,39 @@ void ConfigManager::AddHardware(Hardware *hw)
 {
    if (hw == NULL)
       throw ConfigManagerException("Cannot add NULL Hardware object");
-
+   
    std::string name = hw->GetName();
    if (name == "")
       throw ConfigManagerException("Unnamed objects cannot be managed");
-
+   
    if (!hw->IsOfType(Gmat::HARDWARE))
       throw ConfigManagerException(name + " is not Hardware");
-
+   
    AddObject(hw);
+}
+
+//------------------------------------------------------------------------------
+// void AddFieldOfView(FieldOfView *fov)
+//------------------------------------------------------------------------------
+/**
+ * Adds a FieldOfView object to the configuration.
+ *
+ * @param fov Pointer to the FieldOfView object.
+ */
+//------------------------------------------------------------------------------
+void ConfigManager::AddFieldOfView(FieldOfView *fov)
+{
+   if (fov == NULL)
+      throw ConfigManagerException("Cannot add NULL FieldOfView object");
+   
+   std::string name = fov->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   
+   if (!fov->IsOfType(Gmat::FIELD_OF_VIEW))
+      throw ConfigManagerException(name + " is not a FieldOfView");
+   
+   AddObject(fov);
 }
 
 
@@ -629,85 +679,85 @@ void ConfigManager::AddMeasurementModel(MeasurementModelBase *mModel)
    AddObject(obj);
 }
 
-//------------------------------------------------------------------------------
-// void AddTrackingSystem(TrackingSystem *ts)
-//------------------------------------------------------------------------------
-/**
- * Adds a TrackingSystem to the configuration.
- *
- * @param ts Pointer to the TrackingSystem instance.
- */
-//------------------------------------------------------------------------------
-void ConfigManager::AddTrackingSystem(TrackingSystem *ts)
-{
-   if (ts == NULL)
-      throw ConfigManagerException("Cannot add NULL TrackingSystem object");
+//////------------------------------------------------------------------------------
+////// void AddTrackingSystem(TrackingSystem *ts)
+//////------------------------------------------------------------------------------
+/////**
+//// * Adds a TrackingSystem to the configuration.
+//// *
+//// * @param ts Pointer to the TrackingSystem instance.
+//// */
+//////------------------------------------------------------------------------------
+////void ConfigManager::AddTrackingSystem(TrackingSystem *ts)
+////{
+////   if (ts == NULL)
+////      throw ConfigManagerException("Cannot add NULL TrackingSystem object");
+////
+////   GmatBase *obj = (GmatBase*)ts;
+////
+////   std::string name = obj->GetName();
+////   if (name == "")
+////      throw ConfigManagerException("Unnamed objects cannot be managed");
+////
+////   if (!obj->IsOfType(Gmat::TRACKING_SYSTEM))
+////      throw ConfigManagerException(name + " is not a TrackingSystem");
+////
+////   AddObject(obj);
+////}
+////
+//////------------------------------------------------------------------------------
+////// void AddTrackingData(TrackingData *td)
+//////------------------------------------------------------------------------------
+/////**
+//// * Adds a TrackingData object to the configuration.
+//// *
+//// * @param td Pointer to the TrackingData instance.
+//// */
+//////------------------------------------------------------------------------------
+////void ConfigManager::AddTrackingData(TrackingData *td)
+////{
+////   if (td == NULL)
+////      throw ConfigManagerException("Cannot add NULL TrackingData object");
+////
+////   GmatBase *obj = (GmatBase*)td;
+////
+////   std::string name = obj->GetName();
+////   if (name == "")
+////      throw ConfigManagerException("Unnamed objects cannot be managed");
+////
+////   if (!obj->IsOfType(Gmat::TRACKING_DATA))
+////      throw ConfigManagerException(name + " is not a TrackingData object");
+////
+////   AddObject(obj);
+////}
 
-   GmatBase *obj = (GmatBase*)ts;
 
-   std::string name = obj->GetName();
-   if (name == "")
-      throw ConfigManagerException("Unnamed objects cannot be managed");
-
-   if (!obj->IsOfType(Gmat::TRACKING_SYSTEM))
-      throw ConfigManagerException(name + " is not a TrackingSystem");
-
-   AddObject(obj);
-}
-
-//------------------------------------------------------------------------------
-// void AddTrackingData(TrackingData *td)
-//------------------------------------------------------------------------------
-/**
- * Adds a TrackingData object to the configuration.
- *
- * @param td Pointer to the TrackingData instance.
- */
-//------------------------------------------------------------------------------
-void ConfigManager::AddTrackingData(TrackingData *td)
-{
-   if (td == NULL)
-      throw ConfigManagerException("Cannot add NULL TrackingData object");
-
-   GmatBase *obj = (GmatBase*)td;
-
-   std::string name = obj->GetName();
-   if (name == "")
-      throw ConfigManagerException("Unnamed objects cannot be managed");
-
-   if (!obj->IsOfType(Gmat::TRACKING_DATA))
-      throw ConfigManagerException(name + " is not a TrackingData object");
-
-   AddObject(obj);
-}
-
-
-//------------------------------------------------------------------------------
-// void AddMeasurementModel(MeasurementModel *mModel)
-//------------------------------------------------------------------------------
-/**
- * Adds a MeasurementModel to the configuration.
- *
- * @param mModel Pointer to the MeasurementModel instance.
- */
-//------------------------------------------------------------------------------
-void ConfigManager::AddMeasurement(CoreMeasurement *meas)
-{
-   if (meas == NULL)
-      throw ConfigManagerException("Cannot add NULL Measurement object");
-
-   GmatBase *obj = (GmatBase*)meas;
-   std::string name = obj->GetName();
-   if (name == "")
-      throw ConfigManagerException("Unnamed objects cannot be managed");
-
-   if (!obj->IsOfType(Gmat::CORE_MEASUREMENT))
-      throw ConfigManagerException(name + " is not a Measurement");
-
-   MessageInterface::ShowMessage("Warning: Core measurement %s configured; it "
-         "should be hidden inside of a MeasurementModel", name.c_str());
-   AddObject(obj);
-}
+//////------------------------------------------------------------------------------
+////// void AddMeasurementModel(MeasurementModel *mModel)
+//////------------------------------------------------------------------------------
+/////**
+//// * Adds a MeasurementModel to the configuration.
+//// *
+//// * @param mModel Pointer to the MeasurementModel instance.
+//// */
+//////------------------------------------------------------------------------------
+////void ConfigManager::AddMeasurement(CoreMeasurement *meas)
+////{
+////   if (meas == NULL)
+////      throw ConfigManagerException("Cannot add NULL Measurement object");
+////
+////   GmatBase *obj = (GmatBase*)meas;
+////   std::string name = obj->GetName();
+////   if (name == "")
+////      throw ConfigManagerException("Unnamed objects cannot be managed");
+////
+////   if (!obj->IsOfType(Gmat::CORE_MEASUREMENT))
+////      throw ConfigManagerException(name + " is not a Measurement");
+////
+////   MessageInterface::ShowMessage("Warning: Core measurement %s configured; it "
+////         "should be hidden inside of a MeasurementModel", name.c_str());
+////   AddObject(obj);
+////}
 
 
 //------------------------------------------------------------------------------
@@ -1675,7 +1725,8 @@ bool ConfigManager::RenameItem(UnsignedInt itemType,
    //----------------------------------------------------
    // Since new hardware Parameters were added, check for the Hardware also.
    
-   if (itemType == Gmat::SPACECRAFT || itemType == Gmat::COORDINATE_SYSTEM ||
+   if (itemType == Gmat::SPACECRAFT || itemType == Gmat::COORDINATE_SYSTEM || 
+		 itemType == Gmat::PLATE ||                                                   // made changes by TUAN NGUYEN
        itemType == Gmat::CALCULATED_POINT || itemType == Gmat::BURN ||
        itemType == Gmat::IMPULSIVE_BURN || itemType == Gmat::HARDWARE ||
        itemType == Gmat::THRUSTER || itemType == Gmat::FUEL_TANK ||
@@ -2218,6 +2269,32 @@ SpacePoint* ConfigManager::GetSpacePoint(const std::string &name)
 }
 
 
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// Plate* GetPlate(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+* Retrieves a Plate object.
+*
+* @param name The name of the object.
+*
+* @return A pointer to the object.
+*/
+//------------------------------------------------------------------------------
+Plate* ConfigManager::GetPlate(const std::string &name)
+{
+	Plate *pl = NULL;
+	if (mapping.find(name) != mapping.end())
+	{
+		if (mapping[name]->IsOfType(Gmat::PLATE))
+		{
+			pl = (Plate *)mapping[name];
+		}
+	}
+	return pl;
+}
+
+
 //------------------------------------------------------------------------------
 // Hardware* GetHardware(const std::string &name)
 //------------------------------------------------------------------------------
@@ -2240,6 +2317,30 @@ Hardware* ConfigManager::GetHardware(const std::string &name)
       }
    }
    return hw;
+}
+
+//------------------------------------------------------------------------------
+// FieldOfView* GetFieldOfView(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a FieldOfView object.
+ *
+ * @param name The name of the object.
+ *
+ * @return A pointer to the object.
+ */
+//------------------------------------------------------------------------------
+FieldOfView* ConfigManager::GetFieldOfView(const std::string &name)
+{
+   FieldOfView *fov = NULL;
+   if (mapping.find(name) != mapping.end())
+   {
+      if (mapping[name]->IsOfType(Gmat::FIELD_OF_VIEW))
+      {
+         fov = (FieldOfView *)mapping[name];
+      }
+   }
+   return fov;
 }
 
 
@@ -2618,53 +2719,53 @@ DataFilter* ConfigManager::GetDataFilter(const std::string &name)
 }
 
 
-//------------------------------------------------------------------------------
-// TrackingSystem* GetTrackingSystem(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a TrackingSystem from the configuration
- *
- * @param name The name of the TrackingSystem
- *
- * @return A pointer to the TrackingSystem, or NULL if it was not found
- */
-//------------------------------------------------------------------------------
-TrackingSystem* ConfigManager::GetTrackingSystem(const std::string &name)
-{
-   TrackingSystem *obj = NULL;
-   if (mapping.find(name) != mapping.end())
-   {
-      if (mapping[name]->IsOfType(Gmat::TRACKING_SYSTEM))
-      {
-         obj = (TrackingSystem *)mapping[name];
-      }
-   }
-   return obj;
-}
-
-//------------------------------------------------------------------------------
-// TrackingData* GetTrackingData(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a TrackingData object from the configuration
- *
- * @param name The name of the TrackingData object
- *
- * @return A pointer to the TrackingData object, or NULL if it was not found
- */
-//------------------------------------------------------------------------------
-TrackingData* ConfigManager::GetTrackingData(const std::string &name)
-{
-   TrackingData *obj = NULL;
-   if (mapping.find(name) != mapping.end())
-   {
-      if (mapping[name]->IsOfType(Gmat::TRACKING_DATA))
-      {
-         obj = (TrackingData *)mapping[name];
-      }
-   }
-   return obj;
-}
+////////------------------------------------------------------------------------------
+//////// TrackingSystem* GetTrackingSystem(const std::string &name)
+////////------------------------------------------------------------------------------
+///////**
+////// * Retrieves a TrackingSystem from the configuration
+////// *
+////// * @param name The name of the TrackingSystem
+////// *
+////// * @return A pointer to the TrackingSystem, or NULL if it was not found
+////// */
+////////------------------------------------------------------------------------------
+//////TrackingSystem* ConfigManager::GetTrackingSystem(const std::string &name)
+//////{
+//////   TrackingSystem *obj = NULL;
+//////   if (mapping.find(name) != mapping.end())
+//////   {
+//////      if (mapping[name]->IsOfType(Gmat::TRACKING_SYSTEM))
+//////      {
+//////         obj = (TrackingSystem *)mapping[name];
+//////      }
+//////   }
+//////   return obj;
+//////}
+//////
+////////------------------------------------------------------------------------------
+//////// TrackingData* GetTrackingData(const std::string &name)
+////////------------------------------------------------------------------------------
+///////**
+////// * Retrieves a TrackingData object from the configuration
+////// *
+////// * @param name The name of the TrackingData object
+////// *
+////// * @return A pointer to the TrackingData object, or NULL if it was not found
+////// */
+////////------------------------------------------------------------------------------
+//////TrackingData* ConfigManager::GetTrackingData(const std::string &name)
+//////{
+//////   TrackingData *obj = NULL;
+//////   if (mapping.find(name) != mapping.end())
+//////   {
+//////      if (mapping[name]->IsOfType(Gmat::TRACKING_DATA))
+//////      {
+//////         obj = (TrackingData *)mapping[name];
+//////      }
+//////   }
+//////   return obj;
+//////}
 
 //------------------------------------------------------------------------------
 // DataFile* GetDataStream(const std::string &name)

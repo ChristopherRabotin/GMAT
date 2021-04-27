@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1678,20 +1678,30 @@ void FunctionManager::RefreshFOS()
    StringArray toDelete;
    bool        isInput = false;
    std::map<std::string, GmatBase *>::iterator omi;
-   StringArray inFormalNames =
+   StringArray formalNames =
       currentFunction->GetStringArrayParameter(currentFunction->GetParameterID("Input"));
+   StringArray outFormalNames =
+      currentFunction->GetStringArrayParameter(currentFunction->GetParameterID("Output"));
    
+   // combine the lists of inputs/outputs 
+   for (Integer ii = 0; ii < outFormalNames.size(); ii++)
+      formalNames.push_back(outFormalNames.at(ii));
+
    #ifdef DEBUG_FM_REFRESH
    MessageInterface::ShowMessage
       ("   Function '%s' has %d inputs and FOS <%p> has %d objects\n",
-       functionName.c_str(), inFormalNames.size(), functionObjectStore, functionObjectStore->size());
+       functionName.c_str(), formalNames.size(), functionObjectStore, functionObjectStore->size());
+   MessageInterface::ShowMessage("  inputs are:\n");
+   for (Integer ii = 0; ii < formalNames.size(); ii++)
+      MessageInterface::ShowMessage("   %d  %s\n", ii,
+                                    formalNames.at(ii).c_str());
    #endif
 
    for (omi = functionObjectStore->begin(); omi != functionObjectStore->end(); ++omi)
    {
       isInput = false;
-      for (unsigned int qq = 0; qq < inFormalNames.size(); qq++)
-         if (omi->first == inFormalNames.at(qq))
+      for (unsigned int qq = 0; qq < formalNames.size(); qq++)
+         if (omi->first == formalNames.at(qq))
          {
             isInput = true;
             break;

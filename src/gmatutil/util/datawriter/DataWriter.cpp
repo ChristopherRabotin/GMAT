@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -147,36 +147,75 @@ bool DataWriter::CloseFile()
 }
 
 //-------------------------------------------------------------------------------------
-// bool AddData(WriterData * newDataContainer)
+// bool AddDataBlock()
+//-------------------------------------------------------------------------------------
+/**
+ * Adds a new block of vectors of WriterData objects in preparation for writing
+ */
+//-------------------------------------------------------------------------------------
+bool DataWriter::AddDataBlock()
+{
+   bool retval = true;
+
+   std::vector<WriterData*> data;
+   allData.push_back(data);
+
+   return retval;
+}
+
+//-------------------------------------------------------------------------------------
+// bool AddData(WriterData * newDataContainer, UnsignedInt index)
 //-------------------------------------------------------------------------------------
 /**
  * Adds data to a vector of WriterData objects in preparation for writing
  *
  * @param newDataContainer WriterData object
+ * @param index Index of the data vector to write to
  */
 //-------------------------------------------------------------------------------------
-bool DataWriter::AddData(WriterData * newDataContainer)
+bool DataWriter::AddData(WriterData * newDataContainer, UnsignedInt index)
 {
    bool retval = true;
 
-   allData.push_back(newDataContainer);
+   allData[index].push_back(newDataContainer);
 
    return retval;
 }
 
 
 //------------------------------------------------------------------------------
-// bool DataWriter::DescribeData (const StringArray &variableList)
+// bool DataWriter::DescribeData (const StringArray &variableList, UnsignedInt index)
 //------------------------------------------------------------------------------
 /**
  * Method used to prepare teh writer, if needed, for incoming data
  *
  * @param variableList The names of the incoming data
+ * @param size Number of elements in the data vector
  *
  * @return true on success
  */
 //------------------------------------------------------------------------------
-bool DataWriter::DescribeData (const StringArray &variableList)
+bool DataWriter::DescribeData (const StringArray &variableList, UnsignedInt size)
 {
    return true;
+}
+
+
+//-------------------------------------------------------------------------------------
+// bool ClearData()
+//-------------------------------------------------------------------------------------
+/**
+ * Clears the vector of WriterData objects
+ */
+//-------------------------------------------------------------------------------------
+bool DataWriter::ClearData()
+{
+   bool retval = true;
+
+   for (UnsignedInt ii = 0; ii < allData.size(); ii++)
+      allData[ii].clear();
+
+   allData.clear();
+
+   return retval;
 }

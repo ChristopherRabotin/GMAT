@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -743,18 +743,29 @@ void DifferentialCorrector::SetResultValue(Integer id, Real value,
             "   State %d received id %d    value = %.12lf\n", currentState, id,
             value);
    #endif
-    if (currentState == NOMINAL)
-    {
-        nominal[id] = value;
-    }
 
-    if (currentState == PERTURBING)
-    {
-       if (firstPert)
-          achieved[pertNumber][id] = value;
-       else
-          backAchieved[pertNumber][id] = value;
-    }
+   // Sanity check the achieved values
+   if (GmatMathUtil::IsNaN(value))
+      throw SolverException("The differential corrector " + instanceName +
+            " encountered a goal value for " + goalNames[id] + " that is not "
+            "a number.  Targeting is terminating.");
+   if (GmatMathUtil::IsInf(value))
+      throw SolverException("The differential corrector " + instanceName +
+            " encountered a goal value for " + goalNames[id] + " that is "
+            "infinite.  Targeting is terminating.");
+
+   if (currentState == NOMINAL)
+   {
+      nominal[id] = value;
+   }
+
+   if (currentState == PERTURBING)
+   {
+      if (firstPert)
+         achieved[pertNumber][id] = value;
+      else
+         backAchieved[pertNumber][id] = value;
+   }
 }
 
 
@@ -1417,7 +1428,6 @@ void DifferentialCorrector::ReportProgress(std::list<ISolverListener*> listeners
 //------------------------------------------------------------------------------
 /**
  * Send to the listener a progress report
- *
  */
 //------------------------------------------------------------------------------
 void DifferentialCorrector::ReportProgress(ISolverListener* listener, const SolverState forState)
@@ -1475,11 +1485,24 @@ void DifferentialCorrector::ReportProgress(ISolverListener* listener, const Solv
                      ++i;
                   }
                   listener->Convergence(status == CONVERGED);
+                  break;
             }
             break;
+
+         // States that do not report anything
+         case INITIALIZING:
+         case PERTURBING:
+         case CALCULATING:
+            break;
+
          default:
-            std::cout <<
-            "default branch taken in DifferentialCorrector::ReportProgress\n";
+            std::stringstream stateNum;
+            stateNum << currentState;
+            MessageInterface::ShowMessage("**** WARNING ****  The "
+                  "DifferentialCorrector " + instanceName +
+                  " entered an unknown state " + stateNum.str() +
+                  " while targeting.\n");
+            break;
       }
    }
 }

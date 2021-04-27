@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -40,6 +40,7 @@
 #include "ConfigManager.hpp"
 #include "Publisher.hpp"
 #include "FileManager.hpp"
+#include "TimeSystemConverter.hpp"
 // core
 #include "AtmosphereModel.hpp"
 #include "Attitude.hpp"
@@ -96,13 +97,18 @@ class GMAT_API Moderator
 public:
 
    static Moderator* Instance();
+   void OverridePublisher(Publisher *otherPublisher);
+
    bool Initialize(const std::string &startupFile = "", bool isFromGui = false,
          const std::string &suffix = "", const StringArray *forEntries = NULL);
+   bool IsInitialized();
    bool UpdateDataFiles();
    void Finalize();
    void SetRunReady(bool flag = true);
-   void SetShowFinalState(bool flag = true);
    Integer GetExitCode();
+
+   std::string ToString() const;
+   bool IsFromGui();
    
    //----- Matlab engine
    Interface* GetMatlabInterface();
@@ -142,9 +148,7 @@ public:
    const StringArray& GetListOfAllFactoryItems();
    const StringArray& GetListOfAllFactoryItemsExcept(const ObjectTypeArray &types);
    const StringArray& GetListOfViewableItems(UnsignedInt type);
-   const StringArray& GetListOfViewableItems(const std::string &typeName);
    const StringArray& GetListOfUnviewableItems(UnsignedInt type);
-   const StringArray& GetListOfUnviewableItems(const std::string &typeName);
    const ObjectTypeArrayMap& GetAllObjectTypeArrayMap();
    
    bool               DoesObjectTypeMatchSubtype(
@@ -203,10 +207,21 @@ public:
                                  const std::string &name);
    SpacePoint* GetSpacePoint(const std::string &name);
    
+   // made changes by TUAN NGUYEN
+   // Plate
+   Plate* CreatePlate(const std::string &type,
+                      const std::string &name);
+   Plate* GetPlate(const std::string &name);
+   
    // Hardware
    Hardware* CreateHardware(const std::string &type,
                             const std::string &name);
    Hardware* GetHardware(const std::string &name);
+   
+   // Hardware
+   FieldOfView* CreateFieldOfView(const std::string &type,
+                                  const std::string &name);
+   FieldOfView* GetFieldOfView(const std::string &name);
    
    // Propagator
    Propagator* CreatePropagator(const std::string &type,
@@ -249,7 +264,6 @@ public:
                               const std::string &depName, Integer manage);
    
    // ODEModel
-   ODEModel* CreateDefaultODEModel(const std::string &name);
    ODEModel* CreateODEModel(const std::string &type, const std::string &name);
    ODEModel* GetODEModel(const std::string &name);
    bool AddToODEModel(const std::string &odeModelName,
@@ -270,20 +284,20 @@ public:
          const std::string &name);
    MeasurementModelBase* GetMeasurementModel(const std::string &name);
    
-   // TrackingSystem
-   TrackingSystem* CreateTrackingSystem(const std::string &type,
-                                        const std::string &name);
-   TrackingSystem* GetTrackingSystem(const std::string &name);
+   //// TrackingSystem
+   //TrackingSystem* CreateTrackingSystem(const std::string &type,
+   //                                     const std::string &name);
+   //TrackingSystem* GetTrackingSystem(const std::string &name);
 
-   // TrackingData
-   TrackingData* CreateTrackingData(const std::string &name);
-   TrackingData* GetTrackingData(const std::string &name);
+   //// TrackingData
+   //TrackingData* CreateTrackingData(const std::string &name);
+   //TrackingData* GetTrackingData(const std::string &name);
 
-   // Core Measurement
-   CoreMeasurement* CreateMeasurement(const std::string &type,
-         const std::string &name);
-   CoreMeasurement* GetMeasurement(const std::string &type,
-         const std::string &name);
+   ////// Core Measurement
+   ////CoreMeasurement* CreateMeasurement(const std::string &type,
+   ////      const std::string &name);
+   ////CoreMeasurement* GetMeasurement(const std::string &type,
+   ////      const std::string &name);
    
    // DataFile
    DataFile* CreateDataFile(const std::string &type,
@@ -445,6 +459,9 @@ public:
    bool IsSequenceStarter(const std::string &commandType);
    const std::string& GetStarterStringList();
 
+   // Public so the console app can populate the parameter database
+   void CreateDefaultParameters();
+
 private:
    
    // Initialization
@@ -462,7 +479,6 @@ private:
    void CreateInternalCoordSystem();
    void CreateDefaultCoordSystems();
    void CreateDefaultBarycenter();
-   void CreateDefaultParameters();
    void CreateDefaultMission();
    
    // Parameter reference object setting
@@ -480,6 +496,7 @@ private:
 
    // Handlers for the commands that can start a mission sequence
    StringArray sequenceStarters;
+
    std::string starterList;
    const StringArray& GetSequenceStarters();
    
@@ -527,6 +544,7 @@ private:
    bool endOfInterpreter;
    bool showFinalState;
    bool loadSandboxAndPause;
+   bool isInitialized;
    Integer objectManageOption;
    Integer currentSandboxNumber;
    Integer exitCode;
@@ -547,6 +565,7 @@ private:
    FactoryManager *theFactoryManager;
    FileManager *theFileManager;
    Publisher *thePublisher;
+   TimeSystemConverter *theTimeConverter;
    
    SolarSystem *theDefaultSolarSystem;
    SolarSystem *theSolarSystemInUse;
@@ -569,7 +588,7 @@ private:
    // Plugin creator callback method
    GuiWidgetCreatorCallback pCreateWidget;
 
-   // Thruster related
+   // Thruster related - Why static?  Moderator is a singleton.
    static bool thrusterDeprecateMsgWritten;
    static bool fuelTankDeprecateMsgWritten;
 };

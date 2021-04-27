@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -79,6 +79,9 @@ public:
    virtual void         SetCorrection(const std::string& correctionName,
          const std::string& correctionType);
 
+   virtual Real         ApplyMultiplier(const std::string& useMeasType,
+         const Real factor, const GmatBase* obj);
+
    Real                 GetIonoCorrection();
    Real                 GetTropoCorrection();
 
@@ -90,8 +93,8 @@ protected:
       RangeAdapterKmParamCount = AdapterParamCount,
    };
 
-   static const Real USE_TAYLOR_SERIES;
-   static const Real USE_CHEBYSHEV_DIFFERENCE;
+   static const bool USE_TAYLOR_SERIES;
+   static const bool USE_CHEBYSHEV_DIFFERENCE;
    Real PathMagnitudeDelta(Rvector3 pathVec, Rvector3 delta);
 };
 

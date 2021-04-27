@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -92,6 +92,9 @@ Transponder::Transponder(const std::string &ofType, const std::string &name) :
 
    signal1 = new Signal();
    signal2 = new Signal();
+
+   for (Integer i = RFHardwareParamCount; i < TransponderParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 //------------------------------------------------------------------------------
@@ -127,6 +130,8 @@ Transponder::Transponder(const Transponder& trans):
    outputFrequencyModel  (trans.outputFrequencyModel),
    turnAroundRatio       (trans.turnAroundRatio)
 {
+   for (Integer i = RFHardwareParamCount; i < TransponderParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 //------------------------------------------------------------------------------

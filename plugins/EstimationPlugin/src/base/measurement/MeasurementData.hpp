@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -71,8 +71,14 @@ public:
    std::string       typeName;
    /// Unique ID for associated model.  This number can change from run to run.
    Integer           uniqueID;
+   /// Is measurement periodic, such as 0 to 360, requiring care to compute O - C
+   bool              isPeriodic;
+   /// For a periodic measurement, the minimum value (for Azimuth, this is 0, for XEast -180)
+   Real              minValue;
+   /// For a periodic measurement, the value wraps at minValue + period (for Azimuth and XEast this is 360)
+   Real              period;
    /// Enumerated ID for the epoch time system
-   TimeConverterUtil::TimeSystemTypes
+   TimeSystemConverter::TimeSystemTypes
                      epochSystem;
    /// The epoch of the measurement
    GmatEpoch         epoch;
@@ -121,7 +127,7 @@ public:
 
 
 ///// TBD: Do these go here like this?  We may want a more generic container here
-   // This section is added for DSNTwoWayRange measurement data
+   // This section is added for DSN_SeqRange measurement data
    /// Uplink band
    Integer uplinkBand;
    /// Uplink frequency
@@ -147,8 +153,10 @@ public:
    // This part for media correction QA       GMT-5576
    bool isTropoCorrectWarning;
    bool isIonoCorrectWarning;
-   Real tropoCorrectWarningValue;          // unit: km
-   Real ionoCorrectWarningValue;           // unit: km
+   Real tropoCorrectRawValue;                 // unit: km
+   Real ionoCorrectRawValue;                  // unit: km
+   Real tropoCorrectValue;
+   Real ionoCorrectValue;
 };
 
 #endif /* MeasurementData_hpp */

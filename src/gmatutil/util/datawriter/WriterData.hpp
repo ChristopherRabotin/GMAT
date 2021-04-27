@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -50,8 +50,10 @@ public:
    WriterData(const WriterData &md);
    WriterData& operator=(const WriterData &md);
 
-   virtual bool AddData(const StringMatrix &data);
-   virtual bool AddData(const Matrix &data);
+   virtual bool AddData(const StringMatrix &data, bool isJaggedData = false);
+   virtual bool AddData(const Matrix &data, bool isJaggedData = false);
+   virtual bool AddData(const std::vector<StringMatrix> &data);
+   virtual bool AddData(const std::vector<Matrix> &data);
 
    virtual std::string GetName();
    virtual Gmat::ParameterType GetType();
@@ -63,6 +65,8 @@ protected:
    std::string  varName;
    /// Type of the data
    Gmat::ParameterType dataType;
+   /// Indicates if the secondary dimension(s) of the data matrix is jagged
+   bool isJagged;
 };
 
 #endif /* WriterData_hpp */

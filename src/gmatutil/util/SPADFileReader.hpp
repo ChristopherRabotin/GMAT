@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -36,7 +36,7 @@ class GMATUTIL_API SPADFileReader
 {
 public:
    /// class methods
-   SPADFileReader();
+   SPADFileReader(const std::string &ofType = "Area");
    SPADFileReader(const SPADFileReader &copy);
    SPADFileReader& operator=(const SPADFileReader &copy);
 
@@ -50,9 +50,16 @@ public:
   /// Set the SPAD file name
    virtual bool            SetFile(const std::string &theSPADFile);
 
+   /// Set the SPAD interpolator
+   virtual bool            SetInterpolator(const std::string &theInterpolator);
+
    /// Get the SRP area given the input sun vector; interpolate data
    /// if necessary
-   virtual Rvector3        GetSRPArea(Rvector3 sunVector);
+   virtual Rvector3        GetSRPArea(const Rvector3 &sunVector, bool &scaled);
+
+   /// Get the Drag area given the input sun vector; interpolate data
+   /// if necessary
+   virtual Rvector3        GetDragArea(const Rvector3 &velVector, bool &scaled);
 
    /// Other methods should be added here, to return requested data
    /// TBD
@@ -63,20 +70,20 @@ protected:
    {
       Real     azimuth;     // degrees
       Real     elevation;   // degrees
-      Rvector3 force;       // km^2
+      Rvector3 vec3;        // km^2
       // add to this as necessary
 
       SPADDataRecord(Real az = -999, Real el = -999, Rvector3 f = Rvector3())
       {
          azimuth   = az;
          elevation = el;
-         force     = f;
+         vec3      = f;
       }
       SPADDataRecord(const SPADDataRecord &copy)
       {
          azimuth   = copy.azimuth;
          elevation = copy.elevation;
-         force     = copy.force;
+         vec3      = copy.vec3;
       }
    };
 
@@ -111,6 +118,8 @@ protected:
       }
    };
 
+   // What analysis type do we want?
+   std::string    expectedType;
    // Required header fields
    std::string    analysisType;
    Real           pressure;   // scale factor
@@ -122,6 +131,8 @@ protected:
 
    // The file name
    std::string spadFile;
+   /// Interpolation method
+   std::string interpolator;
    /// Has the file been read and the data stored and validated?
    bool        isInitialized;
    /// The number of data records
@@ -131,9 +142,9 @@ protected:
    /// How many different elevation values are there?
    Integer     elCount;
    /// Azimuth step size
-   Integer     azStepSize;
+   Real        azStepSize;
    /// Elevation step size
-   Integer     elStepSize;
+   Real        elStepSize;
 
    // Store a vector of record pointers
    std::vector<SPADDataRecord*>   spadData;
@@ -155,10 +166,14 @@ protected:
    virtual void     ValidateData();
    /// Is the current line a dashed line?
    virtual bool     IsDashedLine(const std::string &theLine);
-   /// Interpolate the data
-   virtual Real     Interpolate(Real x, Real x1, Real x2, Real y1, Real y2);
-   /// Get the force data at the record with the specified azimuth and Elevation
-   virtual Rvector3 GetForceAt(Real azVal, Real elVal);
+   /// Interpolate the data along 1 dimension
+   virtual Rvector3 Interpolate1D(Real x, Real x1, Real x2, Rvector3 y1, Rvector3 y2);
+   /// Interpolate the data using 2 steps
+   virtual Rvector3 Interpolate2Step(Real azimuth, Real elevation);
+   /// Interpolate the data using a bicubic
+   virtual Rvector3 InterpolateBicubic(Real azimuth, Real elevation);
+   /// Get the vector data at the record with the specified Azimuth and Elevation
+   virtual Rvector3 GetVec3At(Real azVal, Real elVal);
 };
 
 #endif // SPADFileReader_hpp

@@ -1,4 +1,4 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Color</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="System.html" title="System"><link rel="prev" href="CalculationParameters.html" title="Calculation Parameters"><link rel="next" href="CommandLine.html" title="Command-Line Usage"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Color</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="CalculationParameters.html">Prev</a>&nbsp;</td><th align="center" width="60%">System</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="CommandLine.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Color"></a><div class="titlepage"></div><a name="N28D42" class="indexterm"></a><a name="N28D45" class="indexterm"></a><a name="N28D48" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Color</span></h2><p>Color &mdash; Color support in GMAT resources and commands</p></div><div class="refsection"><a name="SettingColors_Description"></a><h2>Description</h2><p>GMAT lets you assign different colors to orbital trajectory segments
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Color</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ch17s03.html" title="System"><link rel="prev" href="ch17s03.html" title="System"><link rel="next" href="ch18.html" title="Chapter&nbsp;18.&nbsp;Targeting/Parameter Optimization"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Color</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ch17s03.html">Prev</a>&nbsp;</td><th align="center" width="60%">System</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ch18.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Color"></a><div class="titlepage"></div><a name="N22C74" class="indexterm"></a><a name="N22C77" class="indexterm"></a><a name="N22C7A" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Color</span></h2><p>Color &mdash; Color support in GMAT resources and commands</p></div><div class="refsection"><a name="SettingColors_Description"></a><h2>Description</h2><p>GMAT lets you assign different colors to orbital trajectory segments
     that are drawn by <span class="guilabel">Spacecraft</span>,
     <span class="guilabel">CelestialBody</span>, <span class="guilabel">LibrationPoint</span>
     and <span class="guilabel">Barycenter</span> resources. You can also assign unique
@@ -84,7 +84,7 @@
     below:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpaceraftVisualProp_SettingColors_2.png" align="middle" height="360"></td></tr></table></div></div><p>Using this Color panel, you can select basic colors, create custom
     colors of your choice and add custom colors to the list of available
     colors and set them on the <span class="guilabel">Propagate</span> command&rsquo;s
-    <span class="guilabel">OrbitColor</span> option.</p></div><div class="refsection"><a name="SettingColors_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N2908D"></a><h3>Configuring Orbit and Target Colors on Spacecraft
+    <span class="guilabel">OrbitColor</span> option.</p></div><div class="refsection"><a name="SettingColors_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N22FBF"></a><h3>Configuring Orbit and Target Colors on Spacecraft
       Resource</h3><p>You can set unique colors of your choice on orbital trajectories
       of a <span class="guilabel">Spacecraft</span> by assigning colors to
       <span class="guilabel">Spacecraft</span> object&rsquo;s <span class="guilabel">OrbitColor</span>
@@ -128,7 +128,7 @@ aSat.TargetColor = [138 43 226]  % RGB triplet value method</code></pre><p>The l
       value input method. Also see the <a class="xref" href="Color.html#SettingColors_Examples" title="Examples">Examples</a> section below for complete sample scripts
       that show how to use <span class="guilabel">Spacecraft</span> object&rsquo;s
       <span class="guilabel">OrbitColor</span> and <span class="guilabel">TargetColor</span>
-      fields.</p></div><div class="refsection"><a name="N290F8"></a><h3>Setting Colors on Ground Station Resource</h3><p>GMAT allows you to set unique colors of your choice on
+      fields.</p></div><div class="refsection"><a name="N2302A"></a><h3>Setting Colors on Ground Station Resource</h3><p>GMAT allows you to set unique colors of your choice on
       <span class="guilabel">GroundStation</span> object's
       <span class="guilabel">OrbitColor</span> or <span class="guilabel">TargetColor</span>
       fields. The list of available colors that you can set are tabulated in
@@ -151,7 +151,7 @@ aGroundStation.TargetColor = Black     % ColorName method
 % or
 aGroundStation.TargetColor = [0 0 0]   % RGB method</code></pre><p>See the <a class="xref" href="Color.html#SettingColors_Examples" title="Examples">Examples</a> section below for complete sample script that
       shows how to use <span class="guilabel">GroundStation</span> object&rsquo;s
-      <span class="guilabel">OrbitColor</span> field.</p></div><div class="refsection"><a name="N2912E"></a><h3>Configuring Orbit and Target Colors on Celestial Body
+      <span class="guilabel">OrbitColor</span> field.</p></div><div class="refsection"><a name="N23060"></a><h3>Configuring Orbit and Target Colors on Celestial Body
       Resource</h3><p>GMAT allows you to set available colors to orbits of built-in or
       custom-defined celestial bodies. GMAT contains built-in models for the
       Sun, the 8 planets, Earth's moon, and Pluto. You can create a custom
@@ -183,7 +183,7 @@ aPlanet.TargetColor = DarkBlue     % ColorName method
 % or
 aPlanet.TargetColor = [0 0 139]    % RGB method</code></pre><p>See the <a class="xref" href="Color.html#SettingColors_Examples" title="Examples">Examples</a> section below for complete sample scripts
       that show how to use <span class="guilabel">CelestialBody</span> object&rsquo;s
-      <span class="guilabel">OrbitColor</span> field</p></div><div class="refsection"><a name="N29170"></a><h3>Configuring Orbit and Target Colors on Libration Point
+      <span class="guilabel">OrbitColor</span> field</p></div><div class="refsection"><a name="N230A2"></a><h3>Configuring Orbit and Target Colors on Libration Point
       Resource</h3><p>GMAT lets you set available colors on an orbit that is drawn by a
       libration point. In order to see orbital trajectory that a libration
       point draws in space, you must draw the Lagrange points in an inertial
@@ -213,7 +213,7 @@ ESL1.TargetColor = Orchid           % ColorName method
 % or
 ESL1.TargetColor = [218 112 214]    % RGB method</code></pre><p>See the <a class="xref" href="Color.html#SettingColors_Examples" title="Examples">Examples</a> section below for complete sample script that
       shows how to use <span class="guilabel">LibrationPoint</span> object&rsquo;s
-      <span class="guilabel">OrbitColor</span> field.</p></div><div class="refsection"><a name="N291AC"></a><h3>Configuring Orbit and Target Colors on Barycenter
+      <span class="guilabel">OrbitColor</span> field.</p></div><div class="refsection"><a name="N230DE"></a><h3>Configuring Orbit and Target Colors on Barycenter
       Resource</h3><p>In GMAT, you can assign available colors on an orbit that is drawn
       by a barycenter point. Since a barycenter is a center of mass of a set
       of celestial bodies, hence in order to see its orbital trajectory, the
@@ -246,7 +246,7 @@ EarthMoonBarycenter.TargetColor = Silver         % ColorName method
 % or
 EarthMoonBarycenter.TargetColor = [192 192 192]  % RGB method</code></pre><p>See the <a class="xref" href="Color.html#SettingColors_Examples" title="Examples">Examples</a> section below for complete sample script that
       shows how to use <span class="guilabel">Barycenter</span> object&rsquo;s
-      <span class="guilabel">OrbitColor</span> field.</p></div><div class="refsection"><a name="N291EB"></a><h3>Configuring Orbit Colors on Propagate Command</h3><p>In GMAT, you can set unique colors on different
+      <span class="guilabel">OrbitColor</span> field.</p></div><div class="refsection"><a name="N2311D"></a><h3>Configuring Orbit Colors on Propagate Command</h3><p>In GMAT, you can set unique colors on different
       <span class="guilabel">Spacecraft</span> trajectory segments by setting orbital
       colors on <span class="guilabel">Propagate</span> commands. If you do not select
       unique colors on each <span class="guilabel">Propagate</span> command, then by
@@ -623,4 +623,4 @@ Vary aDC(TOI.Element1 = 0.24, {Perturbation = 0.001, Lower = 0.0, ...
  Achieve aDC(aSat.Earth.RMAG = 20000)
 EndTarget
 
-Propagate aProp(aSat) {aSat.Earth.Periapsis, OrbitColor = Orange}</pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="CalculationParameters.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="System.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="CommandLine.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Calculation Parameters&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Command-Line Usage</td></tr></table></div></body></html>
+Propagate aProp(aSat) {aSat.Earth.Periapsis, OrbitColor = Orange}</pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ch17s03.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ch17s03.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ch18.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">System&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;18.&nbsp;Targeting/Parameter Optimization</td></tr></table></div></body></html>

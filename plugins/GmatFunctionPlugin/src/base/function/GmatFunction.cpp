@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,7 +39,7 @@
 #include "Parameter.hpp"         // for GetReturnType()
 #include "MessageInterface.hpp"
 
-//#define DEBUG_FUNCTION_CONSTRUCT 
+//#define DEBUG_FUNCTION_CONSTRUCT
 //#define DEBUG_FUNCTION_SET
 //#define DEBUG_FUNCTION_SET_PATH
 //#define DEBUG_FUNCTION_INIT
@@ -1323,7 +1323,8 @@ bool GmatFunction::SetGmatFunctionPath(const std::string &path)
    
    // Compose full path if it has relative path.
    // Assuming if first char has '.', it has relative path.
-   std::string tempPath = GmatStringUtil::Trim(path);
+   std::string thePath  = GmatStringUtil::Trim(path);
+   std::string tempPath = thePath;
    #ifdef DEBUG_FUNCTION_SET_PATH
    MessageInterface::ShowMessage("   tempPath='%s'\n", tempPath.c_str());
    #endif
@@ -1340,7 +1341,17 @@ bool GmatFunction::SetGmatFunctionPath(const std::string &path)
       MessageInterface::ShowMessage("   currPath='%s'\n", currPath.c_str());
       #endif
             
-      tempPath = currPath + tempPath;
+      tempPath = currPath + thePath;
+      tempPath = GmatFileUtil::ConvertToOsFileName(tempPath);
+
+      // if it is not relative to the script, maybe it's relative to the
+      // bin directory
+      if (!fm->DoesDirectoryExist(tempPath))
+      {
+         std::string binDir   = fm->GetBinDirectory();
+         tempPath             = binDir + thePath;
+         tempPath             = GmatFileUtil::ConvertToOsFileName(tempPath);
+      }
       
       #ifdef DEBUG_FUNCTION_SET_PATH
       MessageInterface::ShowMessage("   tempPath='%s'\n", tempPath.c_str());

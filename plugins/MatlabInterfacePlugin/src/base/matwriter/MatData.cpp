@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2016 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -44,7 +44,8 @@ MatData::MatData(const std::string &variable_name) :
    WriterData        (variable_name),
    pmat              (NULL),
    obj_name          (""),
-   mat_struct        (NULL)
+   mat_struct        (NULL),
+   numDim            (0U)
 {
 }
 
@@ -72,7 +73,8 @@ MatData::MatData(const MatData &md) :
    WriterData        (md),
    pmat              (NULL),
    obj_name          (""),
-   mat_struct        (NULL)
+   mat_struct        (NULL),
+   numDim            (0U)
 {
 }
 
@@ -96,6 +98,7 @@ MatData& MatData::operator=(const MatData &md)
       pmat        = NULL;
       obj_name    = md.obj_name;
       mat_struct  = NULL;
+      numDim      = 0U;
    }
 
    return *this;

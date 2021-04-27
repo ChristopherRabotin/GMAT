@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -20,7 +20,6 @@
 //
 // Author: Waka Waktola
 // Created: 2003/08/29
-// Copyright: (c) 2003 NASA/GSFC. All rights reserved.
 //
 /**
  * This class contains the Propagation configuration window.
@@ -179,6 +178,7 @@ private:
    bool isSpkEpFormatChanged;
    bool isSpkEpochChanged;
    bool isSRPModelChanged;
+   bool isDragModelChanged;
 
    wxFlexGridSizer *intFlexGridSizer;
    wxFlexGridSizer *srpRCFlexSizer;
@@ -202,6 +202,7 @@ private:
    wxStaticText *unitsMaxStepStaticText;
    wxStaticText *maxStepAttemptStaticText;
    wxStaticText *srpModelStaticText;
+   wxStaticText *dragModelStaticText;
 
 
    wxTextCtrl *initialStepSizeTextCtrl;
@@ -234,6 +235,7 @@ private:
    wxComboBox *theMagfModelComboBox;
    wxComboBox *theErrorComboBox;
    wxComboBox *theSRPModelComboBox;
+   wxComboBox *theDragModelComboBox;
    
    wxBitmapButton *theGravModelSearchButton;
    wxBitmapButton *theGravModelSaveButton;
@@ -281,12 +283,14 @@ private:
    wxString propOriginName;
    wxString errorControlTypeName;
    wxString srpModelName;
+   wxString dragModelName;
    
    wxArrayString integratorTypeArray;
    wxArrayString dragModelArray;
    wxArrayString magfModelArray;
    wxArrayString errorControlArray;
    wxArrayString srpModelArray;
+   wxArrayString dragModelListArray;
    
    std::map<wxString, wxString> theFileMap;
    
@@ -404,6 +408,7 @@ private:
    void OnPropEpochComboBox(wxCommandEvent &);
    void OnStartEpochComboBox(wxCommandEvent &);
    void OnSRPModelComboBox(wxCommandEvent &event);
+   void OnDragModelComboBox(wxCommandEvent &event);
 
    void OnStartEpochTextChange(wxCommandEvent &);
 
@@ -452,6 +457,7 @@ private:
       ID_CB_MAG,
       ID_CB_ERROR,
       ID_CB_SRP_MODEL,
+      ID_CB_DRAG_MODEL,
       ID_BUTTON_ADD_BODY,
       ID_BUTTON_GRAV_SEARCH,
       ID_BUTTON_GRAV_SAVE,

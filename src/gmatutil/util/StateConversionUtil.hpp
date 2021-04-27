@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -293,14 +293,52 @@ static Rvector6 CartesianToAngularMomentum(Real mu, const Rvector3 &pos,
                                            const Rvector3 &vel);
 
 //------------------------------------------------------------------------------
-// derivative conversion methods
+// general derivative conversion methods
+//------------------------------------------------------------------------------
+static Rmatrix66 StateConvJacobian(const Rvector6 &stateIn,
+                                   const std::string &stateInputType,
+                                   const std::string &jacInputType,
+                                   const std::string &jacOutputType,
+                                   Real mu = EARTH_MU,
+                                   Real flattening = EARTH_FLATTENING,
+                                   Real eqRadius = EARTH_EQ_RADIUS,
+                                   const std::string &anomalyType = "TA");
+static Rmatrix66 JacobianOfCartesian(const Rvector6 &stateIn,
+                                     const std::string &stateInputType,
+                                     const std::string &jacInputType,
+                                     Real mu = EARTH_MU,
+                                     Real flattening = EARTH_FLATTENING,
+                                     Real eqRadius = EARTH_EQ_RADIUS,
+                                     const std::string &anomalyType = "TA");
+static Rmatrix66 JacobianWrtCartesian(const Rvector6 &stateIn,
+                                      const std::string &stateInputType,
+                                      const std::string &jacOutputType,
+                                      Real mu = EARTH_MU,
+                                      Real flattening = EARTH_FLATTENING,
+                                      Real eqRadius = EARTH_EQ_RADIUS,
+                                      const std::string &anomalyType = "TA");
+
+//------------------------------------------------------------------------------
+// specific derivative conversion methods
 //------------------------------------------------------------------------------
 static Real CalculateEccentricAnomaly(Real e, Real M);
-static Rmatrix66 CartesianToKeplerianDerivativeConversion(Real mu, const Rvector6 &cartesianState);
-static Rmatrix66 CartesianToKeplerianDerivativeConversionWithKeplInput(Real mu, const Rvector6 &keplerState);
+static Rmatrix66 CartesianToKeplerianDerivativeConversion(Real mu,
+                                                          const Rvector6 &cartesianState,
+                                                          const std::string &anomalyType = "MA");
+static Rmatrix66 CartesianToKeplerianDerivativeConversionWithKeplInput(Real mu,
+                                                                       const Rvector6 &keplerState,
+                                                                       const std::string &anomalyType = "MA");
 
-static Rmatrix66 CartesianToKeplerianDerivativeConversion_FiniteDiff(Real mu, const Rvector6 &cartesianState);
-static Rmatrix66 CartesianToKeplerianDerivativeConversionWithKeplInput_FiniteDiff(Real mu, const Rvector6 &keplerianState);
+static Rmatrix66 CartesianToKeplerianDerivativeConversion_FiniteDiff(Real mu,
+                                                                     const Rvector6 &cartesianState,
+                                                                     const std::string &anomalyType = "MA");
+static Rmatrix66 CartesianToKeplerianDerivativeConversionWithKeplInput_FiniteDiff(Real mu,
+                                                                                 const Rvector6 &keplerianState,
+                                                                                 const std::string &anomalyType = "MA");
+
+static Rmatrix66 KeplerianToCartesianDerivativeConversion(Real mu, const Rvector6 &cartesianState);
+static Rmatrix66 CartesianToSphericalAzFPADerivativeConversion(Real mu, const Rvector6 &cartesianState);
+static Rmatrix66 SphericalAzFPAToCartesianDerivativeConversion(Real mu, const Rvector6 &cartesianState);
 
 
 //------------------------------------------------------------------------------

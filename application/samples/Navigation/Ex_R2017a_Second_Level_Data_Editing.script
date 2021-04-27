@@ -231,7 +231,7 @@ rf1.FinalEpoch   = '10 Jun 2010 13:59:00.000';
 %   Estimator
 %
 
-Create BatchEstimatorInv bat
+Create BatchEstimator bat
 
 bat.ShowProgress               = True;
 bat.Measurements               = {estData};

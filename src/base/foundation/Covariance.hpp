@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -62,8 +62,16 @@ public:
 
    Rmatrix *GetCovariance();
    Rmatrix *GetCovariance(Integer forParameterID);
+   
+   Integer   GetElementIndex(std::string elementName);                       // made changes by TUAN NGUYEN
+   Integer   GetElementID(std::string elementName);                          // made changes by TUAN NGUYEN
+   Integer   GetElementSize(std::string elementName);                        // made changes by TUAN NGUYEN
+   GmatBase* GetElementOwner(std::string elementName);                       // made changes by TUAN NGUYEN
+
    Integer  GetSubMatrixLocationStart(Integer forParameterID);
    Integer  GetSubMatrixLocationStart(const std::string paramName);
+
+   void     ShowContent();                                                   // made changes by TUAN NGUYEN
 
 protected:
    GmatBase     *covarianceOwner;

@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -33,6 +33,7 @@
 #include "Rvector.hpp"
 #include "utildefs.hpp"
 #include <fstream>
+#include "TimeSystemConverter.hpp"   // for the TimeSystemConverter singleton
 
 class GMATUTIL_API CCSDSEMWriter
 {
@@ -88,6 +89,9 @@ protected:
    /// output data stream
    std::ofstream emOutStream;
    
+   /// Time converter singleton
+   TimeSystemConverter *theTimeConverter;
+
    /// Time conversion
    std::string A1ModJulianToUtcGregorian(Real epochInDays, Integer format);
 };

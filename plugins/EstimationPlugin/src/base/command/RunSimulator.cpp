@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -60,6 +60,8 @@ RunSimulator::RunSimulator() :
    eventMan                (NULL),
    includeSTMPropagation   (false)
 {
+   needToResetSTM = true;                         // made changes by TUAN NGUYEN
+
    overridePropInit = true;
    hasPrecisionTime = true;
 }
@@ -101,6 +103,8 @@ RunSimulator::RunSimulator(const RunSimulator & rs) :
    eventMan                (NULL),
    includeSTMPropagation   (rs.includeSTMPropagation)
 {
+   needToResetSTM = rs.needToResetSTM;              // made changes by TUAN NGUYEN
+
    overridePropInit = true;
 }
 
@@ -122,6 +126,9 @@ RunSimulator & RunSimulator::operator=(const RunSimulator & rs)
       theSimulator    = NULL;
       commandRunning  = false;
       commandComplete = false;
+      
+      needToResetSTM  = rs.needToResetSTM;                 // made changes by TUAN NGUYEN
+
       currentEvent    = NULL;
       eventProcessComplete = false;
       eventMan        = NULL;
@@ -300,7 +307,10 @@ bool RunSimulator::Initialize()
 
    // Clear the old clone if it was set
    if (theSimulator != NULL)
+   {
       delete theSimulator;
+      theSimulator = NULL;                   // made changes by TUAN NGUYEN
+   }
 
    GmatBase *simObj = FindObject(solverName);
    if (simObj == NULL)
@@ -382,65 +392,100 @@ bool RunSimulator::Initialize()
       throw CommandException("The EventManager pointer was not set on the "
             "RunSimulator command");
 
-   // Next comes the propagator
-   PropSetup *obj = theSimulator->GetPropagator();
-
-   #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Propagator at address %p ", obj);
-      if (obj != NULL)
-         MessageInterface::ShowMessage("is named %s\n",
-               obj->GetName().c_str());
-      else
-         MessageInterface::ShowMessage("is not yet set\n");
-   #endif
-
-   if (obj != NULL)
+   // Next comes the propagators
+   // Clear old ones
+   if (propagators.size() > 0)
    {
-      if (obj->IsOfType(Gmat::PROP_SETUP))
+      for (std::vector<PropSetup*>::iterator pp = propagators.begin();
+            pp != propagators.end(); ++pp)
       {
-         PropSetup *ps = (PropSetup*)obj->Clone();
-         ps->SetPrecisionTimeFlag(true);
-
-         // RunSimulator only manages one PropSetup.  If that changes, so
-         // does this code
-         if (propagators.size() > 0)
-         {
-            for (std::vector<PropSetup*>::iterator pp = propagators.begin();
-                  pp != propagators.end(); ++pp)
-            {
-               delete (*pp);
-            }
-            propagators.clear();
-            p.clear();
-            fm.clear();
-         }
-         propagators.push_back(ps);
-         p.push_back(ps->GetPropagator());
-         fm.push_back(ps->GetODEModel());
-         eventMan->SetObject(ps);  // todo <-- Check this -- added 6/28
-
-//         PropagationStateManager *psm = ps->GetPropStateManager();
-//         StringArray propObjects = ps->GetStringArrayParameter("");
-
-         retval = true;
+         delete (*pp);
       }
+      propagators.clear();
+      p.clear();
+      fm.clear();
    }
-   else
-      throw CommandException("Cannot initialize RunSimulator command; the "
-            "propagator pointer in the Simulator " +
-            theSimulator->GetName() + " is NULL.");
-
-   // Now set the participant list
-   MeasurementManager *mm = theSimulator->GetMeasurementManager();
-   StringArray participants = mm->GetParticipantList();
-
-   #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("RunSimulator command found %d "
-            "participants\n", participants.size());
-   #endif
 
    propObjectNames.clear();
-   propObjectNames.push_back(participants);
+   std::map<PropSetup*, StringArray> satList;
+   std::map<std::string,PropSetup*> knownProps;
+
+   // Setup new ones
+   StringArray scraft = measman->GetParticipantList();
+   for (UnsignedInt i = 0; i < scraft.size(); ++i)
+   {
+      GmatBase *sc = FindObject(scraft[i]);
+      if ((sc) && (sc->IsOfType("Spacecraft")))
+      {
+
+         ((Spacecraft*)(sc))->SetRunningCommandFlag(1);    // init value 1 for running simulation command        // made changes by TUAN NGUYEN
+
+         PropSetup *prop = theSimulator->GetPropagator(scraft[i]);
+
+         if (prop == nullptr)
+            throw CommandException("Cannot initialize RunSimulator command; the "
+                  "propagator pointer requested from the Simulator " +
+                  theSimulator->GetName() + " for the spacecraft " + scraft[i] +
+                  " is NULL.");
+
+         std::string propName = prop->GetName();
+         PropSetup *ps = nullptr;
+
+         if (knownProps.find(propName) == knownProps.end())
+         {
+            ps = (PropSetup*)prop->Clone();
+            ps->SetPrecisionTimeFlag(true);
+            propagators.push_back(ps);
+
+            StringArray satNames;
+            satNames.push_back(scraft[i]);
+            satList[ps] = satNames;
+            knownProps[propName] = ps;
+
+            p.push_back(ps->GetPropagator());
+            fm.push_back(ps->GetODEModel());
+            eventMan->SetObject(ps);
+
+            retval = true;
+         }
+         else
+         {
+            // One Ephem Prop per spacecraft
+            if (prop->GetPropagator()->IsOfType("EphemerisPropagator"))
+            {
+               ps = (PropSetup*)prop->Clone();
+               ps->SetPrecisionTimeFlag(true);
+               propagators.push_back(ps);
+
+               StringArray satNames;
+               satNames.push_back(scraft[i]);
+               satList[ps] = satNames;
+               knownProps[propName] = ps;
+
+               p.push_back(ps->GetPropagator());
+               fm.push_back(ps->GetODEModel());
+               eventMan->SetObject(ps);
+
+               retval = true;
+            }
+            else
+            {
+               ps = knownProps[propName];
+               StringArray satNames = satList[ps];
+               if (find(satNames.begin(), satNames.end(), scraft[i]) == satNames.end())
+                  (satList[ps]).push_back(scraft[i]);
+            }
+         }
+
+         if (ps->GetPropagator()->UsesODEModel())
+            sc->TakeAction("UseSTM");
+         else
+            sc->TakeAction("SkipSTM");
+      }
+   }
+
+   for (UnsignedInt i = 0; i < propagators.size(); ++i)
+      propObjectNames.push_back(satList[propagators[i]]);
 
    // Now we can initialize the propagation subsystem by calling up the
    // inheritance tree.
@@ -480,6 +525,7 @@ void RunSimulator::SetPropagationProperties(PropagationStateManager *psm)
       {
          // Always include the STM so that simulation and estimation steps are
          // (nearly) coincident
+
          psm->SetProperty("STM", *p);
       }
    }
@@ -598,6 +644,20 @@ void RunSimulator::RunComplete()
 
    RunSolver::RunComplete();
 
+   if (eventMan)                           // made changes by TUAN NGUYEN
+   {                                       // made changes by TUAN NGUYEN
+      eventMan->CleanUp();                 // made changes by TUAN NGUYEN
+      //eventMan = NULL;                   // made changes by TUAN NGUYEN
+   }                                       // made changes by TUAN NGUYEN
+
+   if (theSimulator)                       // made changes by TUAN NGUYEN
+   {                                       // made changes by TUAN NGUYEN
+      delete theSimulator;                 // made changes by TUAN NGUYEN
+      theSimulator = NULL;                 // made changes by TUAN NGUYEN
+   }                                       // made changes by TUAN NGUYEN
+
+
+
    #ifdef DEBUG_SIMULATOR_EXECUTION
       MessageInterface::ShowMessage("Exit RunSimulator::RunComplete()\n");
    #endif
@@ -707,20 +767,85 @@ void RunSimulator::PrepareToSimulate()
    #ifdef DEBUG_SIMULATOR_EXECUTION
       MessageInterface::ShowMessage("Entered RunSimulator::PrepareToSimulate()\n");
    #endif
+
    // Prep the measurement manager
    MeasurementManager *measman = theSimulator->GetMeasurementManager();
-
-   PropSetup *thePropagator = theSimulator->GetPropagator();
-   thePropagator->SetPrecisionTimeFlag(true);
-
+   
+   // Should RunEstimator do this too?  Or is it superfluous?
+   std::vector<PropSetup*> *thePropagators = theSimulator->GetPropagators();
+   for (UnsignedInt i = 0; i < thePropagators->size(); ++i)
+      thePropagators->at(i)->SetPrecisionTimeFlag(true);
+   
    if (measman->PrepareForProcessing(true) == false)
       throw CommandException(
             "Measurement Manager was unable to prepare for processing");
-
+   
    PrepareToPropagate();  // ?? Test return value here?
+   
    // measman->LoadRampTables();                     // This command is moved to Simulator::CompleteInitialization()
 
+   // Warn that the attitude is not updated at each propagation intermediate step [GMT-4398]
+   // FIXME: Fix this when PropagationEnabledCommand is refactored
+   // Check if the attitude affects the dynamics of any force model
+   bool attAffectDyn = false;
+   for (UnsignedInt n = 0U; n < propagators.size(); n++)
+   {
+      ODEModel *odem = propagators[n]->GetODEModel();
+      if (odem)
+      {
+         for (UnsignedInt ii = 0U; ii < odem->GetNumForces(); ii++)
+         {
+            PhysicalModel* f = odem->GetForce(ii);
 
+            if (f->AttitudeAffectsDynamics())
+            {
+               attAffectDyn = true;
+               break;
+            }
+         }
+      }
+
+      if (attAffectDyn)
+         break;
+   }
+
+   // If the attitude of the Spacecraft affects the force model,
+   // check if the Spacecraft uses an ObjectReferencedAxes
+   bool objRefAxes = false;
+   if (attAffectDyn)
+   {
+      for (std::vector<GmatBase *>::const_iterator obj = sats.begin();
+         obj != sats.end(); ++obj)
+      {
+         if ((*obj)->IsOfType("Spacecraft"))
+         {
+            GmatBase* att = (*obj)->GetRefObject(Gmat::ATTITUDE, "");
+
+            if (att->IsOfType("NadirPointing"))
+            {
+               objRefAxes = true;
+            }
+            else
+            {
+               std::string refCSName = att->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+               CoordinateSystem* cs = (CoordinateSystem*) att->GetRefObject(Gmat::COORDINATE_SYSTEM, refCSName);
+               AxisSystem* ax = cs->GetAxisSystem();
+
+               if (ax->IsOfType("ObjectReferencedAxes"))
+                  objRefAxes = true;
+            }
+         }
+      }
+   }
+
+   if (objRefAxes)
+      MessageInterface::ShowMessage("Warning: A Spacecraft in the Simulator is using NadirPointing or "
+         "an ObjectReferenced axes for its attitude with a force model that has dynamics affected by the attitude. "
+         "The attitude is not updated at intermediate steps in the integrator, so the result may be inaccurate.\n");
+   // End PropagationEnabledCommand FIXME
+
+   // TBD
+   theSimulator->GetMeasurementManager()->SetTransientForces(transientForces);
    theSimulator->UpdateCurrentEpoch(baseEpochGT[0]);
    commandRunning  = true;
    commandComplete = false;

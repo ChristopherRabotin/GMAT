@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -37,6 +37,7 @@
 #include "EstimatorException.hpp"
 #include "MessageInterface.hpp"
 #include "StringUtil.hpp"
+#include "UtilityException.hpp"
 #include <cmath>
 #include <limits>
 
@@ -55,18 +56,13 @@
 //------------------------------------------------------------------------------
 ExtendedKalmanFilter::ExtendedKalmanFilter(const std::string name) :
    SeqEstimator  ("ExtendedKalmanFilter", name),
-   dt(0.0),
-   isFirst(true),
-   prevState(6,1),
-   prevMeas(2),
-   debugMeas(2,1),
-   dState(6,1),
-   dMeas(2),
+   cf(),
+   qr(false),
    calculatedMeas(0),
-   currentObs(0),
-   ocDiff(0.0)
+   currentObs(0)
 {
    objectTypeNames.push_back("ExtendedKalmanFilter");
+
    #ifdef DEBUG_ESTIMATION
       MessageInterface::ShowMessage(" EKF default constructor: stateSize = %o, "
             "measSize = %o", stateSize, measSize);
@@ -82,14 +78,6 @@ ExtendedKalmanFilter::ExtendedKalmanFilter(const std::string name) :
 //------------------------------------------------------------------------------
 ExtendedKalmanFilter::~ExtendedKalmanFilter()
 {
-   if (measNoiseType == MeasNoiseType::Filter)
-   {
-      if (measCovariance)
-      {
-         delete measCovariance;
-         measCovariance = NULL;
-      }
-   }
 }
 
 
@@ -104,16 +92,10 @@ ExtendedKalmanFilter::~ExtendedKalmanFilter()
 //------------------------------------------------------------------------------
 ExtendedKalmanFilter::ExtendedKalmanFilter(const ExtendedKalmanFilter & ekf) :
    SeqEstimator  (ekf),
-   dt(0.0),
-   isFirst(true),
-   prevState(6,1),
-   prevMeas(2),
-   debugMeas(2,1),
-   dState(6,1),
-   dMeas(2),
+   cf(),
+   qr(false),
    calculatedMeas(0),
-   currentObs(0),
-   ocDiff(0.0)
+   currentObs(0)
 {
 }
 
@@ -134,13 +116,10 @@ ExtendedKalmanFilter& ExtendedKalmanFilter::operator=(const ExtendedKalmanFilter
    if (this != &ekf)
    {
       SeqEstimator::operator=(ekf);
-      isFirst = ekf.isFirst;
-      prevState = ekf.prevState;
-      prevMeas = ekf.prevMeas;
-      debugMeas = ekf.debugMeas;
-      dState = ekf.dState;
-      dMeas = ekf.dMeas;
       measSize = ekf.measSize;
+
+      cf = ekf.cf;
+      qr = ekf.qr;
    }
 
    return *this;
@@ -204,37 +183,14 @@ void ExtendedKalmanFilter::CompleteInitialization()
             "covariance matrix is not sized correctly!!!");
    }
 
-   pBar.SetSize(stateSize, stateSize);
-   Q.SetSize(stateSize, stateSize);
-   H.SetSize(measSize, stateSize);
-   yi.SetSize(measSize);
    I = Rmatrix::Identity(stateSize);
-   kalman.SetSize(stateSize, measSize);
-   defaultMeasCovarianceDiag.SetSize(measSize);
-   innovationCov.SetSize(measSize,measSize);
-   innovationCovInv.SetSize(measSize,measSize);
-   dt = 0.0;
 
-   for (Integer i = 0; i < measSize; ++i)
-   {
-      defaultMeasCovarianceDiag(i) = defaultMeasSigma*defaultMeasSigma;
-   }
-   defaultMeasCovariance = Rmatrix::Diagonal(measSize, defaultMeasCovarianceDiag);
-
-   if (measNoiseType == MeasNoiseType::Filter)
-   {
-      Rmatrix measData(measSize, measSize);
-      for (Integer i = 0; i < measSize; ++i)
-      {
-         measData(i,i) = measNoiseSigma(i)*measNoiseSigma(i);
-      }
-      measCovariance = new Covariance(NULL);
-      measCovariance->SetDimension(measSize);
-      measCovariance->FillMatrix(measData, false);
-   }
+   sqrtP_T.SetSize(stateSize, stateSize);
+   sqrtPupdate_T.SetSize(stateSize, stateSize);
+   cf.Factor(*(stateCovariance->GetCovariance()), sqrtP_T);
 
    currentObs =  measManager.GetObsData();
-   prevObsEpochGT = currentEpochGT;
+   prevUpdateEpochGT = currentEpochGT;
 }
 
 
@@ -273,20 +229,18 @@ void ExtendedKalmanFilter::Estimate()
       MessageInterface::ShowMessage("\n");
    #endif
 
+   UpdateInfoType updateStat;
+
+   // fill sigmas
+   updateStat.processNoise.SetSize(Q.GetNumColumns(), Q.GetNumRows());
+   updateStat.processNoise = Q;
+
+   // fill STM
+   updateStat.stm.SetSize(stm->GetNumRows(), stm->GetNumColumns());
+   updateStat.stm = *stm;
+
    // setup the measurement objects for the rest of this frame of data to use
    SetupMeas();
-
-   if (!calculatedMeas->isFeasible && calculatedMeas->unfeasibleReason[0] == 'B')
-   {
-      AdvanceEpoch();
-      return;
-   }
-
-   // Update the Process Noise
-   UpdateProcessNoise();
-
-   // Perform the time update of the covariances, phi P phi^T, and the state
-   TimeUpdate();
 
    #ifdef DEBUG_ESTIMATION
       MessageInterface::ShowMessage("Time updated matrix \\bar P:\n");
@@ -300,37 +254,7 @@ void ExtendedKalmanFilter::Estimate()
    #endif
 
    // Construct the O-C data and H tilde
-   ComputeObs();
-
-   // <debug>
-   Rmatrix state(6, 1);
-   for (UnsignedInt i = 0; i < 6; ++i)
-   {
-      state(i, 0) = (*estimationState)[i];
-   }
-   if (!isFirst)
-   {
-//MessageInterface::ShowMessage("   Value size %d, prev size %d\n", calculatedMeas->value.size(), prevMeas.size());
-      for (UnsignedInt i = 0; i < calculatedMeas->value.size(); ++i)
-      {
-         dMeas[i] = calculatedMeas->value[i] - prevMeas[i];
-      }
-      dState = state - prevState;
-//      debugMeas = H * dState;
-   }
-
-   isFirst = false;
-   for (UnsignedInt i = 0; i < 6; ++i)
-   {
-      prevState(i, 0) = (*estimationState)[i];
-   }
-
-   for (UnsignedInt i = 0; i < 2; ++i)
-   {
-      prevMeas[i] = calculatedMeas->value[i];
-   }
-
-   // </debug>
+   ComputeObs(updateStat);
 
    #ifdef DEBUG_ESTIMATION
       MessageInterface::ShowMessage("hTilde:\n");
@@ -344,7 +268,7 @@ void ExtendedKalmanFilter::Estimate()
    #endif
 
    // Then the Kalman gain
-   ComputeGain();
+   ComputeGain(updateStat);
 
    #ifdef DEBUG_ESTIMATION
       MessageInterface::ShowMessage("The Kalman gain is: \n");
@@ -358,7 +282,7 @@ void ExtendedKalmanFilter::Estimate()
    #endif
 
    // Finally, update everything
-   UpdateElements();
+   UpdateElements(updateStat);
 
    // Plot residuals if set
    if (showAllResiduals)
@@ -368,7 +292,30 @@ void ExtendedKalmanFilter::Estimate()
 
    // Convert current estimation state from GMAT internal coordinate system to participants' coordinate system
    currentSolveForState = esm.GetEstimationStateForReport();
-   UpdateReportText();
+
+   for (UnsignedInt ii = 0; ii < stateSize; ii++)
+      updateStat.state.push_back(currentSolveForState[ii]);
+
+   // Add state offset if not rectified
+   if (esm.HasStateOffset())
+   {
+      GmatState xOffset = *esm.GetStateOffset();
+      for (UnsignedInt ii = 0; ii < stateSize; ii++)
+      {
+         Real conv = GetEpsilonConversion(ii);
+         updateStat.state[ii] += xOffset[ii] * conv;
+      }
+   }
+
+   updateStat.cov.SetSize(informationInverse.GetNumRows(), informationInverse.GetNumColumns());
+   updateStat.cov = informationInverse;
+   updateStat.sigmaVNB = GetCovarianceVNB(informationInverse);
+
+   updateStats.push_back(updateStat);
+   BuildMeasurementLine(updateStat.measStat);
+   WriteDataFile();
+   AddMatlabData(updateStat.measStat);
+   AddMatlabFilterData(updateStat);
 
 
    #ifdef DEBUG_ESTIMATION
@@ -387,9 +334,175 @@ void ExtendedKalmanFilter::Estimate()
       MessageInterface::ShowMessage("\n\n---------------------\n");
    #endif
 
-   ReportProgress();
+   if (textFileMode == "Verbose")
+      ReportProgress();
 
    AdvanceEpoch();
+}
+
+//------------------------------------------------------------------------------
+// void TimeUpdate()
+//------------------------------------------------------------------------------
+/**
+ * Performs the time update of the state error covariance
+ *
+ * This method uses Cholesky factorization for covariance
+ * This is based on section 5.7 of Brown and Hwang 4e
+ */
+ //------------------------------------------------------------------------------
+void ExtendedKalmanFilter::TimeUpdate()
+{
+#ifdef DEBUG_ESTIMATION
+   MessageInterface::ShowMessage("Performing time update\n");
+#endif
+
+#ifdef DEBUG_ESTIMATION
+   MessageInterface::ShowMessage("Q = \n");
+   for (UnsignedInt i = 0; i < stateSize; ++i)
+   {
+      for (UnsignedInt j = 0; j < stateSize; ++j)
+         MessageInterface::ShowMessage("   %.12lf", Q(i, j));
+      MessageInterface::ShowMessage("\n");
+   }
+   MessageInterface::ShowMessage("\n");
+#endif
+
+   /// Calculate conversion derivative matrixes
+   // Calculate conversion derivative matrix [dX/dS] from Cartesian to Solve-for state
+   cart2SolvMatrix = esm.CartToSolveForStateConversionDerivativeMatrix();
+   // Calculate conversion derivative matrix [dS/dK] from solve-for state to Keplerian
+   solv2KeplMatrix = esm.SolveForStateToKeplConversionDerivativeMatrix();
+
+   Rmatrix dX_dS = cart2SolvMatrixPrev;
+   Rmatrix dS_dX = cart2SolvMatrix.Inverse();
+
+   Rmatrix Q_S = dS_dX * Q * dS_dX.Transpose();
+   Rmatrix stm_S = dS_dX * (*stm) * dX_dS;
+
+   // Update offset from reference trajectory
+   if (esm.HasStateOffset())
+   {
+      GmatState *offsetState = esm.GetStateOffset();
+      Rvector xOffset(stateSize);
+      xOffset.Set(offsetState->GetState(), stateSize);
+
+      xOffset = (*stm) * xOffset;
+
+      for (UnsignedInt i = 0; i < stateSize; ++i)
+         (*offsetState)[i] = xOffset[i];
+   }
+
+   // Form C matrix and perform QR decomposition to calculate pBar
+
+   // C = [sqrt(P)^T * Phi^T;
+   //      sqrt(Q)^T];
+   Rmatrix C(2 * stateSize, stateSize);
+   Rmatrix C1 = sqrtP_T * stm_S.Transpose();
+
+   Rmatrix sqrtQ_T(stateSize, stateSize);
+
+   bool hasZeroDiag = false;
+   for (UnsignedInt ii = 0U; ii < stateSize; ii++)
+   {
+      if (Q_S(ii, ii) == 0U)
+      {
+         hasZeroDiag = true;
+         break;
+      }
+   }
+
+   if (!hasZeroDiag)
+   {
+      try
+      {
+         cf.Factor(Q_S, sqrtQ_T);
+      }
+      catch (UtilityException e)
+      {
+         throw EstimatorException("The process noise matrix is not positive definite!");
+      }
+   }
+   else
+   {
+      // Remove all zero rows/columns first
+      IntegerArray removedIndexes;
+      IntegerArray auxVector;
+      Integer numRemoved;
+      Rmatrix reducedQ_S = MatrixFactorization::CompressNormalMatrix(Q_S,
+         removedIndexes, auxVector, numRemoved);
+
+      Rmatrix reducedSqrtQ_T(stateSize - numRemoved, stateSize - numRemoved);
+      try
+      {
+         cf.Factor(reducedQ_S, reducedSqrtQ_T);
+      }
+      catch (UtilityException e)
+      {
+         throw EstimatorException("The process noise matrix is not positive definite!");
+      }
+
+      sqrtQ_T = MatrixFactorization::ExpandNormalMatrixInverse(reducedSqrtQ_T,
+         auxVector, numRemoved);
+   }
+
+   for (UnsignedInt ii = 0U; ii < stateSize; ii++)
+   {
+      for (UnsignedInt jj = 0U; jj < stateSize; jj++)
+      {
+         C(ii, jj) = C1(ii, jj);
+         C(ii + stateSize, jj) = sqrtQ_T(ii, jj);
+      }
+   }
+
+   #ifdef DEBUG_ESTIMATION
+      MessageInterface::ShowMessage("C = \n");
+      for (UnsignedInt i = 0; i < 2 * stateSize; ++i)
+      {
+         for (UnsignedInt j = 0; j < stateSize; ++j)
+         {
+            MessageInterface::ShowMessage("  %.12le", C(i,j));
+         }
+         MessageInterface::ShowMessage("\n");
+      }
+   #endif
+
+   Rmatrix Tc(2 * stateSize, 2 * stateSize);
+   Rmatrix Uc(2 * stateSize, stateSize);
+
+   // Perform QR factorization
+   qr.Factor(C, Uc, Tc);
+
+   #ifdef DEBUG_ESTIMATION
+      MessageInterface::ShowMessage("Uc = \n");
+      for (UnsignedInt i = 0; i < 2 * stateSize; ++i)
+      {
+         for (UnsignedInt j = 0; j < stateSize; ++j)
+         {
+            MessageInterface::ShowMessage("  %.12le", Uc(i,j));
+         }
+         MessageInterface::ShowMessage("\n");
+      }
+   #endif
+
+   // Get sqrt(PBar)^T from top haplf of Uc
+   for (UnsignedInt ii = 0U; ii < stateSize; ii++)
+      for (UnsignedInt jj = 0U; jj < stateSize; jj++)
+         sqrtP_T(ii, jj) = Uc(ii, jj);
+
+   // Warn if covariance is not positive definite
+   for (UnsignedInt ii = 0U; ii < stateSize; ii++)
+   {
+      if (GmatMathUtil::Abs(sqrtP_T(ii, ii)) < 1e-16)
+      {
+         MessageInterface::ShowMessage("WARNING The covariance is no longer positive definite! Epoch = %s\n", currentEpochGT.ToString().c_str());
+         break;
+      }
+   }
+
+   pBar = sqrtP_T.Transpose() * sqrtP_T;
+
+   // make it symmetric!
+   Symmetrize(pBar);
 }
 
 //------------------------------------------------------------------------------
@@ -408,207 +521,126 @@ void ExtendedKalmanFilter::SetupMeas()
    modelsToAccess = measManager.GetValidMeasurementList();
    currentObs =  measManager.GetObsData();
 
-   // Currently assuming uniqueness in models to access
-   measCount = measManager.Calculate(modelsToAccess[0], true);
-   calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
-}
-
-//------------------------------------------------------------------------------
-// void UpdateProcessNoise()
-//------------------------------------------------------------------------------
-/**
- * This updates the process noise matrix, Q
- *
- * Author: Jamie LaPointe
- * Org:    University of Arizona - Department of Aerospace and Mechanical Engineering
- * Date:   9 May 2016
- */
-//------------------------------------------------------------------------------
-void ExtendedKalmanFilter::UpdateProcessNoise()
-{
-   #ifdef DEBUG_ESTIMATION
-      MessageInterface::ShowMessage("Performing process noise update\n");
-   #endif
-
-   // TODO implement SNC and DMC models
-
-   static bool isFirst = true;
-   dt = (calculatedMeas->epochGT - prevObsEpochGT).GetTimeInSec();
-
-   if (processNoiseType == ProcessNoiseType::Constant)
+   if (modelsToAccess.size() > 0U)
    {
-      Q(0,0) = processNoiseConstantVector(0);
-      Q(1,1) = processNoiseConstantVector(1);
-      Q(2,2) = processNoiseConstantVector(2);
-      Q(3,3) = processNoiseConstantVector(3);
-      Q(4,4) = processNoiseConstantVector(4);
-      Q(5,5) = processNoiseConstantVector(5);
-   }
-   else if (processNoiseType == ProcessNoiseType::BasicTime)
-   {
-      Real positionProcessNoiseSigma = processPosNoiseTimeRate * dt;
-      Real velocityProcessNoiseSigma = processVelNoiseTimeRate * dt;
-      Q(0,0) = Q(1,1) = Q(2,2) = positionProcessNoiseSigma * positionProcessNoiseSigma;
-      Q(3,3) = Q(4,4) = Q(5,5) = velocityProcessNoiseSigma * velocityProcessNoiseSigma;
-   }
-   else if (processNoiseType == ProcessNoiseType::SingerModel)
-   {
-      // This algorithm is from Design & Analysis of Modern Tracking Systems by
-      // Blackman, Samuel and Popoli, Robert. 1999. ISBN 1-58053-006-0
-      // pp. 202 & 276
-      // target dynamics/perturbations where the unmodeled accelerations are taken to be
-      // process white noise
-      Real s = 2 * processSingerSigma * processSingerSigma * processSingerTimeConst;
-      Real dt2 = (dt * dt)/2.0;
-      Real dt3 = (dt2 * dt)/3.0;
+      measCount = measManager.CountFeasibleMeasurements(modelsToAccess[0]);
+      calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
 
-      Rmatrix qTemp(2,2, dt3, dt2,
-                         dt2, dt);
+      // verify media correction to be in acceptable range. It is [0m, 60m] for troposphere correction and [0m, 20m] for ionosphere correction
+      ValidateMediaCorrection(calculatedMeas);
 
-      // setup the block diagaonal matrix for the process noise matrix, Q
-      Q(0,0) = Q(1,1) = Q(2,2) = qTemp(0,0) * s;
-      Q(0,3) = Q(1,4) = Q(2,5) = qTemp(0,1) * s;
-      Q(3,0) = Q(4,1) = Q(5,2) = qTemp(1,0) * s;
-      Q(3,3) = Q(4,4) = Q(5,5) = qTemp(1,1) * s;
-   }
-   else if (processNoiseType == ProcessNoiseType::SNC)
-   {
-      // TODO Add SNC
-   }
-   else // ProcessNoiseType::None:
-   {
-      // do nothing
-   }
-}
-
-//------------------------------------------------------------------------------
-// void TimeUpdate()
-//------------------------------------------------------------------------------
-/**
- * Performs the time update of the state error covariance
- *
- * This method applies equation 4.7.1(b), and then symmetrizes the resulting
- * time updated covariance, pBar.
- */
-//------------------------------------------------------------------------------
-void ExtendedKalmanFilter::TimeUpdate()
-{
-   #ifdef DEBUG_ESTIMATION
-      MessageInterface::ShowMessage("Performing time update\n");
-   #endif
-
-   // phi * P * phi^T + Q
-
-   pBar = ((*stm) * (*(stateCovariance->GetCovariance())) * (stm->Transpose())) + Q;
-
-   #ifdef DEBUG_ESTIMATION
-      MessageInterface::ShowMessage("Q = \n");
-      for (UnsignedInt i = 0; i < stateSize; ++i)
+      // Make correction for observation value before running data filter
+      if ((iterationsTaken == 0) && (currentObs->typeName == "DSN_SeqRange"))
       {
-         for (UnsignedInt j = 0; j < measSize; ++j)
-            MessageInterface::ShowMessage("   %.12lf", Q(i,j));
-         MessageInterface::ShowMessage("\n");
+         // value correction is only applied for DSN_SeqRange and it is only performed at the first time
+         for (Integer index = 0; index < currentObs->value.size(); ++index)
+            measManager.GetObsDataObject()->value[index] = ObservationDataCorrection(calculatedMeas->value[index], currentObs->value[index], currentObs->rangeModulo);
       }
-      MessageInterface::ShowMessage("\n");
-   #endif
 
-   // make it symmetric!
-   Symmetrize(pBar);
+      // Size the measurement matricies
+      measSize = currentObs->value.size();
+
+      H.SetSize(measSize, stateSize);
+      yi.SetSize(measSize);
+      kalman.SetSize(stateSize, measSize);
+   }
+
+   /// Calculate conversion derivative matrixes
+   // Calculate conversion derivative matrix [dX/dS] from Cartesian to Solve-for state
+   cart2SolvMatrix = esm.CartToSolveForStateConversionDerivativeMatrix();
+   // Calculate conversion derivative matrix [dS/dK] from solve-for state to Keplerian
+   solv2KeplMatrix = esm.SolveForStateToKeplConversionDerivativeMatrix();
 }
 
 
 //------------------------------------------------------------------------------
-// void ComputeObs()
+// void ComputeObs(UpdateInfoType &updateStat)
 //------------------------------------------------------------------------------
 /**
  * Computes the measurement residuals and the H-tilde matrix
  */
 //------------------------------------------------------------------------------
-void ExtendedKalmanFilter::ComputeObs()
+void ExtendedKalmanFilter::ComputeObs(UpdateInfoType &updateStat)
 {
    #ifdef DEBUG_ESTIMATION
       MessageInterface::ShowMessage("Computing obs and hTilde\n");
    #endif
    // Compute the O-C, Htilde, and Kalman gain
-   std::vector<RealArray> stateDeriv;
-   const std::vector<ListItem*> *stateMap = esm.GetStateMap();
-   hTilde.clear();
 
-   #ifdef DEBUG_ESTIMATION
-      MessageInterface::ShowMessage("StateMap size is %d\n", stateMap->size());
-   #endif
+   // Populate measurement statistics
+   FilterMeasurementInfoType measStat;
+   CalculateResiduals(measStat);
 
-   if (calculatedMeas == NULL || measCount == 0)
+   // Populate H and y
+   if (modelsToAccess.size() > 0)
    {
-      throw EstimatorException("No measurement was calculated!");
-   }
+      // Adjust computed and residual based on value of xOffset
+      Rvector xOffset(stateSize);
+      xOffset.Set(esm.GetEstimationStateOffset().GetState(), stateSize);
 
-   UnsignedInt rowCount;
-   RealArray hTrow;
-   hTrow.assign(stateSize, 0.0);
-   rowCount = calculatedMeas->value.size();
-   measSize = currentObs->value.size();
-
-   #ifdef DEBUG_ESTIMATION
-      if (rowCount != measSize)
-         MessageInterface::ShowMessage("Mismatch between rowCount (%d) and "
-               "measSize(%d)\n", rowCount, measSize);
-   #endif
-
-   for (UnsignedInt i = 0; i < rowCount; ++i)
-   {
-      hTilde.push_back(hTrow);
-   }
-
-   // Now walk the state vector and get elements of H-tilde for each piece
-   for (UnsignedInt i = 0; i < stateSize; ++i)
-   {
-      if ((*stateMap)[i]->subelement == 1)
+      Rvector H_x = H * xOffset;
+      for (UnsignedInt k = 0; k < measStat.residual.size(); ++k)
       {
-         stateDeriv = measManager.CalculateDerivatives(
-               (*stateMap)[i]->object, (*stateMap)[i]->elementID,
-               modelsToAccess[0]);
+         measStat.measValue[k] += H_x(k);
+         measStat.residual[k] -= H_x(k);
+      }
 
-         // Fill in the corresponding elements of hTilde
-         for (UnsignedInt j = 0; j < rowCount; ++j)
-         {
-            for (Integer k = 0; k < (*stateMap)[i]->length; ++k)
-            {
-               hTilde[j][i+k] = stateDeriv[j][k];
-               H(j,i+k) = hTilde[j][i+k];
-            }
-         }
+      if (measStat.isCalculated)
+      {
+         for (UnsignedInt k = 0; k < measStat.residual.size(); ++k)
+            yi(k) = measStat.residual[k];
+      }
+
+      // get scaled residuals
+      Rmatrix R = *(GetMeasurementCovariance()->GetCovariance());
+
+      // Keep this line for when we implement the scaled residual for the entire measurement
+      // instead of for each element of the measurement:
+      // measStat.scaledResid = GmatMathUtil::Sqrt(yi * (H * pBar * H.Transpose() + R).Inverse() * yi);
+
+      // The element-by-element scaled residual calculation:
+      for (UnsignedInt k = 0; k < measStat.residual.size(); ++k)
+      {
+         Rmatrix Rbar = H * pBar * H.Transpose() + R;
+         Real sigmaVal = GmatMathUtil::Sqrt(Rbar(k, k));
+         Real scaledResid = measStat.residual[k] / sigmaVal;
+         measStat.scaledResid.push_back(scaledResid);
+      }
+
+   }  // end of if (modelsToAccess.size() > 0)
+
+   currentSolveForState = esm.GetEstimationStateForReport();
+   for (UnsignedInt ii = 0; ii < stateSize; ii++)
+      measStat.state.push_back(currentSolveForState[ii]);
+
+   // Add state offset if not rectified
+   if (esm.HasStateOffset())
+   {
+      GmatState xOffset = *esm.GetStateOffset();
+      for (UnsignedInt ii = 0; ii < stateSize; ii++)
+      {
+         Real conv = GetEpsilonConversion(ii);
+         measStat.state[ii] += xOffset[ii] * conv;
       }
    }
 
-   for (UnsignedInt k = 0; k < measSize; ++k)
-   {
-      ocDiff = currentObs->value[k] - calculatedMeas->value[k];
-      measurementEpochs.push_back(currentObs->epoch);
-      measurementResiduals.push_back(ocDiff);
-      measurementResidualID.push_back(calculatedMeas->uniqueID);
-      yi(k) = ocDiff;
-      #ifdef DEBUG_ESTIMATION
-         MessageInterface::ShowMessage("*** Current O-C = %.12lf\n", ocDiff);
-      #endif
-   }
+   measStat.cov.SetSize(pBar.GetNumColumns(), pBar.GetNumRows());
+   measStat.cov = pBar;
+   measStat.sigmaVNB = GetCovarianceVNB(pBar);
 
-   if (measNoiseType == MeasNoiseType::Hardware)
-   {
-      if (currentObs->noiseCovariance == NULL)
-      {
-         measCovariance = calculatedMeas->covariance;
-      }
-      else
-      {
-         measCovariance = currentObs->noiseCovariance;
-      }
-   }
+   measStats.push_back(measStat);
+
+   updateStat.epoch = currentEpochGT;
+   updateStat.isObs = true;
+   updateStat.measStat = measStat;
+
+   BuildMeasurementLine(measStat);
+   WriteToTextFile();
 }
 
 
 //------------------------------------------------------------------------------
-// void ComputeGain()
+// void ComputeGain(UpdateInfoType &updateStat)
 //------------------------------------------------------------------------------
 /**
  * Computes the Kalman gain
@@ -622,81 +654,104 @@ void ExtendedKalmanFilter::ComputeObs()
  * gain calculation, this value is also stored in this method
  */
 //------------------------------------------------------------------------------
-void ExtendedKalmanFilter::ComputeGain()
+void ExtendedKalmanFilter::ComputeGain(UpdateInfoType &updateStat)
 {
-   #ifdef DEBUG_ESTIMATION
-      MessageInterface::ShowMessage("Computing Kalman Gain\n");
-   #endif
+   if (updateStat.measStat.isCalculated)
+   {
+      #ifdef DEBUG_ESTIMATION
+         MessageInterface::ShowMessage("Computing Kalman Gain\n");
+      #endif
 
-   #ifdef DEBUG_ESTIMATION_DETAILS
-      MessageInterface::ShowMessage("Calculating P H^T\n");
-   #endif
+      // Form A matrix and perform QR decomposition to calculate K and P
+      Rmatrix R = *(GetMeasurementCovariance()->GetCovariance());
+      Integer measSize = R.GetNumRows();
 
-   // Compute the Innovation (residual) covariance matrix
-   // S = H*P*H^T + R
-   innovationCov = (H * pBar * H.Transpose()) + (*(measCovariance->GetCovariance()));
-   innovationCovInv = innovationCov.Inverse(std::numeric_limits<double>::epsilon());
+      // A = [sqrt(R)^T,        0;
+      //      sqrt(PBar)^T*H^T, sqrt(PBar)^T];
+      Rmatrix A(measSize + stateSize, measSize + stateSize);
 
-   #ifdef DEBUG_ESTIMATION
-	   MessageInterface::ShowMessage("H = \n");
-	   for (UnsignedInt i = 0; i < measSize; ++i)
-	   {
-		  for (UnsignedInt j = 0; j < stateSize; ++j)
-		  {
-			 MessageInterface::ShowMessage("  %.12le", H(i,j));
-		  }
-		  MessageInterface::ShowMessage("\n");
-	   }
-	   MessageInterface::ShowMessage("pBar = \n");
-	   for (UnsignedInt i = 0; i < stateSize; ++i)
-	   {
-		  for (UnsignedInt j = 0; j < stateSize; ++j)
-		  {
-			 MessageInterface::ShowMessage("  %.12le", pBar(i,j));
-		  }
-		  MessageInterface::ShowMessage("\n");
-	   }
-	   MessageInterface::ShowMessage("R = \n");
-	   for (UnsignedInt i = 0; i < measSize; ++i)
-	   {
-		  for (UnsignedInt j = 0; j < measSize; ++j)
-		  {
-			 MessageInterface::ShowMessage("  %.12le", (*(measCovariance->GetCovariance()))(i,j));
-		  }
-		  MessageInterface::ShowMessage("\n");
-	   }
-      MessageInterface::ShowMessage("Gain denominator = \n");
-      for (UnsignedInt i = 0; i < measSize; ++i)
+      Rmatrix sqrtR_T(measSize, measSize);
+      cf.Factor(R, sqrtR_T);
+
+      Rmatrix A21 = sqrtP_T * H.Transpose();
+
+      // Populate A
+      // Top block
+      for (UnsignedInt ii = 0U; ii < measSize; ii++)
+         for (UnsignedInt jj = 0U; jj < measSize; jj++)
+            A(ii, jj) = sqrtR_T(ii, jj);
+
+      // Bottom block
+      for (UnsignedInt ii = 0U; ii < stateSize; ii++)
       {
-         for (UnsignedInt j = 0; j < measSize; ++j)
-         {
-            MessageInterface::ShowMessage("  %.12le", innovationCov(i,j));
-         }
-         MessageInterface::ShowMessage("\n");
-      }
-      MessageInterface::ShowMessage("innovationCovInv = \n");
-      for (UnsignedInt i = 0; i < measSize; ++i)
-      {
-         for (UnsignedInt j = 0; j < measSize; ++j)
-         {
-            MessageInterface::ShowMessage("  %.12le", innovationCovInv(i,j));
-         }
-         MessageInterface::ShowMessage("\n");
-      }
-   #endif
+         // Left block
+         for (UnsignedInt jj = 0U; jj < measSize; jj++)
+            A(measSize + ii, jj) = A21(ii, jj);
 
-   #ifdef DEBUG_ESTIMATION
-      MessageInterface::ShowMessage("Calculating the Kalman gain\n");
-   #endif
+         // Right block
+         for (UnsignedInt jj = 0U; jj < stateSize; jj++)
+            A(measSize + ii, measSize + jj) = sqrtP_T(ii, jj);
+      }
 
-   // compute the Kalman Gain
-   // K = P * H^T * S^{-1}  OR  K = P * H^T * (H * P * H^T + R)^{-1}
-   kalman = pBar * H.Transpose() * innovationCovInv;
+      #ifdef DEBUG_ESTIMATION
+         MessageInterface::ShowMessage("A = \n");
+         for (UnsignedInt i = 0; i < measSize + stateSize; ++i)
+         {
+           for (UnsignedInt j = 0; j < measSize + stateSize; ++j)
+           {
+             MessageInterface::ShowMessage("  %.12le", A(i,j));
+           }
+           MessageInterface::ShowMessage("\n");
+         }
+      #endif
+
+      Rmatrix Ta(measSize + stateSize, measSize + stateSize);
+      Rmatrix Ua(measSize + stateSize, measSize + stateSize);
+
+      // Perform QR factorization
+      qr.Factor(A, Ua, Ta);
+
+      #ifdef DEBUG_ESTIMATION
+         MessageInterface::ShowMessage("Ua = \n");
+         for (UnsignedInt i = 0; i < measSize + stateSize; ++i)
+         {
+           for (UnsignedInt j = 0; j < measSize + stateSize; ++j)
+           {
+             MessageInterface::ShowMessage("  %.12le", Ua(i,j));
+           }
+           MessageInterface::ShowMessage("\n");
+         }
+      #endif
+
+      Rmatrix sqrtB_T(measSize, measSize);
+      Rmatrix W_T(measSize, stateSize);
+
+      // Populate result matricies
+      for (UnsignedInt ii = 0U; ii < measSize; ii++)
+         for (UnsignedInt jj = 0U; jj < measSize; jj++)
+            sqrtB_T(ii, jj) = Ua(ii, jj);
+
+      for (UnsignedInt ii = 0U; ii < measSize; ii++)
+         for (UnsignedInt jj = 0U; jj < stateSize; jj++)
+            W_T(ii, jj) = Ua(ii, measSize + jj);
+
+      for (UnsignedInt ii = 0U; ii < stateSize; ii++)
+         for (UnsignedInt jj = 0U; jj < stateSize; jj++)
+            sqrtPupdate_T(ii, jj) = Ua(measSize + ii, measSize + jj);
+
+      #ifdef DEBUG_ESTIMATION
+         MessageInterface::ShowMessage("Calculating the Kalman gain\n");
+      #endif
+
+      kalman = W_T.Transpose() * sqrtB_T.Transpose().Inverse();
+      updateStat.measStat.kalmanGain.SetSize(kalman.GetNumRows(), kalman.GetNumColumns());
+      updateStat.measStat.kalmanGain = kalman;
+   }
 }
 
 
 //------------------------------------------------------------------------------
-// void UpdateElements()
+// void UpdateElements(UpdateInfoType &updateStat)
 //------------------------------------------------------------------------------
 /**
  * Updates the estimation state and covariance matrix
@@ -705,84 +760,72 @@ void ExtendedKalmanFilter::ComputeGain()
  * method.  The resulting covariance is symmetrized before returning.
  */
 //------------------------------------------------------------------------------
-void ExtendedKalmanFilter::UpdateElements()
+void ExtendedKalmanFilter::UpdateElements(UpdateInfoType &updateStat)
 {
    #ifdef DEBUG_ESTIMATION
       MessageInterface::ShowMessage("Updating elements\n");
    #endif
 
-   dx = kalman * yi;
-
-   // Update the state, covariances, and so forth
-   for (UnsignedInt i = 0; i < stateSize; ++i)
+   if (updateStat.measStat.editFlag == NORMAL_FLAG)
    {
-      (*estimationState)[i] += dx[i];
+      dx = kalman * yi;
+
+      if (esm.HasStateOffset())
+      {
+         GmatState offsetState = esm.GetEstimationStateOffset();
+         for (UnsignedInt i = 0; i < stateSize; ++i)
+         {
+            offsetState[i] += dx[i];
+         }
+         esm.SetEstimationStateOffset(offsetState);
+
+      }
+      else
+      {
+         // Update the state, covariances, and so forth
+         estimationStateS = esm.GetEstimationState();
+         for (UnsignedInt i = 0; i < stateSize; ++i)
+         {
+            estimationStateS[i] += dx[i];
+         }
+
+         // Convert estimation state from Keplerian to Cartesian
+         esm.SetEstimationState(estimationStateS);                       // update the value of estimation state
+         esm.MapVectorToObjects();
+      }
+
+      #ifdef DEBUG_ESTIMATION
+         MessageInterface::ShowMessage("Calculated state change: [");
+         for (UnsignedInt i = 0; i < stateSize; ++i)
+            MessageInterface::ShowMessage(" %.12lf ", dx[i]);
+         MessageInterface::ShowMessage("\n");
+      #endif
+
+      // Select the method used to update the covariance here:
+      // UpdateCovarianceSimple();
+      // UpdateCovarianceJoseph();
+
+      Rmatrix P2 = sqrtPupdate_T.Transpose() * sqrtPupdate_T;
+      sqrtP_T = sqrtPupdate_T;
+
+      // Warn if covariance is not positive definite
+      for (UnsignedInt ii = 0U; ii < stateSize; ii++)
+      {
+         if (GmatMathUtil::Abs(sqrtP_T(ii, ii)) < 1e-16)
+         {
+            MessageInterface::ShowMessage("WARNING The covariance is no longer positive definite! Epoch = %s\n", currentEpochGT.ToString().c_str());
+            break;
+         }
+      }
+
+      (*(stateCovariance->GetCovariance())) = P2;
    }
-
-   #ifdef DEBUG_ESTIMATION
-      MessageInterface::ShowMessage("Calculated state change: [");
-      for (UnsignedInt i = 0; i < stateSize; ++i)
-         MessageInterface::ShowMessage(" %.12lf ", dx[i]);
-      MessageInterface::ShowMessage("\n");
-   #endif
-
-   // Select the method used to update the covariance here:
-   // UpdateCovarianceSimple();
-   UpdateCovarianceJoseph();
+   else
+      (*(stateCovariance->GetCovariance())) = sqrtP_T.Transpose() * sqrtP_T;
 
    Symmetrize(*stateCovariance);
-}
-
-//------------------------------------------------------------------------------
-// void Symmetrize(Rmatrix& mat)
-//------------------------------------------------------------------------------
-/**
- * Symmetrizes a covariance matrix
- *
- * @param mat The covariance matrix that is symmetrized
- */
-//------------------------------------------------------------------------------
-void ExtendedKalmanFilter::Symmetrize(Covariance& mat)
-{
-   Integer size = mat.GetDimension();
-
-   for (Integer i = 0; i < size; ++i)
-   {
-      for (Integer j = i+1; j < size; ++j)
-      {
-         mat(i,j) = 0.5 * (mat(i,j) + mat(j,i));
-         mat(j,i) = mat(i,j);
-      }
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// void Symmetrize(Rmatrix& mat)
-//------------------------------------------------------------------------------
-/**
- * Symmetrizes a square Rmatrix
- *
- * @param mat The matrix that is symmetrized
- */
-//------------------------------------------------------------------------------
-void ExtendedKalmanFilter::Symmetrize(Rmatrix& mat)
-{
-   Integer size = mat.GetNumRows();
-
-   if (size != mat.GetNumColumns())
-   {
-      throw EstimatorException("Cannot symmetrize non-square matrices");
-   }
-
-   for (Integer i = 0; i < size; ++i)
-   {
-      for (Integer j = i+1; j < size; ++j)
-      {
-         mat(i,j) = 0.5 * (mat(i,j) + mat(j,i));
-         mat(j,i) = mat(i,j);
-      }
-   }
+   informationInverse = (*(stateCovariance->GetCovariance()));
+   information = informationInverse.Inverse(COV_INV_TOL);
 }
 
 
@@ -821,16 +864,7 @@ void ExtendedKalmanFilter::UpdateCovarianceJoseph()
             "method\n");
    #endif
 
-   Rmatrix *r;
-
-   if (measCovariance)
-   {
-      r = measCovariance->GetCovariance();
-   }
-   else
-   {
-      r = &defaultMeasCovariance;
-   }
+   Rmatrix *r = GetMeasurementCovariance()->GetCovariance();
 
    // P = (I - K * H) * Pbar * (I - K * H)^T + K * R * K^T
    (*(stateCovariance->GetCovariance())) =
@@ -841,7 +875,7 @@ void ExtendedKalmanFilter::UpdateCovarianceJoseph()
       for (UnsignedInt i = 0; i < stateSize; ++i)
       {
          for (UnsignedInt j = 0; j < stateSize; ++j)
-            MessageInterface::ShowMessage("  %.12lf  ", (*covariance)(i,j));
+            MessageInterface::ShowMessage("  %.12lf  ", (*(stateCovariance->GetCovariance()))(i,j));
          MessageInterface::ShowMessage("\n");
       }
       MessageInterface::ShowMessage("\n");
@@ -850,162 +884,17 @@ void ExtendedKalmanFilter::UpdateCovarianceJoseph()
    #endif
 }
 
-void ExtendedKalmanFilter::UpdateReportText()
-{
-   char s[1000];
-   std::stringstream msg;
-
-   Real temp;
-   std::string times;
-
-   TimeConverterUtil::Convert("A1ModJulian", calculatedMeas->epoch,"","UTCGregorian", temp, times, 2);
-
-   // print the RecNum, UTCGregorian-Epoch, TAIModJulian-Epoch
-   if (textFileMode == "Normal")
-   {
-      sprintf(&s[0],"%8d   %s   ",
-                  measManager.GetCurrentRecordNumber(), times.c_str());
-   }
-   else
-   {
-      Real timeTAI = TimeConverterUtil::Convert(
-            calculatedMeas->epoch,calculatedMeas->epochSystem,
-            TimeConverterUtil::TAIMJD);
-      sprintf(&s[0],"%8d   %s  %.12lf        ",
-             measManager.GetCurrentRecordNumber(), times.c_str(),
-             timeTAI);
-   }
-   msg << s;
-
-   // print the Obs Type
-   std::string ss = currentObs->typeName + "                    ";
-   msg << ss.substr(0,20) << " ";
-
-   // print the Units
-   ss = currentObs->unit + "    ";
-   msg << ss.substr(0,4) << " ";
-
-   // print the Participants
-   ss = "";
-   for(UnsignedInt n = 0; n < currentObs->participantIDs.size(); ++n)
-   {
-      ss = ss + currentObs->participantIDs[n] +
-            (((n+1) == currentObs->participantIDs.size()) ? "" : ",");
-   }
-   msg << GmatStringUtil::GetAlignmentString(ss,
-         GmatMathUtil::Max(pcolumnLen, minPartSize));
-
-   // print the Edit
-   // Specify removed reason and count number of removed records
-   ss = measManager.GetObsDataObject()->removedReason;         //currentObs->removedReason;
-   if (ss.substr(0,1) == "B")
-   {
-      numRemovedRecords["B"]++;
-   }
-   else
-   {
-      numRemovedRecords[ss]++;
-   }
-   msg << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
-
-   // print the obs,
-   sprintf(&s[0],"%22.6lf   %22.6lf   %22.6lf   %18.6lf    %.12le   ",
-         currentObs->value_orig[0],
-         currentObs->value[0],
-         calculatedMeas->value[0],
-         ocDiff,
-         calculatedMeas->feasibilityValue);
-   msg << s;
-
-   UpdateStateReportText(msg);
-
-   // print out the Radar stuff
-   if (textFileMode != "Normal")
-   {
-      if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
-      {
-         sprintf(&s[0],"            %d   %.15le   "
-               "%.15le                     N/A",
-               currentObs->uplinkBand, currentObs->uplinkFreqAtRecei,    // currentObs->uplinkFreq is no longer in use. Use currentObs->uplinkFreqAtRecei instead
-               currentObs->rangeModulo);
-      }
-      else if ((currentObs->typeName == "DSNTwoWayDoppler")||
-            (currentObs->typeName == "Doppler")||
-            (currentObs->typeName == "Doppler_RangeRate"))
-      {
-         sprintf(&s[0],"            %d                      "
-               "N/A                      N/A                 %.4lf",
-               currentObs->uplinkBand, currentObs->dopplerCountInterval);
-      }
-      else
-      {
-         sprintf(&s[0],"          N/A                      "
-               "N/A                      N/A                     N/A");
-      }
-      msg << s;
-   }
-   msg << "\n";
-
-   linesBuff = msg.str();
-   WriteToTextFile(currentState);
-}
-
-void ExtendedKalmanFilter::UpdateStateReportText(std::stringstream& msg)
-{
-   char s[1000];
-   std::string ss;
-
-   // print out the state: xHat(k) = xHat(k)- + K * (z(k) - H * xHat(k)-)
-   // or xHat(k) = xHat(k)- + K * residual
-   for (UnsignedInt i=0; i < stateSize; ++i)
-   {
-      sprintf(&s[0],"   %18.12le", (*estimationState)[i]);
-      ss.assign(s);
-      ss = ss.substr(ss.size()-20,20);
-      msg << "     " << ss;
-   }
-
-   // print out the state covariance:
-   // P(k) = (I - K * H) * P(k)- * (I - K * H)' + K * R * K'
-   for (UnsignedInt i=0; i < stateSize; ++i)
-   {
-      for (UnsignedInt j = 0; j < stateSize; ++j)
-      {
-         sprintf(&s[0],"   %18.12le", (*stateCovariance)(i,j));
-         ss.assign(s);
-         ss = ss.substr(ss.size()-20,20);
-         msg << "     " << ss;
-      }
-   }
-
-   // print out the innovation covariance: S = H * P(k)- * H' + R
-   for (UnsignedInt i = 0; i < measSize; ++i)
-   {
-      for (UnsignedInt j = 0; j < measSize; ++j)
-      {
-         sprintf(&s[0],"   %18.12le", innovationCov(i,j));
-         ss.assign(s);
-         ss = ss.substr(ss.size()-20,20);
-         msg << "     " << ss;
-      }
-   }
-
-   // print out the Kalman Gain: K(k) = P(k)- * H' * inv(H * P(k)- * H' + R)
-   // or K(k) = P(k)- * H' * S^-1
-   for (UnsignedInt i = 0; i < stateSize; ++i)
-   {
-      for (UnsignedInt j = 0; j < measSize; ++j)
-      {
-         sprintf(&s[0],"   %18.12le", kalman(i,j));
-         ss.assign(s);
-         ss = ss.substr(ss.size()-20,20);
-         msg << "     " << ss;
-      }
-   }
-}
-
 void ExtendedKalmanFilter::AdvanceEpoch()
 {
+   // Reset the STM
+   PrepareForStep();
+   esm.MapVectorToObjects();
+   PropagationStateManager *psm = propagators[0]->GetPropStateManager();
+   psm->MapObjectsToVector();
+
+   // Flag that a new current state has been loaded in the objects
+   resetState = true;
+
    // Advance MeasMan to the next measurement and get its epoch
    bool isEndOfTable = measManager.AdvanceObservation();
    if (isEndOfTable)
@@ -1015,41 +904,71 @@ void ExtendedKalmanFilter::AdvanceEpoch()
    else
    {
       nextMeasurementEpochGT = measManager.GetEpochGT();
+
+      // Check if rectification should begin here
+      if (esm.HasStateOffset())
+      {
+         // Check if next measurement is after the delayed rectification span
+         Real elapsedTime = (nextMeasurementEpochGT - estimationEpochGT).GetTimeInSec();
+
+         if (GmatMathUtil::Abs(elapsedTime) > delayRectifySpan)
+         {
+            // Update the state with the state offset
+            GmatState offsetStateS = esm.GetEstimationStateOffset();
+            estimationStateS = esm.GetEstimationState();
+            for (UnsignedInt i = 0; i < stateSize; ++i)
+            {
+               estimationStateS[i] += offsetStateS[i];
+            }
+
+            // Convert estimation state from Keplerian to Cartesian
+            esm.SetEstimationState(estimationStateS);                       // update the value of estimation state
+            esm.MapVectorToObjects();
+
+            // Zero out the state offset
+            GmatState *offsetState = esm.GetStateOffset();
+            for (UnsignedInt i = 0; i < stateSize; ++i)
+               (*offsetState)[i] = 0.0;
+
+            esm.SetHasStateOffset(false);
+            WriteDataFile();
+         }
+      }
+
+      // Reset nextNoiseUpdateGT if it is in the wrong direction
+      Real dtNoise = (nextNoiseUpdateGT - currentEpochGT).GetTimeInSec();
+      Real dtMeasurement = (nextMeasurementEpochGT - currentEpochGT).GetTimeInSec();
+
+      if (dtNoise*dtMeasurement < 0) // If each dt has opposite sign
+      {
+         if (nextMeasurementEpochGT > currentEpochGT)
+            nextNoiseUpdateGT.AddSeconds(processNoiseStep);
+         else if (nextMeasurementEpochGT < currentEpochGT)
+            nextNoiseUpdateGT.SubtractSeconds(processNoiseStep);
+      }
+
+      // Reset nextNoiseUpdateGT if it is near the current epoch
+      if (GmatMathUtil::IsEqual(currentEpochGT, nextNoiseUpdateGT, ESTTIME_ROUNDOFF))
+      {
+         nextNoiseUpdateGT = currentEpochGT;
+         if (nextMeasurementEpochGT > currentEpochGT)
+            nextNoiseUpdateGT.AddSeconds(processNoiseStep);
+         else if (nextMeasurementEpochGT < currentEpochGT)
+            nextNoiseUpdateGT.SubtractSeconds(processNoiseStep);
+      }
+
       FindTimeStep();
 
       #ifdef DEBUG_ESTIMATION
          MessageInterface::ShowMessage("ExtendedKalmanFilter::AdvanceEpoch CurrentEpoch = %.12lf, next "
-               "epoch = %.12lf, timeStep = %.12lf\n", currentEpoch,
-               nextMeasurementEpoch, timeStep);
+               "epoch = %.12lf, timeStep = %.12lf\n", currentEpochGT,
+               nextMeasurementEpochGT, timeStep);
       #endif
 
       // this magical number is from the Batch Estimator in its accumulating state...
       //if (currentEpoch <= (nextMeasurementEpoch+5.0e-12))
-      if ((currentEpochGT - nextMeasurementEpochGT).GetMjd() <= 5.0e-12)
+      if (nextMeasurementEpochGT >= 5.0e-12)
       {
-         // Reset the STM
-         for (UnsignedInt i = 0; i < stateSize; ++i)
-         {
-            for (UnsignedInt j = 0; j < stateSize; ++j)
-            {
-               if (i == j)
-               {
-                  (*stm)(i,j) = 1.0;
-               }
-               else
-               {
-                  (*stm)(i,j) = 0.0;
-               }
-            }
-         }
-         esm.MapSTMToObjects();
-         esm.MapVectorToObjects();
-         PropagationStateManager *psm = propagator->GetPropStateManager();
-         psm->MapObjectsToVector();
-
-         // Flag that a new current state has been loaded in the objects
-         resetState = true;
-
          currentState = PROPAGATING;
       }
       else
@@ -1057,8 +976,6 @@ void ExtendedKalmanFilter::AdvanceEpoch()
          currentState = CHECKINGRUN;  // Should this just go to FINISHED?
       }
    }
-
-   prevObsEpochGT = calculatedMeas->epochGT;
 }
 
 

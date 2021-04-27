@@ -17,3 +17,6 @@ inputs*.txt
 *.exp
 *.lib
 Test*
+gmatpy/*.py
+*.och
+/CSALTTester

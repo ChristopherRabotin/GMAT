@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -63,7 +63,8 @@ class GMAT_API Planet : public CelestialBody
 {
 public:
    // default constructor, with optional name
-   Planet(std::string name = SolarSystem::EARTH_NAME);
+   //Planet(std::string name = SolarSystem::EARTH_NAME);
+   Planet(std::string name = GmatSolarSystemDefaults::EARTH_NAME);
    // additional constructor
    Planet(std::string name, const std::string &cBody);
    // copy constructor
@@ -110,7 +111,9 @@ public:
    virtual std::string     GetStringParameter(const Integer id) const; 
    virtual bool            SetStringParameter(const Integer id, 
                                               const std::string &value); 
-                                            
+   virtual Integer         SetIntegerParameter(const Integer id,
+                                               const Integer value);
+
    virtual bool         IsParameterCloaked(const Integer id) const;
    virtual bool         IsParameterEqualToDefault(const Integer id) const;
    virtual bool         SaveAllAsDefault();

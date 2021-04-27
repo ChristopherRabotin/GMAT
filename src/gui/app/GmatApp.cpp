@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -42,6 +42,7 @@
 #include "ViewTextFrame.hpp"
 #include "GmatAppData.hpp"
 #include "Moderator.hpp"
+#include "GuiPublisher.hpp"
 #include <wx/datetime.h>
 #include <wx/splash.h>
 #include <wx/image.h>
@@ -99,8 +100,8 @@ GmatApp::GmatApp()
    ListenerManagerInterface::SetListenerManager(theListenerManager);
 
    theModerator      = (Moderator *)NULL;
-   scriptToRun       = "";
    showMainFrame     = true;
+   scriptToRun       = "";
    buildScript       = false;
    runScript         = false;
    runBatch          = false;
@@ -184,6 +185,9 @@ bool GmatApp::OnInit()
       // Create the Moderator - GMAT executive
       theModerator = Moderator::Instance();
       
+      // Use the GUI Publisher
+      theModerator->OverridePublisher(GuiPublisher::Instance());
+
       // Check the argument list for the startup and/or log file names
       // here
       StringArray theFiles   = CheckForStartupAndLogFile();
@@ -397,8 +401,6 @@ bool GmatApp::OnInit()
          
          theModerator->LoadDefaultMission();
 
-         wxYield();
-
          #ifdef DEBUG_GMATAPP
          MessageInterface::ShowMessage("   Creating GmatMainFrame...\n");
          #endif
@@ -437,8 +439,12 @@ bool GmatApp::OnInit()
             theMainFrame->CenterOnScreen(wxBOTH);
          }
          #else
-         theMainFrame->Maximize();
-         theMainFrame->CenterOnScreen(wxBOTH);
+         // On Linux, open at default (1024x768) size in upper left of screen
+         theMainFrame->SetPosition(wxPoint(32,32));
+
+         // Here are the maximized settings:
+         // theMainFrame->Maximize();
+         // theMainFrame->CenterOnScreen(wxBOTH);
          #endif
          #endif
          
@@ -479,9 +485,10 @@ bool GmatApp::OnInit()
          {
             wxBusyCursor bc;
             wxLogWarning(wxT("The Moderator failed to initialize."));
-            
+
+            // Check to see if the cursor changed as expected on all platforms; then remove this code:
             // and if ~wxBusyCursor doesn't do it, then call it manually
-            wxYield();
+            //wxYield();
          }
          
          wxLogError(wxT("The error occurred during the initialization.  GMAT will exit"));

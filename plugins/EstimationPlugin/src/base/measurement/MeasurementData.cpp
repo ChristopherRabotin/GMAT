@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -46,7 +46,10 @@ MeasurementData::MeasurementData() :
    type                       (Gmat::UNKNOWN_MEASUREMENT),
    typeName                   ("Unknown"),
    uniqueID                   (-1),
-   epochSystem                (TimeConverterUtil::A1MJD),
+   isPeriodic                 (false),
+   minValue                   (0.0),
+   period                     (0.0),
+   epochSystem                (TimeSystemConverter::A1MJD),
    epoch                      (0.0),
    epochGT                    (0.0),
    isFeasible                 (false),
@@ -66,8 +69,10 @@ MeasurementData::MeasurementData() :
    tdrsDataFlag               (0),
    isTropoCorrectWarning      (false),
    isIonoCorrectWarning       (false),
-   tropoCorrectWarningValue   (0.0),
-   ionoCorrectWarningValue    (0.0)
+   tropoCorrectRawValue       (0.0),
+   ionoCorrectRawValue        (0.0),
+   tropoCorrectValue          (0.0),
+   ionoCorrectValue           (0.0)
 {
 }
 
@@ -85,12 +90,49 @@ MeasurementData::~MeasurementData()
 
 void MeasurementData::CleanUp()
 {
-   if (covariance)
-      delete covariance;
+   // covariance object is holded by TrackingDataAdapter object. Therefor, it cannot delete here.
    covariance = NULL;
 
    participantIDs.clear();
    sensorIDs.clear();
+   value.clear();
+   correction.clear();
+
+   // clean up std::vector<Rvector3*> rangeVecs;
+   for (Integer i = 0; i < rangeVecs.size(); ++i)
+   {
+      if (rangeVecs[i])
+         delete rangeVecs[i];
+   }
+   rangeVecs.clear();
+
+   // clean up std::vector<SpacePoint*> tBodies;
+   tBodies.clear();
+   // clean up std::vector<SpacePoint*> rBodies;
+   rBodies.clear();
+   // clean up std::vector<GmatTime> tPrecTimes;
+   tPrecTimes.clear();
+   // clean up std::vector<GmatTime> rPrecTimes;
+   rPrecTimes.clear();
+
+   // clean up std::vector<Rvector3*> tLocs;
+   for (Integer i = 0; i < tLocs.size(); ++i)
+   {
+      if (tLocs[i])
+         delete tLocs[i];
+   }
+   tLocs.clear();
+
+   // clean up std::vector<Rvector3*> rLocs;
+   for (Integer i = 0; i < rLocs.size(); ++i)
+   {
+      if (rLocs[i])
+         delete rLocs[i];
+   }
+   rLocs.clear();
+
+   // clean up std::vector<GmatTime>  valueInTime;
+   valueInTime.clear();
 }
 
 //-----------------------------------------------------------------------------
@@ -107,6 +149,9 @@ MeasurementData::MeasurementData(const MeasurementData& md) :
    type                     (md.type),
    typeName                 (md.typeName),
    uniqueID                 (md.uniqueID),
+   isPeriodic               (md.isPeriodic),
+   minValue                 (md.minValue),
+   period                   (md.period),
    epochSystem              (md.epochSystem),
    epoch                    (md.epoch),
    epochGT                  (md.epochGT),
@@ -139,8 +184,10 @@ MeasurementData::MeasurementData(const MeasurementData& md) :
    tdrsDataFlag             (md.tdrsDataFlag),
    isTropoCorrectWarning    (md.isTropoCorrectWarning),
    isIonoCorrectWarning     (md.isIonoCorrectWarning),
-   tropoCorrectWarningValue (md.tropoCorrectWarningValue),
-   ionoCorrectWarningValue  (md.ionoCorrectWarningValue)
+   tropoCorrectRawValue     (md.tropoCorrectRawValue),
+   ionoCorrectRawValue      (md.ionoCorrectRawValue),
+   tropoCorrectValue        (md.tropoCorrectValue),
+   ionoCorrectValue         (md.ionoCorrectValue)
 {
 }
 
@@ -164,6 +211,9 @@ MeasurementData MeasurementData::operator=(const MeasurementData& md)
       type                     = md.type;
       typeName                 = md.typeName;
       uniqueID                 = md.uniqueID;
+      isPeriodic               = md.isPeriodic;
+      minValue                 = md.minValue;
+      period                   = md.period;
       epochSystem              = md.epochSystem;
       epoch                    = md.epoch;
       epochGT                  = md.epochGT;
@@ -196,8 +246,10 @@ MeasurementData MeasurementData::operator=(const MeasurementData& md)
 
       isTropoCorrectWarning    = md.isTropoCorrectWarning;
       isIonoCorrectWarning     = md.isIonoCorrectWarning;
-      tropoCorrectWarningValue = md.tropoCorrectWarningValue;
-      ionoCorrectWarningValue  = md.ionoCorrectWarningValue;
+      tropoCorrectRawValue     = md.tropoCorrectRawValue;
+      ionoCorrectRawValue      = md.ionoCorrectRawValue;
+      tropoCorrectValue        = md.tropoCorrectValue;
+      ionoCorrectValue         = md.ionoCorrectValue;
 
    }
 

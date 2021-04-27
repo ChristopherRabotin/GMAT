@@ -205,7 +205,7 @@ sim.AddNoise                   = On;
 %   Estimator
 %
 
-Create BatchEstimatorInv bat
+Create BatchEstimator bat
 
 bat.ShowProgress               = True;
 bat.Measurements               = {estData} 

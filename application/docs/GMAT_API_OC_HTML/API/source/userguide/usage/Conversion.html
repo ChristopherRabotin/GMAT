@@ -1,0 +1,119 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Time and Coordinate Conversions &#8212; GMAT Tools and Extensions R2020a documentation</title>
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GMAT Tools and Extensions R2020a documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="time-and-coordinate-conversions">
+<h1>Time and Coordinate Conversions<a class="headerlink" href="#time-and-coordinate-conversions" title="Permalink to this headline">¶</a></h1>
+<p>One simple application of the GMAT API is the construction of routines that
+convert from one systm to another.  Two examples of that application are
+presented here: time system conversion and coordinate system conversion.</p>
+<div class="section" id="time-system-conversion">
+<h2>Time System Conversion<a class="headerlink" href="#time-system-conversion" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="coordinate-system-conversion">
+<h2>Coordinate System Conversion<a class="headerlink" href="#coordinate-system-conversion" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">gmatpy</span> <span class="kn">as</span> <span class="nn">gmat</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moonec</span> <span class="o">=</span> <span class="n">gmat</span><span class="o">.</span><span class="n">Construct</span><span class="p">(</span><span class="s2">&quot;CoordinateSystem&quot;</span><span class="p">,</span> <span class="s2">&quot;MoonEc&quot;</span><span class="p">,</span> <span class="s2">&quot;Luna&quot;</span><span class="p">,</span> <span class="s2">&quot;MJ2000Ec&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eartheq</span> <span class="o">=</span> <span class="n">gmat</span><span class="o">.</span><span class="n">Construct</span><span class="p">(</span><span class="s2">&quot;CoordinateSystem&quot;</span><span class="p">,</span> <span class="s2">&quot;EarthEq&quot;</span><span class="p">,</span> <span class="s2">&quot;Earth&quot;</span><span class="p">,</span> <span class="s2">&quot;MJ2000Eq&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">instate</span> <span class="o">=</span> <span class="n">gmat</span><span class="o">.</span><span class="n">Rvector6</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">outstate</span> <span class="o">=</span> <span class="n">gmat</span><span class="o">.</span><span class="n">Rvector6</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">instate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">4000.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">instate</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1000.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">instate</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">instate</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">instate</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">instate</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mf">3.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">instate</span><span class="p">)</span>
+<span class="go">4000          1000          0             0.1           0.4           3.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cconverter</span> <span class="o">=</span> <span class="n">gmat</span><span class="o">.</span><span class="n">CoordinateConverter</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gmat</span><span class="o">.</span><span class="n">Initialize</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cconverter</span><span class="o">.</span><span class="n">Convert</span><span class="p">(</span><span class="mi">28718</span><span class="p">,</span> <span class="n">instate</span><span class="p">,</span> <span class="n">moonec</span><span class="p">,</span> <span class="n">outstate</span><span class="p">,</span> <span class="n">eartheq</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">outstate</span><span class="p">)</span>
+<span class="go">278537.716 272130.548 84187.769 -0.64373770 -0.28543905 3.30709590</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Time and Coordinate Conversions</a><ul>
+<li><a class="reference internal" href="#time-system-conversion">Time System Conversion</a></li>
+<li><a class="reference internal" href="#coordinate-system-conversion">Coordinate System Conversion</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../../_sources/API/source/userguide/usage/Conversion.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GMAT Tools and Extensions R2020a documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018-2020, United States Government as represented by the Administrator of the National Aeronautics and Space Administration..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>

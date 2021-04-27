@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -255,7 +255,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    for (unsigned int i = 0; i < cmds.size(); i++)
    {
       #ifndef __ENABLE_NAV_GUI__
-      if (cmds[i] == "RunSimulator" || cmds[i] == "RunEstimator")
+      if (cmds[i] == "RunSimulator" || cmds[i] == "RunEstimator" || cmds[i] == "RunSmoother")
          continue;
       #endif
       mCommandList.Add(cmds[i].c_str());

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -48,6 +48,8 @@
 //#define DEBUG_SPK_PLANETS
 //#define DEBUG_VALID_KERNEL
 //#define DEBUG_SPK_INIT
+//#define DEBUG_FIND_KERNEL
+//#define DEBUG_SPK_FULL_PATH
 
 #ifdef DEBUG_VALID_KERNEL
 #include <unistd.h>
@@ -212,6 +214,7 @@ bool SpiceInterface::IsValidKernel(const std::string &fileName, const std::strin
 SpiceInterface::SpiceInterface() :
    kernelNameSPICE         (NULL)
 {
+   theTimeConverter = TimeSystemConverter::Instance();
    InitializeInterface();
    numInstances++;
 }
@@ -230,6 +233,7 @@ SpiceInterface::SpiceInterface() :
 SpiceInterface::SpiceInterface(const SpiceInterface &copy) :
    kernelNameSPICE         (NULL)
 {
+   theTimeConverter = TimeSystemConverter::Instance();
    numInstances++;
 //   // the kernels are all loaded into that one kernel pool,
 //   // but we need to copy the names
@@ -715,8 +719,8 @@ Real SpiceInterface::SpiceTimeToA1(SpiceDouble spiceTime)
    SpiceDouble julianOffset = GmatTimeConstants::JD_JAN_5_1941 - j2ET;
    Real        tdbTime = (spiceTime / GmatTimeConstants::SECS_PER_DAY) - julianOffset;
 
-   Real        a1Time  = TimeConverterUtil::Convert(tdbTime, TimeConverterUtil::TDBMJD,
-                         TimeConverterUtil::A1MJD, GmatTimeConstants::JD_JAN_5_1941);
+   Real        a1Time  = theTimeConverter->Convert(tdbTime, TimeSystemConverter::TDBMJD,
+                         TimeSystemConverter::A1MJD, GmatTimeConstants::JD_JAN_5_1941);
 
    return a1Time;
 }
@@ -737,8 +741,8 @@ Real SpiceInterface::SpiceTimeToA1(SpiceDouble spiceTime)
 SpiceDouble SpiceInterface::A1ToSpiceTime(Real a1Time)
 {
    SpiceDouble j2ET      = j2000_c();
-   Real        tdbTime   = TimeConverterUtil::Convert(a1Time, TimeConverterUtil::A1MJD,
-                           TimeConverterUtil::TDBMJD, GmatTimeConstants::JD_JAN_5_1941);
+   Real        tdbTime   = theTimeConverter->Convert(a1Time, TimeSystemConverter::A1MJD,
+                           TimeSystemConverter::TDBMJD, GmatTimeConstants::JD_JAN_5_1941);
    SpiceDouble julianOffset = GmatTimeConstants::JD_JAN_5_1941 - j2ET;
    SpiceDouble spiceTime = (tdbTime + julianOffset) *
                            GmatTimeConstants::SECS_PER_DAY;
@@ -817,9 +821,11 @@ void SpiceInterface::InitializeInterface()
 //------------------------------------------------------------------------------
 /**
  * This method finds the kernel with the given name, if it exists.  The code
- * will check the current directory first; if not found, it will check in the
- * directory specified for planetary ephem; if still not found, it will
- * check in the directory relative to the executable directory.
+ * will check locations in this order:
+ * - the path as specified
+ * - the directory specified for vehicle spice kernels (VEHICLE_EPHEM_SPK_PATH)
+ * - the path relative to the current script location
+ * - the path relative to the executable directory
  *
  * @return full file name, if found; blank, otherwise
  *
@@ -827,31 +833,83 @@ void SpiceInterface::InitializeInterface()
 //------------------------------------------------------------------------------
 std::string SpiceInterface::FindKernel(const std::string &withName)
 {
+   #ifdef DEBUG_FIND_KERNEL
+      MessageInterface::ShowMessage("Entering FindKernel with withName = %s\n",
+                                    withName.c_str());
+   #endif
    bool fileFound = true;
    // SPICE expects forward slashes for directory separators
    std::string fullName = GmatStringUtil::Replace(withName, "\\", "/");
+   #ifdef DEBUG_FIND_KERNEL
+      MessageInterface::ShowMessage("In FindKernel, fullName = %s\n",
+                                    fullName.c_str());
+   #endif
    if (!(GmatFileUtil::DoesFileExist(fullName)))
    {
       FileManager *fm = FileManager::Instance();
       // If there is no path for the file, look for it in the
       // directory specified for planetary SPK
-      if (withName.find("/") == withName.npos)
+      if (fullName.find("/") == fullName.npos)
       {
+         std::string fullName1;
          // Changed to use VEHICLE_EPHEM_SPK_PATH (LOJ: 2014.06.18)
          //std::string spkPath = fm->GetPathname(FileManager::SPK_PATH);
-         std::string spkPath = fm->GetPathname(FileManager::VEHICLE_EPHEM_SPK_PATH);
-         fullName = spkPath + fullName;
-         if (!(GmatFileUtil::DoesFileExist(fullName)))
-            fileFound = false;
+         std::string vehicleSpkPath =
+                     fm->GetPathname(FileManager::VEHICLE_EPHEM_SPK_PATH);
+         fullName1 = vehicleSpkPath + fullName;
+         #ifdef DEBUG_FIND_KERNEL
+            MessageInterface::ShowMessage(
+                              "In FindKernel, NOW fullName1 (SPK1) = %s\n",
+                              fullName1.c_str());
+         #endif
+         if (!(GmatFileUtil::DoesFileExist(fullName1)))
+         {
+            std::string planetarySpkPath =
+                        fm->GetPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
+            fullName1 = planetarySpkPath + fullName;
+            #ifdef DEBUG_FIND_KERNEL
+               MessageInterface::ShowMessage(
+                                 "In FindKernel, NOW fullName1 (SPK2) = %s\n",
+                                 fullName1.c_str());
+            #endif
+            if (!(GmatFileUtil::DoesFileExist(fullName1)))
+            {
+               fileFound = false;
+            }
+         }
+         fullName = fullName1;  // last place looked
       }
       else // Otherwise, see if it is a relative path name
       {
-         // Try to find it with the absolute path
+         // Try to find it with the absolute path, by adding default
+         // directory(ies)
          if (fullName.size() > 1 && fullName[0] == '.')
          {
-            fullName = fm->GetCurrentWorkingDirectory() + fm->GetPathSeparator() + fullName;
-            if (!(GmatFileUtil::DoesFileExist(fullName)))
-               fileFound = false;
+            std::string fullName1;
+            // Check for path relative to script (gmat working directory) first
+            fullName1 = fm->GetGmatWorkingDirectory() +
+                        fm->GetPathSeparator() + fullName;
+            #ifdef DEBUG_FIND_KERNEL
+               MessageInterface::ShowMessage("In FindKernel, fullName1 = %s\n",
+                                             fullName1.c_str());
+            #endif
+            if (!(GmatFileUtil::DoesFileExist(fullName1)))
+            {
+               // Check for path relative to the current working directory
+               fullName1 = fm->GetCurrentWorkingDirectory() +
+                           fm->GetPathSeparator() + fullName;
+               #ifdef DEBUG_FIND_KERNEL
+                   MessageInterface::ShowMessage(
+                                     "In FindKernel, NOW fullName1 = %s\n",
+                                    fullName1.c_str());
+               #endif
+               if (!(GmatFileUtil::DoesFileExist(fullName1)))
+                  fileFound = false;
+               else
+                  fullName = fullName1;
+            }
+            else
+               fullName = fullName1;
          }
          else
          {
@@ -864,3 +922,45 @@ std::string SpiceInterface::FindKernel(const std::string &withName)
    else
       return FILE_NOT_FOUND;
 }
+
+//------------------------------------------------------------------------------
+//  std::string GetFullKernelPath(const std::string &forKernel)
+
+//------------------------------------------------------------------------------
+/**
+ * This method finds the full kernel path for the kernel with the given name, 
+ * if it has been loaded.
+ *
+ * @return full kenel path name, if found; blank, otherwise
+ *
+ */
+//------------------------------------------------------------------------------
+std::string SpiceInterface::GetFullKernelPath(const std::string &forKernel)
+{
+   #ifdef DEBUG_SPK_FULL_PATH
+      MessageInterface::ShowMessage(
+                     "IsLoaded::Now attempting to find kernel name %s\n",
+                     forKernel.c_str());
+   #endif
+   
+   std::map<std::string, std::string>::iterator ii;
+   for (ii = loadedKernels.begin(); ii != loadedKernels.end(); ++ii)
+   {
+      if ((*ii).first == forKernel)
+      {
+      #ifdef DEBUG_SPK_FULL_PATH
+         MessageInterface::ShowMessage(
+                  "IsLoaded::kernel name %s WAS INDEED ALREADY LOADED as %s\n",
+                  forKernel.c_str(), ((*ii).second).c_str());
+      #endif
+         return (*ii).second;
+      }
+   }
+   #ifdef DEBUG_SPK_FULL_PATH
+      MessageInterface::ShowMessage(
+                     "IsLoaded::kernel name %s NOT FOUND \n",
+                     forKernel.c_str());
+   #endif
+   return "";
+}
+

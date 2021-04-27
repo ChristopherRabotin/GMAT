@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -634,7 +634,7 @@ bool ResourceTree::AddScriptItem(wxString path)
 //------------------------------------------------------------------------------
 void ResourceTree::UpdateFormation()
 {
-   DeleteChildren(mFormationItem);
+   if(mFormationItem.IsOk()) DeleteChildren(mFormationItem);
    AddDefaultFormations(mFormationItem);
 }
 
@@ -1422,6 +1422,11 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
       itemType = GmatTree::GROUND_TRACK_PLOT;
       itemIcon = GmatTree::RESOURCE_ICON_GROUND_TRACK_PLOT;
    }
+   else if (obj->IsOfType("DynamicDataDisplay"))
+   {
+      itemType = GmatTree::DYNAMIC_DATA_DISPLAY;
+      itemIcon = GmatTree::RESOURCE_ICON_SUBSCRIBER;
+   }
    // Formation
    else if (obj->IsOfType("Formation"))
    {
@@ -1599,7 +1604,8 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
    }
    
    // MeasurementModel
-   else if (obj->IsOfType("MeasurementModel") || obj->IsOfType(Gmat::MEASUREMENT_MODEL))
+   //else if (obj->IsOfType("MeasurementModel") || obj->IsOfType(Gmat::MEASUREMENT_MODEL))
+   else if (obj->IsOfType(Gmat::MEASUREMENT_MODEL))
    {
       itemType = GmatTree::MEASUREMENT_MODEL;
       itemIcon = GmatTree::RESOURCE_ICON_MEASUREMENT_MODEL;
@@ -2495,9 +2501,12 @@ MessageInterface::ShowMessage("ResourceTree::OnRename() oldName = %s, newName = 
             //AddDefaultSpacecraft(mSpacecraftItem);
             
             // update formation which may use new spacecraft name
-            Collapse(mFormationItem);
-            DeleteChildren(mFormationItem);
-            AddDefaultFormations(mFormationItem);
+            if(mFormationItem.IsOk())
+            {
+               Collapse(mFormationItem);
+               DeleteChildren(mFormationItem);
+               AddDefaultFormations(mFormationItem);
+            }
          }
          
          // update variables which may use new object name
@@ -4043,7 +4052,7 @@ void ResourceTree::OnAddPlanet(wxCommandEvent &event)
          {
             ((CelestialBody*)obj)->SetCentralBody(cBody);
             // For now, we only have one solar system with one star ...
-            if (cBody == SolarSystem::SUN_NAME)
+            if (cBody == GmatSolarSystemDefaults::SUN_NAME)
             {
                wxTreeItemId parent = GetItemParent(item);
                AppendItem(parent, name, GmatTree::RESOURCE_ICON_PLANET_GENERIC, -1,
@@ -4098,7 +4107,7 @@ void ResourceTree::OnAddMoon(wxCommandEvent &event)
             ((CelestialBody*)obj)->SetCentralBody(cBody);
             // For now, we only have one solar system with one star ...
             // Of course, a moon around a star makes no sense ...
-            if (cBody == SolarSystem::SUN_NAME)
+            if (cBody == GmatSolarSystemDefaults::SUN_NAME)
             {
                wxTreeItemId parent = GetItemParent(item);
                AppendItem(parent, name, GmatTree::RESOURCE_ICON_MOON_GENERIC, -1,
@@ -4159,7 +4168,7 @@ void ResourceTree::OnAddComet(wxCommandEvent &event)
             ((CelestialBody*)obj)->SetCentralBody(cBody);
             // For now, we only have one solar system with one star ...
             wxTreeItemId parent = item;
-            if (cBody == SolarSystem::SUN_NAME)
+            if (cBody == GmatSolarSystemDefaults::SUN_NAME)
                parent = GetItemParent(item);
             
             GmatTree::ItemType itemType;
@@ -4210,7 +4219,7 @@ void ResourceTree::OnAddAsteroid(wxCommandEvent &event)
            ((CelestialBody*)obj)->SetCentralBody(cBody);
             // For now, we only have one solar system with one star ...
             wxTreeItemId parent = item;
-            if (cBody == SolarSystem::SUN_NAME)
+            if (cBody == GmatSolarSystemDefaults::SUN_NAME)
                parent = GetItemParent(item);
             
             GmatTree::ItemType itemType;
@@ -4380,6 +4389,9 @@ void ResourceTree::PanelObjectChanged( GmatBase *obj )
 void ResourceTree::QuitRunningScriptFolder()
 {
    mScriptFolderRunInterrupted = true;
+
+   // This yield seems misplaced -- seems like if needed it should be in
+   // GmatMainFrame::OnClose near where this method gets called.
    wxYield();
 }
 
@@ -6001,6 +6013,7 @@ UnsignedInt ResourceTree::GetObjectType(GmatTree::ItemType itemType)
    case GmatTree::ORBIT_VIEW:
    case GmatTree::GROUND_TRACK_PLOT:      
    case GmatTree::EPHEMERIS_FILE:
+   case GmatTree::DYNAMIC_DATA_DISPLAY:
    case GmatTree::SUBSCRIBER:       // Added support for plugin Subscribers
       objType = Gmat::SUBSCRIBER;
       break;
@@ -6096,6 +6109,7 @@ wxTreeItemId ResourceTree::GetTreeItemId(GmatTree::ItemType itemType)
    case GmatTree::ORBIT_VIEW:
    case GmatTree::GROUND_TRACK_PLOT:      
    case GmatTree::EPHEMERIS_FILE:
+   case GmatTree::DYNAMIC_DATA_DISPLAY:
       return mSubscriberItem;
       
    case GmatTree::VARIABLE:
@@ -6155,16 +6169,16 @@ void ResourceTree::GetBodyTypeAndIcon(const std::string bodyName,
    CelestialBody *body         = ss->GetBody(bodyName);
    Gmat::BodyType typeOfBody   = body->GetBodyType();
    // These bodies have specific icons ...
-   if (bodyName      == SolarSystem::MERCURY_NAME) iconType = GmatTree::RESOURCE_ICON_MERCURY;
-   else if (bodyName == SolarSystem::VENUS_NAME)   iconType = GmatTree::RESOURCE_ICON_VENUS;
-   else if (bodyName == SolarSystem::EARTH_NAME)   iconType = GmatTree::RESOURCE_ICON_EARTH;
-   else if (bodyName == SolarSystem::MARS_NAME)    iconType = GmatTree::RESOURCE_ICON_MARS;
-   else if (bodyName == SolarSystem::JUPITER_NAME) iconType = GmatTree::RESOURCE_ICON_JUPITER;
-   else if (bodyName == SolarSystem::SATURN_NAME)  iconType = GmatTree::RESOURCE_ICON_SATURN;
-   else if (bodyName == SolarSystem::URANUS_NAME)  iconType = GmatTree::RESOURCE_ICON_URANUS;
-   else if (bodyName == SolarSystem::NEPTUNE_NAME) iconType = GmatTree::RESOURCE_ICON_NEPTUNE;
-   else if (bodyName == SolarSystem::PLUTO_NAME)   iconType = GmatTree::RESOURCE_ICON_PLUTO;
-   else if (bodyName == SolarSystem::MOON_NAME)    iconType = GmatTree::RESOURCE_ICON_MOON;
+   if (bodyName      == GmatSolarSystemDefaults::MERCURY_NAME) iconType = GmatTree::RESOURCE_ICON_MERCURY;
+   else if (bodyName == GmatSolarSystemDefaults::VENUS_NAME)   iconType = GmatTree::RESOURCE_ICON_VENUS;
+   else if (bodyName == GmatSolarSystemDefaults::EARTH_NAME)   iconType = GmatTree::RESOURCE_ICON_EARTH;
+   else if (bodyName == GmatSolarSystemDefaults::MARS_NAME)    iconType = GmatTree::RESOURCE_ICON_MARS;
+   else if (bodyName == GmatSolarSystemDefaults::JUPITER_NAME) iconType = GmatTree::RESOURCE_ICON_JUPITER;
+   else if (bodyName == GmatSolarSystemDefaults::SATURN_NAME)  iconType = GmatTree::RESOURCE_ICON_SATURN;
+   else if (bodyName == GmatSolarSystemDefaults::URANUS_NAME)  iconType = GmatTree::RESOURCE_ICON_URANUS;
+   else if (bodyName == GmatSolarSystemDefaults::NEPTUNE_NAME) iconType = GmatTree::RESOURCE_ICON_NEPTUNE;
+   else if (bodyName == GmatSolarSystemDefaults::PLUTO_NAME)   iconType = GmatTree::RESOURCE_ICON_PLUTO;
+   else if (bodyName == GmatSolarSystemDefaults::MOON_NAME)    iconType = GmatTree::RESOURCE_ICON_MOON;
    else // these bodies don't have specific icons ...
    {
       if (typeOfBody   == Gmat::STAR)        iconType = GmatTree::RESOURCE_ICON_SUN;  // should NOT happen

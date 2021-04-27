@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -111,11 +111,11 @@ public:
                                 const std::string &prefix = "",
                                 bool appendEol = false) const;
    
-   friend Rvector GMATUTIL_API operator*(Real s, const Rvector &v);
-   friend Rmatrix GMATUTIL_API Outerproduct(const Rvector &v1, const Rvector &v2);
+   GMATUTIL_API friend Rvector operator*(Real s, const Rvector &v);
+   GMATUTIL_API friend Rmatrix Outerproduct(const Rvector &v1, const Rvector &v2);
    
-   friend std::istream& operator>> (std::istream &input, Rvector &a);
-   friend std::ostream& operator<< (std::ostream &output, const Rvector &a);
+   GMATUTIL_API friend std::istream& operator>> (std::istream &input, Rvector &a);
+   GMATUTIL_API friend std::ostream& operator<< (std::ostream &output, const Rvector &a);
    
 protected:
 private:

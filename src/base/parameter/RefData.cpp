@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -914,7 +914,7 @@ std::string RefData::FindFirstObjectName(const UnsignedInt type) const
       {
          #if DEBUG_REFDATA_OBJECT > 1
          MessageInterface::ShowMessage
-            ("RefData::FindFirstObjectName() returnig '%s'\n", mRefObjList[i].objName.c_str());
+            ("RefData::FindFirstObjectName() returning '%s'\n", mRefObjList[i].objName.c_str());
          #endif
          return mRefObjList[i].objName;
       }
@@ -922,7 +922,7 @@ std::string RefData::FindFirstObjectName(const UnsignedInt type) const
    
    #if DEBUG_REFDATA_OBJECT > 1
    MessageInterface::ShowMessage
-      ("RefData::FindFirstObjectName() returnig '', no name of given type found\n");
+      ("RefData::FindFirstObjectName() returning '', no name of given type found\n");
    #endif
    return "";
 }

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -97,5 +97,8 @@ protected:
    Integer                  nestLevel;
    /// Container for locally cloned Parameters
    std::vector<Parameter*> localParameters;
+
+   /// Flag used to make sure empty loops only warn one time
+   bool emptyLoopWarningPosted;
 };
 #endif  // While_hpp

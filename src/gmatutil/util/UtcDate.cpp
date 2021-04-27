@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -264,6 +264,6 @@ Real UtcDate::ToA1Mjd() const
    // Convert to Modified Julian date
    Real utcmjd = ModifiedJulianDate(year,month,day,hour,minute,second);
    // Convert to A1Mjd
-   Real a1Mjd = TimeConverterUtil::Convert(utcmjd, TimeConverterUtil::UTCMJD, TimeConverterUtil::A1MJD);
+   Real a1Mjd = TimeSystemConverter::Instance()->Convert(utcmjd, TimeSystemConverter::UTCMJD, TimeSystemConverter::A1MJD);
    return a1Mjd;
 }

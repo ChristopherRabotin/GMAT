@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,6 +38,13 @@
 #include "GetLastState.hpp"
 #include "GetEphemStates.hpp"
 #include "SetSeed.hpp"
+#include "Pause.hpp"
+#include "SystemTime.hpp"
+#include "ConvertTime.hpp"
+#include "Sign.hpp"
+#include "Str2num.hpp"
+#include "Num2str.hpp"
+#include "RotationMatrix.hpp"
 
 //#define DEBUG_MATH_FACTORY 1
 
@@ -93,7 +100,29 @@ Function* FunctionFactory::CreateFunction(const std::string &ofType,
       builtinFunction = new GetEphemStates(ofType, withName);
    else if (ofType == "SetSeed")
       builtinFunction = new SetSeed(ofType, withName);
-   
+   else if (ofType == "Pause")
+      builtinFunction = new Pause(ofType, withName);
+   else if (ofType == "pause")
+      builtinFunction = new Pause(ofType, withName);
+   else if (ofType == "SystemTime")
+      builtinFunction = new SystemTime(ofType, withName);
+   else if (ofType == "ConvertTime")
+      builtinFunction = new ConvertTime(ofType, withName);
+   else if (ofType == "Sign")
+      builtinFunction = new Sign(ofType, withName);
+   else if (ofType == "sign")
+      builtinFunction = new Sign(ofType, withName);
+   else if (ofType == "Str2num")
+      builtinFunction = new Str2num(ofType, withName);
+   else if (ofType == "str2num")
+      builtinFunction = new Str2num(ofType, withName);
+   else if (ofType == "Num2str")
+      builtinFunction = new Num2str(ofType, withName);
+   else if (ofType == "num2str")
+      builtinFunction = new Num2str(ofType, withName);
+   else if (ofType == "RotationMatrix")
+      builtinFunction = new RotationMatrix(ofType, withName);
+
    return builtinFunction;
 }
 
@@ -201,5 +230,16 @@ void FunctionFactory::BuildCreatables()
    creatables.push_back("GetLastState");
    creatables.push_back("GetEphemStates");
    creatables.push_back("SetSeed");
+   creatables.push_back("Pause");
+   creatables.push_back("pause");
+   creatables.push_back("SystemTime");
+   creatables.push_back("ConvertTime");
+   creatables.push_back("Sign");
+   creatables.push_back("sign");
+   creatables.push_back("Str2num");
+   creatables.push_back("str2num");
+   creatables.push_back("Num2str");
+   creatables.push_back("num2str");
+   creatables.push_back("RotationMatrix");
 }
 

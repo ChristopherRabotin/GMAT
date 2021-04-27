@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -132,7 +132,9 @@ void ShadowState::SetSolarSystem(SolarSystem *ss)
 Real ShadowState::FindShadowState(bool &lit, bool &dark,
                           const std::string &shadowModel, Real *state, Real *cbSun,
                           Real *sunSat, Real *force, Real sunRad,
-                          Real bodyRad, Real psunrad)
+                          Real bodyRad, Real psunrad, Real &apparentSunRadius,
+                          Real &apparentBodyRadius,
+                          Real &apparentDistFromSunToBody)
 {
    Real      percentSun    = 1;   // default is full sun
    Real mag = GmatMathUtil::Sqrt(cbSun[0]*cbSun[0] +
@@ -190,8 +192,8 @@ Real ShadowState::FindShadowState(bool &lit, bool &dark,
 //      {
          
          //  Compute apparent quantities like body radii and distances between bodies
-         Real apparentSunRadius, apparentBodyRadius, satToSunDist;
-         Real satToBodyDist, apparentDistFromSunToBody;
+         Real satToSunDist;
+         Real satToBodyDist;
          Real satToSunVec[3], unitSatToSun[3], unitBodyToSat[3];
          satToSunVec[0] = -sunSat[0];
          satToSunVec[1] = -sunSat[1];
@@ -266,7 +268,7 @@ Real ShadowState::FindShadowState(bool &lit, bool &dark,
 			// This is the anteumbra case
 		    lit        = false;
             dark       = false;
-            percentSun =  1 - apparentBodyRadius*apparentBodyRadius/apparentSunRadius*apparentSunRadius;
+            percentSun =  1 - apparentBodyRadius*apparentBodyRadius/(apparentSunRadius*apparentSunRadius);
 			return percentSun;
 		 }
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1227,6 +1227,13 @@ void GuiInterpreter::SetInputFocus()
 #if !defined __CONSOLE_APP__
    GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
    mainFrame->SetFocus();
+
+   if (++focusCounter > 1000)
+   {
+      wxYield();
+      focusCounter = 0;
+   }
+
    if (mainFrame->IsIconized())
       mainFrame->ProcessPendingEvent();
 #endif
@@ -1337,6 +1344,7 @@ GuiInterpreter::GuiInterpreter()
 {
    Initialize();
    isInitialized = false;
+   focusCounter = 0;
 }
 
 

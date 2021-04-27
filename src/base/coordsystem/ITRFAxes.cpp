@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -190,7 +190,7 @@ GmatCoordinate::ParameterUsage ITRFAxes::UsesItrfFile() const
 //---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage ITRFAxes::UsesNutationUpdateInterval() const
 {
-   if (originName == SolarSystem::EARTH_NAME) 
+   if (originName == GmatSolarSystemDefaults::EARTH_NAME)
       return GmatCoordinate::REQUIRED;
    return DynamicAxes::UsesNutationUpdateInterval();
 }
@@ -213,7 +213,7 @@ bool ITRFAxes::Initialize()
    #endif
 
    DynamicAxes::Initialize();
-   if (originName == SolarSystem::EARTH_NAME) InitializeFK5();
+   if (originName == GmatSolarSystemDefaults::EARTH_NAME) InitializeFK5();
    #ifdef DEBUG_FIRST_CALL
       firstCallFired = false;
    #endif
@@ -449,8 +449,8 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Real sec2rad = GmatMathConstants::RAD_PER_DEG/3600;
    Real a1MJD = theEpoch;
 
-   Real utcMJD = TimeConverterUtil::Convert(a1MJD,
-                    TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
+   Real utcMJD = theTimeConverter->Convert(a1MJD,
+                    TimeSystemConverter::A1MJD, TimeSystemConverter::UTCMJD,
                     JD_JAN_5_1941);
    Real offset = JD_JAN_5_1941 - JD_NOV_17_1858;
 
@@ -464,8 +464,8 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    xp = xp*sec2rad;
    yp = yp*sec2rad;
 
-   Real ut1MJD = TimeConverterUtil::Convert(a1MJD,
-                    TimeConverterUtil::A1MJD, TimeConverterUtil::UT1,
+   Real ut1MJD = theTimeConverter->Convert(a1MJD,
+                    TimeSystemConverter::A1MJD, TimeSystemConverter::UT1,
                     JD_JAN_5_1941);
 
    // Compute elapsed Julian centuries (UT1)
@@ -473,8 +473,8 @@ void ITRFAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Real jdUT1 = ut1MJD + JD_JAN_5_1941;
 
    // convert input A1 MJD to TT MJD (for most calculations)
-   Real ttMJD = TimeConverterUtil::Convert(a1MJD,
-                   TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
+   Real ttMJD = theTimeConverter->Convert(a1MJD,
+                   TimeSystemConverter::A1MJD, TimeSystemConverter::TTMJD,
                    JD_JAN_5_1941);
 
    Real jdTT    = ttMJD + JD_JAN_5_1941; // right?

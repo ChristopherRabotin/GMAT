@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,6 +39,7 @@
 #include "CoordinateConverter.hpp"
 #include "StringUtil.hpp"
 #include "FileManager.hpp"
+#include "FileUtil.hpp"
 
 
 #include <cmath>                    // for exp
@@ -139,7 +140,7 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    angVel[1]      = 0.0;
    angVel[2]      = 7.29211585530e-5;
 
- //  fluxReader = new SolarFluxReader();
+   theTimeConverter = TimeSystemConverter::Instance();
 
    #ifdef CHECK_KP2AP
       MessageInterface::ShowMessage("K_p to A_p conversions:\n");
@@ -163,6 +164,9 @@ AtmosphereModel::~AtmosphereModel()
       delete fluxReader;
       fluxReader = NULL;
    }
+
+   if (cbJ2000)
+      delete cbJ2000;
 }
 
 //------------------------------------------------------------------------------
@@ -194,7 +198,7 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    historicalDataSource (am.historicalDataSource),
    predictedDataSource  (am.predictedDataSource),
    mInternalCoordSystem (am.mInternalCoordSystem),
-   cbJ2000              (am.cbJ2000),
+   cbJ2000              (NULL),
    cbFixed              (am.cbFixed),
    wUpdateInterval      (am.wUpdateInterval),
    wUpdateEpoch         (am.wUpdateEpoch),
@@ -217,11 +221,9 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
 {
    parameterCount = AtmosphereModelParamCount;
    nominalAp = ConvertKpToAp(nominalKp);
-/*   if(am.fluxReader != NULL)
-   {
-      fluxReader = new SolarFluxReader();
-    
-   }*/
+   theTimeConverter = TimeSystemConverter::Instance();
+
+   isInitialized = false;
 }
 
 //------------------------------------------------------------------------------
@@ -261,7 +263,7 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    historicalDataSource = am.historicalDataSource;
    predictedDataSource  = am.predictedDataSource;
    mInternalCoordSystem = am.mInternalCoordSystem;
-   cbJ2000              = am.cbJ2000;
+   cbJ2000              = NULL;
    cbFixed              = am.cbFixed;
    wUpdateInterval      = am.wUpdateInterval;
    wUpdateEpoch         = am.wUpdateEpoch;
@@ -285,6 +287,8 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
 
    for (Integer i = 0; i < 7; i++)
       ap[i] = am.ap[i];
+
+   isInitialized = false;
 
    return *this;
 }
@@ -1198,8 +1202,8 @@ bool AtmosphereModel::SetStringParameter(const Integer id,
          // Is is a known format?
          while (!inStream.eof() && !fileIsValid)
          {
-            getline(inStream, line);
-
+            GmatFileUtil::GetLine(&inStream, line);
+            
             // if the line is blank, skip it
             if (GmatStringUtil::IsBlank(line, true)) continue;
 
@@ -1261,8 +1265,8 @@ bool AtmosphereModel::SetStringParameter(const Integer id,
          // Is is a known format?
          while (!inStream.eof() && !fileIsValid)
          {
-            getline(inStream, line);
-
+            GmatFileUtil::GetLine(&inStream, line);
+            
             // if the line is blank, skip it
             if (GmatStringUtil::IsBlank(line, true)) continue;
 

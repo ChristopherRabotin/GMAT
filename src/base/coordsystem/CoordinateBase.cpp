@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -96,6 +96,8 @@ CoordinateBase::CoordinateBase(UnsignedInt ofType,
 {
    objectTypeNames.push_back("CoordinateBase");
    parameterCount = CoordinateBaseParamCount;
+
+   theTimeConverter = TimeSystemConverter::Instance();
 }
 
 //---------------------------------------------------------------------------
@@ -119,6 +121,7 @@ GmatBase(coordBase),
    isBuiltIn     (coordBase.isBuiltIn),
    allowModify   (coordBase.allowModify)
 {
+   theTimeConverter = TimeSystemConverter::Instance();
 }
 
 //---------------------------------------------------------------------------

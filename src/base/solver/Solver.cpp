@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1020,6 +1020,41 @@ bool Solver::SetBooleanParameter(const Integer id, const bool value)
    }
 
    return GmatBase::SetBooleanParameter(id, value);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool GetBooleanParameter(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve a boolean parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ *
+ * @return the boolean value for this parameter, or false if the parameter is
+ *         not boolean.
+ */
+ //---------------------------------------------------------------------------
+bool Solver::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+//---------------------------------------------------------------------------
+//  bool SetBooleanParameter(const Integer id, const char *value)
+//---------------------------------------------------------------------------
+/**
+ * Sets the value for a boolean parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ *
+ * @return the boolean value for this parameter, or false if the parameter is
+ *         not boolean.
+ */
+ //---------------------------------------------------------------------------
+bool Solver::SetBooleanParameter(const std::string &label, const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
 }
 
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -45,6 +45,7 @@ const std::string ErrorModel::PARAMETER_TEXT[] =
    "Bias",
    "BiasSigma",
    "SolveFors",
+   "Id",
 };
 
 const Gmat::ParameterType ErrorModel::PARAMETER_TYPE[] =
@@ -57,6 +58,7 @@ const Gmat::ParameterType ErrorModel::PARAMETER_TYPE[] =
    Gmat::REAL_TYPE,			   // BIAS                  // Measurement bias
    Gmat::REAL_TYPE,			   // BIAS_SIGMA            // Measurement bias sigma
    Gmat::STRINGARRAY_TYPE,    // SOLVEFORS             // Contains a list of all solve-for parameters in ErrorModel 
+   Gmat::STRING_TYPE,         // MODEL_ID              // The id of the error model, which is the instanceName, but using objects' ids instead of names 
 };
 
 
@@ -78,7 +80,8 @@ ErrorModel::ErrorModel(const std::string name) :
    noiseSigma        (103.0),                 // (0.01),                  // 0.01 measurement unit (km, RU, Km/s, or Hz)
 // noiseModel        ("NoiseConstant"), 
    bias              (0.0),                   // 0.0 measurement unit (km, RU, Km/s, or Hz)
-   biasSigma         (1.0e70)                 // 0.0 measurement unit (km, RU, Km/s, or Hz)
+   biasSigma         (1.0e70),                // 0.0 measurement unit (km, RU, Km/s, or Hz)
+   modelId           ("ErrorModelId")
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("ErrorModel default constructor <%s,%p>\n", GetName().c_str(), this);
@@ -92,9 +95,9 @@ ErrorModel::ErrorModel(const std::string name) :
    covariance.AddCovarianceElement("Bias", this);
    covariance(0, 0) = biasSigma*biasSigma;
 
-   // define deprecated type map
-   depTypeMap["Range_RU"]   = "DSN_SeqRange";
-   depTypeMap["Doppler_HZ"] = "DSN_TCP";
+//   // define deprecated type map
+//   depTypeMap["Range_RU"]   = "DSN_SeqRange";
+//   depTypeMap["Doppler_HZ"] = "DSN_TCP";
 }
 
 
@@ -128,7 +131,8 @@ ErrorModel::ErrorModel(const ErrorModel& em) :
 //   noiseModel            (em.noiseModel),
    bias                  (em.bias),
    biasSigma             (em.biasSigma),
-   solveforNames         (em.solveforNames)
+   solveforNames         (em.solveforNames),
+   modelId               (em.modelId)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("ErrorModel copy constructor from <%s,%p>  to  <%s,%p>\n", em.GetName().c_str(), &em, GetName().c_str(), this);
@@ -169,6 +173,7 @@ ErrorModel& ErrorModel::operator=(const ErrorModel& em)
       bias                = em.bias;
       biasSigma           = em.biasSigma;
       solveforNames       = em.solveforNames;
+      modelId             = em.modelId;
 
       Integer locationStart = covariance.GetSubMatrixLocationStart("Bias");
       covariance(locationStart, locationStart) = biasSigma * biasSigma;
@@ -369,6 +374,43 @@ std::string ErrorModel::GetParameterTypeString(const Integer id) const
 }
 
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false if not,
+ */
+ //---------------------------------------------------------------------------
+bool ErrorModel::IsParameterReadOnly(const Integer id) const
+{
+   if (id == MODEL_ID)
+      return true;
+
+   return GmatBase::IsParameterReadOnly(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <label> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not.
+ */
+ //---------------------------------------------------------------------------
+bool ErrorModel::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
+
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
@@ -387,6 +429,9 @@ std::string ErrorModel::GetStringParameter(const Integer id) const
 
    //if (id == NOISE_MODEL)
    //   return noiseModel;
+
+   if (id == MODEL_ID)
+      return modelId;
 
    return GmatBase::GetStringParameter(id);
 }
@@ -432,7 +477,7 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value)
    {
       
       std::string value1 = value;
-      value1 = CheckTypeDeprecation(value1);
+      //value1 = CheckTypeDeprecation(value1);
 
       // Get a list of all available types
       StringArray typesList = GetAllAvailableTypes();
@@ -465,6 +510,12 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value)
 	  //    return true;
    //   }
    //}
+
+   if (id == MODEL_ID)
+   {
+      modelId = value;    
+	   return true;
+   }
 
    return GmatBase::SetStringParameter(id, value);
 }
@@ -908,14 +959,23 @@ StringArray ErrorModel::GetAllAvailableTypes()
    sa.push_back("DSN_SeqRange");
    sa.push_back("DSN_TCP");
    sa.push_back("GPS_PosVec");
-   //sa.push_back("Range_KM");
    sa.push_back("Range");
-   //sa.push_back("Doppler_RangeRate");
+   sa.push_back("Range_Skin");
    sa.push_back("RangeRate");
+   sa.push_back("Azimuth");
+   sa.push_back("Elevation");
+   sa.push_back("XEast");
+   sa.push_back("YNorth");
+   sa.push_back("XSouth");
+   sa.push_back("YEast");
+   //sa.push_back("RightAscension");                           // made changes by TUAN NGUYEN
+   //sa.push_back("Declination");                              // made changes by TUAN NGUYEN
 
    Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();        // fix bug: GMT-5955
    if (runmode == GmatGlobal::TESTING)                                   // fix bug: GMT-5955
    {
+      sa.push_back("RightAscension");                          // made changes by TUAN NGUYEN
+      sa.push_back("Declination");                             // made changes by TUAN NGUYEN
       sa.push_back("SN_Range");
       sa.push_back("SN_Doppler");                                        // fix bug: GMT-5955
    }
@@ -966,22 +1026,22 @@ Rmatrix* ErrorModel::GetParameterCovariances(Integer parameterId)
 }
 
 
-std::string ErrorModel::CheckTypeDeprecation(const std::string datatype)
-{
-   std::string typeName = datatype;
-   for (std::map<std::string, std::string>::iterator i = depTypeMap.begin();
-      i != depTypeMap.end(); ++i)
-   {
-      if ((*i).first == datatype)
-      {
-         MessageInterface::ShowMessage("Warning: " + GetName() + ".Type name '" 
-            + datatype + "' is deprecated and will be removed in a future release. Use '"
-            + (*i).second + "' instead.\n");
-         typeName = (*i).second;
-         break;
-      }
-   }
-
-   return typeName;
-}
+//std::string ErrorModel::CheckTypeDeprecation(const std::string datatype)
+//{
+//   std::string typeName = datatype;
+//   for (std::map<std::string, std::string>::iterator i = depTypeMap.begin();
+//      i != depTypeMap.end(); ++i)
+//   {
+//      if ((*i).first == datatype)
+//      {
+//         MessageInterface::ShowMessage("Warning: " + GetName() + ".Type name '" 
+//            + datatype + "' is deprecated and will be removed in a future release. Use '"
+//            + (*i).second + "' instead.\n");
+//         typeName = (*i).second;
+//         break;
+//      }
+//   }
+//
+//   return typeName;
+//}
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -282,7 +282,8 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    view3dModelRotationY (0.0),
    view3dModelRotationZ (0.0),   
    view3dModelScale     (10.0),
-   msgWritten           (false)
+   msgWritten           (false),
+   isGmatTimeWarning    (false)
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
    objectTypeNames.push_back("CelestialBody");
@@ -403,7 +404,8 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    view3dModelRotationY (0.0),
    view3dModelRotationZ (0.0),   
    view3dModelScale     (10.0),
-   msgWritten           (false)
+   msgWritten           (false),
+   isGmatTimeWarning    (false)
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
    objectTypeNames.push_back("CelestialBody");
@@ -532,7 +534,8 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    view3dModelRotationY (cBody.view3dModelRotationY),
    view3dModelRotationZ (cBody.view3dModelRotationZ),   
    view3dModelScale     (cBody.view3dModelScale),
-   msgWritten           (cBody.msgWritten)
+   msgWritten           (cBody.msgWritten),
+   isGmatTimeWarning    (cBody.isGmatTimeWarning)
 {
    state                  = cBody.state;
    stateTime              = cBody.stateTime;
@@ -698,6 +701,7 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    view3dModelRotationZ = cBody.view3dModelRotationZ;   
    view3dModelScale     = cBody.view3dModelScale;
    msgWritten           = cBody.msgWritten;
+   isGmatTimeWarning = cBody.isGmatTimeWarning;
    
    for (Integer i=0;i<6;i++)  prevState[i] = cBody.prevState[i];
 
@@ -959,8 +963,7 @@ Rvector6 CelestialBody::GetLastState()
  * initial state time.
  */
 //------------------------------------------------------------------------------
-Real CelestialBody::GetFirstStateTime()
-{
+Real CelestialBody::GetFirstStateTime(){
    Real retval = -999.0;
    switch (posVelSrc)
    {
@@ -1180,7 +1183,12 @@ const Rvector6&  CelestialBody::GetState(GmatTime atTime)
    {
 #ifdef __USE_SPICE__
       if (!spiceSetupDone) SetUpSPICE();
-      MessageInterface::ShowMessage("Warning: SPISE does not handle GmatTime. Value of GmatTime was convert to GmatEpoch.\n");
+      if (!isGmatTimeWarning)
+      {
+         MessageInterface::ShowMessage("Warning: SPICE does not handle GmatTime. Value of GmatTime was convert to GmatEpoch.\n");
+         isGmatTimeWarning = true;
+      }
+
       Rvector6 spiceState = kernelReader->GetTargetState(naifName, naifId, atTime, j2000BodyName, naifIdObserver);
       state.Set(spiceState[0], spiceState[1], spiceState[2],
          spiceState[3], spiceState[4], spiceState[5]);
@@ -1281,6 +1289,28 @@ const Rvector3  CelestialBody::GetPositionDelta(const GmatTime &atTime1, const G
       positionDelta.Set(posDelta[0], posDelta[1], posDelta[2]);
       break;
    }
+
+   case Gmat::SPICE:
+   {
+#ifdef __USE_SPICE__
+      if (!spiceSetupDone) SetUpSPICE();
+      if (!isGmatTimeWarning)
+      {
+         MessageInterface::ShowMessage("Warning: SPICE does not handle GmatTime. Value of GmatTime was convert to GmatEpoch.\n");
+         isGmatTimeWarning = true;
+      }
+
+      Rvector6 spiceState1 = kernelReader->GetTargetState(naifName, naifId, atTime1, j2000BodyName, naifIdObserver);
+      Rvector6 spiceState2 = kernelReader->GetTargetState(naifName, naifId, atTime2, j2000BodyName, naifIdObserver);
+      positionDelta.Set(spiceState2[0] - spiceState1[0], spiceState2[1] - spiceState1[1], spiceState2[2] - spiceState1[2]);
+#else
+      // Throw an error if GMAT was not build with __USE_SPICE__ (LOJ: 2010.05.18)
+      std::string errmsg = "Use of SPICE file was disabled";
+      throw SolarSystemException(errmsg);
+#endif
+      break;
+   }
+
    default:
       throw SolarSystemException("Invalid data source defined for body "
          + instanceName + " in CelestialBody::GetPositionDelta()");
@@ -1357,6 +1387,29 @@ const Rvector3  CelestialBody::GetPositionDeltaSSB(const GmatTime &atTime1, cons
       positionDelta = positionDelta - ssbDelta;
       break;
    }
+
+   case Gmat::SPICE:
+   {
+#ifdef __USE_SPICE__
+      if (!spiceSetupDone) SetUpSPICE();
+      if (!isGmatTimeWarning)
+      {
+         MessageInterface::ShowMessage("Warning: SPICE does not handle GmatTime. Value of GmatTime was convert to GmatEpoch.\n");
+         isGmatTimeWarning = true;
+      }
+
+      Rvector6 spiceState1 = kernelReader->GetTargetState(naifName, naifId, atTime1, j2000BodyName, naifIdObserver);
+      Rvector6 spiceState2 = kernelReader->GetTargetState(naifName, naifId, atTime2, j2000BodyName, naifIdObserver);
+      positionDelta.Set(spiceState2[0] - spiceState1[0], spiceState2[1] - spiceState1[1], spiceState2[2] - spiceState1[2]);
+#else
+      // Throw an error if GMAT was not build with __USE_SPICE__ (LOJ: 2010.05.18)
+      std::string errmsg = "Use of SPICE file was disabled";
+      throw SolarSystemException(errmsg);
+#endif
+      break;
+   }
+
+
    default:
       throw SolarSystemException("Invalid data source defined for body "
          + instanceName + " in CelestialBody::GetPositionDeltaSSB()");
@@ -3111,10 +3164,10 @@ const Rvector6 CelestialBody::GetMJ2000State(const A1Mjd &atTime)
    #endif
    #ifdef DEBUG_CB_GET_MJ2000_STATE
       Rvector6 theState = stateEphem - j2kEphemState;
-      Real ttTime    = TimeConverterUtil::Convert(atTime.Get(), TimeConverterUtil::A1MJD,
-                       TimeConverterUtil::TTMJD, GmatTimeConstants::JD_JAN_5_1941);
-      Real tdbTime   = TimeConverterUtil::Convert(atTime.Get(), TimeConverterUtil::A1MJD,
-                       TimeConverterUtil::TDBMJD, GmatTimeConstants::JD_JAN_5_1941);
+      Real ttTime    = theTimeConverter->Convert(atTime.Get(), TimeSystemConverter::A1MJD,
+                       TimeSystemConverter::TTMJD, GmatTimeConstants::JD_JAN_5_1941);
+      Real tdbTime   = theTimeConverter->Convert(atTime.Get(), TimeSystemConverter::A1MJD,
+                       TimeSystemConverter::TDBMJD, GmatTimeConstants::JD_JAN_5_1941);
       MessageInterface::ShowMessage(
             "Body: %s   TT(TDB) Time: %12.10f (%12.10f)   state:  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
             instanceName.c_str(), ttTime, tdbTime,
@@ -3240,10 +3293,10 @@ const Rvector6 CelestialBody::GetMJ2000State(const GmatTime &atTime)
 #endif
 #ifdef DEBUG_CB_GET_MJ2000_STATE
    Rvector6 theState = stateEphem - j2kEphemState;
-   GmatTime ttTime = TimeConverterUtil::Convert(atTime, TimeConverterUtil::A1MJD,
-      TimeConverterUtil::TTMJD, GmatTimeConstants::JD_JAN_5_1941);
-   GmatTime tdbTime = TimeConverterUtil::Convert(atTime, TimeConverterUtil::A1MJD,
-      TimeConverterUtil::TDBMJD, GmatTimeConstants::JD_JAN_5_1941);
+   GmatTime ttTime = theTimeConverter->Convert(atTime, TimeSystemConverter::A1MJD,
+      TimeSystemConverter::TTMJD, GmatTimeConstants::JD_JAN_5_1941);
+   GmatTime tdbTime = theTimeConverter->Convert(atTime, TimeSystemConverter::A1MJD,
+      TimeSystemConverter::TDBMJD, GmatTimeConstants::JD_JAN_5_1941);
    MessageInterface::ShowMessage(
       "Body: %s   TT(TDB) Time: %12.10f (%12.10f)   state:  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
       instanceName.c_str(), ttTime.GetMjd(), tdbTime.GetMjd(),
@@ -3606,27 +3659,30 @@ Real CelestialBody::SetRealParameter(const Integer id, const Real value)
       
    if (id == EQUATORIAL_RADIUS)
    {
-      return SetEquatorialRadius(value);
+      SetEquatorialRadius(value);
+      return GetEquatorialRadius();
    }
    if (id == FLATTENING)
    {
-      return SetFlattening(value);
+      SetFlattening(value);
+      return GetFlattening();
    }
    if (id == MU)
    {
-      return SetGravitationalConstant(value);
+      SetGravitationalConstant(value);
+      return GetGravitationalConstant();
    }
    if (id == HOUR_ANGLE) // does this even make sense?
    { 
       hourAngle           = value;
-      return true;
+      return hourAngle;
    }
    if (id == VIEW_3D_MODEL_OFFSET_X)
    {
       if (IsRealParameterValid(id, value))
       {
          view3dModelOffsetX = value;
-         return true;
+         return view3dModelOffsetX;
       }
       return false;
    }
@@ -3635,7 +3691,7 @@ Real CelestialBody::SetRealParameter(const Integer id, const Real value)
       if (IsRealParameterValid(id, value))
       {
          view3dModelOffsetY = value;
-         return true;
+         return view3dModelOffsetY;
       }
       return false;
    }
@@ -3644,7 +3700,7 @@ Real CelestialBody::SetRealParameter(const Integer id, const Real value)
       if (IsRealParameterValid(id, value))
       {
          view3dModelOffsetZ = value;
-         return true;
+         return view3dModelOffsetZ;
       }
       return false;
    }
@@ -3653,7 +3709,7 @@ Real CelestialBody::SetRealParameter(const Integer id, const Real value)
       if (IsRealParameterValid(id, value))
       {
          view3dModelRotationX = value;
-         return true;
+         return view3dModelRotationX;
       }
       return false;
    }
@@ -3662,7 +3718,7 @@ Real CelestialBody::SetRealParameter(const Integer id, const Real value)
       if (IsRealParameterValid(id, value))
       {
          view3dModelRotationY = value;
-         return true;
+         return view3dModelRotationY;
       }
       return false;
    }
@@ -3671,7 +3727,7 @@ Real CelestialBody::SetRealParameter(const Integer id, const Real value)
       if (IsRealParameterValid(id, value))
       {
          view3dModelRotationZ = value;
-         return true;
+         return view3dModelRotationZ;
       }
       return false;
    }
@@ -3680,7 +3736,7 @@ Real CelestialBody::SetRealParameter(const Integer id, const Real value)
       if (IsRealParameterValid(id, value))
       {
          view3dModelScale = value;
-         return true;
+         return view3dModelScale;
       }
       return false;
    }
@@ -3784,37 +3840,37 @@ Real CelestialBody::SetRealParameter(const Integer id, const Real value)
                    << " and " << DateUtil::LATEST_VALID_MJD_VALUE << "]";
             throw SolarSystemException(errmsg.str());
          }
-         return true;
+         return orientationEpoch.Get();
       }
       if (id == SPIN_AXIS_RA_CONSTANT)
       {
          orientation[0]      = value;
-         return true;
+         return orientation[0];
       }
       if (id == SPIN_AXIS_RA_RATE)
       {
          orientation[1]      = value;
-         return true;
+         return orientation[1];
       }
       if (id == SPIN_AXIS_DEC_CONSTANT)
       {
          orientation[2]      = value;
-         return true;
+         return orientation[2];
       }
       if (id == SPIN_AXIS_DEC_RATE)
       {
          orientation[3]      = value;
-         return true;
+         return orientation[3];
       }
       if (id == ROTATION_CONSTANT)
       {
          orientation[4]      = value;
-         return true;
+         return orientation[4];
       }
       if (id == ROTATION_RATE)
       {
          orientation[5]      = value;
-         return true;
+         return orientation[5];
       }
    }
    else // for default bodies, we are currently not allowing the user to modify these
@@ -3886,22 +3942,22 @@ Integer CelestialBody::SetIntegerParameter(const Integer id,
    if (id == ORDER)
    {
       order               = value;
-      return true;
+      return order;
    }
    if (id == DEGREE)
    {
       degree              = value;
-      return true;
+      return degree;
    }
    if (id == BODY_NUMBER)
    {
       bodyNumber          = value;
-      return true;
+      return bodyNumber;
    }
    if (id == REF_BODY_NUMBER)
    {
       referenceBodyNumber = value;
-      return true;
+      return referenceBodyNumber;
    }
    
    return SpacePoint::SetIntegerParameter(id,value);  // add others in later
@@ -5213,9 +5269,9 @@ bool CelestialBody::IsBlank(char* aLine)
 //------------------------------------------------------------------------------
 Real CelestialBody::GetJulianDaysFromTTEpoch(const A1Mjd &forTime) const
 {
-   Real mjdTT  = TimeConverterUtil::Convert(forTime.Get(),
-                                            TimeConverterUtil::A1MJD,
-                                            TimeConverterUtil::TTMJD, 
+   Real mjdTT  = theTimeConverter->Convert(forTime.Get(),
+                                            TimeSystemConverter::A1MJD,
+                                            TimeSystemConverter::TTMJD,
                                             GmatTimeConstants::JD_JAN_5_1941);
    return (mjdTT + GmatTimeConstants::JD_JAN_5_1941 - 
            GmatTimeConstants::JD_OF_J2000);
@@ -5241,9 +5297,9 @@ Real CelestialBody::GetJulianDaysFromTDBEpoch(const A1Mjd &forTime) const
          "CB::GetJulianDaysFromTDBEpoch: body =  %s; forTime = %le\n",
          instanceName.c_str(), forTime.Get());
    #endif
-   Real mjdTDB  = TimeConverterUtil::Convert(forTime.Get(),
-                                            TimeConverterUtil::A1MJD,
-                                            TimeConverterUtil::TDBMJD,
+   Real mjdTDB  = theTimeConverter->Convert(forTime.Get(),
+                                            TimeSystemConverter::A1MJD,
+                                            TimeSystemConverter::TDBMJD,
                                             GmatTimeConstants::JD_JAN_5_1941);
    // JD_OF_J2000 (2451545.0) TDB is the reference epoch indicated in
    // Seidelmann et. al. "Report of the IAU/IAGWorking Group on Cartographic
@@ -5277,7 +5333,7 @@ Rvector6 CelestialBody::ComputeTwoBody(const A1Mjd &forTime)
    #endif
    
    // Since we want the state in MJ2000Eq Earth-centered
-   if (instanceName == SolarSystem::EARTH_NAME) 
+   if (instanceName == GmatSolarSystemDefaults::EARTH_NAME) 
       return Rvector6(0.0,0.0,0.0,0.0,0.0,0.0);
    #ifdef DEBUG_TWO_BODY
    MessageInterface::ShowMessage
@@ -5339,7 +5395,7 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
    #endif
 
    //   // check for number of revs and reduce dTime if necessary (this does not work for the Sun)
-   if (instanceName != SolarSystem::SUN_NAME)
+   if (instanceName != GmatSolarSystemDefaults::SUN_NAME)
    {
       Real sma = twoBodyKepler[0];   // SMA, which should be constant
       Real T = 2 * GmatMathConstants::PI * Sqrt(Abs(sma)*Abs(sma)*Abs(sma)/cbMu);
@@ -5652,29 +5708,29 @@ bool CelestialBody::SetUpSPICE()
       // user did NOT set one for the body.
       if (naifId == UNDEFINED_NAIF_ID)
       {
-         // SPICE calls Earth's moon "Moon" ; GMAT calls Earth's moon "Luna"
-         Integer spiceNaifId; 
-         if (instanceName == SolarSystem::MOON_NAME)
-            spiceNaifId = kernelReader->GetNaifID("MOON"); 
-         else if (instanceName == GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)
-            spiceNaifId = kernelReader->GetNaifID("SSB");
-         else
-         {
-               spiceNaifId = kernelReader->GetNaifID(instanceName, false);
-               // if not found with the instanceName, try using the NAIF ID
-               if (spiceNaifId == 0)   // SSB is 0, but that's handled above
-               {
+      // SPICE calls Earth's moon "Moon" ; GMAT calls Earth's moon "Luna"
+      Integer spiceNaifId; 
+      if (instanceName == GmatSolarSystemDefaults::MOON_NAME)
+         spiceNaifId = kernelReader->GetNaifID("MOON"); 
+      else if (instanceName == GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)
+         spiceNaifId = kernelReader->GetNaifID("SSB");
+      else
+      {
+            spiceNaifId = kernelReader->GetNaifID(instanceName, false);
+            // if not found with the instanceName, try using the NAIF ID
+            if (spiceNaifId == 0)   // SSB is 0, but that's handled above
+            {
                   std::stringstream ss("");  // @todo - revisit this code 
-                  ss << naifId;
-                  naifName = ss.str();
-                  spiceNaifId = naifId;
-               }
-               else
-               {
-                  naifName = instanceName;
-               }
-         }
-         
+               ss << naifId;
+               naifName = ss.str();
+               spiceNaifId = naifId;
+            }
+            else
+            {
+               naifName = instanceName;
+            }
+      }
+      
          std::stringstream ss("");
          ss << "NAIF ID for body \"" << instanceName << "\" was unset.  Setting to " <<
                "NAIF ID (" << spiceNaifId << ") retrieved from SPICE kernel.\n";

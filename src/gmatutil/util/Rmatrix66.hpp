@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -85,7 +85,7 @@ public:
    friend class Rvector6;
    Rvector6 operator*(const Rvector6& v) const;
    
-   friend Rmatrix66 operator*(Real scalar, const Rmatrix66& m);
+   GMATUTIL_API friend Rmatrix66 operator*(Real scalar, const Rmatrix66& m);
    
    Real               Trace() const;
    Real               Determinant() const;
@@ -94,13 +94,13 @@ public:
    virtual Rmatrix66  Symmetric() const;
    Rmatrix66          AntiSymmetric() const;
    
-   friend Rmatrix66  SkewSymmetric(const Rvector6& v);
-   friend Rmatrix66  TransposeTimesMatrix(const Rmatrix66& m1,
-                                          const Rmatrix66& m2);
-   friend Rmatrix66  MatrixTimesTranspose(const Rmatrix66& m1,
-                                          const Rmatrix66& m2); 
-   friend Rmatrix66  TransposeTimesTranspose(const Rmatrix66& m1,
-                                             const Rmatrix66& m2); 
+   GMATUTIL_API friend Rmatrix66  SkewSymmetric(const Rvector6& v);
+   GMATUTIL_API friend Rmatrix66  TransposeTimesMatrix(const Rmatrix66& m1,
+                                                       const Rmatrix66& m2);
+   GMATUTIL_API friend Rmatrix66  MatrixTimesTranspose(const Rmatrix66& m1,
+                                                       const Rmatrix66& m2); 
+   GMATUTIL_API friend Rmatrix66  TransposeTimesTranspose(const Rmatrix66& m1,
+                                                          const Rmatrix66& m2); 
    
    
 private:

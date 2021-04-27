@@ -48,16 +48,6 @@ DSNTransmitter.Frequency      = 7200;   %MHz.
 DSNTransmitter.PrimaryAntenna = DSNAntenna;
 DSNReceiver.PrimaryAntenna    = DSNAntenna;
 
-GDSTransmitter.Frequency      = 7300;   %MHz.
-GDSTransmitter.PrimaryAntenna = DSNAntenna;
-DSNReceiver.PrimaryAntenna    = DSNAntenna;
-
-MADTransmitter.Frequency      = 7400;   %MHz.
-MADTransmitter.PrimaryAntenna = DSNAntenna;
-DSNReceiver.PrimaryAntenna    = DSNAntenna;
-
-
-
 %   Create Ground station and associated error models
 Create GroundStation CAN;
 CAN.CentralBody           = Earth;
@@ -80,7 +70,7 @@ GDS.Location1 = -2353.621251;
 GDS.Location2 = -4641.341542;
 GDS.Location3 = 3677.052370;
 GDS.Id = '33333';
-GDS.AddHardware = {GDSTransmitter, DSNAntenna, DSNReceiver};
+GDS.AddHardware = {DSNTransmitter, DSNAntenna, DSNReceiver};
 GDS.MinimumElevationAngle = 7.0;
 GDS.IonosphereModel       = 'IRI2007';
 GDS.TroposphereModel      = 'HopfieldSaastamoinen';
@@ -93,7 +83,7 @@ MAD.Location1 = 4849.519988;
 MAD.Location2 = -360.641653;
 MAD.Location3 = 4114.504590;
 MAD.Id = '44444';
-MAD.AddHardware = {MADTransmitter, DSNAntenna, DSNReceiver};
+MAD.AddHardware = {DSNTransmitter, DSNAntenna, DSNReceiver};
 MAD.MinimumElevationAngle = 7.0;
 MAD.IonosphereModel       = 'IRI2007';
 MAD.TroposphereModel      = 'HopfieldSaastamoinen';
@@ -150,7 +140,7 @@ Prop.MinStep                = 0;
 %%		Create and configure Batch Estimator object
 %-----------------------------------------------------------------------------------------
 
-Create BatchEstimatorInv bat
+Create BatchEstimator bat
 bat.ShowProgress = true;
 bat.ReportStyle = Normal;
 bat.ReportFile = 'Orbit Estimation using DSN Range and Doppler Data.report';

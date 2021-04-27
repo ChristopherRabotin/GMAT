@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -53,6 +53,7 @@
 //#define DEBUG_EPHEMFILE_RESTART
 //#define DEBUG_EPHEMFILE_RUNFLAG
 //#define DEBUG_EPHEMFILE_CONVERT_STATE
+//#define DEBUG_EPHEMFILE_BACKGROUND
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -95,9 +96,9 @@ EphemerisWriter::EphemerisWriter(const std::string &name, const std::string &typ
    stateType            ("Cartesian"),
    outCoordSystemName   ("EarthMJ2000Eq"),
    outputFormat         ("LittleEndian"),
+   covarianceFormat     ("None"),
    currComments         (""),
    interpolationOrder   (7),
-   interpolatorStatus   (-1),
    toggleStatus         (0),
    propIndicator        (0),
    prevPropDirection    (0.0),
@@ -201,9 +202,9 @@ EphemerisWriter::EphemerisWriter(const EphemerisWriter &ef) :
    stateType            (ef.stateType),
    outCoordSystemName   (ef.outCoordSystemName),
    outputFormat         (ef.outputFormat),
+   covarianceFormat     (ef.covarianceFormat),
    currComments         (ef.currComments),
    interpolationOrder   (ef.interpolationOrder),
-   interpolatorStatus   (ef.interpolatorStatus),
    toggleStatus         (ef.toggleStatus),
    propIndicator        (ef.propIndicator),
    prevPropDirection    (ef.prevPropDirection),
@@ -287,9 +288,9 @@ EphemerisWriter& EphemerisWriter::operator=(const EphemerisWriter& ef)
    stateType            = ef.stateType;
    outCoordSystemName   = ef.outCoordSystemName;
    outputFormat         = ef.outputFormat;
+   covarianceFormat     = ef.covarianceFormat;
    currComments         = ef.currComments;
    interpolationOrder   = ef.interpolationOrder;
-   interpolatorStatus   = ef.interpolatorStatus;
    toggleStatus         = ef.toggleStatus;
    propIndicator        = ef.propIndicator;
    prevPropDirection    = ef.prevPropDirection;
@@ -462,6 +463,10 @@ void EphemerisWriter::SetIsEphemLocal(bool isLocal)
 //------------------------------------------------------------------------------
 void EphemerisWriter::SetBackgroundGeneration(bool inBackground)
 {
+#ifdef DEBUG_EPHEMFILE_BACKGROUND
+   MessageInterface::ShowMessage("Setting generateInBackground to %s\n",
+                                 (inBackground? "true" : "false"));
+#endif
    generateInBackground = inBackground;
 }
 
@@ -487,9 +492,9 @@ void EphemerisWriter::SetRunFlags(bool finalize, bool endOfRun, bool finalized)
 }
 
 //------------------------------------------------------------------------------
-// void SetOrbitData(Real epochInDays, Real currState[6])
+// void SetOrbitData(Real epochInDays, Real state[6], Real cov[21])
 //------------------------------------------------------------------------------
-void EphemerisWriter::SetOrbitData(Real epochInDays, Real state[6])
+void EphemerisWriter::SetOrbitData(Real epochInDays, Real state[6], Real cov[21])
 {
    #ifdef DEBUG_EPHEMFILE_DATA
       MessageInterface::ShowMessage("   %.12lf [%lf %lf %lf %lf %lf %lf]\n",
@@ -500,6 +505,8 @@ void EphemerisWriter::SetOrbitData(Real epochInDays, Real state[6])
    currEpochInDays = epochInDays;
    for (int i = 0; i < 6; i++)
       currState[i] = state[i];
+   for (int i = 0; i < 21; i++)
+      currCov[i] = cov[i];
 }
 
 
@@ -740,11 +747,12 @@ void EphemerisWriter::InitializeData(bool saveEpochInfo)
 
 //------------------------------------------------------------------------------
 // virtual void CreateEphemerisFile(bool useDefaultFileName, const std::string &stType,
-//                                  const std::string &outFormat)
+//                                  const std::string &outFormat, const std::string &covType)
 //------------------------------------------------------------------------------
 void EphemerisWriter::CreateEphemerisFile(bool useDefaultFileName,
                                           const std::string &stType,
-                                          const std::string &outFormat)
+                                          const std::string &outFormat,
+                                          const std::string &covFormat)
 {
    #ifdef DEBUG_EPHEMFILE_CREATE
    MessageInterface::ShowMessage
@@ -756,6 +764,7 @@ void EphemerisWriter::CreateEphemerisFile(bool useDefaultFileName,
    usingDefaultFileName = useDefaultFileName;
    stateType = stType;
    outputFormat = outFormat;
+   covarianceFormat = covFormat;
    
    #ifdef DEBUG_EPHEMFILE_CREATE
    MessageInterface::ShowMessage
@@ -962,7 +971,7 @@ void EphemerisWriter::HandleWriteOrbit()
       MessageInterface::ShowMessage
          ("===> Need to interpolateInitialState, so calling WriteOrbitAt()\n");
       #endif
-      WriteOrbitAt(nextReqEpochInSecs, currState);
+      WriteOrbitAt(nextReqEpochInSecs, currState, currCov);
       Real tdiff = nextReqEpochInSecs - (initialEpochA1Mjd * GmatTimeConstants::SECS_PER_DAY);
       if (GmatMathUtil::Abs(tdiff) <= 1.0-6)
       {
@@ -980,18 +989,18 @@ void EphemerisWriter::HandleWriteOrbit()
    
    if (useFixedStepSize)
    {
-      WriteOrbitAt(nextReqEpochInSecs, currState);
+      WriteOrbitAt(nextReqEpochInSecs, currState, currCov);
    }
    else if (interpolateFinalState)
    {
       if (currEpochInDays < finalEpochA1Mjd)
-         WriteOrbit(currEpochInSecs, currState);
+         WriteOrbit(currEpochInSecs, currState, currCov);
       else
-         WriteOrbitAt(nextReqEpochInSecs, currState);
+         WriteOrbitAt(nextReqEpochInSecs, currState, currCov);
    }
    else
    {
-      WriteOrbit(currEpochInSecs, currState);
+      WriteOrbit(currEpochInSecs, currState, currCov);
    }
    
    #ifdef DEBUG_EPHEMFILE_WRITE
@@ -1142,9 +1151,10 @@ bool EphemerisWriter::IsBackwardPropAllowed(Real propDirection)
  *
  * @param reqEpochInSecs Requested epoch to write in seconds 
  * @param state State to write 
+ * @param cov Covariance to write
  */
 //------------------------------------------------------------------------------
-void EphemerisWriter::WriteOrbit(Real reqEpochInSecs, const Real state[6])
+void EphemerisWriter::WriteOrbit(Real reqEpochInSecs, const Real state[6], const Real cov[21])
 {
    #ifdef DEBUG_EPHEMFILE_WRITE
    MessageInterface::ShowMessage
@@ -1156,16 +1166,18 @@ void EphemerisWriter::WriteOrbit(Real reqEpochInSecs, const Real state[6])
        currState[0], currState[1], currState[2], state[0], state[1], state[2]);
    #endif
    
-   Real stateToWrite[6];
+   Real stateToWrite[6], covToWrite[21];
    for (int i=0; i<6; i++)
       stateToWrite[i] = state[i];
+   for (int i = 0; i < 21; i++)
+      covToWrite[i] = cov[i];
    
    Real outEpochInSecs = reqEpochInSecs;
    
    if (useFixedStepSize)
-      FindNextOutputEpoch(reqEpochInSecs, outEpochInSecs, stateToWrite);
+      FindNextOutputEpoch(reqEpochInSecs, outEpochInSecs, stateToWrite, covToWrite);
    
-   WriteOrbitData(outEpochInSecs, stateToWrite);
+   WriteOrbitData(outEpochInSecs, stateToWrite, covToWrite);
    
    #ifdef DEBUG_EPHEMFILE_WRITE
    DebugWriteTime("   Setting lastEpochWrote to outEpochInsecs ", outEpochInSecs);
@@ -1192,16 +1204,17 @@ void EphemerisWriter::WriteOrbit(Real reqEpochInSecs, const Real state[6])
 
 
 //------------------------------------------------------------------------------
-// void WriteOrbitAt(Real reqEpochInSecs, const Real state[6])
+// void WriteOrbitAt(Real reqEpochInSecs, const Real state[6], const Real cov[21])
 //------------------------------------------------------------------------------
 /**
  * Writes spacecraft orbit data to a ephemeris file.
  *
  * @param reqEpochInSecs Requested epoch to write in seconds 
  * @param state State to write 
+ * @param cov Covariance to write
  */
 //------------------------------------------------------------------------------
-void EphemerisWriter::WriteOrbitAt(Real reqEpochInSecs, const Real state[6])
+void EphemerisWriter::WriteOrbitAt(Real reqEpochInSecs, const Real state[6], const Real cov[21])
 {
 }
 
@@ -1326,7 +1339,7 @@ std::string EphemerisWriter::GetBackwardPropWarning()
       ("   current time (%s> < previous time (%s)\n", currTimeStr.c_str(),
        prevTimeStr.c_str());
    MessageInterface::ShowMessage
-      ("EphemerisWriter::GetBackwardPropWarning() returning '%s'\n", msg);
+      ("EphemerisWriter::GetBackwardPropWarning() returning '%s'\n", msg.c_str());
    #endif
    
    return msg;
@@ -1394,9 +1407,14 @@ void EphemerisWriter::ClearOrbitData()
    StateArray::iterator si;
    for (si = stateArray.begin(); si != stateArray.end(); ++si)
       delete (*si);
+
+   std::vector<Rvector*>::iterator ci;
+   for (ci = covArray.begin(); ci != covArray.end(); ++ci)
+      delete (*ci);
    
    a1MjdArray.clear();
    stateArray.clear();
+   covArray.clear();
 }
 
 
@@ -1404,16 +1422,16 @@ void EphemerisWriter::ClearOrbitData()
 // void FindNextOutputEpoch(Real reqEpochInSecs, Real &outEpochInSecs)
 //------------------------------------------------------------------------------
 void EphemerisWriter::FindNextOutputEpoch(Real reqEpochInSecs, Real &outEpochInSecs,
-                                          Real stateToWrite[6])
+                                          Real stateToWrite[6], Real covToWrite[21])
 {
    // Do nothing here
 }
 
 
 //------------------------------------------------------------------------------
-// void WriteOrbitData(Real reqEpochInSecs, const Real state[6])
+// void WriteOrbitData(Real reqEpochInSecs, const Real state[6], const Real cov[21])
 //------------------------------------------------------------------------------
-void EphemerisWriter::WriteOrbitData(Real reqEpochInSecs, const Real state[6])
+void EphemerisWriter::WriteOrbitData(Real reqEpochInSecs, const Real state[6], const Real cov[21])
 {
    #ifdef DEBUG_EPHEMFILE_WRITE
    DebugWriteTime
@@ -1422,18 +1440,22 @@ void EphemerisWriter::WriteOrbitData(Real reqEpochInSecs, const Real state[6])
       ("state[0:2]=%.15f, %.15f, %.15f\n", state[0], state[1], state[2]);
    #endif
    
-   Real outState[6];
+   Real outState[6], outCov[21];
    for (int i = 0; i < 6; i++)
       outState[i] = state[i];
+   for (int i = 0; i < 21; i++)
+      outCov[i] = cov[i];
    
    // Convert state if needed
    if (!writeDataInDataCS)
-      ConvertState(reqEpochInSecs/GmatTimeConstants::SECS_PER_DAY, state, outState);
+   {
+      ConvertState(reqEpochInSecs/GmatTimeConstants::SECS_PER_DAY, state, outState, cov, outCov);
+   }
    
    #ifdef DEBUG_EPHEMFILE_WRITE
    MessageInterface::ShowMessage("EphemerisWriter::WriteOrbitData() Calling BufferOrbitData()\n");
    #endif
-   BufferOrbitData(reqEpochInSecs/GmatTimeConstants::SECS_PER_DAY, outState);
+   BufferOrbitData(reqEpochInSecs/GmatTimeConstants::SECS_PER_DAY, outState, outCov);
    
    #ifdef DEBUG_EPHEMFILE_WRITE
    MessageInterface::ShowMessage("EphemerisWriter::WriteOrbitData() leaving\n");
@@ -1442,10 +1464,12 @@ void EphemerisWriter::WriteOrbitData(Real reqEpochInSecs, const Real state[6])
 
 
 //------------------------------------------------------------------------------
-// void ConvertState(Real epochInDays, const Real inState[6], Real outState[6])
+// void ConvertState(Real epochInDays, const Real inState[6], Real outState[6],
+//                   const Real inCov[6], Real outCov[6])
 //------------------------------------------------------------------------------
 void EphemerisWriter::ConvertState(Real epochInDays, const Real inState[6],
-                                 Real outState[6])
+                                 Real outState[6], const Real inCov[21],
+                                 Real outCov[21])
 {
    #ifdef DEBUG_EPHEMFILE_CONVERT_STATE   
    DebugWriteOrbit("In ConvertState(in):", epochInDays, inState, true, true);
@@ -1453,6 +1477,44 @@ void EphemerisWriter::ConvertState(Real epochInDays, const Real inState[6],
    
    coordConverter.Convert(A1Mjd(epochInDays), inState, dataCoordSystem,
                           outState, outCoordSystem, true);
+
+   Rmatrix33 r = coordConverter.GetLastRotationMatrix();
+   Rmatrix33 rdot = coordConverter.GetLastRotationDotMatrix();
+
+   Rmatrix cov(6,6);
+   for (UnsignedInt ii = 0U; ii < 6; ii++)
+   {
+      for (UnsignedInt jj = 0U; jj < 6; jj++)
+      {
+         UnsignedInt idx = (ii)*(ii + 1) / 2 + jj;
+         cov(ii, jj) = inCov[idx];
+      }
+   }
+
+   Rmatrix covRot(6,6);
+   for (UnsignedInt ii = 0U; ii < 3; ii++)
+   {
+      for (UnsignedInt jj = 0U; jj < 3; jj++)
+      {
+         covRot(ii, jj) = r(ii, jj);
+         covRot(ii, jj + 3) = 0;
+         covRot(ii + 3, jj) = rdot(ii, jj);
+         covRot(ii + 3, jj + 3) = r(ii, jj);
+      }
+   }
+
+   Rmatrix outCovMatrix(6, 6);
+   outCovMatrix = covRot * cov * covRot.Transpose();
+
+   UnsignedInt idx = 0U;
+   for (UnsignedInt ii = 0; ii < 6; ii++)
+   {
+      for (UnsignedInt jj = 0; jj <= ii; jj++)
+      {
+         outCov[idx] = outCovMatrix(ii, jj);
+         idx++;
+      }
+   }
    
    #ifdef DEBUG_EPHEMFILE_CONVERT_STATE   
    DebugWriteOrbit("In ConvertState(out):", epochInDays, outState, true, true);
@@ -1491,7 +1553,7 @@ std::string EphemerisWriter::ToUtcGregorian(Real epoch, bool inDays, Integer for
       outFormat = "UTCGregorian";
    
    // Convert current epoch to specified format
-   TimeConverterUtil::Convert("A1ModJulian", epochInDays, "", outFormat,
+   TimeSystemConverter::Instance()->Convert("A1ModJulian", epochInDays, "", outFormat,
                               toMjd, epochStr, format);
    
    if (epochStr == "")
@@ -1504,57 +1566,6 @@ std::string EphemerisWriter::ToUtcGregorian(Real epoch, bool inDays, Integer for
    }
    
    return epochStr;
-}
-
-
-//------------------------------------------------------------------------------
-// void FormatErrorMessage(std::string &ephemMsg, std::string &errMsg)
-//------------------------------------------------------------------------------
-void EphemerisWriter::FormatErrorMessage(std::string &ephemMsg, std::string &errMsg)
-{
-   std::string commonMsg = "There is not enough data available to generate the current block of "
-      "ephemeris";
-   std::string ephemFileStr = " to EphemerisWriter: \"" + fileName + "\"";
-   
-   Real timeSpanInSecs = (currEpochInDays - blockBeginA1Mjd) * GmatTimeConstants::SECS_PER_DAY;
-
-   #ifdef DEBUG_TIME_SPAN
-   DebugWriteTime("=> blockBeginA1Mjd = ", blockBeginA1Mjd, true, 2);
-   DebugWriteTime("=> currEpochInDays = ", currEpochInDays, true, 2);
-   MessageInterface::ShowMessage("=> timeSpanInSecs  = %f\n", timeSpanInSecs);
-   #endif
-   
-   // Format error message
-   if (initialEpochA1Mjd != -999.999 && (currEpochInDays < initialEpochA1Mjd))
-   {
-      //std::string initEpochStr = ToUtcGregorian(initialEpochA1Mjd, true, 2);
-      std::string currentEpochStr = ToUtcGregorian(currEpochInDays, true, 2);
-      std::string detailedMsg = ". The block ended at " + currentEpochStr + "(" +
-         GmatStringUtil::ToString(currEpochInDays) + ") before the user defined initial epoch of " +
-         initialEpochStr + "(" + GmatStringUtil::ToString(initialEpochA1Mjd) + ").";
-      ephemMsg = commonMsg + detailedMsg;
-      errMsg = commonMsg + ephemFileStr + detailedMsg;
-   }
-   else if (timeSpanInSecs < stepSizeInSecs)
-   {
-      std::string blockBeginEpochStr = ToUtcGregorian(blockBeginA1Mjd, true, 2);
-      std::string currentEpochStr = ToUtcGregorian(currEpochInDays, true, 2);
-      std::string detailedMsg = ".  The data time span (" + blockBeginEpochStr + " - " +
-         currentEpochStr + ") is less than the step size of " +
-         GmatStringUtil::ToString(stepSizeInSecs, 2, true) + " seconds.";
-      ephemMsg = commonMsg + detailedMsg;
-      errMsg = commonMsg + ephemFileStr + detailedMsg;
-   }
-   else
-   {
-      std::string detailedMsg1 = " at the requested interpolation order. ";
-      std::string detailedMsg2 = "Number of required points is " +
-         GmatStringUtil::ToString(interpolationOrder + 1, 1) + ", but received XXX"; //+
-         //GmatStringUtil::ToString(interpolator->GetPointCount(), 1) + ". ";
-      std::string detailedMsg3 = "There should be at least one data point more than interpolation order.";
-      ephemMsg = commonMsg + detailedMsg1 + detailedMsg3;
-      errMsg = commonMsg + ephemFileStr + detailedMsg1 + detailedMsg2 + detailedMsg3;
-   }
 }
 
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -2069,6 +2069,87 @@ bool SolarSystem::AddBody(CelestialBody* cb)
 }
 
 //------------------------------------------------------------------------------
+// std::string GetBodyName(const std::string &body)
+//------------------------------------------------------------------------------
+std::string SolarSystem::GetBodyName(const std::string &body)
+{
+   std::string bodyName = GmatStringUtil::ToUpper(body);
+   if (bodyName == "SOLAR_SYSTEM_BARYCENTER") return GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME;
+
+   else if (bodyName == "SUN") return  GmatSolarSystemDefaults::SUN_NAME;
+   
+   else if (bodyName == "MERCURY") return  GmatSolarSystemDefaults::MERCURY_NAME;
+   
+   else if (bodyName == "VENUS") return  GmatSolarSystemDefaults::VENUS_NAME;
+   
+   else if (bodyName == "EARTH") return  GmatSolarSystemDefaults::EARTH_NAME;
+   else if (bodyName == "MOON") return  GmatSolarSystemDefaults::MOON_NAME;
+   
+   else if (bodyName == "MARS") return  GmatSolarSystemDefaults::MARS_NAME;
+   else if (bodyName == "PHOBOS") return  GmatSolarSystemDefaults::PHOBOS_NAME;
+   else if (bodyName == "DEIMOS") return  GmatSolarSystemDefaults::DEIMOS_NAME;
+   
+   else if (bodyName == "JUPITER") return  GmatSolarSystemDefaults::JUPITER_NAME;
+   else if (bodyName == "METIS") return  GmatSolarSystemDefaults::METIS_NAME;
+   else if (bodyName == "ADRASTEA") return  GmatSolarSystemDefaults::ADRASTEA_NAME;
+   else if (bodyName == "AMALTHEA") return  GmatSolarSystemDefaults::AMALTHEA_NAME;
+   else if (bodyName == "THEBE") return  GmatSolarSystemDefaults::THEBE_NAME;
+   else if (bodyName == "IO") return  GmatSolarSystemDefaults::IO_NAME;
+   else if (bodyName == "EUROPA") return  GmatSolarSystemDefaults::EUROPA_NAME;
+   else if (bodyName == "GANYMEDE") return  GmatSolarSystemDefaults::GANYMEDE_NAME;
+   else if (bodyName == "CALLISTO") return  GmatSolarSystemDefaults::CALLISTO_NAME;
+   
+   else if (bodyName == "SATURN") return  GmatSolarSystemDefaults::SATURN_NAME;
+   else if (bodyName == "PAN") return  GmatSolarSystemDefaults::PAN_NAME;
+   else if (bodyName == "ATLAS") return  GmatSolarSystemDefaults::ATLAS_NAME;
+   else if (bodyName == "PROMETHEUS") return  GmatSolarSystemDefaults::PROMETHEUS_NAME;
+   else if (bodyName == "PANDORA") return  GmatSolarSystemDefaults::PANDORA_NAME;
+   else if (bodyName == "EPIMETHEUS") return  GmatSolarSystemDefaults::EPIMETHEUS_NAME;
+   else if (bodyName == "JANUS") return  GmatSolarSystemDefaults::JANUS_NAME;
+   else if (bodyName == "MIMAS") return  GmatSolarSystemDefaults::MIMAS_NAME;
+   else if (bodyName == "ENCELADUS_NAME ") return  GmatSolarSystemDefaults::ENCELADUS_NAME;
+   else if (bodyName == "TETHYS") return  GmatSolarSystemDefaults::TETHYS_NAME;
+   else if (bodyName == "TELESTO") return  GmatSolarSystemDefaults::TELESTO_NAME;
+   else if (bodyName == "CALYPSO") return  GmatSolarSystemDefaults::CALYPSO_NAME;
+   else if (bodyName == "DIONE") return  GmatSolarSystemDefaults::DIONE_NAME;
+   else if (bodyName == "HELENE") return  GmatSolarSystemDefaults::HELENE_NAME;
+   else if (bodyName == "RHEA") return  GmatSolarSystemDefaults::RHEA_NAME;
+   else if (bodyName == "TITAN") return  GmatSolarSystemDefaults::TITAN_NAME;
+   else if (bodyName == "IAPETUS") return  GmatSolarSystemDefaults::IAPETUS_NAME;
+   else if (bodyName == "PHOEBE") return  GmatSolarSystemDefaults::PHOEBE_NAME;
+   
+   else if (bodyName == "URANUS") return  GmatSolarSystemDefaults::URANUS_NAME;
+   else if (bodyName == "CORDELIA") return  GmatSolarSystemDefaults::CORDELIA_NAME;
+   else if (bodyName == "OPHELIA") return  GmatSolarSystemDefaults::OPHELIA_NAME;
+   else if (bodyName == "BIANCA") return  GmatSolarSystemDefaults::BIANCA_NAME;
+   else if (bodyName == "CRESSIDA") return  GmatSolarSystemDefaults::CRESSIDA_NAME;
+   else if (bodyName == "DESDEMONA") return  GmatSolarSystemDefaults::DESDEMONA_NAME;
+   else if (bodyName == "JULIET") return  GmatSolarSystemDefaults::JULIET_NAME;
+   else if (bodyName == "PORTIA") return  GmatSolarSystemDefaults::PORTIA_NAME;
+   else if (bodyName == "ROSALIND") return  GmatSolarSystemDefaults::ROSALIND_NAME;
+   else if (bodyName == "BELINDA") return  GmatSolarSystemDefaults::BELINDA_NAME;
+   else if (bodyName == "PUCK") return  GmatSolarSystemDefaults::PUCK_NAME;
+   else if (bodyName == "MIRANDA") return  GmatSolarSystemDefaults::MIRANDA_NAME;
+   else if (bodyName == "ARIEL") return  GmatSolarSystemDefaults::ARIEL_NAME;
+   else if (bodyName == "UMBRIEL") return  GmatSolarSystemDefaults::UMBRIEL_NAME;
+   else if (bodyName == "TITANIA") return  GmatSolarSystemDefaults::TITANIA_NAME;
+   else if (bodyName == "OBERON") return  GmatSolarSystemDefaults::OBERON_NAME;
+   
+   else if (bodyName == "NEPTUNE") return  GmatSolarSystemDefaults::NEPTUNE_NAME;
+   else if (bodyName == "NAIAD") return  GmatSolarSystemDefaults::NAIAD_NAME;
+   else if (bodyName == "THALASSA") return  GmatSolarSystemDefaults::THALASSA_NAME;
+   else if (bodyName == "DESPINA") return  GmatSolarSystemDefaults::DESPINA_NAME;
+   else if (bodyName == "GALATEA") return  GmatSolarSystemDefaults::GALATEA_NAME;
+   else if (bodyName == "LARISSA") return  GmatSolarSystemDefaults::LARISSA_NAME;
+   else if (bodyName == "PROTEUS") return  GmatSolarSystemDefaults::PROTEUS_NAME;
+   else if (bodyName == "TRITON") return  GmatSolarSystemDefaults::TRITON_NAME;
+   
+   else if (bodyName == "PLUTO") return  GmatSolarSystemDefaults::PLUTO_NAME;
+   else if (bodyName == "CHARON") return  GmatSolarSystemDefaults::CHARON_NAME;
+   else return "";
+}
+
+//------------------------------------------------------------------------------
 //  CelestialBody* GetBody(const char *withName)
 //------------------------------------------------------------------------------
 /**
@@ -2821,7 +2902,7 @@ const StringArray& SolarSystem::GetBodiesInUse() const
 }
 
 //------------------------------------------------------------------------------
-//  SolarSystem* Clone() const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
 * This method returns a clone of the SolarSystem.
@@ -2830,7 +2911,7 @@ const StringArray& SolarSystem::GetBodiesInUse() const
  *
  */
 //------------------------------------------------------------------------------
-SolarSystem* SolarSystem::Clone() const
+GmatBase* SolarSystem::Clone() const
 {
    // clone all objects in the Solar System as well
    SolarSystem * clonedSS = new SolarSystem(*this);
@@ -2917,6 +2998,92 @@ void SolarSystem::Copy(const GmatBase* orig)
    }
 }
 
+
+//------------------------------------------------------------------------------
+// std::string SolarSystem::Help(const std::string &forItem)
+//------------------------------------------------------------------------------
+/**
+ * Override of the Help message for the solar system
+ *
+ * @param forItem Accesses help for the member items
+ *
+ * @return The help string
+ */
+//------------------------------------------------------------------------------
+std::string SolarSystem::Help(const std::string &forItem)
+{
+   std::string retval = "No help is available for that topic.";
+   std::stringstream text;
+
+   if (forItem == "")
+   {
+
+      std::string bodyList = "";
+      std::string pointList = "";
+
+      if (bodyStrings.size() > 0)
+      {
+         bodyList = "   [";
+         for (UnsignedInt i = 0; i < bodyStrings.size(); ++i)
+         {
+            if (i > 0)
+               bodyList += ", ";
+            bodyList += bodyStrings[i];
+         }
+         bodyList += "]\n";
+      }
+      else
+         bodyList = "   No bodies are set\n";
+
+      if (specialPoints.size() > 0)
+      {
+         pointList = "   [";
+         for (std::map<std::string, SpecialCelestialPoint*>::iterator i =
+               specialPoints.begin(); i != specialPoints.end(); ++i)
+         {
+            if (i != specialPoints.begin())
+               pointList += ", ";
+            pointList += i->first;
+         }
+         pointList += "]\n";
+      }
+
+      text << "\nSolar System Help\n"
+           << "=================\n"
+           << "The solar system object is a special object in GMAT, used to define the\n"
+           << "environment for the GMAT simulation.\n"
+           << "\n"
+           << "The GMAT solar system currently contains the following objects:\n"
+           << "\n"
+           << bodyList
+           << "\n";
+
+      if (pointList != "")
+      {
+         text << "The GMAT solar system currently contains the following special points:\n\n"
+              << pointList << "\n";
+      }
+
+      text << "Help is available for each of these bodies. For example, help for the\n"
+           << "Earth object is accessed in Python by calling gmat.Help(\"Earth\")\n"
+           << "\n"
+           << "The GMAT solar system defines classes for Stars, Planets, Moons, Comets,\n"
+           << "Asteroids, Barycenters, and LibrarionPoints. Objects created from these\n"
+           << "classes provide separate help topics.\n"
+           << "\n"
+           << "The solar system has a set of files and settings defining the data \n"
+           << "sources used in the model. Help for these setting is accessed by \n"
+           << "calling Help(\"DataFiles\") on the solar system object.\n";
+   }
+
+   if (forItem == "DataFiles")
+      text << GmatBase::Help();
+
+   if (text.str() != "")
+      retval = text.str();
+
+   return retval;
+}
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const

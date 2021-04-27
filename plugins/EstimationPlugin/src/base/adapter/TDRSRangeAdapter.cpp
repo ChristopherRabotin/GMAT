@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -171,27 +171,25 @@ const MeasurementData& TDRSRangeAdapter::CalculateMeasurement(bool withEvents,
    {
       // QA Media correction:
       cMeasurement.isIonoCorrectWarning = false;
-      cMeasurement.ionoCorrectWarningValue = 0.0;
+      cMeasurement.ionoCorrectRawValue = 0.0;
+      cMeasurement.ionoCorrectValue = 0.0;
       cMeasurement.isTropoCorrectWarning = false;
-      cMeasurement.tropoCorrectWarningValue = 0.0;
+      cMeasurement.tropoCorrectRawValue = 0.0;
+      cMeasurement.tropoCorrectValue = 0.0;
 
       if (withMediaCorrection)
       {
          Real correction = GetIonoCorrection();                                  // unit: km
-         if ((correction < 0.0) || (correction > 0.04))
-         {
-            // Set a warning to measurement data when ionosphere correction is outside of range [0 km , 0.04 km]
-            cMeasurement.isIonoCorrectWarning = true;
-            cMeasurement.ionoCorrectWarningValue = correction;                   // unit: km
-         }
+
+         // Set a warning to measurement data when ionosphere correction is outside of range [0 km , 0.04 km]
+         cMeasurement.isIonoCorrectWarning = (correction < 0.0) || (correction > 0.04);
+         cMeasurement.ionoCorrectRawValue = correction;                   // unit: km
 
          correction = GetTropoCorrection();                                      // unit: km
-         if ((correction < 0.0) || (correction > 0.12))
-         {
-            // Set a warning to measurement data when troposphere correction is outside of range [0 km , 0.12 km]
-            cMeasurement.isTropoCorrectWarning = true;
-            cMeasurement.tropoCorrectWarningValue = correction;                  // unit: km
-         }
+
+         // Set a warning to measurement data when troposphere correction is outside of range [0 km , 0.12 km]
+         cMeasurement.isTropoCorrectWarning = (correction < 0.0) || (correction > 0.12);
+         cMeasurement.tropoCorrectRawValue = correction;                  // unit: km
       }
 
       std::vector<SignalBase*> paths = calcData->GetSignalPaths();
@@ -247,7 +245,7 @@ const MeasurementData& TDRSRangeAdapter::CalculateMeasurement(bool withEvents,
             // accumulate all range corrections for signal path ith
             for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
             {
-               if (current->useCorrection[j])
+               if (current->useCorrection[j] && current->correctionTypes[j] == "Range")
                   values[i] += current->corrections[j];
             }// for j loop
 
@@ -388,6 +386,8 @@ const MeasurementData& TDRSRangeAdapter::CalculateMeasurement(bool withEvents,
       // Calculate measurement covariance
       cMeasurement.covariance = &measErrorCovariance;
 
+      cMeasurement.ionoCorrectValue = cMeasurement.ionoCorrectRawValue;
+      cMeasurement.tropoCorrectValue = cMeasurement.tropoCorrectRawValue;
 
 #ifdef DEBUG_ADAPTER_EXECUTION
       MessageInterface::ShowMessage("Computed measurement\n   Type:  %d\n   "

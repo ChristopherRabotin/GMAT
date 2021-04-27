@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -82,8 +82,8 @@ const Real GeocentricSolarMagneticAxes::phiD    =  78.6 * GmatMathConstants::RAD
 GeocentricSolarMagneticAxes::GeocentricSolarMagneticAxes(const std::string &itsName) :
 ObjectReferencedAxes("GSM",itsName)
 {
-   primaryName   = SolarSystem::EARTH_NAME;
-   secondaryName = SolarSystem::SUN_NAME;
+   primaryName   = GmatSolarSystemDefaults::EARTH_NAME;
+   secondaryName = GmatSolarSystemDefaults::SUN_NAME;
    ComputeDipoleEarthFixed();
    objectTypeNames.push_back("GSM");
    parameterCount = GeocentricSolarMagneticAxesParamCount;
@@ -324,8 +324,8 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 
    // Convert to MJD UTC to use for polar motion  and LOD
    // interpolations
-   Real mjdUTC = TimeConverterUtil::Convert(atEpoch.Get(),
-                  TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD, 
+   Real mjdUTC = theTimeConverter->Convert(atEpoch.Get(),
+                  TimeSystemConverter::A1MJD, TimeSystemConverter::UTCMJD,
                   JD_JAN_5_1941);
    Real offset = JD_JAN_5_1941 - JD_NOV_17_1858;
    // convert to MJD referenced from time used in EOP file
@@ -333,14 +333,14 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
 
 
    // convert input time to UT1 for later use (for AST calculation)
-   Real mjdUT1 = TimeConverterUtil::Convert(atEpoch.Get(),
-                  TimeConverterUtil::A1MJD, TimeConverterUtil::UT1MJD,
+   Real mjdUT1 = theTimeConverter->Convert(atEpoch.Get(),
+                  TimeSystemConverter::A1MJD, TimeSystemConverter::UT1MJD,
                   JD_JAN_5_1941);
    
 
    // convert input A1 MJD to TT MJD (for most calculations)
-   Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
-                  TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
+   Real mjdTT = theTimeConverter->Convert(atEpoch.Get(),
+                  TimeSystemConverter::A1MJD, TimeSystemConverter::TTMJD,
                   JD_JAN_5_1941);
    Real jdTT    = mjdTT + JD_JAN_5_1941;
 

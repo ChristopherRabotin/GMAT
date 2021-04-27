@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -20,6 +20,7 @@
 
 #include "SignalData.hpp"
 #include "PropSetup.hpp"
+#include "MessageInterface.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -62,12 +63,25 @@ SignalData::SignalData() :
    //rSTM.ChangeSize(6,6,true);
    //tSTMtm.ChangeSize(6,6,true);
    //rSTMtm.ChangeSize(6,6,true);
-   for(UnsignedInt i = 0; i < 6; ++i)
-   {
-      tSTM(i,i) = 1.0;
-      rSTM(i,i) = 1.0;
-      tSTMtm(i,i) = 1.0;
-      rSTMtm(i,i) = 1.0;
+	for (UnsignedInt i = 0; i < 6; ++i)
+	{
+		for (UnsignedInt j = 0; j < 6; ++j)
+		{
+			if (i == j)
+			{
+				tSTM(i, j) = 1.0;
+				rSTM(i, j) = 1.0;
+				tSTMtm(i, j) = 1.0;
+				rSTMtm(i, j) = 1.0;
+			}
+			else
+			{
+				tSTM(i, j) = 0.0;
+				rSTM(i, j) = 0.0;
+				tSTMtm(i, j) = 0.0;
+				rSTMtm(i, j) = 0.0;
+			}
+		}
    }
 }
 
@@ -81,14 +95,37 @@ SignalData::SignalData() :
 //------------------------------------------------------------------------------
 SignalData::~SignalData()
 {
+   //MessageInterface::ShowMessage("SignalData::~SignalData() data leg = <%p> start\n", this);
    CleanUp();
+
+   //This step is not needed due to SignalBase object handles this clean up 
+   //// clean up SignalData *next;
+   //if (next)
+   //   delete next;
+
+   //MessageInterface::ShowMessage("SignalData::~SignalData() data leg = <%p> end\n", this);
 }
 
 
 void SignalData::CleanUp()
 {
+   // clean up SpacePoint *tNode;
+   tNode = NULL;
+   // clean up SpacePoint *rNode;
+   rNode = NULL;
+
+   // clean up PropSetup *tPropagator;
+   tPropagator = NULL;
+   // clean up PropSetup *rPropagator;
+   rPropagator = NULL;
+
+   // clean up StringArray correctionIDs;
    correctionIDs.clear();
+   // clean up StringArray correctionTypes;
+   correctionTypes.clear();
+   // clean std::vector<Real> corrections;
    corrections.clear();
+   // clean up std::vector<bool> useCorrection;
    useCorrection.clear();
 }
 
@@ -136,6 +173,7 @@ SignalData::SignalData(const SignalData& sd) :
    tJ2kRotation         (sd.tJ2kRotation),
    rJ2kRotation         (sd.rJ2kRotation),
    correctionIDs        (sd.correctionIDs),
+   correctionTypes      (sd.correctionTypes),
    corrections          (sd.corrections),
    useCorrection        (sd.useCorrection),
    tDelay               (sd.tDelay),
@@ -213,6 +251,7 @@ SignalData& SignalData::operator=(const SignalData& sd)
       tJ2kRotation         = sd.tJ2kRotation;
       rJ2kRotation         = sd.rJ2kRotation;
       correctionIDs        = sd.correctionIDs;
+      correctionTypes      = sd.correctionTypes;
       corrections          = sd.corrections;
       useCorrection        = sd.useCorrection;
       tDelay               = sd.tDelay;

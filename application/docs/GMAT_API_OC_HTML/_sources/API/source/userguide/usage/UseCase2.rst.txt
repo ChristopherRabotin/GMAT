@@ -1,0 +1,73 @@
+***************************************************
+Example: MONTE-GMAT Interoperability for OSIRIS_REx
+***************************************************
+At this writing, the Origins, Spectral Interpretation, Resource Identification, 
+Security-Regolith Explorer (OSIRIS-REx) spacecraft is in orbit at the near-Earth 
+asteroid Bennu (formerly 1999 RQ36). The mission plans to bring at least a 
+2.1-ounce sample of the asteroid back to Earth for study. The mission is using 
+the Mission Analysis, Operations and Navigation Toolkit Environment, 
+`MONTE <https://montepy.jpl.nasa.gov/>`_, for navigation and trajectory 
+planning.
+
+In this example, data will be shared between MONTE and GMAT using interfaces 
+built with MONTE's native Python framework and GMAT's API, accessed through 
+Python.
+
+Ephemeris Sharing
+=================
+Both GMAT and MONTE have ephemeris reading and writing capabilities.  GMAT 
+supports four types of spacecraft ephemerides: Goddard specific "Code-500", STK
+time-position-velocity (.e), CCSDS OEM, and SPICE SPK formats.  MONTE supports 
+SPICE based SPK ephemerides, so that format is used for data interchange between
+the systems.
+
+General Ephemeris Sharing
+-------------------------
+Ephemeris sharing between GMAT and MONTE is straightforward: use the system 
+providing the ephemeris to generate the file, and then import it into the other
+system.  The steps for this procedure are described below, beginning with the
+GMAT to MONTE procedure.
+
+
+Generating an Ephemeris in GMAT
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:ref:`UseCase1` describes the steps needed to propagate a spacecraft using the 
+GMAT API.  The sample code shown here starts from a similar propagation 
+configuration, with a spacecraft in the following initial state:
+
+
+
+
+Reading the GMAT Ephemeris in MONTE
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+Generating an Ephemeris in MONTE
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+Reading the MONTE Ephemeris in GMAT
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+A Round Trip
+^^^^^^^^^^^^
+
+
+
+Ephemeris Sharing for OSIRIS-REx
+--------------------------------
+
+
+
+
+Maneuver Planning
+=================
+
+
+
+Navigation Data Sharing
+=======================

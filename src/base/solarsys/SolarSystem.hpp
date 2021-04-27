@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -98,6 +98,7 @@ public:
    // method to add a body to the solar system
    bool                 AddBody(CelestialBody* cb);
    // method to return a body of the solar system, given its name
+   static std::string   GetBodyName(const std::string &body);
    CelestialBody*       GetBody(const char *withName);
    CelestialBody*       GetBody(const std::string &withName);
    // method to remove a body from the solar system
@@ -184,11 +185,11 @@ public:
    virtual bool         SaveParameterAsDefault(const Integer id);
 
    // all classes derived from GmatBase must supply this Clone method
-   virtual SolarSystem* Clone() const;
+   virtual GmatBase*    Clone() const;
    
    // required method for all subclasses that can be copied in a script
    virtual void         Copy(const GmatBase* orig);
-   
+
    /// default names for celestial bodies in the solar system
    // @todo use the ones from the GmatDefaults everywhere instead of these
    static const std::string SOLAR_SYSTEM_BARYCENTER_NAME;
@@ -266,6 +267,10 @@ public:
    
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
+
+   // API methods
+   virtual std::string  Help(const std::string &forItem = "");
+
 
 protected:
    enum

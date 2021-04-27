@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -37,6 +37,7 @@
 #include "RealUtilities.hpp"
 #include "CalculationUtilities.hpp"
 #include "GmatConstants.hpp"
+#include "GmatGlobal.hpp"
 #include "Linear.hpp"
 #include "AngleUtil.hpp"
 #include "CelestialBody.hpp"
@@ -507,6 +508,49 @@ Rvector6 OrbitData::GetCartState()
    #endif
    
    mCartEpoch = mSpacePoint->GetEpoch();
+
+   // Handle case where the mSpacePoint object does not have a true epoch yet
+   if (mCartEpoch == 0.0)
+   {
+      #ifdef DEBUG_ORBITDATA_RUN
+      MessageInterface::ShowMessage(
+                     "   mCartEpoch is ZERO ...\n");
+      #endif
+      // Find a spacecraft to use
+      Spacecraft *sat  = NULL;
+
+      // Check to see if Spacecraft pointer is set directly
+      if (mSpacecraft)
+         sat = mSpacecraft;
+      else if (mOrigin->IsOfType(Gmat::SPACECRAFT))
+         sat = (Spacecraft*)mOrigin;
+
+      if (sat)
+      {
+         #ifdef DEBUG_ORBITDATA_RUN
+         MessageInterface::ShowMessage("   Got sat =  %s ...\n",
+                                       sat->GetName().c_str());
+         #endif
+         mCartEpoch = sat->GetEpoch();
+         #ifdef DEBUG_ORBITDATA_RUN
+         MessageInterface::ShowMessage(
+                        "   Getting mCartEpoch %12.10f from SC %s ...\n",
+                        mCartEpoch, sat->GetName().c_str());
+         #endif
+      }
+      else
+      {
+         mCartEpoch = GmatGlobal::Instance()->GetBaseEpoch();
+         #ifdef DEBUG_ORBITDATA_RUN
+         MessageInterface::ShowMessage(
+                        "   mCartEpoch from GmatGlobal = %12.10f\n ...\n",
+                                       mCartEpoch);
+         #endif
+      }
+      // Update the spacepoint's state to the desired epoch
+      mSpacePoint->GetMJ2000State(mCartEpoch);
+   }
+
    Rvector6 lastCartState = mSpacePoint->GetLastState();
    #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
@@ -1248,7 +1292,7 @@ Real OrbitData::GetOtherAngleReal(Integer item)
    else
       state = GetCartState();
    // compute sun unit vector from the origin
-   Rvector3 sunPos = (mSolarSystem->GetBody(SolarSystem::SUN_NAME))->
+   Rvector3 sunPos = (mSolarSystem->GetBody(GmatSolarSystemDefaults::SUN_NAME))->
       GetMJ2000Position(mCartEpoch);
    Rvector3 originPos = mOrigin->GetMJ2000Position(mCartEpoch);
    Rvector3 originToSun = sunPos - originPos;

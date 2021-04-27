@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -854,18 +854,44 @@ bool TDRSDopplerAdapter::SetMeasurement(MeasureModel* meas)
  *       PropSetup objects.
  */
 //------------------------------------------------------------------------------
-void TDRSDopplerAdapter::SetPropagator(PropSetup* ps)
+void TDRSDopplerAdapter::SetPropagators(std::vector<PropSetup*> *ps,
+      std::map<std::string, StringArray> *spMap)
 {
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("Setting propagator to %p in "
             "TDRSDopplerAdapter\n", ps);
    #endif
 
-   adapterSL->SetPropagator(ps);
-   adapterSS->SetPropagator(ps);
-   adapterES->SetPropagator(ps);
+   adapterSL->SetPropagators(ps, spMap);
+   adapterSS->SetPropagators(ps, spMap);
+   adapterES->SetPropagators(ps, spMap);
 
-   RangeAdapterKm::SetPropagator(ps);
+   RangeAdapterKm::SetPropagators(ps, spMap);
+}
+
+
+//------------------------------------------------------------------------------
+//  void SetTransientForces(std::vector<PhysicalModel*> *tf)
+//------------------------------------------------------------------------------
+/**
+* Passes the transient force vector into the adapter
+*
+* The transient force vector is a set of models used in GMAT's ODEModel for
+* affects that are turned on and off over the course of a mission.  An example
+* of a transient force is a finite burn, which is toggled by the
+* BeginFiniteBurn and EndFiniteBurn commands.  These components are only used
+* by commands that need them.  Typical usage is found in the propagation
+* enabled commands.
+*
+* @param tf The vector of transient forces
+*/
+//------------------------------------------------------------------------------
+void TDRSDopplerAdapter::SetTransientForces(std::vector<PhysicalModel*> *tf)
+{
+    GetMeasurementModel()->SetTransientForces(tf);
+    adapterSL->SetTransientForces(tf);
+    adapterSS->SetTransientForces(tf);
+    adapterES->SetTransientForces(tf);
 }
 
 
@@ -1050,7 +1076,10 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
 
    // 3.4. Remove obData object when it is not used
    if (obData)
+   {
       delete obData;
+      obData = NULL;
+   }
 
    // 3.5. Get measurement data for Start long and short paths
    measDataSL = adapterSL->GetMeasurement();
@@ -1235,6 +1264,13 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
 
       // 4.10. Calculate Frequency Doppler Shift
       cMeasurement.value[i] = multiplierEL*measDataEL.value[i] + multiplierSL*measDataSL.value[i] + multiplierES*measDataES.value[i] + multiplierSS*measDataSS.value[i]; // unit: Hz    //(Equation 7-92 GTDS MathSpec)   
+
+      // Update media corrections
+      cMeasurement.ionoCorrectValue = multiplierEL * GetIonoCorrection() + multiplierSL * adapterSL->GetIonoCorrection() 
+         + multiplierES * adapterES->GetIonoCorrection() + multiplierSS * adapterSS->GetIonoCorrection();
+
+      cMeasurement.tropoCorrectValue = multiplierEL * GetTropoCorrection() + multiplierSL * adapterSL->GetTropoCorrection()
+         + multiplierES * adapterES->GetTropoCorrection() + multiplierSS * adapterSS->GetTropoCorrection();
 
       // 4.11. Specify measurement feasibility
       if (!measDataEL.isFeasible)

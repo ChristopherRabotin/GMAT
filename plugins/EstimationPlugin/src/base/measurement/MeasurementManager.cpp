@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,8 +38,6 @@
 
 #include "DataFileAdapter.hpp"
 #include "PropSetup.hpp"
-#include "StatisticAcceptFilter.hpp"
-#include "StatisticRejectFilter.hpp"
 #include "AcceptFilter.hpp"
 #include "RejectFilter.hpp"
 #include "Spacecraft.hpp"
@@ -78,13 +76,17 @@
  */
 //------------------------------------------------------------------------------
 MeasurementManager::MeasurementManager() :
-   thePropagator     (NULL),
+   thePropagators    (NULL),
+   satPropagatorMap  (NULL),
    anchorEpochGT     (GmatTimeConstants::MJD_OF_J2000),
    currentEpochGT    (GmatTimeConstants::MJD_OF_J2000),
+   obsIndex          (0),
    idBase            (10000),
    largestId         (10000),
    eventCount        (0),
-   inSimulationMode  (false)
+   inSimulationMode  (false),
+   isForward         (true),
+   transientForces   (NULL)
 {
 }
 
@@ -98,7 +100,127 @@ MeasurementManager::MeasurementManager() :
 MeasurementManager::~MeasurementManager()
 {
    //MessageInterface::ShowMessage("MeasurementMaganger destruction!!!!!!!!!!!!\n");
+   CleanUp();                                   // made changes by TUAN NGUYEN
 }
+
+
+// made changes by TUAN NGUYEN
+void MeasurementManager::CleanUp()
+{
+
+   modelNames.clear();
+   participants.clear();
+
+   // clean up std::vector<TrackingFileSet*>    trackingSets;
+   // It cannot delete these objects because they were not created in this class. TrackingFileSet objects are created by Factory and they will be deleted in Sandbox
+   trackingSets.clear();
+
+   // clean up std::map<TrackingFileSet*, StringArray> adapterFromTFSMap;
+   for (std::map<TrackingFileSet*, StringArray>::iterator i = adapterFromTFSMap.begin(); i != adapterFromTFSMap.end(); ++i)
+      (*i).second.clear();
+   adapterFromTFSMap.clear();
+
+   // clean up std::vector<TrackingDataAdapter*> adapters;
+   // It cannot delete objects in adapters because they were not created in this class. 
+   // TrackingDataAdapter objects (belong to a given TrackingFileSet) will be deleted by TrackingFileSet object 
+   adapters.clear();
+
+   // clean up std::vector<PhysicalModel *>     *transientForces;
+   // This vector are passed by pointer from Spacecraft object. The clean up task has to be handled by Spacecraft objects. 
+   //if (transientForces)
+   //{
+   //   for (Integer i = 0; i < (*transientForces).size(); ++i)
+   //   {
+   //      if ((*transientForces)[i])
+   //         delete (*transientForces)[i];
+   //   }
+   //   (*transientForces).clear();
+   //}
+
+   // clean up PropSetup *thePropagator;
+   // It cannot delete because this object was not created in this class
+   //if (thePropagator)
+   //{
+   //   delete thePropagator;
+   //   thePropagator = NULL;
+   //}
+   thePropagators = NULL;
+   satPropagatorMap = NULL;
+
+   // clean up std::vector<MeasurementData>     measurements;
+   // MeasurementData object in measurements did not exist after TrackingDataAdapter object was deleted. Therefor, it cannot run measurements[i].CleanUp().
+   for (Integer i = 0; i < measurements.size(); ++i)
+      measurements[i].CleanUp();
+   measurements.clear();
+
+   // clean up std::vector<ObservationData>     observations;
+   for (Integer i = 0; i < observations.size(); ++i)
+      observations[i].Clear();
+   observations.clear();
+   
+   derivatives.clear();
+   streamNames.clear();
+
+   // clean up std::vector<DataFile*> streamList;
+   for (Integer i = 0; i < streamList.size(); ++i)
+   {
+      if (streamList[i])
+      {
+         streamList[i]->CloseStream();
+         delete streamList[i];
+      }
+   }
+   streamList.clear();
+
+   rampTableDataStreamNames.clear();
+
+   // clean up std::vector<DataFile*> rampTableDataStreamList;
+   for (Integer i = 0; i < rampTableDataStreamList.size(); ++i)
+   {
+      if (rampTableDataStreamList[i])
+      {
+         rampTableDataStreamList[i]->CloseStream();
+         delete rampTableDataStreamList[i];
+      }
+   }
+   rampTableDataStreamList.clear();
+
+   // clean up std::map<Integer, DataFile*>      idToRampTableStreamMap;
+   idToRampTableStreamMap.clear();
+
+   // clean up std::map<std::string, std::vector<RampTableData> > rampTables;
+   for (std::map<std::string, std::vector<RampTableData>>::iterator i = rampTables.begin(); i != rampTables.end(); ++i)
+   {
+      for (Integer j = 0; j < (*i).second.size(); ++j)
+      {
+         (*i).second[j].Clear();
+      }
+      (*i).second.clear();
+   }
+   rampTables.clear();
+
+   //// clean up ObjectArray activeEvents;
+   //for (Integer i = 0; i < activeEvents.size(); ++i)
+   //{
+   //   if (activeEvents[i])
+   //      delete activeEvents[i];
+   //}
+   //activeEvents.clear();
+
+   // clean up std::map<Integer, DataFile*> idToStreamMap;
+   idToStreamMap.clear();
+
+   activeMeasurements.clear();
+
+   // clean up std::map<UnsignedInt, StringArray> trackingConfigsMap;
+   for (std::map<UnsignedInt, StringArray>::iterator i = trackingConfigsMap.begin(); i != trackingConfigsMap.end(); ++i)
+   {
+      (*i).second.clear();
+   }
+   trackingConfigsMap.clear();
+   
+}
+
 
 //------------------------------------------------------------------------------
 // MeasurementManager(const MeasurementManager &mm)
@@ -110,62 +232,45 @@ MeasurementManager::~MeasurementManager()
  */
 //------------------------------------------------------------------------------
 MeasurementManager::MeasurementManager(const MeasurementManager &mm) :
-   thePropagator     (mm.thePropagator),
+   thePropagators    (mm.thePropagators),
+   satPropagatorMap  (mm.satPropagatorMap),
    anchorEpochGT     (mm.anchorEpochGT),
    currentEpochGT    (mm.currentEpochGT),
+   obsIndex          (mm.obsIndex),
    idBase            (mm.idBase),
    largestId         (mm.largestId),
    eventCount        (mm.eventCount),
-   inSimulationMode  (mm.inSimulationMode)
+   inSimulationMode  (mm.inSimulationMode),
+   isForward         (mm.isForward),
+   modelNames        (mm.modelNames),                    // made changes by TUAN NGUYEN
+   adapters          (mm.adapters),                      // made changes by TUAN NGUYEN
+   trackingSets      (mm.trackingSets),                  // made changes by TUAN NGUYEN
+   
+   transientForces   (NULL)
 {
-   modelNames = mm.modelNames;
+   // made changes by TUAN NGUYEN
+   //modelNames = mm.modelNames;
 
-   // process MeasurementModel objects
-   for (std::vector<MeasurementModel*>::const_iterator i = mm.models.begin();
-         i != mm.models.end(); ++i)
-   {
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("Cloning %s MeasurementModel\n",
-               (*i)->GetStringParameter("Type").c_str());
-      #endif
-      models.push_back((MeasurementModel*)((*i)->Clone()));
-   }
+   //// process TrackingDataAdapter objects
+   //for (std::vector<TrackingDataAdapter*>::const_iterator i = mm.adapters.begin();
+   //      i != mm.adapters.end(); ++i)
+   //{
+   //   #ifdef DEBUG_INITIALIZATION
+   //      MessageInterface::ShowMessage("Cloning %s TrackingDataAdapter\n",
+   //            (*i)->GetStringParameter("Type").c_str());
+   //   #endif
+   //   adapters.push_back((TrackingDataAdapter*)((*i)->Clone()));
+   //}
 
-   for (std::vector<TrackingSystem*>::const_iterator i = mm.systems.begin();
-         i != mm.systems.end(); ++i)
-   {
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("Cloning %s TrackingSystem\n",
-               (*i)->GetStringParameter("Type").c_str());
-      #endif
-      systems.push_back((TrackingSystem*)((*i)->Clone()));
-   }
-
-   // made changes @ 9/16/2014
-   // process TrackingDataAdapter objects
-   for (std::vector<TrackingDataAdapter*>::const_iterator i = mm.adapters.begin();
-         i != mm.adapters.end(); ++i)
-   {
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("Cloning %s TrackingDataAdapter\n",
-               (*i)->GetStringParameter("Type").c_str());
-      #endif
-      adapters.push_back((TrackingDataAdapter*)((*i)->Clone()));
-   }
-
-   for (std::vector<TrackingFileSet*>::const_iterator i = mm.trackingSets.begin();
-         i != mm.trackingSets.end(); ++i)
-   {
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("Cloning %s TrackingDataSet\n",
-               (*i)->GetName().c_str());
-      #endif
-      trackingSets.push_back((TrackingFileSet*)((*i)->Clone()));
-
-      // Note: No measurement data associated with TrackingFileSet object, but TrackingDataAdapter has its owe measurement data
-      // MeasurementData md;
-      // measurements.push_back(md);
-   }
+   //for (std::vector<TrackingFileSet*>::const_iterator i = mm.trackingSets.begin();
+   //      i != mm.trackingSets.end(); ++i)
+   //{
+   //   #ifdef DEBUG_INITIALIZATION
+   //      MessageInterface::ShowMessage("Cloning %s TrackingDataSet\n",
+   //            (*i)->GetName().c_str());
+   //   #endif
+   //   trackingSets.push_back((TrackingFileSet*)((*i)->Clone()));
+   //}
 }
 
 //------------------------------------------------------------------------------
@@ -186,53 +291,41 @@ MeasurementManager& MeasurementManager::operator=(const MeasurementManager &mm)
 #endif
    if (&mm != this)
    {
-      thePropagator    = mm.thePropagator;
+      thePropagators   = mm.thePropagators;
+      satPropagatorMap = mm.satPropagatorMap;
       anchorEpochGT    = mm.anchorEpochGT;
       currentEpochGT   = mm.currentEpochGT;
+      obsIndex         = mm.obsIndex;
       modelNames       = mm.modelNames;
       eventCount       = mm.eventCount;
       inSimulationMode = mm.inSimulationMode;
+      isForward        = mm.isForward;
+      transientForces  = NULL;
 
-      // Clone the measurements, tracking systems, adapters, and tracking file sets
-      // Clean up first
-      for (std::vector<MeasurementModel*>::iterator i = models.begin();
-            i != models.end(); ++i)
-         delete (*i);
-      models.clear();
+      adapters         = mm.adapters;                 // made changes by TUAN NGUYEN
+      trackingSets     = mm.trackingSets;             // made changes by TUAN NGUYEN
 
-      for (std::vector<TrackingSystem*>::iterator i = systems.begin();
-            i != systems.end(); ++i)
-         delete (*i);
-      systems.clear();
+      // made changes by TUAN NGUYEN
+      //// Clone the measurements, adapters, and tracking file sets
+      //for (std::vector<TrackingDataAdapter*>::iterator i = adapters.begin();
+      //      i != adapters.end(); ++i)
+      //   delete (*i);
+      //adapters.clear();
 
-      for (std::vector<TrackingDataAdapter*>::iterator i = adapters.begin();
-            i != adapters.end(); ++i)
-         delete (*i);
-      adapters.clear();
-
-      for (std::vector<TrackingFileSet*>::iterator i = trackingSets.begin();
-            i != trackingSets.end(); ++i)
-         delete (*i);
-      trackingSets.clear();
+      //for (std::vector<TrackingFileSet*>::iterator i = trackingSets.begin();
+      //      i != trackingSets.end(); ++i)
+      //   delete (*i);
+      //trackingSets.clear();
 
       measurements.clear();
 
-      // Then clone them
-      for (std::vector<MeasurementModel*>::const_iterator i = mm.models.begin();
-            i != mm.models.end(); ++i)
-         models.push_back((MeasurementModel*)(*i)->Clone());
+      ////for (std::vector<TrackingDataAdapter*>::const_iterator i = mm.adapters.begin();
+      ////      i != mm.adapters.end(); ++i)
+      ////   adapters.push_back((TrackingDataAdapter*)(*i)->Clone());
 
-      for (std::vector<TrackingSystem*>::const_iterator i = mm.systems.begin();
-            i != mm.systems.end(); ++i)
-         systems.push_back((TrackingSystem*)(*i)->Clone());
-
-      for (std::vector<TrackingDataAdapter*>::const_iterator i = mm.adapters.begin();
-            i != mm.adapters.end(); ++i)
-         adapters.push_back((TrackingDataAdapter*)(*i)->Clone());
-
-      for (std::vector<TrackingFileSet*>::const_iterator i = mm.trackingSets.begin();
-            i != mm.trackingSets.end(); ++i)
-         trackingSets.push_back((TrackingFileSet*)((*i)->Clone()));
+      ////for (std::vector<TrackingFileSet*>::const_iterator i = mm.trackingSets.begin();
+      ////      i != mm.trackingSets.end(); ++i)
+      ////   trackingSets.push_back((TrackingFileSet*)((*i)->Clone()));
 
       // Should measurements be rebuilt here?
    }
@@ -245,28 +338,30 @@ MeasurementManager& MeasurementManager::operator=(const MeasurementManager &mm)
 
 
 //------------------------------------------------------------------------------
-// bool SetPropagator(PropSetup* ps)
+// bool SetPropagator(std::vector<PropSetup*> *props,
+//       std::map<std::string, StringArray> *satPropMap)
 //------------------------------------------------------------------------------
 /**
  * Sets the propagator needed by the tracking data adapters
  *
- * @param ps The propagator
+ * @param props The propagators
+ * @param satPropMap The spacecraft/propagator map
  *
- * @todo The current call supports a single propagator.  Once the estimation
- *       system supports multiple propagators, this should be changed to a
- *       vector of PropSetup objects.
- *
- * @return true if the pointer is set; false if it is NULL
+ * @return true if the propagator vector pointer is set; false if it is NULL
  */
 //------------------------------------------------------------------------------
-bool MeasurementManager::SetPropagator(PropSetup* ps)
+bool MeasurementManager::SetPropagators(std::vector<PropSetup*> *props,
+      std::map<std::string, StringArray> *satPropMap)
 {
    #ifdef DEBUG_LIGHTTIME
       MessageInterface::ShowMessage("Setting the propagator in the measurement "
-            "manager to %p\n", ps);
+            "manager to %p\n", props);
    #endif
-   thePropagator = ps;
-   return (thePropagator != NULL);
+
+   thePropagators = props;
+   satPropagatorMap = satPropMap;
+
+   return (thePropagators != NULL);
 }
 
 
@@ -295,13 +390,6 @@ bool MeasurementManager::Initialize()
    bool retval = true;
 
    measurements.clear();
-   for (UnsignedInt i = 0; i < models.size(); ++i)
-   {
-      if (models[i]->Initialize() == false)
-         return false;
-      MeasurementData md;
-      measurements.push_back(md);
-   }
    
    for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
    {
@@ -373,9 +461,6 @@ bool MeasurementManager::Initialize()
       StringArray rampedTablenames = trackingSets[i]->GetStringArrayParameter("RampTable");
       for (UnsignedInt k1 = 0; k1 < rampedTablenames.size(); ++k1)
       {
-//         std::stringstream fn;
-//         fn << trackingSets[i]->GetName() << "RampTable" << k1;
-//         DataFile *newStream = new DataFile(fn.str());
          DataFile *newStream = new DataFile(rampedTablenames[k1]);
          newStream->SetStringParameter("Filename", rampedTablenames[k1]);
 
@@ -512,10 +597,10 @@ bool MeasurementManager::SetStatisticsDataFiltersToDataFiles(UnsignedInt i)
       // 1. Get tracking configs in ID from TrackingFileSet trackingSet[i]
       StringArray tkconfigs;
       std::stringstream ss;
-      std::vector<TrackingDataAdapter*>* adapters = trackingSets[i]->GetAdapters();
-      for (UnsignedInt k = 0; k < adapters->size(); ++k)
+      std::vector<TrackingDataAdapter*>* ads = trackingSets[i]->GetAdapters();             // made changes by TUAN NGUYEN
+      for (UnsignedInt k = 0; k < ads->size(); ++k)                                        // made changes by TUAN NGUYEN
       {
-         MeasureModel* model = adapters->at(k)->GetMeasurementModel();
+         MeasureModel* model = ads->at(k)->GetMeasurementModel();                          // made changes by TUAN NGUYEN
          std::vector<ObjectArray*> objArrList = model->GetParticipantObjectLists();
          for (UnsignedInt k1 = 0; k1 < objArrList.size(); ++k1)
          {
@@ -527,7 +612,7 @@ bool MeasurementManager::SetStatisticsDataFiltersToDataFiles(UnsignedInt i)
                if (k2 < objArrList[k1]->size()-1)
                   ss << ",";
             }
-            ss << "}" << adapters->at(k)->GetStringParameter("MeasurementType") << "}";
+            ss << "}" << ads->at(k)->GetStringParameter("MeasurementType") << "}";         // made changes by TUAN NGUYEN
             tkconfigs.push_back(ss.str());
             //MessageInterface::ShowMessage("tkconfig: <%s>\n", ss.str().c_str());
          }
@@ -545,16 +630,10 @@ bool MeasurementManager::SetStatisticsDataFiltersToDataFiles(UnsignedInt i)
       for (UnsignedInt k = 0; k < dataFilterObjects.size(); ++k)
       {
          // set tracking configs to statistics accept filter
-         // @todo: StatisticsAcceptFilter is deprecated and will be removed in a future build.
-         if (dataFilterObjects[k]->IsOfType("StatisticsAcceptFilter"))
-            ((StatisticAcceptFilter*)dataFilterObjects[k])->SetTrackingConfigs(tkconfigs);
          if (dataFilterObjects[k]->IsOfType("AcceptFilter"))
             ((AcceptFilter*)dataFilterObjects[k])->SetTrackingConfigs(tkconfigs);
 
          // set tracking configs to statistics reject filter
-         // @todo: StatisticsRejectFilter is deprecated and will be removed in a future build.
-         if (dataFilterObjects[k]->IsOfType("StatisticsRejectFilter"))
-            ((StatisticRejectFilter*)dataFilterObjects[k])->SetTrackingConfigs(tkconfigs);
          if (dataFilterObjects[k]->IsOfType("RejectFilter"))
             ((RejectFilter*)dataFilterObjects[k])->SetTrackingConfigs(tkconfigs);
       }
@@ -597,6 +676,11 @@ bool MeasurementManager::SetStatisticsDataFiltersToDataFiles(UnsignedInt i)
             fileObj->SetDataFilter((DataFilter*)datafilter);
          }// for k loop
       }// for j loop
+
+      // clean up                              // made changes by TUAN NGUYEN
+      tkconfigs.clear();                       // made changes by TUAN NGUYEN
+      ss.clear();                              // made changes by TUAN NGUYEN
+      dataFilterObjects.clear();               // made changes by TUAN NGUYEN
 
    return true;
 }
@@ -651,12 +735,12 @@ bool MeasurementManager::PrepareForProcessing(bool simulating)
       }
    }
    
-   /// @todo: Set the propagators based on the spacecraft in each adapter.  This
-   ///        piece is not yet part of the GMAT implementation, but when ready,
-   ///        needs to be addressed here.
-   // Pass the propagator to the tracking data adapters
-   for (UnsignedInt i = 0; i < adapters.size(); ++i)
-      adapters[i]->SetPropagator(thePropagator);
+   // Pass the propagator settings to the tracking data adapters
+   for (UnsignedInt i = 0; i < adapters.size(); ++i) {
+      adapters[i]->SetPropagators(thePropagators, satPropagatorMap);
+      if (adapters[i]->GetMeasurementModel() != NULL)
+         adapters[i]->SetTransientForces(transientForces);
+   }
    
    // Open all streams in streamList
    bool retval = true;
@@ -808,36 +892,11 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
 
    if (measurementToCalc == -1)
    {
-      for (UnsignedInt j = 0; j < models.size(); ++j)
-      {
-         // Specify ramp table associated with measurement model models[j]:
-         // Note: Only one ramp table is used for a measurement model
-///// TBD: Do we want something more generic here?
-         StringArray sr = models[j]->GetStringArrayParameter("RampTables");
-         std::vector<RampTableData>* rt = NULL;
-         if (sr.size() > 0)
-            rt = &(rampTables[sr[0]]);
-
-         // Specify current observation data. If no observation data used, it passes a NULL pointer. 
-         ObservationData* od = NULL;
-         if (!observations.empty())
-            od = &(*currentObs);
-
-         measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);
-
-         if (measurements[j].isFeasible)
-         {
-            ++successCount;
-            eventCount += measurements[j].eventCount;
-         }
-      }
-
       for (UnsignedInt j = 0; j < adapters.size(); ++j)
       {
          // Specify ramp table associated with measurement model models[j]:
          // Note: Only one ramp table is used for a measurement model
 ///// TBD: Do we want something more generic here?
-         //StringArray sr = models[j]->GetStringArrayParameter("RampTables");
          StringArray sr = adapters[j]->GetStringArrayParameter("RampTables");
          std::vector<RampTableData>* rt = NULL;
          if (sr.size() > 0)
@@ -847,8 +906,8 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
          // passes a NULL pointer.
          ObservationData* od = NULL;
          if (!observations.empty())
-            od = &(*currentObs);
-
+            od = &(observations[obsIndex]);
+         
          measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od, rt);
 
          if (measurements[j].isFeasible)
@@ -860,32 +919,6 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
    }
    else
    {
-      if ((measurementToCalc < (Integer)models.size()) && measurementToCalc >= 0)
-      {
-///// TBD: Do we want something more generic here?
-         // Specify ramp table associated with measurement model models[j]:
-         // Note: Only one ramp table is used for a measurement model
-         StringArray sr = models[measurementToCalc]->GetStringArrayParameter("RampTables");
-         std::vector<RampTableData>* rt = NULL;
-         if (sr.size() > 0)
-            rt = &(rampTables[sr[0]]);
-
-         // Specify current observation data. If no observation data used, it passes a NULL pointer. 
-         ObservationData* od = NULL;
-         if (!observations.empty())
-            od = &(*currentObs);
-
-         measurements[measurementToCalc] = 
-            models[measurementToCalc]->CalculateMeasurement(withEvents, od, rt);
-         
-         if ((measurements[measurementToCalc].isFeasible) || 
-            (measurements[measurementToCalc].unfeasibleReason.substr(0,1) == "B"))
-         {
-            successCount = 1;
-            eventCount = measurements[measurementToCalc].eventCount;
-         }
-      }
-
       if ((measurementToCalc < (Integer)adapters.size()) && (measurementToCalc >= 0))
       {
 ///// TBD: Do we want something more generic here?
@@ -900,7 +933,7 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
          // Specify current observation data. If no observation data used, it passes a NULL pointer.
          ObservationData* od = NULL;
          if (!observations.empty())
-            od = &(*currentObs);
+            od = &(observations[obsIndex]);
 
          #ifdef DEBUG_CALCULATE
             MessageInterface::ShowMessage("****** adapters[%d]name = '%s'\n",
@@ -943,6 +976,59 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
             "Exit MeasurementManager::Calculate(%d, %s) method\n",
             measurementToCalc, (withEvents?"true":"false"));
    #endif
+
+   return successCount;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer CountFeasibleMeasurements(const Integer measurementToCalc)
+//------------------------------------------------------------------------------
+/**
+ * Count the number of feasible measurements which were last calculated
+ *
+ * @param measurementToCalc The ID of the measurement that was calculated.  If
+ *                          the ID is -1, all measurements are checked
+ *
+ * @return The number of calculated measurements that were feasible
+ */
+//------------------------------------------------------------------------------
+Integer MeasurementManager::CountFeasibleMeasurements(const Integer measurementToCalc) const
+{
+   #ifdef DEBUG_FLOW
+      MessageInterface::ShowMessage(
+            "Entered MeasurementManager::CountFeasibleMeasurements(%d, %s) method\n",
+            measurementToCalc, (withEvents?"true":"false"));
+   #endif
+
+   const MeasurementData *measurement;
+   Integer successCount = 0;
+
+   if (measurementToCalc == -1)
+   {
+      for (UnsignedInt j = 0; j < adapters.size(); ++j)
+      {
+         measurement = &adapters[j]->GetMeasurement();
+
+         if (measurement->isFeasible)
+         {
+            ++successCount;
+         }
+      }
+   }
+   else
+   {
+      if ((measurementToCalc < (Integer)adapters.size()) && (measurementToCalc >= 0))
+      {
+         measurement = &adapters[measurementToCalc]->GetMeasurement();
+
+         if ((measurement->isFeasible) || 
+            (measurement->unfeasibleReason.substr(0, 1) == "B"))
+         {
+            successCount = 1;
+         }
+      }
+   }
 
    return successCount;
 }
@@ -997,9 +1083,7 @@ MeasurementModelBase* MeasurementManager::GetMeasurementObject(
 {
    MeasurementModelBase *retval = NULL;
 
-   if ((measurementToGet >= 0) && (measurementToGet < (Integer)models.size()))
-      retval = models[measurementToGet];
-   else if ((measurementToGet >= 0) && (measurementToGet < (Integer)adapters.size()))
+   if ((measurementToGet >= 0) && (measurementToGet < (Integer)adapters.size()))
       retval = adapters[measurementToGet];
 
 
@@ -1170,9 +1254,9 @@ UnsignedInt MeasurementManager::LoadObservations()
    std::map<std::string, Integer> totalCount;
    totalCount["Invalid measurement value"]        = 0;
    totalCount["Record duplication or time order"] = 0;
-   totalCount["Old Syntax's Trackers selection"]  = 0;
-   totalCount["Old Syntax's Data thinning"]       = 0;
-   totalCount["Old Syntax's Time span"]           = 0;
+   //totalCount["Old Syntax's Trackers selection"]  = 0;        // made changes by TUAN NGUYEN
+   //totalCount["Old Syntax's Data thinning"]       = 0;        // made changes by TUAN NGUYEN
+   //totalCount["Old Syntax's Time span"]           = 0;        // made changes by TUAN NGUYEN
 
    observations.clear();
 
@@ -1258,10 +1342,10 @@ UnsignedInt MeasurementManager::LoadObservations()
       switch (rejectedReason)
       {
          case 1:
-            ++totalCount["Old Syntax's Data thinning"];
+            //++totalCount["Old Syntax's Data thinning"];             // made changes by TUAN NGUYEN
             break;
          case 2:
-            ++totalCount["Old Syntax's Time span"];
+            //++totalCount["Old Syntax's Time span"];                 // made changes by TUAN NGUYEN
             break;
          case 3:
             ++totalCount["Invalid measurement value"];
@@ -1270,7 +1354,7 @@ UnsignedInt MeasurementManager::LoadObservations()
             ++totalCount["Record duplication or time order"];
             break;
          case 5:
-            ++totalCount["Old Syntax's Trackers selection"];
+            //++totalCount["Old Syntax's Trackers selection"];        // made changes by TUAN NGUYEN
             break;
          default:
             {
@@ -1281,16 +1365,12 @@ UnsignedInt MeasurementManager::LoadObservations()
                   if (filterIndex < filters.size())
                   {
                      std::string filterName = "";
-                     if (filters[filterIndex]->IsOfType("StatisticsAcceptFilter") ||              //@todo: StatisticsAcceptFilter is deprecated and will be remove in a future GMAT build.
-                        filters[filterIndex]->IsOfType("AcceptFilter"))
+                     if (filters[filterIndex]->IsOfType("AcceptFilter"))
                      {
-                        //filterName += "All Statistics Accept Filter";
                         filterName = "All Accept Filter";
                      }
-                     else if (filters[filterIndex]->IsOfType("StatisticsRejectFilter") ||         //@todo: StatisticsAcceptFilter is deprecated and will be remove in a future GMAT build.
-                              filters[filterIndex]->IsOfType("RejectFilter"))
+                     else if (filters[filterIndex]->IsOfType("RejectFilter"))
                      {
-                        //filterName += "StatisticsRejectFilter ";
                         filterName = "RejectFilter ";
                         filterName += filters[filterIndex]->GetName();
                      }
@@ -1315,12 +1395,11 @@ UnsignedInt MeasurementManager::LoadObservations()
    MessageInterface::ShowMessage("Number of thrown records due to:\n");
    for(std::map<std::string,Integer>::iterator i = totalCount.begin(); i != totalCount.end(); ++i)
    {
-      //if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))
-      if (runmode != GmatGlobal::TESTING)
-      {
-         if (i->first.substr(0, 3) == "Old")
-            continue;
-      }
+      //if (runmode != GmatGlobal::TESTING)                        // made changes by TUAN NGUYEN
+      //{                                                          // made changes by TUAN NGUYEN
+      //   if (i->first.substr(0, 3) == "Old")                     // made changes by TUAN NGUYEN
+      //      continue;                                            // made changes by TUAN NGUYEN
+      //}                                                          // made changes by TUAN NGUYEN
       MessageInterface::ShowMessage("     .%s : %d\n", i->first.c_str(), i->second); 
    }
 
@@ -1339,7 +1418,7 @@ UnsignedInt MeasurementManager::LoadObservations()
    #endif
    
    // Set the current data pointer to the first observation value
-   currentObs = observations.begin();
+   obsIndex = isForward ? 0 : (observations.size()-1);
    MessageInterface::ShowMessage("Total number of load records : %d\n\n", observations.size());
 
    for(UnsignedInt i = 0; i < trackingConfigsMap.size(); ++i)
@@ -1558,9 +1637,7 @@ bool MeasurementManager::AutoGenerateTrackingDataAdapters()
             #endif
             for (UnsignedInt k = 0; k < dataFilterObjects.size(); ++k)
             {
-               if (dataFilterObjects[k]->IsOfType("StatisticsAcceptFilter") ||   //@todo: StatisticsAcceptFilter is deprecated and will be removed in the future GMAT build.
-                   dataFilterObjects[k]->IsOfType("StatisticsRejectFilter")||    //@todo: StatisticsRejectFilter is deprecated and will be removed in the future GMAT build.
-                   dataFilterObjects[k]->IsOfType("AcceptFilter")||
+               if (dataFilterObjects[k]->IsOfType("AcceptFilter") ||
                    dataFilterObjects[k]->IsOfType("RejectFilter"))
                {
                   // data filter is only set to data file if and only if datafilter.Filenames parameter 
@@ -1572,10 +1649,9 @@ bool MeasurementManager::AutoGenerateTrackingDataAdapters()
                      setfilter = true;
                   else
                   {
-                     if ((dataFilterObjects[k]->IsOfType("StatisticsAcceptFilter")||        //@todo: StatisticsAcceptFilter is deprecated and will be removed in the future GMAT build.
-                          dataFilterObjects[k]->IsOfType("AcceptFilter")) && 
-                         ((find(nameList.begin(), nameList.end(), "From_AddTrackingConfig") != nameList.end())||
-                          (find(nameList.begin(), nameList.end(), "All") != nameList.end())))
+                     if (dataFilterObjects[k]->IsOfType("AcceptFilter") &&
+                         ((find(nameList.begin(), nameList.end(), "From_AddTrackingConfig") != nameList.end()) ||
+                         (find(nameList.begin(), nameList.end(), "All") != nameList.end())))
                         setfilter = true;
                      else
                      {
@@ -1753,7 +1829,7 @@ void MeasurementManager::LoadRampTables()
                   MessageInterface::ShowMessage("      ^^^^^^ ramp_table[%s] = <%p>\n", rampTableDataStreamList[i]->GetName().c_str(), &rampTables[rampTableDataStreamList[i]->GetName()]);
                #endif
 
-               // Clean up memmory
+               // Clean up memory
                ramp_table_map.clear();
                ramp_table.clear();
             }
@@ -1780,9 +1856,9 @@ void MeasurementManager::LoadRampTables()
 //-----------------------------------------------------------------------------
 GmatTime MeasurementManager::GetEpochGT()
 {
-   if (currentObs == observations.end())
+   if (obsIndex == observations.size() || obsIndex == -1)
       return 0.0;
-   return currentObs->epochGT;
+   return observations[obsIndex].epochGT;
 }
 
 
@@ -1797,17 +1873,25 @@ GmatTime MeasurementManager::GetEpochGT()
 //-----------------------------------------------------------------------------
 GmatTime MeasurementManager::GetNextEpochGT()
 {
-   std::vector<ObservationData>::iterator nextObs = observations.end();
-   if (currentObs != observations.end())
-      nextObs = currentObs + 1;
+   Integer nextIndex;
 
-   if (nextObs == observations.end())
-      return 0.0;
+   if (isForward)
+   {
+      nextIndex = obsIndex + 1;
+      if (nextIndex >= observations.size())
+         return 0.0;
+   }
+   else
+   {
+      nextIndex = obsIndex - 1;
+      if (nextIndex <= 0)
+         return 0.0;
+   }
 
 #ifdef DEBUG_FLOW
-   MessageInterface::ShowMessage("Next epoch: %s\n", nextObs->epochGT.ToString().c_str());
+   MessageInterface::ShowMessage("Next epoch: %s\n", observations[nextIndex].epochGT.ToString().c_str());
 #endif
-   return nextObs->epochGT;
+   return observations[nextIndex].epochGT;
 }
 
 
@@ -1832,7 +1916,7 @@ const ObservationData *MeasurementManager::GetObsData(
       const Integer observationToGet)
 {
    if (observationToGet == -1)
-      return &(*currentObs);
+      return &(observations[obsIndex]);
 
    if ((observationToGet < 0) ||
        (observationToGet >= (Integer)observations.size()))
@@ -1862,7 +1946,7 @@ ObservationData* MeasurementManager::GetObsDataObject(const Integer observationT
 {
    if (observationToGet == -1)
    {
-      return &(*currentObs);
+      return &(observations[obsIndex]);
    }
 
    if ((observationToGet < 0) ||
@@ -1886,93 +1970,130 @@ ObservationData* MeasurementManager::GetObsDataObject(const Integer observationT
 //-----------------------------------------------------------------------------
 bool MeasurementManager::AdvanceObservation()
 {
-   if (currentObs != observations.end())
+   if (isForward)
    {
-      ++currentObs;
+      if (obsIndex != observations.size())
+         ++obsIndex;
+   }
+   else
+   {
+      if (obsIndex != -1)
+         --obsIndex;
    }
 
 
 #ifdef DEBUG_ADVANCE_OBSERVATION
-   if (currentObs == observations.end())
-      MessageInterface::ShowMessage("MeasurementManager::AdanceObservation():   currentObs == end\n");
+   if (obsIndex == observations.size() || obsIndex == -1)
+      MessageInterface::ShowMessage("MeasurementManager::AdanceObservation():   current observation is at the end\n");
    else
-      MessageInterface::ShowMessage("MeasurementManager::AdanceObservation():   currentObs->epoch = %.12lf   correntObs->value.size() = %d\n", currentObs->epoch, currentObs->value.size());
+      MessageInterface::ShowMessage("MeasurementManager::AdanceObservation():   current observation: epoch = %s   measurement type = <%s>   value.size() = %d\n", observations[obsIndex].epochGT.ToString().c_str(), observations[obsIndex].typeName.c_str(), observations[obsIndex].value.size());
 #endif
 
-   if (currentObs == observations.end())
+   if (obsIndex == observations.size() || obsIndex == -1)
       return true;
    else
      return false;
 }
 
 
-//------------------------------------------------------------------------------
-// Integer AddMeasurement(MeasurementModel *meas)
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// bool MeasurementManager::RemoveObservation(const Integer observationToRemove)
+//-----------------------------------------------------------------------------
 /**
- * Sets a new MeasurementModel on the MeasurementManager
+ * Removes the current or selected observation from the observations vector
  *
- * @param meas The new MeasurementModel
+ * @param observationToRemove Index of the desired observation data object to remove,
+ *                            or -1 for the current observation data object.
  *
- * @return The ID for the model during this run
+ * @return true when it is at the end of observations table otherwise return false
  */
-//------------------------------------------------------------------------------
-Integer MeasurementManager::AddMeasurement(MeasurementModel *meas)
+ //-----------------------------------------------------------------------------
+bool MeasurementManager::RemoveObservation(const Integer observationToRemove)
 {
-   Integer retval = -1;
-   if (meas->IsOfType("TrackingFileSet"))
-   {
-      retval = AddMeasurement((TrackingFileSet*)meas);
-   }
+   //bool removeIndex = observationToRemove;           // made changes by TUAN NGUYEN
+   Integer removeIndex = observationToRemove;          // made changes by TUAN NGUYEN
+   if (observationToRemove == -1)
+      removeIndex = obsIndex;
+
+   observations.erase(observations.begin() + removeIndex);
+
+   if (obsIndex > removeIndex)
+      --obsIndex;
+
+   if (obsIndex == observations.size() || obsIndex == -1)
+      return true;
    else
-   {
-      meas->SetModelID(largestId++);
-      models.push_back(meas);
-      retval = meas->GetModelID();
-
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage(
-            "Added measurement of type %s with unique ID %d\n",
-            meas->GetStringParameter("Type").c_str(),
-            meas->GetModelID());
-      #endif
-   }
-
-   return retval;
+      return false;
 }
 
 
-//------------------------------------------------------------------------------
-// Integer AddMeasurement(MeasurementModel *meas)
-//------------------------------------------------------------------------------
-/**
- * Sets a TrackingSystem and associated collection of MeasurementModels on the
- * MeasurementManager
- *
- * @param system The new TrackingSystem
- *
- * @return The ID for the first model in this system
- */
-//------------------------------------------------------------------------------
-Integer MeasurementManager::AddMeasurement(TrackingSystem *system)
-{
-//   Integer firstModel = largestId;
+////------------------------------------------------------------------------------
+//// Integer AddMeasurement(MeasurementModel *meas)
+////------------------------------------------------------------------------------
+///**
+// * Sets a new MeasurementModel on the MeasurementManager
+// *
+// * @param meas The new MeasurementModel
+// *
+// * @return The ID for the model during this run
+// */
+////------------------------------------------------------------------------------
+//Integer MeasurementManager::AddMeasurement(MeasurementModel *meas)
+//{
+//   Integer retval = -1;
+//   if (meas->IsOfType("TrackingFileSet"))
+//   {
+//      retval = AddMeasurement((TrackingFileSet*)meas);
+//   }
+//   else
+//   {
+//      meas->SetModelID(largestId++);
+//      models.push_back(meas);
+//      retval = meas->GetModelID();
 //
-//   MeasurementModel *meas = NULL;
+//      #ifdef DEBUG_INITIALIZATION
+//         MessageInterface::ShowMessage(
+//            "Added measurement of type %s with unique ID %d\n",
+//            meas->GetStringParameter("Type").c_str(),
+//            meas->GetModelID());
+//      #endif
+//   }
 //
-//   return firstModel;
-//   meas->SetModelID(largestId++);
-   systems.push_back(system);
+//   return retval;
+//}
 
-   #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage(
-            "Added tracking system named %s of type %s with unique ID %d\n",
-            system->GetName().c_str(), system->GetTypeName().c_str(),
-            -1 /*meas->GetModelID()*/);
-   #endif
 
-   return -1; //meas->GetModelID();
-}
+////------------------------------------------------------------------------------
+//// Integer AddMeasurement(MeasurementModel *meas)
+////------------------------------------------------------------------------------
+///**
+// * Sets a TrackingSystem and associated collection of MeasurementModels on the
+// * MeasurementManager
+// *
+// * @param system The new TrackingSystem
+// *
+// * @return The ID for the first model in this system
+// */
+////------------------------------------------------------------------------------
+//Integer MeasurementManager::AddMeasurement(TrackingSystem *system)
+//{
+////   Integer firstModel = largestId;
+////
+////   MeasurementModel *meas = NULL;
+////
+////   return firstModel;
+////   meas->SetModelID(largestId++);
+//   systems.push_back(system);
+//
+//   #ifdef DEBUG_INITIALIZATION
+//      MessageInterface::ShowMessage(
+//            "Added tracking system named %s of type %s with unique ID %d\n",
+//            system->GetName().c_str(), system->GetTypeName().c_str(),
+//            -1 /*meas->GetModelID()*/);
+//   #endif
+//
+//   return -1; //meas->GetModelID();
+//}
 
 
 //------------------------------------------------------------------------------
@@ -1990,8 +2111,6 @@ const StringArray& MeasurementManager::GetParticipantList()
 
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("MeasurementManager knows about %d "
-         "measurement models\n", models.size());
-      MessageInterface::ShowMessage("MeasurementManager knows about %d "
             "TrackingDataSets\n", trackingSets.size());
       MessageInterface::ShowMessage("MeasurementManager knows about %d "
          "measurement model names\n", modelNames.size());
@@ -2000,20 +2119,6 @@ const StringArray& MeasurementManager::GetParticipantList()
    #endif
 
    // Walk through the collection of measurement models...
-   for (std::vector<MeasurementModel*>::iterator i =  models.begin();
-         i !=  models.end(); ++i)
-   {
-      // Walk through the participant list for the model
-      StringArray parts = (*i)->GetStringArrayParameter("Participants");
-      for (StringArray::iterator j = parts.begin(); j != parts.end(); ++j)
-      {
-         // If the participant is not in the list yet, add it
-         if (find(participants.begin(), participants.end(), (*j)) ==
-               participants.end())
-            participants.push_back(*j);
-      }
-   }
-
    for (std::vector<TrackingFileSet*>::iterator i =  trackingSets.begin();
          i !=  trackingSets.end(); ++i)
    {
@@ -2048,13 +2153,6 @@ std::vector<StringArray> MeasurementManager::GetSignalPathList()
    signalPathList.clear();
 
    // Walk through the collection of measurement models...
-   for (std::vector<MeasurementModel*>::iterator i =  models.begin();
-         i !=  models.end(); ++i)
-   {
-      StringArray parts = (*i)->GetStringArrayParameter("Participants");
-      signalPathList.push_back(parts);
-   }
-
    for (std::vector<TrackingDataAdapter*>::iterator i =  adapters.begin();
          i !=  adapters.end(); ++i)
    {
@@ -2113,6 +2211,28 @@ const std::vector<TrackingDataAdapter*>& MeasurementManager::GetAllTrackingDataA
 }
 
 
+//------------------------------------------------------------------------------
+//  void SetTransientForces(std::vector<PhysicalModel*> *tf)
+//------------------------------------------------------------------------------
+/**
+* Passes the transient force vector into the measurement manager
+*
+* The transient force vector is a set of models used in GMAT's ODEModel for
+* affects that are turned on and off over the course of a mission.  An example
+* of a transient force is a finite burn, which is toggled by the
+* BeginFiniteBurn and EndFiniteBurn commands.  These components are only used
+* by commands that need them.  Typical usage is found in the propagation
+* enabled commands.
+*
+* @param tf The vector of transient forces
+*/
+//------------------------------------------------------------------------------
+void MeasurementManager::SetTransientForces(std::vector<PhysicalModel*> *tf)
+{
+    transientForces = tf;
+}
+
+
 //-----------------------------------------------------------------------------
 // const Integer GetMeasurementId(const std::string &modelName) const
 //-----------------------------------------------------------------------------
@@ -2130,55 +2250,41 @@ const IntegerArray MeasurementManager::GetMeasurementId(
    IntegerArray arrayId;
    Integer foundId = -1;
 
-   for (UnsignedInt i = 0; i < models.size(); ++i)
+   // Check modelName to be a name of trackingSet 
+   UnsignedInt i;
+   for (i = 0; i < trackingSets.size(); ++i)
    {
-      if (models[i]->GetName() == modelName)
-      {
-         foundId = models[i]->GetModelID();
+      if (trackingSets[i]->GetName() == modelName)
          break;
-      }
    }
 
-   if (foundId != -1)
-      arrayId.push_back(foundId);
-   else
+   if (i < trackingSets.size())
    {
-      // Check modelName to be a name of trackingSet 
-      UnsignedInt i;
-      for (i = 0; i < trackingSets.size(); ++i)
-      {
-         if (trackingSets[i]->GetName() == modelName)
-            break;
-      }
+      // Get a name list of TrackingDataAdapter object associated the TrackingFileSet specified by modelName
+      StringArray tfsAdapterList;
+      if (adapterFromTFSMap.find(trackingSets[i]) != adapterFromTFSMap.end())
+         tfsAdapterList = adapterFromTFSMap.find(trackingSets[i])->second;
 
-      if (i < trackingSets.size())
+      for (UnsignedInt k = 0; k < tfsAdapterList.size(); ++k)
       {
-         // Get a name list of TrackingDataAdapter object associated the TrackingFileSet specified by modelName
-         StringArray tfsAdapterList;
-         if (adapterFromTFSMap.find(trackingSets[i]) != adapterFromTFSMap.end())
-            tfsAdapterList = adapterFromTFSMap.find(trackingSets[i])->second;
-
-         for (UnsignedInt k = 0; k < tfsAdapterList.size(); ++k)
+         // Find an adapter having the same name as tfsAdapterList[i]
+         foundId = -1;
+         for (UnsignedInt j = 0; j < adapters.size(); ++j)
          {
-            // Find an adapter having the same name as tfsAdapterList[i]
-            foundId = -1;
-            for (UnsignedInt j = 0; j < adapters.size(); ++j)
+            if (adapters[j]->GetName() == tfsAdapterList[k])
             {
-               if (adapters[j]->GetName() == tfsAdapterList[k])
-               {
-                  foundId = adapters[j]->GetModelID();
-                  break;
-               }
+               foundId = adapters[j]->GetModelID();
+               break;
             }
-
-            // Add founId to ID
-            if (foundId != -1)
-               arrayId.push_back(foundId);
          }
+
+         // Add founId to ID
+         if (foundId != -1)
+            arrayId.push_back(foundId);
       }
-      else
-         arrayId.push_back(-1);
    }
+   else
+      arrayId.push_back(-1);
 
    return arrayId;
 
@@ -2227,14 +2333,6 @@ GmatBase* MeasurementManager::GetClone(GmatBase *obj)
 
    if (objname != "")
    {
-      // Check the models
-      for (UnsignedInt i = 0; i < models.size(); ++i)
-         if (models[i]->GetName() == objname)
-         {
-            retval = models[i];
-            break;
-         }
-
       // Check the tracking file sets
       for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
          if (trackingSets[i]->GetName() == objname)
@@ -2261,42 +2359,6 @@ bool MeasurementManager::ValidateDuplicationOfGroundStationID(std::string& error
 {
    std::map<std::string, std::string> gsNameIdMap;
    
-   for (Integer i = 0; i < models.size(); ++i)
-   {
-      ObjectArray oa = models[i]->GetParticipants();
-
-      for (Integer j = 0; j < oa.size(); ++j)
-      {
-         if (oa[j]->IsOfType(Gmat::GROUND_STATION))
-         {
-            if (gsNameIdMap.empty())
-               gsNameIdMap[oa[j]->GetName()] = oa[j]->GetStringParameter("Id");
-            else
-            {
-               for (std::map<std::string, std::string>::iterator objPtr = gsNameIdMap.begin(); objPtr != gsNameIdMap.end(); ++objPtr)
-               {
-                  if (objPtr->first == oa[j]->GetName())
-                     continue;
-                  else
-                  {
-                     if (objPtr->second != oa[j]->GetStringParameter("Id"))
-                     {
-                        // Add to gsNameIdMap
-                        gsNameIdMap[oa[j]->GetName()] = oa[j]->GetStringParameter("Id");
-                        break;
-                     }
-                     else
-                     {
-                        errorMsg = "Both ground stations " + objPtr->first + " and " + oa[j]->GetName() + " have the same Id '" + objPtr->second + "'";
-                        return false;
-                     }
-                  }
-               }
-            }
-         }
-      }
-   }
-
    for (Integer i = 0; i < adapters.size(); ++i)
    {
       std::vector<ObjectArray*> participantObjLists = adapters[i]->GetMeasurementModel()->GetParticipantObjectLists();
@@ -2364,69 +2426,13 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
    // Specify observation data for measurement
    ObservationData* od = NULL;
    if (!observations.empty())
-      od = &(*currentObs);
+      od = &(observations[obsIndex]);
 
    bool retval = false;
    eventCount = 0;
    
    if (forSimulation)
    {  // This section is used for simulation only:
-      for (UnsignedInt j = 0; j < models.size(); ++j)
-      {
-         #ifdef DEBUG_CALCULATE_MEASUREMENTS
-           MessageInterface::ShowMessage(" Measurement models[%d] name = '%s'    measurement type = '%s'\n", j, models[j]->GetName().c_str(), models[j]->GetStringParameter("Type").c_str());
-         #endif
-
-///// TBD: Do we want something more generic here?
-         // Specify ramp table associated with measurement model models[j]:
-         // Note: Only one ramp table is used for a measurement model
-         StringArray sr = models[j]->GetStringArrayParameter("RampTables");
-         std::vector<RampTableData>* rt = NULL;
-         if (sr.size() > 0)
-            rt = &(rampTables[sr[0]]);
-       
-         if (withEvents)
-         {
-#ifdef DEBUG_CALCULATE_MEASUREMENTS
-            MessageInterface::ShowMessage(" Simulation: measurement with events\n");
-#endif
-            measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt, addNoise);
-         }
-         else
-         {
-#ifdef DEBUG_CALCULATE_MEASUREMENTS
-            MessageInterface::ShowMessage(" Simulation: measurement without events\n");
-#endif
-            // when running without event, no noise is added due to check feasibility
-            measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);
-         }
-
-         // Throw an error message if ramp table is missed when it needs
-         if (measurements[j].unfeasibleReason == "R")
-         {
-               Real a1Time = measurements[j].epoch;
-               Real taiTime;
-               std::string tais;
-               TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
-               char s[1000];
-               sprintf(&s[0], "Error: In simulation for measurement model %s, epoch %.12lf TAIMdj is out of ramp table.\n Please make sure ramped table cover all simulation epochs.\n", models[j]->GetName().c_str(), taiTime);
-               throw MeasurementException(s); 
-         }
-
-         if (measurements[j].isFeasible)
-         {
-            if (!withEvents)
-               eventCount += measurements[j].eventCount;
-            retval = true;
-         }
-
-         #ifdef DEBUG_CALCULATE_MEASUREMENTS
-            MessageInterface::ShowMessage(" Measurement is %s. Its value is %lf\n", (measurements[j].isFeasible?"feasible":" not feasible"), measurements[j].value[0]);
-         #endif
-
-      } // for j loop
-      
-      // Now do the same thing for the TrackingDataAdapters
       #ifdef DEBUG_CALCULATE_MEASUREMENTS
       MessageInterface::ShowMessage("adapters size = %d\n", adapters.size());
       #endif
@@ -2434,35 +2440,10 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
       {
          // Specify ramp table associated with measurement adapters[i]:
          // Note: Only one ramp table is used for a measurement model
-         StringArray sr = adapters[i]->GetStringArrayParameter("RampTables");
-         std::vector<RampTableData>* rt = NULL;
-         if (sr.size() > 0)
-            rt = &(rampTables[sr[0]]);
+         std::vector<RampTableData>* rt = GetRampTableForAdapter(*adapters[i]);
 
-         
          // Set AddNoise to measuement apdater
          adapters[i]->SetBooleanParameter("AddNoise", addNoise);
-
-
-         // Run CalculateMeasurement() function          
-         //if (withEvents)
-         //{  
-         //   #ifdef DEBUG_CALCULATE_MEASUREMENTS
-         //      MessageInterface::ShowMessage(" Simulation: measurement adapter %s with events\n", adapters[i]->GetName().c_str());
-         //   #endif
-         //   measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
-         //   if (measurements[i].unfeasibleReason == "R")
-         //      throw MeasurementException(adapters[i]->GetErrorMessage());
-         //}
-         //else
-         //{
-         //   #ifdef DEBUG_CALCULATE_MEASUREMENTS
-         //      MessageInterface::ShowMessage(" Simulation: measurement adapter %s without events\n", adapters[i]->GetName().c_str());
-         //   #endif
-         //   measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
-         //   if (measurements[i].unfeasibleReason == "R")
-         //      throw MeasurementException(adapters[i]->GetErrorMessage());
-         //}
 
          #ifdef DEBUG_CALCULATE_MEASUREMENTS
             if (withEvents)
@@ -2484,11 +2465,20 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          #ifdef DEBUG_CALCULATE_MEASUREMENTS
             MessageInterface::ShowMessage(" Adapter Measurement is %s."
                , (measurements[i].isFeasible?"feasible":" not feasible"));
+            MessageInterface::ShowMessage(" Its feasible value = %lf  reason = <%s>.   ", measurements[i].feasibilityValue, measurements[i].unfeasibleReason.c_str());
             MessageInterface::ShowMessage(" Its value is [");
             for (Integer k = 0; k < measurements[i].value.size(); ++k)
                MessageInterface::ShowMessage("%lf  ", measurements[i].value[k]);
             MessageInterface::ShowMessage("]km\n");
          #endif
+
+         //MessageInterface::ShowMessage(" %s  ", measurements[i].epochGT.ToString().c_str());
+         //MessageInterface::ShowMessage(" %s  ", GmatStringUtil::GetAlignmentString(adapters[i]->GetName(),60).c_str());
+         //MessageInterface::ShowMessage(" %s  ", GmatStringUtil::GetAlignmentString(measurements[i].unfeasibleReason,10).c_str());
+         //MessageInterface::ShowMessage(" Measurement value is [");
+         //for (Integer k = 0; k < measurements[i].value.size(); ++k)
+         //   MessageInterface::ShowMessage("%lf  ", measurements[i].value[k]);
+         //MessageInterface::ShowMessage("]\n");
       } // for i loop
    }
    else
@@ -2500,78 +2490,9 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          #endif
          return retval;               // no calculation measurement value whenever no observation data is available
       }
+
       #ifdef DEBUG_CALCULATE_MEASUREMENTS
-      else
          MessageInterface::ShowMessage("    %s observation data: %.12lf  %s  %d  %s  %s   %.12lf\n", od->dataFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(),od->value[0]);
-      #endif
-
-      #ifdef DEBUG_CALCULATE_MEASUREMENTS
-         MessageInterface::ShowMessage(" processing for measurement models ...\n");
-      #endif
-      for (UnsignedInt j = 0; j < models.size(); ++j)
-      {
-         // Verify observation data belonging to the measurement model jth
-         bool isbelong;
-         if ((models[j]->GetStringParameter("Type") != od->typeName))
-         {
-            isbelong = false;
-         }
-         else
-         {
-            isbelong = false;
-            ObjectArray participants = models[j]->GetParticipants();      // participants in measurement model
-            if (participants.size() == od->participantIDs.size())
-            {
-               isbelong = true;
-               int num = participants.size();
-               for (int i1 = 0; i1 < num; ++i1)
-               {
-                  // when observation data's signal path and measurement model's signal path
-                  // are different, they do not belong each other
-                  if (od->participantIDs[i1] != participants[i1]->GetStringParameter("Id"))
-                  {
-                     isbelong = false;
-                     break;
-                  }
-               }
-            }
-         }
-       
-         if (isbelong == false)
-         {
-            measurements[j].typeName       = models[j]->GetStringParameter("Type");
-            measurements[j].epochGT        = od->epochGT;
-            measurements[j].epoch          = od->epoch;
-            measurements[j].epochSystem        = od->epochSystem;
-            measurements[j].isFeasible       = false;
-            measurements[j].covariance       = NULL;
-            measurements[j].eventCount       = 0;
-            measurements[j].feasibilityValue = 0.0;
-            measurements[j].unfeasibleReason = "U";
-            measurements[j].value.clear();  
-         }
-         else
-         {
-///// TBD: Do we want something more generic here?
-            // Specify ramp table associated with measurement model models[j]:
-            // Note: Only one ramp table is used for a measurement model
-            StringArray sr = models[j]->GetStringArrayParameter("RampTables");
-            std::vector<RampTableData>* rt = NULL;
-            if (sr.size() > 0)
-               rt = &(rampTables[sr[0]]);
-          
-            measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);
-        
-            if (measurements[j].isFeasible)
-            {
-               if (!withEvents)
-                  eventCount += measurements[j].eventCount;
-               retval = true;
-            }
-         }
-      }// for j loop
-
-      #ifdef DEBUG_CALCULATE_MEASUREMENTS
          MessageInterface::ShowMessage(" processing for tracking data adapters ...\n");
          MessageInterface::ShowMessage("adapters.size() = %d:\n", adapters.size());
       #endif
@@ -2622,10 +2543,9 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 ///// TBD: Do we want something more generic here?
             // Specify ramp table associated with tracking data adapter adapters[j]:
             // Note: Only one ramp table is used for a tracking data adapter
-            StringArray sr = adapters[j]->GetStringArrayParameter("RampTables");
-            std::vector<RampTableData>* rt = NULL;
-            if (sr.size() > 0)
-               rt = &(rampTables[sr[0]]);
+            std::vector<RampTableData>* rt = GetRampTableForAdapter(*adapters[j]);
+
+            //MessageInterface::LogMessage(" calculating %s \n", adapters[j]->GetName().c_str());
             measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od, rt, forSimulation);
             
             if (measurements[j].isFeasible)
@@ -2691,27 +2611,6 @@ ObjectArray& MeasurementManager::GetActiveEvents()
 #endif
 
    activeEvents.clear();
-   eventMap.clear();
-
-   for (UnsignedInt j = 0; j < models.size(); ++j)
-   {
-#ifdef DEBUG_GET_ACTIVE_EVENTS
-      MessageInterface::ShowMessage("    measurement model[%d] <%s> is %s.\n", j, models[j]->GetName().c_str(), (measurements[j].isFeasible?"feasible":"not feasible"));
-#endif
-      if (measurements[j].isFeasible)
-      {
-         Integer count = models[j]->GetEventCount();
-         for (Integer i = 0; i < count; ++i)
-         {
-            Event *currentEvent = models[j]->GetEvent(i);
-            eventMap[currentEvent] = models[j];
-            activeEvents.push_back(currentEvent);
-#ifdef DEBUG_GET_ACTIVE_EVENTS
-     MessageInterface::ShowMessage("    measurement model[%d] <%s> event %s.\n", j, models[j]->GetName().c_str(), currentEvent->GetName().c_str());
-#endif
-         }
-      }
-   }
 
 #ifdef DEBUG_GET_ACTIVE_EVENTS
    MessageInterface::ShowMessage("MeasurementManager::GetActiveEvents()   exit: \n");
@@ -2741,13 +2640,6 @@ bool MeasurementManager::ProcessEvent(Event *locatedEvent)
 {
    bool retval = false;
 
-   if (eventMap.find(locatedEvent) != eventMap.end())
-   {
-      MeasurementModel *model = eventMap[locatedEvent];
-      model->SetEventData(locatedEvent);
-      retval = true;
-   }
-
    return retval;
 }
 
@@ -2775,10 +2667,7 @@ const std::vector<RealArray>& MeasurementManager::CalculateDerivatives(
             obj, wrt, forMeasurement);
    #endif
 
-   if ((Integer)models.size() > forMeasurement)
-      return models[forMeasurement]->CalculateMeasurementDerivatives(obj, wrt);
-   else
-      return adapters[forMeasurement]->CalculateMeasurementDerivatives(obj,wrt);
+   return adapters[forMeasurement]->CalculateMeasurementDerivatives(obj,wrt);
 }
 
 
@@ -2852,14 +2741,14 @@ const StringArray& MeasurementManager::GetStreamList()
 {
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("MeasurementManager::GetStreamList() "
-            "Entered\n   %d models registered\n", models.size());
+            "Entered\n   %d adapters registered\n", adapters.size());
    #endif
 
    // Run through the measurements and build the list
    streamNames.clear();
-   for (UnsignedInt i = 0; i < models.size(); ++i)
+   for (UnsignedInt i = 0; i < adapters.size(); ++i)
    {
-      StringArray names = models[i]->GetStringArrayParameter("ObservationData");
+      StringArray names = adapters[i]->GetStringArrayParameter("ObservationData");
       for (UnsignedInt j = 0; j < names.size(); ++j)
       {
          if(find(streamNames.begin(), streamNames.end(), names[j]) ==
@@ -2895,14 +2784,14 @@ const StringArray& MeasurementManager::GetRampTableDataStreamList()
 {
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("MeasurementManager::GetRampTableDataStreamList() "
-            "Entered\n   %d models registered\n", models.size());
+            "Entered\n   %d adapters registered\n", adapters.size());
    #endif
 
    // Run through the measurements and build the list
    rampTableDataStreamNames.clear();
-   for (UnsignedInt i = 0; i < models.size(); ++i)
+   for (UnsignedInt i = 0; i < adapters.size(); ++i)
    {
-      StringArray names = models[i]->GetStringArrayParameter("RampTables");
+      StringArray names = adapters[i]->GetStringArrayParameter("RampTables");
       for (UnsignedInt j = 0; j < names.size(); ++j)
       {
          if(find(rampTableDataStreamNames.begin(), rampTableDataStreamNames.end(), names[j]) ==
@@ -2942,25 +2831,6 @@ void MeasurementManager::SetStreamObject(DataFile *newStream)
    {
       streamList.push_back(newStream);
       std::string streamName = newStream->GetName();
-
-      // Walk through the models and set each model's index that refs the new
-      // stream to point to it.
-      for (UnsignedInt i = 0; i < models.size(); ++i)
-      {
-         StringArray od = models[i]->GetStringArrayParameter("ObservationData");
-         for (UnsignedInt j = 0; j < od.size(); ++j)
-         {
-            // todo: Each model feeds only one stream with this code
-            if (streamName == od[j])
-            {
-               idToStreamMap[models[i]->GetModelID()] = newStream;
-               #ifdef DEBUG_INITIALIZATION
-                  MessageInterface::ShowMessage("Stream id %d -> %s\n",
-                        models[i]->GetModelID(), newStream->GetName().c_str());
-               #endif
-            }
-         }
-      }
    }
 }
 
@@ -2989,25 +2859,6 @@ void MeasurementManager::SetRampTableDataStreamObject(DataFile *newStream)
    {
       rampTableDataStreamList.push_back(newStream);
       std::string streamName = newStream->GetName();
-
-      // Walk through the models and set each model's index that refs the new
-      // stream to point to it.
-      for (UnsignedInt i = 0; i < models.size(); ++i)
-      {
-         StringArray rtNameList = models[i]->GetStringArrayParameter("RampTables");
-         for (UnsignedInt j = 0; j < rtNameList.size(); ++j)
-         {
-            // todo: Each model feeds only one stream with this code
-            if (streamName == rtNameList[j])
-            {
-               idToRampTableStreamMap[models[i]->GetModelID()] = newStream;
-               #ifdef DEBUG_INITIALIZATION
-                  MessageInterface::ShowMessage("Ramp table stream id %d -> %s\n",
-                        models[i]->GetModelID(), newStream->GetName().c_str());
-               #endif
-            }
-         }
-      }
    }
 }
 
@@ -3053,75 +2904,39 @@ Integer MeasurementManager::FindModelForObservation()
    #endif
    Integer retval = 0;
 
-   Integer type =  currentObs->type;
+   Integer type = observations[obsIndex].type;
 
    #ifdef DEBUG_MODEL_MAPPING
        MessageInterface::ShowMessage("   Current observation type: %d\n", type);
    #endif
 
-   if (type < 9000)
+   for (UnsignedInt i = 0; i < adapters.size(); ++i)
    {
-   for (UnsignedInt i = 0; i < models.size(); ++i)
-   {
-      MeasurementData theMeas = models[i]->GetMeasurement();
+      MeasurementData theMeas = adapters[i]->GetMeasurement();
 
       #ifdef DEBUG_MODEL_MAPPING
-          MessageInterface::ShowMessage("   Current model type: %d\n",
-                theMeas.type);
+            MessageInterface::ShowMessage("   Current model type: %d\n",
+                  theMeas.type);
       #endif
 
       if (theMeas.type == type)
       {
          #ifdef DEBUG_MODEL_MAPPING
-             MessageInterface::ShowMessage("   Found a model of this type; "
-                   "checking participants\n");
+               MessageInterface::ShowMessage("   Found a model of this type; "
+                     "checking participants\n");
          #endif
-         StringArray parts = currentObs->participantIDs;
+         StringArray parts = observations[obsIndex].participantIDs;
          StringArray measParts = theMeas.participantIDs;
          bool missingParticipant = false;
          for (UnsignedInt j = 0; j < parts.size(); ++j)
             if (find(measParts.begin(), measParts.end(), parts[j]) ==
-                  measParts.end())
+               measParts.end())
                missingParticipant = true;
 
          if (!missingParticipant)
          {
             activeMeasurements.push_back(i);
             ++retval;
-         }
-      }
-   }
-   }
-   else
-   {
-      for (UnsignedInt i = 0; i < adapters.size(); ++i)
-      {
-         MeasurementData theMeas = adapters[i]->GetMeasurement();
-
-         #ifdef DEBUG_MODEL_MAPPING
-             MessageInterface::ShowMessage("   Current model type: %d\n",
-                   theMeas.type);
-         #endif
-
-         if (theMeas.type == type)
-         {
-            #ifdef DEBUG_MODEL_MAPPING
-                MessageInterface::ShowMessage("   Found a model of this type; "
-                      "checking participants\n");
-            #endif
-            StringArray parts = currentObs->participantIDs;
-            StringArray measParts = theMeas.participantIDs;
-            bool missingParticipant = false;
-            for (UnsignedInt j = 0; j < parts.size(); ++j)
-               if (find(measParts.begin(), measParts.end(), parts[j]) ==
-                     measParts.end())
-                  missingParticipant = true;
-
-            if (!missingParticipant)
-            {
-               activeMeasurements.push_back(i);
-               ++retval;
-            }
          }
       }
    }
@@ -3148,7 +2963,44 @@ Integer MeasurementManager::FindModelForObservation()
 //-----------------------------------------------------------------------------
 void  MeasurementManager::Reset()
 {
-   currentObs = observations.begin();
+   if (isForward)
+      obsIndex = 0;
+   else
+      obsIndex = observations.size() - 1;
+}
+
+
+//-----------------------------------------------------------------------------
+// void SetDirection(bool forwards)
+//-----------------------------------------------------------------------------
+/**
+ * Set the direction to advance through the observations in MeasurementManager.
+ *
+ * This setting affects which direction AdvanceObservation() will travel through
+ * the vector of observations.
+ *
+ * @param forwards The direction to set. True means to advance forwads through
+ *                 the vector of observations, false means to advance in reverse
+ */
+ //-----------------------------------------------------------------------------
+void MeasurementManager::SetDirection(bool forwards)
+{
+   isForward = forwards;
+}
+
+
+//-----------------------------------------------------------------------------
+// bool IsForward()
+//-----------------------------------------------------------------------------
+/**
+ * Gets the direction to advance through the observations in MeasurementManager.
+ *
+ * @return True if the direction is forwards, false if backwards
+ */
+ //-----------------------------------------------------------------------------
+bool MeasurementManager::IsForward()
+{
+   return isForward;
 }
 
 
@@ -3175,45 +3027,6 @@ Integer MeasurementManager::AddMeasurement(TrackingFileSet* tfs)
                tfs->GetName().c_str(), tfs);
       #endif
       trackingSets.push_back(tfs);
-
-//      // Now add the adapters
-//      std::vector<TrackingDataAdapter*> *setAdapters = tfs->GetAdapters();
-//
-//      for (UnsignedInt i = 0; i < setAdapters->size(); ++i)
-//         AddMeasurement((*setAdapters)[i]);
-//
-//      // And the stream objects
-//      StringArray filenames = tfs->GetStringArrayParameter("FileName");
-//      for (UnsignedInt i = 0; i < filenames.size(); ++i)
-//      {
-//         std::stringstream fn;
-//         fn << tfs->GetName() << "DataFile" << i;
-//         DataFile *newStream = new DataFile(fn.str());
-//         newStream->SetStringParameter("Filename", filenames[i]);
-//         GmatObType *got = new GmatObType();
-//         newStream->SetStream(got);
-//         newStream->Initialize();
-//
-//         #ifdef DEBUG_INITIALIZATION
-//            MessageInterface::ShowMessage("   Adding %s DataFile %s <%p>\n",
-//                  (newStream->IsInitialized() ? "initialized" :
-//                  "not initialized"), newStream->GetName().c_str(), newStream);
-//         #endif
-//
-//         SetStreamObject(newStream);
-//
-//         // Associate the adapters with the stream
-//         for (UnsignedInt j = 0; j < setAdapters->size(); ++j)
-//         {
-//            #ifdef DEBUG_INITIALIZATION
-//               MessageInterface::ShowMessage("Associating %d with %s\n",
-//                     (*setAdapters)[j]->GetModelID(),
-//                     newStream->GetName().c_str());
-//            #endif
-//            idToStreamMap[(*setAdapters)[j]->GetModelID()] = newStream;
-//         }
-//      }
-//      // Set retval?
    }
 
    return retval;
@@ -3239,37 +3052,37 @@ Integer MeasurementManager::AddMeasurement(TrackingDataAdapter* adapter)
             "not initialized"), adapter->GetName().c_str(), adapter);
    #endif
    adapter->SetModelID(largestId++);
-   if (thePropagator)
-      adapter->SetPropagator(thePropagator);
+   if (thePropagators)
+      adapter->SetPropagators(thePropagators, satPropagatorMap);
    adapters.push_back(adapter);
    return -1;
 }
 
 
-//------------------------------------------------------------------------------
-// const std::vector<MeasurementModel*>& GetAllMeasurementModels()
-//------------------------------------------------------------------------------
-/**
-* Get a list of all MeasurementModel objects
-*/
-//------------------------------------------------------------------------------
-const std::vector<MeasurementModel*>& MeasurementManager::GetAllMeasurementModels()
-{
-   return models;
-}
+////------------------------------------------------------------------------------
+//// const std::vector<MeasurementModel*>& GetAllMeasurementModels()
+////------------------------------------------------------------------------------
+///**
+//* Get a list of all MeasurementModel objects
+//*/
+////------------------------------------------------------------------------------
+//const std::vector<MeasurementModel*>& MeasurementManager::GetAllMeasurementModels()
+//{
+//   return models;
+//}
 
 
-//------------------------------------------------------------------------------
-// const std::vector<TrackingSystem*>& GetAllTrackingSystems()
-//------------------------------------------------------------------------------
-/**
-* Get a list of all TrackingSystem objects
-*/
-//------------------------------------------------------------------------------
-const std::vector<TrackingSystem*>& MeasurementManager::GetAllTrackingSystems()
-{
-   return systems;
-}
+////------------------------------------------------------------------------------
+//// const std::vector<TrackingSystem*>& GetAllTrackingSystems()
+////------------------------------------------------------------------------------
+///**
+//* Get a list of all TrackingSystem objects
+//*/
+////------------------------------------------------------------------------------
+//const std::vector<TrackingSystem*>& MeasurementManager::GetAllTrackingSystems()
+//{
+//   return systems;
+//}
 
 
 //------------------------------------------------------------------------------
@@ -3286,6 +3099,19 @@ const std::vector<TrackingFileSet*>& MeasurementManager::GetAllTrackingFileSets(
 
 
 //------------------------------------------------------------------------------
+// UnsignedInt GetMeasurementSize()
+//------------------------------------------------------------------------------
+/**
+* Get the size of the measurement vector
+*/
+//------------------------------------------------------------------------------
+UnsignedInt MeasurementManager::GetMeasurementSize()
+{
+   return observations.size();
+}
+
+
+//------------------------------------------------------------------------------
 // UnsignedInt GetCurrentRecordNumber()
 //------------------------------------------------------------------------------
 /**
@@ -3294,13 +3120,39 @@ const std::vector<TrackingFileSet*>& MeasurementManager::GetAllTrackingFileSets(
 //------------------------------------------------------------------------------
 UnsignedInt MeasurementManager::GetCurrentRecordNumber()
 {
-   UnsignedInt i = 0;
-   for (std::vector<ObservationData>::iterator j = observations.begin(); j != observations.end(); ++j)
-   {
-      if (j == currentObs)
-       break;
-     ++i;
-   }
+   return obsIndex;
+}
 
-   return i;
+//------------------------------------------------------------------------------
+// GetRampTableForAdapter(TrackingDataAdapter& adapter)
+//------------------------------------------------------------------------------
+/**
+ * @param adapter The adapter to get the ramp table from
+ */
+ //------------------------------------------------------------------------------
+std::vector<RampTableData>* MeasurementManager::GetRampTableForAdapter(TrackingDataAdapter& adapter)
+{
+   StringArray sr = adapter.GetStringArrayParameter("RampTables");
+   std::string measType = adapter.GetStringParameter("MeasurementType");
+
+   std::vector<RampTableData>* rt = NULL;
+   if( (measType == "DSN_SeqRange" || measType == "DSN_TCP") && sr.size() > 0 )
+      rt = &(rampTables[sr[0]]);
+
+   return rt;
+}
+
+//------------------------------------------------------------------------------
+// ClearIonosphereCache()
+//------------------------------------------------------------------------------
+/**
+ * Clears the ionosphere cache
+ */
+ //------------------------------------------------------------------------------
+void MeasurementManager::ClearIonosphereCache()
+{
+   // Make sure previous cache is cleared
+   for (auto it = trackingSets.begin(); it != trackingSets.end(); ++it) {
+      (*it)->ClearIonosphereCache();
+   }
 }

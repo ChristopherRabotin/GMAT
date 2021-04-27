@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -55,16 +55,20 @@ private:
    bool dataChanged;
    bool canClose;
    
-   bool spadFileChanged;
+   bool spadSRPFileChanged;
+   bool spadDragFileChanged;
 
    void Create();
     
    // Event Handling
    DECLARE_EVENT_TABLE();
    void OnTextChange(wxCommandEvent &event);
-   void OnSPADTextChange(wxCommandEvent &event);
-   void OnBrowseButton(wxCommandEvent& event);
-    
+   void OnSPADSRPTextChange(wxCommandEvent &event);
+   void OnSRPBrowseButton(wxCommandEvent& event);
+   void OnSPADDragTextChange(wxCommandEvent &event);
+   void OnDragBrowseButton(wxCommandEvent& event);
+   void OnComboBoxChange(wxCommandEvent& event);
+   
    Spacecraft *theSpacecraft;
 
    GmatPanel *theScPanel;
@@ -75,21 +79,39 @@ private:
    wxTextCtrl *dragAreaTextCtrl;
    wxTextCtrl *srpAreaTextCtrl;
 
-   wxTextCtrl *spadSrpFileTextCtrl;
-   wxTextCtrl *spadSrpScaleFactorTextCtrl;
-
+   // SPAD 
+   wxTextCtrl     *spadSrpFileTextCtrl;
+   wxTextCtrl     *spadSrpScaleFactorTextCtrl;
+   wxComboBox     *spadSrpInterpComboBox;
+   
    wxBitmapButton *spadBrowseButton;
-
+   
    std::string    theSpadSrpFile;
    std::string    prevSpadSrpFile;
-
+   std::string    srpInterpMethod;
+   
+   wxTextCtrl     *spadDragFileTextCtrl;
+   wxTextCtrl     *spadDragScaleFactorTextCtrl;
+   wxComboBox     *spadDragInterpComboBox;
+   
+   wxBitmapButton *spadDragBrowseButton;
+   
+   std::string    theSpadDragFile;
+   std::string    prevSpadDragFile;
+   std::string    dragInterpMethod;
+   
+   wxArrayString ToWxArrayString(const StringArray &array);
+   
    // IDs for the controls and the menu commands
    enum
    {     
       ID_TEXT = 30100,
       ID_TEXTCTRL,
-      ID_SPAD_TEXTCTRL,
-      ID_SPAD_BUTTON_BROWSE,
+      ID_SPAD_SRP_TEXTCTRL,
+      ID_SPAD_SRP_BUTTON_BROWSE,
+      ID_SPAD_DRAG_TEXTCTRL,
+      ID_SPAD_DRAG_BUTTON_BROWSE,
+      ID_SPAD_COMBOBOX,
    };
 };
 #endif

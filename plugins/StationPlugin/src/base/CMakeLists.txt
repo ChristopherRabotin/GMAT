@@ -16,9 +16,6 @@ MESSAGE("GMAT Station Plugin setup " ${VERSION})
 
 SET(TargetName Station)
 
-# Add Preproccessor Definitions
-ADD_DEFINITIONS("-DSTATION_EXPORTS")
-
 # ====================================================================
 # list of directories containing source/header files
 SET(PLUGIN_DIRS factory include plugin station)
@@ -34,3 +31,6 @@ SET(PLUGIN_SRCS
 # ====================================================================
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
+
+# Rename DLL export preproccessor definition
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEFINE_SYMBOL "STATION_EXPORTS")

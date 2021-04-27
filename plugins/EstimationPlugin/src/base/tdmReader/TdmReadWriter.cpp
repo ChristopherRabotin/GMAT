@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -24,7 +24,6 @@
 #include "xercesc/framework/LocalFileInputSource.hpp"
 #include "MeasurementException.hpp"
 #include "DateUtil.hpp"
-#include <memory>                         // for auto_ptr
 
 
 //------------------------------------------------------------------------------
@@ -88,9 +87,12 @@ TdmReadWriter& TdmReadWriter::operator=(const TdmReadWriter &trw)
    if (this != &trw)
    {
       TdmErrorHandler *newErrorHandler = trw.theErrorHandler; 
+      if (theErrorHandler)                         // made changes by TUAN NGUYEN
+      {                                            // made changes by TUAN NGUYEN
+         delete theErrorHandler;
+         theErrorHandler = NULL;                   // made changes by TUAN NGUYEN
+      }                                            // made changes by TUAN NGUYEN
 
-      delete theErrorHandler;
-     
       theErrorHandler = newErrorHandler;
       theDOMParser = trw.theDOMParser;;
       theBody = trw.theBody;
@@ -202,7 +204,7 @@ ObservationData *TdmReadWriter::ProcessMetadata()
                {
                   std::string strT(XMLString::transcode(pChild->getTextContent()));
                   if ( strT == "UTC")
-                     theTemplate.epochSystem = TimeConverterUtil::UTCMJD;
+                     theTemplate.epochSystem = TimeSystemConverter::UTCMJD;
                   break;
                }
                case PARTICIPANT_1:
@@ -399,12 +401,12 @@ ObservationData *TdmReadWriter::LoadRecord(ObservationData *newData)
 //------------------------------------------------------------------------------
 bool TdmReadWriter::Validate(const std::string &tdmFileName)
 {
-   std::auto_ptr<LocalFileInputSource> xmlFile;
+   LocalFileInputSource *xmlFile;
 
    // Load the TDM XML file
    try
    {
-      xmlFile.reset(new LocalFileInputSource(XMLString::transcode(tdmFileName.c_str())));
+      xmlFile = new LocalFileInputSource(XMLString::transcode(tdmFileName.c_str()));
    }
    catch(const XMLException &xe)
    {
@@ -450,10 +452,16 @@ bool TdmReadWriter::Validate(const std::string &tdmFileName)
 //------------------------------------------------------------------------------
 bool TdmReadWriter::Finalize()
 {
-   delete theDOMParser;
-   delete theErrorHandler;
-   theDOMParser = NULL;
-   theErrorHandler = NULL;
+   if (theDOMParser)                       // made changes by TUAN NGUYEN
+   {
+      delete theDOMParser;
+      theDOMParser = NULL;
+   }
+   if (theErrorHandler)                    // made changes by TUAN NGUYEN
+   {
+      delete theErrorHandler;
+      theErrorHandler = NULL;
+   }
    xercesInitialized = false;
 
    XMLPlatformUtils::Terminate();

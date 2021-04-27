@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -63,7 +63,10 @@ public:
    virtual void SetReal(Real val);
    
    virtual Integer GetParameterID(const std::string &str) const;
-   
+   virtual std::string GetParameterTypeString(const Integer id) const;
+   virtual Gmat::ParameterType GetParameterType(const Integer id) const;
+   virtual bool IsParameterReadOnly(const Integer id) const;
+
    virtual Real GetRealParameter(const Integer id) const;
    virtual Real GetRealParameter(const std::string &label) const;
    

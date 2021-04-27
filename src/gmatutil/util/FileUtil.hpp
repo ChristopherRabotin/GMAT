@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -70,7 +70,7 @@ namespace GmatFileUtil
    bool GMATUTIL_API GetLine(std::istream *inStream, std::string &line);
    bool GMATUTIL_API IsAppInstalled(const std::string &appName, std::string &appLoc);
 
-   std::string GetGmatPath();
+   GMATUTIL_API std::string GetGmatPath();
    
    WrapperTypeArray GMATUTIL_API
       GetFunctionOutputTypes(std::istream *is, const StringArray &inputs,
@@ -81,7 +81,7 @@ namespace GmatFileUtil
                                                  bool addPath = false);
    StringArray GMATUTIL_API GetTextLines(const std::string &fileName);
 
-   bool                 PrepareCompare(Integer numDirsToCompare,
+   GMATUTIL_API bool    PrepareCompare(Integer numDirsToCompare,
                            const std::string &basefilename,
                            const std::string &filename1,
                            const std::string &filename2,

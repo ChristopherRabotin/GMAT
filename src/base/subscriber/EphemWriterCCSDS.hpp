@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -46,7 +46,8 @@ public:
    // Methods can be overridden by subclasses
    virtual void CreateEphemerisFile(bool useDefaultFileName,
                                     const std::string &stType,
-                                    const std::string &outFormat);
+                                    const std::string &outFormat,
+                                    const std::string &covFormat);
    virtual void InitializeData(bool saveEpochInfo);
    virtual bool IsBackwardPropAllowed(Real propDirection);
    virtual void HandleOrbitData();
@@ -82,7 +83,7 @@ protected:
    bool        saveMetaDataStart;
    
    // Abstract methods required by all subclasses
-   virtual void BufferOrbitData(Real epochInDays, const Real state[6]);
+   virtual void BufferOrbitData(Real epochInDays, const Real state[6], const Real cov[21]);
    
    
    // Data

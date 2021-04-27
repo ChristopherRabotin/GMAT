@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -84,6 +84,17 @@ GroundStation::PARAMETER_TYPE[GroundStationParamCount - BodyFixedPointParamCount
       Gmat::REAL_TYPE,      // Humidity
       Gmat::REAL_TYPE,      // MinimumElevationAngle
       Gmat::OBJECTARRAY_TYPE,      // ERROR_MODEL
+   };
+
+const std::map<std::string, std::set<std::string>> 
+GroundStation::DISALLOWED_ANGLE_PAIRS =
+   {
+     { "Azimuth",   { "XEast", "YNorth", "XSouth", "YEast"}      },
+     { "Elevation", { "XEast", "YNorth", "XSouth", "YEast"}      },
+     { "XEast",     { "Azimuth", "Elevation", "XSouth", "YEast"} },
+     { "YNorth",    { "Azimuth", "Elevation", "XSouth", "YEast"} },
+     { "XSouth",    { "Azimuth", "Elevation", "XEast", "YNorth"} },
+     { "YEast",     { "Azimuth", "Elevation", "XEast", "YNorth"} }
    };
 
 //---------------------------------
@@ -1031,41 +1042,22 @@ bool GroundStation::SetRefObject(GmatBase *obj, const UnsignedInt type,
    case Gmat::ERROR_MODEL:   // work for error model
       if (obj->GetType() == Gmat::ERROR_MODEL)
       {
-         for (UnsignedInt i=0; i < errorModels.size(); ++i)
+         std::string errorMessage;
+         if (!VerifyErrorModels(*obj, errorMessage))
          {
-            // Don't add if it's already there
-            if (errorModels[i]->GetName() == obj->GetName())
+            try
             {
-               try
-               {
-                  throw GmatBaseException("Error: ErrorModel object " +
-                     errorModels[i]->GetName() + " was added multiple times to " + GetName() + ".ErrorModels parameter.\n");
-               }
-               catch (GmatBaseException &ex)
-               {
-                  ex.SetFatal(true);
-                  throw ex;
-               }
+               throw GmatBaseException(errorMessage);
             }
-
-            // Don't add if it has type (trip and strand) the same as the one in the list
-            if (errorModels[i]->GetStringParameter("Type") == obj->GetStringParameter("Type"))
+            catch (GmatBaseException &ex)
             {
-               try
-               {
-                  throw GmatBaseException("Error: ErrorModel objects " +
-                     errorModels[i]->GetName() + " and " + obj->GetName() + " set to " + GetName() + ".ErrorModels parameter have the same measurement type.\n");
-               }
-               catch (GmatBaseException &ex)
-               {
-                  ex.SetFatal(true);
-                  throw ex;
-               }
+               ex.SetFatal(true);
+               throw ex;
             }
          }
-
          GmatBase* refObj = obj->Clone();       // a error model needs to be cloned
          refObj->SetFullName(GetName() + "." + refObj->GetName()); // It needs to have full name. ex: "CAN.ErrorModel1"  
+         refObj->SetStringParameter("Id", stationId + "." + refObj->GetStringParameter("Type"));
          errorModels.push_back(refObj);   
 
          return true;
@@ -1261,7 +1253,6 @@ bool GroundStation::VerifyAddHardware()
    return verify;
 }
 
-
 //------------------------------------------------------------------------------
 /**
  */
@@ -1324,11 +1315,12 @@ bool GroundStation::Initialize()
       MessageInterface::ShowMessage("GroundStation<%s,%p>::Initialize()  exit\n", GetName().c_str(), this);
    #endif
 
+   isInitialized = true;
    return true;
 }
 
 
-bool GroundStation::CreateErrorModelForSignalPath(std::string spacecraftName)
+bool GroundStation::CreateErrorModelForSignalPath(std::string spacecraftName, std::string spacecraftId)
 {
    std::map<std::string, ObjectArray>::iterator i = errorModelMap.find(spacecraftName);
    if (i == errorModelMap.end())
@@ -1339,6 +1331,7 @@ bool GroundStation::CreateErrorModelForSignalPath(std::string spacecraftName)
          GmatBase* cloneObj = errorModels[j]->Clone();
          //MessageInterface::ShowMessage("###  object = <%s,%p>\n", cloneObj->GetFullName().c_str(), cloneObj);
          cloneObj->SetFullName(GetName() + "." + spacecraftName + "_" + cloneObj->GetName());
+         cloneObj->SetStringParameter("Id", stationId + "." + spacecraftId + "." + cloneObj->GetStringParameter("Type"));
          oa.push_back(cloneObj);
       }
       errorModelMap[spacecraftName] = oa; 
@@ -1446,5 +1439,60 @@ Real* GroundStation::IsValidElevationAngle(const Rvector6 &state_sez)
    #endif
 
    return az_el_visible;
+}
+
+//------------------------------------------------------------------------------
+// bool VerifyErrorModels(const GmatBase &errorModelToadd, std::string &message)
+//------------------------------------------------------------------------------
+/**
+ * Performs general validation for the error model being added to this ground station.
+ *
+ * @param errorModelToadd error model that is to be considered for validation
+ * @param message validation message if validation fails
+ *
+ * @return true if the error model passes validation
+ */
+ //------------------------------------------------------------------------------
+bool GroundStation::VerifyErrorModels(const GmatBase &errorModelToadd,
+                                      std::string &message) const
+{
+   message.clear();
+   for (auto& existingErrorModel: errorModels)
+   {
+      // Don't add if it's already there
+      if (existingErrorModel->GetName() == errorModelToadd.GetName())
+      {
+         message = "Error: ErrorModel object " + existingErrorModel->GetName()
+            + " was added multiple times to " + GetName() + ".ErrorModels parameter.\n";
+         return false;
+      }
+
+      // Don't add if it has type (trip and strand) the same as the one in the list
+      if (existingErrorModel->GetStringParameter("Type") == errorModelToadd.GetStringParameter("Type"))
+      {
+         message = "Error: ErrorModel objects " + existingErrorModel->GetName() + " and "
+            + errorModelToadd.GetName() + " set to "
+            + GetName() + ".ErrorModels parameter have the same measurement type.\n";
+         return false;
+      }
+
+      // Check if it should validate for disallowed angle pairs
+      if (DISALLOWED_ANGLE_PAIRS.find(
+         existingErrorModel->GetStringParameter("Type")) != DISALLOWED_ANGLE_PAIRS.end())
+      {
+         //check if the error to add is part of measurement angle validation
+         auto disallowedList = DISALLOWED_ANGLE_PAIRS.at(existingErrorModel->GetStringParameter("Type"));
+         if (disallowedList.find(errorModelToadd.GetStringParameter("Type")) != disallowedList.end())
+         {
+            //found disallowed angle
+            message = "Error: ErrorModel angle type '" + errorModelToadd.GetStringParameter("Type")
+               + "' may not be paired with angle type '" + existingErrorModel->GetStringParameter("Type")
+               + "' on GroundStation '"+ GetName() +"'. Allowed angle type pairs are Azimuth/Elevation,"
+               + " XEast/YNorth, and XSouth/YEast.";
+            return false;
+         }
+      }
+   }
+   return true;
 }
 

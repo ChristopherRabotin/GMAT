@@ -1,0 +1,72 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Create and configure BatchEstimator object</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html" title="Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data"><link rel="prev" href="DSN_Estimation_Create_and_configure_Force_model_and_propagator.html" title="Create and configure Force model and propagator"><link rel="next" href="DSN_Estimation_Run_the_mission_and_analyze_the_results.html" title="Run the mission and analyze the results"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Create and configure BatchEstimator object</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="DSN_Estimation_Create_and_configure_Force_model_and_propagator.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="DSN_Estimation_Run_the_mission_and_analyze_the_results.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="DSN_Estimation_Create_and_configure_BatchEstimator_object"></a>Create and configure BatchEstimator object</h2></div></div></div><p>As shown below, we create and configure the
+    <span class="guilabel">BatchEstimator</span> object used to define our estimation
+    process.</p><pre class="programlisting">Create BatchEstimator bat
+bat.ShowProgress               = true;
+bat.ReportStyle                = Normal;
+bat.ReportFile                 =  ...
+         'Orbit Estimation using DSN Range and Doppler Data.report';
+bat.Measurements               = {DSNsimData} 
+bat.AbsoluteTol                = 0.001;
+bat.RelativeTol                = 0.0001;
+bat.MaximumIterations          = 10
+bat.MaxConsecutiveDivergences  = 3;
+bat.Propagator                 = Prop;
+bat.ShowAllResiduals           = On;
+bat.OLSEInitialRMSSigma        = 10000;
+bat.OLSEMultiplicativeConstant = 3;
+bat.OLSEAdditiveConstant       = 0;
+bat.EstimationEpochFormat      = 'FromParticipants'; 
+bat.InversionAlgorithm         = 'Internal';    
+bat.MatlabFile                 =  ...
+           'Orbit Estimation using DSN Range and Doppler Data.mat'</pre><p>All of the fields above are described in
+    <span class="guilabel">BatchEstimator</span> Help but we describe them briefly here
+    as well. In the first script line above, we create a
+    <span class="guilabel">BatchEstimator</span> object, <span class="guilabel">bat</span>. In
+    the next line, we set the <span class="guilabel">ShowProgress</span> field to true
+    so that detailed output of the batch estimator will be shown in the
+    message window.</p><p>In the third line, we set the <span class="guilabel">ReportStyle</span> to
+    Normal. For the R2016A GMAT release, this is the only report style that is
+    available. In a future release, if we wanted to see additional data such
+    as measurement partial derivatives, we would use the Verbose style. In the
+    next line, we set the <span class="guilabel">ReportFile</span> field to the name of
+    our desired output file which by default is written to GMAT&rsquo;s &lsquo;output&rsquo;
+    directory.</p><p>We set the Measurements field to the name of the
+    <span class="guilabel">TrackingFileSet</span> resource we wish to use. Recall that
+    the <span class="guilabel">TrackingFileSet</span>, <span class="guilabel">DSNsimData</span>,
+    that we created in the <a class="xref" href="DSN_Estimation_Define_the_types_of_measurements_that_will_be_processed.html" title="Define the types of measurements that will be processed">Define the types of measurements that will be processed</a> section defines the type of measurements that
+    we wish to process. In our case, we wish to process DSN range and Doppler
+    data associated with the <span class="guilabel">CAN</span>,
+    <span class="guilabel">GDS</span>, and <span class="guilabel">MAD</span> ground
+    stations.</p><p>The next four fields, <span class="guilabel">AbsoluteTol</span>,
+    <span class="guilabel">RelativeTol</span>, <span class="guilabel">MaximumIterations</span>,
+    and <span class="guilabel">MaxConsecutiveDivergences</span> define the batch
+    estimator convergence criteria. See the &ldquo;Behavior of Convergence Criteria&rdquo;
+    discussion in the <span class="guilabel">BatchEstimator</span> Help for complete
+    details.</p><p>The next script line sets the Propagator field which specifies which
+    <span class="guilabel">Propagator</span> object should be used during estimation.
+    We set this field to the <span class="guilabel">Prop</span>
+    <span class="guilabel">Propagator</span> object which we created in the <a class="xref" href="DSN_Estimation_Define_the_types_of_measurements_that_will_be_processed.html" title="Define the types of measurements that will be processed">Define the types of measurements that will be processed</a> section.</p><p>In the 11th script line, we set the
+    <span class="guilabel">ShowAllResiduals</span> field to true show that the
+    observation residuals plots, associated with the various ground stations,
+    will be displayed</p><p>The next three script lines set fields,
+    <span class="guilabel">OLSEInitialRMSSigma</span>,
+    <span class="guilabel">OLSEMultiplicativeConstant</span>, and
+    <span class="guilabel">OLSEAdditiveConstant</span>, that are associated with GMAT&rsquo;s
+    Outer Loop Sigma Editing (OLSE) capability that is used to edit, i.e.,
+    remove, certain measurements so that they are not used to calculate the
+    orbit estimate. See the &ldquo;Behavior of Outer Loop Sigma Editing (OLSE)&rdquo;
+    discussion in the <span class="guilabel">BatchEstimator</span> Help for complete
+    details.</p><p>Next, we set the <span class="guilabel">EstimationEpochFormat</span> field to
+    'FromParticipants&rsquo; which tells GMAT that the epoch associated with the
+    solve-for variables, in this case the Cartesian State of
+    <span class="guilabel">Sat</span>, comes from the value of
+    <span class="guilabel">Sat.Epoch</span> which we have set to &ldquo;19 Aug 2015
+    00:00:00.000 UTCG.&rdquo;</p><p>Next, we set the <span class="guilabel">InversionAlgorithm</span> field to
+    'Internal' which specifies which algorithm GMAT should use to invert the
+    normal equations. There are two other inversion algorithms, 'Cholesky' or
+    'Schur' that we could optionally use.</p><p>Finally, we set the value of <span class="guilabel">MatlabFile</span>. This
+    is the name of the MATLAB output file that will be created, which, by
+    default, is written to GMAT&rsquo;s &lsquo;output&rsquo; directory. This file can be read
+    into MATLAB to perform detailed calculations and analysis. The MATLAB file
+    can only be created if you have MATLAB installed and properly configured
+    for use with GMAT.</p></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="DSN_Estimation_Create_and_configure_Force_model_and_propagator.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="DSN_Estimation_Run_the_mission_and_analyze_the_results.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Create and configure Force model and propagator&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Run the mission and analyze the results</td></tr></table></div></body></html>

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -58,6 +58,8 @@
 #include "GmatOpenGLSupport.hpp"   // for OpenGL support
 #include "AttitudeConversionUtility.hpp"
 #include <string.h>                // for strlen( )
+
+#include "GuiPublisher.hpp"
 
 #ifdef __WXMAC__
 #  ifdef __DARWIN__
@@ -1773,21 +1775,17 @@ void OrbitViewCanvas::DrawFrame()
    mIsEndOfData = false;
    mIsEndOfRun = false;
    mCurrIndex = 0;
-   
+
+   Publisher *publisher = GuiPublisher::Instance();
+
    // refresh every 50 points (Allow user to set frame this increment?)
    for (int frame = 1; frame <= numberOfData; frame+=mFrameInc)
    {
       mIsAnimationRunning = true;
-      
-      // wxYield() yields control to pending messages in the windowing system.
-      
-      // wxSafeYield() is similar to wxYield() except it disables the user
-      // input to all program windows before calling wxYield and re-enables
-      // it again afterwards.
-      
-      //wxSafeYield();
-      wxYield(); //loj: 8/16/05 to allow mouse event
-      
+
+      // Yield periodically
+      publisher->Ping();
+
       if (mHasUserInterrupted)
          break;
       

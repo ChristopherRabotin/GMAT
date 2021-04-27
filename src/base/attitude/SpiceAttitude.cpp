@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -800,6 +800,13 @@ void SpiceAttitude::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 
 }
 
+
+// made changes by TUAN NGUYEN
+void SpiceAttitude::ComputeCosineMatrixAndAngularVelocity(GmatTime &atTime)
+{
+   ///@todo: it needs to add code for a high precision of time
+   ComputeCosineMatrixAndAngularVelocity(atTime.GetMjd());
+}
 
 //------------------------------------------------------------------------------
 //  private methods

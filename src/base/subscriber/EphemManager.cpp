@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -332,13 +332,15 @@ bool EphemManager::RecordEphemerisData()
          ephemFile->SetStringParameter("Filename", fileName);
          ephemFile->SetStringParameter("Interpolator", "Hermite");
          ephemFile->SetIntegerParameter(ephemFile->GetParameterID("InterpolationOrder"), 7);
-         ephemFile->SetBackgroundGeneration(true);
+//         ephemFile->SetBackgroundGeneration(true); // must be set after initialization
 
          ephemFile->SetInternalCoordSystem(coordSys);
          ephemFile->SetRefObject(theObj,   Gmat::SPACECRAFT,        theObjName);
          ephemFile->SetRefObject(coordSys, Gmat::COORDINATE_SYSTEM, coordSysName);
 
          ephemFile->Initialize();
+         ephemFile->TakeAction("ToggleOn");
+         ephemFile->SetBackgroundGeneration(true);
 
          // Subscribe to the data
          Publisher *pub = Publisher::Instance();
@@ -1061,8 +1063,14 @@ void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
    #endif
    // first check to see if a kernel specified is not loaded; if not,
    // try to load it
+   FileManager *fm = FileManager::Instance();
    for (unsigned int ii = 0; ii < inKernels.size(); ii++)
-      if (!spice->IsLoaded(inKernels.at(ii)))   spice->LoadKernel(inKernels.at(ii));
+   {
+      std::string kName = GmatStringUtil::Replace(inKernels.at(ii), "\\", "/");
+      std::string fullPath = fm->FindPath(kName, "VEHICLE_EPHEM_SPK_PATH",
+                                          true, false, true);
+      if (!spice->IsLoaded(fullPath))   spice->LoadKernel(fullPath);
+   }
 
    SpiceInt         idSpice     = forNaifId;
    SpiceInt         arclen      = 4;
@@ -1094,7 +1102,9 @@ void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
                forNaifId, (inKernels.at(ii)).c_str());
       #endif
       // SPICE expects forward slashes for directory separators
-      std::string kName = GmatStringUtil::Replace(inKernels.at(ii), "\\", "/");
+      std::string kName1 = GmatStringUtil::Replace(inKernels.at(ii), "\\", "/");
+      std::string kName  = fm->FindPath(kName1, "VEHICLE_EPHEM_SPK_PATH",
+                                        true, false, true);
       #ifdef DEBUG_SPK_COVERAGE
          MessageInterface::ShowMessage("--- Setting kernel name to %s\n", kName.c_str());
       #endif

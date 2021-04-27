@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -29,6 +29,7 @@
 #include "CoordinateConverter.hpp"
 #include "ProgressReporter.hpp"
 #include "SignalData.hpp"
+#include "SignalDataCache.hpp"
 #include "GmatTime.hpp"
 #include "RampTableData.hpp"
 
@@ -110,6 +111,10 @@ public:
                                           bool epochAtReceive,
                                           bool moveAll = true);
 
+   void                SetIonosphereCache(SignalDataCache::SimpleSignalDataCache* cache);
+
+   void                SetStrandId(unsigned long id);
+
 protected:
    /// The next node in the list of signals (NULL at the end of the list)
    SignalBase                 *next;
@@ -188,6 +193,12 @@ protected:
    /// The current logging level for signals
    UnsignedInt                logLevel;
 
+   /// The light time cache 
+   SignalDataCache::SimpleSignalDataCache *ionosphereCache;
+
+   /// The strandID
+   unsigned long strandId;
+
    void                       SetPrevious(SignalBase *prev);
 
    // Some useful methods
@@ -200,7 +211,9 @@ protected:
 
    virtual Real               GetCrDerivative(GmatBase *forObj);
    virtual Real               GetCdDerivative(GmatBase *forObj);
-   virtual void               GetCDerivativeVector(GmatBase *forObj, Rvector &deriv);
+   virtual Real               GetTSFDerivative(GmatBase *forObj, const std::string &paramName);     // Thrust Scale Factor Solve For
+   virtual Real               GetParamDerivative(GmatBase *forObj, std::string paramName, GmatBase *objPtr = NULL);                // made changes by TUAN NGUYEN
+   virtual void               GetCDerivativeVector(GmatBase *forObj, Rvector &deriv, const std::string &solveForType);
    virtual void               GetRangeDerivative(GmatBase *forObj, bool wrtR, bool wrtV,
                                  Rvector &deriv);
    virtual void               GetRangeVectorDerivative(GmatBase *forObj, bool wrtR, bool wrtV,

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -32,17 +32,21 @@
  *     GMAT object.parameter = value;
  *     GMAT variable = parameter;
  *     GMAT variable = equation;
- * 
  */
 //------------------------------------------------------------------------------
+
 #ifndef Assignment_hpp
 #define Assignment_hpp
 
 #include "gmatdefs.hpp"
 #include "GmatCommand.hpp"
-#include "MathTree.hpp"
 #include "Function.hpp"
+#include "RHSEquation.hpp"
 
+
+/**
+ * Sets one property or object equal to a computed quantity or other object
+ */
 class GMAT_API Assignment : public GmatCommand
 {
 public:
@@ -120,8 +124,8 @@ protected:
    ElementWrapper*      lhsWrapper;
    /// ElementWrapper pointer for the rhs of the equals sign
    ElementWrapper*      rhsWrapper;
-   /// MathNode pointer for RHS equation
-   MathTree             *mathTree;
+   /// Container for RHS equation
+   RHSEquation          *rhsEquation;
    /// Wrapper name and ElementWrapper pointer Map for RHS math element
    WrapperMap           mathWrapperMap;
 
@@ -136,11 +140,13 @@ protected:
    bool ValidateRvector(ElementWrapper *lhsWrapper, ElementWrapper *rhsWrapper);
    
    void ClearMathTree();
-   ElementWrapper* RunMathTree();
+   // ElementWrapper* RunMathTree();
    void HandleObjectPropertyChange(ElementWrapper *lhsWrapper);
 
    void PassToClones();
    void MatchAttribute(Integer id, GmatBase *owner, GmatBase *receiver);
+
+   bool ParseRHS(std::string &rhs);
 };
 
 #endif // Assignment_hpp

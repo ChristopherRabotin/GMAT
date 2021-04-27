@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -51,7 +51,10 @@ private:
    RealArray CalculateMarini(); // Marini model
 
    void TROGET(Real FLATD, Real FLOND, Integer MON, Integer &NS, Real &HT);
-   Real BendingIntegral(Real ALPHA, Real FF1, Real FF2, Real FO, Real F1, Real P);
+   // 'FF1_Tropo' and 'FF2_Tropo' are necessary because FF1 is an OS X Macro and
+   // the code will not compile with original argument name 'FF1'
+   Real BendingIntegral(Real ALPHA, Real FF1_Tropo, Real FF2_Tropo,
+                        Real FO, Real F1, Real P);
 
    void LoadMariniDataFile();
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -42,8 +42,8 @@
 #endif
 
 /// TBD: Are these needed?
-#include "GmatODType.hpp"
-#include "GmatODDopplerType.hpp"
+//#include "GmatODType.hpp"
+//#include "GmatODDopplerType.hpp"
 #include "RampTableType.hpp"
 
 
@@ -61,8 +61,8 @@ ObTypeFactory::ObTypeFactory() :
    if (creatables.empty())
    {
       creatables.push_back("GMATInternal");
-	   creatables.push_back("GMAT_OD");
-	   creatables.push_back("GMAT_ODDoppler");
+	   //creatables.push_back("GMAT_OD");
+	   //creatables.push_back("GMAT_ODDoppler");
 	   creatables.push_back("GMAT_RampTable");
 #ifdef INCLUDE_TDM
       creatables.push_back("TDM");
@@ -99,8 +99,8 @@ ObTypeFactory::ObTypeFactory(StringArray createList) :
    if (creatables.empty())
    {
       creatables.push_back("GMATInternal");
-	   creatables.push_back("GMAT_OD");
-	   creatables.push_back("GMAT_ODDoppler");
+	   //creatables.push_back("GMAT_OD");
+	   //creatables.push_back("GMAT_ODDoppler");
 	   creatables.push_back("GMAT_RampTable");
 #ifdef INCLUDE_TDM
       creatables.push_back("TDM");
@@ -124,8 +124,8 @@ ObTypeFactory::ObTypeFactory(const ObTypeFactory& fact) :
    if (creatables.empty())
    {
       creatables.push_back("GMATInternal");
-	   creatables.push_back("GMAT_OD");
-	   creatables.push_back("GMAT_ODDoppler");
+	   //creatables.push_back("GMAT_OD");
+	   //creatables.push_back("GMAT_ODDoppler");
 	   creatables.push_back("GMAT_RampTable");
 #ifdef INCLUDE_TDM
       creatables.push_back("TDM");
@@ -154,8 +154,8 @@ ObTypeFactory& ObTypeFactory::operator= (const ObTypeFactory& fact)
       if (creatables.empty())
       {
          creatables.push_back("GMATInternal");
-		   creatables.push_back("GMAT_OD");
-		   creatables.push_back("GMAT_ODDoppler");
+		   //creatables.push_back("GMAT_OD");
+		   //creatables.push_back("GMAT_ODDoppler");
 		   creatables.push_back("GMAT_RampTable");
 #ifdef INCLUDE_TDM
          creatables.push_back("TDM");
@@ -203,10 +203,10 @@ ObType* ObTypeFactory::CreateObType(const std::string &ofType,
 
    if (ofType == "GMATInternal")
       retval = new GmatObType(withName);
-   else if (ofType == "GMAT_OD")
-      retval = new GmatODType(withName);
-   else if (ofType == "GMAT_ODDoppler")
-      retval = new GmatODDopplerType(withName);
+   //else if (ofType == "GMAT_OD")
+   //   retval = new GmatODType(withName);
+   //else if (ofType == "GMAT_ODDoppler")
+   //   retval = new GmatODDopplerType(withName);
    else if (ofType == "GMAT_RampTable")
       retval = new RampTableType(withName);
 #ifdef INCLUDE_TDM

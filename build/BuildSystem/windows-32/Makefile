@@ -1,9 +1,13 @@
+GMAT_BRANCH = master
+#GMAT_BRANCH = GMAT-R2018a
+GMAT_OFI_BRANCH = master
 GMAT_HOME = C:/Users/gsfc580gmatbuild/Documents
 GMAT_DIR = $(GMAT_HOME)/GmatDevelopment
 GMAT_SRC_BASE_DIR = $(GMAT_DIR)/src/base
 GMAT_SRC_GUI_DIR = $(GMAT_DIR)/src/gui
 GMAT_PLUGIN_DIR = $(GMAT_HOME)/GmatPlugins/code
-GMAT_BUILD_DIR = $(GMAT_DIR)/build/windows-VS2013-CMake-32
+GMAT_OFI_DIR = $(GMAT_HOME)/OFI
+GMAT_BUILD_DIR = $(GMAT_DIR)/build/windows-VS2017-CMake-64
 GMAT_BIN_DIR = $(GMAT_DIR)/application/bin
 GMAT_MATLAB_CINTF_DIR = $(GMAT_DIR)/application/matlab/libCInterface
 GMAT_PLUGIN_BIN_DIR = $(GMAT_DIR)/application/plugins
@@ -14,7 +18,7 @@ GMAT_CAPI_PLUGIN_DOCS_DIR = $(GMAT_CAPI_PLUGIN_DIR)/doc
 GMAT_DOC_DIR = $(GMAT_DIR)/doc
 GMAT_HELP_BUILD_DIR = $(GMAT_DOC_DIR)/help
 NETWORK_DIR = Y:
-DESTINATION_DIR  = $(NETWORK_DIR)/Builds/windows/VS2013_build_32
+DESTINATION_DIR  = $(NETWORK_DIR)/Builds/windows/VS2017_build_64
 BUILD_DATE = ` date "+%Y-%m-%d" `
 DAILY_DESTINATION_DIR = $(DESTINATION_DIR)/$(BUILD_DATE)
 DAILY_MATLAB_DEST_DIR = $(DAILY_DESTINATION_DIR)/matlab
@@ -45,8 +49,9 @@ clean:
 
 # checks out the repositories
 checkout:
-	cd $(GMAT_DIR); git checkout master; git pull 
-	cd $(GMAT_PLUGIN_DIR); git checkout master; git pull; 
+	cd $(GMAT_DIR); git checkout $(GMAT_BRANCH); git pull 
+	cd $(GMAT_PLUGIN_DIR); git checkout $(GMAT_BRANCH); git pull; 
+	cd $(GMAT_OFI_DIR); git checkout $(GMAT_OFI_BRANCH); git pull;
 
 # assembles the latest build, including user help
 dist: 
@@ -61,7 +66,8 @@ dist:
 	cd $(GMAT_BIN_DIR); \
 	cp GMAT.exe $(DAILY_EXE_DEST_DIR); \
 	cp libGmatBase.dll $(DAILY_EXE_DEST_DIR); \
-	cp libCInterface.dll $(DAILY_EXE_DEST_DIR); 
+	cp libCInterface.dll $(DAILY_EXE_DEST_DIR); \
+    cp libGmatUtil.dll $(DAILY_EXE_DEST_DIR); 
 	cd $(GMAT_MATLAB_CINTF_DIR); \
 #	cp interfacewrapper.m $(DAILY_MATLAB_CINTF_DEST_DIR); 
 	cd $(GMAT_PLUGIN_BIN_DIR); \
@@ -76,10 +82,13 @@ dist:
 	cp -r $(GMAT_HELP_BUILD_DIR)/html $(DAILY_HELP_DEST_DIR);  \
 	cp -r $(GMAT_HELP_BUILD_DIR)/files $(DAILY_HELP_DEST_DIR); 
 	rm -rf $(LATEST_BUILD_DIR);
+# Don't use assemble.sh since cmake INSTALL handles all build assembly
 #	$(GMAT_BUILD_DIR)/assemble.sh -d $(LATEST_BUILD_DIR) -j $(GMAT_PLUGIN_DIR) -n $(NETWORK_DIR) -b $(DAILY_DESTINATION_DIR)
 	cd $(GMAT_BUILD_DIR); \
 	cmake --build . --target INSTALL --config Release -- //fl ;
 #	msbuild.exe GMAT.sln //p:Configuration=Release //fl //target:INSTALL;
+# Copy Visual Studio redistributables since cmake doesn't know about them
+	cp -av "$(NETWORK_DIR)"/Builds/windows/vc_lib/*.dll "$(LATEST_BUILD_DIR)"/bin
 	cp -a $(DAILY_HELP_DEST_DIR) $(LATEST_BUILD_DIR)/docs
 
 dist-devdocs:
@@ -94,7 +103,7 @@ check:
 # makes the user docs
 userdocs:
 #	cd  $(GMAT_HELP_BUILD_DIR) && $(MAKE) help
-	cd  $(GMAT_HELP_BUILD_DIR) && $(MAKE) help JAVA=C:/Java/jre7/bin/java.exe
+	cd  $(GMAT_HELP_BUILD_DIR) && $(MAKE) help JAVA=C:/Java/bin/java.exe
 	
 # makes the dev docs
 devdocs:

@@ -2,7 +2,7 @@
     related parameters</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Orbit_Estimation_using_DSN_Range_and_Doppler_Data.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;14.&nbsp;Orbit Estimation using DSN Range and Doppler Data</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="DSN_Estimation_Create_and_configure_the_Ground_Station_and_related_parameters.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="DSN_Estimation_Create_and_configure_the_spacecraft_spacecraft_transponder_and_related_parameters"></a>Create and configure the spacecraft, spacecraft transponder, and
     related parameters</h2></div></div></div><p>For this tutorial, you&rsquo;ll need GMAT open, with a new empty script
     open. To create a new script, click <span class="guibutton">New Script</span>,
-    (<span class="inlinemediaobject"><img src="../files/images/icons/NewScript.png" align="middle" height="11"></span>)</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N14CFC"></a>Create a satellite and set its epoch and Cartesian
+    (<span class="inlinemediaobject"><img src="../files/images/icons/NewScript.png" align="middle" height="11"></span>)</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N14CF5"></a>Create a satellite and set its epoch and Cartesian
       coordinates</h3></div></div></div><p>Since this is a Sun-orbiting spacecraft, we choose to represent
       the orbit in a Sun-centered coordinate frame which we define using the
       scripting below.</p><pre class="programlisting">%  Create the Sun-centered J2000 frame.
@@ -31,7 +31,7 @@ Sat.Id               = 11111;</pre><p>Note that, in addition to setting <span cl
       priori</em></span> estimate. Because, one never has exact knowledge of
       the true state, we have perturbed the Cartesian state above by a few km
       in each component as compared to the simulated true state shown in the
-      comment field.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N14D1A"></a>Create a Transponder object and attach it to our
+      comment field.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N14D13"></a>Create a Transponder object and attach it to our
       spacecraft</h3></div></div></div><p>To estimate an orbit state for a given spacecraft, GMAT requires
       that a <span class="guilabel">Transponder</span> object, which receives the
       ground station uplink signal and re-transmits it, typically, to a ground

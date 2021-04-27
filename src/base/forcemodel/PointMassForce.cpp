@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -87,6 +87,8 @@
 //#define DEBUG_INDIRECT_TERM
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_DERIVATIVES_FOR_SPACECRAFT
+//#define DEBUG_TIME_ADDITION
+
 
 #ifdef DEBUG_FIRST_CALL
    static bool firstCallFired = false;
@@ -139,11 +141,13 @@ PointMassForce::PointMassForce(const std::string &name) :
    objectTypeNames.push_back("PointMassForce");
 
    // create default body
-   bodyName = SolarSystem::EARTH_NAME; //loj: 5/20/04 added
+   bodyName = GmatSolarSystemDefaults::EARTH_NAME; //loj: 5/20/04 added
    
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
    derivativeIds.push_back(Gmat::ORBIT_STATE_TRANSITION_MATRIX);
    derivativeIds.push_back(Gmat::ORBIT_A_MATRIX);
+
+   hasTimeJacobian = true;
 }
 
 //------------------------------------------------------------------------------
@@ -318,10 +322,10 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
    #ifdef DEBUG_PMF_DERV
       MessageInterface::ShowMessage("Evaluating PointMassForce; "
          "state pointer = %d, time offset = %le, order = %d, id = %d "
-         "satCount = %d, epoch = %le\n", state, dt, order, id, satCount, theState->GetEpoch());
+         "satCount = %d, epoch = %le\n", state, dt, order, id, satCount, epoch);
    #endif
    
-   Integer i6, a6, ix;
+   Integer i6, s6, a6, ix;                             // made changes by TUAN NGUYEN
 
    if (fillCartesian || fillSTM || fillAMatrix)
    {
@@ -333,11 +337,15 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
          return false;
    
       Real radius, r3, mu_r, rbb3, mu_rbb, a_indirect[3];
-   
-      epoch = theState->GetEpoch();
-      now = epoch + dt/GmatTimeConstants::SECS_PER_DAY;
-      epochGT = theState->GetEpochGT();
-      nowGT = epochGT; nowGT.AddSeconds(dt);
+
+      now = epoch + (elapsedTime + dt)/GmatTimeConstants::SECS_PER_DAY;
+      nowGT = epochGT; nowGT.AddSeconds(elapsedTime); nowGT.AddSeconds(dt);
+
+      #ifdef DEBUG_TIME_ADDITION
+         MessageInterface::ShowMessage("%12s epoch: %.12lf from %.12lf + (%lf "
+               "+ %lf) sec\n", bodyName.c_str(), now.Get(), epoch, elapsedTime,
+               dt);
+      #endif
 
       Real relativePosition[3];
       if (hasPrecisionTime)
@@ -361,13 +369,69 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
             state[2], state[3], state[4], state[5], "origin", orig[0], orig[1],
             orig[2], orig[3], orig[4], orig[5]);
       #endif
-   
+
       const Real *brv = bodyrv.GetDataVector(), *orv = orig.GetDataVector();
-      Real rv[3];
+      Real rv[6];
       rv[0] = brv[0] - orv[0];
       rv[1] = brv[1] - orv[1];
       rv[2] = brv[2] - orv[2];
-   
+      rv[3] = brv[3] - orv[3];
+      rv[4] = brv[4] - orv[4];
+      rv[5] = brv[5] - orv[5];
+      
+      if (fillTimeJacobian)
+      {
+         Real rvmag = sqrt(rv[0] * rv[0] + rv[1] * rv[1] + rv[2] * rv[2]);
+         Real rvunit[3];
+         rvunit[0] = rv[0] / rvmag;
+         rvunit[1] = rv[1] / rvmag;
+         rvunit[2] = rv[2] / rvmag;
+
+         // Calculate the unit vector of the position of the spacecraft w/r/t
+         // the point mass body
+         Real rvrel[3];
+         rvrel[0] = rv[0] - state[0];
+         rvrel[1] = rv[1] - state[1];
+         rvrel[2] = rv[2] - state[2];
+
+         Real rvrelmag = sqrt(rvrel[0] * rvrel[0] + rvrel[1] * rvrel[1] +
+            rvrel[2] * rvrel[2]);
+         Real rvrelunit[3];
+         rvrelunit[0] = rvrel[0] / rvrelmag;
+         rvrelunit[1] = rvrel[1] / rvrelmag;
+         rvrelunit[2] = rvrel[2] / rvrelmag;
+
+         for (Integer i = 0; i < stmRowCount; ++i)
+            timeJacobian[i] = 0.0;
+
+         // If this point mass is not the central body, calculate the n-body
+         // time Jacobian
+         if (rvmag != 0.0)
+         {
+            Real timeJacElement;
+            for (Integer i = 0; i < 3; ++i)
+            {
+               for (Integer j = 0; j < 3; ++j)
+               {
+                  if (i == j)
+                  {
+                     timeJacElement = (1.0 - 3.0 * rvrelunit[i] *
+                        rvrelunit[j]) /
+                        pow(rvrelmag, 3) - (1.0 - 3.0 * rvunit[i] *
+                        rvunit[j]) / pow(rvmag, 3);
+                  }
+                  else
+                  {
+                     timeJacElement = (-3.0 * rvrelunit[i] * rvrelunit[j] / pow(rvrelmag, 3)) -
+                        (-3.0 * rvunit[i] * rvunit[j]) /
+                        pow(rvmag, 3);
+                  }
+                  timeJacobian[i + 3] += mu * timeJacElement * rv[j + 3];
+               }
+            }
+         }
+      }
+
       // The vector from the force origin to the gravitating body
       // Precalculations for the indirect effect term
       rbb3 = rv[0]*rv[0]+rv[1]*rv[1]+rv[2]*rv[2];
@@ -497,19 +561,21 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
       #endif
       if (fillSTM || fillAMatrix)
       {
-         Integer stmSize = stmRowCount * stmRowCount;
-         Real *aTilde;
-         aTilde = new Real[stmSize];
-
          Integer associate, element;
          Integer aiCount = (fillSTM ? stmCount : aMatrixCount);
 
+			s6 = stmStart;                                                   // made changes by TUAN NGUYEN
+			a6 = aMatrixStart;                                               // made changes by TUAN NGUYEN
+
          for (Integer i = 0; i < aiCount; ++i)
          {
-            i6 = stmStart + i * stmRowCount*stmRowCount;
-            a6 = aMatrixStart + i * stmRowCount*stmRowCount;
-            if (!fillSTM)
-               i6 = a6;
+            //////i6 = stmStart + i * stmRowCount*stmRowCount;            // made changes by TUAN NGUYEN
+            //////a6 = aMatrixStart + i * stmRowCount*stmRowCount;        // made changes by TUAN NGUYEN
+            //////if (!fillSTM)                                           // made changes by TUAN NGUYEN
+            //////   i6 = a6;                                             // made changes by TUAN NGUYEN
+
+
+				i6 = (fillSTM ? s6 : a6);                                     // made changes by TUAN NGUYEN
             associate = theState->GetAssociateIndex(i6);
             
             relativePosition[0] = rv[0] - state[ associate ];
@@ -524,14 +590,21 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
             r3 *= radius;
             mu_r = mu / r3;
             
-            // Calculate A-tilde
+				// Get Spacecraft object                                              // made changes by TUAN NGUYEN
+				Spacecraft *sc = (Spacecraft*)scObjs[i];                              // made changes by TUAN NGUYEN
+
+				// Create aTilde matrix                                               // made changes by TUAN NGUYEN
+				stmRowCount = sc->GetIntegerParameter("FullSTMRowCount");     // made changes by TUAN NGUYEN
+				Integer stmSize = stmRowCount * stmRowCount;                          // made changes by TUAN NGUYEN
+				Real *aTilde = new Real[stmSize];                                     // made changes by TUAN NGUYEN
             for (Integer i = 0; i < stmRowCount; ++i)
             {
                ix = i * stmRowCount;
                for (Integer j = 0; j < stmRowCount; ++j)
                   aTilde[ix+j] = 0.0;
             }
-               
+            
+				// Calculate A-tilde
             // Math spec, equ 6.69, broken into separate pieces
             ix = stmRowCount * 3;
             aTilde[ix] = - mu_r + 3.0 * mu_r / (radius*radius) *
@@ -586,14 +659,22 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
                {
                   element = j * stmRowCount + k;
                   if (fillSTM)
-                     deriv[i6+element] = aTilde[element];
+                     //deriv[i6+element] = aTilde[element];
+						   deriv[s6 + element] = aTilde[element];
                   if (fillAMatrix)
                      deriv[a6 + element] = aTilde[element];
                }
             }
+
+				delete[] aTilde;                             // made changes by TUAN NGUYEN
+				if (fillSTM)                                 // made changes by TUAN NGUYEN
+					s6 = s6 + stmSize;                        // made changes by TUAN NGUYEN
+				if (fillAMatrix)                             // made changes by TUAN NGUYEN
+					a6 = a6 + stmSize;                        // made changes by TUAN NGUYEN
+
          }
 
-		 delete [] aTilde;
+		   //delete [] aTilde;                             // made changes by TUAN NGUYEN
       }
    }
    
@@ -1086,17 +1167,17 @@ bool PointMassForce::SupportsDerivative(Gmat::StateElementId id)
  * vector, so that the derivative information can be placed in the correct place 
  * in the derivative vector.
  * 
- * @param id State Element ID for the derivative type
- * @param index Starting index in the state vector for this type of derivative
- * @param quantity Number of objects that supply this type of data
- * @param sizeOfType For sizable types, the size to use.  For example, for STM,
- *                   this is the number of rows or columns in the STM
+ * @param id         State Element ID for the derivative type
+ * @param index      Starting index in the state vector for this type of derivative
+ * @param quantity   Number of objects that supply this type of data
+ * @param totalSize  For sizable types, the size to use.  For example, for STM,
+ *                   this is the number of elements in all STMs                     // made changes by TUAN NGUYEN
  * 
  * @return true if the type is supported, false otherwise. 
  */
 //------------------------------------------------------------------------------
 bool PointMassForce::SetStart(Gmat::StateElementId id, Integer index, 
-                      Integer quantity, Integer sizeOfType)
+                      Integer quantity, Integer totalSize)                          // made changes by TUAN NGUYEN
 {
    #ifdef DEBUG_REGISTRATION
       MessageInterface::ShowMessage("PointMassForce setting start data for id "
@@ -1119,7 +1200,8 @@ bool PointMassForce::SetStart(Gmat::StateElementId id, Integer index,
          stmCount = quantity;
          stmStart = index;
          fillSTM = true;
-         stmRowCount = Integer(sqrt((Real)sizeOfType));
+         //stmRowCount = Integer(sqrt((Real)sizeOfType));              // made changes by TUAN NGUYEN
+			totalSTMSize = totalSize;                                     // made changes by TUAN NGUYEN
          retval = true;
          break;
          
@@ -1127,7 +1209,8 @@ bool PointMassForce::SetStart(Gmat::StateElementId id, Integer index,
          aMatrixCount = quantity;
          aMatrixStart = index;
          fillAMatrix = true;
-         stmRowCount = Integer(sqrt((Real)sizeOfType));
+         //stmRowCount = Integer(sqrt((Real)sizeOfType));              // made changes by TUAN NGUYEN
+			totalSTMSize = totalSize;                                     // made changes by TUAN NGUYEN
          retval = true;
          break;
 

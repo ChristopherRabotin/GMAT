@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -238,7 +238,7 @@ bool RelativisticCorrection::GetDerivatives(Real *state, Real dt, Integer order,
       throw ODEModelException(
          "RelativisticCorrection requires at least one spacecraft.");
 
-   now         = epoch + dt/GmatTimeConstants::SECS_PER_DAY;
+   now         = epoch + (elapsedTime + dt)/GmatTimeConstants::SECS_PER_DAY;
 
    if (fillCartesian)
    {
@@ -428,24 +428,30 @@ bool RelativisticCorrection::GetDerivatives(Real *state, Real dt, Integer order,
 
    if (fillSTM)
    {
-      // Setting all zeroes for now
-      Integer stmSize = stmRowCount * stmRowCount;
-      Real *aTilde;
-      aTilde = new Real[stmSize];
-
+		Integer i6 = stmStart;                                                  // made changes by TUAN NGUYEN
       Integer element;
       for (Integer i = 0; i < stmCount; ++i)
       {
-         Integer ix, i6 = stmStart + i * stmRowCount*stmRowCount;
+         //Integer ix, i6 = stmStart + i * stmRowCount*stmRowCount;           // made changes by TUAN NGUYEN
+			Integer ix;                                                          // made changes by TUAN NGUYEN
+         
+			// Get Spacecraft object                                             // made changes by TUAN NGUYEN
+			Spacecraft* sc = (Spacecraft*)scObjs[i];                             // made changes by TUAN NGUYEN
 
-         // Calculate A-tilde
-         for (Integer j = 0; j < stmRowCount; ++j)
+			// Create aTilde matrix                                              // made changes by TUAN NGUYEN
+			stmRowCount = sc->GetIntegerParameter("FullSTMRowCount");    // made changes by TUAN NGUYEN
+			Integer stmSize = stmRowCount * stmRowCount;                         // made changes by TUAN NGUYEN
+			Real *aTilde = new Real[stmSize];                                    // made changes by TUAN NGUYEN
+
+			// Calculate A-tilde
+			for (Integer j = 0; j < stmRowCount; ++j)
          {
             ix = j * stmRowCount;
             for (Integer k = 0; k < stmRowCount; ++k)
                aTilde[ix+k] = 0.0;
          }
 
+			
          for (Integer j = 0; j < stmRowCount; j++)
          {
             for (Integer k = 0; k < stmRowCount; k++)
@@ -457,23 +463,31 @@ bool RelativisticCorrection::GetDerivatives(Real *state, Real dt, Integer order,
                deriv[i6+element] = aTilde[element];
             }
          }
+
+			delete[] aTilde;                                       // made changes by TUAN NGUYEN
+			i6 = i6 + stmSize;                                     // made changes by TUAN NGUYEN
       }
 
-	  delete [] aTilde;
+	   //delete [] aTilde;                                       // made changes by TUAN NGUYEN
    }
    if (fillAMatrix)
    {
-      // Setting all zeroes for now
-      Integer stmSize = stmRowCount * stmRowCount;
-      Real *aTilde;
-      aTilde = new Real[stmSize];
-
+      Integer i6 = aMatrixStart;
       Integer element;
       for (Integer i = 0; i < stmCount; ++i)
       {
-         Integer ix, i6 = stmStart + i * stmRowCount*stmRowCount;
+         //Integer ix, i6 = stmStart + i * stmRowCount*stmRowCount;           // made changes by TUAN NGUYEN
+			Integer ix;                                                          // made changes by TUAN NGUYEN
 
-         // Calculate A-tilde
+			// Get Spacecraft object                                             // made changes by TUAN NGUYEN
+			Spacecraft* sc = (Spacecraft*)scObjs[i];                             // made changes by TUAN NGUYEN
+
+         // Create aTilde matrix                                              // made changes by TUAN NGUYEN
+			stmRowCount = sc->GetIntegerParameter("FullSTMRowCount");    // made changes by TUAN NGUYEN
+			Integer stmSize = stmRowCount * stmRowCount;                         // made changes by TUAN NGUYEN
+			Real *aTilde = new Real[stmSize];                                    // made changes by TUAN NGUYEN
+
+			// Calculate A-tilde
          for (Integer j = 0; j < stmRowCount; ++j)
          {
             ix = j * stmRowCount;
@@ -492,9 +506,12 @@ bool RelativisticCorrection::GetDerivatives(Real *state, Real dt, Integer order,
                deriv[i6+element] = aTilde[element];
             }
          }
-      }
 
-      delete [] aTilde;
+			delete[] aTilde;                                       // made changes by TUAN NGUYEN
+			i6 = i6 + stmSize;                                     // made changes by TUAN NGUYEN
+		}
+
+      //delete [] aTilde;                                       // made changes by TUAN NGUYEN
    }
 
    return true;
@@ -897,17 +914,17 @@ bool RelativisticCorrection::SupportsDerivative(Gmat::StateElementId id)
  * vector, so that the derivative information can be placed in the correct place
  * in the derivative vector.
  *
- * @param id State Element ID for the derivative type
- * @param index Starting index in the state vector for this type of derivative
- * @param quantity Number of objects that supply this type of data
- * @param sizeOfType For sizable types, the size to use.  For example, for STM,
- *                   this is the number of rows or columns in the STM
+ * @param id         State Element ID for the derivative type
+ * @param index      Starting index in the state vector for this type of derivative
+ * @param quantity   Number of objects that supply this type of data
+ * @param totalSize  For sizable types, the size to use.  For example, for STM,
+ *                   this is the number of elements in all STMs                             // made changes by TUAN NGUYEN
  *
  * @return true if the type is supported, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool RelativisticCorrection::SetStart(Gmat::StateElementId id, Integer index,
-                                      Integer quantity, Integer sizeOfType)
+                                      Integer quantity, Integer totalSize)                  // made changes by TUAN NGUYEN
 {
    bool retval = false;
 
@@ -925,7 +942,8 @@ bool RelativisticCorrection::SetStart(Gmat::StateElementId id, Integer index,
          stmCount = quantity;
          stmStart = index;
          fillSTM = true;
-         stmRowCount = Integer(sqrt((Real)sizeOfType));
+         //stmRowCount = Integer(sqrt((Real)sizeOfType));             // made changes by TUAN NGUYEN
+			totalSTMSize = totalSize;                                    // made changes by TUAN NGUYEN
          retval = true;
          break;
 
@@ -933,8 +951,9 @@ bool RelativisticCorrection::SetStart(Gmat::StateElementId id, Integer index,
          aMatrixCount = quantity;
          aMatrixStart = index;
          fillAMatrix = true;
-         stmRowCount = Integer(sqrt((Real)sizeOfType));
-         retval = true;
+			//stmRowCount = Integer(sqrt((Real)sizeOfType));             // made changes by TUAN NGUYEN
+			totalSTMSize = totalSize;                                    // made changes by TUAN NGUYEN
+			retval = true;
          break;
 
       default:

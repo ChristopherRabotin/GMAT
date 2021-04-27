@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -34,6 +34,8 @@
 #define Interpolator_hpp
 
 #include "utildefs.hpp"
+#include "InterpolatorException.hpp"
+#include "StringUtil.hpp"
 
 /**
  * Base class for the GMAT Interpolators
@@ -58,6 +60,7 @@ public:
    virtual void    SetExtrapolation(bool flag);
    
    std::string     GetName();
+   bool            GetRange(Real &lower, Real &upper);
 
    //---------------------------------------------------------------------------
    // bool Interpolate(const Real ind, Real *results)
@@ -69,9 +72,9 @@ public:
     * perform the data interpolation, resulint in an array of interpolated data
     * valid at the desired value of the independent variable.
     *
-    * @param <ind>     Value of the independent variable at which the data is
-    *                  interpolated.
-    * @param <results> Array of interpolated data.
+    * @param ind     Value of the independent variable at which the data is
+    *                interpolated.
+    * @param results Array of interpolated data.
     *
     * @return true on success, false (or throw) on failure.
     */

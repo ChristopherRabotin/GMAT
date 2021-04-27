@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -61,7 +61,7 @@ public:
    virtual Integer GetCompletionCount();
    virtual Integer GetCompletionIndex(const Integer which);
    virtual Integer GetCompletionSize(const Integer which);
-   virtual Integer GetSTMIndex(Integer forParameterID);
+   virtual Integer GetSTMIndex(Integer forParameterID, GmatBase* scObj);
 
 protected:
    /// Flag indicating if a member needs updating after superposition occurs
@@ -71,7 +71,8 @@ protected:
    /// Sizes of the elements that need post superposition updates
    IntegerArray   completionSizeList;
    /// Mapping of the STM rows: entries are IDs of each row/column of the STM
-   IntegerArray   stmRowMap;
+   IntegerArray   stmRowMapID;                                                  // made changes by TUAN NGUYEN
+	ObjectArray    stmRowMapObj;                                                 // made changes by TUAN NGUYEN
 
    Integer        SortVector();
 };

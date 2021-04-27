@@ -341,9 +341,9 @@ const GmatTime& GmatTime::operator-=(const Real mjd)
 //------------------------------------------------------------------------------
 GmatTime GmatTime::operator*(const Real num) const
 {
-   GmatTime gt1(Sec*num);
-   GmatTime gt2(FracSec*num);
-   GmatTime result = gt1 + gt2;
+   GmatTime result(Days*num);
+   result.AddSeconds(Sec*num);
+   result.AddSeconds(FracSec*num);
 
    return result;
 }
@@ -366,7 +366,7 @@ GmatTime GmatTime::operator/(const Real num) const
 
    // Specify FracSec
    Real remainSec = gt.Sec + remainDays * 86400 - result.Sec * num;
-   result.FracSec = gt.FracSec + remainSec;
+   result.FracSec = (gt.FracSec + remainSec)/num;
 
 
    // Adjust value
@@ -692,7 +692,7 @@ bool GmatTime::SetMjdString(std::string sMjd)
 }
 
 
-bool GmatTime::IsNearlyEqual(GmatTime gt, Real tolerance)
+bool GmatTime::IsNearlyEqual(const GmatTime &gt, Real tolerance)
 {
    bool retVal = false;
    Real time = ((*this) - gt).GetTimeInSec();

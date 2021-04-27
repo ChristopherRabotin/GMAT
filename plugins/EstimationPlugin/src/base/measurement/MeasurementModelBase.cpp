@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -27,6 +27,7 @@ MeasurementModelBase::MeasurementModelBase(const std::string& name,
       const std::string& typeName) :
    GmatBase             (Gmat::MEASUREMENT_MODEL, typeName, name)
 {
+   theTimeConverter = TimeSystemConverter::Instance();
 }
 
 MeasurementModelBase::~MeasurementModelBase()
@@ -36,6 +37,7 @@ MeasurementModelBase::~MeasurementModelBase()
 MeasurementModelBase::MeasurementModelBase(const MeasurementModelBase& mm) :
    GmatBase             (mm)
 {
+   theTimeConverter = TimeSystemConverter::Instance();
 }
 
 MeasurementModelBase& MeasurementModelBase::operator=(

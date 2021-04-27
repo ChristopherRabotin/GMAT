@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Example: MONTE-GMAT Interoperability for OSIRIS_REx &#8212; GMAT Tools and Extensions R2020a documentation</title>
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="API Best Practices" href="../BestPractices.html" />
+    <link rel="prev" title="Tutorial: Accessing GMAT Propagation and Navigation Features" href="UseCase1.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../BestPractices.html" title="API Best Practices"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="UseCase1.html" title="Tutorial: Accessing GMAT Propagation and Navigation Features"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GMAT Tools and Extensions R2020a documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../apiIndex.html" accesskey="U">DRAFT GMAT API Design and User’s Guide</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="example-monte-gmat-interoperability-for-osiris-rex">
+<h1>Example: MONTE-GMAT Interoperability for OSIRIS_REx<a class="headerlink" href="#example-monte-gmat-interoperability-for-osiris-rex" title="Permalink to this headline">¶</a></h1>
+<p>At this writing, the Origins, Spectral Interpretation, Resource Identification,
+Security-Regolith Explorer (OSIRIS-REx) spacecraft is in orbit at the near-Earth
+asteroid Bennu (formerly 1999 RQ36). The mission plans to bring at least a
+2.1-ounce sample of the asteroid back to Earth for study. The mission is using
+the Mission Analysis, Operations and Navigation Toolkit Environment,
+<a class="reference external" href="https://montepy.jpl.nasa.gov/">MONTE</a>, for navigation and trajectory
+planning.</p>
+<p>In this example, data will be shared between MONTE and GMAT using interfaces
+built with MONTE’s native Python framework and GMAT’s API, accessed through
+Python.</p>
+<div class="section" id="ephemeris-sharing">
+<h2>Ephemeris Sharing<a class="headerlink" href="#ephemeris-sharing" title="Permalink to this headline">¶</a></h2>
+<p>Both GMAT and MONTE have ephemeris reading and writing capabilities.  GMAT
+supports four types of spacecraft ephemerides: Goddard specific “Code-500”, STK
+time-position-velocity (.e), CCSDS OEM, and SPICE SPK formats.  MONTE supports
+SPICE based SPK ephemerides, so that format is used for data interchange between
+the systems.</p>
+<div class="section" id="general-ephemeris-sharing">
+<h3>General Ephemeris Sharing<a class="headerlink" href="#general-ephemeris-sharing" title="Permalink to this headline">¶</a></h3>
+<p>Ephemeris sharing between GMAT and MONTE is straightforward: use the system
+providing the ephemeris to generate the file, and then import it into the other
+system.  The steps for this procedure are described below, beginning with the
+GMAT to MONTE procedure.</p>
+<div class="section" id="generating-an-ephemeris-in-gmat">
+<h4>Generating an Ephemeris in GMAT<a class="headerlink" href="#generating-an-ephemeris-in-gmat" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference internal" href="UseCase1.html#usecase1"><span class="std std-ref">Tutorial: Accessing GMAT Propagation and Navigation Features</span></a> describes the steps needed to propagate a spacecraft using the
+GMAT API.  The sample code shown here starts from a similar propagation
+configuration, with a spacecraft in the following initial state:</p>
+</div>
+<div class="section" id="reading-the-gmat-ephemeris-in-monte">
+<h4>Reading the GMAT Ephemeris in MONTE<a class="headerlink" href="#reading-the-gmat-ephemeris-in-monte" title="Permalink to this headline">¶</a></h4>
+</div>
+<div class="section" id="generating-an-ephemeris-in-monte">
+<h4>Generating an Ephemeris in MONTE<a class="headerlink" href="#generating-an-ephemeris-in-monte" title="Permalink to this headline">¶</a></h4>
+</div>
+<div class="section" id="reading-the-monte-ephemeris-in-gmat">
+<h4>Reading the MONTE Ephemeris in GMAT<a class="headerlink" href="#reading-the-monte-ephemeris-in-gmat" title="Permalink to this headline">¶</a></h4>
+</div>
+<div class="section" id="a-round-trip">
+<h4>A Round Trip<a class="headerlink" href="#a-round-trip" title="Permalink to this headline">¶</a></h4>
+</div>
+</div>
+<div class="section" id="ephemeris-sharing-for-osiris-rex">
+<h3>Ephemeris Sharing for OSIRIS-REx<a class="headerlink" href="#ephemeris-sharing-for-osiris-rex" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="maneuver-planning">
+<h2>Maneuver Planning<a class="headerlink" href="#maneuver-planning" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="navigation-data-sharing">
+<h2>Navigation Data Sharing<a class="headerlink" href="#navigation-data-sharing" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: MONTE-GMAT Interoperability for OSIRIS_REx</a><ul>
+<li><a class="reference internal" href="#ephemeris-sharing">Ephemeris Sharing</a><ul>
+<li><a class="reference internal" href="#general-ephemeris-sharing">General Ephemeris Sharing</a><ul>
+<li><a class="reference internal" href="#generating-an-ephemeris-in-gmat">Generating an Ephemeris in GMAT</a></li>
+<li><a class="reference internal" href="#reading-the-gmat-ephemeris-in-monte">Reading the GMAT Ephemeris in MONTE</a></li>
+<li><a class="reference internal" href="#generating-an-ephemeris-in-monte">Generating an Ephemeris in MONTE</a></li>
+<li><a class="reference internal" href="#reading-the-monte-ephemeris-in-gmat">Reading the MONTE Ephemeris in GMAT</a></li>
+<li><a class="reference internal" href="#a-round-trip">A Round Trip</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ephemeris-sharing-for-osiris-rex">Ephemeris Sharing for OSIRIS-REx</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#maneuver-planning">Maneuver Planning</a></li>
+<li><a class="reference internal" href="#navigation-data-sharing">Navigation Data Sharing</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="UseCase1.html"
+                        title="previous chapter">Tutorial: Accessing GMAT Propagation and Navigation Features</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../BestPractices.html"
+                        title="next chapter">API Best Practices</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../../_sources/API/source/userguide/usage/UseCase2.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../BestPractices.html" title="API Best Practices"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="UseCase1.html" title="Tutorial: Accessing GMAT Propagation and Navigation Features"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GMAT Tools and Extensions R2020a documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../apiIndex.html" >DRAFT GMAT API Design and User’s Guide</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018-2020, United States Government as represented by the Administrator of the National Aeronautics and Space Administration..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>

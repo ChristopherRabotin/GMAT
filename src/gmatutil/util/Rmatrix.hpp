@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -133,13 +133,13 @@ public:
    Rmatrix AntiSymmetric() const;    
    
    // friends
-   friend Rmatrix SkewSymmetric4by4(const Rvector3 &v);
-   friend Rmatrix TransposeTimesMatrix(const Rmatrix &m1, const Rmatrix &m2);
-   friend Rmatrix MatrixTimesTranspose(const Rmatrix &m1, const Rmatrix &m2);
-   friend Rmatrix TransposeTimesTranspose(const Rmatrix &m1, const Rmatrix &m2);
+   GMATUTIL_API friend Rmatrix SkewSymmetric4by4(const Rvector3 &v);
+   GMATUTIL_API friend Rmatrix TransposeTimesMatrix(const Rmatrix &m1, const Rmatrix &m2);
+   GMATUTIL_API friend Rmatrix MatrixTimesTranspose(const Rmatrix &m1, const Rmatrix &m2);
+   GMATUTIL_API friend Rmatrix TransposeTimesTranspose(const Rmatrix &m1, const Rmatrix &m2);
    
-   friend std::istream& operator>> (std::istream &input, Rmatrix &a);
-   friend std::ostream& operator<< (std::ostream &output, const Rmatrix &a);
+   GMATUTIL_API friend std::istream& operator>> (std::istream &input, Rmatrix &a);
+   GMATUTIL_API friend std::ostream& operator<< (std::ostream &output, const Rmatrix &a);
    
    Rvector GetRow(int r) const;
    Rvector GetColumn(int c) const;

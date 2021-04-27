@@ -1,0 +1,291 @@
+% Sample optimal control script optimizing an integrated (i.e., not patched conic) flyby of Mars.
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+%
+% Create a spacecraft names aSat.  Guess is set later.
+%
+Create Spacecraft emsat;
+GMAT emsat.DateFormat = A1ModJulian;
+GMAT emsat.Epoch = '21545';
+GMAT emsat.CoordinateSystem = EarthMJ2000Eq;
+GMAT emsat.DisplayStateType = Cartesian;
+GMAT emsat.X = 7100;
+GMAT emsat.Y = 0;
+GMAT emsat.Z = 1300;
+GMAT emsat.VX = 0;
+GMAT emsat.VY = 7.35;
+GMAT emsat.VZ = 1;
+GMAT emsat.DryMass = 1000;
+GMAT emsat.Cd = 2.2;
+GMAT emsat.Cr = 1.8;
+GMAT emsat.DragArea = 15;
+GMAT emsat.SRPArea = 1;
+GMAT emsat.SPADDragScaleFactor = 1;
+GMAT emsat.SPADSRPScaleFactor = 1;
+GMAT emsat.NAIFId = -10010001;
+GMAT emsat.NAIFIdReferenceFrame = -9010001;
+GMAT emsat.OrbitColor = Red;
+GMAT emsat.TargetColor = Teal;
+GMAT emsat.OrbitErrorCovariance = [ 1e+70 0 0 0 0 0 ; 0 1e+70 0 0 0 0 ; 0 0 1e+70 0 0 0 ; 0 0 0 1e+70 0 0 ; 0 0 0 0 1e+70 0 ; 0 0 0 0 0 1e+70 ];
+GMAT emsat.CdSigma = 1e+70;
+GMAT emsat.CrSigma = 1e+70;
+GMAT emsat.Id = 'SatId';
+GMAT emsat.Attitude = CoordinateSystemFixed;
+GMAT emsat.SPADSRPInterpolationMethod = Bilinear;
+GMAT emsat.SPADSRPScaleFactorSigma = 1e+70;
+GMAT emsat.SPADDragInterpolationMethod = Bilinear;
+GMAT emsat.SPADDragScaleFactorSigma = 1e+70;
+GMAT emsat.ModelFile = 'aura.3ds';
+GMAT emsat.ModelOffsetX = 0;
+GMAT emsat.ModelOffsetY = 0;
+GMAT emsat.ModelOffsetZ = 0;
+GMAT emsat.ModelRotationX = 0;
+GMAT emsat.ModelRotationY = 0;
+GMAT emsat.ModelRotationZ = 0;
+GMAT emsat.ModelScale = 1;
+GMAT emsat.AttitudeDisplayStateType = 'Quaternion';
+GMAT emsat.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT emsat.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT emsat.EulerAngleSequence = '321';
+GMAT emsat.Tanks = {ChemicalTank1};
+
+%----------------------------------------
+%---------- Hardware
+%----------------------------------------
+%
+% Create a chemical tank
+%
+Create ChemicalTank ChemicalTank1;
+GMAT ChemicalTank1.AllowNegativeFuelMass = false;
+GMAT ChemicalTank1.FuelMass = 4000;
+GMAT ChemicalTank1.Pressure = 1500;
+GMAT ChemicalTank1.Temperature = 20;
+GMAT ChemicalTank1.RefTemperature = 20;
+GMAT ChemicalTank1.Volume = 4;
+GMAT ChemicalTank1.FuelDensity = 1260;
+GMAT ChemicalTank1.PressureModel = PressureRegulated;
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+%
+% Create an orbit dynamics model with Earth, Sun, Moon point mass
+%
+Create ForceModel DeepSpaceForceModel;
+GMAT DeepSpaceForceModel.CentralBody = Sun;
+GMAT DeepSpaceForceModel.PointMasses = {Sun};%, Earth, Luna};
+GMAT DeepSpaceForceModel.Drag = None;
+GMAT DeepSpaceForceModel.SRP = On;
+GMAT DeepSpaceForceModel.RelativisticCorrection = Off;
+GMAT DeepSpaceForceModel.ErrorControl = RSSStep;
+GMAT DeepSpaceForceModel.SRP.Flux = 1367;
+GMAT DeepSpaceForceModel.SRP.SRPModel = Spherical;
+GMAT DeepSpaceForceModel.SRP.Nominal_Sun = 149597870.691;
+
+%----------------------------------------
+%---------- Coordinate Systems
+%----------------------------------------
+
+Create CoordinateSystem EarthJ2000Eq;
+GMAT EarthJ2000Eq.Origin = Earth;
+GMAT EarthJ2000Eq.Axes = MJ2000Eq;
+
+Create CoordinateSystem SunMJ2000Ec;
+GMAT SunMJ2000Ec.Origin = Sun;
+GMAT SunMJ2000Ec.Axes = MJ2000Ec;
+
+Create CoordinateSystem MarsMJ2000Ec;
+GMAT MarsMJ2000Ec.Origin = Mars;
+GMAT MarsMJ2000Ec.Axes = MJ2000Ec;
+
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+Create OrbitView OrbitView1;
+GMAT OrbitView1.SolverIterations = All;
+GMAT OrbitView1.UpperLeft = [ 0 0.6394736842105263 ];
+GMAT OrbitView1.Size = [ 0.5705128205128205 0.3228070175438597 ];
+GMAT OrbitView1.RelativeZOrder = 160;
+GMAT OrbitView1.Maximized = true;
+GMAT OrbitView1.Add = {emsat, Earth, Mars};
+GMAT OrbitView1.CoordinateSystem = SunMJ2000Ec;
+GMAT OrbitView1.DrawObject = [ true true ];
+GMAT OrbitView1.DataCollectFrequency = 1;
+GMAT OrbitView1.UpdatePlotFrequency = 50;
+GMAT OrbitView1.NumPointsToRedraw = 0;
+GMAT OrbitView1.ShowPlot = true;
+GMAT OrbitView1.MaxPlotPoints = 200;
+GMAT OrbitView1.ShowLabels = true;
+GMAT OrbitView1.ViewPointReference = Sun;
+GMAT OrbitView1.ViewPointVector = [ 0 0 149000000 ];
+GMAT OrbitView1.ViewDirection = Sun;
+GMAT OrbitView1.ViewScaleFactor = 2;
+GMAT OrbitView1.ViewUpCoordinateSystem = SunMJ2000Ec;
+GMAT OrbitView1.ViewUpAxis = Y;
+GMAT OrbitView1.EclipticPlane = Off;
+GMAT OrbitView1.XYPlane = On;
+GMAT OrbitView1.WireFrame = Off;
+GMAT OrbitView1.Axes = On;
+GMAT OrbitView1.Grid = Off;
+GMAT OrbitView1.SunLine = Off;
+GMAT OrbitView1.UseInitialView = On;
+GMAT OrbitView1.StarCount = 7000;
+GMAT OrbitView1.EnableStars = Off;
+GMAT OrbitView1.EnableConstellations = Off;
+
+Create OrbitView OrbitView2;
+GMAT OrbitView2.SolverIterations = All;
+GMAT OrbitView2.UpperLeft = [ 0.02777777777777778 0.1859649122807017 ];
+GMAT OrbitView2.Size = [ 0.5705128205128205 0.3228070175438597 ];
+GMAT OrbitView2.RelativeZOrder = 152;
+GMAT OrbitView2.Maximized = false;
+GMAT OrbitView2.Add = {emsat, Earth, Mars};
+GMAT OrbitView2.CoordinateSystem = MarsMJ2000Ec;
+GMAT OrbitView2.DrawObject = [ true true ];
+GMAT OrbitView2.DataCollectFrequency = 1;
+GMAT OrbitView2.UpdatePlotFrequency = 50;
+GMAT OrbitView2.NumPointsToRedraw = 0;
+GMAT OrbitView2.ShowPlot = true;
+GMAT OrbitView2.MaxPlotPoints = 200;
+GMAT OrbitView2.ShowLabels = true;
+GMAT OrbitView2.ViewPointReference = Mars;
+GMAT OrbitView2.ViewPointVector = [ 0 0 149000000 ];
+GMAT OrbitView2.ViewDirection = Sun;
+GMAT OrbitView2.ViewScaleFactor = 2;
+GMAT OrbitView2.ViewUpCoordinateSystem = MarsMJ2000Ec;
+GMAT OrbitView2.ViewUpAxis = Y;
+GMAT OrbitView2.EclipticPlane = Off;
+GMAT OrbitView2.XYPlane = On;
+GMAT OrbitView2.WireFrame = Off;
+GMAT OrbitView2.Axes = On;
+GMAT OrbitView2.Grid = Off;
+GMAT OrbitView2.SunLine = Off;
+GMAT OrbitView2.UseInitialView = On;
+GMAT OrbitView2.StarCount = 7000;
+GMAT OrbitView2.EnableStars = Off;
+GMAT OrbitView2.EnableConstellations = Off;
+
+%----------------------------------------
+%---------- User Objects
+%----------------------------------------
+
+%
+% Create an emtgThrustModel Resource
+%
+Create EMTGSpacecraft emtgThrustModel;
+GMAT emtgThrustModel.SpacecraftFile = 'FixedThrustAndIsp_Model1.emtg_spacecraftopt';
+GMAT emtgThrustModel.DutyCycle = 1;
+GMAT emtgThrustModel.SpacecraftStage = [ 1 ];
+
+%
+% Create a DynamicsConfiguration object and add spacecraft
+% ForceModel and Thrust model
+%
+Create DynamicsConfiguration SunThrustDynConfig;
+GMAT SunThrustDynConfig.ForceModels = {DeepSpaceForceModel};
+GMAT SunThrustDynConfig.Spacecraft = {emsat};
+GMAT SunThrustDynConfig.FiniteBurns = {emtgThrustModel};
+GMAT SunThrustDynConfig.EMTGTankConfig = {ChemicalTank1};
+
+Create OptimalControlGuess transferGuess;
+GMAT transferGuess.Type = 'CollocationGuessFile';
+GMAT transferGuess.TimeSystem = 'A1ModJulian';
+GMAT transferGuess.CoordinateSystem = EarthJ2000Eq;
+GMAT transferGuess.FileName = '../data/misc/e2m_transfer_guessFile.och';
+
+%
+%  Create a phase and set transcription and parameter bounds
+%
+Create Phase thrustToArrival;
+GMAT thrustToArrival.Type = 'RadauPseudospectral';
+GMAT thrustToArrival.ThrustMode = 'Thrust';
+GMAT thrustToArrival.SubPhaseBoundaries = [ -1 -0.5 0 0.5 1 ];
+GMAT thrustToArrival.PointsPerSubPhase = [ 3 3 3 7 ];
+GMAT thrustToArrival.GuessSource = transferGuess;
+GMAT thrustToArrival.EpochFormat = 'A1ModJulian';
+GMAT thrustToArrival.StateLowerBound = [ -230000000 -230000000 -230000000 -100 -100 -100 1e-05 ];
+GMAT thrustToArrival.StateUpperBound = [ 230000000 230000000 230000000 100 100 100 5000 ];
+GMAT thrustToArrival.ControlLowerBound = [ -2 -2 -2 ];
+GMAT thrustToArrival.ControlUpperBound = [ 2 2 2 ];
+GMAT thrustToArrival.EpochLowerBound = '29000';
+GMAT thrustToArrival.EpochUpperBound = '29500';
+GMAT thrustToArrival.InitialEpoch = '29080';
+GMAT thrustToArrival.FinalEpoch = '29380';
+GMAT thrustToArrival.DynamicsConfiguration = SunThrustDynConfig;
+GMAT thrustToArrival.BuiltInCost = 'TotalMassFinal';
+GMAT thrustToArrival.MinControlMagnitude = 0;
+GMAT thrustToArrival.MaxControlMagnitude = 1;
+GMAT thrustToArrival.MaxRelativeErrorTolerance = 1e-05;
+GMAT thrustToArrival.OverrideColorInGraphics = false;
+GMAT thrustToArrival.OrbitColor = Red;
+
+Create Phase coast;
+GMAT coast.Type = 'RadauPseudospectral';
+GMAT coast.ThrustMode = 'Coast';
+GMAT coast.SubPhaseBoundaries = [ -1 -0.5 0 0.5 1 ];
+GMAT coast.PointsPerSubPhase = [ 7 7 7 7 ];
+GMAT coast.GuessSource = transferGuess;
+GMAT coast.EpochFormat = 'A1ModJulian';
+GMAT coast.StateLowerBound = [ -230000000 -230000000 -230000000 -100 -100 -100 1e-05 ];
+GMAT coast.StateUpperBound = [ 230000000 230000000 230000000 100 100 100 5000 ];
+GMAT coast.ControlLowerBound = [ -2 -2 -2 ];
+GMAT coast.ControlUpperBound = [ 2 2 2 ];
+GMAT coast.EpochLowerBound = '29380';
+GMAT coast.EpochUpperBound = '29420';
+GMAT coast.InitialEpoch = '29380';
+GMAT coast.FinalEpoch = '29420';
+GMAT coast.DynamicsConfiguration = SunThrustDynConfig;
+GMAT coast.BuiltInCost = 'TotalMassFinal';
+GMAT coast.MinControlMagnitude = 0;
+GMAT coast.MaxControlMagnitude = 1;
+GMAT coast.MaxRelativeErrorTolerance = 1e-05;
+GMAT coast.OverrideColorInGraphics = false;
+GMAT coast.OrbitColor = White;
+
+Create OptimalControlFunction MarsPre;
+GMAT MarsPre.Function = 'IntegratedFlyby';
+GMAT MarsPre.Type = 'AlgebraicConstraint';
+GMAT MarsPre.PhaseList = {'thrustToArrival.Final', 'coast.Initial'};
+GMAT MarsPre.SetModelParameter(CelestialBody, Mars);
+GMAT MarsPre.SetModelParameter(PeriapsisRadiusLowerBound, 6000);
+GMAT MarsPre.SetModelParameter(PeriapsisRadiusUpperBound, 6000);
+
+
+%
+% Create the trajectory and add constraints
+%
+Create Trajectory traj;
+GMAT traj.GuessSource = transferGuess;
+GMAT traj.MaxMeshRefinementIterations = 5;
+GMAT traj.PhaseList = {thrustToArrival, coast};
+GMAT traj.AddBoundaryFunction = {MarsPre};
+GMAT traj.SNOPTOutputFile = 'SNOPTOutputFile.txt';
+GMAT traj.AddSimpleLinkageChain = {thrustToArrival, coast};
+GMAT traj.SolutionFile = 'IntegratedFlyby_MarsFlyby.och';
+GMAT traj.StateScaleMode = 'Canonical';
+GMAT traj.MassScaleFactor = 1000;
+GMAT traj.OutputCoordinateSystem = MarsMJ2000Ec;
+GMAT traj.FeasibilityTolerances = [ 1e-07 0.001 0.001 0.001 1e-06 ];
+GMAT traj.MajorOptimalityTolerances = [ 0.0005 0.01 0.01 0.01 0.0001 ];
+
+GMAT traj.MajorIterationsLimits = [ 2000 500 ];
+GMAT traj.TotalIterationsLimits = [ 20000 ];
+GMAT traj.OptimizationMode = {'Maximize'};
+GMAT traj.AllowFailedMeshOptimizations = true;
+GMAT traj.MeshRefinementGuessMode = 'CurrentSolution';
+GMAT traj.PublishUpdateRate = 10;
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+
+%
+% Run the mission
+%
+BeginMissionSequence;
+
+Collocate traj

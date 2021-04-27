@@ -16,9 +16,6 @@ MESSAGE("GMAT Geometric Measurement Plugin setup " ${VERSION})
 
 SET(TargetName GeometricMeasurements)
 
-# Add Preproccessor Definitions
-ADD_DEFINITIONS("-DGEOMETRICMEAS_EXPORTS")
-
 # ====================================================================
 # list of directories containing source/header files
 SET(PLUGIN_DIRS factory include measurement plugin)
@@ -37,6 +34,9 @@ SET(PLUGIN_SRCS
 # ====================================================================
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
+
+# Rename DLL export preproccessor definition
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEFINE_SYMBOL "GEOMETRICMEAS_EXPORTS")
 
 # ====================================================================
 # Additional link libraries

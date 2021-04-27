@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -31,7 +31,7 @@
 
 
 #include "MeasurementModelFactory.hpp"
-#include "MeasurementModel.hpp"
+//#include "MeasurementModel.hpp"
 #include "TrackingFileSet.hpp"
 #include "MessageInterface.hpp"
 
@@ -81,12 +81,6 @@ MeasurementModelBase* MeasurementModelFactory::CreateMeasurementModel(
       const std::string & ofType, const std::string & withName)
 {
    Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
-   //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
-   if (runmode == GmatGlobal::TESTING)
-   {
-      if (ofType == "MeasurementModel")
-         return new MeasurementModel(withName);
-   }
 
    if (ofType == "TrackingFileSet")
       return new TrackingFileSet(withName);
@@ -108,11 +102,6 @@ MeasurementModelFactory::MeasurementModelFactory() :
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
-      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
-      if (runmode == GmatGlobal::TESTING)
-         creatables.push_back("MeasurementModel");
-
       creatables.push_back("TrackingFileSet");
    }
    GmatType::RegisterType(Gmat::MEASUREMENT_MODEL, "MeasurementModel");
@@ -145,11 +134,6 @@ MeasurementModelFactory::MeasurementModelFactory(StringArray createList) :
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
-      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
-      if (runmode == GmatGlobal::TESTING)
-         creatables.push_back("MeasurementModel");
-
       creatables.push_back("TrackingFileSet");
    }
 }
@@ -170,11 +154,6 @@ MeasurementModelFactory::MeasurementModelFactory(const MeasurementModelFactory &
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
-      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
-      if (runmode == GmatGlobal::TESTING)
-         creatables.push_back("MeasurementModel");
-
       creatables.push_back("TrackingFileSet");
    }
 }
@@ -198,11 +177,6 @@ MeasurementModelFactory&
    Factory::operator=(fact);
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
-      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
-      if (runmode == GmatGlobal::TESTING)
-         creatables.push_back("MeasurementModel");
-
       creatables.push_back("TrackingFileSet");
    }
    return *this;

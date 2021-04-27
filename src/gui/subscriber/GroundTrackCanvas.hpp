@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -110,6 +110,9 @@ private:
    // central body
    std::string mCentralBodyName;
    std::string mCentralBodyTextureFile;
+   
+   // warning flags
+   bool        mWriteCentralBodyWarning;
    
    // foot print option
    Integer mFootPrintOption;

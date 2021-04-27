@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -77,15 +77,15 @@ Moon::Moon(std::string name) :
    // Set default colors
    SetDefaultColors(GmatColor::TAN, GmatColor::DARK_GRAY);
    
-   theCentralBodyName  = SolarSystem::EARTH_NAME; // by default, the Moon is Luna 
+   theCentralBodyName  = GmatSolarSystemDefaults::EARTH_NAME; // by default, the Moon is Luna 
    bodyType            = Gmat::MOON;
    bodyNumber          = 2;
    referenceBodyNumber = 3;
-   if (name == SolarSystem::MOON_NAME) rotationSrc         = Gmat::DE_FILE;
+   if (name == GmatSolarSystemDefaults::MOON_NAME) rotationSrc         = Gmat::DE_FILE;
    else                                rotationSrc         = Gmat::IAU_SIMPLIFIED;
    
 
-   if (name == SolarSystem::MOON_NAME)  
+   if (name == GmatSolarSystemDefaults::MOON_NAME)  
    {
       FileManager *fm = FileManager::Instance();
       std::string path = fm->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
@@ -123,10 +123,10 @@ Moon::Moon(std::string name, const std::string &cBody) :
    bodyType            = Gmat::MOON;
    bodyNumber          = 2;
    referenceBodyNumber = 3;
-   if (name == SolarSystem::MOON_NAME) rotationSrc         = Gmat::DE_FILE;
+   if (name == GmatSolarSystemDefaults::MOON_NAME) rotationSrc         = Gmat::DE_FILE;
    else                                rotationSrc         = Gmat::IAU_SIMPLIFIED;
 
-   if (name == SolarSystem::MOON_NAME)  
+   if (name == GmatSolarSystemDefaults::MOON_NAME)  
    {
       FileManager *fm = FileManager::Instance();
       std::string path = fm->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
@@ -220,7 +220,7 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
    Real d = GetJulianDaysFromTDBEpoch(forTime); // interval in Julian days
    Real T = d / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY; // interval in Julian centuries
    // Compute for Earth's Moon
-   if (theCentralBodyName == SolarSystem::EARTH_NAME) 
+   if (theCentralBodyName == GmatSolarSystemDefaults::EARTH_NAME) 
    {
 //      if (rotationSrc == Gmat::IAU_2002)
 //      {
@@ -276,14 +276,14 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
 //      }
    }
    // Compute for Mars' moons
-   else if (theCentralBodyName == SolarSystem::MARS_NAME)
+   else if (theCentralBodyName == GmatSolarSystemDefaults::MARS_NAME)
    {
       if (rotationSrc == Gmat::IAU_2002)
       {
          p1  = Rad(169.51  -    0.4357640 * d);
          p2  = Rad(192.93  + 1128.4096700 * d +  8.864 * T * T);
          p3  = Rad( 53.47  -    0.0181510 * d);
-         if (instanceName == SolarSystem::PHOBOS_NAME)
+         if (instanceName == GmatSolarSystemDefaults::PHOBOS_NAME)
          {
             alpha = 317.68           -    0.108 * T     +  1.79 * Sin(p1);
             delta =  52.90           -    0.061 * T     -  1.08 * Cos(p1);
@@ -364,6 +364,37 @@ bool Moon::NeedsOnlyMainSPK()
    if (instanceName == GmatSolarSystemDefaults::MOON_NAME)  return true;
    return false;
 }
+
+//------------------------------------------------------------------------------
+//  Integer  SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the Integer parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ * @param <value> Integer value for the requested parameter.
+ *
+ * @return  Integer value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer Moon::SetIntegerParameter(const Integer id,
+                                  const Integer value)
+{
+   if (instanceName == GmatSolarSystemDefaults::MOON_NAME)
+   {
+      if ((id == NAIF_ID) &&
+          (value != GmatSolarSystemDefaults::MOON_NAIF_IDS[0]))
+      {
+         std::string errmsg = "NAIF ID for body Luna may not be modified.\n";
+         throw SolarSystemException(errmsg);
+      }
+   }
+   return CelestialBody::SetIntegerParameter(id,value);
+}
+
+
 
 
 //------------------------------------------------------------------------------

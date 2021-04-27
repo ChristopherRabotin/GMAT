@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -73,6 +73,7 @@ PropagationEnabledCommand::PropagationEnabledCommand(const std::string &typeStr)
    overridePropInit     (false),
    hasFired             (false),
    inProgress           (false),
+   needToResetSTM       (false),                                // made changes by TUAN NGUYEN
    dim                  (0),
    epochID              (-1),
    transientForces      (NULL),
@@ -105,9 +106,12 @@ PropagationEnabledCommand::~PropagationEnabledCommand()
       propagators.clear();
    }
 
-   for (std::vector<PropObjectArray*>::iterator i = propObjects.begin();
-         i != propObjects.end(); ++i)
-      delete (*i);
+	for (std::vector<PropObjectArray*>::iterator i = propObjects.begin();
+		i != propObjects.end(); ++i)
+	{                                                 // made changes by TUAN NGUYEN
+		if (*i)                                        // made changes by TUAN NGUYEN
+		   delete (*i);
+	}                                                 // made changes by TUAN NGUYEN
    propObjects.clear();
 
    if (pubdata)
@@ -131,6 +135,7 @@ PropagationEnabledCommand::PropagationEnabledCommand(
    overridePropInit     (pec.overridePropInit),
    hasFired             (false),
    inProgress           (false),
+   needToResetSTM       (pec.needToResetSTM),                           // made changes by TUAN NGUYEN
    dim                  (pec.dim),
    epochID              (pec.epochID),
    transientForces      (NULL),
@@ -167,6 +172,7 @@ PropagationEnabledCommand& PropagationEnabledCommand::operator=(
       direction           = pec.direction;
       hasFired            = false;
       inProgress          = false;
+      needToResetSTM      = pec.needToResetSTM;                            // made changes by TUAN NGUYEN
       dim                 = pec.dim;
       epochID             = pec.epochID;
       isInitialized       = false;
@@ -176,9 +182,12 @@ PropagationEnabledCommand& PropagationEnabledCommand::operator=(
          delete [] pubdata;
       pubdata             = NULL;
 
-      for (std::vector<PropSetup*>::const_iterator i = propagators.begin();
-            i != propagators.end(); ++i)
-         delete (*i);
+		for (std::vector<PropSetup*>::const_iterator i = propagators.begin();
+			i != propagators.end(); ++i)
+		{                                                       // made changes by TUAN NGUYEN
+			if (*i)                                              // made changes by TUAN NGUYEN
+			   delete (*i);
+		}                                                       // made changes by TUAN NGUYEN
       propagators.clear();
       sats.clear();
 
@@ -270,7 +279,8 @@ bool PropagationEnabledCommand::Initialize()
                   ((*ps), (*ps)->GetName(), "PropagationEnabledCommand::"
                         "Initialize()", "deleting oldPs");
                #endif
-               delete (*ps);
+               if (*ps)                                               // made changes by TUAN NGUYEN
+                  delete (*ps);
             }
 
             propagators.clear();
@@ -319,6 +329,11 @@ bool PropagationEnabledCommand::Initialize()
          ODEModel *currentODE = currentPS->GetODEModel();
          PropagationStateManager *currentPSM = currentPS->GetPropStateManager();
 
+         if ((!currentODE) && currentP->UsesODEModel())
+            throw CommandException("ForceModel not set in Propagator " +
+                  currentPS->GetName());
+
+
          StringArray owners, elements;
          /// @todo Check to see if All and All.Epoch belong for all modes.
          owners.push_back("All");
@@ -338,6 +353,10 @@ bool PropagationEnabledCommand::Initialize()
 
             if (obj->IsOfType(Gmat::SPACEOBJECT))
             {
+               // Reset STM to [I] matrix                                  // made changes by TUAN NGUYEN
+               if (obj->IsOfType(Gmat::SPACECRAFT) && needToResetSTM)      // made changes by TUAN NGUYEN
+                  ((Spacecraft*)obj)->SetSTMToIdentityMatrix();            // made changes by TUAN NGUYEN
+
                objects->push_back((SpaceObject*)obj);
                #ifdef DEBUG_INITIALIZATION
                   MessageInterface::ShowMessage("   Added the space object "
@@ -410,26 +429,39 @@ bool PropagationEnabledCommand::Initialize()
             throw CommandException("Could not map state objects for the "
                   "command\n" + generatingString);
 
-         currentODE->SetState(currentPSM->GetState());
 
-         // Set solar system to ForceModel for Propagate inside a GmatFunction(loj: 2008.06.06)
-         currentODE->SetSolarSystem(solarSys);
+         if (currentODE != NULL)
+         {
+            currentODE->SetState(currentPSM->GetState());
 
-//         // Check for finite thrusts and update the force model if there are any
-//         if (finiteBurnActive == true)
-//            AddTransientForce(satName[index], currentODE);
+            // Set solar system to ForceModel for Propagate inside a GmatFunction(loj: 2008.06.06)
+            currentODE->SetSolarSystem(solarSys);
+//            // Check for finite thrusts and update the force model if there are any
+//            if (finiteBurnActive == true)
+//               AddTransientForce(satName[index], currentODE);
+            currentP->SetPhysicalModel(currentODE);
+         }
+         else
+         {
+            ObjectArray pObjects;
+
+            currentPSM->GetStateObjects(pObjects, Gmat::SPACEOBJECT);
+            for (UnsignedInt i = 0; i < pObjects.size(); ++i)
+               currentP->SetRefObject(pObjects[i], Gmat::SPACEOBJECT,
+                     pObjects[i]->GetName());
+            currentP->SetSolarSystem(solarSys);
+         }
+
+
 
          streamID = publisher->RegisterPublishedData(this, streamID, owners, elements);
-
-         currentP->SetPhysicalModel(currentODE);
-//         currentP->SetRealParameter("InitialStepSize",
-//               fabs(currentP->GetRealParameter("InitialStepSize")) * direction);
          currentP->Initialize();
 
          // Set spacecraft parameters for forces that need them
-         if (currentODE->SetupSpacecraftData((ObjectArray*)objects, 0) <= 0)
-            throw PropagatorException("Propagate::Initialize -- "
-                  "ODE model cannot set spacecraft parameters");
+         if (currentODE != NULL)
+            if (currentODE->SetupSpacecraftData((ObjectArray*)objects, 0) <= 0)
+               throw PropagatorException("Propagate::Initialize -- "
+                     "ODE model cannot set spacecraft parameters");
 
       }
 
@@ -580,7 +612,7 @@ void PropagationEnabledCommand::SetPropagationProperties(
 }
 
 //------------------------------------------------------------------------------
-// bool PrepareToPropagate()
+// bool PrepareToPropagate(bool preparePublisher)
 //------------------------------------------------------------------------------
 /**
  * Fills in the data structures needed to start propagation
@@ -589,12 +621,15 @@ void PropagationEnabledCommand::SetPropagationProperties(
  * array, fills in the data needed to propagate, and completes the steps needed
  * to propagate the objects selected for propagation by the user.
  *
+ * @param preparePublisher True if this function should prepare the publisher,
+ *                         false if it should not.
+ *
  * @return true on success, false on failure
  *
  * todo The current implementation does not yet incorporate transient forces
  */
 //------------------------------------------------------------------------------
-bool PropagationEnabledCommand::PrepareToPropagate()
+bool PropagationEnabledCommand::PrepareToPropagate(bool preparePublisher)
 {
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage(
@@ -717,8 +752,13 @@ bool PropagationEnabledCommand::PrepareToPropagate()
             // Build the ODE model
             ode->SetPropStateManager((*i)->GetPropStateManager());
             if (ode->BuildModelFromMap() == false)
-               throw CommandException("Unable to assemble the ODE model for " +
-                     (*i)->GetName());
+               throw CommandException(typeName + "::PrepareToPropagate(): "
+                     "Unable to assemble the ODE model for " + (*i)->GetName());
+         }
+         else
+         {
+            (*i)->GetPropagator()->SetPropStateManager(
+                  (*i)->GetPropStateManager());
          }
       }
 
@@ -773,50 +813,62 @@ bool PropagationEnabledCommand::PrepareToPropagate()
          psm[n]->MapObjectsToVector();
 
          p[n]->Update(true/*direction > 0.0*/);
-//         state = fm[n]->GetState();
-         j2kState = fm[n]->GetJ2KState();
+
+         if (fm[n])
+         {
+            j2kState = fm[n]->GetJ2KState();
+            dim += fm[n]->GetDimension();
+         }
+         else
+         {
+            j2kState = p[n]->GetJ2KState();
+            dim += p[n]->GetDimension();
+         }
          baseEpoch.push_back(psm[n]->GetState()->GetEpoch());
          baseEpochGT.push_back(psm[n]->GetState()->GetEpochGT());
-
-         dim += fm[n]->GetDimension();
 
          hasFired = true;
          inProgress = true;
       }
    }
 
-   if (pubdata)
+
+   if (preparePublisher)
    {
+      if (pubdata)
+      {
+         #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Remove
+               (pubdata, "pubdata", "Propagate::PrepareToPropagate()",
+                "deleting pub data");
+         #endif
+         delete [] pubdata;
+      }
+
+      pubdata = new Real[dim+1];
       #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Remove
+         MemoryTracker::Instance()->Add
             (pubdata, "pubdata", "Propagate::PrepareToPropagate()",
-             "deleting pub data");
+             "pubdata = new Real[dim+1]");
       #endif
-      delete [] pubdata;
+
+      // Publish the data
+      if (hasPrecisionTime)
+         pubdata[0] = currEpochGT[0].GetMjd();
+      else
+         pubdata[0] = currEpoch[0];
+
+      memcpy(&pubdata[1], j2kState, dim*sizeof(Real));
+
+      #ifdef DEBUG_PUBLISH_DATA
+         MessageInterface::ShowMessage
+            ("PropagationEnabledCommand::PrepareToPropagate() '%s' publishing initial %d data to "
+             "stream %d, 1st data = %f\n", GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+             dim+1, streamID, pubdata[0]);
+      #endif
+
+      publisher->Publish(this, streamID, pubdata, dim+1, direction);
    }
-   pubdata = new Real[dim+1];
-   #ifdef DEBUG_MEMORY
-      MemoryTracker::Instance()->Add
-         (pubdata, "pubdata", "Propagate::PrepareToPropagate()",
-          "pubdata = new Real[dim+1]");
-   #endif
-
-   // Publish the data
-   if (hasPrecisionTime)
-      pubdata[0] = currEpochGT[0].GetMjd();
-   else
-      pubdata[0] = currEpoch[0];
-
-   memcpy(&pubdata[1], j2kState, dim*sizeof(Real));
-
-   #ifdef DEBUG_PUBLISH_DATA
-      MessageInterface::ShowMessage
-         ("PropagationEnabledCommand::PrepareToPropagate() '%s' publishing initial %d data to "
-          "stream %d, 1st data = %f\n", GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
-          dim+1, streamID, pubdata[0]);
-   #endif
-
-   publisher->Publish(this, streamID, pubdata, dim+1, direction);
 
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage(
@@ -893,14 +945,29 @@ bool PropagationEnabledCommand::Step(Real dt)
 
    for (UnsignedInt i = 0; i < fm.size(); ++i)
    {
-      fm[i]->UpdateInitialData();
-      fm[i]->BufferState();
+      if (fm[i])
+      {
+         fm[i]->UpdateInitialData(false, false);
+         fm[i]->BufferState();
+      }
+      else
+      {
+         p[i]->BufferState();
+      }
    }
 
    std::vector<Propagator*>::iterator current = p.begin();
+
    // Step all of the propagators by the input amount
+   #ifdef DEBUG_MULIPLE_PROPAGATORS
+      MessageInterface::ShowMessage("PropagationEnabledCommand::Step(%lf)  ", dt);
+   #endif
+
    while (current != p.end())
    {
+      #ifdef DEBUG_MULIPLE_PROPAGATORS
+         MessageInterface::ShowMessage("%s by %lf  ", (*current)->GetName().c_str(), dt);
+      #endif
       if (!(*current)->Step(dt))
       {
          char size[32];
@@ -916,20 +983,38 @@ bool PropagationEnabledCommand::Step(Real dt)
       ++current;
    }
 
+   #ifdef DEBUG_MULIPLE_PROPAGATORS
+      MessageInterface::ShowMessage("\n");
+   #endif
+
    for (UnsignedInt i = 0; i < fm.size(); ++i)
    {
       // orbit related parameters use spacecraft for data
-      elapsedTime[i] = fm[i]->GetTime();
+      if (fm[i])
+         elapsedTime[i] = fm[i]->GetTime();
+      else
+         elapsedTime[i] = p[i]->GetTime();
+
       currEpoch[i] = baseEpoch[i] + elapsedTime[i] /
          GmatTimeConstants::SECS_PER_DAY;
       currEpochGT[i] = baseEpochGT[i]; currEpochGT[i].AddSeconds(elapsedTime[i]);
 
       // Update spacecraft epoch, without argument the spacecraft epoch
       // won't get updated for consecutive Propagate command
-      if (fm[i]->HasPrecisionTime())
-         fm[i]->UpdateSpaceObjectGT(currEpochGT[i]);
+      if (fm[i])
+      {
+         if (fm[i]->HasPrecisionTime())
+            fm[i]->UpdateSpaceObjectGT(currEpochGT[i]);
+         else
+            fm[i]->UpdateSpaceObject(currEpoch[i]);
+      }
       else
-         fm[i]->UpdateSpaceObject(currEpoch[i]);
+      {
+         if (p[i]->HasPrecisionTime())
+            p[i]->UpdateSpaceObjectGT(currEpochGT[i]);
+         else
+            p[i]->UpdateSpaceObject(currEpoch[i]);
+      }
 
       #ifdef DEBUG_PROP_STEPS
          MessageInterface::ShowMessage("  ---> elapsed time = %.12lf, epoch "
@@ -1520,8 +1605,9 @@ void PropagationEnabledCommand::SetNames(const std::string& name, StringArray& o
 {
    // Add satellite labels
    for (Integer i = 0; i < 6; ++i)
-      owners.push_back(name);       // X, Y, Z, Vx, Vy, Vz
-
+      owners.push_back(name);
+   
+   // X, Y, Z, Vx, Vy, Vz
    elements.push_back(name+".X");
    elements.push_back(name+".Y");
    elements.push_back(name+".Z");

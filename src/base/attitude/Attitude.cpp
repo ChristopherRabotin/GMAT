@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool.
 //
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -51,6 +51,8 @@
 #include "StringUtil.hpp"
 #include "GmatConstants.hpp"
 #include "AttitudeConversionUtility.hpp"
+#include "CoordinateConverter.hpp"                  // made changes by TUAN NGUYEN
+
 
 //#define DEBUG_REF_SETTING
 //#define DEBUG_ATTITUDE_GEN_STRING
@@ -4037,4 +4039,46 @@ bool Attitude::IsInitialAttitudeParameter(Integer id, std::string ofType) const
    }
    return false;
 }
+
+
+// made changes by TUAN NGUYEN
+Rmatrix33 Attitude::GetRotationMatrix(GmatTime &epochGT)
+{
+   // Compute dcm matrix and angles' velocity w.r.t. MJ2000Eq
+   ComputeCosineMatrixAndAngularVelocity(epochGT.GetMjd());
+
+   // dcm.Transpose() is rotation matrix from spacecraft's attitude frame (B-frame) to inertial frame (I-frame)
+   Rmatrix33 MT = dcm.Transpose();
+
+	return MT;
+}
+
+
+// made changes by TUAN NGUYEN
+std::vector<Rmatrix33> Attitude::GetRotationMatrixDerivative(GmatTime &epochGT, CoordinateSystem *j2kCS)
+{
+	// 1. Specify spacecraft attitude's coordinate system
+	CoordinateSystem *attCS = NULL;
+   std::string attCSName = GetStringParameter("AttitudeCoordinateSystem");
+   attCS = (CoordinateSystem *)(GetRefObject(Gmat::COORDINATE_SYSTEM, attCSName));
+	
+   if (attCS == NULL)
+	{
+		throw GmatBaseException("Error: ********************!!!!!!!!!!!!!!!\n");
+	}
+
+	// 2. Specify rotation matrix [M]^T from spacecraft's attitude frame to spacecraft's inertial frame 
+	Rvector inState(6, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
+	Rvector outState(6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	CoordinateConverter cv;
+
+	cv.SetToCalculateRotMatrixDeriv(true);                  // turn flag to calculate rotation matrix derivative on
+	cv.Convert(epochGT, inState, attCS, outState, j2kCS);
+	cv.SetToCalculateRotMatrixDeriv(false);                 // reset to default flag
+
+	std::vector<Rmatrix33> MTDeriv = cv.GetLastRotationMatrixDerivative();
+
+	return MTDeriv;
+}
+
 

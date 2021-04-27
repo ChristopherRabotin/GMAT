@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -73,6 +73,9 @@ RFHardware::RFHardware(const std::string &type, const std::string &name) :
    objectTypes.push_back(Gmat::RF_HARDWARE);
    objectTypeNames.push_back("RFHardware");
    parameterCount = RFHardwareParamCount;
+
+   for (Integer i = SensorParamCount; i < RFHardwareParamCount; i++)
+      parameterWriteOrder.push_back(i);
 }
 
 
@@ -102,6 +105,8 @@ RFHardware::RFHardware(const RFHardware & rfh) :
    primaryAntenna       (NULL),
    primaryAntennaName   (rfh.primaryAntennaName)
 {
+   for (Integer i = SensorParamCount; i < RFHardwareParamCount; i++)
+      parameterWriteOrder.push_back(i);
 }
 
 

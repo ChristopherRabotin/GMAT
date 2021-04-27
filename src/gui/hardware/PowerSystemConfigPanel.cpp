@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -405,7 +405,7 @@ void PowerSystemConfigPanel::LoadData()
    Integer paramID;
 
    // Load the epoch formats
-   StringArray reps = TimeConverterUtil::GetValidTimeRepresentations();
+   StringArray reps = TimeSystemConverter::Instance()->GetValidTimeRepresentations();
    for (unsigned int i = 0; i < reps.size(); i++)
       epochFormatComboBox->Append(reps[i].c_str());
 
@@ -448,7 +448,7 @@ void PowerSystemConfigPanel::LoadData()
          ("  about to convert from the epoch format %s to TAIModJulian ...\n",
                fromEpochFormat.c_str());
       #endif
-      TimeConverterUtil::Convert(fromEpochFormat, fromMjd, theEpochStr,
+      TimeSystemConverter::Instance()->Convert(fromEpochFormat, fromMjd, theEpochStr,
                                  "TAIModJulian", outMjd, outStr);
       taiMjdStr = outStr;
 
@@ -827,13 +827,13 @@ void PowerSystemConfigPanel::OnComboBoxChange(wxCommandEvent &event)
             }
             else
             {
-               TimeConverterUtil::Convert(fromEpochFormat, fromMjd, theEpochStr,
+               TimeSystemConverter::Instance()->Convert(fromEpochFormat, fromMjd, theEpochStr,
                                           "TAIModJulian", outMjd, outStr);
                taiMjdStr = outStr;
             }
 
             // Convert to desired format with new date
-            TimeConverterUtil::Convert(fromEpochFormat, fromMjd, theEpochStr,
+            TimeSystemConverter::Instance()->Convert(fromEpochFormat, fromMjd, theEpochStr,
                                        toEpochFormat, outMjd, outStr);
 
             epochTxtCtrl->SetValue(outStr.c_str());
@@ -848,7 +848,7 @@ void PowerSystemConfigPanel::OnComboBoxChange(wxCommandEvent &event)
                      "TAIModJulian", toEpochFormat.c_str());
             #endif
             // Convert to desired format using TAIModJulian date
-            TimeConverterUtil::Convert("TAIModJulian", fromMjd, taiMjdStr,
+            TimeSystemConverter::Instance()->Convert("TAIModJulian", fromMjd, taiMjdStr,
                                        toEpochFormat, outMjd, outStr);
 
             epochTxtCtrl->SetValue(outStr.c_str());

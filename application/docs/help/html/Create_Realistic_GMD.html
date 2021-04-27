@@ -253,11 +253,12 @@ DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'DSN_TCP'};</pre><p>We now crea
     <span class="guilabel">DSNTransmitter.Frequency</span>) differently. See the
     <span class="guilabel">RunSimulator</span> Help for details.</p><p>We only have two steps remaining in order to create a script that
     generates more realistic measurement data. The first step is to increase
-    the simulation time from 10 minutes to the more realistic 3 weeks worth of
-    data that is typically needed to generate an orbit determination solution
-    for a spacecraft in this type of deep space orbit. The second step is to
-    turn on the measurement noise. These two steps are accomplished by making
-    the following changes to our <span class="guilabel">TrackingFileSet</span> object,
+    the simulation time from 10 minutes to the more realistic three weeks
+    worth of data that is typically needed to generate an orbit determination
+    solution for a spacecraft in this type of deep space orbit. The second
+    step is to turn on the measurement noise. These two steps are accomplished
+    by making the following changes to our
+    <span class="guilabel">TrackingFileSet</span> object,
     <span class="guilabel">DSNsimData</span>.</p><pre class="programlisting">Sim.FinalEpoch          = '09 Sep 2015 00:00:00.000';
 Sim.AddNoise            = On;
 Sim.MeasurementTimeStep = 3600;</pre><p>Note that above, in addition to implementing the two needed steps,
@@ -271,7 +272,7 @@ Sim.MeasurementTimeStep = 3600;</pre><p>Note that above, in addition to implemen
     <code class="filename">Tut_Simulate_DSN_Range_and_Doppler_Data_3_weeks.script</code>.
     Note that in this file, in addition to the changes above, we have also
     changed the GMD output file name to <code class="filename">Simulate DSN Range and
-    Doppler Data 3 weeks.gmd</code>.</p><p>Now run the script which should take approximately 1-2 minutes since
+    Doppler Data 3 weeks.gmd</code>.</p><p>Now run the script which should take approximately 2-3 minutes since
     we are generating much more data than previously. We will use the GMD file
     we have created here as input to an estimation script we will build in the
     next tutorial, <span class="bold"><strong>Orbit Estimation using DSN Range and

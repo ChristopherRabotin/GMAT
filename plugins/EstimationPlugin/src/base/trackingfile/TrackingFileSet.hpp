@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -26,6 +26,7 @@
 #include "MeasurementModelBase.hpp"
 #include "TrackingDataAdapter.hpp"
 #include "DataFile.hpp"
+#include "SignalDataCache.hpp"
 
 class SolarSystem;
 class PropSetup;
@@ -54,6 +55,9 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const std::string &label) const;
+
    virtual Integer      GetIntegerParameter(const Integer id) const;
    virtual Integer      SetIntegerParameter(const Integer id,
                                             const Integer value);
@@ -62,12 +66,16 @@ public:
                                             const Integer value);
 
    virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         GetRealParameter(const Integer id,
+                                         const Integer index) const;
    virtual Real         SetRealParameter(const Integer id,
                                          const Real value);
+
    virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         GetRealParameter(const std::string &label,
+                                         const Integer index) const;
    virtual Real         SetRealParameter(const std::string &label,
                                          const Real value);
-
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
@@ -143,14 +151,22 @@ public:
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
    virtual void         SetSolarSystem(SolarSystem *ss);
+   virtual void         SetPropagators(std::vector<PropSetup*> *ps,
+                                       std::map<std::string, StringArray> *spMap);
+
+   /// @note:  These SetPropagator methods are only used by the API
    virtual void         SetPropagator(PropSetup *ps);
+   virtual void         SetPropagator(PropSetup *ps, const std::string &forSpacecraft);
+
    virtual bool         Initialize();
 
    const StringArray&   GetParticipants() const;
+   TrackingDataAdapter  *GetAdapter(Integer index);
    std::vector<TrackingDataAdapter*> *GetAdapters();
 
    bool                 GenerateTrackingConfigs(std::vector<StringArray> strandsList, std::vector<StringArray> sensorsList, StringArray typesList);
 
+   void                 ClearIonosphereCache();
 protected:
    /**
     * Internal class used to match strand and model descriptions together, as
@@ -190,6 +206,8 @@ protected:
    bool        useRelativityCorrection;
    /// Flag for the inclusion of ET-TAI correction
    bool        useETminusTAICorrection;
+   /// Type of angular aberration correction (None, Annual, Diurnal, or AnnualAndDiurnal)
+   std::string aberrationCorrection;
 
    /// Range modulo constant
    Real        rangeModulo;
@@ -215,9 +233,12 @@ protected:
 
    /// Solar system used in the measurements
    SolarSystem *solarsystem;
-   /// @todo Adjust this code when multiple propagator support is implemented
-   /// Propagator used for light time computations
-   PropSetup *thePropagator;
+
+   /// Propagators used for light time solution
+   std::vector<PropSetup*> *thePropagators;
+   /// Mapping for propagator overrides for specific spacecraft
+   std::map<std::string, StringArray> *satPropagatorMap;
+
    /// Pointers to ref objects that the adapters use
    ObjectArray references;
 
@@ -230,6 +251,7 @@ protected:
       USELIGHTTIME,
       USE_RELATIVITY,
       USE_ETMINUSTAI,
+      ABERRATION_CORRECTION,
       RANGE_MODULO,
       DOPPLER_COUNT_INTERVAL,
       TDRS_SERVICE_ACCESS,
@@ -238,6 +260,11 @@ protected:
       TDRS_SMAR_ID,
       TDRS_DATA_FLAG,
       DATA_FILTERS,
+
+      // API fields used to access calculated measurements
+      API_TRACKINGCONFIGCOUNT,
+      API_GET_C_VALUE,
+
       TrackingFileSetParamCount,
    };
 
@@ -248,14 +275,18 @@ protected:
    static const Gmat::ParameterType PARAMETER_TYPE[TrackingFileSetParamCount -
                                                    MeasurementModelBaseParamCount];
 
-   TrackingDataAdapter *BuildAdapter(const StringArray &strand,
+   TrackingDataAdapter *BuildAdapter(const StringArray &strand, const StringArray &sensors,                    // made changes by TUAN NGUYEN
          const std::string &type, Integer configIndex);
 
 private:
+
+   /// Cache for ionosphere corrections
+   SignalDataCache::SimpleSignalDataCache ionosphereCache;
+
    /// Warning messages
    StringArray mesg;
 
-   std::string CheckTypeDeprecation(const std::string datatype);
+   //std::string CheckTypeDeprecation(const std::string datatype);
    bool    ParseTrackingConfig(std::string value, Integer& configIndex, bool& start);
    bool    ParseStrand(std::string value, Integer configIndex, Integer strandIndex = 0);
    bool    AddToSignalPath(std::string participantName, Integer configIndex, Integer strandIndex);
@@ -263,6 +294,16 @@ private:
    Integer openBracketCount;
    bool    start;
 
+   /**
+    * @note:  The propvec and spm members are only used by the API.  These
+    * pieces are isolated here to allow multiple propagator support for API
+    * users without needing to change the GMAT flow driven through the
+    * navigation Solvers.
+    */
+   /// API vector of propagator pointers
+   std::vector<PropSetup*> propvec;
+   /// API mapping of propagators to spacecraft
+   std::map<std::string, StringArray> spm;
 };
 
 #endif /* TrackingFileSet_hpp */

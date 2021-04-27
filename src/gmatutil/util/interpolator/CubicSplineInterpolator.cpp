@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -56,6 +56,7 @@ CubicSplineInterpolator::CubicSplineInterpolator(const std::string &name,
    lastX               (-9.9999e75)
 {
    bufferSize = 5;
+   requiredPoints = 5;
    Integer i;
    for (i = 0; i < bufferSize; ++i)
    {
@@ -147,7 +148,10 @@ CubicSplineInterpolator& CubicSplineInterpolator::operator=
 bool CubicSplineInterpolator::Interpolate(const Real ind, Real *results)
 {
    if (pointCount < requiredPoints)
-      return false;
+      throw InterpolatorException("ERROR - CublicSplineInterpolator: " +
+         GmatStringUtil::ToString(requiredPoints, 1) + " points "
+         "are required for interpolation, but only " +
+         GmatStringUtil::ToString(pointCount, 1) + " were provided.\n");
         
    bool retval = BuildSplines();
    if (retval)

@@ -38,7 +38,7 @@ function [F,GradF] = EvaluateGMATObjective(X)
 % 
 % External References: CallGMATfminconSolver 
 % 
-% Copyright (c) 2002 - 2018 United States Government as represented by the
+% Copyright (c) 2002 - 2020 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
 % All Other Rights Reserved.
 %

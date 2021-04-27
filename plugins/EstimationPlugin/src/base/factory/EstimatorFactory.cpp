@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,9 +35,7 @@
 
 // Here are the supported leaf classes
 #include "Simulator.hpp"
-#include "BatchEstimatorInv.hpp"
-#include "BatchEstimatorSVD.hpp"
-#include "ExtendedKalmanInv.hpp"
+#include "BatchEstimator.hpp"
 
 
 //---------------------------------
@@ -103,16 +101,24 @@ Solver* EstimatorFactory::CreateSolver(const std::string &ofType,
 
    if (ofType == "Simulator")
       return new Simulator(withName);
+   if (ofType == "BatchEstimator")
+      return new BatchEstimator(withName);
    if (ofType == "BatchEstimatorInv")
-      return new BatchEstimatorInv(withName);
+   {
+      // Write deprecated message once per GMAT session
+      static bool batchEstimatorInvFirstWarning = true;
 
-#ifdef ENABLE_UNFINISHED_FEATURES
-   if (ofType == "BatchEstimatorSVD")
-      return new BatchEstimatorSVD(withName);
+      if (batchEstimatorInvFirstWarning)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"BatchEstimatorInv\" resource is "
+             "deprecated and will be removed from a future build; "
+             "please use \"BatchEstimator\" instead.\n");
+         batchEstimatorInvFirstWarning = false;
+      }
 
-   if (ofType == "ExtendedKalmanInv")
-      return new ExtendedKalmanInv(withName);
-#endif
+      return new BatchEstimator(withName);
+   }
 
    // Here's a list of other potential estimators:
    //if (ofType == "BatchLeastSquares")
@@ -159,12 +165,8 @@ EstimatorFactory::EstimatorFactory() :
    if (creatables.empty())
    {
       creatables.push_back("Simulator");
-      creatables.push_back("BatchEstimatorInv");
-
-#ifdef ENABLE_UNFINISHED_FEATURES
-      creatables.push_back("BatchEstimatorSVD");
-      creatables.push_back("ExtendedKalmanInv");
-#endif
+      creatables.push_back("BatchEstimator");
+      creatables.push_back("BatchEstimatorInv"); // DEPRECATED: Renamed to BatchEstimator
 
       //creatables.push_back("BatchLeastSquares");
       //creatables.push_back("SequentialLeastSquares");

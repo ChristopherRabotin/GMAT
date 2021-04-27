@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -3233,20 +3233,6 @@ bool Propagate::Initialize()
    EmptyBuffer();
    cloneCount = 0;
 
-   // Remove old PropSetups
-   for (std::vector<PropSetup*>::iterator ps = propagators.begin(); ps != propagators.end();
-        ++ps)
-   {
-      PropSetup *oldPs = *ps;
-      *ps = NULL;
-      #ifdef DEBUG_MEMORY
-      MemoryTracker::Instance()->Remove
-         (oldPs, oldPs->GetName(), "Propagate::Initialize()",
-          "deleting oldPs");
-      #endif
-      delete oldPs;
-   }
-
    if (propagators.size() > 0)
    {
       for (std::vector<PropSetup*>::iterator ps = propagators.begin();
@@ -3900,6 +3886,46 @@ void Propagate::PrepareToPropagate()
                   (*i)->GetPropStateManager());
       }
 
+      // Check if the attitude affects the dynamics of the force model
+      bool attAffectDyn = false;
+      for (UnsignedInt n = 0U; n < propagators.size(); n++)
+      {
+         ODEModel *odem = propagators[n]->GetODEModel();
+         if (odem)
+         {
+            for (UnsignedInt ii = 0U; ii < odem->GetNumForces(); ii++)
+            {
+               PhysicalModel* f = odem->GetForce(ii);
+
+               if (f->AttitudeAffectsDynamics())
+               {
+                  attAffectDyn = true;
+                  break;
+               }
+            }
+         }
+
+         if (attAffectDyn)
+            break;
+      }
+
+      // If the attitude of the Spacecraft affects the force model,
+      // indicate that the Cartesian state affects dynamics.
+      // This is needed when the Spacecraft's attitude uses a coordinate
+      // system which is a function of the Spacecraft's state
+      if (attAffectDyn)
+      {
+         for (std::vector<GmatBase *>::const_iterator obj = sats.begin();
+            obj != sats.end(); ++obj)
+         {
+            if ((*obj)->IsOfType("Spacecraft"))
+            {
+               Spacecraft* s = (Spacecraft*)(*obj);
+               s->AttitudeAffectsDynamics(true);
+            }
+         }
+      }
+
       // Initialize the subsystem
       #ifdef DEBUG_PROPAGATE_INIT
          MessageInterface::ShowMessage("Initializing Propagate command\n");
@@ -3913,6 +3939,19 @@ void Propagate::PrepareToPropagate()
             MessageInterface::ShowMessage("Building models for Setup %s\n",
                   (*i)->GetName().c_str());
          #endif
+         
+         PropagationStateManager *psmObj = (*i)->GetPropStateManager();            // made changes by TUAN NGUYEN
+         ObjectArray objList;                                                      // made changes by TUAN NGUYEN
+         psmObj->GetStateObjects(objList, Gmat::UNKNOWN_OBJECT);                   // made changes by TUAN NGUYEN
+         for (Integer i = 0; i < objList.size(); ++i)                              // made changes by TUAN NGUYEN
+         {                                                                         // made changes by TUAN NGUYEN
+            if (objList[i]->IsOfType(Gmat::SPACECRAFT))                            // made changes by TUAN NGUYEN
+            {                                                                      // made changes by TUAN NGUYEN
+               // Input value 2 tells spacecraft that propagation command is running    // made changes by TUAN NGUYEN
+               ((Spacecraft*)objList[i])->SetRunningCommandFlag(2);                // made changes by TUAN NGUYEN
+            }                                                                      // made changes by TUAN NGUYEN
+         }                                                                         // made changes by TUAN NGUYEN
+
          ODEModel *ode = (*i)->GetODEModel();
          if (ode != NULL)    // Only do this for the PropSetups that integrate
          {
@@ -4020,6 +4059,21 @@ void Propagate::PrepareToPropagate()
 
       }
    }
+
+
+   ////for (UnsignedInt i = 0; i < psm.size(); ++i)                                 // made changes by TUAN NGUYEN
+   ////{                                                                            // made changes by TUAN NGUYEN
+   ////   ObjectArray objList;                                                      // made changes by TUAN NGUYEN
+   ////   psm[i]->GetStateObjects(objList, Gmat::UNKNOWN_OBJECT);                   // made changes by TUAN NGUYEN
+   ////   for (Integer i = 0; i < objList.size(); ++i)                              // made changes by TUAN NGUYEN
+   ////   {                                                                         // made changes by TUAN NGUYEN
+   ////      if (objList[i]->IsOfType(Gmat::SPACECRAFT))                            // made changes by TUAN NGUYEN
+   ////      {                                                                      // made changes by TUAN NGUYEN
+   ////         // Input value 2 tells spacecraft that propagation command is running    // made changes by TUAN NGUYEN
+   ////         ((Spacecraft*)objList[i])->SetRunningCommandFlag(2);                // made changes by TUAN NGUYEN
+   ////      }                                                                      // made changes by TUAN NGUYEN
+   ////   }                                                                         // made changes by TUAN NGUYEN
+   ////}                                                                            // made changes by TUAN NGUYEN
 
    // Sanity check the Spacecraft epochs to be sure that they match for each propagator
    for (UnsignedInt i = 0; i < psm.size(); ++i)
@@ -4320,7 +4374,7 @@ bool Propagate::Execute()
          for (UnsignedInt i = 0; i < fm.size(); ++i)
          {
             if (fm[i] != NULL)
-               fm[i]->UpdateInitialData();
+               fm[i]->UpdateInitialData(false, false);
             else
                p[i]->UpdateFromSpaceObject();
          }
@@ -4633,6 +4687,17 @@ bool Propagate::Execute()
          ((SpaceObject*)(*i))->ClearLastStopTriggered();
    }
 
+   // Clear the flag set by AttitudeAffectsDynamics flag in the Spacecraft
+   for (std::vector<GmatBase *>::const_iterator obj = sats.begin();
+      obj != sats.end(); ++obj)
+   {
+      if ((*obj)->IsOfType("Spacecraft"))
+      {
+         Spacecraft* s = (Spacecraft*)(*obj);
+         s->AttitudeAffectsDynamics(false);
+      }
+   }
+
    #ifdef DEBUG_EPOCH_UPDATES
       if (fm[0]);
          fm[0]->ReportEpochData();
@@ -4748,11 +4813,12 @@ bool Propagate::TakeAStep(Real propStep)
 
          if (!(*current)->Step(propStep))
          {
-            char size[32];
-            std::sprintf(size, "%.12lf", propStep);
+            std::stringstream sizebuffer;
+            sizebuffer << propStep;
+            sizebuffer.precision(15);
             throw CommandException("In Propagate::TakeAStep, Propagator " + 
                (*current)->GetName() +
-               " failed to take a good final step (size = " + size + ")\n");
+               " failed to take a good final step (size = " + sizebuffer.str() + ")\n");
          }
 
 
@@ -5013,8 +5079,10 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
          "elapsedTime = %f\n", currEpoch[0], stopEpoch, elapsedTime[0]);
    #endif
 
-   Real secsToStep = 1.0e99 * direction, dt = 0.0;
-   StopCondition *stopper = NULL;
+//   Real secsToStep = 1.0e99 * direction;
+   Real secsToStep = stepBrackets[1] * direction;
+   Real dt = 0.0;
+   StopCondition *stopper = (triggers.size() > 0 ? triggers[0] : NULL);
 
    #ifdef DEBUG_EPOCH_SYNC
       MessageInterface::ShowMessage("Top of final step code:\n");
@@ -5050,7 +5118,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
       {
          if (fm[i]->HasPrecisionTime())
          {
-            GmatTime gt = baseEpochGT[i]; gt.SetTimeInSec(fm[i]->GetTime());
+            GmatTime gt = baseEpochGT[i]; gt.AddSeconds(fm[i]->GetTime());
             fm[i]->UpdateSpaceObjectGT(gt);
          }
          else
@@ -5061,7 +5129,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
       {
          if (p[i]->HasPrecisionTime())
          {
-            GmatTime gt = baseEpochGT[i]; gt.SetTimeInSec(p[i]->GetTime());
+            GmatTime gt = baseEpochGT[i]; gt.AddSeconds(p[i]->GetTime());
             p[i]->UpdateSpaceObjectGT(gt);
          }
          else
@@ -5612,6 +5680,17 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
             secsToStep);
    #endif
 
+//   Real theMax = 0.0;
+//   for (UnsignedInt i = 0; i < maxSteps.size(); ++i)
+//      if (fabs(theMax) < fabs(maxSteps[i]))
+//         theMax = maxSteps[i];
+//
+//   if (fabs(secsToStep) > fabs(theMax))
+//      secsToStep = theMax;
+
+   if (fabs(secsToStep) > fabs(stepBrackets[1]))
+      return BisectFinalStep(stopper);
+
    bool closeEnough = false;
    bool nextTimeThrough = false;
    Integer attempts = 0;
@@ -5724,6 +5803,9 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
             prevStep = secsToStep;
             slope = (y[1] - y[0]) / (x[1] - x[0]);
             secsToStep = (target - y[0]) / slope;
+
+            if (fabs(secsToStep) > fabs(stepBrackets[1]))
+               return BisectFinalStep(stopper);
          }
 
          ++attempts;
@@ -5800,6 +5882,9 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
                }
 
                secsToStep = bisectStep;
+               if (fabs(secsToStep) > fabs(stepBrackets[1]))
+                  return BisectFinalStep(stopper);
+
                break;
             }
             slope = (y[1] - y[0]) / (x[1] - x[0]);
@@ -5846,9 +5931,14 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
                }
 
                secsToStep = bisectStep;
+               if (fabs(secsToStep) > fabs(stepBrackets[1]))
+                  return BisectFinalStep(stopper);
+
                break;
             }
             secsToStep = x[1] + (target - y[1]) / slope;
+            if (fabs(secsToStep) > fabs(stepBrackets[1]))
+               return BisectFinalStep(stopper);
 
             #ifdef DEBUG_STOPPING_CONDITIONS
                MessageInterface::ShowMessage(
@@ -6018,6 +6108,243 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
    return secsToStep;
 }
 
+
+//------------------------------------------------------------------------------
+// Real RefineFinalStep(Real secsToStep, StopCondition *stopper)
+//------------------------------------------------------------------------------
+/**
+ * Routine that refines the solution found by the cubic spline, by solving for
+ * the stopping condition using bisection for a bracketed step to find the
+ * closest obtainable step to the stopping condition.
+ *
+ * This implementation replaces the previous method that used secants until the
+ * step produced fell within the desired accuracy.  That approach occasionally
+ * found secants that were essentially flat, producing bad steps.
+ *
+ * @param <secsToStep>  First guess at the duration needed for stopping.
+ * @param <stopper>     The stopping condition used for the refinement.
+ *
+ * @return The time step to the stopping condition, as determined by this
+ * method.
+ */
+//------------------------------------------------------------------------------
+Real Propagate::BisectFinalStep(StopCondition *stopper)
+{
+   #ifdef DEBUG_SECANT_DETAILS
+      MessageInterface::ShowMessage("\nRefineFinalStep(%16.13lf) entered.\n",
+            secsToStep);
+   #endif
+   Real dt = (stepBrackets[1] - stepBrackets[0]) / 2.0;
+
+   bool closeEnough = false;
+   bool nextTimeThrough = false;
+
+   Integer attempts = 0;
+   Real x[2], y[2], target, thisValue, nextStep, startTime, prevStep = 0.0;
+
+   Parameter *stopParam = stopper->GetStopParameter(),
+             *targParam = stopper->GetGoalParameter();
+
+   x[0] = stepBrackets[0];
+   x[1] = stepBrackets[1];
+
+   nextStep = stepBrackets[1];
+   startTime = fm[0]->GetTime();
+
+   // Set the LHS setting
+   if (x[0] != 0.0)  // Not at the starting epoch
+   {
+      if (!TakeAStep(x[0]))
+         throw CommandException("Unable to take a good step while searching "
+            "for stopping step in command\n   \"" + GetGeneratingString() +
+            "\"\n");
+
+      prevStep = x[0];
+
+      // Update spacecraft for that step
+      for (UnsignedInt i = 0; i < fm.size(); ++i)
+      {
+         if (fm[i])
+         {
+            if (fm[i]->HasPrecisionTime())
+            {
+               GmatTime gt = baseEpochGT[i]; gt.AddSeconds(fm[i]->GetTime());
+               fm[i]->UpdateSpaceObjectGT(gt);
+            }
+            else
+               fm[i]->UpdateSpaceObject(
+                  baseEpoch[i] + fm[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+         }
+         else
+         {
+            if (p[i]->HasPrecisionTime())
+            {
+               GmatTime gt = baseEpochGT[i]; gt.AddSeconds(p[i]->GetTime());
+               p[i]->UpdateSpaceObjectGT(gt);
+            }
+            else
+               p[i]->UpdateSpaceObject(
+                  baseEpoch[i] + p[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+         }
+      }
+
+      y[0] = stopParam->EvaluateReal();
+
+   }
+   else  // Starting at dt[0] = 0.0
+      y[0] = stopParam->EvaluateReal();
+
+   Integer count = 0;
+
+   // Set RHS data
+   // Reset to start
+   BufferSatelliteStates(false);
+   for (UnsignedInt i = 0; i < fm.size(); ++i)
+   {
+      if (fm[i])
+      {
+         fm[i]->UpdateFromSpaceObject();
+         fm[i]->SetTime(startTime);
+      }
+      else
+      {
+         p[i]->UpdateFromSpaceObject();
+         p[i]->SetTime(startTime);
+      }
+   }
+
+   if (!TakeAStep(x[1]))
+      throw CommandException("Unable to take a good step while searching "
+         "for stopping step in command\n   \"" + GetGeneratingString() +
+         "\"\n");
+
+   // Update spacecraft for that step
+   for (UnsignedInt i = 0; i < fm.size(); ++i)
+   {
+      if (fm[i])
+      {
+         if (fm[i]->HasPrecisionTime())
+         {
+            GmatTime gt = baseEpochGT[i];
+            gt.AddSeconds(fm[i]->GetTime());
+            fm[i]->UpdateSpaceObjectGT(gt);
+         }
+         else
+            fm[i]->UpdateSpaceObject(
+               baseEpoch[i] + fm[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+      }
+      else
+      {
+         if (p[i]->HasPrecisionTime())
+         {
+            GmatTime gt = baseEpochGT[i];
+            gt.AddSeconds(p[i]->GetTime());
+            p[i]->UpdateSpaceObjectGT(gt);
+         }
+         else
+            p[i]->UpdateSpaceObject(
+               baseEpoch[i] + p[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+      }
+   }
+   y[1] = stopParam->EvaluateReal();
+
+   while (count < 51)
+   {
+      // Reset to start
+      BufferSatelliteStates(false);
+      for (UnsignedInt i = 0; i < fm.size(); ++i)
+      {
+         if (fm[i])
+         {
+            fm[i]->UpdateFromSpaceObject();
+            fm[i]->SetTime(startTime);
+         }
+         else
+         {
+            p[i]->UpdateFromSpaceObject();
+            p[i]->SetTime(startTime);
+         }
+      }
+
+      if (!TakeAStep(nextStep))
+         throw CommandException("Unable to take a good step while searching "
+            "for stopping step in command\n   \"" + GetGeneratingString() +
+            "\"\n");
+
+      // Update spacecraft for that step
+      for (UnsignedInt i = 0; i < fm.size(); ++i)
+      {
+         if (fm[i])
+         {
+            if (fm[i]->HasPrecisionTime())
+            {
+               GmatTime gt = baseEpochGT[i];
+               gt.AddSeconds(fm[i]->GetTime());
+               fm[i]->UpdateSpaceObjectGT(gt);
+            }
+            else
+               fm[i]->UpdateSpaceObject(
+                  baseEpoch[i] + fm[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+         }
+         else
+         {
+            if (p[i]->HasPrecisionTime())
+            {
+               GmatTime gt = baseEpochGT[i];
+               gt.AddSeconds(p[i]->GetTime());
+               p[i]->UpdateSpaceObjectGT(gt);
+            }
+            else
+               p[i]->UpdateSpaceObject(
+                  baseEpoch[i] + p[i]->GetTime() / GmatTimeConstants::SECS_PER_DAY);
+         }
+      }
+
+      if (targParam != NULL)
+         target = targParam->EvaluateReal();
+      else
+         target = stopper->GetStopGoal();
+
+      thisValue = stopParam->EvaluateReal();
+
+      if (fabs(stopper->GetStopDifference()) < stopAccuracy)
+      {
+         #ifdef DEBUG_SECANT_DETAILS
+            MessageInterface::ShowMessage("Solution found at iteration %d:  "
+                  "[%.12le, %.12le]\n", count, nextStep, thisValue);
+
+            MessageInterface::ShowMessage("   %.12le is close enough!\n", thisValue);
+         #endif
+         break;
+      }
+
+      // Setup for next iteration
+      if (y[0] * thisValue >= 0.0)  // Start and current on same side of 0
+      {
+         x[0] = nextStep;
+         y[0] = thisValue;
+      }
+      else                          // or not
+      {
+         x[1] = nextStep;
+         y[1] = thisValue;
+      }
+
+      #ifdef DEBUG_BISECTION
+         MessageInterface::ShowMessage("States at iteration %d:  [%.12le, %.12le],"
+               " [%.12le, %.12le]\n", count, x[0], y[0], x[1], y[1]);
+      #endif
+
+      prevStep = nextStep;
+      nextStep = x[0] + (x[1] - x[0]) / 2.0;
+      ++count;
+   }
+
+//   throw PropagatorException("Stopping to evaluate things");
+
+   return nextStep;
+}
+
 //------------------------------------------------------------------------------
 // Real BisectToStop(StopCondition *stopper)
 //------------------------------------------------------------------------------
@@ -6180,8 +6507,8 @@ Real Propagate::BisectToStop(StopCondition *stopper)
       }
    }
 
-   if (attempts == attemptsMax)
-      secsToStep = 0.0;
+//   if (attempts == attemptsMax)
+//      secsToStep = 0.0;
 
    return secsToStep;
 }

@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 // ODTBX: Orbit Determination Toolbox
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -546,7 +546,7 @@ extern "C"
          }
          else
          {
-            char msg[128];
+            char msg[512];
             sprintf(msg, "ERROR: Incoming state size (%d) is larger than the "
                   "propagation state vector size (%d)!\n   Epoch: %lf\n   "
                   "State = [%lf %lf %lf %lf %lf %lf]\n", stateDim,

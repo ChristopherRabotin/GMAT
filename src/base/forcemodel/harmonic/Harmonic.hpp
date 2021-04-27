@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -60,6 +60,8 @@
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
 #include "Rmatrix33.hpp"
+#include "TimeSystemConverter.hpp"   // for the TimeSystemConverter singleton
+
 //------------------------------------------------------------------------------
 class GMAT_API Harmonic
 {
@@ -103,6 +105,9 @@ protected:
    Real**      VR22;    // Temporary
    /// Flag used to warn about truncating matrix calculations to 20x20 only once
    static bool matrixTruncationWasPosted;
+
+   /// Time converter singleton
+   TimeSystemConverter *theTimeConverter;
 protected:
    void Allocate();
    void Deallocate();

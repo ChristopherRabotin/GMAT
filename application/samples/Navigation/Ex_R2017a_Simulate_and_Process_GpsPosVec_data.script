@@ -114,7 +114,7 @@ EstMeas.DataFilters               = {};
 %   Configure BLS
 %
 
-Create BatchEstimatorInv Bls;
+Create BatchEstimator Bls;
 
 Bls.ShowProgress                = True;
 Bls.Measurements                = {EstMeas};

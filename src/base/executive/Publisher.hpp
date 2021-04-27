@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -49,9 +49,10 @@ public:
    bool Unsubscribe(Subscriber *s);
    bool UnsubscribeAll();
    
-   bool Publish(GmatBase *provider, Integer id, Real *data, Integer count, Real propDir = 1.0);
-   bool Publish(Integer id, char *data, Integer count = 0);
-   bool Publish(Integer id, Integer *data, Integer count);
+   virtual bool Publish(GmatBase *provider, Integer id, Real *data, Integer count, Real propDir = 1.0);
+   virtual bool Publish(Integer id, char *data, Integer count = 0);
+   virtual bool Publish(Integer id, Integer *data, Integer count);
+   virtual void Ping();
    
    bool FlushBuffers(bool endOfDataBlock = true);
    bool NotifyEndOfRun();
@@ -104,7 +105,7 @@ public:
    CelestialBody* GetDataMJ2000EqOrigin() { return dataMJ2000EqOrigin; }
    inline Gmat::RunState GetRunState();
    
-private:
+protected:
    /// The singleton
    static Publisher         *instance;
    /// List of the subscribers

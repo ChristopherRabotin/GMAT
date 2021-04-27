@@ -17,9 +17,6 @@ MESSAGE("GMAT NewParameter Plugin setup " ${VERSION})
 # For some reason the binary is NewParameters, not NewParameter
 SET(TargetName NewParameters)
 
-# Add Preproccessor Definitions
-ADD_DEFINITIONS("-DNEW_PARAMETER_EXPORTS")
-
 # ====================================================================
 # list of directories containing source/header files
 SET(PLUGIN_DIRS factory include parameter plugin)
@@ -44,3 +41,6 @@ SET(PLUGIN_SRCS
 # ====================================================================
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
+
+# Rename DLL export preproccessor definition
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEFINE_SYMBOL "NEW_PARAMETER_EXPORTS")

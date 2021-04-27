@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -45,6 +45,7 @@
 class Spacecraft;
 class Formation;
 class Hardware;
+class FieldOfView;
 class Propagator;
 class ODEModel;
 class PropSetup;
@@ -61,6 +62,8 @@ class Function;
 class Moderator;
 class Validator;
 class Interface;
+class RHSEquation;
+
 
 
 /**
@@ -75,7 +78,7 @@ class GMAT_API Interpreter
 public:
    Interpreter(SolarSystem *ss = NULL, ObjectMap *objMap = NULL);
    virtual ~Interpreter();
-   
+
    //------------------------------------------------------------------------------
    // bool Interpret()
    //------------------------------------------------------------------------------
@@ -133,6 +136,9 @@ public:
    void SetFunction(Function *func);
    Function* GetFunction();
    
+   virtual GmatBase* CheckForMethod(const std::string &objectName,
+         const std::string &methodName);
+
    void SetContinueOnError(bool flag);
    bool GetContinueOnError();
    bool IsInCommandMode();
@@ -285,7 +291,31 @@ protected:
    bool AssembleReportCommand(GmatCommand *cmd, const std::string &desc);
    bool AssembleCreateCommand(GmatCommand *cmd, const std::string &desc);
    bool SetCommandRefObjects(GmatCommand *cmd, const std::string &desc);
-   
+
+//#ifdef USE_METHOD_CODE
+   // For CallFunction commands
+   enum FunctionType
+   {
+      NOT_A_FUNCTION,
+      GMAT_FUNCTION,
+      MATLAB_FUNCTION,
+      PYTHON_FUNCTION,
+      OBJECT_METHOD,
+      UNKNOWN_FUNCTION_TYPE
+   };
+
+   /// Type of function called
+   FunctionType functionType;
+   bool isMethod;
+
+   bool AssembleCallMethodCommand(GmatCommand *cmd, const std::string &desc);
+
+   FunctionType ValidateFunctionCall(GmatCommand *cmd, const std::string &desc,
+         StringArray &inputs, StringArray &outputs);
+   bool SetFunctionInputs(GmatCommand *cmd, const StringArray &inputs);
+   bool SetFunctionOutputs(GmatCommand *cmd, const StringArray &outputs);
+//#endif
+
    // for assignment
    GmatBase* MakeAssignment(const std::string &lhs, const std::string &rhs);
    
@@ -321,6 +351,7 @@ protected:
                          const Gmat::ParameterType type,
                          const std::string &value,
                          const Integer index = -1, const Integer colIndex = -1);
+   bool SetGeneric(GmatBase *obj, const Integer id, const std::string &value);
    bool SetPropertyObjectValue(GmatBase *obj, const Integer id,
                                const Gmat::ParameterType type,
                                const std::string &value,
@@ -367,6 +398,7 @@ protected:
    // Final setting of reference object pointers needed by the GUI and validation
    bool FinalPass();
    bool FinalPassSubscribers();
+   bool SetupEquationParameters();
    
    // for GamtFunction handling
    bool CheckFunctionDefinition(const std::string &funcPathAndName,
@@ -404,6 +436,7 @@ private:
    bool CheckForSpecialCase(GmatBase *obj, Integer id, std::string &value);
    bool CheckUndefinedReference(GmatBase *obj, bool writeLine = true);
    bool HandleMathTree(GmatCommand *cmd);
+   bool HandleEquation(RHSEquation *rhs);
    bool HasFilenameTypeParameter(GmatCommand *cmd);
    
    static const std::string defaultIndicator;

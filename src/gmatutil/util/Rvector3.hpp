@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -76,9 +76,9 @@ public:
    Rvector3 operator/(const Rmatrix33 &m) const;
    const Rvector3& operator/=(const Rmatrix33 &m);
    
-   friend Rvector3 GMATUTIL_API operator*(Real s, const Rvector3 &v);
-   friend Rmatrix33 GMATUTIL_API Outerproduct(const Rvector3 &v1, const Rvector3 &v2);
-   friend Rvector3 GMATUTIL_API Cross(const Rvector3 &v1, const Rvector3 &v2);
+   GMATUTIL_API friend Rvector3 operator*(Real s, const Rvector3 &v);
+   GMATUTIL_API friend Rmatrix33 Outerproduct(const Rvector3 &v1, const Rvector3 &v2);
+   GMATUTIL_API friend Rvector3 Cross(const Rvector3 &v1, const Rvector3 &v2);
    
    static Real Normalize(const Real from[3], Real to[3]);
    static void Copy(const Real from[3], Real to[3]);

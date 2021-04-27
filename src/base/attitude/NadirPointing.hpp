@@ -40,6 +40,9 @@ public:
    /// inherited from GmatBase
    virtual GmatBase* Clone() const;
    
+   virtual std::vector<Rmatrix33> 
+                     GetRotationMatrixDerivative(GmatTime &epochGT, CoordinateSystem *j2kCS);     // made changes by TUAN NGUYEN
+
 protected:
    enum 
    {
@@ -51,6 +54,7 @@ protected:
    Rmatrix33 TRIAD(Rvector3& V1, Rvector3& V2, Rvector3& W1, Rvector3& W2);
 
    virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime);
+   virtual void ComputeCosineMatrixAndAngularVelocity(GmatTime &atTime);           // made changes by TUAN NGUYEN
 
 private:
    // Default constructor - not implemented

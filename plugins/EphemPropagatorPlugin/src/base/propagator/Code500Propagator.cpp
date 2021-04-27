@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -728,15 +728,16 @@ bool Code500Propagator::Initialize()
                if (timeSystem == 1.0)
                   theEpoch = epoch;
                else //if (timeSystem == 2.0) // Should check to be sure it was set
-                  theEpoch = TimeConverterUtil::Convert(epoch, TimeConverterUtil::UTCMJD,
-                        TimeConverterUtil::A1MJD);
+                  theEpoch = theTimeConverter->Convert(epoch, TimeSystemConverter::UTCMJD,
+                        TimeSystemConverter::A1MJD);
 
                startEpochs.push_back(theEpoch);
                timeSteps.push_back(ephem.ReadDoubleField(&ephemRecords->at(i).timeIntervalBetweenPoints_SEC));
 
                Real span = timeSteps.back() * Code500EphemerisFile::NUM_STATES_PER_RECORD;
                if (timeSystem == 2.0) // If using UTC, adjust for leap seconds if necessary
-                  span += TimeConverterUtil::NumberOfLeapSecondsFrom(epoch + span/GmatTimeConstants::SECS_PER_DAY) - TimeConverterUtil::NumberOfLeapSecondsFrom(epoch);
+                  span += theTimeConverter->NumberOfLeapSecondsFrom(epoch + span/GmatTimeConstants::SECS_PER_DAY) -
+                          theTimeConverter->NumberOfLeapSecondsFrom(epoch);
                timeSpans.push_back(span);
 
                #ifdef DEBUG_INITIALIZATION
@@ -817,8 +818,7 @@ bool Code500Propagator::Initialize()
             GetState(initialEpoch, outState);
             lastEpoch = initialEpoch;
 
-            std::memcpy(state, outState.GetDataVector(),
-                  dimension*sizeof(Real));
+            std::memcpy(state, outState.GetDataVector(), 6*sizeof(Real));
 
             //MoveToOrigin(currentEpoch);
 
@@ -952,8 +952,7 @@ bool Code500Propagator::Step()
       GetState(currentEpochGT, outState);
       lastEpochGT = currentEpochGT;
 
-      std::memcpy(state, outState.GetDataVector(),
-         dimension*sizeof(Real));
+      std::memcpy(state, outState.GetDataVector(), 6*sizeof(Real));
 
       //MoveToOrigin(currentEpoch);
 
@@ -1042,8 +1041,7 @@ bool Code500Propagator::Step()
       GetState(currentEpoch, outState);
       lastEpoch = currentEpoch;
 
-      std::memcpy(state, outState.GetDataVector(),
-         dimension*sizeof(Real));
+      std::memcpy(state, outState.GetDataVector(), 6*sizeof(Real));
 
       //MoveToOrigin(currentEpoch);
 
@@ -1122,8 +1120,7 @@ void Code500Propagator::UpdateState()
    else
       GetState(currentEpoch, theState);
 
-   std::memcpy(state, theState.GetDataVector(),
-         dimension*sizeof(Real));
+   std::memcpy(state, theState.GetDataVector(), 6*sizeof(Real));
 }
 
 
@@ -1403,12 +1400,12 @@ void Code500Propagator::UpdateInterpolator(const GmatEpoch &forEpoch)
          startEpoch = startEpochs[usedRecords[i][0]];
          currentEpoch = startEpoch + timeSteps[usedRecords[i][0]] * (usedRecords[i][1]) / GmatTimeConstants::SECS_PER_DAY;
 
-         startEpochUTC = TimeConverterUtil::Convert(startEpoch, TimeConverterUtil::A1MJD,
-                        TimeConverterUtil::UTCMJD);
-         currentEpochUTC = TimeConverterUtil::Convert(currentEpoch, TimeConverterUtil::A1MJD,
-                        TimeConverterUtil::UTCMJD);
+         startEpochUTC = theTimeConverter->Convert(startEpoch, TimeSystemConverter::A1MJD,
+                        TimeSystemConverter::UTCMJD);
+         currentEpochUTC = theTimeConverter->Convert(currentEpoch, TimeSystemConverter::A1MJD,
+                        TimeSystemConverter::UTCMJD);
 
-         epochOffset+= TimeConverterUtil::NumberOfLeapSecondsFrom(currentEpochUTC) - TimeConverterUtil::NumberOfLeapSecondsFrom(startEpochUTC);
+         epochOffset+= theTimeConverter->NumberOfLeapSecondsFrom(currentEpochUTC) - theTimeConverter->NumberOfLeapSecondsFrom(startEpochUTC);
       }
 
       epochOffset /= GmatTimeConstants::SECS_PER_DAY;

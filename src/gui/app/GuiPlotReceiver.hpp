@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -36,6 +36,7 @@
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
 #include "PlotReceiver.hpp"
+#include "DynamicDataStruct.hpp"
 
 
 /**
@@ -189,6 +190,20 @@ public:
    virtual bool ActivateXyPlot(const std::string &plotName);
    virtual bool TakeXYAction(const std::string &plotName,
                         const std::string &action);
+
+   // for dynamic data display
+   virtual bool CreateDynamicDataDisplay(const std::string &plotName,
+                        const std::string &oldName,
+                        const std::string &plotTitle, Real positionX,
+                        Real positionY, Real width, Real height);
+   virtual bool SetDynamicDataTableSize(const std::string &plotName,
+                        Integer maxRowCount, Integer maxColCount);
+   virtual bool UpdateDynamicDataDisplay(const std::string &plotName,
+                        std::vector<std::vector<DDD>> newData);
+   virtual bool DeleteDynamicData(const std::string &plotName,
+                        const std::string &oldName);
+   virtual bool SetDynamicDataTextColor(const std::string &plotName,
+                        std::vector<std::vector<DDD>> newColors);
 
 protected:
    bool ComputePlotPositionAndSize(bool isGLPlot, Real positionX,

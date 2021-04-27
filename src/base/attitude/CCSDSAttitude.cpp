@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -85,7 +85,7 @@ CCSDSAttitude::CCSDSAttitude(const CCSDSAttitude& att) :
    Attitude(att)
 {
    if (att.reader)
-      reader = (att.reader)->Clone();
+      reader = (CCSDSAEMReader*) (att.reader)->Clone();
    else
       reader = new CCSDSAEMReader();
 }
@@ -109,7 +109,7 @@ CCSDSAttitude& CCSDSAttitude::operator=(const CCSDSAttitude& att)
    Attitude::operator=(att);
    if (reader) delete reader;
    if (att.reader)
-      reader = (att.reader)->Clone();
+      reader = (CCSDSAEMReader*) (att.reader)->Clone();
    else
       reader = new CCSDSAEMReader();
    return *this;
@@ -210,6 +210,14 @@ void CCSDSAttitude::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    #ifdef DEBUG_CCSDS_ATTITUDE
       MessageInterface::ShowMessage("EXITing CCSDSAttitude::Compute\n");
    #endif
+}
+
+
+// made changes by TUAN NGUYEN
+void CCSDSAttitude::ComputeCosineMatrixAndAngularVelocity(GmatTime &atTime)
+{
+   ///@todo: it needs to implement code for a high precision of time
+   ComputeCosineMatrixAndAngularVelocity(atTime.GetMjd());
 }
 
 

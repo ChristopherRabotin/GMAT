@@ -1,0 +1,1036 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>ThrustHistoryFile</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ch16.html#N1516B" title="Resources"><link rel="prev" href="SpacecraftVisualizationProperties.html" title="Spacecraft Visualization Properties"><link rel="next" href="ThrustSegment.html" title="ThrustSegment"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">ThrustHistoryFile</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="SpacecraftVisualizationProperties.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ThrustSegment.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="ThrustHistoryFile"></a><div class="titlepage"></div><a name="N1EAB3" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ThrustHistoryFile</span></h2><p>ThrustHistoryFile &mdash; A time history of input thrust/acceleration vectors and mass
+    flow rate</p></div><div class="refsection"><a name="N1EAC4"></a><h2>Description</h2><p>A <span class="guilabel">ThrustHistoryFile</span> resource is used to read in
+    a time history of thrust or acceleration vectors that will be applied to a
+    specified spacecraft. The user can optionally choose to read in a time
+    history of mass flow rate that applies to a specified fuel
+    resource.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="ThrustSegment.html" title="ThrustSegment"><span class="refentrytitle">ThrustSegment</span></a>, <a class="xref" href="BeginFileThrust.html" title="BeginFileThrust"><span class="refentrytitle">BeginFileThrust</span></a>, <a class="xref" href="EndFileThrust.html" title="EndFileThrust"><span class="refentrytitle">EndFileThrust</span></a></p></div><div class="refsection"><a name="ThrustHistoryFile_Resource_Fields"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="23%"><col width="77%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AddThrustSegment </span></td><td><p>Method to specify one or more thrust segments
+            contained in a given thrust/acceleration and mass flow rate
+            history file. </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any user-defined <span class="guilabel">ThrustSegment</span>
+                    resource</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">N/A</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FileName</span></td><td><p>File name of the associated thrust/acceleration and
+            mass flow rate history file. Details on the format of this user
+            created file is described in the Remarks. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any user-defined file name</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1EB4A"></a><h2>Remarks</h2><div class="refsection"><a name="N1EB4D"></a><h3>Format of a thrust history file</h3><p>The thrust history file contains blocks of data. Each block of
+      data starts with a BeginThrust keyword and ends with an EndThrust
+      keyword. More specifically, the start of a block of data is indicated by
+      the keyword "BeginThrust {<span class="guilabel">ThrustSegment</span> object
+      name}" and ends with the keyword "EndThrust
+      {<span class="guilabel">ThrustSegment</span> object name}." The specified
+      <span class="guilabel">ThrustSegment</span> resource defines how the data in a
+      given block is to be used.</p><p>We assume that the user has created a script where a
+      <span class="guilabel">ThrustSegment</span> resource,
+      <span class="guilabel">Segment1</span>, has been created. Below, we show a sample
+      thrust history file that references
+      <span class="guilabel">Segment1</span>.</p><pre class="programlisting"><code class="code">BeginThrust {Segment1}
+Start_Epoch = 29 Jan 2019 16:35:00.000
+Thrust_Vector_Coordinate_System = EarthMJ2000Eq   
+Thrust_Vector_Interpolation_Method  = None
+Mass_Flow_Rate_Interpolation_Method = None
+ModelAccelOnly
+0.0     0.003 0.011 0.002
+1.0     0.003 0.011 0.002
+EndThrust {Segment1}</code></pre><p>The <code class="code">Start_Epoch</code> parameter value in this history file
+      specifies that the thrust/acceleration data in the file should be
+      applied starting at 29 Jan 2019 16:35:00.000 UTCG. The
+      <code class="code">Thrust_Vector_Coordinate_System</code> parameter value specifies
+      that the thurst/acceleration data in this file uses the EarthMJ2000Eq
+      coordinate system. The <code class="code">Thrust_Vector_Interpolation_Method</code>
+      parameter value specifies that the thrust/acceleration data in this file
+      should not be interpolated. The
+      <code class="code">Mass_Flow_Rate_Interpolation_Method</code> parameter value
+      specifies that mass flow rate data, if any, in this file, should not be
+      interpolated. <code class="code">ModelAccelOnly</code> in the file above is a header
+      describing the data that follows. It tells GMAT what type of
+      acceleration/thrust and mass flow rate modeling to perform. In this
+      case, the <code class="code">ModelAccelOnly</code> tells GMAT we are modeling
+      acceleration only.</p><p>Next, the thrust history file contains two rows of acceleration
+      data. The first entry in each row is elapsed seconds from the
+      <code class="code">Start_Epoch</code> value. The next three entries in each row is an
+      acceleration vector in <m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+            <m:mrow>
+              <m:mi>m</m:mi>
+
+              <m:mo>/</m:mo>
+
+              <m:msup>
+                <m:mi>s</m:mi>
+
+                <m:mn>2</m:mn>
+              </m:msup>
+            </m:mrow>
+          </m:math>. The 0.0 value in the first row indicates that the
+      acceleration should occur 0 elapsed seconds from
+      <code class="code">Start_Epoch</code>, at 29 Jan 2019 16:35:00.000 UTCG. The
+      acceleration vector, at this time, will have a value of (0.003 0.011
+      0.002) <m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+            <m:mrow>
+              <m:mi>m</m:mi>
+
+              <m:mo>/</m:mo>
+
+              <m:msup>
+                <m:mi>s</m:mi>
+
+                <m:mn>2</m:mn>
+              </m:msup>
+            </m:mrow>
+          </m:math> applied in the EarthMJ2000Eq coordinate system. The
+      1.0 value in the second row indicates that the applied acceleration
+      should end at 29 Jan 2019 16:35:01.000 UTCG. The acceleration vector, at
+      this time, will have a value of (0.003 0.011 0.002) <m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+            <m:mrow>
+              <m:mi>m</m:mi>
+
+              <m:mo>/</m:mo>
+
+              <m:msup>
+                <m:mi>s</m:mi>
+
+                <m:mn>2</m:mn>
+              </m:msup>
+            </m:mrow>
+          </m:math> applied in the EarthMJ2000Eq coordinate system. Note
+      that if the interpolation method is <code class="code">None</code> as shown here, the
+      acceleration is applied in piecewise constant fashion and only the time
+      from the last acceleration record is needed; the acceleration values are
+      ignored. The <code class="code">Linear</code> and <code class="code">CubicSpline</code>
+      interpolation methods will use the acceleration values in the last
+      record as interpolation nodes.</p><p>The table below provides more information on the four parameters
+      defined within a block of data, enclosed within
+      <code class="code">BeginThrust</code>/<code class="code">EndThrust</code> pair keywords, in a
+      thrust history file.</p><div class="informaltable"><table border="1"><colgroup><col width="51%"><col width="49%"></colgroup><thead><tr><th>File Parameter</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Start_Epoch </span></td><td><p>Reference epoch, in UTC Gregorian format, for the
+              thrust/acceleration and mass flow rate data.
+              </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any valid Epoch in UTCG format</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Thrust_Vector_Coordinate_System
+              </span></td><td><p>Coordinate system used to specify the
+              thrust/acceleration vector data. </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any valid built-in or user-defined
+                      <span class="guilabel">CoordinateSystem</span> Resource. If
+                      <span class="guilabel">BodyFixed</span> is chosen, the user must
+                      define the spacecraft attitude separately</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Thrust_Vector_Interpolation_Method</span></td><td><p>Interpolation method used for the
+              thrust/acceleration vector components. </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Linear, CubicSpline, or None.</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Mass_Flow_Rate_Interpolation_Method
+              </span></td><td><p>Interpolation method used for the mass flow rate
+              </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Linear, CubicSpline, or None</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr></tbody></table></div><p>The table below lists the four valid header values that describe
+      how the data enclosed within
+      <code class="code">BeginThrust</code>/<code class="code">EndThrust</code> pair keywords, in a
+      thrust history file, is to be used.</p><div class="informaltable"><table border="1"><colgroup><col width="23%"><col width="77%"></colgroup><thead><tr><th>Header</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">ModelThrustAndMassRate</span></td><td><p>Each row of data contains five elements. The first
+              element is the elapsed seconds (non-negative) from the
+              <code class="code">Start_Epoch</code> parameter value. The next three
+              elements are the three components of thrust in Newtons (N). The
+              final (fifth) element is the mass flow rate in kg/s. A positive
+              value for this fifth element corresponds to a mass decrease to
+              simulate fuel mass being consumed. </p></td></tr><tr><td><span class="guilabel">ModelThrustOnly</span></td><td><p>Each row of data contains four elements. The first
+              element is the elapsed seconds (non-negative) from the
+              <code class="code">Start_Epoch</code> parameter value. The next three
+              elements are the three components of thrust in Newtons (N).
+              </p></td></tr><tr><td><span class="guilabel">ModelAccelAndMassRate</span></td><td><p>Each row of data contains five elements. The first
+              element is the elapsed seconds (non-negative) from the
+              <code class="code">Start_Epoch</code> parameter value. The next three
+              elements are the three components of acceleration in m/s^2. The
+              final (fifth) element is the mass flow rate in kg/s. A positive
+              value for this fifth element corresponds to a mass decrease to
+              simulate fuel mass being consumed. </p></td></tr><tr><td><span class="guilabel">ModelAccelOnly</span></td><td><p>Each row of data contains four elements. The first
+              element is the elapsed seconds (non-negative) from the
+              <code class="code">Start_Epoch</code> parameter value. The next three
+              elements are the three components of acceleration in
+              m/s^2.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1EC96"></a><h3>Equations of Motion (EOM) as a function of Header type and
+      ThrustSegment.ApplyThrustScaleToMassFlow parameter value</h3><p>The choice of header value as listed in the previous table will
+      affect the GMAT EOM. In addition, the choice of value for the associated
+      <span class="guilabel">ThrustSegment</span>
+      <span class="guilabel">ApplyThrustScaleToMassFlow</span> flag, either True or
+      False, can also affect the EOM. The table below shows how the GMAT EOM
+      change as a function of header type and value of the
+      <span class="guilabel">ThrustSegment</span>.
+      <span class="guilabel">ApplyThrustScaleToMassFlow</span> parameter.</p><div class="informaltable"><table width="100%" border="1"><colgroup><col align="center" width="33%"><col width="19%"><col width="23%"><col width="25%"></colgroup><thead><tr><th align="center">Header</th><th align="center">ApplyThrustScaleToMassFlow</th><th align="center">Total Acceleration</th><th align="center">Total Mass Flow Rate</th></tr></thead><tbody><tr><td align="center">ModelAccelOnly</td><td>True or False</td><td><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>a</m:mi>
+
+                        <m:mrow>
+                          <m:mi>T</m:mi>
+
+                          <m:mi>o</m:mi>
+
+                          <m:mi>t</m:mi>
+
+                          <m:mi>a</m:mi>
+
+                          <m:mi>l</m:mi>
+                        </m:mrow>
+                      </m:msub>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mi>a</m:mi>
+
+                      <m:mo>+</m:mo>
+
+                      <m:mi>s</m:mi>
+
+                      <m:msub>
+                        <m:mi>a</m:mi>
+
+                        <m:mrow>
+                          <m:mi>F</m:mi>
+
+                          <m:mi>i</m:mi>
+
+                          <m:mi>l</m:mi>
+
+                          <m:mi>e</m:mi>
+                        </m:mrow>
+                      </m:msub>
+                    </m:mrow>
+                  </m:math></td><td><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                    <m:mrow>
+                      <m:msub>
+                        <m:mover accent="true">
+                          <m:mi>m</m:mi>
+
+                          <m:mo>&#729;</m:mo>
+                        </m:mover>
+
+                        <m:mrow>
+                          <m:mi>T</m:mi>
+
+                          <m:mi>o</m:mi>
+
+                          <m:mi>t</m:mi>
+
+                          <m:mi>a</m:mi>
+
+                          <m:mi>l</m:mi>
+                        </m:mrow>
+                      </m:msub>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mover accent="true">
+                        <m:mi>m</m:mi>
+
+                        <m:mo>&#729;</m:mo>
+                      </m:mover>
+                    </m:mrow>
+                  </m:math></td></tr><tr><td align="center">ModelThrustOnly</td><td>True or False</td><td><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>a</m:mi>
+
+                        <m:mrow>
+                          <m:mi>T</m:mi>
+
+                          <m:mi>o</m:mi>
+
+                          <m:mi>t</m:mi>
+
+                          <m:mi>a</m:mi>
+
+                          <m:mi>l</m:mi>
+                        </m:mrow>
+                      </m:msub>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mi>a</m:mi>
+
+                      <m:mo>+</m:mo>
+
+                      <m:mfrac>
+                        <m:mrow>
+                          <m:mi>s</m:mi>
+
+                          <m:msub>
+                            <m:mi>T</m:mi>
+
+                            <m:mrow>
+                              <m:mi>F</m:mi>
+
+                              <m:mi>i</m:mi>
+
+                              <m:mi>l</m:mi>
+
+                              <m:mi>e</m:mi>
+                            </m:mrow>
+                          </m:msub>
+                        </m:mrow>
+
+                        <m:mrow>
+                          <m:msub>
+                            <m:mi>m</m:mi>
+
+                            <m:mrow>
+                              <m:mi>T</m:mi>
+
+                              <m:mi>o</m:mi>
+
+                              <m:mi>t</m:mi>
+
+                              <m:mi>a</m:mi>
+
+                              <m:mi>l</m:mi>
+                            </m:mrow>
+                          </m:msub>
+                        </m:mrow>
+                      </m:mfrac>
+                    </m:mrow>
+                  </m:math></td><td><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                    <m:mrow>
+                      <m:msub>
+                        <m:mover accent="true">
+                          <m:mi>m</m:mi>
+
+                          <m:mo>&#729;</m:mo>
+                        </m:mover>
+
+                        <m:mrow>
+                          <m:mi>T</m:mi>
+
+                          <m:mi>o</m:mi>
+
+                          <m:mi>t</m:mi>
+
+                          <m:mi>a</m:mi>
+
+                          <m:mi>l</m:mi>
+                        </m:mrow>
+                      </m:msub>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mover accent="true">
+                        <m:mi>m</m:mi>
+
+                        <m:mo>&#729;</m:mo>
+                      </m:mover>
+                    </m:mrow>
+                  </m:math></td></tr><tr><td align="center">ModelAccelAndMassRate</td><td>True</td><td><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>a</m:mi>
+
+                        <m:mrow>
+                          <m:mi>T</m:mi>
+
+                          <m:mi>o</m:mi>
+
+                          <m:mi>t</m:mi>
+
+                          <m:mi>a</m:mi>
+
+                          <m:mi>l</m:mi>
+                        </m:mrow>
+                      </m:msub>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mi>a</m:mi>
+
+                      <m:mo>+</m:mo>
+
+                      <m:mi>s</m:mi>
+
+                      <m:msub>
+                        <m:mi>a</m:mi>
+
+                        <m:mrow>
+                          <m:mi>F</m:mi>
+
+                          <m:mi>i</m:mi>
+
+                          <m:mi>l</m:mi>
+
+                          <m:mi>e</m:mi>
+                        </m:mrow>
+                      </m:msub>
+                    </m:mrow>
+                  </m:math></td><td><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                    <m:mrow>
+                      <m:msub>
+                        <m:mover accent="true">
+                          <m:mi>m</m:mi>
+
+                          <m:mo>&#729;</m:mo>
+                        </m:mover>
+
+                        <m:mrow>
+                          <m:mi>T</m:mi>
+
+                          <m:mi>o</m:mi>
+
+                          <m:mi>t</m:mi>
+
+                          <m:mi>a</m:mi>
+
+                          <m:mi>l</m:mi>
+                        </m:mrow>
+                      </m:msub>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mover accent="true">
+                        <m:mi>m</m:mi>
+
+                        <m:mo>&#729;</m:mo>
+                      </m:mover>
+
+                      <m:mtext>&nbsp;</m:mtext>
+
+                      <m:mo>&minus;</m:mo>
+
+                      <m:mi>s</m:mi>
+
+                      <m:msub>
+                        <m:mi>s</m:mi>
+
+                        <m:mi>m</m:mi>
+                      </m:msub>
+
+                      <m:msub>
+                        <m:mover accent="true">
+                          <m:mi>m</m:mi>
+
+                          <m:mo>&#729;</m:mo>
+                        </m:mover>
+
+                        <m:mrow>
+                          <m:mi>F</m:mi>
+
+                          <m:mi>i</m:mi>
+
+                          <m:mi>l</m:mi>
+
+                          <m:mi>e</m:mi>
+                        </m:mrow>
+                      </m:msub>
+                    </m:mrow>
+                  </m:math></td></tr><tr><td align="center">ModelAccelAndMassRate</td><td>False</td><td><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>a</m:mi>
+
+                        <m:mrow>
+                          <m:mi>T</m:mi>
+
+                          <m:mi>o</m:mi>
+
+                          <m:mi>t</m:mi>
+
+                          <m:mi>a</m:mi>
+
+                          <m:mi>l</m:mi>
+                        </m:mrow>
+                      </m:msub>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mi>a</m:mi>
+
+                      <m:mo>+</m:mo>
+
+                      <m:mi>s</m:mi>
+
+                      <m:msub>
+                        <m:mi>a</m:mi>
+
+                        <m:mrow>
+                          <m:mi>F</m:mi>
+
+                          <m:mi>i</m:mi>
+
+                          <m:mi>l</m:mi>
+
+                          <m:mi>e</m:mi>
+                        </m:mrow>
+                      </m:msub>
+                    </m:mrow>
+                  </m:math></td><td><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                    <m:mrow>
+                      <m:msub>
+                        <m:mover accent="true">
+                          <m:mi>m</m:mi>
+
+                          <m:mo>&#729;</m:mo>
+                        </m:mover>
+
+                        <m:mrow>
+                          <m:mi>T</m:mi>
+
+                          <m:mi>o</m:mi>
+
+                          <m:mi>t</m:mi>
+
+                          <m:mi>a</m:mi>
+
+                          <m:mi>l</m:mi>
+                        </m:mrow>
+                      </m:msub>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mover accent="true">
+                        <m:mi>m</m:mi>
+
+                        <m:mo>&#729;</m:mo>
+                      </m:mover>
+
+                      <m:mtext>&nbsp;</m:mtext>
+
+                      <m:mo>&minus;</m:mo>
+
+                      <m:msub>
+                        <m:mi>s</m:mi>
+
+                        <m:mi>m</m:mi>
+                      </m:msub>
+
+                      <m:msub>
+                        <m:mover accent="true">
+                          <m:mi>m</m:mi>
+
+                          <m:mo>&#729;</m:mo>
+                        </m:mover>
+
+                        <m:mrow>
+                          <m:mi>F</m:mi>
+
+                          <m:mi>i</m:mi>
+
+                          <m:mi>l</m:mi>
+
+                          <m:mi>e</m:mi>
+                        </m:mrow>
+                      </m:msub>
+                    </m:mrow>
+                  </m:math></td></tr><tr><td align="center">ModelThrustAndMassRate</td><td>True</td><td><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>a</m:mi>
+
+                        <m:mrow>
+                          <m:mi>T</m:mi>
+
+                          <m:mi>o</m:mi>
+
+                          <m:mi>t</m:mi>
+
+                          <m:mi>a</m:mi>
+
+                          <m:mi>l</m:mi>
+                        </m:mrow>
+                      </m:msub>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mi>a</m:mi>
+
+                      <m:mo>+</m:mo>
+
+                      <m:mfrac>
+                        <m:mrow>
+                          <m:mi>s</m:mi>
+
+                          <m:msub>
+                            <m:mi>T</m:mi>
+
+                            <m:mrow>
+                              <m:mi>F</m:mi>
+
+                              <m:mi>i</m:mi>
+
+                              <m:mi>l</m:mi>
+
+                              <m:mi>e</m:mi>
+                            </m:mrow>
+                          </m:msub>
+                        </m:mrow>
+
+                        <m:mrow>
+                          <m:msub>
+                            <m:mi>m</m:mi>
+
+                            <m:mrow>
+                              <m:mi>T</m:mi>
+
+                              <m:mi>o</m:mi>
+
+                              <m:mi>t</m:mi>
+
+                              <m:mi>a</m:mi>
+
+                              <m:mi>l</m:mi>
+                            </m:mrow>
+                          </m:msub>
+                        </m:mrow>
+                      </m:mfrac>
+                    </m:mrow>
+                  </m:math></td><td><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                    <m:mrow>
+                      <m:msub>
+                        <m:mover accent="true">
+                          <m:mi>m</m:mi>
+
+                          <m:mo>&#729;</m:mo>
+                        </m:mover>
+
+                        <m:mrow>
+                          <m:mi>T</m:mi>
+
+                          <m:mi>o</m:mi>
+
+                          <m:mi>t</m:mi>
+
+                          <m:mi>a</m:mi>
+
+                          <m:mi>l</m:mi>
+                        </m:mrow>
+                      </m:msub>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mover accent="true">
+                        <m:mi>m</m:mi>
+
+                        <m:mo>&#729;</m:mo>
+                      </m:mover>
+
+                      <m:mtext>&nbsp;</m:mtext>
+
+                      <m:mo>&minus;</m:mo>
+
+                      <m:mi>s</m:mi>
+
+                      <m:msub>
+                        <m:mi>s</m:mi>
+
+                        <m:mi>m</m:mi>
+                      </m:msub>
+
+                      <m:msub>
+                        <m:mover accent="true">
+                          <m:mi>m</m:mi>
+
+                          <m:mo>&#729;</m:mo>
+                        </m:mover>
+
+                        <m:mrow>
+                          <m:mi>F</m:mi>
+
+                          <m:mi>i</m:mi>
+
+                          <m:mi>l</m:mi>
+
+                          <m:mi>e</m:mi>
+                        </m:mrow>
+                      </m:msub>
+                    </m:mrow>
+                  </m:math></td></tr><tr><td align="center">ModelThrustAndMassRate</td><td>False</td><td><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>a</m:mi>
+
+                        <m:mrow>
+                          <m:mi>T</m:mi>
+
+                          <m:mi>o</m:mi>
+
+                          <m:mi>t</m:mi>
+
+                          <m:mi>a</m:mi>
+
+                          <m:mi>l</m:mi>
+                        </m:mrow>
+                      </m:msub>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mi>a</m:mi>
+
+                      <m:mo>+</m:mo>
+
+                      <m:mfrac>
+                        <m:mrow>
+                          <m:mi>s</m:mi>
+
+                          <m:msub>
+                            <m:mi>T</m:mi>
+
+                            <m:mrow>
+                              <m:mi>F</m:mi>
+
+                              <m:mi>i</m:mi>
+
+                              <m:mi>l</m:mi>
+
+                              <m:mi>e</m:mi>
+                            </m:mrow>
+                          </m:msub>
+                        </m:mrow>
+
+                        <m:mrow>
+                          <m:msub>
+                            <m:mi>m</m:mi>
+
+                            <m:mrow>
+                              <m:mi>T</m:mi>
+
+                              <m:mi>o</m:mi>
+
+                              <m:mi>t</m:mi>
+
+                              <m:mi>a</m:mi>
+
+                              <m:mi>l</m:mi>
+                            </m:mrow>
+                          </m:msub>
+                        </m:mrow>
+                      </m:mfrac>
+                    </m:mrow>
+                  </m:math></td><td><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                    <m:mrow>
+                      <m:msub>
+                        <m:mover accent="true">
+                          <m:mi>m</m:mi>
+
+                          <m:mo>&#729;</m:mo>
+                        </m:mover>
+
+                        <m:mrow>
+                          <m:mi>T</m:mi>
+
+                          <m:mi>o</m:mi>
+
+                          <m:mi>t</m:mi>
+
+                          <m:mi>a</m:mi>
+
+                          <m:mi>l</m:mi>
+                        </m:mrow>
+                      </m:msub>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mover accent="true">
+                        <m:mi>m</m:mi>
+
+                        <m:mo>&#729;</m:mo>
+                      </m:mover>
+
+                      <m:mtext>&nbsp;</m:mtext>
+
+                      <m:mo>&minus;</m:mo>
+
+                      <m:msub>
+                        <m:mi>s</m:mi>
+
+                        <m:mi>m</m:mi>
+                      </m:msub>
+
+                      <m:msub>
+                        <m:mover accent="true">
+                          <m:mi>m</m:mi>
+
+                          <m:mo>&#729;</m:mo>
+                        </m:mover>
+
+                        <m:mrow>
+                          <m:mi>F</m:mi>
+
+                          <m:mi>i</m:mi>
+
+                          <m:mi>l</m:mi>
+
+                          <m:mi>e</m:mi>
+                        </m:mrow>
+                      </m:msub>
+                    </m:mrow>
+                  </m:math></td></tr></tbody></table></div><p>Notation:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                <m:msub>
+                  <m:mi>a</m:mi>
+
+                  <m:mrow>
+                    <m:mi>T</m:mi>
+
+                    <m:mi>o</m:mi>
+
+                    <m:mi>t</m:mi>
+
+                    <m:mi>a</m:mi>
+
+                    <m:mi>l</m:mi>
+                  </m:mrow>
+                </m:msub>
+
+                <m:mtext>&nbsp;=&nbsp;Total&nbsp;acceleration</m:mtext>
+              </m:math></p></li><li class="listitem"><p><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                <m:mi>a</m:mi>
+
+                <m:mtext>&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Acceleration&nbsp;due&nbsp;to&nbsp;all&nbsp;sources&nbsp;other&nbsp;than&nbsp;that&nbsp;given&nbsp;in&nbsp;the&nbsp;input&nbsp;thrust
+                history file</m:mtext>
+              </m:math></p></li><li class="listitem"><p><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                <m:msub>
+                  <m:mi>a</m:mi>
+
+                  <m:mrow>
+                    <m:mi>F</m:mi>
+
+                    <m:mi>i</m:mi>
+
+                    <m:mi>l</m:mi>
+
+                    <m:mi>e</m:mi>
+                  </m:mrow>
+                </m:msub>
+
+                <m:mo>&nbsp;&nbsp;=</m:mo>
+
+                <m:mtext>Acceleration&nbsp;given&nbsp;in&nbsp;the&nbsp;input&nbsp;thrust history
+                file</m:mtext>
+              </m:math></p></li><li class="listitem"><p><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                <m:msub>
+                  <m:mi>m</m:mi>
+
+                  <m:mrow>
+                    <m:mi>T</m:mi>
+
+                    <m:mi>o</m:mi>
+
+                    <m:mi>t</m:mi>
+
+                    <m:mi>a</m:mi>
+
+                    <m:mi>l</m:mi>
+                  </m:mrow>
+                </m:msub>
+
+                <m:mtext>&nbsp;=&nbsp;Total&nbsp;mass</m:mtext>
+              </m:math></p></li><li class="listitem"><p><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                <m:msub>
+                  <m:mover accent="true">
+                    <m:mi>m</m:mi>
+
+                    <m:mo>&#729;</m:mo>
+                  </m:mover>
+
+                  <m:mrow>
+                    <m:mi>T</m:mi>
+
+                    <m:mi>o</m:mi>
+
+                    <m:mi>t</m:mi>
+
+                    <m:mi>a</m:mi>
+
+                    <m:mi>l</m:mi>
+                  </m:mrow>
+                </m:msub>
+
+                <m:mo>=</m:mo>
+
+                <m:mtext>&nbsp;Total&nbsp;mass&nbsp;flow&nbsp;rate</m:mtext>
+              </m:math></p></li><li class="listitem"><p><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                <m:mover accent="true">
+                  <m:mi>m</m:mi>
+
+                  <m:mo>&#729;</m:mo>
+                </m:mover>
+
+                <m:mtext>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;mass&nbsp;flow&nbsp;rate&nbsp;due&nbsp;to&nbsp;all&nbsp;sources&nbsp;other&nbsp;than&nbsp;that&nbsp;given&nbsp;in&nbsp;the&nbsp;input&nbsp;file</m:mtext>
+              </m:math></p></li><li class="listitem"><p><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                <m:msub>
+                  <m:mover accent="true">
+                    <m:mi>m</m:mi>
+
+                    <m:mo>&#729;</m:mo>
+                  </m:mover>
+
+                  <m:mrow>
+                    <m:mi>F</m:mi>
+
+                    <m:mi>i</m:mi>
+
+                    <m:mi>l</m:mi>
+
+                    <m:mi>e</m:mi>
+                  </m:mrow>
+                </m:msub>
+
+                <m:mo>&nbsp;&nbsp;=</m:mo>
+
+                <m:mtext>mass&nbsp;flow&nbsp;rate&nbsp;given&nbsp;in&nbsp;the&nbsp;input&nbsp;file</m:mtext>
+              </m:math></p></li><li class="listitem"><p><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                <m:msub>
+                  <m:mi>T</m:mi>
+
+                  <m:mrow>
+                    <m:mi>F</m:mi>
+
+                    <m:mi>i</m:mi>
+
+                    <m:mi>l</m:mi>
+
+                    <m:mi>e</m:mi>
+                  </m:mrow>
+                </m:msub>
+
+                <m:mo>&nbsp;&nbsp;&nbsp;=</m:mo>
+
+                <m:mtext>Thrust&nbsp;given&nbsp;in&nbsp;the&nbsp;input&nbsp;file</m:mtext>
+              </m:math></p></li><li class="listitem"><p><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook">
+                <m:mi>s</m:mi>
+
+                <m:mo>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=</m:mo>
+
+                <m:mi>T</m:mi>
+
+                <m:mi>h</m:mi>
+
+                <m:mi>r</m:mi>
+
+                <m:mi>u</m:mi>
+
+                <m:mi>s</m:mi>
+
+                <m:mi>t</m:mi>
+
+                <m:mi>S</m:mi>
+
+                <m:mi>e</m:mi>
+
+                <m:mi>g</m:mi>
+
+                <m:mi>m</m:mi>
+
+                <m:mi>e</m:mi>
+
+                <m:mi>n</m:mi>
+
+                <m:mi>t</m:mi>
+
+                <m:mo>.</m:mo>
+
+                <m:mi>T</m:mi>
+
+                <m:mi>h</m:mi>
+
+                <m:mi>r</m:mi>
+
+                <m:mi>u</m:mi>
+
+                <m:mi>s</m:mi>
+
+                <m:mi>t</m:mi>
+
+                <m:mi>S</m:mi>
+
+                <m:mi>c</m:mi>
+
+                <m:mi>a</m:mi>
+
+                <m:mi>l</m:mi>
+
+                <m:mi>e</m:mi>
+
+                <m:mi>F</m:mi>
+
+                <m:mi>a</m:mi>
+
+                <m:mi>c</m:mi>
+
+                <m:mi>t</m:mi>
+
+                <m:mi>o</m:mi>
+
+                <m:mi>r</m:mi>
+
+                <m:mtext>.&nbsp;&nbsp;User
+                can&nbsp;optionally&nbsp;solve&nbsp;for&nbsp;s&nbsp;as&nbsp;part&nbsp;of&nbsp;the&nbsp;estimation&nbsp;process</m:mtext>
+
+                <m:mtext>.&nbsp;</m:mtext>
+              </m:math></p></li><li class="listitem"><p><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="block">
+                <m:msub>
+                  <m:mi>s</m:mi>
+
+                  <m:mi>m</m:mi>
+                </m:msub>
+
+                <m:mtext>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;</m:mtext>
+
+                <m:mi>T</m:mi>
+
+                <m:mi>h</m:mi>
+
+                <m:mi>r</m:mi>
+
+                <m:mi>u</m:mi>
+
+                <m:mi>s</m:mi>
+
+                <m:mi>t</m:mi>
+
+                <m:mi>S</m:mi>
+
+                <m:mi>e</m:mi>
+
+                <m:mi>g</m:mi>
+
+                <m:mi>m</m:mi>
+
+                <m:mi>e</m:mi>
+
+                <m:mi>n</m:mi>
+
+                <m:mi>t</m:mi>
+
+                <m:mo>.</m:mo>
+
+                <m:mi>M</m:mi>
+
+                <m:mi>a</m:mi>
+
+                <m:mi>s</m:mi>
+
+                <m:mi>s</m:mi>
+
+                <m:mi>F</m:mi>
+
+                <m:mi>l</m:mi>
+
+                <m:mi>o</m:mi>
+
+                <m:mi>w</m:mi>
+
+                <m:mi>S</m:mi>
+
+                <m:mi>c</m:mi>
+
+                <m:mi>a</m:mi>
+
+                <m:mi>l</m:mi>
+
+                <m:mi>e</m:mi>
+
+                <m:mi>F</m:mi>
+
+                <m:mi>a</m:mi>
+
+                <m:mi>c</m:mi>
+
+                <m:mi>t</m:mi>
+
+                <m:mi>o</m:mi>
+
+                <m:mi>r</m:mi>
+
+                <m:mtext>.</m:mtext>
+              </m:math></p></li></ul></div></div></div><div class="refsection"><a name="N1F282"></a><h2>Examples</h2><div class="informalexample"><p>Create a <span class="guilabel">ThrustHistoryFile</span> that utilizes two
+      <span class="guilabel">ThrustSegment</span>s.</p><pre class="programlisting"><code class="code">Create ThrustHistoryFile aThrustHistoryFile
+aThrustHistoryFile.AddThrustSegment = {Segment1, Segment2}   
+aThrustHistoryFile.FileName = '../data/myThrustFile.thrust'
+
+Create ThrustSegment Segment1 Segment2
+
+BeginMissionSequence;</code></pre><p>The script above will would pass a syntax check but in order for
+      it to run without error, you would have to create a thrust file,
+      <code class="filename">myThrustFile.thrust</code>, and place it in the GMAT
+      'data' folder. For a complete example of how the
+      <span class="guilabel">ThrustHistoryFile</span> and
+      <span class="guilabel">ThrustSegment</span> resources are used to apply a
+      thrust/acceleration and mass flow rate profile to a spacecraft, see the
+      first example in the <a class="xref" href="BeginFileThrust.html" title="BeginFileThrust"><span class="refentrytitle">BeginFileThrust</span></a> Help.</p></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="SpacecraftVisualizationProperties.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ch16.html#N1516B">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ThrustSegment.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Spacecraft Visualization Properties&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;ThrustSegment</td></tr></table></div></body></html>

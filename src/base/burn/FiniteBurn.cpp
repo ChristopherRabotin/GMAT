@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -82,7 +82,7 @@ FiniteBurn::PARAMETER_TYPE[FiniteBurnParamCount - BurnParamCount] =
 /**
  * FiniteBurn constructor (default constructor).
  * 
- * @param <nomme> Name of the constructed object.
+ * @param nomme Name of the constructed object.
  */
 //------------------------------------------------------------------------------
 FiniteBurn::FiniteBurn(const std::string &nomme) :
@@ -116,7 +116,7 @@ FiniteBurn::~FiniteBurn()
 /**
  * Copy constructor.
  * 
- * @param <fb> The FiniteBurn that is copied.
+ * @param fb The FiniteBurn that is copied.
  */
 //------------------------------------------------------------------------------
 FiniteBurn::FiniteBurn(const FiniteBurn& fb) :
@@ -135,7 +135,7 @@ FiniteBurn::FiniteBurn(const FiniteBurn& fb) :
 /**
  * Assignment operator.
  * 
- * @param <fb> The FiniteBurn that is copied.
+ * @param fb The FiniteBurn that is copied.
  * 
  * @return this instance, with parameters set to match fb.
  */
@@ -161,7 +161,7 @@ FiniteBurn& FiniteBurn::operator=(const FiniteBurn& fb)
 /**
  * Accessor method used by Maneuver to pass in the spacecraft pointer
  * 
- * @param <sat> the Spacecraft
+ * @param sat the Spacecraft
  */
 //------------------------------------------------------------------------------
 void FiniteBurn::SetSpacecraftToManeuver(Spacecraft *sat)
@@ -189,6 +189,11 @@ void FiniteBurn::SetSpacecraftToManeuver(Spacecraft *sat)
       spacecraft = sat;
       SetThrustersFromSpacecraft();
    }
+
+   // Load starting data into the data buffer
+   Real epoch = sat->GetEpoch();
+   Real burnData[4];
+   Fire(burnData, epoch);
    
    #ifdef DEBUG_FINITEBURN_SET
    MessageInterface::ShowMessage
@@ -205,14 +210,14 @@ void FiniteBurn::SetSpacecraftToManeuver(Spacecraft *sat)
  * BeginManeuver/EndManeuver commands replace the actions that fire would 
  * perform.
  * 
- * @param <burnData> Pointer to an array that will be filled with the
+ * @param burnData   Pointer to an array that will be filled with the
  *                   acceleration and mass flow data.  The data returned in 
  *                   burnData has the format
  *                     burnData[0]  dVx/dt
  *                     burnData[1]  dVy/dt
  *                     burnData[2]  dVz/dt
  *                     burnData[3]  dM/dt
- * @param <epoch>    Epoch of the burn fire
+ * @param epoch      Epoch of the burn fire
  * @param backwards  Flag used by impulsive burns to indicate application as if
  *                   in a backprop
  *
@@ -1091,6 +1096,16 @@ bool FiniteBurn::TakeAction(const std::string& action,
    {
       thrusterNames.clear();
       retval = true;
+   }
+   else if (action == "SetData")
+   {
+      if (spacecraft)
+      {
+         // Load starting data into the data buffer
+         Real epoch = spacecraft->GetEpoch();
+         Real burnData[4];
+         Fire(burnData, epoch);
+      }
    }
    else
       retval = Burn::TakeAction(action, actionData);

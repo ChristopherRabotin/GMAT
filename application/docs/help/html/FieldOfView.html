@@ -1,0 +1,98 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>FieldOfView</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ch16.html#N1516B" title="Resources"><link rel="prev" href="FiniteBurn.html" title="FiniteBurn"><link rel="next" href="ForceModel.html" title="ForceModel"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">FieldOfView</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="FiniteBurn.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ForceModel.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="FieldOfView"></a><div class="titlepage"></div><a name="N187D4" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">FieldOfView</span></h2><p><span class="guilabel">Field-Of-View</span> &mdash; Models the mask, or field-of-view, of a hardware
+    <span class="guilabel">Resource</span>.</p></div><div class="refsection"><a name="N187E9"></a><h2>Description</h2><p>GMAT supports three field-of-view <span class="guilabel">Resources</span>
+    including <span class="guilabel">ConicalFOV</span>,
+    <span class="guilabel">RectangularFOV</span>, and <span class="guilabel">CustomFOV</span>.
+    These <span class="guilabel">Resources</span> are used to model masks of sensors
+    and antenna (in graphics currently) and can be added to the selected
+    hardware <span class="guilabel">Resources</span>. See the
+    <span class="guilabel">Remarks</span> section for a detailed discussion of each
+    field-of-view <span class="guibutton">Resource</span>.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Antenna.html" title="Antenna"><span class="refentrytitle">Antenna</span></a></p></div><div class="refsection"><a name="FieldOfView_Resource_Fields"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Alpha</span></td><td><p>The transparency of the sensor field-of-view in the
+            graphics display. </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0 to 255. 0 represents fully transparent, 255
+                    represents fully opaque.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Color</span></td><td><p>The color of the sensor field-of-view displayed in
+            graphics.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer array or string</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Valid predefined color or a triplet of integers
+                    representing a red, green or blue value ranging from 0 to
+                    255.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>[0 0 0] or Black</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FieldOfViewAngle</span></td><td><p>The half angle of the conical sensor vield of view.
+            Only applies to <span class="guilabel">ConicalFOV</span>
+            <span class="guilabel">Resource.</span></p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0 &lt; <span class="guilabel">FieldOfViewAngle</span> &lt;=
+                    90</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>30</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>degrees</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AngleWidth</span></td><td><p>Maximum clock angle distance from reference point (+X
+            axis of Hardware coordinate frame) for points in the field of
+            view. Only applies to <span class="guilabel">RectangularFOV</span>
+            <span class="guilabel">Resource.</span></p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0 to 180</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>30</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AngleHeight</span></td><td><p>Maximum cone angle distance from the boresight (+Z
+            axis of Hardware coordinate frame) for points within the field of
+            view. Only applies to <span class="guilabel">RectangularFOV</span>
+            <span class="guilabel">Resource.</span></p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0 to 90</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>10</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>degrees</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">FOVFileName</span></td><td><p>Name and path to FOV file. Only applies to
+            <span class="guilabel">CustomFOV</span>
+            <span class="guilabel">Resource.</span></p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Text file containing a valid cone angle and clock
+                    angle on each row.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>none</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Angles are in degrees.</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ConeAngles</span></td><td><p>Array containing cone angles for each point on the
+            perimeter of the field of view. This array is used in conjunction
+            with ClockAngles. Only applies to <span class="guilabel">CustomFOV</span>
+            <span class="guilabel">Resource.</span></p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>RealArray, each element is in the range 0 to
+                    180</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>empty array</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Degrees</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ClockAngles</span></td><td><p>Array containing cone angles for each point on the
+            perimeter of the field of view. This array is used in conjunction
+            with ClockAngles. Only applies to <span class="guilabel">CustomFOV</span>
+            <span class="guilabel">Resource.</span></p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real array, each element is in the range -180 to
+                    180.</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set,</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>empty array</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Degrees</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N189A4"></a><h2>Remarks</h2><p>Field-of-view objects define the sensor mask (a representation of
+    the perimeter of the field of view) for use in graphics applications.
+    Future versions of GMAT will determine if a given vector (e.g., the
+    spacecraft-to-Sun vector) is in the sensor field of view.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>The configuration of a sensor location and orientation in the body
+      frame is configured on the <span class="guilabel">Antenna</span>
+      <span class="guilabel">Resource</span>. The orientation of the hardware object in
+      the spacecraft body frame and the spacecraft attitude is used to perform
+      the rotations of vectors between a reference frame and a hardware
+      coordinate frame. By convention a sensor boresight is the +Z axis of the
+      sensor coordinate frame.</p></div><div class="refsection"><a name="N189B2"></a><h3>Configuring a ConicalFOV</h3><p>A <span class="guilabel">ConicalFOV</span> object models a conical field of
+      view, which can be represented by its cone angle; the angle between the
+      boresight and the edge of the field of view. This angle remains
+      constant, and the field of view mask can be thought of as a circle on
+      the unit sphere.</p><div class="informalexample"><p>Configure a ConicalFOV.</p><pre class="programlisting"><code class="code">% Create the ConicalFOV object
+Create ConicalFOV cone1;
+cone1.FieldOfViewAngle = 60;
+cone1.Color = Blue;
+cone1.Alpha = 255;  %the field of view is fully opaque
+
+% Attach the FOV object to an antenna
+Create Antenna antenna1;
+antenna1.FieldOfView = cone1;
+</code></pre></div></div><div class="refsection"><a name="N189C0"></a><h3>Configurating a RectangularFOV</h3><p>The <span class="guilabel">RectangularFOV</span>
+      <span class="guilabel">Resource</span> models a field-of-view where the 4 corners
+      are defined by the angular width and height limits.A RectangularFOV
+      object models a field of view defined by limits on cone angle and and
+      clock angle. A (cone angle, clock angle) pair defines a point on the
+      unit sphere. Unlike a conical sensor, which assumes the cone angle is
+      uniform for all clock angles, the cone angle is measured along a &ldquo;prime
+      meridian&rdquo; lying in the X-Z plane of the Hardware coordinate frame. A
+      positive cone angle is measured towards the +X axis, a negative cone
+      angle is measured towards the -X axis.</p><div class="informalexample"><p>Configure a RectangularFOV.</p><pre class="programlisting"><code class="code">% Create the RectangularFOV object
+Create RectangularFOV box1;
+box1.AngleHeight = 20;
+box1.AngleWidth  = 50;
+box1.Color = [255 255 0];  % Yellow
+box1.Alpha = 255;  %the field of view is fully opaque
+
+% Attach the FOV object to an antenna
+Create Antenna antenna1;
+antenna1.FieldOfView = cone1;
+</code></pre></div></div><div class="refsection"><a name="N189D1"></a><h3>Configurating a CustomFOV</h3><p>The <span class="guilabel">CustomFOV</span> models the field of view&rsquo;s
+      perimeter as a sequence of points on the unit sphere, represented by a
+      (cone,clock) pair of angles. A CustomFOV can model an irregular sensor
+      field of view zigzag across the unit sphere in an arbitrary
+      manner.</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>The CustomFOV uses the Jordan Curve Thereom to determine if a
+        point is inside of a sensor. Future versions of GMAT will expose that
+        interface to provide sensor coverage computations. It is important
+        that no line segements in a CustomFOV cross one another.</p></div><div class="informalexample"><p>Configure a CustomFOV.</p><pre class="programlisting"><code class="code">% Create a CustomFOV from a text file of cone and clock angles
+Create CustomFOV fov;
+fov.FOVFileName = 'ConeClockAngles.txt';
+
+% ... or alternatively, create a CustomFOV by 
+fov.ConeAngles  = [ 30.0 45.0 60.0];
+fov.ClockAngles = [ 15.0 25.0 35.0];
+
+% Attach the FOV object to an antenna
+Create Antenna antenna1;
+antenna1.FieldOfView = fov;</code></pre><p>The example below contains contents of the mask file for the
+        example above. The mask file consists of pairs of cone and clock
+        angles in degrees. Cone and clock angles pairs are on a row with the
+        cone angle first and the clock angle second.</p><pre class="programlisting"><code class="code">30.0  15.0
+45.0  25.0
+60.0. 35.0
+</code></pre></div></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="FiniteBurn.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ch16.html#N1516B">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ForceModel.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">FiniteBurn&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;ForceModel</td></tr></table></div></body></html>

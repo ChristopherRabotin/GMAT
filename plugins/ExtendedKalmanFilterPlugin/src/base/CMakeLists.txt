@@ -30,31 +30,43 @@ MESSAGE("GMAT EKF Plugin setup " ${VERSION})
 SET(TargetName EKF)
 
 # ====================================================================
-# Add preproccessor definitions for your plugin
-ADD_DEFINITIONS("-DKALMAN_EXPORTS")
 # More definitions can be added here if needed
 
 # ====================================================================
 # Specify each directory containing source/header files
 # Separate each directory with a space
 # Make sure to include subdirectories if there are any
-SET(PLUGIN_DIRS command EKF factory include plugin)
+SET(PLUGIN_DIRS command EKF factory include noise plugin smoother)
 
 # ====================================================================
 # Specify each source file to be compiled for your plugin
 # The path to each file should be given relative to your plugin's
 # src/base directory (where this CMakeLists.txt file should be)
 SET(PLUGIN_SRCS
+    command/RunSmoother.cpp
     EKF/ExtendedKalmanFilter.cpp
     EKF/SeqEstimator.cpp
+    factory/EKFCommandFactory.cpp
     factory/ExtendedKalmanFilterFactory.cpp
+    factory/ProcessNoiseFactory.cpp
+    factory/ProcessNoiseModelFactory.cpp
+    factory/SmootherFactory.cpp
+    noise/LinearProcessNoise.cpp
+    noise/ProcessNoiseBase.cpp
+    noise/ProcessNoiseModel.cpp
+    noise/SNCProcessNoise.cpp
     plugin/GmatPluginFunctions.cpp
+    smoother/Smoother.cpp
+    smoother/SmootherBase.cpp
 )
 
 # ====================================================================
 # This CMake macro (defined in <GMAT>/plugins/CMakeLists.txt) sets up
 # definitions and variables common to all plugins.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
+
+# Rename DLL export preproccessor definition
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEFINE_SYMBOL "KALMAN_EXPORTS")
 
 # ====================================================================
 # Additional link libraries

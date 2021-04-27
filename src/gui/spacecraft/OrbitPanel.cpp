@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -112,6 +112,8 @@ OrbitPanel::OrbitPanel(GmatPanel *scPanel, wxWindow *parent,
    canClose = true;
    dataChanged = false;
 
+   theTimeConverter = TimeSystemConverter::Instance();
+
    Create();
 }
 
@@ -168,7 +170,7 @@ void OrbitPanel::LoadData()
       Rvector6 outState, displayState;
       
       // Load the epoch formats
-      StringArray reps = TimeConverterUtil::GetValidTimeRepresentations();
+      StringArray reps = theTimeConverter->GetValidTimeRepresentations();
       for (unsigned int i = 0; i < reps.size(); i++)
          epochFormatComboBox->Append(reps[i].c_str());
       
@@ -198,7 +200,7 @@ void OrbitPanel::LoadData()
          Real fromMjd = -999.999;
          Real outMjd;
          std::string outStr;
-         TimeConverterUtil::Convert(mFromEpochFormat, fromMjd, mEpochStr,
+         theTimeConverter->Convert(mFromEpochFormat, fromMjd, mEpochStr,
                                     "TAIModJulian", outMjd, outStr);
          mTaiMjdStr = outStr;
          
@@ -377,7 +379,7 @@ void OrbitPanel::SaveData()
             // time sent to the spacecraft should be in A1   WCS 2010.05.22
             if (timeOK)
             {
-               TimeConverterUtil::Convert(epochFormat, fromMjd, newEpoch,
+               theTimeConverter->Convert(epochFormat, fromMjd, newEpoch,
                                           "A1ModJulian", a1mjd, outStr);
 
                theSpacecraft->SetEpoch(epochFormat, newEpoch, a1mjd);
@@ -824,13 +826,13 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
             }
             else
             {
-               TimeConverterUtil::Convert(mFromEpochFormat, fromMjd, mEpochStr,
+               theTimeConverter->Convert(mFromEpochFormat, fromMjd, mEpochStr,
                                           "TAIModJulian", outMjd, outStr);
                mTaiMjdStr = outStr;
             }
             
             // Convert to desired format with new date
-            TimeConverterUtil::Convert(mFromEpochFormat, fromMjd, mEpochStr,
+            theTimeConverter->Convert(mFromEpochFormat, fromMjd, mEpochStr,
                                        toEpochFormat, outMjd, outStr);
             
             epochValue->SetValue(outStr.c_str());
@@ -840,7 +842,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
          else
          {
             // Convert to desired format using TAIModJulian date
-            TimeConverterUtil::Convert("TAIModJulian", fromMjd, mTaiMjdStr,
+            theTimeConverter->Convert("TAIModJulian", fromMjd, mTaiMjdStr,
                                        toEpochFormat, outMjd, outStr);
             
             epochValue->SetValue(outStr.c_str());
@@ -1182,13 +1184,13 @@ void OrbitPanel::OnButton(wxCommandEvent& event)
             }
             else
             {
-               TimeConverterUtil::Convert(mFromEpochFormat, fromMjd, mEpochStr,
+               theTimeConverter->Convert(mFromEpochFormat, fromMjd, mEpochStr,
                                           "TAIModJulian", outMjd, outStr);
                mTaiMjdStr = outStr;
             }
 
             // Convert to desired format with new date
-            TimeConverterUtil::Convert(mFromEpochFormat, fromMjd, mEpochStr,
+            theTimeConverter->Convert(mFromEpochFormat, fromMjd, mEpochStr,
                                        toEpochFormat, outMjd, outStr);
 
             epochValue->SetValue(outStr.c_str());
@@ -1198,7 +1200,7 @@ void OrbitPanel::OnButton(wxCommandEvent& event)
          else
          {
             // Convert to desired format using TAIModJulian date
-            TimeConverterUtil::Convert("TAIModJulian", fromMjd, mTaiMjdStr,
+            theTimeConverter->Convert("TAIModJulian", fromMjd, mTaiMjdStr,
                                        toEpochFormat, outMjd, outStr);
 
             epochValue->SetValue(outStr.c_str());
@@ -1415,7 +1417,7 @@ void OrbitPanel::DisplayState()
 
       try
       {
-         TimeConverterUtil::Convert(epochFormat, fromMjd, newEpoch,
+         theTimeConverter->Convert(epochFormat, fromMjd, newEpoch,
                                     "A1ModJulian", a1mjd, outStr);
 
          theSpacecraft->SetEpoch(epochFormat, newEpoch, a1mjd);

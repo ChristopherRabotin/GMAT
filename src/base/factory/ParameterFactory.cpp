@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -251,11 +251,11 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    
    // Delaunay parameters; Modified by M.H.
    if (ofType == "Delaunayl")
-      return new Delal(withName);
+      return new Dela_l(withName);
    if (ofType == "Delaunayg")
-      return new Delag(withName);
+      return new Dela_g(withName);
    if (ofType == "Delaunayh")
-      return new Delah(withName);
+      return new Dela_h(withName);
    if (ofType == "DelaunayL")
       return new DelaL(withName);
    if (ofType == "DelaunayG")
@@ -483,6 +483,10 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new SRPArea(withName);
    if (ofType == "TotalMass")
       return new TotalMass(withName);
+   if (ofType == "SPADDragScaleFactor")                 // made changes by TUAN NGUYEN
+      return new SpadDragScaleFactor(withName);         // made changes by TUAN NGUYEN
+   if (ofType == "SPADSRPScaleFactor")                  // made changes by TUAN NGUYEN
+      return new SpadSRPScaleFactor(withName);          // made changes by TUAN NGUYEN
    
    // orbit STM parameters
    if (ofType == "OrbitSTM")
@@ -797,6 +801,8 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("DragArea");
       creatables.push_back("SRPArea");
       creatables.push_back("TotalMass");
+      creatables.push_back("SPADDragScaleFactor");               // made changes by TUAN NGUYEN
+      creatables.push_back("SPADSRPScaleFactor");                // made changes by TUAN NGUYEN
       
       // Orbit STM parameters
       creatables.push_back("OrbitSTM");

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -26,6 +26,7 @@
 #include "estimation_defs.hpp"
 #include "EstimationDefs.hpp"
 #include "GmatBase.hpp"
+#include "TimeSystemConverter.hpp"   // for the TimeSystemConverter singleton
 
 /**
  * Base class for measurement models and tracking file sets so the Factories 
@@ -45,6 +46,9 @@ protected:
    {
       MeasurementModelBaseParamCount = GmatBaseParamCount,
    };
+
+   /// Time converter singleton
+   TimeSystemConverter *theTimeConverter;
 
    Integer GetParmIdFromEstID(Integer id, GmatBase *obj);
 };

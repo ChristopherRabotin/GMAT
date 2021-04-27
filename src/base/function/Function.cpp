@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -644,6 +644,13 @@ bool Function::SetStringParameter(const std::string &label,
                                   const std::string &value)
 {
    return SetStringParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+// void         SetOutputName(const std::string &mOutputNames)
+//------------------------------------------------------------------------------
+void Function::SetOutputName(const std::string &outputName)
+{
 }
 
 //---------------------------------

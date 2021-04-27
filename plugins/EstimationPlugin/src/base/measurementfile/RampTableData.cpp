@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -37,7 +37,7 @@
 RampTableData::RampTableData() :
    typeName          (""),
    type              (Gmat::UNKNOWN_MEASUREMENT),
-   epochSystem       (TimeConverterUtil::A1MJD),
+   epochSystem       (TimeSystemConverter::A1MJD),
    epoch             (-1.0),
    epochGT           (-1.0),
    uplinkBand        (0),
@@ -133,7 +133,7 @@ void RampTableData::Clear()
    dataFormat              = "";
    typeName                = "";
    type                    = Gmat::UNKNOWN_MEASUREMENT;
-   epochSystem             = TimeConverterUtil::A1MJD;
+   epochSystem             = TimeSystemConverter::A1MJD;
    epoch                   = 0.0;
    epochGT                 = 0.0;
    participantIDs.clear();

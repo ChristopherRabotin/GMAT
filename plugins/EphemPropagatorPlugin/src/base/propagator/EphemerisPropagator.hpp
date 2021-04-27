@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -36,6 +36,7 @@
 #include "ephempropagator_defs.hpp"
 #include "Propagator.hpp"
 #include "Ephemeris.hpp"
+#include "TimeSystemConverter.hpp"   // for the TimeSystemConverter singleton
 
 /**
  * EphemerisPropagator is the base class for objects that model orbit evolution
@@ -142,7 +143,7 @@ public:
 //   virtual ObjectArray& GetRefObjectArray(const UnsignedInt type);
 //   virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
-   bool                 UsesODEModel();
+   virtual bool         UsesODEModel();
    virtual void         SetPropStateManager(PropagationStateManager *sm);
    virtual bool         Initialize();
    virtual bool         Step(Real dt);
@@ -221,6 +222,10 @@ protected:
 
    ///The solar system that supplies the j2kBody and propOrigin
    SolarSystem                *solarSystem;
+
+   /// Time converter singleton
+   TimeSystemConverter          *theTimeConverter;
+
    /// Parameter IDs
    enum
    {
@@ -242,6 +247,7 @@ protected:
    GmatEpoch ConvertToRealEpoch(const std::string &theEpoch,
          const std::string &theFormat);
    virtual void UpdateState() = 0;
+   virtual Real* GetAnalyticState();
 
    virtual void SetEphemSpan(const GmatEpoch start, const GmatEpoch);
    virtual void SetEphemSpan(Integer whichOne = 0);

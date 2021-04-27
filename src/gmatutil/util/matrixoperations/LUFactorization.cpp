@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -60,6 +60,7 @@ LUFactorization::LUFactorization(bool pivotOption)
 //------------------------------------------------------------------------------
 LUFactorization::LUFactorization(const LUFactorization &lufactorization)
 {
+   usePivot = lufactorization.usePivot;
 }
 
 
@@ -88,13 +89,15 @@ LUFactorization& LUFactorization::operator=(const LUFactorization
    {
       //Call base class method
       MatrixFactorization::operator=(lufactorization);
+
+      usePivot = lufactorization.usePivot;
    }
 
    return *this;
 }
 
 //------------------------------------------------------------------------------
-// void Factor(const Rmatrix inputMatrix, Rmatrix &L, Rmatrix &U)
+// void Factor(const Rmatrix &inputMatrix, Rmatrix &L, Rmatrix &U)
 //------------------------------------------------------------------------------
 /**
 * Method used to factor the matrix with LU factorization (A = LU).  This method
@@ -105,7 +108,7 @@ LUFactorization& LUFactorization::operator=(const LUFactorization
 * @param &U The upper triangular matrix
 */
 //------------------------------------------------------------------------------
-void LUFactorization::Factor(const Rmatrix inputMatrix, Rmatrix &L, Rmatrix &U)
+void LUFactorization::Factor(const Rmatrix &inputMatrix, Rmatrix &L, Rmatrix &U)
 {
    //Initialize the required parameters
    Rmatrix A = inputMatrix;

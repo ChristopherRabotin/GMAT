@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -85,7 +85,8 @@ TrackingDataAdapter::TrackingDataAdapter(const std::string &typeStr,
    modelType            ("UnknownType"),
    multiplier           (1.0),
    withLighttime        (false),
-   thePropagator        (NULL),
+   thePropagators       (NULL),
+   satPropagatorMap     (NULL),
    uplinkFreq           (1.0e3),         // unit: Mhz
    uplinkFreqAtRecei    (1.0e3),         // unit: Mhz
    freqBand             (1),
@@ -97,7 +98,8 @@ TrackingDataAdapter::TrackingDataAdapter(const std::string &typeStr,
    beginIndex           (0),
    endIndex             (0),
    withMediaCorrection  (true),
-   errMsg               ("")
+   errMsg               (""),
+   ionosphereCache      (NULL)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("TrackingDataAdapter default constructor <%p>\n", this);
@@ -118,15 +120,23 @@ TrackingDataAdapter::~TrackingDataAdapter()
    MessageInterface::ShowMessage("TrackingDataAdapter default destructor  <%p>\n", this);
 #endif
 
-   if (calcData)
-      delete calcData;
+   dimNames.clear();
+   noiseSigma.clear();
+   measurementBias.clear();
+   rampTableNames.clear();
+   
+   //clean up ProgressReporter *navLog;
+   navLog = NULL;
+   
+   // clean up cMeasurement.CleanUp();              // This step does not need
 
-   if (thePropagator)
-      delete thePropagator;
-
-   cMeasurement.CleanUp();
-
-   for(UnsignedInt i=0; i < participantLists.size(); ++i)
+   // clean up std::vector<RealArray>    theDataDerivatives;
+   for (Integer i = 0; i < theDataDerivatives.size(); ++i)
+      theDataDerivatives[i].clear();
+   theDataDerivatives.clear();
+   
+   // clean up std::vector<StringArray*> participantLists;
+   for (UnsignedInt i = 0; i < participantLists.size(); ++i)
    {
       if (participantLists[i])
       {
@@ -136,15 +146,31 @@ TrackingDataAdapter::~TrackingDataAdapter()
    }
    participantLists.clear();
 
-   for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
-   {
-      theDataDerivatives[i].clear();
-   }
-   theDataDerivatives.clear();
+   // clean up MeasureModel *calcData;
+   if (calcData)
+      delete calcData;
 
+   // clean up ObjectArray               refObjects;
    refObjects.clear();
 
+   // clean up ObservationData*          obsData;
+   obsData = NULL;
+
+   // clean up std::vector<RampTableData>*rampTB;
+   // rampTB were not created inside this class. Therefore, we cannot clean it up here. 
+   //if (rampTB)
+   //{
+   //   for (Integer i = 0; i < rampTB->size(); ++i)
+   //   {
+   //      (*rampTB)[i].Clear();
+   //   }
+   //   rampTB->clear();
+   //}
+   rampTB = NULL;
+
+   // clean up ObjectArray forObjects;
    forObjects.clear();
+   
 }
 
 
@@ -171,7 +197,8 @@ TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
    modelType            (ma.modelType),
    multiplier           (ma.multiplier),
    withLighttime        (ma.withLighttime),
-   thePropagator        (NULL),
+   thePropagators       (NULL),
+   satPropagatorMap     (NULL),
    uplinkFreq           (ma.uplinkFreq),
    uplinkFreqAtRecei    (ma.uplinkFreqAtRecei),
    freqBand             (ma.freqBand),
@@ -185,12 +212,12 @@ TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
    rampTableNames       (ma.rampTableNames),
    forObjects           (ma.forObjects),
    withMediaCorrection  (ma.withMediaCorrection),
-   errMsg               (ma.errMsg)
+   errMsg               (ma.errMsg),
+   ionosphereCache      (NULL)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("TrackingDataAdapter copy constructor  from <%p> to <%p>\n", &ma, this);
 #endif
-   MessageInterface::ShowMessage("It is coppying\n");
    isInitialized = false;
 }
 
@@ -243,6 +270,10 @@ TrackingDataAdapter& TrackingDataAdapter::operator=(
       withMediaCorrection = ma.withMediaCorrection;
       errMsg             = ma.errMsg;
 
+      // We require that these be set after a copy
+      thePropagators     = NULL;
+      satPropagatorMap   = NULL;
+
       if (calcData)
       {
          delete calcData;
@@ -255,6 +286,7 @@ TrackingDataAdapter& TrackingDataAdapter::operator=(
       isInitialized = false;
    }
 
+   ionosphereCache = NULL;
    return *this;
 }
 
@@ -1208,7 +1240,7 @@ Integer TrackingDataAdapter::GetEventCount()
 
 
 //------------------------------------------------------------------------------
-// void SetPropagator(PropSetup* ps)
+// void SetPropagators(PropSetup* ps)
 //------------------------------------------------------------------------------
 /**
  * Passes a propagator to the adapter for use in light time iterations.  The
@@ -1222,28 +1254,19 @@ Integer TrackingDataAdapter::GetEventCount()
  *       PropSetup objects.
  */
 //------------------------------------------------------------------------------
-void TrackingDataAdapter::SetPropagator(PropSetup* ps)
+void TrackingDataAdapter::SetPropagators(std::vector<PropSetup*> *ps,
+      std::map<std::string, StringArray> *spMap)
 {
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("TrackingDataAdapter<%p>::SetPropagator(ps = <%p>)\n", this, ps);
    #endif
-   
-   if (thePropagator != NULL)
-      delete thePropagator;
-   
+
+   thePropagators = ps;
+   satPropagatorMap = spMap;
    if (ps != NULL)
-   {
-      thePropagator = (PropSetup*)(ps->Clone());
-
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("   TDA propagator is the clone %p\n",
-               thePropagator);
-      #endif
-
-         calcData->SetPropagator(thePropagator);
-   }
+      calcData->SetPropagators(thePropagators, satPropagatorMap);
    else
-      thePropagator = NULL;
+      thePropagators = NULL;
 }
 
 
@@ -1301,14 +1324,16 @@ bool TrackingDataAdapter::Initialize()
          throw MeasurementException("TrackingDataAdapter Initialization failed "
                "because the measurement model is not yet set");
 
-      if (thePropagator)
-         calcData->SetPropagator(thePropagator);
+      if (thePropagators)
+         calcData->SetPropagators(thePropagators, satPropagatorMap);
 
       calcData->SetSolarSystem(solarsys);
       calcData->SetProgressReporter(navLog);
       calcData->UsesLightTime(withLighttime);
 
       retval = calcData->Initialize();
+
+      calcData->UseIonosphereCache(ionosphereCache);
    }
 
    cMeasurement.type = modelTypeID;
@@ -1336,6 +1361,28 @@ bool TrackingDataAdapter::Initialize()
    #endif
    
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+//  void SetTransientForces(std::vector<PhysicalModel*> *tf)
+//------------------------------------------------------------------------------
+/**
+* Passes the transient force vector into the adapter
+*
+* The transient force vector is a set of models used in GMAT's ODEModel for
+* affects that are turned on and off over the course of a mission.  An example
+* of a transient force is a finite burn, which is toggled by the
+* BeginFiniteBurn and EndFiniteBurn commands.  These components are only used
+* by commands that need them.  Typical usage is found in the propagation
+* enabled commands.
+*
+* @param tf The vector of transient forces
+*/
+//------------------------------------------------------------------------------
+void TrackingDataAdapter::SetTransientForces(std::vector<PhysicalModel*> *tf)
+{
+    GetMeasurementModel()->SetTransientForces(tf);
 }
 
 
@@ -1645,7 +1692,7 @@ void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName, con
       measurementBias.push_back(bias);
    }
    
-   // Clean up memmory
+   // Clean up memory
    data.clear();
 }
 
@@ -1695,7 +1742,7 @@ void TrackingDataAdapter::ComputeMeasurementNoiseSigma(const std::string noiseSi
       if ((first->tNode->IsOfType(Gmat::GROUND_STATION)) && (last->rNode->IsOfType(Gmat::GROUND_STATION) == false))
          gs = first->tNode;
       else if (last->rNode->IsOfType(Gmat::GROUND_STATION))
-         gs = first->tNode;
+         gs = last->rNode;
 
       // Search for ErrorModel associated with measType and numTrip
       ObjectArray errmodels = ((GroundstationInterface*)gs)->GetRefObjectArray("ErrorModel");
@@ -1721,7 +1768,7 @@ void TrackingDataAdapter::ComputeMeasurementNoiseSigma(const std::string noiseSi
       noiseSigma.push_back(noise);
    }// for i
 
-   // Clean up memmory
+   // Clean up memory
    data.clear();
 }
 
@@ -1759,7 +1806,7 @@ void TrackingDataAdapter::ComputeMeasurementErrorCovarianceMatrix()
       }
    }// for i
 
-   // Clean up memmory
+   // Clean up memory
    data.clear();
 }
 
@@ -1897,9 +1944,9 @@ void TrackingDataAdapter::BeginEndIndexesOfRampTable(Integer & err)
 //      Real t1TAI, tminTAI;
 //      std::string tais;
 //      Real a1Time = t1;
-//      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", t1TAI, tais);
+//      theTimeConverter->Convert("A1ModJulian", a1Time, "", "TAIModJulian", t1TAI, tais);
 //      a1Time = time_min;
-//      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
+//      theTimeConverter->Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
 //
 //      // Generate error message
 //      char s[200];
@@ -1916,9 +1963,9 @@ void TrackingDataAdapter::BeginEndIndexesOfRampTable(Integer & err)
 //      Real t0TAI, tminTAI;
 //      std::string tais;
 //      Real a1Time = t0;
-//      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", t0TAI, tais);
+//      theTimeConverter->Convert("A1ModJulian", a1Time, "", "TAIModJulian", t0TAI, tais);
 //      a1Time = time_min;
-//      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
+//      theTimeConverter->Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
 //
 //      // Generate error message
 //      char s[200];
@@ -2050,9 +2097,9 @@ Real TrackingDataAdapter::IntegralRampedFrequency(GmatTime t1, Real delta_t, Int
       GmatTime t1TAI, tminTAI;
       std::string tais;
       GmatTime a1Time = t1;
-      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", t1TAI, tais);
+      theTimeConverter->Convert("A1ModJulian", a1Time, "", "TAIModJulian", t1TAI, tais);
       a1Time = time_min;
-      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
+      theTimeConverter->Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
 
       // Generate error message
       char s[200];
@@ -2069,9 +2116,9 @@ Real TrackingDataAdapter::IntegralRampedFrequency(GmatTime t1, Real delta_t, Int
       GmatTime t0TAI, tminTAI;
       std::string tais;
       GmatTime a1Time = t0;
-      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", t0TAI, tais);
+      theTimeConverter->Convert("A1ModJulian", a1Time, "", "TAIModJulian", t0TAI, tais);
       a1Time = time_min;
-      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
+      theTimeConverter->Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
 
       // Generate error message
       char s[200];
@@ -2156,3 +2203,51 @@ Real TrackingDataAdapter::IntegralRampedFrequency(GmatTime t1, Real delta_t, Int
    return value;
 }
 
+
+//------------------------------------------------------------------------------
+// Real ApiGetDerivativeValue(Integer row,Integer column)
+//------------------------------------------------------------------------------
+/**
+ * Methos used in teh API calls to access dervative data
+ *
+ * @param row Index for the row.  Set to -1  with column = 0 to get the number of rows.
+ * @param column Index for the column.  Set to -1  with row = 0 to get the number of rows.
+ *
+ * @return The derivative value, or the row/column count as spec'd above
+ */
+//------------------------------------------------------------------------------
+Real TrackingDataAdapter::ApiGetDerivativeValue(Integer row,Integer column)
+{
+   Real retval = -987654321.012345;
+
+   if ((row == -1) && (column == 0))
+      retval = theDataDerivatives.size();
+   else if ((row == 0) && (column == -1))
+   {
+      if (theDataDerivatives.size() > 0)
+         retval = theDataDerivatives[0].size();
+      else
+         retval = 0.0;
+   }
+   else if ((row < theDataDerivatives.size()) && (row >= 0))
+      if ((column < theDataDerivatives[row].size()) && (column >= 0))
+         retval = theDataDerivatives[row][column];
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// void SetIonosphereCache(SignalDataCache::SimpleSignalDataCache * cache)
+//------------------------------------------------------------------------------
+/**
+ * Sets a reference to the ionosphere cache that will be passed in to the measure model and that
+ * can subsequently be used to store calculated corrections that can be reused
+ *
+ * @param cache the ionosphere cache started by the tracking file set
+ *
+ */
+ //------------------------------------------------------------------------------
+void TrackingDataAdapter::SetIonosphereCache(SignalDataCache::SimpleSignalDataCache * cache)
+{
+   ionosphereCache = cache;
+}

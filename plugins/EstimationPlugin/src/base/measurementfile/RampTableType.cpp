@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -339,18 +339,18 @@ RampTableData* RampTableType::ReadRampTableData()
 
    GmatTime taiEpochGT;
    taiEpochGT.SetMjdString(taiEpochStr);
-   currentRecord.epochGT = (currentRecord.epochSystem == TimeConverterUtil::TAIMJD ?
+   currentRecord.epochGT = (currentRecord.epochSystem == TimeSystemConverter::TAIMJD ?
               taiEpochGT :
-              TimeConverterUtil::ConvertFromTaiMjd(currentRecord.epochSystem, taiEpochGT,
+              theTimeConverter->ConvertFromTaiMjd(currentRecord.epochSystem, taiEpochGT,
               GmatTimeConstants::JD_NOV_17_1858));
 
 
    GmatEpoch taiEpoch;
    theLine >> taiEpoch;
 
-   currentRecord.epoch = (currentRecord.epochSystem == TimeConverterUtil::TAIMJD ?
+   currentRecord.epoch = (currentRecord.epochSystem == TimeSystemConverter::TAIMJD ?
          taiEpoch :
-         TimeConverterUtil::ConvertFromTaiMjd(currentRecord.epochSystem, taiEpoch,
+         theTimeConverter->ConvertFromTaiMjd(currentRecord.epochSystem, taiEpoch,
                GmatTimeConstants::JD_NOV_17_1858));
 /*
    switch (currentRecord.type)
@@ -448,9 +448,9 @@ RampTableData* RampTableType::ReadRampTableData()
 //   GmatEpoch taiEpoch;
 //   theLine >> taiEpoch;
 //
-//   currentRecord.epoch = (currentRecord.epochSystem == TimeConverterUtil::TAIMJD ?
+//   currentRecord.epoch = (currentRecord.epochSystem == TimeSystemConverter::TAIMJD ?
 //   taiEpoch :
-//            TimeConverterUtil::ConvertFromTaiMjd(currentRecord.epochSystem, taiEpoch,
+//            theTimeConverter->ConvertFromTaiMjd(currentRecord.epochSystem, taiEpoch,
 //            GmatTimeConstants::JD_NOV_17_1858));
 //
 //   participantSize = 2;

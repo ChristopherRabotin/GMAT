@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -337,8 +337,8 @@ void NLPFunctionGenerator::PrepareArrays()
    userVarBoundConIdxs.SetSize(0);
    for (Integer conIdx = 0; conIdx < numUserDecisionVars; ++conIdx)
    {
-      if (userVarLowerBounds[conIdx] == -9.999999e300 &&
-         userVarUpperBounds[conIdx] == 9.999999e300)
+      if (userVarLowerBounds[conIdx] <= -9e299 &&
+         userVarUpperBounds[conIdx] >= 9e299)
       {
       }
       else
@@ -1058,11 +1058,11 @@ Rvector NLPFunctionGenerator::GetElasticW(Rvector decVector)
 //------------------------------------------------------------------------------
 Real NLPFunctionGenerator::GetMaxElasticVar(Rvector decVector)
 {
-   Real maxElasticVar = decVector[elasticVarVStartIdx];
+   Real maxElasticVar = GmatMathUtil::Abs(decVector[elasticVarVStartIdx]);
    for (Integer i = elasticVarVStartIdx + 1; i < elasticVarWStopIdx; ++i)
    {
-      if (decVector[i] > maxElasticVar)
-         maxElasticVar = decVector[i];
+      if (GmatMathUtil::Abs(decVector[i]) > maxElasticVar)
+         maxElasticVar = GmatMathUtil::Abs(decVector[i]);
    }
 
    return maxElasticVar;

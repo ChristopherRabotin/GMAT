@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -263,7 +263,7 @@ bool CallFunction::AddInputParameter(const std::string &paramName, Integer index
       mInputNames.push_back(paramName);
       mNumInputParams = mInputNames.size();
       mInputList.push_back(NULL);
-      fm.AddInput(paramName);
+      fm.AddInput(paramName, index);
       return true;
    }
    
@@ -281,7 +281,7 @@ bool CallFunction::AddOutputParameter(const std::string &paramName, Integer inde
       mOutputNames.push_back(paramName);
       mNumOutputParams = mOutputNames.size();
       mOutputList.push_back(NULL);
-      fm.AddOutput(paramName);      
+      fm.AddOutput(paramName, index);
       return true;
    }
 
@@ -854,7 +854,7 @@ bool CallFunction::RenameRefObject(const UnsignedInt type,
    }
    // Since parameter name is composed of spacecraftName.dep.paramType or
    // burnName.dep.paramType, check the type first
-   else if (type == Gmat::SPACECRAFT || type == Gmat::BURN ||
+   else if (type == Gmat::SPACECRAFT || type == Gmat::BURN || type == Gmat::PLATE ||          // made changes by TUAN NGUYEN
             type == Gmat::HARDWARE   || type == Gmat::IMPULSIVE_BURN ||
             type == Gmat::COORDINATE_SYSTEM || type == Gmat::CALCULATED_POINT)
    {

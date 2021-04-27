@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1011,7 +1011,7 @@ GmatEpoch Set::ConvertToSystemTime(const std::string& from, GmatEpoch fromTime)
 {
    std::string outStr;
    GmatEpoch newEpoch;
-   TimeConverterUtil::Convert(from, fromTime, "",
+   TimeSystemConverter::Instance()->Convert(from, fromTime, "",
          "A1ModJulian", newEpoch, outStr);
 
    return newEpoch;

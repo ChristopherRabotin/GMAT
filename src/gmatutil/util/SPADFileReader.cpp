@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,6 +35,7 @@
 #include "FileTypes.hpp"
 #include "SPADFileReader.hpp"
 #include "Rvector3.hpp"
+#include "Rmatrix.hpp"
 #include "utildefs.hpp"
 #include "UtilityException.hpp"
 #include "RealUtilities.hpp"
@@ -61,11 +62,13 @@
 // -----------------------------------------------------------------------------
 // Default constructor
 // -----------------------------------------------------------------------------
-SPADFileReader::SPADFileReader() :
+SPADFileReader::SPADFileReader(const std::string &ofType) :
+   expectedType  (ofType),
    analysisType  ("NONE"),
-   pressure      (-999.0),
+   pressure      (1.0),
    recordCount   (-999),
    spadFile      (""),
+   interpolator  ("Bilinear"),
    isInitialized (false),
    numData       (0),
    azCount       (0),
@@ -81,10 +84,12 @@ SPADFileReader::SPADFileReader() :
 // Copy constructor
 // -----------------------------------------------------------------------------
 SPADFileReader::SPADFileReader(const SPADFileReader &copy) :
+   expectedType  (copy.expectedType),
    analysisType  (copy.analysisType),
    pressure      (copy.pressure),
    recordCount   (copy.recordCount),
    spadFile      (copy.spadFile),
+   interpolator  (copy.interpolator),
    isInitialized (copy.isInitialized),
    numData       (copy.numData),
    azCount       (copy.azCount),
@@ -97,7 +102,7 @@ SPADFileReader::SPADFileReader(const SPADFileReader &copy) :
    {
       Real az      = copy.spadData.at(ii)->azimuth;
       Real el      = copy.spadData.at(ii)->elevation;
-      Rvector3 xyz = copy.spadData.at(ii)->force;
+      Rvector3 xyz = copy.spadData.at(ii)->vec3;
       AddDataRecord(az, el, xyz);
    }
 
@@ -117,10 +122,12 @@ SPADFileReader& SPADFileReader::operator=(const SPADFileReader &copy)
    if (&copy == this)
       return *this;
 
+   expectedType  = copy.expectedType;
    analysisType  = copy.analysisType;
    pressure      = copy.pressure;
    recordCount   = copy.recordCount;
    spadFile      = copy.spadFile;
+   interpolator  = copy.interpolator;
    isInitialized = copy.isInitialized;
    numData       = copy.numData;
    azCount       = copy.azCount;
@@ -135,7 +142,7 @@ SPADFileReader& SPADFileReader::operator=(const SPADFileReader &copy)
    {
       Real az      = copy.spadData.at(ii)->azimuth;
       Real el      = copy.spadData.at(ii)->elevation;
-      Rvector3 xyz = copy.spadData.at(ii)->force;
+      Rvector3 xyz = copy.spadData.at(ii)->vec3;
       AddDataRecord(az, el, xyz);
    }
 
@@ -147,7 +154,6 @@ SPADFileReader& SPADFileReader::operator=(const SPADFileReader &copy)
       SPADMotionRecord *newMotion = new SPADMotionRecord(*(copy.spadMotion.at(ii)));
       spadMotion.push_back(newMotion);
    }
-   spadMotion.clear();
 
    return *this;
 }
@@ -258,41 +264,51 @@ bool SPADFileReader::SetFile(const std::string &theSPADFile)
 }
 
 // -----------------------------------------------------------------------------
-// Rvector3 GetSRPArea(Rvector3 sunVector)
+// bool SetInterpolator(const std::string &theInterpolator)
+// Set the SPAD interpolator.
+// -----------------------------------------------------------------------------
+bool SPADFileReader::SetInterpolator(const std::string &theInterpolator)
+{
+   interpolator = theInterpolator;
+   return true;
+}
+
+// -----------------------------------------------------------------------------
+// Rvector3 GetSRPArea(Rvector3 sunVector, bool &scaled)
 // Determine the SRP area, given the input sun vector, interpolating the
 // data as necessary.
 // -----------------------------------------------------------------------------
-Rvector3 SPADFileReader::GetSRPArea(Rvector3 sunVector)
+Rvector3 SPADFileReader::GetSRPArea(const Rvector3 &sunVector, bool &scaled)
 {
-   #ifdef DEBUG_SPAD_FILE_AREA
-      MessageInterface::ShowMessage("In SPADFileReader::GetSRPArea\n");
-      MessageInterface::ShowMessage("   azStepSize = %d\n", azStepSize);
-      MessageInterface::ShowMessage("   elStepSize = %d\n", elStepSize);
-      MessageInterface::ShowMessage("   sunVector  = %12.10f  %12.10f  %12.10f\n",
-            sunVector[0], sunVector[1], sunVector[2]);
-   #endif
+#ifdef DEBUG_SPAD_FILE_AREA
+   MessageInterface::ShowMessage("In SPADFileReader::GetSRPArea\n");
+   MessageInterface::ShowMessage("   azStepSize = %lf\n", azStepSize);
+   MessageInterface::ShowMessage("   elStepSize = %lf\n", elStepSize);
+   MessageInterface::ShowMessage("   sunVector  = %12.10f  %12.10f  %12.10f\n",
+                                 sunVector[0], sunVector[1], sunVector[2]);
+#endif
    Rvector3 result;
-
+   
    Real  azimuth, elevation;
    Real  x = sunVector[0];
    Real  y = sunVector[1];
    Real  z = sunVector[2];
-
+   
    if (x == 0 && y == 0)
    {
       throw UtilityException("Cannot compute Right Ascension - "
-            "x and y elements of sun vector are zero.\n");
+                             "x and y elements of sun vector are zero.\n");
    }
-
+   
    azimuth = GmatMathUtil::ATan2(y,x) * GmatMathConstants::DEG_PER_RAD;
    if (azimuth > 360.0)
       azimuth -= 360.0;
    else if (azimuth < 0.0)
       azimuth += 360.0;
    if (azimuth > 180.0) azimuth -= 360.0;
-
+   
    elevation = GmatMathUtil::ATan2(z, GmatMathUtil::Sqrt(x*x+y*y))
-               * GmatMathConstants::DEG_PER_RAD;
+   * GmatMathConstants::DEG_PER_RAD;
    if (elevation > 90.0)
       elevation -= 360.0;
    else if (elevation < -90.0)
@@ -300,47 +316,82 @@ Rvector3 SPADFileReader::GetSRPArea(Rvector3 sunVector)
    if (elevation > 90.0)  elevation -= 360.0;
    if (elevation < -90.0) elevation += 180.00;
 
-   // Find the azimuth and elevation values that bracket the
-   // sun vector direction
-   Integer azLow  = Integer((azimuth+180)/azStepSize) * azStepSize - 180;
-   Integer azHigh = azLow + azStepSize;
+   if (interpolator == "Bicubic")
+      result = InterpolateBicubic(azimuth, elevation);
+   else
+      result = Interpolate2Step(azimuth, elevation);
 
-   Integer elLow  = Integer((elevation+90)/elStepSize) * elStepSize - 90;
-   Integer elHigh = elLow + elStepSize;
+#ifdef DEBUG_SPAD_FILE_AREA
+   MessageInterface::ShowMessage(
+                                 "EXITing SPADFileReader::GetSRPArea, returning %12.10f  %12.10f  %12.10f\n",
+                                 result[0], result[1], result[2]);
+#endif
+   if (pressure == 1.0)
+      scaled = false;
+   else
+      scaled = true;
+   
+   return result;
+}
 
-   Rvector3 lowLow   = GetForceAt(azLow,  elLow);
-   Rvector3 lowHigh  = GetForceAt(azLow,  elHigh);
-   Rvector3 highLow  = GetForceAt(azHigh, elLow);
-   Rvector3 highHigh = GetForceAt(azHigh, elHigh);
-
+// -----------------------------------------------------------------------------
+// Rvector3 GetDragArea(const Rvector3 &velVector, bool &scaled)
+// Determine the Drag area, given the input sun vector, interpolating the
+// data as necessary according to the interpMethod argument.
+// -----------------------------------------------------------------------------
+Rvector3 SPADFileReader::GetDragArea(const Rvector3 &velVector, bool &scaled)
+{
    #ifdef DEBUG_SPAD_FILE_AREA
-      MessageInterface::ShowMessage("In SPADFileReader::GetSRPArea, az = %12.10f,  el = %12.10f\n",
-            azimuth, elevation);
-      MessageInterface::ShowMessage("In SPADFileReader::GetSRPArea, four points used for interpolation are:\n");
-      MessageInterface::ShowMessage("   azimuth = %d  elevation = %d  force = %12.10f  %12.10f  %12.10f\n",
-            azLow, elLow, lowLow[0], lowLow[1], lowLow[2]);
-      MessageInterface::ShowMessage("   azimuth = %d  elevation = %d  force = %12.10f  %12.10f  %12.10f\n",
-            azLow, elHigh, lowHigh[0], lowHigh[1], lowHigh[2]);
-      MessageInterface::ShowMessage("   azimuth = %d  elevation = %d  force = %12.10f  %12.10f  %12.10f\n",
-            azHigh, elLow, highLow[0], highLow[1], highLow[2]);
-      MessageInterface::ShowMessage("   azimuth = %d  elevation = %d  force = %12.10f  %12.10f  %12.10f\n",
-            azHigh, elHigh, highHigh[0], highHigh[1], highHigh[2]);
+      MessageInterface::ShowMessage("In SPADFileReader::GetDragArea\n");
+   //   MessageInterface::ShowMessage("   azStepSize = %lf\n", azStepSize);
+   //   MessageInterface::ShowMessage("   elStepSize = %lf\n", elStepSize);
+      MessageInterface::ShowMessage("   velVector  = %12.10f  %12.10f  %12.10f\n",
+                                    velVector[0], velVector[1], velVector[2]);
    #endif
-
-   Real interp1, interp2;
-
-   for (unsigned int ii = 0; ii < 3; ii++)
+   Rvector3 result;
+   
+   Real  azimuth, elevation;
+   Real  x = velVector[0];
+   Real  y = velVector[1];
+   Real  z = velVector[2];
+   
+   if (x == 0 && y == 0)
    {
-      interp1 = Interpolate(azimuth, azLow, azHigh, lowLow[ii],  highLow[ii]);
-      interp2 = Interpolate(azimuth, azLow, azHigh, lowHigh[ii], highHigh[ii]);
-      result[ii] = Interpolate(elevation, elLow, elHigh, interp1, interp2);
+      throw UtilityException("Cannot compute Right Ascension - "
+                             "x and y elements of velocity vector are zero.\n");
    }
+   
+   azimuth = GmatMathUtil::ATan2(y,x) * GmatMathConstants::DEG_PER_RAD;
+   if (azimuth > 360.0)
+      azimuth -= 360.0;
+   else if (azimuth < 0.0)
+      azimuth += 360.0;
+   if (azimuth > 180.0) azimuth -= 360.0;
+   
+   elevation = GmatMathUtil::ATan2(z, GmatMathUtil::Sqrt(x*x+y*y))
+   * GmatMathConstants::DEG_PER_RAD;
+   if (elevation > 90.0)
+      elevation -= 360.0;
+   else if (elevation < -90.0)
+      elevation += 360.0;
+   if (elevation > 90.0)  elevation -= 360.0;
+   if (elevation < -90.0) elevation += 180.00;
+
+   if (interpolator == "Bicubic")
+      result = InterpolateBicubic(azimuth, elevation);
+   else
+      result = Interpolate2Step(azimuth, elevation);
 
    #ifdef DEBUG_SPAD_FILE_AREA
       MessageInterface::ShowMessage(
-            "EXITing SPADFileReader::GetSRPArea, returning %12.10f  %12.10f  %12.10f\n",
-            result[0], result[1], result[2]);
+             "EXITing SPADFileReader::GetDragArea, returning %12.10f  %12.10f  %12.10f\n",
+             result[0], result[1], result[2]);
    #endif
+   
+   if (pressure == 1.0)
+      scaled = false;
+   else
+      scaled = true;
 
    return result;
 }
@@ -450,10 +501,14 @@ bool SPADFileReader::ParseFile()
       if (readingData && (line.find("--") != line.npos) && IsDashedLine(line))
          continue;
       #ifdef DEBUG_PARSE_SPAD_FILE
-         MessageInterface::ShowMessage("In SPADFileReader, line= %s\n", line.c_str());
-         MessageInterface::ShowMessage("   readingHeader = %s\n", (readingHeader? "true" : "false"));
-         MessageInterface::ShowMessage("   readingMeta   = %s\n", (readingMeta? "true" : "false"));
-         MessageInterface::ShowMessage("   readingData   = %s\n", (readingData? "true" : "false"));
+         MessageInterface::ShowMessage("In SPADFileReader, line= %s\n",
+                                       line.c_str());
+         MessageInterface::ShowMessage("   readingHeader = %s\n",
+                                       (readingHeader? "true" : "false"));
+         MessageInterface::ShowMessage("   readingMeta   = %s\n",
+                                       (readingMeta? "true" : "false"));
+         MessageInterface::ShowMessage("   readingData   = %s\n",
+                                       (readingData? "true" : "false"));
       #endif
 
       trimmedLine = GmatStringUtil::Trim(line);
@@ -511,40 +566,56 @@ bool SPADFileReader::ParseFile()
             errmsg            += ".  Expecting keyword:value pair.\n";
             throw UtilityException(errmsg);
          }
-         part1 = GmatStringUtil::Trim(parts.at(0), GmatStringUtil::BOTH, true, true);
-         part2 = GmatStringUtil::Trim(parts.at(1), GmatStringUtil::BOTH, true, true);
+         part1 = GmatStringUtil::Trim(parts.at(0), GmatStringUtil::BOTH,
+                                      true, true);
+         part2 = GmatStringUtil::Trim(parts.at(1), GmatStringUtil::BOTH,
+                                      true, true);
          #ifdef DEBUG_PARSE_SPAD_FILE
-            MessageInterface::ShowMessage("                  part1= \"%s\"\n", part1.c_str());
-            MessageInterface::ShowMessage("                  part2= \"%s\"\n", part2.c_str());
+            MessageInterface::ShowMessage("                  part1= \"%s\"\n",
+                                          part1.c_str());
+            MessageInterface::ShowMessage("                  part2= \"%s\"\n",
+                                          part2.c_str());
          #endif
 
          if (readingHeader)
          {
             // Read and validate header data
             // Currently we ignore Version, System, Pixel Size, Spacecraft Size,
-            // Center of Mass, and Current Time so read them as strings and don't save
+            // Center of Mass, and Current Time so read them as strings and
+            // don't save
             if (part1 == "Analysis Type")
             {
-               if (part2 != "Area")
+               if ((part2 != "Area") && (part2 != "Drag")) // CHECK THIS - Drag or just Area?
                {
-                  std::string errmsg = "Only currently allowed value for ";
+                  std::string errmsg = "Only currently allowed values for ";
                   errmsg            += "\"Analysis Type\" ";
-                  errmsg            += "field in SPAD file header is ";
-                  errmsg            += "\"Area\"\n";
+                  errmsg            += "field in SPAD file header are ";
+                  errmsg            += "\"Area\" and \"Drag\"\n";
                   throw UtilityException(errmsg);
                }
                analysisType = part2;
+               if (GmatStringUtil::ToUpper(analysisType) !=
+                   GmatStringUtil::ToUpper(expectedType))
+               {
+                  std::string errmsg = "Value for ";
+                  errmsg            += "\"Analysis Type\" ";
+                  errmsg            += "field in SPAD file header (";
+                  errmsg            += analysisType + ") is ";
+                  errmsg            += "not of the expected type (";
+                  errmsg            += expectedType + ")\n";
+                  throw UtilityException(errmsg);
+               }
             }
-            else if (part1 == "Pressure")
+            else if (part1 == "Pressure") // Different name for Drag????
             {
                // ignoring this for now
-//               if (!GmatStringUtil::ToReal(part2, pressure))
-//               {
-//                  std::string errmsg = "Value for \"Pressure\" field in header ";
-//                  errmsg            += "of SPAD file " + spadFile;
-//                  errmsg            += " is not a valid Real number.\n";
-//                  throw UtilityException(errmsg);
-//               }
+               if (!GmatStringUtil::ToReal(part2, pressure))
+               {
+                  std::string errmsg = "Value for \"Pressure\" field in header ";
+                  errmsg            += "of SPAD file " + spadFile;
+                  errmsg            += " is not a valid Real number.\n";
+                  throw UtilityException(errmsg);
+               }
             }
             else if ((part1 == "Version")         || (part1 == "System") ||
                      (part1 == "Pixel Size")      ||
@@ -571,8 +642,9 @@ bool SPADFileReader::ParseFile()
                if (newSpadMotion != NULL)
                {
                   #ifdef DEBUG_MOTION_RECORDS
-                     MessageInterface::ShowMessage("NOW putting SPADMotion record <%p> into store ...\n",
-                           newSpadMotion);
+                     MessageInterface::ShowMessage(
+                        "NOW putting SPADMotion record <%p> into store ...\n",
+                        newSpadMotion);
                   #endif
                   spadMotion.push_back(newSpadMotion);
                   newSpadMotion = NULL;
@@ -593,7 +665,8 @@ bool SPADFileReader::ParseFile()
                numMotion++;
                newSpadMotion = new SPADMotionRecord(theID);
                #ifdef DEBUG_MOTION_RECORDS
-                  MessageInterface::ShowMessage("just created SPADMotion record <%p> for id = %d ...\n",
+                  MessageInterface::ShowMessage(
+                        "just created SPADMotion record <%p> for id = %d ...\n",
                         newSpadMotion, theID);
                #endif
             }
@@ -626,16 +699,16 @@ bool SPADFileReader::ParseFile()
             }
             else if (part1 == "Step")
             {
-               Integer theStep;
-               GmatStringUtil::ToInteger(part2, theStep);
+               Real theStep;
+               GmatStringUtil::ToReal(part2, theStep);
                if (theStep <= 0)
                {
                   std::string errmsg = "Only allowed value for \"Step\" ";
                   errmsg            += "field in SPAD file meta data is ";
-                  errmsg            += "a positive, non-zero Integer\n";
+                  errmsg            += "a positive, non-zero number\n";
                   throw UtilityException(errmsg);
                }
-               newSpadMotion->itsStep = (Real) theStep;
+               newSpadMotion->itsStep = theStep;
             }
             else if (part1 == "Record count")
             {
@@ -670,14 +743,15 @@ bool SPADFileReader::ParseFile()
             for (Integer ii = 2; ii < (Integer) spadMotion.size(); ii++)
                lineStr >> dummyStr;
             lineStr >> xUnits >> yUnits >> zUnits;
-            // remove blanks from the force units strings
+            // remove blanks from the vec3 units strings
             xUnits = GmatStringUtil::RemoveAllBlanks(xUnits);
             yUnits = GmatStringUtil::RemoveAllBlanks(yUnits);
             zUnits = GmatStringUtil::RemoveAllBlanks(zUnits);
             #ifdef DEBUG_SPAD_DATA
                MessageInterface::ShowMessage("azUnits = %s, elUnits = %s\n",
                        azUnits.c_str(), elUnits.c_str());
-               MessageInterface::ShowMessage("xUnits = %s, yUnits = %s,  zUnits = %s\n",
+               MessageInterface::ShowMessage("xUnits = %s, yUnits = %s,  "
+                       "zUnits = %s\n",
                        xUnits.c_str(), yUnits.c_str(), zUnits.c_str());
             #endif
             if (azUnits != "degrees")
@@ -720,12 +794,12 @@ bool SPADFileReader::ParseFile()
                 (!GmatStringUtil::ToReal(zStr,  zVal)))
             {
                std::string errmsg = "Numeric value for one of ";
-               errmsg            += "(azimuth, elevation, or force data) ";
+               errmsg            += "(azimuth, elevation, or vec3 data) ";
                errmsg            += "of SPAD file " + spadFile;
                errmsg            += " is not a valid Real number.\n";
                throw UtilityException(errmsg);
             }
-            // Convert the force to the proper units (m^2)
+            // Convert the vec3 to the proper units (m^2)
             if (xUnits == "mm^2")      xVal *= 1.0e-06;
             else if (xUnits == "m^2")  xVal *= 1.0;
             else if (xUnits == "cm^2") xVal *= 1.0e-04;
@@ -735,7 +809,7 @@ bool SPADFileReader::ParseFile()
             {
                std::string errmsg = "Error reading SPAD file ";
                errmsg            += spadFile + ".  Units \"" + xUnits;
-               errmsg            += "\" for force(x) are unsupported.  ";
+               errmsg            += "\" for vec3(x) are unsupported.  ";
                errmsg            += "Units must be one of ";
                errmsg            += "[mm^2  m^2  cm^2  in^2  ft^2].\n";
                throw UtilityException(errmsg);
@@ -749,7 +823,7 @@ bool SPADFileReader::ParseFile()
             {
                std::string errmsg = "Error reading SPAD file ";
                errmsg            += spadFile + ".  Units \"" + yUnits;
-               errmsg            += "\" for force(y) are unsupported.  ";
+               errmsg            += "\" for vec3(y) are unsupported.  ";
                errmsg            += "Units must be one of ";
                errmsg            += "[mm^2  m^2  cm^2  in^2  ft^2].\n";
                throw UtilityException(errmsg);
@@ -763,7 +837,7 @@ bool SPADFileReader::ParseFile()
             {
                std::string errmsg = "Error reading SPAD file ";
                errmsg            += spadFile + ".  Units \"" + zUnits;
-               errmsg            += "\" for force(z) are unsupported.  ";
+               errmsg            += "\" for vec3(z) are unsupported.  ";
                errmsg            += "Units must be one of ";
                errmsg            += "[mm^2  m^2  cm^2  in^2  ft^2].\n";
                throw UtilityException(errmsg);
@@ -814,6 +888,8 @@ void SPADFileReader::ValidateMetaData()
       errmsg += "Elevation records.\n";
       throw UtilityException(errmsg);
    }
+   /// We are assuming here that there are only two motion records, and that
+   /// the first is azimuth and the second is elevation
    SPADMotionRecord *az = spadMotion.at(0);
    SPADMotionRecord *el = spadMotion.at(1);
 
@@ -860,8 +936,8 @@ void SPADFileReader::ValidateMetaData()
       throw UtilityException(errmsg);
    }
 
-   azStepSize = (Integer)az->itsStep;
-   elStepSize = (Integer)el->itsStep;
+   azStepSize = az->itsStep;
+   elStepSize = el->itsStep;
    if ((azStepSize == -999) || (elStepSize == -999))
    {
       std::string errmsg = "\"Step\" field for Azimuth or Elevation record ";
@@ -870,8 +946,8 @@ void SPADFileReader::ValidateMetaData()
       throw UtilityException(errmsg);
    }
 
-   azCount    = (Integer)(360./ azStepSize + 1);
-   elCount    = (Integer)(180./ elStepSize + 1);
+   azCount    = (Integer) GmatMathUtil::Round(360./ azStepSize + 1);
+   elCount    = (Integer) GmatMathUtil::Round(180./ elStepSize + 1);
 }
 
 // -----------------------------------------------------------------------------
@@ -880,8 +956,8 @@ void SPADFileReader::ValidateMetaData()
 // -----------------------------------------------------------------------------
 void SPADFileReader::ValidateData()
 {
-   Integer azStep = (Integer)spadMotion.at(0)->itsStep;
-   Integer elStep = (Integer)spadMotion.at(1)->itsStep;
+   Real azStep = spadMotion.at(0)->itsStep;
+   Real elStep = spadMotion.at(1)->itsStep;
 
    bool azEvenlyDiv = true;
    bool elEvenlyDiv = true;
@@ -947,7 +1023,7 @@ void SPADFileReader::ValidateData()
    {
       Real     nextAz     = -180.00 + azStepSize;
       Real     nextEl     = -90.00  + elStepSize;
-      Rvector3 nextAzEl   = GetForceAt(nextAz, nextEl);
+      Rvector3 nextAzEl   = GetVec3At(nextAz, nextEl);
    }
    catch (UtilityException &ue)
    {
@@ -967,9 +1043,11 @@ bool SPADFileReader::IsDashedLine(const std::string &theLine)
 {
    std::string s1 = GmatStringUtil::RemoveAll(theLine, '-');
    #ifdef DEBUG_DASHED_LINES
-      MessageInterface::ShowMessage("----- BEFORE removing dashes, line = \"%s\"\n",
+      MessageInterface::ShowMessage(
+            "----- BEFORE removing dashes, line = \"%s\"\n",
             theLine.c_str());
-      MessageInterface::ShowMessage("----- after removing dashes, line = \"%s\"\n",
+      MessageInterface::ShowMessage(
+            "----- after removing dashes, line = \"%s\"\n",
             s1.c_str());
    #endif
    if (GmatStringUtil::IsBlank(s1, true))
@@ -978,33 +1056,180 @@ bool SPADFileReader::IsDashedLine(const std::string &theLine)
 }
 
 // -----------------------------------------------------------------------------
-// Real Interpolate(Real x, Real x1, real x2, Real y1, Real y2)
-// Performs linear interpolation of the input values
+// Rvector3 Interpolate(Real x, Real x1, real x2, Rvector3 y1, Rvector3 y2)
+// Performs bilinear interpolation of the input values.
 // -----------------------------------------------------------------------------
-Real SPADFileReader::Interpolate(Real x, Real x1, Real x2, Real y1, Real y2)
+Rvector3 SPADFileReader::Interpolate1D(Real x, Real x1, Real x2, Rvector3 y1, Rvector3 y2)
 {
    if (GmatMathUtil::IsEqual(x1, x2))   return y1;
-   return (x2-x)/(x2-x1)*y1 + (x-x1)/(x2-x1)*y2;
+
+   Rvector3 y;
+
+   for (UnsignedInt ii = 0U; ii < 3U; ii++)
+      y[ii] = (x2-x)/(x2-x1)*y1[ii] + (x-x1)/(x2-x1)*y2[ii];
+
+   return y;
 }
 
 // -----------------------------------------------------------------------------
-// Rvector3 GetForceAt(Real azVal, Real elVal)
-// Returns the force vector from the Data Store given the input azimuth
+// Rvector3 Interpolate2Step(Real azimuth, Real elevation)
+// Performs interpolation of the input values in 2 steps
+// -----------------------------------------------------------------------------
+Rvector3 SPADFileReader::Interpolate2Step(Real azimuth, Real elevation)
+{
+   Rvector3 result;
+   
+   // Find the azimuth and elevation values that bracket the
+   // sun vector direction
+   Real azLow  = GmatMathUtil::Floor((azimuth + 180.)/azStepSize) * azStepSize - 180.;
+   Real azHigh = azLow + azStepSize;
+   
+   Real elLow  = GmatMathUtil::Floor((elevation + 90.)/elStepSize) * elStepSize - 90.;
+   Real elHigh = elLow + elStepSize;
+   
+   Rvector3 lowLow   = GetVec3At(azLow,  elLow);
+   Rvector3 lowHigh  = GetVec3At(azLow,  elHigh);
+   Rvector3 highLow  = GetVec3At(azHigh, elLow);
+   Rvector3 highHigh = GetVec3At(azHigh, elHigh);
+   
+#ifdef DEBUG_SPAD_FILE_AREA
+   MessageInterface::ShowMessage("In SPADFileReader::GetSRPArea, az = %12.10f,  el = %12.10f\n",
+                                 azimuth, elevation);
+   MessageInterface::ShowMessage("In SPADFileReader::GetSRPArea, four points used for interpolation are:\n");
+   MessageInterface::ShowMessage("   azimuth = %lf  elevation = %lf  vec3 = %12.10f  %12.10f  %12.10f\n",
+                                 azLow, elLow, lowLow[0], lowLow[1], lowLow[2]);
+   MessageInterface::ShowMessage("   azimuth = %lf  elevation = %lf  vec3 = %12.10f  %12.10f  %12.10f\n",
+                                 azLow, elHigh, lowHigh[0], lowHigh[1], lowHigh[2]);
+   MessageInterface::ShowMessage("   azimuth = %lf  elevation = %lf  vec3 = %12.10f  %12.10f  %12.10f\n",
+                                 azHigh, elLow, highLow[0], highLow[1], highLow[2]);
+   MessageInterface::ShowMessage("   azimuth = %lf  elevation = %lf  vec3 = %12.10f  %12.10f  %12.10f\n",
+                                 azHigh, elHigh, highHigh[0], highHigh[1], highHigh[2]);
+#endif
+   
+   Rvector3 interp1, interp2;
+
+   interp1 = Interpolate1D(azimuth, azLow, azHigh, lowLow,  highLow);
+   interp2 = Interpolate1D(azimuth, azLow, azHigh, lowHigh, highHigh);
+   result = Interpolate1D(elevation, elLow, elHigh, interp1, interp2);
+
+   return result;
+}
+
+// -----------------------------------------------------------------------------
+// Rvector3 InterpolateBicubic(Real azimuth, Real elevation)
+// Performs bicubic interpolation of the input values.
+// -----------------------------------------------------------------------------
+Rvector3 SPADFileReader::InterpolateBicubic(Real azimuth, Real elevation)
+{
+   Rvector3 result;
+
+   // Find the azimuth and elevation values that bracket the
+   // sun vector direction
+   Real azLow  = GmatMathUtil::Floor((azimuth + 180.)/azStepSize) * azStepSize - 180.;
+   Real elLow  = GmatMathUtil::Floor((elevation + 90.)/elStepSize) * elStepSize - 90.;
+
+   if (GmatMathUtil::IsEqual(azimuth, azLow) && GmatMathUtil::IsEqual(elevation, elLow))
+      return GetVec3At(azLow, elLow);
+
+   RealArray azVals(4), elVals(4);
+
+   // These will be corrected for angle limits later
+   for (UnsignedInt ii = 0U; ii < 4U; ii++)
+   {
+      azVals[ii] = azLow - azStepSize + ii*azStepSize;
+      elVals[ii] = elLow - elStepSize + ii*elStepSize;
+   }
+
+   #ifdef DEBUG_SPAD_FILE_AREA
+         MessageInterface::ShowMessage("In SPADFileReader::InterpolateBicubic, az = %12.10f,  el = %12.10f\n",
+                                       azimuth, elevation);
+   for (UnsignedInt ii = 0; ii < 4; ii++)
+         MessageInterface::ShowMessage("                                       azVals[%d] = %12.10f,  elVals[%d] = %12.10f\n",
+                                       ii, azVals[ii], ii, elVals[ii]);
+   #endif
+
+   // Get fraction of angle values between grid points that bracket the desired angles
+   Real azFrac = (azimuth - azLow) / (azVals[2] - azLow);
+   Real elFrac = (elevation - elLow) / (elVals[2] - elLow);
+
+   static const Rmatrix Binv(4, 4,
+      -1./6.,  1./2., -1./2.,  1./6.,
+       1./2., -1.   ,  1./2.,  0.,
+      -1./3., -1./2.,  1.   , -1./6.,
+       0.   ,  1.   ,  0.   ,  0.);
+   static const Rmatrix BinvT = Binv.Transpose();
+
+   for (UnsignedInt ii = 0U; ii < 3U; ii++) // Each force componenet
+   {
+      // Matrix containing the SPAD values
+      Rmatrix F(4, 4);
+
+      for (UnsignedInt jj = 0U; jj < 4U; jj++) // Row
+      {
+         Real azVal = azVals[jj];
+
+         if (azVal > 180.)
+            azVal -= 360.;
+         else if (azVal < -180.)
+            azVal += 360.;
+
+         for (UnsignedInt kk = 0U; kk < 4U; kk++) // Column
+         {
+            Real elVal = elVals[kk];
+
+            if (elVal > 90. || elVal < -90.)
+            {
+               elVal = 180. - elVal;
+
+               if (azVal > 0.)
+                  azVal -= 180.;
+               else
+                  azVal += 180;
+            }
+
+            F(jj, kk) = GetVec3At(azVal, elVal)(ii);
+         }
+      }
+
+      // a = inv(B) * F * inv(B)^T
+      Rmatrix a = Binv * F * BinvT;
+
+      Rvector vec1(4, azFrac*azFrac*azFrac, azFrac*azFrac, azFrac, 1.);
+      Rvector vec2(4, elFrac*elFrac*elFrac, elFrac*elFrac, elFrac, 1.);
+
+      result[ii] = vec1 * a * vec2;
+   }
+
+   return result;
+}
+
+// -----------------------------------------------------------------------------
+// Rvector3 GetVec3At(Real azVal, Real elVal)
+// Returns the vec3 vector from the Data Store given the input azimuth
 // and elevation value
 // -----------------------------------------------------------------------------
-Rvector3 SPADFileReader::GetForceAt(Real azVal, Real elVal)
+Rvector3 SPADFileReader::GetVec3At(Real azVal, Real elVal)
 {
+   bool searchAllEl = false;
+
    // Figure out where in the dataStore to start looking
-   Integer azRecords = Integer((azVal + 180) / azStepSize) * elCount;
-   for (Integer ii = azRecords; ii < recordCount; ii++)
+   Integer record = (Integer) GmatMathUtil::Round((azVal + 180) / azStepSize) * elCount;
+
+   if (!searchAllEl)
+      record += (Integer) GmatMathUtil::Round((elVal + 90) / elStepSize);
+
+   for (Integer ii = record; ii < recordCount; ii++)
    {
-      Integer theAZ = (Integer)spadData.at(ii)->azimuth;
-      Integer theEL = (Integer)spadData.at(ii)->elevation;
-      if (GmatMathUtil::IsEqual(theAZ, azVal) && (GmatMathUtil::IsEqual(theEL, elVal)))
-         return spadData.at(ii)->force;
+      Real theAZ = spadData.at(ii)->azimuth;
+      Real theEL = spadData.at(ii)->elevation;
+      if (GmatMathUtil::IsEqual(theAZ, azVal, azStepSize / 1e3) &&
+         (GmatMathUtil::IsEqual(theEL, elVal, elStepSize / 1e3)))
+         return spadData.at(ii)->vec3;
    }
+
    std::string errmsg  = "SPAD file ";
-   errmsg += spadFile + " does not contain force data for ";
-   errmsg += "the specified azimuth-elevation pair.\n";
+   errmsg += spadFile + " does not contain vec3 data for ";
+   errmsg += "the specified azimuth-elevation pair or it is ";
+   errmsg += "not in its expected location in the SPAD file.\n";
    throw UtilityException(errmsg);
 }

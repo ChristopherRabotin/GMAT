@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -40,6 +40,7 @@
 //#include "GmatGlobal.hpp"
 #include "EopFile.hpp"
 #include "TimeTypes.hpp"
+#include "FileUtil.hpp"
 #include "UtilityException.hpp"
 #include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
@@ -81,6 +82,7 @@ lastOffset      (0.0),
 lastIndex       (0),
 isInitialized   (false)
 {
+   theTimeConverter = TimeSystemConverter::Instance();
 }
 
 //---------------------------------------------------------------------------
@@ -106,6 +108,7 @@ lastOffset      (eopF.lastOffset),
 lastIndex       (eopF.lastIndex),
 isInitialized   (eopF.isInitialized)
 {
+   theTimeConverter = TimeSystemConverter::Instance();
 }
 
 //---------------------------------------------------------------------------
@@ -210,11 +213,27 @@ void EopFile::Initialize()
       std::string   firstWord;
       while ((!startNow) && (!eopFile.eof()))
       {
-         getline(eopFile,line);
+         bool lineRead = GmatFileUtil::GetLine(&eopFile,line);
+         if (lineRead == false)
+            throw UtilityException("Unable to read EopFile.");
          std::istringstream lineStr;
          lineStr.str(line);
          lineStr >> firstWord;
-         if (firstWord == "1962") startNow = true;
+         #ifdef DEBUG_EOP_INITIALIZE
+            MessageInterface::ShowMessage("--- firstWord =  %s ...\n",
+                                          firstWord.c_str());
+         #endif
+//         if (firstWord == "1962") startNow = true;
+         if (firstWord == "(0h") // last line of header - assume this remains unchanged!
+         {
+            startNow = true;
+            if (eopFile.eof())
+               throw UtilityException("NO data found on EopFile.");
+            // Get the next line (first line after header)
+            lineRead = GmatFileUtil::GetLine(&eopFile,line);
+            if (lineRead == false)
+               throw UtilityException("Unable to read EopFile.");
+         }
       }
       if (startNow == false)
          throw UtilityException("Unable to read EopFile.");
@@ -242,7 +261,7 @@ void EopFile::Initialize()
             ut1UtcOffsets->SetElement(tableSz,1,ut1_utc);
 
             GmatEpoch utcepoch = mjd + GmatTimeConstants::JD_NOV_17_1858 - GmatTimeConstants::JD_JAN_5_1941;
-            GmatEpoch a1JD = TimeConverterUtil::Convert(utcepoch, TimeConverterUtil::UTCMJD, TimeConverterUtil::TAIMJD);
+            GmatEpoch a1JD = theTimeConverter->Convert(utcepoch, TimeSystemConverter::UTCMJD, TimeSystemConverter::TAIMJD);
             taiTime->SetElement(tableSz, a1JD); // is actually TAI
 
             polarMotion->SetElement(tableSz,0,mjd + GmatTimeConstants::JD_NOV_17_1858);
@@ -252,7 +271,12 @@ void EopFile::Initialize()
             tableSz++;
          }
          if (eopFile.eof())   done = true;
-         else                 getline(eopFile, line);
+         else
+         {
+            bool lineRead = GmatFileUtil::GetLine(&eopFile,line);
+            if (lineRead == false)
+               throw UtilityException("Unable to read EopFile.");
+         }
       }
    }
    else if (eopFType == GmatEop::FINALS)  // No longer supported!!
@@ -264,7 +288,9 @@ void EopFile::Initialize()
       bool        done = false;
       while (!done && (!eopFile.eof()))
       {
-         getline(eopFile, line);
+         bool lineRead = GmatFileUtil::GetLine(&eopFile,line);
+         if (lineRead == false)
+            throw UtilityException("Unable to read EopFile.");
          if (!IsBlank(line.c_str()))
          {
             std::istringstream lineS;
@@ -283,7 +309,7 @@ void EopFile::Initialize()
                ut1UtcOffsets->SetElement(tableSz,1,ut1_utc);
 
                GmatEpoch utcepoch = mjd + GmatTimeConstants::JD_NOV_17_1858 - GmatTimeConstants::JD_JAN_5_1941;
-               GmatEpoch a1JD = TimeConverterUtil::Convert(utcepoch, TimeConverterUtil::UTCMJD, TimeConverterUtil::TAIMJD);
+               GmatEpoch a1JD = theTimeConverter->Convert(utcepoch, TimeSystemConverter::UTCMJD, TimeSystemConverter::TAIMJD);
                taiTime->SetElement(tableSz, a1JD); // is actually TAI
 
                polarMotion->SetElement(tableSz,0,mjd + GmatTimeConstants::JD_NOV_17_1858);
@@ -407,7 +433,7 @@ Real EopFile::GetUt1UtcOffset(const Real taiMjd)
                Real diffOff = data[(i + 1)*col + 1] -
                               data[i*col + 1];
                Real errorInSec = (diffJD - 1.0)*GmatTimeConstants::SECS_PER_DAY;
-               if (abs(errorInSec) > 0.6)
+               if (GmatMathUtil::Abs(errorInSec) > 0.6)
                   diffOff = diffOff - GmatMathUtil::Round(errorInSec);
                off = data[i*col + 1] + ratio * diffOff;
                lastIndex = i;
@@ -432,7 +458,7 @@ Real EopFile::GetUt1UtcOffset(const Real taiMjd)
                Real diffOff = data[(i + 1)*col + 1] -
                               data[i*col + 1];
                Real errorInSec = (diffJD - 1.0)*GmatTimeConstants::SECS_PER_DAY;
-               if (abs(errorInSec) > 0.6)
+               if (GmatMathUtil::Abs(errorInSec) > 0.6)
                   diffOff = diffOff - GmatMathUtil::Round(errorInSec);
                off = data[i*col + 1] + ratio * diffOff;
                lastIndex    = i;
@@ -606,8 +632,8 @@ void EopFile::GetTimeRange(Real& timeMin, Real& timeMax)
    Integer row = polarMotion->GetNumRows();
    Real timeUtcMjdMin = data[0] - GmatTimeConstants::JD_JAN_5_1941;                       // unit: UTCMjd w.r.t ref GmatTimeConstants::JD_JAN_5_1941
    Real timeUtcMjdMax = data[(tableSz - 1)*col] - GmatTimeConstants::JD_JAN_5_1941;       // unit: UTCMjd w.r.t ref GmatTimeConstants::JD_JAN_5_1941
-   timeMin = TimeConverterUtil::Convert(timeUtcMjdMin, TimeConverterUtil::UTCMJD, TimeConverterUtil::A1MJD);    // unit: A1Mjd
-   timeMax = TimeConverterUtil::Convert(timeUtcMjdMax, TimeConverterUtil::UTCMJD, TimeConverterUtil::A1MJD);    // unit: A1Mjd
+   timeMin = theTimeConverter->Convert(timeUtcMjdMin, TimeSystemConverter::UTCMJD, TimeSystemConverter::A1MJD);    // unit: A1Mjd
+   timeMax = theTimeConverter->Convert(timeUtcMjdMax, TimeSystemConverter::UTCMJD, TimeSystemConverter::A1MJD);    // unit: A1Mjd
 
    //MessageInterface::ShowMessage("timeMin = %lf A1Mjd    timeMax = %lf A1Mjd\n", timeMin, timeMax);
 }

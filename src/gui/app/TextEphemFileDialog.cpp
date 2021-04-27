@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -29,7 +29,7 @@
 #include "TextEphemFileDialog.hpp"
 #include "FileManager.hpp"
 #include "TextEphemFile.hpp"
-#include "TimeSystemConverter.hpp"  // for TimeConverterUtil::
+#include "TimeSystemConverter.hpp"  // for TimeSystemConverter::
 #include "MessageInterface.hpp"
 
 #include <wx/dir.h>
@@ -257,7 +257,7 @@ void TextEphemFileDialog::LoadData()
    mCoordSysComboBox->SetSelection(0);
    
    // Load the epoch formats
-   StringArray reps = TimeConverterUtil::GetValidTimeRepresentations();
+   StringArray reps = TimeSystemConverter::Instance()->GetValidTimeRepresentations();
    for (unsigned int i = 0; i < reps.size(); i++)
       mEpochFormatComboBox->Append(reps[i].c_str());
    

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -75,6 +75,7 @@
 #include "GroundTrackPlotPanel.hpp"
 #include "ReportFileSetupPanel.hpp"
 #include "EphemerisFilePanel.hpp"
+#include "DynamicDataDisplaySetupPanel.hpp"
 #include "SubscriberSetupPanel.hpp"
 #include "FindEventsPanel.hpp"
 #include "MessageInterface.hpp"
@@ -282,7 +283,6 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
 
    EVT_SIZE (GmatMainFrame::OnMainFrameSize)
    EVT_CLOSE (GmatMainFrame::OnClose)
-   EVT_SET_FOCUS (GmatMainFrame::OnSetFocus)
    EVT_KEY_DOWN (GmatMainFrame::OnKeyDown)
    
    EVT_MENU (MENU_SCRIPT_BUILD_OBJECT, GmatMainFrame::OnScriptBuildObject)
@@ -476,7 +476,9 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
                      wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH);
    msgTextCtrl->Connect(wxEVT_RIGHT_DOWN,
                         wxMouseEventHandler(GmatMainFrame::OnMsgWinRightMouseDown), NULL, this);
-
+   wxFont msgTextFont;
+   msgTextFont.SetFamily(wxFONTFAMILY_MODERN);
+   msgTextCtrl->SetFont(msgTextFont);
 
    msgTextCtrl->SetMaxLength(320000);
    // Added SetFocus() to automatically show the last line. (LOJ: 2009.03.04)
@@ -834,7 +836,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
    #ifdef DEBUG_CREATE_CHILD
    MessageInterface::ShowMessage
       ("GmatMainFrame::CreateChild() entered, this=<%p>, title='%s', name='%s', type=%d, "
-       "restore=%d\n", this, item->GetTitle().c_str(), item->GetName().c_str(),
+       "restore=%d\n", this, item->GetTitle().WX_TO_C_STRING, item->GetName().WX_TO_C_STRING,
        item->GetItemType(), restore);
    #endif
    
@@ -927,7 +929,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
       #ifdef DEBUG_CREATE_CHILD
       MessageInterface::ShowMessage
          ("GmatMainFrame::CreateChild() Invalid item=%s itemType=%d entered\n",
-          item->GetTitle().c_str(), itemType);
+          item->GetTitle().WX_TO_C_STRING, itemType);
       #endif
    }
    
@@ -991,7 +993,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
    #ifdef DEBUG_CREATE_CHILD
    MessageInterface::ShowMessage
       ("GmatMainFrame::CreateChild() name='%s', returning <%p>\n",
-       item->GetName().c_str(), newChild);
+       item->GetName().WX_TO_C_STRING, newChild);
    #endif
    
    return newChild;
@@ -2110,6 +2112,7 @@ void GmatMainFrame::MinimizeChildren()
       if (child->GetItemType() != GmatTree::OUTPUT_ORBIT_VIEW &&
          child->GetItemType() != GmatTree::OUTPUT_GROUND_TRACK_PLOT &&
          child->GetItemType() != GmatTree::OUTPUT_XY_PLOT &&
+         child->GetItemType() != GmatTree::OUTPUT_PERSISTENT &&
          child->GetItemType() != GmatTree::MISSION_TREE_UNDOCKED &&
          child->GetItemType() != GmatTree::OUTPUT_COMPARE_REPORT)
       {
@@ -2870,11 +2873,12 @@ Integer GmatMainFrame::RunCurrentMission()
    // TGG: Moved from after SetFocus to BEFORE so that animation buttons
    // can be properly turned off
    mRunCompleted = false;
-   mIsMissionRunning = true;
+   //mIsMissionRunning = true;                    // made changes by TUAN NGUYEN
 
    EnableMenuAndToolBar(false, true);
    EnableNotebookAndMissionTree(false);
    
+   // Hand the GUI a timeslice to process the toolbar and tree updates
    wxYield();
    SetFocus();
    
@@ -2883,6 +2887,9 @@ Integer GmatMainFrame::RunCurrentMission()
    {
       mRunPaused = false;
       MessageInterface::ShowMessage("Execution resumed.\n");
+
+      mIsMissionRunning = true;                                                           // made changes by TUAN NGUYEN
+
       theGuiInterpreter->ChangeRunState("Resume");
       SetStatusText("Busy", 1);
       EnableNotebookAndMissionTree(false);
@@ -2892,25 +2899,29 @@ Integer GmatMainFrame::RunCurrentMission()
       SetStatusText("Busy", 1);
       MinimizeChildren();
       GmatAppData::Instance()->GetMessageTextCtrl()->SetFocus();
-      retval = theGuiInterpreter->RunMission();
-      
-      #ifdef DEBUG_RUN_MISSION
-      MessageInterface::ShowMessage("   return code from RunMission()=%d\n", retval);
-      #endif
-      
-      // always stop server after run (loj: 2008.02.06) - to investigate Bug 1133
-      // stop server after user interrupt (loj: 2008.03.05)
-      //if (mMatlabServer)
-      if (retval != 1 && mMatlabServer)
-         StopMatlabServer(); // stop server if running to avoid getting callback staus
-                             // when run stopped by user
-      mIsMissionRunning = false;
-      EnableMenuAndToolBar(true, true);
-      EnableNotebookAndMissionTree(true);
-      SetStatusText("", 1);
-      
-      //put items in output tab
-      GmatAppData::Instance()->GetOutputTree()->UpdateOutput(false, true, true);
+      if (mIsMissionRunning == false)                                                     // made changes by TUAN NGUYEN
+      {                                                                                   // made changes by TUAN NGUYEN
+         mIsMissionRunning = true;                                                        // made changes by TUAN NGUYEN
+         retval = theGuiInterpreter->RunMission();
+
+#ifdef DEBUG_RUN_MISSION
+         MessageInterface::ShowMessage("   return code from RunMission()=%d\n", retval);
+#endif
+
+         // always stop server after run (loj: 2008.02.06) - to investigate Bug 1133
+         // stop server after user interrupt (loj: 2008.03.05)
+         //if (mMatlabServer)
+         if (retval != 1 && mMatlabServer)
+            StopMatlabServer(); // stop server if running to avoid getting callback staus
+                                // when run stopped by user
+         mIsMissionRunning = false;
+         EnableMenuAndToolBar(true, true);
+         EnableNotebookAndMissionTree(true);
+         SetStatusText("", 1);
+
+         //put items in output tab
+         GmatAppData::Instance()->GetOutputTree()->UpdateOutput(false, true, true);
+      }                                                                                   // made changes by TUAN NGUYEN
    }
    
    #ifdef DEBUG_RUN_MISSION
@@ -2938,6 +2949,10 @@ void GmatMainFrame::StopRunningMission()
    
    wxToolBar* toolBar = GetToolBar();
    toolBar->EnableTool(TOOL_STOP, FALSE);
+
+   // Give the GUI an opportunity to catch up.  This may not be strictly
+   // necessary, since we are going idle, but just in case the cleanup takes a
+   // while to finish...
    wxYield();
    
    theGuiInterpreter->ChangeRunState("Stop");
@@ -2990,6 +3005,7 @@ void GmatMainFrame::StopAnimation()
       toolBar->ToggleTool(TOOL_ANIMATION_PLAY, false);
       toolBar->ToggleTool(TOOL_ANIMATION_STOP, true);
       frame->SetUserInterrupt();
+      // Update the graphics before proceeding
       wxYield();
    }
    else
@@ -3161,11 +3177,14 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
             GmatAppData *gmatAppData = GmatAppData::Instance();
             gmatAppData->GetResourceTree()->QuitRunningScriptFolder();
          }
-         
-         // @todo Figure out why GMAT crashes when running mission is stopped
-         // and process CloseEvent while script folder is running. (LOJ: 2012.07.10)
-         // So veto CloseEvent for now.
-         event.Veto();
+         else if (event.CanVeto())                                                            // made changes by TUAN NGUYEN
+         {                                                                                    // made changes by TUAN NGUYEN
+            // @todo Figure out why GMAT crashes when running mission is stopped
+            // and process CloseEvent while script folder is running. (LOJ: 2012.07.10)
+            // So veto CloseEvent for now.
+            event.Veto();
+            return;                                                                           // made changes by TUAN NGUYEN
+         }                                                                                    // made changes by TUAN NGUYEN
       }
       else
       {
@@ -3179,18 +3198,25 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
             StopRunningMission();
             event.Skip();
          }
-         else
+         //else                                                                              // made changes by TUAN NGUYEN
+         else if (event.CanVeto())                                                           // made changes by TUAN NGUYEN
          {
             event.Veto();
+            
+            #ifdef DEBUG_MAINFRAME_CLOSE                                                     // made changes by TUAN NGUYEN
+               MessageInterface::ShowMessage                                                 // made changes by TUAN NGUYEN
+                  ("GmatMainFrame::OnClose() leaving, mission was still running\n");         // made changes by TUAN NGUYEN
+            #endif                                                                           // made changes by TUAN NGUYEN
+            return;                                                                          // made changes by TUAN NGUYEN
          }
       }
       
-      #ifdef DEBUG_MAINFRAME_CLOSE
-      MessageInterface::ShowMessage
-         ("GmatMainFrame::OnClose() leaving, mission was still running\n");
-      #endif
+      //#ifdef DEBUG_MAINFRAME_CLOSE                                                         // made changes by TUAN NGUYEN
+      //MessageInterface::ShowMessage                                                        // made changes by TUAN NGUYEN
+      //   ("GmatMainFrame::OnClose() leaving, mission was still running\n");                // made changes by TUAN NGUYEN
+      //#endif                                                                               // made changes by TUAN NGUYEN
       
-      return;
+      //return;                                                                              // made changes by TUAN NGUYEN
    }
    
    // Check if animation is running
@@ -3209,16 +3235,23 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
          OnAnimation(tempEvent);
          event.Skip();
       }
-      else
+      //else                                                                                 // made changes by TUAN NGUYEN
+      else if (event.CanVeto())                                                              // made changes by TUAN NGUYEN
       {
          event.Veto();
+
+         #ifdef DEBUG_MAINFRAME_CLOSE                                                        // made changes by TUAN NGUYEN
+            MessageInterface::ShowMessage                                                    // made changes by TUAN NGUYEN
+               ("GmatMainFrame::OnClose() leaving, animation was running\n");                // made changes by TUAN NGUYEN
+         #endif                                                                              // made changes by TUAN NGUYEN
+         return;                                                                             // made changes by TUAN NGUYEN
       }
       
-      #ifdef DEBUG_MAINFRAME_CLOSE
-      MessageInterface::ShowMessage
-         ("GmatMainFrame::OnClose() leaving, animation was running\n");
-      #endif
-      return;
+      //#ifdef DEBUG_MAINFRAME_CLOSE                                                         // made changes by TUAN NGUYEN
+      //MessageInterface::ShowMessage                                                        // made changes by TUAN NGUYEN
+      //   ("GmatMainFrame::OnClose() leaving, animation was running\n");                    // made changes by TUAN NGUYEN
+      //#endif                                                                               // made changes by TUAN NGUYEN
+      //return;                                                                              // made changes by TUAN NGUYEN
    }
    
    // close all child windows first
@@ -3231,15 +3264,21 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
       {
          // Check if there are any unsaved panels.
          // If user canceled, veto the event
-         if (ShowSaveMessage())
+         //if (ShowSaveMessage())                                                            // made changes by TUAN NGUYEN
+         if (ShowSaveMessage() && event.CanVeto())                                           // made changes by TUAN NGUYEN
+         {                                                                                   // made changes by TUAN NGUYEN
             event.Veto();
+            return;                                                                          // made changes by TUAN NGUYEN
+         }                                                                                   // made changes by TUAN NGUYEN
          else
             event.Skip();
       }
    }
-   else
+   //else                                                                                    // made changes by TUAN NGUYEN
+   else if (event.CanVeto())                                                                 // made changes by TUAN NGUYEN
    {
       event.Veto();
+      return;                                                                                // made changes by TUAN NGUYEN
    }
    
    // stop server if running
@@ -3595,7 +3634,7 @@ void GmatMainFrame::OpenRecentScript(wxString filename, wxCommandEvent &event,
    // Check if file exist first
    if (!wxFileName::FileExists(filename))
    {
-      wxMessageBox(wxT("The script file \"" + filename + "\" no longer exist.  "
+      wxMessageBox(wxT("The script file \"" + filename + "\" no longer exists.  "
                        "It may have been removed or renamed.\n"),
                    wxT("GMAT Error"));
       return;
@@ -3634,7 +3673,7 @@ void GmatMainFrame::OpenRecentScript(wxString filename, wxCommandEvent &event,
 
       SetStatusText("", 2);
       InterpretScript(mScriptFilename.c_str(), GmatGui::OPEN_SCRIPT_ON_ERROR, true,
-            false, "", false, closeWelcomePanel);
+         false, "", false, closeWelcomePanel);
    }
 }
 
@@ -3909,6 +3948,8 @@ void GmatMainFrame::OnPause(wxCommandEvent& WXUNUSED(event))
 {
    wxToolBar* toolBar = GetToolBar();
    toolBar->EnableTool(TOOL_PAUSE, FALSE);
+
+   // Respond as quickly as possible so the user knows the action was received
    wxYield();
    
    theGuiInterpreter->ChangeRunState("Pause");
@@ -4422,6 +4463,9 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
       // Try custom panel (LOJ: 2013.09.17)
       sizer->Add(new GroundTrackPlotPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
      break;
+   case GmatTree::DYNAMIC_DATA_DISPLAY:
+      sizer->Add(new DynamicDataDisplaySetupPanel(scrolledWin, name), 0, wxGROW | wxALL, 0);
+      break;
    case GmatTree::SUBSCRIBER:
       sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
@@ -4528,7 +4572,7 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
    #ifdef DEBUG_CREATE_CHILD
    MessageInterface::ShowMessage
       ("GmatMainFrame::CreateNewResource() '%s' returning newChild <%p>\n",
-       title.c_str(), newChild);
+       title.WX_TO_C_STRING, newChild);
    #endif
    return newChild;
 }
@@ -4670,6 +4714,21 @@ GmatMainFrame::CreatePluginChild(const std::string &title, const std::string &na
 
       if (isRuntimeWindow)
          theChild->Show();
+
+      if (GmatGlobal::Instance()->GetPlotMode() == GmatGlobal::TILED_PLOT)
+      {
+         // Set wxVERTICAL or wxHORIZONTAL based on main frame width and height
+         wxOrientation tileMode = wxVERTICAL;
+         // We only apply the size checks in TESTING mode.  Not sure why.
+         if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING)
+         {
+            int w, h;
+            GetActualClientSize(&w, &h, false);
+            if (w < h)
+               tileMode = wxHORIZONTAL;
+         }
+         Tile(tileMode);
+      }
    }
    else     // The GUI window is already in place from a previous run
    {
@@ -4741,7 +4800,7 @@ GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *i
    #ifdef DEBUG_CREATE_CHILD
    MessageInterface::ShowMessage
       ("GmatMainFrame::CreateNewCommand() title=%s, name=%s, itemType=%d, cmd=<%p><%s>\n",
-       title.c_str(), name.c_str(), itemType, cmd, cmd ? cmd->GetTypeName().c_str() : "NULL");
+       title.WX_TO_C_STRING, name.WX_TO_C_STRING, itemType, cmd, cmd ? (cmd->GetTypeName()).c_str() : "NULL");
    #endif
    
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
@@ -4944,7 +5003,7 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
    #ifdef DEBUG_CREATE_CHILD
    MessageInterface::ShowMessage
       ("GmatMainFrame::CreateNewOutput() title='%s', name='%s', itemType=%d\n",
-       title.c_str(), name.c_str(), itemType);
+       title.WX_TO_C_STRING, name.WX_TO_C_STRING, itemType);
    #endif
    
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
@@ -5036,7 +5095,7 @@ GmatMainFrame::CreateUndockedMissionPanel(const wxString &title,
    #ifdef DEBUG_CREATE_CHILD
    MessageInterface::ShowMessage
       ("GmatMainFrame::CreateUndockedMissionPanel() title=%s, name=%s, itemType=%d\n",
-       title.c_str(), name.c_str(), itemType);
+       title.WX_TO_C_STRING, name.WX_TO_C_STRING, itemType);
    #endif
    
    // Get config data from the personalization file
@@ -5533,22 +5592,6 @@ void GmatMainFrame::OnMainFrameSize(wxSizeEvent& event)
    MessageInterface::ShowMessage("GmatMainFrame::OnMainFrameSize() leaving\n");
    MessageInterface::ShowMessage("   client size w=%d, h=%d\n", w, h);
    #endif
-}
-
-
-//------------------------------------------------------------------------------
-// void OnSetFocus(wxFocusEvent& event)
-//------------------------------------------------------------------------------
-/**
- * Handles set focus event of the window
- *
- * @param <event> input event.
- */
-//------------------------------------------------------------------------------
-void GmatMainFrame::OnSetFocus(wxFocusEvent& event)
-{
-   wxYield();
-   event.Skip(true);
 }
 
 

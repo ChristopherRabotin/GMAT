@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -84,7 +84,7 @@ public:
    /// Unique ID for associated data stream.
    Integer           uniqueID;
    /// Enumerated ID for the epoch time system
-   TimeConverterUtil::TimeSystemTypes
+   TimeSystemConverter::TimeSystemTypes
                      epochSystem;
    /// The epoch of the measurement
    GmatEpoch         epoch;

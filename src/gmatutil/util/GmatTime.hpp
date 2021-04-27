@@ -73,7 +73,7 @@ public:
    bool SetMjdString(std::string sMjd);
 
    std::string ToString() const;
-   bool IsNearlyEqual(GmatTime gt, Real tolerance);
+   bool IsNearlyEqual(const GmatTime &gt, Real tolerance);
    const GmatTime& AddSeconds(const Real sec);
    const GmatTime& SubtractSeconds(const Real sec);
 

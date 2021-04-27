@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -78,6 +78,9 @@ Sensor::Sensor(const std::string &type, const std::string &name) :
    objectTypes.push_back(Gmat::SENSOR);
    objectTypeNames.push_back("Sensor");
    parameterCount = SensorParamCount;
+
+   for (Integer i = HardwareParamCount; i < SensorParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 //-----------------------------------------------------------------------------
@@ -124,6 +127,9 @@ Sensor::Sensor(const Sensor & sensor) :
       signal2->SetEpoch(sensor.signal2->GetEpoch());
       signal2->SetValue(sensor.signal2->GetValue());
    }
+
+   for (Integer i = HardwareParamCount; i < SensorParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 //-----------------------------------------------------------------------------
@@ -347,9 +353,6 @@ bool Sensor::IsParameterReadOnly(const std::string& label) const
 //------------------------------------------------------------------------------
 bool Sensor::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == DIRECTION_X) || (id == DIRECTION_Y) || (id == DIRECTION_Z))
-      return true;
-
    if ((id == HARDWARE_DELAY)||(id == SENSOR_ID))
       return true; 
 
@@ -500,7 +503,7 @@ Real Sensor::GetRealParameter(const Integer id, const Integer index) const
          break;
    }
 
-   return Hardware::GmatBase::GetRealParameter(id, index);
+   return Hardware::GetRealParameter(id, index);
 }
 
 //------------------------------------------------------------------------------
@@ -516,7 +519,9 @@ Real Sensor::GetRealParameter(const Integer id, const Integer index) const
 //------------------------------------------------------------------------------
 Real Sensor::GetRealParameter(const Integer id) const
 {
-   return GetRealParameter(id,0);
+   if (id == HARDWARE_DELAY)
+      return hardwareDelay1;
+   return Hardware::GetRealParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -564,7 +569,7 @@ Real Sensor::SetRealParameter(const Integer id, const Real value, const Integer 
          break;
    }
 
-   return Hardware::GmatBase::SetRealParameter(id, value, index);
+   return Hardware::SetRealParameter(id, value, index);
 }
 
 
@@ -582,7 +587,18 @@ Real Sensor::SetRealParameter(const Integer id, const Real value, const Integer 
 //------------------------------------------------------------------------------
 Real Sensor::SetRealParameter(const Integer id, const Real value)
 {
-   return SetRealParameter(id, value, 0);
+   // Without an index, use delay 1
+   if (id == HARDWARE_DELAY)
+   {
+      if (value < 0.0)
+         throw HardwareException("Error: A negative number was set for the " +
+               instanceName + ".HardwareDelay parameter.\n");
+
+      hardwareDelay1 = value;
+      return hardwareDelay1;
+   }
+
+   return Hardware::SetRealParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -616,7 +632,7 @@ Real Sensor::GetRealParameter(const std::string & label, const Integer index) co
 //------------------------------------------------------------------------------
 Real Sensor::GetRealParameter(const std::string & label) const
 {
-   return GetRealParameter(GetParameterID(label), 0);
+   return GetRealParameter(GetParameterID(label));
 }
 
 
@@ -655,7 +671,7 @@ Real Sensor::SetRealParameter(const std::string & label, const Real value,
 //------------------------------------------------------------------------------
 Real Sensor::SetRealParameter(const std::string & label, const Real value)
 {
-   return SetRealParameter(GetParameterID(label), value, 0);
+   return SetRealParameter(GetParameterID(label), value);
 }
 
 //------------------------------------------------------------------------------

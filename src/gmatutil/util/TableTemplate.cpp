@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -391,20 +391,11 @@ TableTemplate<T>::ChangeSize(int r, int c, bool zeroElements)
       delete [] elementD;
    elementD = NULL;
 
-
-   // Step 3. Create a new table
-   Integer newSize = r*c;
-   if (newSize != 0)
-   {
-      elementD = new T[newSize];
-   }
-
-
-   // Step 4. Set new size and fill table content by 0
+   // Step 3. Set new size and fill table content by 0
    init(r,c);
 
 
-   // Step 5. fill all element by its old value
+   // Step 4. fill all element by its old value
    if (!zeroElements)
    {
       for (Integer ii = 0; ii < oldRows; ii++)
@@ -420,7 +411,7 @@ TableTemplate<T>::ChangeSize(int r, int c, bool zeroElements)
       //delete saved;
    }
 
-   //Step 6: Delete temporary buffer
+   // Step 5: Delete temporary buffer
    if (saved != NULL)
       delete [] saved;
 }

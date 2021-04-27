@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -622,6 +622,7 @@ bool Report::RenameRefObject(const UnsignedInt type,
    // Check for allowed object types for name change.
    if (type != Gmat::SUBSCRIBER && type != Gmat::PARAMETER &&
        type != Gmat::SPACECRAFT && type != Gmat::COORDINATE_SYSTEM &&
+       type != Gmat::PLATE &&                                                // made changes by TUAN NGUYEN
        type != Gmat::BURN && type != Gmat::IMPULSIVE_BURN &&
        type != Gmat::CALCULATED_POINT && type != Gmat::HARDWARE)
    {

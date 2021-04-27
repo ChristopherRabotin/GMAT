@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -231,9 +231,9 @@ void EphemWriterSPK::Copy(const EphemerisWriter* orig)
 //--------------------------------------
 
 //------------------------------------------------------------------------------
-// void BufferOrbitData(Real epochInDays, const Real state[6])
+// void BufferOrbitData(Real epochInDays, const Real state[6], const Real cov[21])
 //------------------------------------------------------------------------------
-void EphemWriterSPK::BufferOrbitData(Real epochInDays, const Real state[6])
+void EphemWriterSPK::BufferOrbitData(Real epochInDays, const Real state[6], const Real cov[21])
 {
    #ifdef DEBUG_EPHEMFILE_BUFFER
    MessageInterface::ShowMessage
@@ -272,11 +272,12 @@ void EphemWriterSPK::BufferOrbitData(Real epochInDays, const Real state[6])
 
 //------------------------------------------------------------------------------
 // void CreateEphemerisFile(bool useDefaultFileName, const std::string &stType,
-//                          const std::string &outFormat)
+//                          const std::string &outFormat, const std::string &covFormat)
 //------------------------------------------------------------------------------
 void EphemWriterSPK::CreateEphemerisFile(bool useDefaultFileName,
                                          const std::string &stType,
-                                         const std::string &outFormat)
+                                         const std::string &outFormat,
+                                         const std::string &covFormat)
 {
    #ifdef DEBUG_EPHEMFILE_CREATE
    MessageInterface::ShowMessage
@@ -285,7 +286,7 @@ void EphemWriterSPK::CreateEphemerisFile(bool useDefaultFileName,
        outFormat.c_str(), fullPathFileName.c_str());
    #endif
    
-   EphemerisWriter::CreateEphemerisFile(useDefaultFileName, stType, outFormat);
+   EphemerisWriter::CreateEphemerisFile(useDefaultFileName, stType, outFormat, covFormat);
    
    CreateSpiceKernelWriter();
    isEphemFileOpened = true;
@@ -471,7 +472,7 @@ void EphemWriterSPK::HandleWriteOrbit()
       ("EphemWriterSPK::HandleWriteOrbit() entered\n");
    #endif
    
-   WriteOrbit(currEpochInSecs, currState);
+   WriteOrbit(currEpochInSecs, currState, currCov);
    
    #ifdef DEBUG_EPHEMFILE_WRITE
    MessageInterface::ShowMessage("EphemWriterSPK::HandleWriteOrbit() leaving\n");
@@ -501,15 +502,21 @@ void EphemWriterSPK::HandleSpkOrbitData(bool writeData, bool timeToWrite)
       
       if (bufferData)
       {
-         Real outState[6];
+         Real outState[6], outCov[21];
          // Convert if necessary
          if (!writeDataInDataCS)
-            ConvertState(currEpochInDays, currState, outState);
+         {
+            ConvertState(currEpochInDays, currState, outState, currCov, outCov);
+         }
          else
+         {
             for (unsigned int ii = 0; ii < 6; ii++)
               outState[ii] = currState[ii];
+            for (unsigned int ii = 0; ii < 21; ii++)
+              outCov[ii] = currCov[ii];
+         }
          
-         BufferOrbitData(currEpochInDays, outState);
+         BufferOrbitData(currEpochInDays, outState, outCov);
          
          #ifdef DEBUG_EPHEMFILE_SPICE
          DebugWriteOrbit("In HandleSpkOrbitData:", currEpochInDays, currState, true, true);
@@ -690,6 +697,12 @@ void EphemWriterSPK::FinishUpWritingSPK()
       {
          Integer mnSz   = spkWriter->GetMinNumberOfStates();
          Integer numPts = (Integer) a1MjdArray.size();
+         #ifdef DEBUG_EPHEMFILE_SPICE
+         MessageInterface::ShowMessage("FinishUpWritingSPK::mnSz = %d, numPts = %d\n",
+                                       mnSz, numPts);
+         MessageInterface::ShowMessage("FinishUpWritingSPK::generateInBackground = %s\n",
+                                       (generateInBackground? "true" : "false"));
+         #endif
          // if we are generating SPK files in the background and there
          // are not enough states for the interpolation, we DO NOT
          // want to try to write and trigger the SPICE error;

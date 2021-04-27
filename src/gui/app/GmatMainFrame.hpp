@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -225,7 +225,6 @@ public:
    void OnSashDrag(wxSashEvent &event);
    void OnMsgSashDrag(wxSashEvent &event);
    void OnMainFrameSize(wxSizeEvent &event);
-   void OnSetFocus(wxFocusEvent &event);
    void OnKeyDown(wxKeyEvent &event);
    void OnCycleTab(wxCommandEvent &event);
    

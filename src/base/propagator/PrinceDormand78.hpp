@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -63,7 +63,7 @@ public:
     PrinceDormand78(const PrinceDormand78&);
     PrinceDormand78 & operator=(const PrinceDormand78&);
 
-    virtual Propagator* Clone() const;
+    virtual GmatBase* Clone() const;
 protected:
     void                        SetCoefficients();
 

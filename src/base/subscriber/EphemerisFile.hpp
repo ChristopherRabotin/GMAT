@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -136,6 +136,7 @@ protected:
    std::string stateType;
    std::string outCoordSystemName;
    std::string outputFormat;
+   std::string covFormat;
    bool        writeEphemeris;
    bool        usingDefaultFileName;
    bool        generateInBackground;
@@ -159,6 +160,7 @@ protected:
    Real        maneuverEpochInDays;
    Real        eventEpochInSecs;
    Real        currState[6];
+   Real        currCov[21];
    Real        stepSizeInSecs;
    
    bool        firstTimeWriting;
@@ -195,6 +197,8 @@ protected:
    static StringArray interpolatorTypeList;
    /// Available output format list
    static StringArray outputFormatList;
+   /// Available covariance type list
+   static StringArray covFormatList;
    /// Available distance unit list
    static StringArray distanceUnitList;
    /// Available include event boundaries list
@@ -211,7 +215,7 @@ protected:
    // Time and data
    bool         HandleEndOfRun();
    bool         SkipFunctionData();
-   bool         RetrieveData(const Real *dat);
+   bool         RetrieveData(const Real *dat, Integer len);
    void         HandlePropDirectionChange();
    
    bool         IsBackwardPropAllowed();
@@ -275,6 +279,7 @@ protected:
       STATE_TYPE,
       COORDINATE_SYSTEM,
       OUTPUT_FORMAT,
+      INCLUDE_COVARIANCE,
       WRITE_EPHEMERIS,
       FILE_NAME,                // deprecated
       DISTANCE_UNIT,            // Meters or kilometers

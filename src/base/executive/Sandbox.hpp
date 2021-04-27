@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -142,6 +142,10 @@ private:
    updateMethod                      cloneUpdateStyle;
    /// Flag indicting error creating FCS
    bool                              errorInPreviousFcs;
+
+   // Exception suppression counters
+   /// Count of PythonInterface exceptions thrown
+   Integer                           warnPyInterface;
    
    /// List of FiniteThrust objects that are currently available
    std::vector<PhysicalModel *>      transientForces;
@@ -174,6 +178,8 @@ private:
    void      UpdateAndInitializeCloneOwner(GmatBase *theClone,
                                            GmatBase *theOwner,
                                            Integer updatedParameterIndex);
+
+   bool      ReportError(BaseException &be);
 
    #ifdef DEBUG_SANDBOX_CLONING
       std::vector<UnsignedInt>  clonable;

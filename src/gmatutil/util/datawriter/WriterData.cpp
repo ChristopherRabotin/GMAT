@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -32,7 +32,8 @@
 
 WriterData::WriterData(const std::string &variable_name) :
    varName        (variable_name),
-   dataType       (Gmat::UNKNOWN_PARAMETER_TYPE)
+   dataType       (Gmat::UNKNOWN_PARAMETER_TYPE),
+   isJagged       (false)
 {
 }
 
@@ -42,7 +43,8 @@ WriterData::~WriterData()
 
 WriterData::WriterData(const WriterData &md) :
    varName        (md.varName),
-   dataType       (md.dataType)
+   dataType       (md.dataType),
+   isJagged       (md.isJagged)
 {
 }
 
@@ -53,19 +55,30 @@ WriterData& WriterData::operator=(const WriterData &md)
       // Data types should already match; no assignment across types
       if (dataType == md.dataType)
       {
-         varName  = md.varName;
+         varName   = md.varName;
+         isJagged  = md.isJagged;
       }
    }
 
    return *this;
 }
 
-bool WriterData::AddData(const StringMatrix &data)
+bool WriterData::AddData(const StringMatrix &data, bool isJagged)
 {
    return false;
 }
 
-bool WriterData::AddData(const Matrix &data)
+bool WriterData::AddData(const Matrix &data, bool isJagged)
+{
+   return false;
+}
+
+bool WriterData::AddData(const std::vector<StringMatrix> &data)
+{
+   return false;
+}
+
+bool WriterData::AddData(const std::vector<Matrix> &data)
 {
    return false;
 }

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -45,7 +45,7 @@ public:
    ~LUFactorization();
    LUFactorization& operator=(const LUFactorization &lufactorization);
 
-   void Factor(const Rmatrix inputMatrix, Rmatrix &L, Rmatrix &U);
+   void Factor(const Rmatrix &inputMatrix, Rmatrix &L, Rmatrix &U);
    void Invert(Rmatrix &inputMatrix);
    void SolveSystem(const Rmatrix inputMatrix, Rvector b, Rvector &x);
    Real Determinant(Rmatrix A);

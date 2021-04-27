@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -48,11 +48,11 @@
  * 
  * The density is given by
  * 
- * \f[\rho = \rho_0 e^{-{{h_{ellp} - h_0}\over{H}}}\f]
+ * \f[ \rho = \rho_0 e^{-{{h_{ellp} - h_0}\over{H}}} \f]
  * 
- * where \f$\rho_0\f$ is a reference density, specified at a reference altitude
- * \f$h_0\f$, \f$h_{ellp}\f$ is the height of the specified position above the 
- * body's ellipsoid, and \f$H\f$ is a scale height, used to scale the other 
+ * where \f$ \rho_0 \f$ is a reference density, specified at a reference altitude
+ * \f$ h_0 \f$, \f$ h_{ellp} \f$ is the height of the specified position above the 
+ * body's ellipsoid, and \f$ H \f$ is a scale height, used to scale the other 
  * variables in the formula.
  * 
  * Developers and other users can build exponential models for bodies other than 

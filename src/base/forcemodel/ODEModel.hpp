@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -148,7 +148,7 @@ public:
    void UpdateFromSpaceObject();
    void RevertSpaceObject();
    void BufferState();
-   Integer SetupSpacecraftData(ObjectArray *sats, Integer i);
+   Integer SetupSpacecraftData(ObjectArray *sats, Integer i, bool updateEpoch = true);
 
    Integer UpdateDynamicSpacecraftData(ObjectArray *sats, Integer i);
 
@@ -163,7 +163,7 @@ public:
    // Take action method inherited from GmatBase
    virtual bool         TakeAction(const std::string &action,
                                    const std::string &actionData = "");
-   
+
    // Parameter definition and accessor methods inherited from GmatBase
    virtual Integer      GetParameterCount() const;
    virtual bool         RenameRefObject(const UnsignedInt type,
@@ -250,12 +250,22 @@ public:
    virtual Integer      GetOwnedObjectCount();
    virtual GmatBase*    GetOwnedObject(Integer whichOne);
    virtual std::string  BuildPropertyName(GmatBase *ownedObj);
+
+   // Covariance handling code
+   virtual Integer      HasParameterCovariances(Integer parameterId);
+   virtual Rmatrix*     GetParameterCovariances(Integer parameterId = -1);
+   virtual Covariance*  GetCovariance();
    
-   void                 UpdateInitialData(bool dynamicOnly = false);
+   void                 UpdateInitialData(bool dynamicOnly = false, bool updateEpoch = true);
    void                 ReportEpochData();
    
 
    void                 SetState(GmatState *gms);
+
+   virtual void         IncrementTime(Real dt);
+   virtual void         SetTime(Real t);
+   virtual void         SetDirection(Real dir);
+   virtual Real         GetStepPrecision(Real stepSize);
 
    virtual bool         HasLocalClones();
    virtual void         UpdateClonedObject(GmatBase *obj);
@@ -266,6 +276,19 @@ public:
    // Interface added for the C Interface to force epoch updates
    bool                 SetEpoch(const GmatEpoch newEpoch); 
    virtual void         SetPropStateManager(PropagationStateManager *sm);
+
+   virtual StringArray     GetSolveForList();
+   virtual Integer         GetEstimationParameterID(const std::string &param);
+   virtual std::string     GetParameterNameForEstimationParameter(const std::string &parmName);
+   //   virtual std::string     GetParameterNameFromEstimationParameter(const std::string &parmName);
+   virtual Integer         SetEstimationParameter(const std::string &param);
+   virtual bool            IsEstimationParameterValid(const Integer id);
+//   virtual Integer         GetEstimationParameterSize(const Integer id);
+   virtual Real*           GetEstimationParameterValue(const Integer id);
+   GmatBase*               GetStmObject(const std::string &rowName);
+
+   // Methods for getting stop epochs for force models
+   virtual Real                     GetForceMaxStep(bool forwards = true);
 
 protected:
    /// Count of the number of forces in the model
@@ -308,7 +331,7 @@ protected:
    std::string centralBodyName;
    /// Flag indicating whether or not the first time of coverage has already been
    /// determined for the force origin
-   bool        coverageStartDetermined;
+   bool coverageStartDetermined;
    /// Flag used to prevent unnecessary initialization calls
    bool forceMembersNotInitialized;
    
@@ -316,7 +339,8 @@ protected:
    Integer satCount;
    
    /// Parameter IDs on spacecraft needed to access the parms during integration
-   Integer satIds[7];
+   //Integer satIds[7];                                     // made changes by TUAN NGUYEN
+   Integer satIds[9];                                       // made changes by TUAN NGUYEN
 
    /// Internal flag used to relax constraint for Cd
    bool constrainCd;
@@ -346,6 +370,14 @@ protected:
 
    /// Mapping between script descriptions and force names.
    static std::map<std::string, std::string> scriptAliases;
+
+   /// The nominal derivatives at the current time and state values
+   RealArray nomDerivs;
+   /// Flag used to determine whether the finite differencing method for the
+   /// time Jacobian should be called
+   bool finiteDifferencingTimeJac;
+   /// Array containing the most recent derivative calculation, when needed
+   Real * nonAnalyticTimeDerivs;
    
    const StringArray&  BuildBodyList(std::string type) const;
    const StringArray&  BuildCoordinateList() const;
@@ -388,6 +420,20 @@ protected:
    //   Integer size;
    };
    
+   /// Structure used in the estimation code when solving for force parameters
+   struct SolveForData
+   {
+      GmatBase *solveForHolder;
+      Integer solveForId;
+      Real value;
+   };
+
+   /// Names of Solve-for parameters and also associated Epsilon names
+   StringArray solveForNames;
+
+   /// Map between identifying strings and the solve for data
+   std::map<std::string, SolveForData> solveForMap;
+
 private:
    // Throws a warning, but can be safely ignored because this vector is not
    // used elsewhere
@@ -399,9 +445,11 @@ protected:
    bool                      BuildModelElement(Gmat::StateElementId id, 
                                                Integer start, 
                                                Integer objectCount,
-                                               Integer size);
+                                               Integer totalSize);                     // made changes by TUAN NGUYEN
    bool                      PrepareDerivativeArray();
    bool                      CompleteDerivativeCalculations(Real *state);
+
+   void                      FiniteDiffTimeJacobian(Real * state, Real dt, Integer order);
    
 //   /// Data file used when debugging epoch data
 //   std::ofstream             epochFile;
@@ -476,6 +524,8 @@ protected:
 private:
    
    Integer GetOwnedObjectId(Integer id, GmatBase **owner) const;
+
+   std::string GetShapeModel(std::string forcetype);              // made changes by TUAN NGUYEN
    
 };
 

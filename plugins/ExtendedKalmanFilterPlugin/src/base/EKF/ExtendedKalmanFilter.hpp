@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2016 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,6 +35,8 @@
 
 #include "kalman_defs.hpp"
 #include "SeqEstimator.hpp"
+#include "CholeskyFactorization.hpp"
+#include "QRFactorization.hpp"
 
 
 /**
@@ -68,54 +70,36 @@ public:
    virtual void            Copy(const GmatBase*);
 
 protected:
-   /// The time updates covariance matrix
-   Rmatrix                 pBar;
    /// The measurement Residuals (O-C)
    Rvector                 yi;
    /// The Kalman gain
    Rmatrix                 kalman;
-   // The process noise
-   Rmatrix                 Q;
-   // time delta (seconds)
-   Real                    dt;
 
-   // S = H * P(k)- * H' + R
-   Rmatrix                 innovationCov;
-   // innovationCov inverse
-   Rmatrix                 innovationCovInv;
+   // Fatorization classes
+   CholeskyFactorization   cf;
+   QRFactorization         qr;
 
-   // <debug>
-   bool                    isFirst;
-   Rmatrix                 prevState;
-   RealArray               prevMeas;
-   Rmatrix                 debugMeas;
-   Rmatrix                 dState;
-   RealArray               dMeas;
-   // </debug>
+   // Factorization variables
+   Rmatrix                 sqrtP_T;
+   Rmatrix                 sqrtPupdate_T;
 
    virtual void            CompleteInitialization();
    virtual void            Estimate();
 
-   virtual void            UpdateReportText();
-   virtual void            UpdateStateReportText(std::stringstream& sLine);
+   virtual void            TimeUpdate();
 
 private:
    void                    SetupMeas();
-   void                    UpdateProcessNoise();
-   void                    TimeUpdate();
-   void                    ComputeObs();
-   void                    ComputeGain();
-   void                    UpdateElements();
+   void                    ComputeObs(UpdateInfoType &updateStat);
+   void                    ComputeGain(UpdateInfoType &updateStat);
+   void                    UpdateElements(UpdateInfoType &updateStat);
    void                    AdvanceEpoch();
 
-   void                    Symmetrize(Covariance& mat);
-   void                    Symmetrize(Rmatrix& mat);
    void                    UpdateCovarianceSimple();
    void                    UpdateCovarianceJoseph();
 
    const MeasurementData *calculatedMeas;
    const ObservationData *currentObs;
-   Real ocDiff;
 };
 
 #endif /* ExtendedKalmanFilter_hpp */

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -37,13 +37,14 @@
 #include "Burn.hpp"
 #include "FuelTank.hpp"
 
-
-// Not used anywhere, so commented out
+// ChemicalThruster.hpp static const Integer COEFFICIENT_COUNT = 16;
+// confuses with COEFFICIENT_COUNT 16, so commented out here.
 //#define COEFFICIENT_COUNT 16
 
 class GMAT_API ImpulsiveBurn : public Burn
 {
 public:
+   
    ImpulsiveBurn(const std::string &nomme = "");
    virtual ~ImpulsiveBurn();
    ImpulsiveBurn(const ImpulsiveBurn &copy);

@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -56,6 +56,8 @@ public:
    // initializes the CoordinateConverter
    virtual void Initialize(); 
    
+	bool SetToCalculateRotMatrixDeriv(bool turnOn);                              // made changes by TUAN NGUYEN
+
    bool Convert(const A1Mjd &epoch, const Rvector &inState,
                 CoordinateSystem *inCoord, Rvector &outState,
                 CoordinateSystem *outCoord, 
@@ -102,9 +104,15 @@ public:
    Rmatrix33    GetLastRotationDotMatrix() const;
    Rmatrix33    GetRotationMatrixFromICRFToFK5(const A1Mjd &atEpoch);
 
+	std::vector<Rmatrix33>                                                             // made changes by TUAN NGUYEN
+		          GetLastRotationMatrixDerivative() const;                              // made changes by TUAN NGUYEN
+
 protected:
    Rmatrix33 lastRotMatrix;
    Rmatrix33 lastRotDotMatrix;
+
+	bool      specifyRotMatrixDeriv;                                                   // made changes by TUAN NGUYEN
+	std::vector<Rmatrix33> lastRotMatrixDeriv;                                         // made changes by TUAN NGUYEN
 
    bool         ConvertFromBaseToBase(const A1Mjd &epoch, SolarSystem *solarSystem,
                                       const std::string &inBase,  const std::string &outBase,

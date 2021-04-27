@@ -16,9 +16,6 @@ MESSAGE("GMAT EventLocator Plugin setup " ${VERSION})
 
 SET(TargetName EventLocator)
 
-# Add Preproccessor Definitions
-ADD_DEFINITIONS("-DLOCATOR_EXPORTS")
-
 # ====================================================================
 # list of directories containing source/header files
 SET(PLUGIN_DIRS event factory include locator plugin)
@@ -39,3 +36,6 @@ SET(PLUGIN_SRCS
 # ====================================================================
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
+
+# Rename DLL export preproccessor definition
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEFINE_SYMBOL "LOCATOR_EXPORTS")

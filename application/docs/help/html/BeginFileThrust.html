@@ -1,0 +1,212 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>BeginFileThrust</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ch16s02.html" title="Commands"><link rel="prev" href="ch16s02.html" title="Commands"><link rel="next" href="BeginFiniteBurn.html" title="BeginFiniteBurn"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">BeginFileThrust</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ch16s02.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="BeginFiniteBurn.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="BeginFileThrust"></a><div class="titlepage"></div><a name="N1F440" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">BeginFileThrust</span></h2><p>BeginFileThrust &mdash; Apply a piece-wise continuous thrust/acceleration and mass
+    flow rate profile</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><pre class="synopsis"><code class="literal">BeginFileThrust</code> <em class="replaceable"><code>aThrustHistoryFile</code></em>(<em class="replaceable"><code>aSpacecraft</code></em>)</pre><pre class="synopsis"><code class="literal">EndFileThrust</code> <em class="replaceable"><code>aThrustHistoryFile</code></em>(<em class="replaceable"><code>aSpacecraft</code></em>)</pre></div><div class="refsection"><a name="N1F468"></a><h2>Description</h2><p>When you apply a <span class="guilabel">BeginFileThrust</span> command, you
+    turn on the thrust/acceleration and mass flow rate profile given in the
+    specified <span class="guilabel">ThrustHistoryFile</span> as applied to the
+    specified <span class="guilabel">Spacecraft</span>. Similarly when you apply an
+    <span class="guilabel">EndFileThrust</span> command, you turn off the
+    thrust/acceleration and mass flow rate profile given in the specified
+    <span class="guilabel">ThrustHistoryFile</span> as applied to the specified
+    <span class="guilabel">Spacecraft</span>. In order to actually apply the
+    thrust/acceleration and mass flow rate profile, there must be a
+    <span class="guilabel">Propagate</span> command between the
+    <span class="guilabel">BeginFileThrust</span> and
+    <span class="guilabel">End</span><span class="guilabel">FileThrust</span> commands.</p><p>To apply the<span class="guilabel"> BeginFileThrust</span> and
+    <span class="guilabel">EndFileThrust</span> commands, a
+    <span class="guilabel">ThrustHistoryFile</span> object must be configured. This
+    <span class="guilabel">ThrustHistoryFile</span> object, in turn, requires the
+    configuration of one or more <span class="guilabel">ThrustSegment</span> objects.
+    See the Remarks section and the examples below for a more detailed
+    explanation.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a>, <a class="xref" href="ThrustHistoryFile.html" title="ThrustHistoryFile"><span class="refentrytitle">ThrustHistoryFile</span></a>, <a class="xref" href="ThrustSegment.html" title="ThrustSegment"><span class="refentrytitle">ThrustSegment</span></a>, <a class="xref" href="FuelTank.html" title="ChemicalTank"><span class="refentrytitle">ChemicalTank</span></a></p></div><div class="refsection"><a name="N1F4AB"></a><h2>Options</h2><div class="informaltable"><table border="1"><colgroup><col width="40%"><col width="60%"></colgroup><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">BeginFileThrust -
+            ThrustHistoryFile</span></td><td><p>Specifies the <span class="guilabel">ThrustHistoryFile</span>
+            object activated by the <span class="guilabel">BeginFileThrust</span>
+            command. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>
+                      <span class="guilabel">ThrustHistoryFile</span>
+                    </p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">ThrustHistoryFile</span> object</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">N/A</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">BeginFileThrust - Spacecraft</span></td><td><p>Specifies the <span class="guilabel">Spacecraft</span> acted
+            upon by the <span class="guilabel">BeginFileThrust</span> command. The
+            mass/acceleration and mass flow rate profile specified by the
+            <span class="guilabel">ThrustFileHistory</span> and applied to the
+            <span class="guilabel">Spacecraft</span> will be activated. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>
+                      <span class="guilabel">Spacecraf</span>
+
+                       
+
+                      <span class="guilabel">t</span>
+                    </p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Spacecraf</span><span class="guilabel">t
+                    </span>Object</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">N/A</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EndFileThrust -
+            ThrustHistoryFile</span></td><td><p>Specifies the <span class="guilabel">ThrustHistoryFile</span>
+            object de-activated by the <span class="guilabel">EndFileThrust</span>
+            command. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>
+                      <span class="guilabel">ThrustHistoryFile</span>
+                    </p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">ThrustHistoryFile</span> object</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">N/A</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">EndFileThrust - Spacecraft</span></td><td><p>Specifies the <span class="guilabel">Spacecraft</span> acted
+            upon by the <span class="guilabel">EndFileThrust</span> command. The
+            mass/acceleration and mass flow rate profile specified by the
+            <span class="guilabel">ThrustFileHistory</span> and applied to the
+            <span class="guilabel">Spacecraft</span> will be de-activated. </p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Accepted Data Types</span></p></td><td><p>
+                      <span class="guilabel">Spacecraft</span>
+                    </p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">Spacecraft</span> object</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
+                      <span class="guilabel">N/A</span>
+                    </p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>yes</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1F5A5"></a><h2>Remarks</h2><div class="refsection"><a name="N1F5A8"></a><h3>Using <span class="guilabel">BeginFileThrust</span> and
+      <span class="guilabel">EndFileThrust</span> commands</h3><p>To use the <span class="guilabel">BeginFileThrust</span> and
+      <span class="guilabel">EndFileThrust</span> commands in your mission sequence,
+      you must configure a <span class="guilabel">ThrustHistoryFile</span> object along
+      with one or more <span class="guilabel">ThrustSegment</span> objects. In
+      addition, if you wish to apply a mass flow rate profile, you must also
+      create a <span class="guilabel">ChemicalTank</span> object. Additional details
+      are provided in the steps below.</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Create a <span class="guilabel">Spacecraft</span> object whose
+          thrust/acceleration and/or mass flow rate profile you wish to
+          modify.</p></li><li class="listitem"><p>If you wish to apply a mass flow rate profile, create and
+          configure a <span class="guilabel">ChemicalTank</span> model. Add this
+          <span class="guilabel">ChemicalTank</span> to the
+          <span class="guilabel">Spacecraft</span> created in Step 1. The mass of the
+          <span class="guilabel">ChemicalTank</span> will be changed according to the
+          profile specified by the <span class="guilabel">ThrustHistoryFile</span> and
+          <span class="guilabel">ThrustSegment</span> objects that we will
+          create.</p></li><li class="listitem"><p>Create one or more <span class="guilabel">ThrustSegment</span> objects.
+          A thrust segment is a block of data inside the file specified by the
+          <span class="guilabel">ThrustHistoryFile</span> object, encapsulated between
+          "BeginThrust {<span class="guilabel">ThrustSegment</span> object name}" and
+          "EndThrust {<span class="guilabel">ThrustSegment</span> object name}"
+          keywords. A given thrust history file can contain one or more thrust
+          segments. As described in the <a class="xref" href="ThrustSegment.html" title="ThrustSegment"><span class="refentrytitle">ThrustSegment</span></a> help,
+          the <span class="guilabel">ThrustSegment</span> object describes how the
+          segment data will be used. The following steps should be
+          taken.</p><div class="orderedlist"><ol class="orderedlist" type="a"><li class="listitem"><p>Set the parameters (scale factor related parameters,
+              solve-for related parameters, etc) for the
+              <span class="guilabel">ThrustSegment</span>.</p></li><li class="listitem"><p>(If modeling mass flow), configure the
+              <span class="guilabel">ThrustSegment</span> to use the
+              <span class="guilabel">ChemicalTank</span> created in Step 2.</p></li></ol></div></li><li class="listitem"><p>Create a <span class="guilabel">ThrustHistoryFile</span> Object.</p><div class="orderedlist"><ol class="orderedlist" type="a"><li class="listitem"><p>Use the
+              <span class="guilabel">ThrustHistoryFile.AddThrustSegment</span>
+              parameter to specify which <span class="guilabel">ThrustSegments,</span>
+              created in Step 3, our new
+              <span class="guilabel">ThrustHistoryFile</span> object will use.</p></li><li class="listitem"><p>Specify the actual thrust history file name.</p></li></ol></div></li><li class="listitem"><p>Create the thrust history file specified in part b of Step 4.
+          Refer to the <a class="xref" href="ThrustHistoryFile.html" title="ThrustHistoryFile"><span class="refentrytitle">ThrustHistoryFile</span></a> Help, which
+          contains a description of the file format, as needed.</p></li></ol></div></div><div class="refsection"><a name="N1F61F"></a><h3>BeginFileThrust and EndFileThrust commands are NOT branch
+      commands</h3><p>The <span class="guilabel">BeginFileThrust</span> and
+      <span class="guilabel">EndFileThrust</span> commands are NOT branch commands,
+      meaning, a <span class="guilabel">BeginFileThrust</span> command can exist
+      without an <span class="guilabel">EndFileThrust</span> command.</p><p>Similarly, since the <span class="guilabel">BeginFileThrust</span> and
+      <span class="guilabel">EndFileThrust</span> commands are used to turn on or off
+      the thrust/mass and mass flow rate profiles, applying the same command
+      multiple times in a script without its inverse is the same as applying
+      it once. In other words, if you do this:</p><pre class="programlisting"><code class="code">BeginFileThrust aThrustHistoryFile(aSat);
+BeginFileThrust aThrustHistoryFile(aSat);
+BeginFileThrust aThrustHistoryFile(aSat);</code></pre><p>The effect is the same as only applying the
+      <span class="guilabel">BeginFileThrust</span> command one time. The same holds
+      true for the <span class="guilabel">EndFileThrust</span> command.</p></div></div><div class="refsection"><a name="N1F643"></a><h2>Examples</h2><div class="refsection"><a name="N1F646"></a><h3>Apply a thrust and mass flow rate profile to a
+      <span class="guilabel">Spacecraft</span></h3><div class="informalexample"><p>We will create a sample script to apply a thrust and mass flow
+        rate profile to a <span class="guilabel">Spacecraft</span> object. In our
+        script, we will create a <span class="guilabel">Spacecraft</span> object,
+        <span class="guilabel">aSat</span>, with an initial epoch of '01 Jan 2010
+        00:00:00.000.'. We decide that we want to apply a 3 Newton force in
+        the Earth Centered Inertial (ECI) X direction for a duration of 100
+        seconds starting at '01 Jan 2010 00:01:00.000.' During the same time
+        duration, we also want to apply a mass flow rate profile that uses
+        fuel at a rate of 0.01 kg/s. Before we run our script, we will need to
+        create a thrust history file, with the contents listed below. The user
+        should name this file 'SampleThrustFile.thrust' and place it in the
+        GMAT 'data' directory.</p><pre class="programlisting">BeginThrust {aThrustSegment}
+Start_Epoch = 01 Jan 2010 00:00:00.000
+Thrust_Vector_Coordinate_System = EarthMJ2000Eq   
+Thrust_Vector_Interpolation_Method  = None
+Mass_Flow_Rate_Interpolation_Method = None
+ModelThrustAndMassRate
+60.0      3.0 0.0 0.0  0.01
+160.0     3.0 0.0 0.0  0.01
+EndThrust {aThrustSegment}</pre><p>Below, we create a script that will</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Create and configure our needed
+            <span class="guilabel">Spacecraft</span>,
+            <span class="guilabel">ChemicalTank</span>, <span class="guilabel">Propagator,
+            ThrustSegment</span>, and
+            <span class="guilabel">T</span><span class="guilabel">hrustHistoryFile</span>
+            objects.</p></li><li class="listitem"><p>Use the <span class="guilabel">BeginFileThrust</span> and
+            <span class="guilabel">EndFileThrust</span> commands to apply our desired
+            thrust and mass flow rate profile to our
+            <span class="guilabel">Spacecraft</span> object,
+            <span class="guilabel">aSat</span>.</p></li><li class="listitem"><p>Create and configure a <span class="guilabel">ReportFile
+            </span>object so that we can determine the fuel mass in our
+            created <span class="guilabel">ChemicalTank</span> object both before and
+            after the desired thrust and mass flow rate profile has been
+            applied.</p></li></ul></div><pre class="programlisting">%  Create and configure objects
+Create Spacecraft aSat
+aSat.DateFormat = UTCGregorian;
+aSat.Epoch = '01 Jan 2010 00:00:00.000';
+
+Create ChemicalTank aTank 
+aSat.Tanks = {aTank}
+
+Create Propagator aPropagator
+
+Create ThrustSegment aThrustSegment
+aThrustSegment.ThrustScaleFactor = 1.2;
+aThrustSegment.ApplyThrustScaleToMassFlow = false;
+aThrustSegment.MassFlowScaleFactor = 2.0;
+aThrustSegment.MassSource = {'aTank'};
+
+Create ThrustHistoryFile aThrustHistoryFile
+
+aThrustHistoryFile.AddThrustSegment = {'aThrustSegment'};
+aThrustHistoryFile.FileName = '../data/SampleThrustFile.thrust';
+
+Create ReportFile aReportFile
+
+BeginMissionSequence
+
+Report aReportFile aSat.aTank.FuelMass
+
+BeginFileThrust aThrustHistoryFile(aSat);
+  Propagate aPropagator(aSat) {aSat.ElapsedSecs = 180.0};
+EndFileThrust aThrustHistoryFile(aSat);
+
+Report aReportFile aSat.aTank.FuelMass</pre><p>After running the script above, take a look at the before and
+        after values of <span class="guilabel">aTank</span>'s fuel mass to note that
+        the mass has decreased by 2 kg. This is the expected result. Recall
+        that we apply a mass flow rate profile of 0.01 kg/s for 100 seconds
+        starting at '01 Jan 2010 00:01:00.000' and ending at '01 Jan 2010
+        00:02:40.000'. 100 seconds multiplied by 0.01 kg/s corresponds to a
+        mass drop of 1 kg but we need to remember that
+        aThrustSegment.MassFlowScaleFactor=2.0. Thus, the mass flow rate
+        specified in the file is doubled to obtain an expected mass drop of 2
+        kg.</p></div></div><div class="refsection"><a name="N1F68C"></a><h3>Navigation Applications</h3><div class="informalexample"><p>In the example above, we focused on applying a thrust and mass
+        flow rate profile to a spacecraft in a mission design trajectory
+        propagation context. We did this by sandwiching in a
+        <span class="guilabel">Propagate</span> command in between a
+        <span class="guilabel">BeginFileThrust</span> and
+        <span class="guilabel">EndFileThrust</span> command. One can also use
+        <span class="guilabel">BeginFileThrust</span> and
+        <span class="guilabel">EndFileThrust</span> commands in the context of orbit
+        determination. This is done by sandwiching in a
+        <span class="guilabel">RunSimulator</span> or a
+        <span class="guilabel">RunEstimator</span> command in between a
+        <span class="guilabel">BeginFileThrust</span> and
+        <span class="guilabel">EndFileThrust</span> command.</p><p>See the sample/Navigation folder for a script,
+        Simulate_Continuous_thrust_SolveFor_ScaleFactor.script, that uses the
+        <span class="guilabel">BeginFileThrust</span> and
+        <span class="guilabel">EndFileThrust</span> commands in an orbit determination
+        context. In this script,</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>We configure two <span class="guilabel">Spacecraft</span>,
+            <span class="guilabel">SimSat</span>, and<span class="guilabel"> EstSat</span>, in
+            Low Earth Orbit to use Range measurements from three
+            <span class="guilabel">GroundStations</span> to obtain a navigation
+            solution.</p></li><li class="listitem"><p>The <span class="guilabel">SimSat</span> spacecraft is used to
+            generate simulated Range measurements over a 12 hour period.
+            During the entire period, a thrust history profile, 20 N in the
+            velocity direction, is applied. When we apply this thrust, we use
+            a ThrustScaleFactor of 1.0. For this simplified case, we do not
+            apply a mass flow rate profile.</p></li><li class="listitem"><p>The <span class="guilabel">EstSat</span> spacecraft reads in the
+            simulated Range measurements generated by the
+            <span class="guilabel">SimSat</span> spacecraft. During the entire 12 hour
+            period, a thrust history profile, 20 N in the velocity direction,
+            is applied, albeit with a different starting value for the
+            ThrustScaleFactor. We wish to solve-for the EstSat
+            ThrustScaleFactor. We start with an a priori guess,
+            ThrustScaleFactor = 0.75, which results in large initial
+            residuals. We run the estimation process to show that we both
+            converge to a good orbit solution with low measurement residuals
+            and that we solve for a ThrustScaleFactor close to the true 1.0
+            value.</p></li></ul></div></div></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ch16s02.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ch16s02.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="BeginFiniteBurn.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Commands&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;BeginFiniteBurn</td></tr></table></div></body></html>

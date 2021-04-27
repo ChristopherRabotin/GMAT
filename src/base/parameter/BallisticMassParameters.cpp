@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -467,4 +467,150 @@ GmatBase* TotalMass::Clone() const
 {
    return new TotalMass(*this);
 }
+
+// made changes by TUAN NGUYEN
+//==============================================================================
+//                              SpadDragScaleFactor
+//==============================================================================
+/**
+* Implements SpadDragScaleFactor class.
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// SpadDragScaleFactor(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+SpadDragScaleFactor::SpadDragScaleFactor(const std::string &name, GmatBase *obj)
+   : BallisticMassReal(name, "SPADDragScaleFactor", obj, "SPAD Drag Scale Factor", "")
+{
+#ifdef USE_PREDEFINED_COLORS
+   mColor = GmatColor::BLUE32;
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// SpadDragScaleFactor(const SpadDragScaleFactor &copy)
+//------------------------------------------------------------------------------
+SpadDragScaleFactor::SpadDragScaleFactor(const SpadDragScaleFactor &copy)
+   : BallisticMassReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// SpadDragScaleFactor& operator=(const SpadDragScaleFactor &right)
+//------------------------------------------------------------------------------
+SpadDragScaleFactor& SpadDragScaleFactor::operator=(const SpadDragScaleFactor &right)
+{
+   if (this != &right)
+      BallisticMassReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~SpadDragScaleFactor()
+//------------------------------------------------------------------------------
+SpadDragScaleFactor::~SpadDragScaleFactor()
+{
+}
+
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+bool SpadDragScaleFactor::Evaluate()
+{
+   mRealValue = SpacecraftData::GetReal(SPAD_DRAG_COEFF);
+
+   if (mRealValue == GmatBase::REAL_PARAMETER_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* SpadDragScaleFactor::Clone() const
+//------------------------------------------------------------------------------
+GmatBase* SpadDragScaleFactor::Clone() const
+{
+   return new SpadDragScaleFactor(*this);
+}
+
+
+// made changes by TUAN NGUYEN
+//==============================================================================
+//                              SpadSRPScaleFactor
+//==============================================================================
+/**
+* Implements SpadSRPScaleFactor class.
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// SpadSRPScaleFactor(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+SpadSRPScaleFactor::SpadSRPScaleFactor(const std::string &name, GmatBase *obj)
+   : BallisticMassReal(name, "SPADSRPScaleFactor", obj, "SPAD SRP Scale Factor", "")
+{
+#ifdef USE_PREDEFINED_COLORS
+   mColor = GmatColor::BLUE32;
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// SpadSRPScaleFactor(const SpadSRPScaleFactor &copy)
+//------------------------------------------------------------------------------
+SpadSRPScaleFactor::SpadSRPScaleFactor(const SpadSRPScaleFactor &copy)
+   : BallisticMassReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// SpadSRPScaleFactor& operator=(const SpadSRPScaleFactor &right)
+//------------------------------------------------------------------------------
+SpadSRPScaleFactor& SpadSRPScaleFactor::operator=(const SpadSRPScaleFactor &right)
+{
+   if (this != &right)
+      BallisticMassReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~SpadSRPScaleFactor()
+//------------------------------------------------------------------------------
+SpadSRPScaleFactor::~SpadSRPScaleFactor()
+{
+}
+
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+bool SpadSRPScaleFactor::Evaluate()
+{
+   mRealValue = SpacecraftData::GetReal(SPAD_REFLECT_COEFF);
+
+   if (mRealValue == GmatBase::REAL_PARAMETER_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* SpadSRPScaleFactor::Clone() const
+//------------------------------------------------------------------------------
+GmatBase* SpadSRPScaleFactor::Clone() const
+{
+   return new SpadSRPScaleFactor(*this);
+}
+
 

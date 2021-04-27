@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -115,6 +115,10 @@ PowerSystem::PowerSystem(const std::string &systemType, const std::string &nomme
    objectTypeNames.push_back("PowerSystem");
 
    parameterCount = PowerSystemParamCount;
+   theTimeConverter = TimeSystemConverter::Instance();
+
+   for (Integer i = HardwareParamCount; i < PowerSystemParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 
@@ -159,6 +163,8 @@ PowerSystem::PowerSystem(const PowerSystem& copy) :
    sunRadius            (copy.sunRadius)
 {
    parameterCount = copy.parameterCount;
+   for (Integer i = HardwareParamCount; i < PowerSystemParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 
@@ -363,7 +369,7 @@ void PowerSystem::SetEpoch(const std::string &ep)
 
    std::string timeSystem;
    std::string timeFormat;
-   TimeConverterUtil::GetTimeSystemAndFormat(epochFormat, timeSystem, timeFormat);
+   theTimeConverter->GetTimeSystemAndFormat(epochFormat, timeSystem, timeFormat);
    if (timeFormat == "ModJulian") // numeric - save and output without quotes
       initialEpoch = GmatStringUtil::RemoveEnclosingString(ep, "'");
    else // "Gregorian" - not numeric - save and output with quotes
@@ -395,7 +401,7 @@ std::string PowerSystem::GetEpochString()
    Real outMjd = -999.999;
    std::string outStr;
 
-   TimeConverterUtil::Convert("A1ModJulian", initialEp, "",
+   theTimeConverter->Convert("A1ModJulian", initialEp, "",
                               epochFormat, outMjd, outStr);
 
    return outStr;
@@ -528,9 +534,6 @@ std::string PowerSystem::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool PowerSystem::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == DIRECTION_X) || (id == DIRECTION_Y) || (id == DIRECTION_Z))
-      return true;
-
    // These are output only, computed quantities for use as parameters
    if ((id == TOTAL_POWER_AVAILABLE) || (id == REQUIRED_BUS_POWER) ||
        (id == THRUST_POWER_AVAILABLE))
@@ -749,7 +752,7 @@ bool PowerSystem::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == EPOCH_FORMAT)
    {
-      if (TimeConverterUtil::IsValidTimeSystem(value))
+      if (theTimeConverter->IsValidTimeSystem(value))
       {
          epochFormat = value;
          return true;
@@ -845,7 +848,7 @@ Real PowerSystem::EpochToReal(const std::string &ep)
       }
    }
 
-   TimeConverterUtil::Convert(epochFormat, fromMjd, epNoQuote, "A1ModJulian", outMjd,
+   theTimeConverter->Convert(epochFormat, fromMjd, epNoQuote, "A1ModJulian", outMjd,
                               outStr);
    #ifdef DEBUG_DATE_FORMAT
       MessageInterface::ShowMessage

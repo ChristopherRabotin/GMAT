@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -80,8 +80,8 @@ private:
    /// Warning messages
    StringArray mesg;
 
-   std::string    CheckTypeDeprecation(const std::string datatype);
-   std::map<std::string, std::string> depTypeMap;
+//   std::string    CheckTypeDeprecation(const std::string datatype);
+//   std::map<std::string, std::string> depTypeMap;
 
    bool ProcessSignals(const std::string str, Integer& participantSize,
          Integer& dataSize);

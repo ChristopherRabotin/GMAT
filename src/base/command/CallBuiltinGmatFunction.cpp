@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -144,6 +144,9 @@ bool CallBuiltinGmatFunction::Initialize()
       fm.SetSolarSystem(solarSys);
       fm.SetTransientForces(forces);
       fm.SetGlobalObjectMap(globalObjectMap);
+
+      for (UnsignedInt i = 0; i < mOutputNames.size(); ++i)
+         mFunction->SetOutputName(mOutputNames[i]);
    }
    
    #ifdef DEBUG_CALL_FUNCTION_INIT

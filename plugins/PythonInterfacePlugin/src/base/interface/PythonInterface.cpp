@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -142,10 +142,78 @@ GmatBase* PythonInterface::Clone() const
 //------------------------------------------------------------------------------
 bool PythonInterface::PyInitialize()
 {
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("PythonInterface::PyInitialize() start.\n");
+#endif
+
    // Initialize Python only once.
    if (!isPythonInitialized)
-      Py_Initialize();
+   {
+      bool pyLibFound = false;
 
+      #ifdef _WIN32
+         ////// This code only work on Windows:
+         ////wchar_t *pythonHomePath = Py_GetPythonHome();
+         ////if (pythonHomePath == NULL)
+         ////   throw InterfaceException("Error: The value of the system "
+         ////         "environment variable PYTHONHOME is not set.\nThe Python"
+         ////         "interface cannot be accessed");
+
+
+         ////char homePath[1000];
+         ////size_t len = wcstombs(&homePath[0], pythonHomePath, sizeof(homePath));
+         ////homePath[len] = '\0';
+         ////std::string homePaths;
+         ////homePaths.assign(&homePath[0]);
+
+         ////// Check the existance of python37.dll file
+         ////std::string pythonDll = homePaths + "/python37.dll";
+         ////FILE *fp = fopen(pythonDll.c_str(), "r");
+
+         ////if (fp != NULL)
+         ////{
+         ////   fclose(fp);
+         ////   pyLibFound = true;
+         ////}
+         ////else
+         ////   throw InterfaceException("Error: PYTHONHOME = " + homePaths +
+         ////         ".  PYTHONHOME contains an incorrect path or a path pointing "
+         ////         "to the wrong version of Python.  Set PYTHONPATH to point to "
+         ////         "your Anaconda 3.7 folder.\n");
+         pyLibFound = true;
+      #else
+         /// @todo Mac and Linux configuration
+
+//         // Locate Python and validate version
+//         wchar_t *pythonHomePath = Py_GetPythonHome();
+//         if (pythonHomePath)
+//         {
+//            MessageInterface::ShowMessage("Python home: %ls\n", pythonHomePath);
+//            Py_SetProgramName(pythonHomePath);
+//         }
+         // Temporarily assume they are located
+         pyLibFound = true;
+      #endif
+
+      if (pyLibFound)
+      {
+         try
+         {
+            Py_Initialize();
+         }
+         catch (...)
+         {
+            PyObject* error = PyErr_Occurred();
+            if (error)
+               throw InterfaceException("The Python interpreter failed to "
+                     "initialize.  You may need to set the PYTHONPATH "
+                     "environment variable.");
+            // Rethrow other exceptions
+            throw;
+         }
+      }
+   }
+   
    if (Py_IsInitialized())
    {
       if (!isPythonInitialized)
@@ -162,6 +230,9 @@ bool PythonInterface::PyInitialize()
 	   throw CommandException ("Python failed to load properly.");
    }
 		
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("PythonInterface::PyInitialize() end.\n");
+#endif
    return isPythonInitialized;
 }
 
@@ -179,6 +250,10 @@ bool PythonInterface::PyInitialize()
 //------------------------------------------------------------------------------
 bool PythonInterface::PyFinalize()
 {
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("PythonInterface::PyFinalize() start.\n");
+#endif
+
    // When all the Python commands in the Gmat script are run and completed,
    // close and finalize Python.
    if (--numPyCommands == 0)
@@ -197,7 +272,11 @@ bool PythonInterface::PyFinalize()
             "when this counter reaches 0)\n", numPyCommands);
    #endif
 
-   return isPythonInitialized;
+#ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("PythonInterface::PyFinalize() end.\n");
+#endif
+
+      return isPythonInitialized;
 }
 
 

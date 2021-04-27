@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -46,7 +46,10 @@
  */
 //------------------------------------------------------------------------------
 GPSAdapter::GPSAdapter(const std::string& name) :
-   TrackingDataAdapter("GPS_PosVec", name)
+   TrackingDataAdapter("GPS_PosVec", name),
+   ecf  (NULL),
+   ej2k (NULL),
+   cv   (NULL)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("GPSAdapter default constructor <%p>\n", this);
@@ -69,6 +72,13 @@ GPSAdapter::~GPSAdapter()
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("GPSAdapter default destructor  <%p>\n", this);
 #endif
+
+   if (ecf)
+      delete ecf;
+   if (ej2k)
+      delete ej2k;
+   if (cv)
+      delete cv;
 }
 
 
@@ -82,7 +92,10 @@ GPSAdapter::~GPSAdapter()
  */
 //------------------------------------------------------------------------------
 GPSAdapter::GPSAdapter(const GPSAdapter& gps) :
-   TrackingDataAdapter      (gps)
+   TrackingDataAdapter      (gps),
+   ecf                      (NULL),
+   ej2k                     (NULL),
+   cv                       (NULL)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("GPSAdapter copy constructor   from <%p> to <%p>\n", &gps, this);
@@ -112,6 +125,10 @@ GPSAdapter& GPSAdapter::operator=(const GPSAdapter& gps)
    {
       TrackingDataAdapter::operator=(gps);
    }
+
+   ecf  = NULL;
+   ej2k = NULL;
+   cv   = NULL;
 
    return *this;
 }
@@ -383,26 +400,24 @@ const MeasurementData& GPSAdapter::CalculateMeasurement(bool withEvents,
       // 2.3. Convert EarthMJ200Eq to EarthFixed coordinate system
       Rvector instate(6, pos[0], pos[1], pos[2], 0.0, 0.0, 0.0);
       Rvector outstate(6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-      CoordinateSystem* ecf = CoordinateSystem::CreateLocalCoordinateSystem("ecf", "BodyFixed",
-         earthBody, NULL, NULL, earthBody, solarsys);
-      CoordinateSystem* ej2k = CoordinateSystem::CreateLocalCoordinateSystem("emj2k", "MJ2000Eq",
-         earthBody, NULL, NULL, earthBody, solarsys);
-      CoordinateConverter* cv = new CoordinateConverter();
+      if (ecf == NULL)
+         ecf = CoordinateSystem::CreateLocalCoordinateSystem("ecf", "BodyFixed",
+            earthBody, NULL, NULL, earthBody, solarsys);
+      if (ej2k == NULL)
+         ej2k = CoordinateSystem::CreateLocalCoordinateSystem("emj2k", "MJ2000Eq",
+            earthBody, NULL, NULL, earthBody, solarsys);
+      if (cv == NULL)
+         cv = new CoordinateConverter();
       cv->Convert(A1Mjd(cMeasurement.epoch), instate, ej2k, outstate, ecf, true, true);
 
       RealArray values;
       for (Integer i = 0; i < 3; ++i)
          values.push_back(outstate[i]);
 
-      if (ecf)
-         delete ecf;
-      if (ej2k)
-         delete ej2k;
-      if (cv)
-         delete cv;
-
       
       // Get GPS Receiver
+      std::string receiverName = gpsReceiverName.substr(gpsReceiverName.find_last_of('.')+1);
+      std::string scName = gpsReceiverName.substr(0, gpsReceiverName.find_last_of('.'));
       ObjectArray hwList = data[0]->rNode->GetRefObjectArray(Gmat::HARDWARE);
       Receiver* gpsReceiver = NULL;
       for (UnsignedInt i = 0; i < hwList.size(); ++i)
@@ -410,16 +425,21 @@ const MeasurementData& GPSAdapter::CalculateMeasurement(bool withEvents,
          //if (hwList[i]->IsOfType("GPSReceiver"))
          if (hwList[i]->IsOfType("Receiver"))
          {
-            gpsReceiver = (Receiver*)hwList[i];
-            break;
+            //if (hwList[i]->GetName() == gpsReceiverName)                                 // made changes by TUAN NGUYEN
+            if (hwList[i]->GetName() == receiverName)                                      // made changes by TUAN NGUYEN
+            {                                                                              // made changes by TUAN NGUYEN
+               gpsReceiver = (Receiver*)hwList[i];
+               break;
+            }                                                                              // made changes by TUAN NGUYEN
          }
       }
       if (gpsReceiver == NULL)
-         throw MeasurementException("Error: No Receiver was set to spacecraft to perform GPS measurement.\n");
+         throw MeasurementException("Error: No Receiver with name '" + receiverName + "' was defined in script and/or added to spacecraft '" + scName + "' to perform GPS measurement.\n");
 
       // Store value of Receiver.ID to MeasurementData 
       std::string theReceiverID = gpsReceiver->GetStringParameter("Id");
       //MessageInterface::ShowMessage("Receiver: name = <%s>   Id = <%s>\n", gpsReceiver->GetName().c_str(), theReceiverID.c_str());
+      cMeasurement.sensorIDs.clear();
       cMeasurement.sensorIDs.push_back(theReceiverID);
 
       // Specify noise sigma from Receiver

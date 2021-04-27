@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -71,7 +71,7 @@ Asteroid::Asteroid(std::string name) :
    // Set default colors
    SetDefaultColors(GmatColor::SALMON, GmatColor::DARK_GRAY);
    
-   theCentralBodyName  = SolarSystem::SUN_NAME; 
+   theCentralBodyName  = GmatSolarSystemDefaults::SUN_NAME; 
    bodyType            = Gmat::ASTEROID;
    bodyNumber          = -1;
    referenceBodyNumber = -1;

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -54,7 +54,7 @@ public:
    Gmat::MeasurementType   
 					      type;
    /// Enumerated ID for the epoch time system
-   TimeConverterUtil::TimeSystemTypes  epochSystem;
+   TimeSystemConverter::TimeSystemTypes  epochSystem;
    /// The start epoch in a ramp 
    GmatEpoch         epoch;						// unit: its unit is defined by epochSystem
    GmatTime          epochGT;						// unit: its unit is defined by epochSystem

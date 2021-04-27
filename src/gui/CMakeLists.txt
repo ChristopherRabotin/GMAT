@@ -85,6 +85,7 @@ SET(GUI_SRCS
     app/GuiInterpreter.cpp
     app/GuiListenerManager.cpp
     app/GuiMessageReceiver.cpp
+    app/GuiPublisher.cpp
     app/GmatNotebook.cpp
     app/GmatServer.cpp
     app/GmatTreeItemData.cpp
@@ -201,10 +202,13 @@ SET(GUI_SRCS
     spacecraft/ThrusterPanel.cpp
     spacecraft/VisualModelCanvas.cpp
     spacecraft/VisualModelPanel.cpp
+    subscriber/DynamicDataDisplaySetupPanel.cpp
+    subscriber/DynamicDataSettingsDialog.cpp
     subscriber/EphemerisFilePanel.cpp
     subscriber/GroundTrackCanvas.cpp
     subscriber/GroundTrackPlotPanel.cpp
     subscriber/MdiChild3DViewFrame.cpp
+    subscriber/MdiChildDynamicDataFrame.cpp
     subscriber/MdiChildGroundTrackFrame.cpp
     subscriber/MdiChildViewFrame.cpp
     subscriber/MdiChildTsFrame.cpp

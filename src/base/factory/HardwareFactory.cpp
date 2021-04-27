@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -141,6 +141,7 @@ Factory(Gmat::HARDWARE)
    GmatType::RegisterType(Gmat::POWER_SYSTEM, "PowerSystem");
    GmatType::RegisterType(Gmat::SOLAR_POWER_SYSTEM, "SolarPowerSystem");
    GmatType::RegisterType(Gmat::NUCLEAR_POWER_SYSTEM, "NuclearPowerSystem");
+
 }
 
 //------------------------------------------------------------------------------
@@ -166,6 +167,7 @@ Factory(createList, Gmat::HARDWARE)
       creatables.push_back("ElectricThruster");
       creatables.push_back("NuclearPowerSystem");
       creatables.push_back("SolarPowerSystem");
+
    }
 }
 
@@ -192,6 +194,7 @@ Factory(fact)
       creatables.push_back("ElectricThruster");
       creatables.push_back("NuclearPowerSystem");
       creatables.push_back("SolarPowerSystem");
+
    }
 }
 
@@ -220,6 +223,7 @@ HardwareFactory& HardwareFactory::operator= (const HardwareFactory& fact)
       creatables.push_back("ElectricThruster");
       creatables.push_back("NuclearPowerSystem");
       creatables.push_back("SolarPowerSystem");
+
    }
    return *this;
 }

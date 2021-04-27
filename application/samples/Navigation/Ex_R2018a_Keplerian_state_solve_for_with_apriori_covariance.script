@@ -197,7 +197,7 @@ sim.MeasurementTimeStep         = 60;
 sim.Propagator                  = ODProp;
 sim.AddNoise                    = On;
 
-Create BatchEstimatorInv bat
+Create BatchEstimator bat
 
 bat.ShowProgress                = True;
 bat.Measurements                = {estData} 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -27,10 +27,12 @@
 #include "ProgressReporter.hpp"
 #include "RampTableData.hpp"
 #include "ObservationData.hpp"
+#include "SignalDataCache.hpp"
 
 // Forward reference
 class SolarSystem;
 class PropSetup;
+class PhysicalModel;
 
 /**
  * Base class for the tracking data adapters
@@ -133,8 +135,10 @@ public:
                                      const Integer index);
 
 
-   virtual void         SetPropagator(PropSetup *ps);
+   virtual void         SetPropagators(std::vector<PropSetup*> *ps,
+                           std::map<std::string, StringArray> *spMap);
    virtual bool         Initialize();
+   virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
 
    DEFAULT_TO_NO_CLONES
 
@@ -191,11 +195,15 @@ public:
 
    std::string          GetErrorMessage(){ return errMsg; };
 
+   Real                 ApiGetDerivativeValue(Integer row,Integer column);
+
    StringArray          GetMeasurementDimension() { return dimNames;};
+
+   void                 SetIonosphereCache(SignalDataCache::SimpleSignalDataCache *cache);
 
 protected:
    /// Measurement dimesion
-   StringArray                   dimNames;
+   StringArray               dimNames;
    /// The ordered list of participants in the measurement
    std::vector<StringArray*> participantLists;
    /// The measurement model that holds the raw data processed in this adapter
@@ -230,8 +238,19 @@ protected:
 
    /// Flags controlling the internal computations and corrections
    bool                      withLighttime;
-   /// Propagator used for light time solutions, when needed
-   PropSetup                 *thePropagator;
+
+   /*
+    *  Propagator components are passed through to the objects that need
+    *  them.  We do not make local clones of these objects - cloning is not
+    *  needed.  Instead, the pointers to the propagator management components,
+    *  owned by the calling code, are just set as local pointers, and are never
+    *  destroyed.  The calling code is responsible for that task.
+    */
+
+   /// Propagators used by adapters for light time solution
+   std::vector<PropSetup*>          *thePropagators;
+   /// Mapping for propagator overrides for specific spacecraft
+   std::map<std::string, StringArray> *satPropagatorMap;
 
 
    /// Constant frequency value used in a physical measurement when needed (In DSNDoppler, it is used as uplink frequency for S path)
@@ -273,6 +292,9 @@ protected:
    /// Store the error message whenever an error occurs during measurement calculation
    std::string               errMsg;
 
+   ///  Ionosphere cache
+   SignalDataCache::SimpleSignalDataCache *ionosphereCache;
+
    /// Parameter IDs for the TrackingDataAdapter
    enum
    {
@@ -296,8 +318,8 @@ protected:
 
    StringArray*         DecomposePathString(const std::string &value);
    
-   void                 ComputeMeasurementBias(const std::string biasName, const std::string measType, Integer numTrip);
-   void                 ComputeMeasurementNoiseSigma(const std::string noiseSigmaName, const std::string measType, Integer numTrip);
+   virtual void         ComputeMeasurementBias(const std::string biasName, const std::string measType, Integer numTrip);
+   virtual void         ComputeMeasurementNoiseSigma(const std::string noiseSigmaName, const std::string measType, Integer numTrip);
    void                 ComputeMeasurementErrorCovarianceMatrix();
 
    void                 BeginEndIndexesOfRampTable(Integer & err);

@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -32,7 +32,6 @@
 #include "TimeTypes.hpp"             // for FormatCurrentTime()
 #include "UtilityException.hpp"
 #include "MessageInterface.hpp"
-#include "TimeSystemConverter.hpp"   // for TimeConverterUtil::Convert()
 #include "A1Mjd.hpp"
 #include "Rvector6.hpp"
 #include "GmatGlobal.hpp"
@@ -50,6 +49,7 @@
 //#define DEBUG_FINALIZE
 //#define DEBUG_INITIAL_FINAL
 //#define DEBUG_WRITE_POSVEL
+//#define DEBUG_WRITE_COVPOSVEL
 //#define DEBUG_DISTANCEUNIT
 
 //----------------------------
@@ -68,6 +68,7 @@ STKEphemerisFile::STKEphemerisFile() :
    stkFileNameForWrite (""),
    writeFinalized      (false)
 {
+   theTimeConverter = TimeSystemConverter::Instance();
    InitializeData();
 }
 
@@ -79,6 +80,7 @@ STKEphemerisFile::STKEphemerisFile(const STKEphemerisFile &copy) :
    stkFileNameForWrite (copy.stkFileNameForWrite),
    writeFinalized      (false)
 {
+   theTimeConverter = TimeSystemConverter::Instance();
    InitializeData();
 }
 
@@ -136,6 +138,7 @@ void STKEphemerisFile::InitializeData()
 
    beginSegmentArray.clear();
    numberOfEphemPoints = 0;
+   numberOfCovPoints = 0;
    interpolationOrder = 0;
    
    scenarioEpochUtcGreg = "";
@@ -147,7 +150,10 @@ void STKEphemerisFile::InitializeData()
    distanceUnit = "Meters";
    ephemTypeForRead = "";
    ephemTypeForWrite = "";
+   ephemCovTypeForWrite = "";
+   writeCov = false;
    stkTempFileName = "";
+   stkTempCovFileName = "";
    numEphemPointsBegPos = 0;
    
    initialSecsFromEpoch = 0.0;
@@ -158,7 +164,8 @@ void STKEphemerisFile::InitializeData()
 }
 
 //------------------------------------------------------------------------------
-// bool OpenForRead(const std::string &filename, const std::string &ephemType)
+// bool OpenForRead(const std::string &filename, const std::string &ephemType,
+//                  const std::string &ephemCovType)
 //------------------------------------------------------------------------------
 /**
  * Opens STK ephemeris (.e) file for reading.
@@ -166,10 +173,13 @@ void STKEphemerisFile::InitializeData()
  * @filename File name to open
  * @ephemType Ephemeris type to read, at this time only "TimePos" or "TimePosVel"
  *               is allowed
+ * @ephemCovType Ephemeris covariance type to read, at this time only "", "TimePos" or "TimePosVel"
+ *               is allowed
  */
 //------------------------------------------------------------------------------
 bool STKEphemerisFile::OpenForRead(const std::string &filename,
-                                   const std::string &ephemType)
+                                   const std::string &ephemType,
+                                   const std::string &ephemCovType)
 {
    #ifdef DEBUG_STK_FILE
    MessageInterface::ShowMessage
@@ -187,6 +197,17 @@ bool STKEphemerisFile::OpenForRead(const std::string &filename,
       ue.SetDetails("STKEphemerisFile::OpenForRead() *** INTERNAL ERROR *** "
                     "Only TimePos or TimePosVel is valid for read on STK "
                     "ephemeris file '%s'.", stkFileNameForRead.c_str());
+      throw ue;
+   }
+
+   // Check covariance ephem type
+   // Currently only "", TimePos, and TimePosVel are allowed
+   if (ephemCovType != "" && ephemCovType != "TimePos" && ephemCovType != "TimePosVel")
+   {
+      UtilityException ue;
+      ue.SetDetails("STKEphemerisFile::OpenForRead() *** INTERNAL ERROR *** "
+         "Only "", TimePos, or TimePosVel is valid to read covariance on STK "
+         "ephemeris file '%s'.", stkFileNameForRead.c_str());
       throw ue;
    }
    
@@ -216,6 +237,31 @@ bool STKEphemerisFile::OpenForRead(const std::string &filename,
          ("   Failed open '%s' for reading\n", stkFileNameForRead.c_str());
       #endif
    }
+
+   if (openForTempOutput && writeCov)
+   {
+      if (stkCovInStream.is_open())
+         stkCovInStream.close();
+
+      std::string stkCovFileNameForRead = filename + ".cov";
+      stkCovInStream.open(stkCovFileNameForRead.c_str());
+
+      if (stkCovInStream.is_open())
+      {
+         #ifdef DEBUG_STK_FILE
+         MessageInterface::ShowMessage
+            ("   Successfully opened '%s' for reading\n", stkCovFileNameForRead.c_str());
+         #endif
+      }
+      else
+      {
+         retval = false;
+         #ifdef DEBUG_STK_FILE
+         MessageInterface::ShowMessage
+            ("   Failed open '%s' for reading\n", stkCovFileNameForRead.c_str());
+         #endif
+      }
+   }
    
    #ifdef DEBUG_STK_FILE
    MessageInterface::ShowMessage
@@ -226,7 +272,8 @@ bool STKEphemerisFile::OpenForRead(const std::string &filename,
 
 
 //------------------------------------------------------------------------------
-// bool OpenForWrite(const std::string &filename, const std::string &ephemType)
+// bool OpenForWrite(const std::string &filename, const std::string &ephemType,
+//                   const std::string &ephemCovType)
 //------------------------------------------------------------------------------
 /**
  * Opens STK ephemeris (.e) file for writing.
@@ -234,10 +281,13 @@ bool STKEphemerisFile::OpenForRead(const std::string &filename,
  * @filename File name to open
  * @ephemType Ephemeris type to write, at this time only "TimePos" or "TimePosVel"
  *               is allowed
+ * @ephemCovType Ephemeris covariance type to read, at this time only "", "TimePos" or "TimePosVel"
+ *               is allowed
   */
 //------------------------------------------------------------------------------
 bool STKEphemerisFile::OpenForWrite(const std::string &filename,
-                                    const std::string &ephemType)
+                                    const std::string &ephemType,
+                                    const std::string &ephemCovType)
 {
    #ifdef DEBUG_STK_FILE
    MessageInterface::ShowMessage
@@ -257,12 +307,27 @@ bool STKEphemerisFile::OpenForWrite(const std::string &filename,
                     "ephemeris file '%s'.", stkFileNameForWrite.c_str());
       throw ue;
    }
+
+   // Check covariance ephem type
+   // Currently only "", TimePos, and TimePosVel are allowed
+   if (ephemCovType != "" && ephemCovType != "TimePos" && ephemCovType != "TimePosVel")
+   {
+      UtilityException ue;
+      ue.SetDetails("STKEphemerisFile::OpenForWrite() *** INTERNAL ERROR *** "
+         "Only "", TimePos, or TimePosVel is valid for writing covariance to STK "
+         "ephemeris file '%s'.", stkFileNameForWrite.c_str());
+      throw ue;
+   }
    
    if (stkOutStream.is_open())
       stkOutStream.close();
+   if (stkCovOutStream.is_open())
+      stkCovOutStream.close();
    
    stkFileNameForWrite = filename;
    ephemTypeForWrite = ephemType;
+   ephemCovTypeForWrite = ephemCovType;
+   writeCov = ephemCovTypeForWrite != "";
    
    stkOutStream.open(stkFileNameForWrite.c_str());
    
@@ -300,6 +365,17 @@ bool STKEphemerisFile::OpenForWrite(const std::string &filename,
           stkTempFileName.c_str());
       #endif
       stkOutStream.open(stkTempFileName.c_str());
+
+      if (ephemCovType != "")
+      {
+         stkTempCovFileName = tempPath + fileNameNoPath + ".cov";
+         #ifdef DEBUG_STK_FILE
+            MessageInterface::ShowMessage
+            ("          tempPath='%s'\n   stkTempCovFileName='%s'\n", tempPath.c_str(),
+             stkTempCovFileName.c_str());
+         #endif
+         stkCovOutStream.open(stkTempCovFileName.c_str());
+      }
    }
    
    #ifdef DEBUG_STK_FILE
@@ -325,6 +401,9 @@ void STKEphemerisFile::CloseForWrite()
 {
    if (stkOutStream.is_open())
       stkOutStream.close();
+
+   if (stkCovOutStream.is_open())
+      stkCovOutStream.close();
 }
 
 //------------------------------------------------------------------------------
@@ -473,6 +552,11 @@ bool STKEphemerisFile::WriteHeader()
    ss.str("");
    
    ss << "NumberOfEphemerisPoints " << numberOfEphemPoints << std::endl;
+   if (writeCov)
+   {
+      ss << "NumberOfCovariancePoints " << numberOfCovPoints << std::endl;
+      ss << "CovarianceFormat LowerTriangular" << std::endl;
+   }
    ss << "ScenarioEpoch           " << scenarioEpochUtcGreg << std::endl;
    
    // Write interpolation info if not blank
@@ -535,9 +619,20 @@ bool STKEphemerisFile::WriteBlankLine()
 {
    if (!stkOutStream.is_open())
       return false;
+
+   if (writeCov)
+      if (!stkCovOutStream.is_open())
+         return false;
    
    stkOutStream << std::endl;
    stkOutStream.flush();
+
+   if (writeCov)
+   {
+      stkCovOutStream << std::endl;
+      stkCovOutStream.flush();
+   }
+
    return true;
 }
 
@@ -570,10 +665,11 @@ bool STKEphemerisFile::WriteString(const std::string &str)
 
 //------------------------------------------------------------------------------
 // bool WriteDataSegment(const EpochArray &epochArray, const StateArray &stateArray, 
-//                       bool canFinalize = false);
+//                       const std::vector<Rvector*> &covArray, bool canFinalize = false);
 //------------------------------------------------------------------------------
 bool STKEphemerisFile::WriteDataSegment(const EpochArray &epochArray,
                                         const StateArray &stateArray, 
+                                        const std::vector<Rvector*> &covArray,
                                         bool canFinalize)
 {
    Integer numPoints = stateArray.size();
@@ -620,6 +716,20 @@ bool STKEphemerisFile::WriteDataSegment(const EpochArray &epochArray,
       ue.SetDetails("STKEphemerisFile::WriteDataSegment() *** INTERNAL ERROR *** "
                     "Only TimePos or TimePosVel is valid for read on STK "
                     "ephemeris file '%s'.", stkFileNameForWrite.c_str());
+      throw ue;
+   }
+
+   if (ephemCovTypeForWrite == "TimePosVel")
+      WriteCovTimePosVel(epochArray, covArray);
+   else if (ephemCovTypeForWrite == "TimePos")
+      WriteCovTimePos(epochArray, covArray);
+   else if (ephemCovTypeForWrite != "")
+   {
+      // ephemType has already validated in OpenFile but check anyway
+      UtilityException ue;
+      ue.SetDetails("STKEphemerisFile::WriteDataSegment() *** INTERNAL ERROR *** "
+         "Only TimePos or TimePosVel is valid for read on STK "
+         "ephemeris file '%s'.", stkFileNameForWrite.c_str());
       throw ue;
    }
    
@@ -871,6 +981,138 @@ void STKEphemerisFile::WriteTimePos(Real epoch, const Rvector6 *state)
    #endif
 }
 
+//------------------------------------------------------------------------------
+// void WriteCovTimePosVel(const EpochArray &epochArray, const std::vector<Rvector*> &covArray)
+//------------------------------------------------------------------------------
+/**
+ * Writes STK ephemeris in EphemerisTimePosVel format
+ */
+ //------------------------------------------------------------------------------
+void STKEphemerisFile::WriteCovTimePosVel(const EpochArray &epochArray,
+                                          const std::vector<Rvector*> &covArray)
+{
+#ifdef DEBUG_WRITE_COVPOSVEL
+   MessageInterface::ShowMessage
+   ("STKEphemerisFile::WriteTimePosVel() entered, epochArray.size()=%d, "
+      "covArray.size()=%d\n", epochArray.size(), covArray.size());
+#endif
+
+   Integer numPoints = covArray.size();
+
+   // Write out to stream
+   for (int i = 0; i < numPoints; i++)
+   {
+      // For multiple segments, end epoch of previous segment may be the same as
+      // beginning epoch of new segment, so check for duplicate epoch and use the
+      // state of new epoch since any maneuver or some spacecraft property update
+      // may happened.
+      Real epoch = (epochArray[i])->GetReal();
+      if (!includeEventBoundaries && (epoch == lastEpochWritten && i > 1))
+      {
+         continue;
+      }
+
+      WriteCovTimePosVel(epoch, covArray[i]);
+   }
+
+#ifdef DEBUG_WRITE_COVPOSVEL
+   MessageInterface::ShowMessage
+   ("STKEphemerisFile::WriteTimePosVel() leaving, epochArray.size()=%d, "
+      "covArray.size()=%d\n", epochArray.size(), covArray.size());
+#endif
+}
+
+//------------------------------------------------------------------------------
+// void WriteCovTimePosVel(Real epoch, const Rvector *cov)
+//------------------------------------------------------------------------------
+void STKEphemerisFile::WriteCovTimePosVel(Real epoch, const Rvector *cov)
+{
+   // Format output using scientific notation
+   const Real *outCov = cov->GetDataVector();
+   Real timeIntervalInSecs = (epoch - scenarioEpochA1Mjd) * 86400.0;
+   char strBuff[200];
+   std::stringstream ss("");
+
+   sprintf(strBuff, "%1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e\n",
+      timeIntervalInSecs, outCov[0] * 1e6, outCov[1] * 1e6, outCov[2] * 1e6,
+      outCov[3] * 1e6, outCov[4] * 1e6, outCov[5] * 1e6, outCov[6] * 1e6);
+   ss << strBuff;
+
+   sprintf(strBuff, "%21s  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e\n",
+      " ", outCov[7] * 1e6, outCov[8] * 1e6, outCov[9] * 1e6, outCov[10] * 1e6,
+      outCov[11] * 1e6, outCov[12] * 1e6, outCov[13] * 1e6);
+   ss << strBuff;
+
+   sprintf(strBuff, "%21s  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e\n",
+      " ", outCov[14] * 1e6, outCov[15] * 1e6, outCov[16] * 1e6, outCov[17] * 1e6,
+      outCov[18] * 1e6, outCov[19] * 1e6, outCov[20] * 1e6);
+   ss << strBuff;
+
+   if (includeEventBoundaries || (!includeEventBoundaries && (epoch != lastEpochWritten)))
+   {
+      stkCovOutStream << ss.str();
+      //lastEpochWritten = epoch;
+      numberOfCovPoints++;
+   }
+
+#ifdef DEBUG_WRITE_COVPOSVEL
+   std::string epochStr = A1ModJulianToUtcGregorian(epoch, 2);
+   MessageInterface::ShowMessage("   %s  % 1.15e\n", epochStr.c_str(), outCov[0]);
+#endif
+}
+
+//------------------------------------------------------------------------------
+// void WriteCovTimePos(const EpochArray &epochArray, const std::vector<Rvector*> &covArray)
+//------------------------------------------------------------------------------
+/**
+ * Writes STK ephemeris in EphemerisTimePos format
+ */
+ //------------------------------------------------------------------------------
+void STKEphemerisFile::WriteCovTimePos(const EpochArray &epochArray,
+                                       const std::vector<Rvector*> &covArray)
+{
+   Integer numPoints = covArray.size();
+
+   // Write out to stream
+   for (int i = 0; i < numPoints; i++)
+   {
+      // For multiple segments, end epoch of previous segment may be the same as
+      // beginning epoch of new segment, so check for duplicate epoch and use the
+      // state of new epoch since any maneuver or some spacecraft property update
+      // may happened.
+      Real epoch = (epochArray[i])->GetReal();
+      if (!includeEventBoundaries && (epoch == lastEpochWritten))
+         continue;
+
+      WriteCovTimePos(epoch, covArray[i]);
+
+      //lastEpochWritten = epoch;
+      numberOfCovPoints++;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteCovTimePos(Real epoch, const Rvector *cov)
+//------------------------------------------------------------------------------
+void STKEphemerisFile::WriteCovTimePos(Real epoch, const Rvector *cov)
+{
+   // Format output using scientific notation
+   const Real *outCov = cov->GetDataVector();
+   Real timeIntervalInSecs = (epoch - scenarioEpochA1Mjd) * 86400.0;
+   char strBuff[200];
+   sprintf(strBuff, "%1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e\n",
+      timeIntervalInSecs, outCov[0] * 1e6, outCov[1] * 1e6,
+      outCov[2] * 1e6, outCov[3] * 1e6, outCov[4] * 1e6,
+      outCov[5] * 1e6);
+   stkCovOutStream << strBuff;
+
+#ifdef DEBUG_WRITE_COVPOSVEL
+   std::string epochStr = A1ModJulianToUtcGregorian(epoch, 2);
+   MessageInterface::ShowMessage("   %s  % 1.15e\n", epochStr.c_str(), outCov[0]);
+#endif
+}
+
 
 //------------------------------------------------------------------------------
 // void FinalizeEphemeris()
@@ -890,18 +1132,14 @@ void STKEphemerisFile::FinalizeEphemeris()
        (long)numEphemPointsBegPos, stkTempFileName.c_str());
    #endif
    
-   // Write end ephemeris keyword
-   stkOutStream << "END Ephemeris" << std::endl << std::endl;
-   stkOutStream.flush();
-   
    // Close temp file and copy content to actual STK ephemeris file
    // after writing header data
    stkOutStream.close();   
    
-   if (OpenForRead(stkTempFileName, "TimePosVel"))
+   if (OpenForRead(stkTempFileName, "TimePosVel", ephemCovTypeForWrite))
    {
       openForTempOutput = false;
-      OpenForWrite(stkFileNameForWrite, "TimePosVel");
+      OpenForWrite(stkFileNameForWrite, "TimePosVel", ephemCovTypeForWrite);
       WriteHeader();   
       
       // Read lines
@@ -913,12 +1151,30 @@ void STKEphemerisFile::FinalizeEphemeris()
          getline(stkInStream, line);
          stkOutStream << line << std::endl;
       }
+
+      if (writeCov)
+      {
+         stkOutStream << "Covariance" << ephemCovTypeForWrite << std::endl << std::endl;
+
+         while (!stkCovInStream.eof())
+         {
+            // Use cross-platform GetLine
+            //GmatFileUtil::GetLine(&stkInStream, line);
+            getline(stkCovInStream, line);
+            stkOutStream << line << std::endl;
+         }
+      }
+
+      // Write end ephemeris keyword
+      stkOutStream << "END Ephemeris" << std::endl << std::endl;
+      stkOutStream.flush();
       
       stkInStream.close();
       stkOutStream.close();
       
       // Delete temp file
       remove(stkTempFileName.c_str());
+      remove(stkTempCovFileName.c_str());
       writeFinalized = true;
    }
    else
@@ -959,7 +1215,7 @@ std::string STKEphemerisFile::A1ModJulianToUtcGregorian(Real epochInDays, Intege
    std::string toType = "UTCGregorian";
    
    // Convert current epoch to specified format
-   TimeConverterUtil::Convert(fromType, epochInDays, "", toType, toMjd, epochStr, format);
+   theTimeConverter->Convert(fromType, epochInDays, "", toType, toMjd, epochStr, format);
    
    if (epochStr == "")
    {
@@ -1027,7 +1283,7 @@ bool STKEphemerisFile::UTCGregorianToA1ModJulian(const std::string &utcGreg, Rea
    // Build the base epoch.  Note that the return from this call may differ from
    // the returned a1Mjd value by the submillisecond value, so the epochStr
    // returned here is not necessarily the final ephem epoch.
-   TimeConverterUtil::Convert(fromType, fromMjd, dateToMilliSecond, toType,
+   theTimeConverter->Convert(fromType, fromMjd, dateToMilliSecond, toType,
          toMjd, epochStr, 1);
    
    if (epochStr == "")

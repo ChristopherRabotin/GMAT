@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -31,6 +31,7 @@
 #ifndef ScriptEditor_hpp
 #define ScriptEditor_hpp
 
+#include "gmatdefs.hpp"
 #include "EditorPreferences.hpp" // for GmatEditor::
 #include "wx/stc/stc.h"          // for wxStyledTextCtrl
 
@@ -102,6 +103,7 @@ public:
    void OnMarginClick(wxStyledTextEvent &event);
    void OnTextChange(wxStyledTextEvent &event);
    void OnCharAdded(wxStyledTextEvent &event);
+   void OnStyleNeeded(wxStyledTextEvent &event);
    
    // language/lexer
    bool UserSettings(const wxString &filename);
@@ -128,6 +130,8 @@ private:
    // language/lexer
    wxString DeterminePrefs(const wxString &filename);
    bool InitializePrefs(const wxString &filename);
+   void ApplySyntaxHighlight(int fromPos, int toPos);
+   void ApplyFoldLevels(int fromLine, bool checkForEnds);
    
    // find/replace text
    FindReplaceDialog *mFindReplaceDialog;
@@ -150,7 +154,19 @@ private:
    int  mFoldingID;
    int  mFoldingMargin;
    int  mDividerID;
+
+   // syntax highlighting
+   StringArray mObjCreatablesArray;
+   StringArray mCmdCreatablesArray;
+   bool mInitializeHighlights;
+   bool mIsStringBlock;
+   int  mStringBlockLines;
    
+   // fold text
+   std::vector<std::vector<int>> mFoldLocations;
+   StringArray mFoldTypes;
+   int mPrevLineCount;
+
    // goto line
    long mPrevLineNumber;
    

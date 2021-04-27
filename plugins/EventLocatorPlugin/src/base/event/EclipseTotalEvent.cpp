@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -74,15 +74,16 @@ EclipseTotalEvent& EclipseTotalEvent::operator=(const EclipseTotalEvent& copy)
    {
       LocatedEvent::operator=(copy);
       theIndex      = copy.theIndex;
-   }
-   TakeAction("Clear");
-   EclipseEvent *toCopy   = NULL;
-   EclipseEvent *newEvent = NULL;
-   for (Integer ii = 0; ii < (copy.theEvents).size(); ii++)
-   {
-      toCopy   = copy.theEvents.at(ii);
-      newEvent = new EclipseEvent(*toCopy);
-      theEvents.push_back(newEvent);
+
+      TakeAction("Clear");
+      EclipseEvent *toCopy   = NULL;
+      EclipseEvent *newEvent = NULL;
+      for (Integer ii = 0; ii < (copy.theEvents).size(); ii++)
+      {
+         toCopy   = copy.theEvents.at(ii);
+         newEvent = new EclipseEvent(*toCopy);
+         theEvents.push_back(newEvent);
+      }
    }
 
    return *this;

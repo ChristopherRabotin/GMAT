@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -28,6 +28,7 @@
 #include "SpaceObject.hpp"
 #include "PropSetup.hpp"
 #include "ODEModel.hpp"
+#include "Propagator.hpp"
 #include <sstream>
 
 
@@ -38,13 +39,19 @@
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_RANGE_CALCULATION
 //#define DEBUG_TAYLOR_SERIES
+//#define DEBUG_API
+
+#ifdef DEBUG_API
+   #include <fstream>
+   std::ofstream apiFile;
+   bool apiFileOpen = false;
+#endif
 
 //---------------------------------
 //  static data
 //---------------------------------
-const Real RangeAdapterKm::USE_TAYLOR_SERIES = true;
-const Real RangeAdapterKm::USE_CHEBYSHEV_DIFFERENCE = true;
-
+const bool RangeAdapterKm::USE_TAYLOR_SERIES = true;
+const bool RangeAdapterKm::USE_CHEBYSHEV_DIFFERENCE = true;
 
 //------------------------------------------------------------------------------
 // RangeAdapterKm(const std::string& name)
@@ -62,6 +69,14 @@ RangeAdapterKm::RangeAdapterKm(const std::string& name) :
    MessageInterface::ShowMessage("RangeAdapterKm default constructor <%p>\n", this);
 #endif
 
+   #ifdef DEBUG_API
+      if (!apiFileOpen)
+      {
+         apiFile.open("RangeAdapterKm_API.txt");
+         apiFile << "API Debug data for RangeAdapterKm\n" << std::endl;
+         apiFileOpen = true;
+      }
+   #endif
 }
 
 
@@ -77,6 +92,14 @@ RangeAdapterKm::~RangeAdapterKm()
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("RangeAdapterKm default destructor  <%p>\n", this);
 #endif
+
+   #ifdef DEBUG_API
+      if (apiFileOpen)
+      {
+         apiFile.close();
+         apiFileOpen = false;
+      }
+   #endif
 }
 
 
@@ -312,7 +335,7 @@ bool RangeAdapterKm::Initialize()
          }
       }
    
-
+      isInitialized = true;
    }
 
    #ifdef DEBUG_INITIALIZATION
@@ -350,39 +373,71 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             "<%p>, <%p>) called\n", (withEvents ? "true" : "false"), forObservation,
             rampTB);
    #endif
-   
+
+   #ifdef DEBUG_API
+      if (apiFileOpen)
+      {
+         apiFile << "RangeAdapterKm::CalculateMeasurement("
+                 << (withEvents ? "true, <" : "false, <")
+                 << forObservation << ">, <"
+                 << rampTB << ">) entered\n" << std::endl;
+         apiFile << "calcData pointer: <"
+                 << calcData << "> of type "
+                 << (calcData!=NULL ? calcData->GetTypeName() : "undefined")
+                 << std::endl;
+      }
+   #endif
+
    if (!calcData)
       throw MeasurementException("Measurement data was requested for " +
             instanceName + " before the measurement was set");
    
+#ifdef DEBUG_API
+   if (apiFileOpen)
+   {
+      apiFile << "   Calling calcData::CalculateMeasurement()" << std::endl;
+   }
+#endif
    // Fire the measurement model to build the collection of signal data
    if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB, forSimulation))
    {
       // QA Media correction:
       cMeasurement.isIonoCorrectWarning = false;
-      cMeasurement.ionoCorrectWarningValue = 0.0;
+      cMeasurement.ionoCorrectRawValue = 0.0;
+      cMeasurement.ionoCorrectValue = 0.0;
       cMeasurement.isTropoCorrectWarning = false;
-      cMeasurement.tropoCorrectWarningValue = 0.0;
+      cMeasurement.tropoCorrectRawValue = 0.0;
+      cMeasurement.tropoCorrectValue = 0.0;
+
+#ifdef DEBUG_API
+   if (apiFileOpen)
+   {
+      apiFile << "   That worked; handling corrections" << std::endl;
+   }
+#endif
 
       if (withMediaCorrection)
       {
          Real correction = GetIonoCorrection();                                  // unit: km
-         if ((correction < 0.0) || (correction > 0.04))
-         {
-            // Set a warning to measurement data when ionosphere correction is outside of range [0 km , 0.04 km]
-            cMeasurement.isIonoCorrectWarning = true;
-            cMeasurement.ionoCorrectWarningValue = correction;                   // unit: km
-         }
-         
+
+         // Set a warning to measurement data when ionosphere correction is outside of range [0 km , 0.04 km]
+         cMeasurement.isIonoCorrectWarning = (correction < 0.0) || (correction > 0.04);
+         cMeasurement.ionoCorrectRawValue = correction;                   // unit: km
+
          correction = GetTropoCorrection();                                      // unit: km
-         if ((correction < 0.0) || (correction > 0.12))
-         {
-            // Set a warning to measurement data when troposphere correction is outside of range [0 km , 0.12 km]
-            cMeasurement.isTropoCorrectWarning = true;
-            cMeasurement.tropoCorrectWarningValue = correction;                  // unit: km
-         }
+
+         // Set a warning to measurement data when troposphere correction is outside of range [0 km , 0.12 km]
+         cMeasurement.isTropoCorrectWarning = (correction < 0.0) || (correction > 0.12);
+         cMeasurement.tropoCorrectRawValue = correction;                  // unit: km
       }
-      
+
+#ifdef DEBUG_API
+   if (apiFileOpen)
+   {
+      apiFile << "   That worked; processing signal paths" << std::endl;
+   }
+#endif
+
       std::vector<SignalBase*> paths = calcData->GetSignalPaths();
       std::string unfeasibilityReason;
       Real        unfeasibilityValue;
@@ -451,7 +506,10 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             }
             else
             {
-               body = current->tPropagator->GetODEModel()->GetForceOrigin();
+               if (current->tPropagator->GetPropagator()->UsesODEModel())
+                  body = current->tPropagator->GetODEModel()->GetForceOrigin();
+               else
+                  body = current->tPropagator->GetPropagator()->GetPropOrigin();
             }
             cMeasurement.tBodies.push_back((CelestialBody*) body);
 
@@ -463,7 +521,10 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             }
             else
             {
-               body = current->rPropagator->GetODEModel()->GetForceOrigin();
+               if (current->rPropagator->GetPropagator()->UsesODEModel())
+                  body = current->rPropagator->GetODEModel()->GetForceOrigin();
+               else
+                  body = current->rPropagator->GetPropagator()->GetPropOrigin();
             }
             cMeasurement.rBodies.push_back(body);
 
@@ -480,7 +541,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             // accumulate all range corrections for signal path ith
             for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
             {
-               if (current->useCorrection[j])
+               if (current->useCorrection[j] && current->correctionTypes[j] == "Range")
                {
                   values[i] += current->corrections[j];
                   corrections[i] += current->corrections[j];
@@ -522,21 +583,61 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          
       }// for i loop
       
+#ifdef DEBUG_API
+   if (apiFileOpen)
+   {
+      apiFile << "   Almost done: frequency handing is next" << std::endl;
+   }
+#endif
+
+
       // Caluclate uplink frequency at received time and transmit time
       cMeasurement.uplinkFreq = calcData->GetUplinkFrequency(0, rampTB) * 1.0e6;                        // unit: Hz
       cMeasurement.uplinkFreqAtRecei = calcData->GetUplinkFrequencyAtReceivedEpoch(0,rampTB) * 1.0e6;   // unit: Hz
       cMeasurement.uplinkBand = calcData->GetUplinkFrequencyBand(0, rampTB);
       
+#ifdef DEBUG_API
+   if (apiFileOpen)
+   {
+      apiFile << "   Then Bias, Noise, and Error Covariance" << std::endl;
+   }
+#endif
+
       //if (measurementType == "Range_KM")
       if (measurementType == "Range")
       {
          // @todo: it needs to specify number of trips instead of using 2
          //ComputeMeasurementBias("Bias", "Range_KM", 2);
-         //ComputeMeasurementNoiseSigma("NoiseSigma", "Range_KM", 2);
          ComputeMeasurementBias("Bias", measurementType, 2);
+#ifdef DEBUG_API
+   if (apiFileOpen)
+   {
+      apiFile << "      Bias computed" << std::endl;
+   }
+#endif
+         //ComputeMeasurementNoiseSigma("NoiseSigma", "Range_KM", 2);
          ComputeMeasurementNoiseSigma("NoiseSigma", measurementType, 2);
+#ifdef DEBUG_API
+   if (apiFileOpen)
+   {
+      apiFile << "      Noise computed" << std::endl;
+   }
+#endif
          ComputeMeasurementErrorCovarianceMatrix();
+#ifdef DEBUG_API
+   if (apiFileOpen)
+   {
+      apiFile << "      Error covariance computed" << std::endl;
+   }
+#endif
       }
+
+#ifdef DEBUG_API
+   if (apiFileOpen)
+   {
+      apiFile << "   Setting values" << std::endl;
+   }
+#endif
 
       // Set measurement values
       cMeasurement.value.clear();
@@ -637,6 +738,15 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
 
       }
 
+#ifdef DEBUG_API
+   if (apiFileOpen)
+   {
+      apiFile << "   Covariance computations" << std::endl;
+   }
+#endif
+
+
+
       // Calculate measurement covariance
       cMeasurement.covariance = &measErrorCovariance;
 
@@ -664,6 +774,13 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             "<%p>, <%p>) exit\n", (withEvents ? "true" : "false"), forObservation,
             rampTB);
    #endif
+
+#ifdef DEBUG_API
+   if (apiFileOpen)
+   {
+      apiFile << "Finished; what an adventure!" << std::endl;
+   }
+#endif
 
    return cMeasurement;
 }
@@ -851,7 +968,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
             // accumulate all range corrections for signal path ith
             for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
             {
-               if (current->useCorrection[j])
+               if (current->useCorrection[j] && current->correctionTypes[j] == "Range")
                   values[i] += current->corrections[j];
             }// for j loop
 
@@ -1004,14 +1121,8 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
       // Note that: multiplier is only applied for elements of spacecraft's state, position, and velocity
       Real factor = 1.0;
       //if (measurementType == "Range_KM")
-      if (measurementType == "Range")
-      {
-         if (obj->IsOfType(Gmat::SPACECRAFT))
-         {
-            factor = multiplier;
-         }
-      }
-
+      factor = ApplyMultiplier(measurementType, factor, obj);
+      
       UnsignedInt size = derivativeData->at(0).size();
       for (UnsignedInt i = 0; i < derivativeData->size(); ++i)
       {
@@ -1136,6 +1247,35 @@ void RangeAdapterKm::SetCorrection(const std::string& correctionName,
       const std::string& correctionType)
 {
    TrackingDataAdapter::SetCorrection(correctionName, correctionType);
+}
+
+//------------------------------------------------------------------------------
+// Real ApplyMultiplier(const std::string& useMeasType, 
+// const Real factor, const GmatBase* obj)
+//------------------------------------------------------------------------------
+/**
+ * Resolves a multiplier based on the passed in measurment type
+ *
+ * @param useMeasType The measurement type to use
+ * @param factor The initial factor
+ * @param obj The GMAT object in the current path 
+ *
+ */
+ //------------------------------------------------------------------------------
+Real RangeAdapterKm::ApplyMultiplier(const std::string& useMeasType, 
+     const Real factor, const GmatBase* obj)
+{
+  Real multFactor = factor;
+
+  if (useMeasType == "Range")
+  {
+     if (obj->IsOfType(Gmat::SPACECRAFT))
+     {
+        multFactor = multiplier;
+     }
+  }
+
+  return multFactor;
 }
 
 Real RangeAdapterKm::PathMagnitudeDelta(Rvector3 pathVec, Rvector3 delta)

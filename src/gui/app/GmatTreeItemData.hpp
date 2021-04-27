@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -284,6 +284,7 @@ namespace GmatTree
       ORBIT_VIEW,
       GROUND_TRACK_PLOT,
       EPHEMERIS_FILE,
+      DYNAMIC_DATA_DISPLAY,
       
       VARIABLE = 41600,
       ARRAY,
@@ -372,6 +373,7 @@ namespace GmatTree
       OUTPUT_ORBIT_VIEW,
       OUTPUT_GROUND_TRACK_PLOT,
       OUTPUT_XY_PLOT,
+      OUTPUT_PERSISTENT,      // Other output windows that should not close between runs
       OUTPUT_END_PLOT,
       OUTPUT_BEGIN_REPORT,
       OUTPUT_REPORT,

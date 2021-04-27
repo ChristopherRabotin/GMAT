@@ -18,7 +18,6 @@ SET(TargetName GmatBase)
 
 # Add preprocessor definitions
 ADD_DEFINITIONS("-D_DYNAMICLINK")
-ADD_DEFINITIONS("-DGMAT_EXPORTS")
 ADD_DEFINITIONS("-DEXP_STL")
 
 SET(SPICE_SRCS
@@ -38,6 +37,7 @@ SET(MSISE_SRCS "solarsys/msise90_sub.c")
 # ====================================================================
 # list of directories containing source/header files
 SET(BASE_DIRS
+  api
   asset
   attitude
   burn
@@ -71,6 +71,10 @@ SET(BASE_DIRS
 # ====================================================================
 # source files
 SET(BASE_SRCS
+    api/APIFunctions.cpp
+    api/APIException.cpp
+    api/APIMessageReceiver.cpp
+    api/HelpSystem.cpp
     asset/AssetException.cpp
     asset/BodyFixedPoint.cpp
     asset/GroundstationInterface.cpp
@@ -82,6 +86,7 @@ SET(BASE_SRCS
     attitude/NadirPointing.cpp
     attitude/PrecessingSpinner.cpp
     attitude/Spinner.cpp
+    attitude/ThreeAxisKinematic.cpp
     burn/BurnException.cpp
     burn/Burn.cpp
     burn/FiniteBurn.cpp
@@ -130,6 +135,7 @@ SET(BASE_SRCS
     command/PropagationEnabledCommand.cpp
     command/PlotCommand.cpp
     command/SolverSequenceCommand.cpp
+    command/RHSEquation.cpp
     command/Report.cpp
     command/RunSolver.cpp
     command/SaveMission.cpp
@@ -137,6 +143,7 @@ SET(BASE_SRCS
     command/Stop.cpp
     command/Target.cpp
     command/Toggle.cpp
+    command/UpdateDynamicData.cpp
     command/Vary.cpp
     command/While.cpp
     command/Write.cpp
@@ -151,6 +158,8 @@ SET(BASE_SRCS
     coordsystem/CoordinateConverter.cpp
     coordsystem/CoordinateSystemException.cpp
     coordsystem/CoordinateSystem.cpp
+    coordsystem/CoordinateTransformation.cpp
+    coordsystem/CoordinateTranslation.cpp
     coordsystem/DynamicAxes.cpp
     coordsystem/EquatorAxes.cpp
     coordsystem/GeocentricSolarEclipticAxes.cpp
@@ -171,6 +180,7 @@ SET(BASE_SRCS
     coordsystem/TOEEcAxes.cpp
     coordsystem/TOEEqAxes.cpp
     coordsystem/TopocentricAxes.cpp
+    coordsystem/TransformUtil.cpp
     coordsystem/TrueOfDateAxes.cpp
     coordsystem/ICRFAxes.cpp
     coordsystem/ICRFFile.cpp
@@ -202,11 +212,13 @@ SET(BASE_SRCS
     factory/Factory.cpp
     factory/FunctionFactory.cpp
     factory/HardwareFactory.cpp
+    factory/FieldOfViewFactory.cpp
     factory/InterfaceFactory.cpp
     factory/MathFactory.cpp
     factory/ODEModelFactory.cpp
     factory/ParameterFactory.cpp
     factory/PhysicalModelFactory.cpp
+	factory/PlateFactory.cpp
     factory/PropagatorFactory.cpp
     factory/PropSetupFactory.cpp
     factory/SolarSystemFactory.cpp
@@ -224,6 +236,7 @@ SET(BASE_SRCS
     forcemodel/GravityField.cpp
     forcemodel/GravityBase.cpp
     forcemodel/HarmonicField.cpp
+    forcemodel/NumericJacobianOriginal.cpp
     forcemodel/PhysicalModel.cpp
     forcemodel/PointMassForce.cpp
     forcemodel/SolarRadiationPressure.cpp
@@ -233,6 +246,7 @@ SET(BASE_SRCS
     forcemodel/harmonic/HarmonicGravity.cpp
     foundation/Covariance.cpp
     foundation/ElementWrapper.cpp
+    foundation/EquationInitializer.cpp
     foundation/FileUpdaterSVN.cpp
     foundation/GmatBaseException.cpp
     foundation/GmatBase.cpp
@@ -250,17 +264,29 @@ SET(BASE_SRCS
     function/GetEphemStates.cpp
     function/GetLastState.cpp
     function/ObjectManagedFunction.cpp
+    function/Pause.cpp
+    function/SystemTime.cpp
     function/SetSeed.cpp
+    function/ConvertTime.cpp
+    function/Sign.cpp
+    function/Str2num.cpp
+    function/Num2str.cpp
+    function/RotationMatrix.cpp
     function/UserDefinedFunction.cpp
     hardware/ChemicalTank.cpp
+    hardware/ConicalFOV.cpp  
+    hardware/CustomFOV.cpp  
     hardware/ChemicalThruster.cpp
     hardware/ElectricTank.cpp
     hardware/ElectricThruster.cpp
+    hardware/FieldOfView.cpp
+    hardware/FieldOfViewException.cpp
     hardware/FuelTank.cpp
     hardware/HardwareException.cpp
     hardware/Hardware.cpp
     hardware/NuclearPowerSystem.cpp
     hardware/PowerSystem.cpp
+    hardware/RectangularFOV.cpp  
     hardware/SolarPowerSystem.cpp
     hardware/Thruster.cpp
     interface/InterfaceException.cpp
@@ -324,6 +350,7 @@ SET(BASE_SRCS
     math/Tan.cpp
     math/Tanh.cpp
     math/Transpose.cpp
+    math/EquationWrapper.cpp
     parameter/AlternateEquinoctialParameters.cpp
     parameter/AngularParameters.cpp
     parameter/Array.cpp
@@ -416,6 +443,7 @@ SET(BASE_SRCS
     solarsys/CelestialBody.cpp
     solarsys/Comet.cpp
     solarsys/DeFile.cpp
+    solarsys/EphemSmoother.cpp
     solarsys/ExponentialAtmosphere.cpp
     solarsys/JacchiaRobertsAtmosphere.cpp
     solarsys/LibrationPoint.cpp
@@ -437,12 +465,12 @@ SET(BASE_SRCS
     solver/InternalOptimizer.cpp
     solver/ISolverListener.cpp
     solver/ExternalOptimizer.cpp
-    solver/SteepestDescent.cpp
     solver/DerivativeModel.cpp
     solver/Gradient.cpp
     solver/Jacobian.cpp
     solver/LineSearch.cpp
     spacecraft/FormationInterface.cpp
+	spacecraft/Plate.cpp
     spacecraft/Spacecraft.cpp
     spacecraft/SpaceObject.cpp
     spacecraft/TextTrajectoryFile.cpp
@@ -464,6 +492,8 @@ SET(BASE_SRCS
     subscriber/XyPlot.cpp
     subscriber/OrbitPlot.cpp
     subscriber/GroundTrackPlot.cpp
+    subscriber/DynamicDataDisplay.cpp
+    subscriber/DynamicDataInterface.cpp
     solarsys/SimpleExponentialAtmosphere.cpp
     solarsys/SpecialCelestialPoint.cpp
     ${MSISE_SRCS}
@@ -480,6 +510,7 @@ FILE(GLOB_RECURSE BASE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
 
 # Create GmatBase as a shared library
 ADD_LIBRARY(${TargetName} SHARED ${BASE_SRCS} ${BASE_HEADERS})
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEFINE_SYMBOL "GMAT_EXPORTS")
 
 # Add necessary include directories
 TARGET_INCLUDE_DIRECTORIES(${TargetName} PUBLIC ${BASE_DIRS})

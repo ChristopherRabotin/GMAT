@@ -1,4 +1,4 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>ImpulsiveBurn</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="GroundTrackPlot.html" title="GroundTrackPlot"><link rel="next" href="LibrationPoint.html" title="LibrationPoint"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">ImpulsiveBurn</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="GroundTrackPlot.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="LibrationPoint.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="ImpulsiveBurn"></a><div class="titlepage"></div><a name="N1A42E" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ImpulsiveBurn</span></h2><p>ImpulsiveBurn &mdash; An impulsive maneuver</p></div><div class="refsection"><a name="N1A43F"></a><h2>Description</h2><p>The <span class="guilabel">ImpulsiveBurn</span> resource allows the
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>ImpulsiveBurn</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ch16.html#N1516B" title="Resources"><link rel="prev" href="GroundStation.html" title="GroundStation"><link rel="next" href="LibrationPoint.html" title="LibrationPoint"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">ImpulsiveBurn</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="GroundStation.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="LibrationPoint.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="ImpulsiveBurn"></a><div class="titlepage"></div><a name="N19121" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ImpulsiveBurn</span></h2><p>ImpulsiveBurn &mdash; An impulsive maneuver</p></div><div class="refsection"><a name="N19132"></a><h2>Description</h2><p>The <span class="guilabel">ImpulsiveBurn</span> resource allows the
     spacecraft to undergo an instantaneous Delta-V (&#916;V), as opposed to a
     finite burn which is not instantaneous, by specifying the three vector
     components of the Delta-V. You can configure the burn by defining its
@@ -6,7 +6,7 @@
     <span class="guilabel">Loca</span><span class="guilabel">l</span> coordinate systems, the
     user can choose the <span class="guilabel">Origin</span> and type of
     <span class="guilabel">Axes</span>. Depending on the mission, it may be simpler to
-    use one coordinate system over another.</p><p>See Also <a class="xref" href="Maneuver.html" title="Maneuver"><span class="refentrytitle">Maneuver</span></a>,<a class="xref" href="FuelTank.html" title="ChemicalTank"><span class="refentrytitle">ChemicalTank</span></a>,<a class="xref" href="BeginFiniteBurn.html" title="BeginFiniteBurn"><span class="refentrytitle">BeginFiniteBurn</span></a></p></div><div class="refsection"><a name="N1A45C"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Axes </span></td><td><p>Allows you to define a spacecraft centered set of
+    use one coordinate system over another.</p><p>See Also <a class="xref" href="Maneuver.html" title="Maneuver"><span class="refentrytitle">Maneuver</span></a>,<a class="xref" href="FuelTank.html" title="ChemicalTank"><span class="refentrytitle">ChemicalTank</span></a>,<a class="xref" href="BeginFiniteBurn.html" title="BeginFiniteBurn"><span class="refentrytitle">BeginFiniteBurn</span></a></p></div><div class="refsection"><a name="N1914F"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Axes </span></td><td><p>Allows you to define a spacecraft centered set of
             axes for the impulsive burn. This field cannot be modified in the
             Mission Sequence. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">VNB</span>, <span class="guilabel">LVLH</span>,
                     <span class="guilabel">MJ2000Eq</span>,
@@ -57,7 +57,7 @@
             <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><code class="literal">Cartesian</code>,
                     <code class="literal">Spherical</code></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>
                       <code class="literal">Cartesian</code>
-                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1A752"></a><h2>GUI</h2><p>The <span class="guilabel">ImpulsiveBurn</span> dialog box allows you to
+                    </p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N19445"></a><h2>GUI</h2><p>The <span class="guilabel">ImpulsiveBurn</span> dialog box allows you to
     specify properties of an <span class="guilabel">ImpulsiveBurn</span> including
     Delta-V component values and choice of <span class="guimenu">Coordinate
     System</span>. If you choose to model fuel loss associated with an
@@ -67,7 +67,7 @@
     only relevant if <span class="guimenu">Coordinate System</span> is set to Local. See
     the Remarks for more detail on local coordinate systems.</p><p>If <span class="guimenu">Decrement Mass</span> is checked, then you can select
     the desired <span class="guilabel">ChemicalTank</span> used as the fuel supply for mass
-    depletion.</p></div><div class="refsection"><a name="N1A77F"></a><h2>Remarks</h2><div class="refsection"><a name="N1A782"></a><h3>Local Coordinate Systems</h3><p>Here, a Local <span class="guilabel">Coordinate System</span> is defined as
+    depletion.</p></div><div class="refsection"><a name="N19472"></a><h2>Remarks</h2><div class="refsection"><a name="N19475"></a><h3>Local Coordinate Systems</h3><p>Here, a Local <span class="guilabel">Coordinate System</span> is defined as
       one that we configure "locally" using the
       <span class="guilabel">ImpulsiveBurn</span> resource interface as opposed to
       defining a coordinate system using the <span class="guilabel">Coordinate
@@ -103,7 +103,7 @@
       by the spacecraft. Since the thrust is applied in this system, GMAT uses
       the attitude of the spacecraft, a spacecraft attribute, to determine the
       inertial thrust direction. Note that the <span class="guilabel">Origin</span>
-      sub-field is not needed to define this coordinate system.</p></div><div class="refsection"><a name="N1A7CC"></a><h3>Deprecated Field Names for an ImpulsiveBurn</h3><p>Note that the standard method, as shown below, for specifying the
+      sub-field is not needed to define this coordinate system.</p></div><div class="refsection"><a name="N194BF"></a><h3>Deprecated Field Names for an ImpulsiveBurn</h3><p>Note that the standard method, as shown below, for specifying the
       components of an ImpulsiveBurn is to use the
       <span class="guilabel">Element1</span>, <span class="guilabel">Element2</span>, and
       <span class="guilabel">Element3</span> field names.</p><pre class="programlisting"><code class="code">Create ImpulsiveBurn DefaultIB
@@ -128,7 +128,7 @@ DefaultIB.B = -2</code></pre><p>It is important to note that the <span class="gu
       their use will not be allowed in future versions of GMAT. If you use the
       <span class="guilabel">V</span>, <span class="guilabel">N</span>, <span class="guilabel">B</span>
       field names in this version of GMAT, you will receive a warning to this
-      affect.</p></div><div class="refsection"><a name="N1A81E"></a><h3>Backwards-propagated Impulsive maneuvers defined using the
+      affect.</p></div><div class="refsection"><a name="N19511"></a><h3>Backwards-propagated Impulsive maneuvers defined using the
       spacecraft velocity</h3><p>Examples of axes defined using the spacecraft velocity are the
       <span class="guilabel">VNB</span> and <span class="guilabel">LVLH</span> axes discussed
       above as well as some user-defined axes. The behavior when applying an
@@ -191,7 +191,7 @@ Maneuver BackProp myImpulsiveBurn(Sat);</code></pre><p>Finally, we note that whe
       backwards-propagated impulsive maneuver, mass is added to the tank. This
       is done so there is no change in mass when a backwards-propagated
       impulsive maneuver is followed by the same maneuver using a normal
-      forward propagation.</p></div><div class="refsection"><a name="N1A857"></a><h3>Interactions</h3><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Resource</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Spacecraft resource</span></td><td><p> Must be created in order to apply any
+      forward propagation.</p></div><div class="refsection"><a name="N1954A"></a><h3>Interactions</h3><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Resource</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Spacecraft resource</span></td><td><p> Must be created in order to apply any
               <span class="guilabel">ImpulsiveBurn</span></p></td></tr><tr><td><span class="guilabel">ChemicalTank resource</span></td><td><p> If you want to model mass depletion for an
               <span class="guilabel">ImpulsiveBurn</span>, attach a
               <span class="guilabel">ChemicalTank</span> to the maneuvered
@@ -203,7 +203,7 @@ Maneuver BackProp myImpulsiveBurn(Sat);</code></pre><p>Finally, we note that whe
               some goal, then the <span class="guilabel">Vary</span> command, as part
               of a <span class="guilabel">Targe</span>t or
               <span class="guilabel">Optimize</span> command sequence, must be used.
-              </p></td></tr></tbody></table></div></div></div><div class="refsection"><a name="N1A8A8"></a><h2>Examples</h2><div class="informalexample"><p>Create a default <span class="guilabel">ChemicalTank</span> and an
+              </p></td></tr></tbody></table></div></div></div><div class="refsection"><a name="N1959B"></a><h2>Examples</h2><div class="informalexample"><p>Create a default <span class="guilabel">ChemicalTank</span> and an
       <span class="guilabel">ImpulsiveBurn</span> that allows for fuel depletion,
       assign the <span class="guilabel">ImpulsiveBurn</span> the default
       <span class="guilabel">ChemicalTank</span>, attach the <span class="guilabel">ChemicalTank</span>
@@ -237,4 +237,4 @@ Create Spacecraft DefaultSC
 DefaultSC.Tanks = {FuelTank1}
 
 BeginMissionSequence
-Maneuver DefaultIB(DefaultSC) </pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="GroundTrackPlot.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="LibrationPoint.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">GroundTrackPlot&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;LibrationPoint</td></tr></table></div></body></html>
+Maneuver DefaultIB(DefaultSC) </pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="GroundStation.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ch16.html#N1516B">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="LibrationPoint.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">GroundStation&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;LibrationPoint</td></tr></table></div></body></html>

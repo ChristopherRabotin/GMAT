@@ -1,0 +1,130 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>DynamicDataDisplay</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ch17.html#N201C5" title="Resources"><link rel="prev" href="ch17.html" title="Chapter&nbsp;17.&nbsp;Input/Output"><link rel="next" href="EphemerisFile.html" title="EphemerisFile"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">DynamicDataDisplay</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ch17.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="EphemerisFile.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="DynamicDataDisplay"></a><div class="titlepage"></div><a name="N201CC" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">DynamicDataDisplay</span></h2><p>DynamicDataDisplay &mdash; A user-defined resource used in tandem with the
+	<span class="guilabel">UpdateDynamicData</span> command to print current values of
+	parameters to a table on the GUI.</p></div><div class="refsection"><a name="N201E0"></a><h2>Description</h2><p>The <span class="guilabel">DynamicDataDisplay</span> is a resource that
+	generates a table of user chosen parameters that are updated during a
+	mission sequence where the <span class="guilabel">UpdateDynamicData</span> command
+	is used.  The purpose of this display is to provide the user the option to
+	directly see how data is changing during a mission as the changes
+	happen.</p><p>Various options when using this resource include being able to set
+	the parameter's text color, setting the background color of the data cell,
+	setting warning condition bounds and setting critical condition bounds.  
+	The most common places to use this resource is in looping sequences such as
+	a for loop, optimization, targeting, etc.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="UpdateDynamicData.html" title="UpdateDynamicData"><span class="refentrytitle">UpdateDynamicData</span></a></p></div><div class="refsection"><a name="N201F4"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="26%"><col width="74%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AddParameters</span></td><td><p> Field to set the parameters the desired row, the
+			first entry in this array must be the row number desired. Ex.
+			MyDynamicDataDisplay.AddParameters = {1, Sat.X, Array(2, 1)};</p>
+			<div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Reference Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any variable, Array element, String, or Object
+					parameter (an entire Array cannot be used)</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>2x2 empty table</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">BackgroundColor</span></td><td><p>Field to set the background color of the cell showing the chosen
+			parameter value, the first entry in this array must be the
+			parameter to change the background color of followed by the desired
+			color, i.e. MyDynamicDataDisplay.BackgroundColor = {ParamName, Color}.</p>
+			<div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any parameter name from the DynamicDataDisplay object
+					and any color available from the TextColorPicker in the
+					GUI, a valid predefined color name, or RGB triplet value
+					between 0 and 255</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>White</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">CritBounds</span></td><td><p>Field to set the critical bounds on a parameter,
+			stepping outside these bounds will change the parameter value&rsquo;s
+			text to the set critical color.  The first entry is the parameter
+			to which these bounds will be applied to while the second is a real
+			array, i.e. MyDynamicDataDisplay.CritBounds = {ParamName,
+			[LowerBound UpperBound]}.</p>
+			<div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any Real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>[-9.999e300, 9.999e300]</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">CritColor</span></td><td><p> Field to set the text color that a parameter&rsquo;s value
+			will change to once it has stepped outside the defined critical
+			bounds.</p>
+			<div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer Array or String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any color available from the TextColorPicker in the
+					GUI, a valid predefined, or RGB triplet value between 0
+					and 255</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Red</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Maximized</span></td><td><p>Allows the user to maximize the
+            <span class="guilabel">DynamicDataDisplay</span> window. This field cannot
+			be modified in the Mission Sequence.</p>
+			<div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>true,false</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>false</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RelativeZOrder</span></td><td><p>Allows the user to select which
+            <span class="guilabel">DynamicDataDisplay</span> to display first on the screen.
+            The <span class="guilabel">DynamicDataDisplay</span> with the lowest
+            <span class="guilabel">RelativeZOrder</span> value will be displayed last
+            while the <span class="guilabel">DynamicDataDisplay</span> with the highest
+            <span class="guilabel">RelativeZOrder</span> value will be displayed first.
+            This field cannot be modified in the Mission Sequence.</p>
+            <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Integer &ge; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">RowTextColors</span></td><td><p>Field to set the colors of the text showing parameter
+			values, the first entry in this array must be the row number
+			desired entered as a string, i.e. MyDynamicDataDisplay.RowTextColors
+			= {RowNum, Color1, Color2, ...};  The number of colors cannot exceed
+			the number of parameters in the selected row.</p>
+			<div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any row number the DynamicDataDisplay object contains
+					and any color available from the TextColorPicker in the
+					GUI, a valid predefined color name, or RGB triplet value
+					between 0 and 255</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Black</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Size</span></td><td><p>Allows the user to control the display size of
+            generated DynamicDataDisplay. First value in [0 0] matrix controls
+            horizontal size and second value controls vertical size of the
+			DynamicDataDisplay. This field cannot be modified in the Mission
+            Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any Real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>[ 0 0 ]</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">TextColor</span></td><td><p>Field to set the color of the text showing the chosen
+			parameter value, the first entry in this array must be the
+			parameter to change the text color of followed by the desired color,
+			i.e. MyDynamicDataDisplay.TextColor = {ParamName, Color}.</p>
+			<div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any parameter name from the DynamicDataDisplay object
+					and any color available from the TextColorPicker in the
+					GUI, a valid predefined color name, or RGB triplet value
+					between 0 and 255</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Black</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Upperleft</span></td><td><p>Allows the user to pan the generated report file
+            display window in any direction. First value in [0 0] matrix pans
+			the DynamicDataDisplay horizontally and second value pans
+			the window vertically. This field cannot be modified in the
+            Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any Real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>[ 0 0 ]</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">WarnBounds</span></td><td><p>Field to set the warning bounds on a parameter,
+			stepping outside these bounds will change the parameter value&rsquo;s
+			text to the set warning color.  The first entry is the parameter
+			to which these bounds will be applied to while the second is a real
+			array, i.e. MyDynamicDataDisplay.WarnBounds = {ParamName,
+			[LowerBound UpperBound]}.</p>
+			<div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any parameter name from the DynamicDataDisplay
+					object and any real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>[-9.999e300, 9.999e300]</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">WarnColor</span></td><td><p> Field to set the text color that a parameter&rsquo;s value
+			will change to once it has stepped outside the defined warning
+			bounds.</p>
+			<div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Integer Array or String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any color available from the TextColorPicker in the
+					GUI, a valid predefined, or RGB triplet value between 0
+					and 255</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>GoldenRod</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N20437"></a><h2>GUI</h2><p>The figure below shows default name and settings for the
+    <span class="guilabel">DynamicDataDisplay</span> resource:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_DynamicDataDisplay_GUI.png" align="middle" height="488"></td></tr></table></div></div><p>The figure below shows default name and settings for a parameter to
+	be displayed in the <span class="guilabel">DynamicDataDisplay</span> resource:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_DynamicDataDisplay_GUI_2.png" align="middle" height="480"></td></tr></table></div></div><p>The grid in the setup panel represents the current parameters added
+	to this <span class="guilabel">DynamicDataDisplay</span>.  To change the grid
+	dimensions, enter integers into the &ldquo;Row&rdquo; and &ldquo;Column&rdquo; text boxes and click
+	&ldquo;Update&rdquo;.  Double clicking with the left mouse button on one of the grid
+	cells will open a dialog containing all the options for the parameter that
+	will go in the selected cell.  The &ldquo;Select&rdquo; button takes the user to a
+	parameter selection window to choose the desired parameter.  Once selected,
+	the user can also change the options on this parameter if desired.  Once
+	&ldquo;Ok&rdquo; is clicked, the name of the chosen parameter will appear in the cell
+	on the initial panel that was selected.  To remove an undesired parameter
+	from the grid, select a cell and hit the Delete key.  This will remove the
+	parameter and set all other settings of that cell back to default
+	values.</p></div><div class="refsection"><a name="N2045B"></a><h2>Remarks</h2><div class="refsection"><a name="N2045E"></a><h3>Behavior of display under various inputs</h3><p>If the user skips a row or multiple rows in the script (for example
+	  only putting parameters in rows 1 and 4), then the rows in between are
+	  simply left as empty cells shown in the GUI.  When the table is built,
+	  it will make the number of columns in each row match the row with the
+	  most parameters.  For example, if row 1 has 5 parameters, but row 2 only
+	  has 3, the two extra columns in row 2 will still appear but they will
+	  simply be left empty.  The user may also insert their own empty fields in
+	  the grid by adding an empty string using quotations or by leaving boxes
+	  in the grid blank when using the setup panel.</p></div><div class="refsection"><a name="N20463"></a><h3>Behavior of warning and critical conditions</h3><p>The critical condition overrides the warning condition, i.e. if a
+	  parameter is currently the warning color and proceeds to step outside the
+	  critical bounds, the text color will be changed to the critical color.
+	  If a parameter returns within the critical or warning bounds, the
+	  critical or warning colors are removed respectively.  If the user has
+	  specified a text color besides black to be used for a parameter, the
+	  warning and critical bound colors will not be applied even if bounds are
+	  violated.</p></div></div><div class="refsection"><a name="N20468"></a><h2>Examples</h2><div class="informalexample"><p>Create a <span class="guilabel">DynamicDataDisplay</span> resource named
+      myDisplay with two rows, user set text colors, and setting condition
+	  bounds on mySC.X.</p><pre class="programlisting"><code class="code">Create Spacecraft mySC;
+Create DynamicDataDisplay myDisplay
+GMAT myDisplay.AddParameters = {1, mySC.X, mySC.Y};
+GMAT myDisplay.AddParameters = {2, &lsquo;&rsquo;, mySC.Z};
+GMAT myDisplay.RowTextColors = {1, Red, Black};
+GMAT myDisplay.TextColor = {mySC.Z, [200 0 200]};
+GMAT myDisplay.BackgroundColor = {mySC.Y, Blue};
+GMAT myDisplay.WarnBounds = {mySC.X, [-1000 1000]};
+GMAT myDisplay.CritBounds = {mySC.X, [-3000 3000]};
+GMAT myDisplay.WarnColor = Orange;
+GMAT myDisplay.CritColor = [200 150 0];</code></pre></div><div class="informalexample"><p>Using a <span class="guilabel">DynamicDataDisplay</span> with an
+	  <span class="guilabel">UpdateDynamicData</span> command.</p><pre class="programlisting"><code class="code">Create Spacecraft mySC;
+Create Propagator myProp;
+
+Create DynamicDataDisplay myDisplay;
+GMAT myDisplay.AddParameters = {1, mySC.EarthMJ2000Eq.X};
+
+BeginMissionSequence
+Propagate myProp(mySC) {mySC.ElapsedSec = 12000.0};
+UpdateDynamicData myDisplay;
+</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ch17.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ch17.html#N201C5">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="EphemerisFile.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Chapter&nbsp;17.&nbsp;Input/Output&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;EphemerisFile</td></tr></table></div></body></html>

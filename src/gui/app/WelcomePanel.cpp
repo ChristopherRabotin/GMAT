@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -588,7 +588,10 @@ void WelcomePanel::OnOpenSampleScript(wxHyperlinkEvent& event)
          #ifdef DEBUG_SAMPLE_SCRIPT
          MessageInterface::ShowMessage("   scriptfile='%s'\n", scriptfile.c_str());
          #endif
-         GmatAppData::Instance()->GetMainFrame()->OpenRecentScript(scriptfile, event);
+
+         // Fix bug GMT-6627                                                                       // made changes by TUAN NGUYEN
+         GmatAppData::Instance()->GetMainFrame()->OpenRecentScript(scriptfile, event, false);      // made changes by TUAN NGUYEN
+         GmatAppData::Instance()->GetMainFrame()->CloseWelcomePanel();                             // made changes by TUAN NGUYEN
       }
    }
    else

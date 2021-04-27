@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -451,7 +451,7 @@ void GLStars::DrawStarsVA(GLfloat ColorAlpha, int starCount, bool drawConstellat
    
    // Draw the constellation lines if the user wants them
    if (drawConstellations)
-      {
+   {
       glColor4fv(LineColor);
       // Point to the vertex array
       glVertexPointer(4, GL_FLOAT, 0, CLines);
@@ -463,21 +463,21 @@ void GLStars::DrawStarsVA(GLfloat ColorAlpha, int starCount, bool drawConstellat
       
       glColor4fv(NameColor);
       for (int i = 1; i < NumConstellations; i++)
-         {
+      {
          int count = 0;
          double v[3] = {0,0,0};
          for (int j=ConstellationIndex[i][0];  j<=ConstellationIndex[i][1];  ++j)
-             {
+         {
              ++count;
              for (int k=0;  k<=3-1;  ++k)
                 v[k] += CLines[j][k];
-             }
+         }
          for (int k=0;  k<=3-1;  ++k)
             v[k] /= count;
          GLfloat w = CLines[ConstellationIndex[i][0]][3];
          if (w == 0.0) w = 0.00001f;
          DrawStringAt(ConstellationNames[i],v[0],v[1],v[2],w);
-         }
+      }
 
       glColor4fv(BorderColor);
       // Point to the vertex array
@@ -486,9 +486,9 @@ void GLStars::DrawStarsVA(GLfloat ColorAlpha, int starCount, bool drawConstellat
       glEnable(GL_LINE_SMOOTH);
       glLineWidth(0.3f);
       // Draw the lines
-      for (int i=0;  i<=BorderGroupCount-1;  ++i)
+      for (int i = 0; i < BorderGroupCount-1; ++i)
          glDrawArrays(GL_LINE_STRIP, BorderGroup[i], BorderGroup[i+1]-BorderGroup[i]-1);
-      }
+   }
    
    glEnable(GL_DEPTH_TEST);
    // Disable vertex arrays

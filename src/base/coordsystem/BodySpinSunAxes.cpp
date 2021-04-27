@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -99,7 +99,7 @@ BodySpinSunAxes::BodySpinSunAxes(const std::string &itsName) :
 	MessageInterface::ShowMessage("BodySpinSunAxes::BodySpinSunAxes()   default construction.\n");
 #endif
 
-   primaryName    = SolarSystem::SUN_NAME;
+   primaryName    = GmatSolarSystemDefaults::SUN_NAME;
 
    objectTypeNames.push_back("BodySpinSun");
    parameterCount = BodySpinSunAxesParamCount;
@@ -198,7 +198,7 @@ GmatCoordinate::ParameterUsage BodySpinSunAxes::UsesItrfFile() const
 
 GmatCoordinate::ParameterUsage BodySpinSunAxes::UsesNutationUpdateInterval() const
 {
-   //if (originName == SolarSystem::EARTH_NAME) 
+   //if (originName == GmatSolarSystemDefaults::EARTH_NAME)
       return GmatCoordinate::REQUIRED;
    //return ObjectReferencedAxes::UsesNutationUpdateInterval();
 }

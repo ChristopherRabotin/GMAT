@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2015 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -512,6 +512,17 @@ bool BeginFileThrust::Initialize()
 bool BeginFileThrust::Execute()
 {
    bool retval = true; // false;
+   StringArray segsNotLoaded;
+
+   // Check that all ThrustSegments were loaded from the file
+   if (!thrustFile->AllDataSegmentsLoaded(segsNotLoaded)) {
+      std::string msg = "Not all ThrustSegments have data loaded for ThrustHistoryFile '" +
+         thrustFile->GetName() + "', missing segments are: ";
+      for (int i = 0; i < segsNotLoaded.size() - 1; i++)
+         msg += "'" + segsNotLoaded.at(i) + "', ";
+      msg += "'" + segsNotLoaded.at(segsNotLoaded.size() - 1) + "'";
+      throw ODEModelException(msg);
+   }
 
    // Tell active spacecraft that they are now firing
    for (std::vector<Spacecraft*>::iterator s=sats.begin(); s!=sats.end(); ++s)
@@ -530,6 +541,8 @@ bool BeginFileThrust::Execute()
    if (burnForce == NULL)
       throw CommandException("Thrust history file burn was NOT initialized; "
             "ABORTING RUN!!!\n\n");
+
+   thrustFile->ActivateSegments();
 
    // Insert the force into the list of transient forces if not found
    bool fileForceConfigured = false;
@@ -611,9 +624,11 @@ bool BeginFileThrust::Execute()
    // Set maneuvering to Publisher so that any subscriber can do its own action
    if (!sats.empty())
    {
+      // could do: if (sats[0]->HasPrecisionTime()) { GmatTime epoch = sats[0]->GetEpochGT(); publisher->SetManeuvering(...); }
+      // but publisher->SetManeuvering() only takes a Real epoch, it doesn't have a precision time overload
       Real epoch = sats[0]->GetEpoch();
       publisher->SetManeuvering(this, true, epoch, satNames,
-            "begin of thrust history file maneuver");
+         "begin of thrust history file maneuver");
    }
 
    #ifdef DEBUG_BEGIN_MANEUVER_EXE

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -47,6 +47,7 @@
 #include "CoordinateSystemFactory.hpp"
 #include "FunctionFactory.hpp"
 #include "HardwareFactory.hpp"
+#include "FieldOfViewFactory.hpp"
 #include "ODEModelFactory.hpp"
 #include "ParameterFactory.hpp"
 #include "PhysicalModelFactory.hpp"
@@ -54,6 +55,7 @@
 #include "PropSetupFactory.hpp"
 #include "SolverFactory.hpp"
 #include "SpacecraftFactory.hpp"
+#include "PlateFactory.hpp"                         // made changes by TUAN NGUYEN
 #include "StopConditionFactory.hpp"
 #include "SubscriberFactory.hpp"
 #include "CalculatedPointFactory.hpp"
@@ -83,6 +85,11 @@
 #include <ctime>                    // for clock()
 #include <errno.h>                 
 
+#include <chrono>
+
+#ifdef __linux__
+   #include <iostream>              // to detect GUI plugins
+#endif
 
 #ifdef CREATE_OUTPUT_FOLDER
 #include <sys/stat.h>               // for mkdir
@@ -135,6 +142,7 @@
 //#define DEBUG_LIST_CALCULATED_POINT
 //#define DEBUG_SHOW_SYSTEM_EXCEPTIONS
 //#define DEBUG_MAC_ENVIRONMENT
+//#define REPORT_UNHANDLED_EXCEPTIONS
 
 #ifdef DEBUG_MAC_ENVIRONMENT
 #include <stdlib.h>                 // for getenv (for Mac)
@@ -188,6 +196,19 @@ Moderator* Moderator::Instance()
    return instance;
 }
 
+//------------------------------------------------------------------------------
+// void OverridePublisher(Publisher *otherPublisher)
+//------------------------------------------------------------------------------
+/**
+ * Replace the (GmatBase) Publisher with a derived instance
+ *
+ * @param otherPublisher The derived Publisher
+ */
+//------------------------------------------------------------------------------
+void Moderator::OverridePublisher(Publisher *otherPublisher)
+{
+   thePublisher = otherPublisher;
+}
 
 //------------------------------------------------------------------------------
 // bool Initialize(const std::string &startupFile, bool fromGui = false,
@@ -211,6 +232,7 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui,
       
       // Set theFileManager
       theFileManager = FileManager::Instance();
+      theTimeConverter = TimeSystemConverter::Instance();
 
       // Read startup file, Set Log file
       theFileManager->ReadStartupFile(startupFile);
@@ -257,7 +279,7 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui,
       #endif
       
       theConfigManager = ConfigManager::Instance();
-      
+
       #if DEBUG_INITIALIZE
       MessageInterface::ShowMessage
          (".....created  (%p)theConfigManager\n", theConfigManager);
@@ -273,6 +295,7 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui,
       theFactoryManager->RegisterFactory(new CoordinateSystemFactory());
       theFactoryManager->RegisterFactory(new FunctionFactory());
       theFactoryManager->RegisterFactory(new HardwareFactory());
+      theFactoryManager->RegisterFactory(new FieldOfViewFactory());
       theFactoryManager->RegisterFactory(new MathFactory());
       theFactoryManager->RegisterFactory(new ODEModelFactory());
       theFactoryManager->RegisterFactory(new ParameterFactory());
@@ -281,12 +304,14 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui,
       theFactoryManager->RegisterFactory(new PropSetupFactory());
       theFactoryManager->RegisterFactory(new SolverFactory());
       theFactoryManager->RegisterFactory(new SpacecraftFactory());
+		theFactoryManager->RegisterFactory(new PlateFactory());                     // made changes by TUAN NGUYEN
       theFactoryManager->RegisterFactory(new StopConditionFactory());
       theFactoryManager->RegisterFactory(new SubscriberFactory());
       theFactoryManager->RegisterFactory(new CelestialBodyFactory());
       
-      // Create publisher
-      thePublisher = Publisher::Instance();
+      // Create publisher if not overridden
+      if (thePublisher == NULL)
+         thePublisher = Publisher::Instance();
       
       #if DEBUG_INITIALIZE
       MessageInterface::ShowMessage
@@ -439,9 +464,25 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui,
    MessageInterface::ShowMessage("Moderator::Initialize() returning true\n");
    #endif
    
+   isInitialized = true;
    return true;;
 } // Initialize()
 
+
+//------------------------------------------------------------------------------
+// bool IsInitialized()
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if Initialize() has succeeded (at least one time).#include <iostream>
+ *
+ *
+ * @return true if Initialize() has been executed successfully, false if not
+ */
+//------------------------------------------------------------------------------
+bool Moderator::IsInitialized()
+{
+   return isInitialized;
+}
 
 
 //------------------------------------------------------------------------------
@@ -483,7 +524,15 @@ void Moderator::Finalize()
    delete theItrfFile;
    delete theLeapSecsFile;
    if (theMatlabInterface != NULL)
+   {
+      #if DEBUG_FINALIZE > 0
+            MessageInterface::ShowMessage
+            (".....Moderator::Finalize() deleting (%p)theMatlabInterface\n",
+             theMatlabInterface);
+      #endif
       delete theMatlabInterface;
+      theMatlabInterface = NULL;
+   }
    
    theFileManager = NULL;
    theEopFile = NULL;
@@ -662,6 +711,38 @@ Integer Moderator::GetExitCode()
    return exitCode;
 }
 
+//------------------------------------------------------------------------------
+// Integer IsFromGui()
+//------------------------------------------------------------------------------
+/**
+* Returns boolean of whether GMAT is being run from the GUI or not
+*/
+//------------------------------------------------------------------------------
+bool Moderator::IsFromGui()
+{
+   return isFromGui;
+}
+
+//---------------------------------------------------------------------------
+//  std::string ToString() const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves a string representation of this object
+ *
+ * @return A string representation of this object
+ */
+ //------------------------------------------------------------------------------
+std::string Moderator::ToString() const
+{
+   std::string outString = "Instance of GMAT Moderator ";
+   outString += (isInitialized ? "is initialized." : "is not initialized.");
+   if (isRunReady)
+      outString += " Script ready to run.";
+   else
+      outString += " No script ready to run.";
+   return outString;
+}
+
 
 //------------------------------------------------------------------------------
 // Interface* GetMatlabInterface()
@@ -837,6 +918,26 @@ void Moderator::LoadAPlugin(std::string pluginName)
       MessageInterface::ShowMessage("Used plugin name:  \"%s\"\n", pluginName.c_str());
    #endif
 
+   #ifdef __linux__
+      if (!isFromGui)
+      {
+         // Linux exclusion code: if running without GUI, don't load GUI plugin
+         std::ifstream ifs(pluginName + ".so", std::ios::binary);
+         if (ifs.is_open())
+         {
+            std::string str((std::istreambuf_iterator<char>(ifs)),
+                  std::istreambuf_iterator<char>());
+            size_t pos = str.find("PluginWidget");
+            if (pos != std::string::npos)
+            {
+               MessageInterface::ShowMessage("Skipping \"%s\": GUI plugins are "
+                     "skipped in console mode\n", pluginName.c_str());
+               return;
+            }
+         }
+      }
+   #endif
+
    DynamicLibrary *theLib = LoadLibrary(pluginName);
 
    if (theLib != NULL)
@@ -910,7 +1011,6 @@ void Moderator::LoadAPlugin(std::string pluginName)
                tm->GetTriggerTypeString().c_str());
          #endif
       }
-
       // Check for new GUI elements
       Integer menuCount = theLib->GetMenuEntryCount();
       #ifdef DEBUG_PLUGIN_REGISTRATION
@@ -2256,8 +2356,14 @@ GmatBase* Moderator::CreateObject(UnsignedInt objTypeId, const std::string &type
    // When we clean up deprecated fields this special creation can be removed
    else if (objTypeId == Gmat::EVENT_LOCATOR)  
       return CreateEventLocator(type, name, createDefault);
-   else if (objTypeId == Gmat::HARDWARE)  
+
+	else if (objTypeId == Gmat::PLATE)                                    // made changes by TUAN NGUYEN
+		return CreatePlate(type, name);                                    // made changes by TUAN NGUYEN
+
+	else if (objTypeId == Gmat::HARDWARE)
       return CreateHardware(type, name);
+   else if (objTypeId == Gmat::FIELD_OF_VIEW)
+      return CreateFieldOfView(type, name);
    else if (objTypeId == Gmat::FUNCTION)
       return CreateFunction(type, name, objectManageOption);
    else if (objTypeId == Gmat::ODE_MODEL)
@@ -2913,6 +3019,98 @@ SpacePoint* Moderator::GetSpacePoint(const std::string &name)
 }
 
 
+// Plates
+//------------------------------------------------------------------------------
+// Plate* CreatePlate(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+* Creates a Plate object by given name.
+*
+* @param <type> object type
+* @param <name> object name
+*
+* @return Plate object pointer
+*/
+//------------------------------------------------------------------------------
+Plate* Moderator::CreatePlate(const std::string &type,
+	const std::string &name)
+{
+#if DEBUG_CREATE_RESOURCE
+	MessageInterface::ShowMessage
+	("Moderator::CreatePlate() type = '%s', name = '%s'\n",
+		type.c_str(), name.c_str());
+#endif
+
+	if (GetPlate(name) == NULL)
+	{
+		Plate *obj = (Plate*)(theFactoryManager->CreatePlate(type, name));
+
+		if (obj == NULL)
+		{
+			throw GmatBaseException
+			("The Moderator cannot create a Plate type \"" + type + "\"\n");
+		}
+
+#ifdef DEBUG_MEMORY
+		if (obj)
+		{
+			std::string funcName;
+			funcName = currentFunction ? "function: " + currentFunction->GetName() : "";
+			MemoryTracker::Instance()->Add
+			(obj, name, "Moderator::CreatePlate()", funcName);
+		}
+#endif
+
+		// Manage it if it is a named Plate
+		try
+		{
+			if (name != "")
+			{
+				if (objectManageOption == 1)
+					theConfigManager->AddPlate(obj);
+				else if (objectManageOption == 2)
+					AddObject(obj);
+			}
+		}
+		catch (BaseException &e)
+		{
+			MessageInterface::ShowMessage("In Moderator::CreatePlate()\n" +
+				e.GetFullMessage());
+		}
+
+		return obj;
+	}
+	else
+	{
+#if DEBUG_CREATE_RESOURCE
+		MessageInterface::ShowMessage
+		("Moderator::CreatePlate() Unable to create Plate "
+			"name: %s already exist\n", name.c_str());
+#endif
+		return GetPlate(name);
+	}
+}
+
+//------------------------------------------------------------------------------
+// Plate* GetPlate(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+* Retrieves a Plate object pointer by given name.
+*
+* @param <name> object name
+*
+* @return a Plate object pointer, return null if name not found
+*/
+//------------------------------------------------------------------------------
+Plate* Moderator::GetPlate(const std::string &name)
+{
+	if (name == "")
+		return NULL;
+	else
+		return (Plate*)FindObject(name);
+}
+
+
 // Hardware
 //------------------------------------------------------------------------------
 // Hardware* CreateHardware(const std::string &type, const std::string &name)
@@ -3020,6 +3218,97 @@ Hardware* Moderator::GetHardware(const std::string &name)
       return NULL;
    else
       return (Hardware*)FindObject(name);
+}
+
+// FieldOfView
+//------------------------------------------------------------------------------
+// FieldOfView* CreateFieldOfView(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a FieldOfView object by given name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return Hardware object pointer
+ */
+//------------------------------------------------------------------------------
+FieldOfView* Moderator::CreateFieldOfView(const std::string &type, const std::string &name)
+{
+#if DEBUG_CREATE_RESOURCE
+   MessageInterface::ShowMessage
+   ("Moderator::CreateFieldOfView() type = '%s', name = '%s'\n",
+    type.c_str(), name.c_str());
+#endif
+   
+   if (GetFieldOfView(name) == NULL)
+   {
+      FieldOfView *obj = theFactoryManager->CreateFieldOfView(type, name);
+
+      if (obj == NULL)
+      {
+         throw GmatBaseException
+         ("The Moderator cannot create a Hardware type \"" + type + "\"\n");
+      }
+      
+#ifdef DEBUG_MEMORY
+      if (obj)
+      {
+         std::string funcName;
+         funcName = currentFunction ? "function: " + currentFunction->GetName() : "";
+         MemoryTracker::Instance()->Add
+         (obj, name, "Moderator::CreateHardware()", funcName);
+      }
+#endif
+      
+      // Manage it if it is a named FieldOfView
+      try
+      {
+         if (name != "")
+         {
+            if (objectManageOption == 1)
+               theConfigManager->AddFieldOfView(obj);
+            else if (objectManageOption == 2)
+               AddObject(obj);
+         }
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::ShowMessage("In Moderator::CreateFieldOfView()\n" +
+                                       e.GetFullMessage());
+      }
+      
+      return obj;
+   }
+   else
+   {
+#if DEBUG_CREATE_RESOURCE
+      MessageInterface::ShowMessage
+      ("Moderator::CreateFieldOfView() Unable to create Hardware "
+       "name: \"%s\" already exists\n", name.c_str());
+#endif
+      return GetFieldOfView(name);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// FieldOfView* GetFieldOfView(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a Hardware object pointer by given name and add to configuration.
+ *
+ * @param <name> object name
+ *
+ * @return a Hardware object pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
+FieldOfView* Moderator::GetFieldOfView(const std::string &name)
+{
+   if (name == "")
+      return NULL;
+   else
+      return (FieldOfView*)FindObject(name);
 }
 
 
@@ -4302,281 +4591,281 @@ MeasurementModelBase* Moderator::GetMeasurementModel(const std::string &name)
       return (MeasurementModelBase*)FindObject(name);
 }
 
-// TrackingSystem
-//------------------------------------------------------------------------------
-// TrackingSystem* CreateTrackingSystem(const std::string &type,
-//       const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Creates a new named TrackingSystem and adds it to the configuration
- *
- * @param type The type of the new TrackingSystem
- * @param name The name of the new TrackingSystem
- *
- * @return The new TrackingSystem
- */
-//------------------------------------------------------------------------------
-TrackingSystem* Moderator::CreateTrackingSystem(const std::string &type,
-         const std::string &name)
-{
-   #if DEBUG_CREATE_RESOURCE
-   MessageInterface::ShowMessage("====================\n");
-   MessageInterface::ShowMessage("Moderator::CreateTrackingSystem() type=%s, "
-            "name='%s'\n", type.c_str(), name.c_str());
-   #endif
+//// TrackingSystem
+////------------------------------------------------------------------------------
+//// TrackingSystem* CreateTrackingSystem(const std::string &type,
+////       const std::string &name)
+////------------------------------------------------------------------------------
+///**
+// * Creates a new named TrackingSystem and adds it to the configuration
+// *
+// * @param type The type of the new TrackingSystem
+// * @param name The name of the new TrackingSystem
+// *
+// * @return The new TrackingSystem
+// */
+////------------------------------------------------------------------------------
+//TrackingSystem* Moderator::CreateTrackingSystem(const std::string &type,
+//         const std::string &name)
+//{
+//   #if DEBUG_CREATE_RESOURCE
+//   MessageInterface::ShowMessage("====================\n");
+//   MessageInterface::ShowMessage("Moderator::CreateTrackingSystem() type=%s, "
+//            "name='%s'\n", type.c_str(), name.c_str());
+//   #endif
+//
+//   if (GetTrackingSystem(name) == NULL)
+//   {
+//      TrackingSystem *obj = theFactoryManager->CreateTrackingSystem(type, name);
+//
+//      if (obj == NULL)
+//      {
+//         MessageInterface::PopupMessage
+//            (Gmat::ERROR_, "The Moderator cannot create a TrackingSystem.\n"
+//             "Make sure TrackingSystem is correct type and registered to "
+//             "TrackingSystemFactory.\n");
+//         return NULL;
+//      }
+//
+//      #ifdef DEBUG_MEMORY
+//      if (obj)
+//      {
+//         std::string funcName;
+//         funcName = currentFunction ? "function: " + currentFunction->GetName() : "";
+//         MemoryTracker::Instance()->Add
+//            (obj, name, "Moderator::CreateTrackingSystem()", funcName);
+//      }
+//      #endif
+//      
+//      if (name != "")
+//      {
+//         if (objectManageOption == 1)
+//            theConfigManager->AddTrackingSystem(obj);
+//         else if (objectManageOption == 2)
+//            AddObject((GmatBase*)obj);
+//      }
+//      
+//      #if DEBUG_CREATE_RESOURCE
+//      MessageInterface::ShowMessage
+//         ("Moderator::CreateTrackingSystem() returning new TrackingSystem "
+//               "<%p>\n", obj);
+//      #endif
+//
+//      return obj;
+//   }
+//   else
+//   {
+//      #if DEBUG_CREATE_RESOURCE
+//      MessageInterface::ShowMessage
+//         ("Moderator::CreateTrackingSystem() Unable to create "
+//          "TrackingSystem name: %s already exists\n", name.c_str());
+//      #endif
+//      return GetTrackingSystem(name);
+//   }
+//}
+//
+////------------------------------------------------------------------------------
+//// TrackingSystem* GetTrackingSystem(const std::string &name)
+////------------------------------------------------------------------------------
+///**
+// * Retrieves a TrackingSystem from the configuration
+// *
+// * @param name The name of the TrackingSystem object
+// *
+// * @return The named TrackingSystem
+// */
+////------------------------------------------------------------------------------
+//TrackingSystem* Moderator::GetTrackingSystem(const std::string &name)
+//{
+//   if (name == "")
+//      return NULL;
+//   else
+//      return (TrackingSystem*)FindObject(name);
+//}
 
-   if (GetTrackingSystem(name) == NULL)
-   {
-      TrackingSystem *obj = theFactoryManager->CreateTrackingSystem(type, name);
-
-      if (obj == NULL)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, "The Moderator cannot create a TrackingSystem.\n"
-             "Make sure TrackingSystem is correct type and registered to "
-             "TrackingSystemFactory.\n");
-         return NULL;
-      }
-
-      #ifdef DEBUG_MEMORY
-      if (obj)
-      {
-         std::string funcName;
-         funcName = currentFunction ? "function: " + currentFunction->GetName() : "";
-         MemoryTracker::Instance()->Add
-            (obj, name, "Moderator::CreateTrackingSystem()", funcName);
-      }
-      #endif
-      
-      if (name != "")
-      {
-         if (objectManageOption == 1)
-            theConfigManager->AddTrackingSystem(obj);
-         else if (objectManageOption == 2)
-            AddObject((GmatBase*)obj);
-      }
-      
-      #if DEBUG_CREATE_RESOURCE
-      MessageInterface::ShowMessage
-         ("Moderator::CreateTrackingSystem() returning new TrackingSystem "
-               "<%p>\n", obj);
-      #endif
-
-      return obj;
-   }
-   else
-   {
-      #if DEBUG_CREATE_RESOURCE
-      MessageInterface::ShowMessage
-         ("Moderator::CreateTrackingSystem() Unable to create "
-          "TrackingSystem name: %s already exists\n", name.c_str());
-      #endif
-      return GetTrackingSystem(name);
-   }
-}
-
-//------------------------------------------------------------------------------
-// TrackingSystem* GetTrackingSystem(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a TrackingSystem from the configuration
- *
- * @param name The name of the TrackingSystem object
- *
- * @return The named TrackingSystem
- */
-//------------------------------------------------------------------------------
-TrackingSystem* Moderator::GetTrackingSystem(const std::string &name)
-{
-   if (name == "")
-      return NULL;
-   else
-      return (TrackingSystem*)FindObject(name);
-}
-
-// TrackingData
-//------------------------------------------------------------------------------
-// TrackingData* CreateTrackingData(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Creates a new named TrackingData object and adds it to the configuration
- *
- * @param name The name of the new TrackingData object
- *
- * @return The new TrackingData object
- */
-//------------------------------------------------------------------------------
-TrackingData* Moderator::CreateTrackingData(const std::string &name)
-{
-   #if DEBUG_CREATE_RESOURCE
-   MessageInterface::ShowMessage("====================\n");
-   MessageInterface::ShowMessage("Moderator::CreateTrackingData() name='%s'\n",
-                                 name.c_str());
-   #endif
-
-   if (GetTrackingData(name) == NULL)
-   {
-      TrackingData *obj = theFactoryManager->CreateTrackingData(name);
-
-      if (obj == NULL)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, "The Moderator cannot create a TrackingData object."
-             "\nMake sure TrackingData is correct type and registered to "
-             "TrackingDataFactory.\n");
-         return NULL;
-      }
-
-      #ifdef DEBUG_MEMORY
-      if (obj)
-      {
-         std::string funcName;
-         funcName = currentFunction ? "function: " + currentFunction->GetName() : "";
-         MemoryTracker::Instance()->Add
-            (obj, name, "Moderator::CreateTrackingData()", funcName);
-      }
-      #endif
-      
-      if (name != "")
-      {
-         if (objectManageOption == 1)
-            theConfigManager->AddTrackingData(obj);
-         else if (objectManageOption == 2)
-            AddObject((GmatBase*)obj);
-      }
-      
-      #if DEBUG_CREATE_RESOURCE
-      MessageInterface::ShowMessage
-         ("Moderator::CreateTrackingData() returning new TrackingData "
-               "<%p>\n", obj);
-      #endif
-      
-      return obj;
-   }
-   else
-   {
-      #if DEBUG_CREATE_RESOURCE
-      MessageInterface::ShowMessage
-         ("Moderator::CreateTrackingData() Unable to create "
-          "TrackingData name: %s already exists\n", name.c_str());
-      #endif
-      return GetTrackingData(name);
-   }
-}
-
-//------------------------------------------------------------------------------
-// TrackingData* GetTrackingData(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a TrackingData object from the configuration
- *
- * @param name The name of the TrackingData object
- *
- * @return The named TrackingData object
- */
-//------------------------------------------------------------------------------
-TrackingData* Moderator::GetTrackingData(const std::string &name)
-{
-   if (name == "")
-      return NULL;
-   else
-      return (TrackingData*)FindObject(name);
-}
+//// TrackingData
+////------------------------------------------------------------------------------
+//// TrackingData* CreateTrackingData(const std::string &name)
+////------------------------------------------------------------------------------
+///**
+// * Creates a new named TrackingData object and adds it to the configuration
+// *
+// * @param name The name of the new TrackingData object
+// *
+// * @return The new TrackingData object
+// */
+////------------------------------------------------------------------------------
+//TrackingData* Moderator::CreateTrackingData(const std::string &name)
+//{
+//   #if DEBUG_CREATE_RESOURCE
+//   MessageInterface::ShowMessage("====================\n");
+//   MessageInterface::ShowMessage("Moderator::CreateTrackingData() name='%s'\n",
+//                                 name.c_str());
+//   #endif
+//
+//   if (GetTrackingData(name) == NULL)
+//   {
+//      TrackingData *obj = theFactoryManager->CreateTrackingData(name);
+//
+//      if (obj == NULL)
+//      {
+//         MessageInterface::PopupMessage
+//            (Gmat::ERROR_, "The Moderator cannot create a TrackingData object."
+//             "\nMake sure TrackingData is correct type and registered to "
+//             "TrackingDataFactory.\n");
+//         return NULL;
+//      }
+//
+//      #ifdef DEBUG_MEMORY
+//      if (obj)
+//      {
+//         std::string funcName;
+//         funcName = currentFunction ? "function: " + currentFunction->GetName() : "";
+//         MemoryTracker::Instance()->Add
+//            (obj, name, "Moderator::CreateTrackingData()", funcName);
+//      }
+//      #endif
+//      
+//      if (name != "")
+//      {
+//         if (objectManageOption == 1)
+//            theConfigManager->AddTrackingData(obj);
+//         else if (objectManageOption == 2)
+//            AddObject((GmatBase*)obj);
+//      }
+//      
+//      #if DEBUG_CREATE_RESOURCE
+//      MessageInterface::ShowMessage
+//         ("Moderator::CreateTrackingData() returning new TrackingData "
+//               "<%p>\n", obj);
+//      #endif
+//      
+//      return obj;
+//   }
+//   else
+//   {
+//      #if DEBUG_CREATE_RESOURCE
+//      MessageInterface::ShowMessage
+//         ("Moderator::CreateTrackingData() Unable to create "
+//          "TrackingData name: %s already exists\n", name.c_str());
+//      #endif
+//      return GetTrackingData(name);
+//   }
+//}
+//
+////------------------------------------------------------------------------------
+//// TrackingData* GetTrackingData(const std::string &name)
+////------------------------------------------------------------------------------
+///**
+// * Retrieves a TrackingData object from the configuration
+// *
+// * @param name The name of the TrackingData object
+// *
+// * @return The named TrackingData object
+// */
+////------------------------------------------------------------------------------
+//TrackingData* Moderator::GetTrackingData(const std::string &name)
+//{
+//   if (name == "")
+//      return NULL;
+//   else
+//      return (TrackingData*)FindObject(name);
+//}
 
 
-//------------------------------------------------------------------------------
-// CoreMeasurement* CreateMeasurement(const std::string &type,
-//       const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * This method calls the FactoryManager to create a new CoreMeasurement object
- *
- * @param type The type of measurement object needed
- * @param name The new object's name, is it is to be configured
- *
- * @return The new object's pointer
- */
-//------------------------------------------------------------------------------
-CoreMeasurement* Moderator::CreateMeasurement(const std::string &type,
-      const std::string &name)
-{
-   #if DEBUG_CREATE_RESOURCE
-   MessageInterface::ShowMessage("====================\n");
-   MessageInterface::ShowMessage("Moderator::CreateMeasurement() name='%s'\n",
-                                 name.c_str());
-   #endif
-
-   if (GetMeasurement(type, name) == NULL)
-   {
-      CoreMeasurement *obj = theFactoryManager->CreateMeasurement(type, name);
-
-      if (obj == NULL)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, "The Moderator cannot create a Measurement.\n"
-             "Make sure Measurement %s is correct type and registered to "
-             "MeasurementFactory.\n", type.c_str());
-         return NULL;
-      }
-
-      #ifdef DEBUG_MEMORY
-      if (obj)
-      {
-         std::string funcName;
-         funcName = currentFunction ? "function: " + currentFunction->GetName() : "";
-         MemoryTracker::Instance()->Add
-            (obj, name, "Moderator::CreateMeasurementModel()", funcName);
-      }
-      #endif
-
-      if (name != "")
-      {
-         if (objectManageOption == 1)
-            theConfigManager->AddMeasurement(obj);
-         else if (objectManageOption == 2)
-            AddObject((GmatBase*)obj);
-      }
-      
-      #if DEBUG_CREATE_RESOURCE
-      MessageInterface::ShowMessage
-         ("Moderator::CreateMeasurement() returning new Measurement "
-               "<%p>\n", obj);
-      #endif
-
-      return obj;
-   }
-   else
-   {
-      #if DEBUG_CREATE_RESOURCE
-      MessageInterface::ShowMessage
-         ("Moderator::CreateMeasurement() Unable to create "
-          "Measurement name: %s already exist\n", name.c_str());
-      #endif
-      return GetMeasurement(type, name);
-   }
-}
-
-//------------------------------------------------------------------------------
-// CoreMeasurement* GetMeasurement(const std::string &type,
-//       const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * This method finds a configured CoreMeasurement
- *
- * @param type The type of measurement object needed
- * @param name The new object's name, is it is to be configured
- *
- * @return The object's pointer; NULL if the object is not in the configuration
- */
-//------------------------------------------------------------------------------
-CoreMeasurement* Moderator::GetMeasurement(const std::string &type,
-      const std::string &name)
-{
-   if (name == "")
-      return NULL;
-   else
-      return (CoreMeasurement*)FindObject(name);
-}
+//////------------------------------------------------------------------------------
+////// CoreMeasurement* CreateMeasurement(const std::string &type,
+//////       const std::string &name)
+//////------------------------------------------------------------------------------
+/////**
+//// * This method calls the FactoryManager to create a new CoreMeasurement object
+//// *
+//// * @param type The type of measurement object needed
+//// * @param name The new object's name, is it is to be configured
+//// *
+//// * @return The new object's pointer
+//// */
+//////------------------------------------------------------------------------------
+////CoreMeasurement* Moderator::CreateMeasurement(const std::string &type,
+////      const std::string &name)
+////{
+////   #if DEBUG_CREATE_RESOURCE
+////   MessageInterface::ShowMessage("====================\n");
+////   MessageInterface::ShowMessage("Moderator::CreateMeasurement() name='%s'\n",
+////                                 name.c_str());
+////   #endif
+////
+////   if (GetMeasurement(type, name) == NULL)
+////   {
+////      CoreMeasurement *obj = theFactoryManager->CreateMeasurement(type, name);
+////
+////      if (obj == NULL)
+////      {
+////         MessageInterface::PopupMessage
+////            (Gmat::ERROR_, "The Moderator cannot create a Measurement.\n"
+////             "Make sure Measurement %s is correct type and registered to "
+////             "MeasurementFactory.\n", type.c_str());
+////         return NULL;
+////      }
+////
+////      #ifdef DEBUG_MEMORY
+////      if (obj)
+////      {
+////         std::string funcName;
+////         funcName = currentFunction ? "function: " + currentFunction->GetName() : "";
+////         MemoryTracker::Instance()->Add
+////            (obj, name, "Moderator::CreateMeasurementModel()", funcName);
+////      }
+////      #endif
+////
+////      if (name != "")
+////      {
+////         if (objectManageOption == 1)
+////            theConfigManager->AddMeasurement(obj);
+////         else if (objectManageOption == 2)
+////            AddObject((GmatBase*)obj);
+////      }
+////      
+////      #if DEBUG_CREATE_RESOURCE
+////      MessageInterface::ShowMessage
+////         ("Moderator::CreateMeasurement() returning new Measurement "
+////               "<%p>\n", obj);
+////      #endif
+////
+////      return obj;
+////   }
+////   else
+////   {
+////      #if DEBUG_CREATE_RESOURCE
+////      MessageInterface::ShowMessage
+////         ("Moderator::CreateMeasurement() Unable to create "
+////          "Measurement name: %s already exist\n", name.c_str());
+////      #endif
+////      return GetMeasurement(type, name);
+////   }
+////}
+////
+//////------------------------------------------------------------------------------
+////// CoreMeasurement* GetMeasurement(const std::string &type,
+//////       const std::string &name)
+//////------------------------------------------------------------------------------
+/////**
+//// * This method finds a configured CoreMeasurement
+//// *
+//// * @param type The type of measurement object needed
+//// * @param name The new object's name, is it is to be configured
+//// *
+//// * @return The object's pointer; NULL if the object is not in the configuration
+//// */
+//////------------------------------------------------------------------------------
+////CoreMeasurement* Moderator::GetMeasurement(const std::string &type,
+////      const std::string &name)
+////{
+////   if (name == "")
+////      return NULL;
+////   else
+////      return (CoreMeasurement*)FindObject(name);
+////}
 
 
 // DataFile
@@ -5200,6 +5489,16 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
             {
                // add default spacecraft and coordinate system
                obj->SetStringParameter("Spacecraft", GetDefaultSpacecraft()->GetName());
+            }
+            else if (type == "DynamicDataDisplay")
+            {
+               // add two empty rows and columns to the display
+               obj->SetStringParameter("AddParameters", "1", 0);
+               obj->SetStringParameter("AddParameters", "", 1);
+               obj->SetStringParameter("AddParameters", "", 1);
+               obj->SetStringParameter("AddParameters", "2", 0);
+               obj->SetStringParameter("AddParameters", "", 1);
+               obj->SetStringParameter("AddParameters", "", 1);
             }
          }
       }
@@ -6912,8 +7211,21 @@ Integer Moderator::RunMission(Integer sandboxNum)
       ("Moderator::RunMission() HasConfigurationChanged()=%d\n", HasConfigurationChanged());
    #endif
    
-   clock_t t1 = clock(); // Should I clock after initilization?
-   
+//   clock_t t1 = clock(); // Should I clock after initilization?
+   //Retrieve the system time. This result is UTCGregorian, but not in the accepted
+   //GMAT format.
+   std::chrono::system_clock::time_point time1 = std::chrono::system_clock::now();
+   long int millis1 =
+         std::chrono::duration_cast<std::chrono::milliseconds>
+         (time1.time_since_epoch()).count();
+
+   #ifdef DEBUG_TIME_SYSTEM
+      // What is the epoch time?
+      std::chrono::time_point<std::chrono::system_clock> p1;
+      std::time_t epoch_time = std::chrono::system_clock::to_time_t(p1);
+      std::string epstr = std::ctime(&epoch_time);
+   #endif
+
    if (isRunReady)
    {
       // clear sandbox
@@ -7055,6 +7367,17 @@ Integer Moderator::RunMission(Integer sandboxNum)
          MessageInterface::ShowMessage
             ("Moderator::RunMission() Unknown error occurred during Mission Run.\n");
          status = -6;
+
+         #ifdef REPORT_UNHANDLED_EXCEPTIONS
+            std::exception_ptr p = std::current_exception();
+            std::stringstream msg;
+            msg << (p ? p.__cxa_exception_type()->name() : "null") << "\n";
+            MessageInterface::ShowMessage(msg.str().c_str());
+         #endif
+
+         // Tell commands to reset their run states
+         commands[sandboxNum-1]->RunComplete(true);
+
          //throw; // LOJ: We want to finish up the clearing process below
       }
 		} // if (isRunReady)
@@ -7083,10 +7406,21 @@ Integer Moderator::RunMission(Integer sandboxNum)
    else
       MessageInterface::ShowMessage("*** Mission run failed.\n");
    
-   clock_t t2 = clock();
-   MessageInterface::ShowMessage
-      ("===> Total Run Time: %f seconds\n", (Real)(t2-t1)/CLOCKS_PER_SEC);
+//   clock_t t2 = clock();
+
+   std::chrono::system_clock::time_point time2 = std::chrono::system_clock::now();
+   long int millis2 =
+         std::chrono::duration_cast<std::chrono::milliseconds>
+         (time2.time_since_epoch()).count();
+
+   Real ms = millis2 - millis1;
+
+   //MessageInterface::ShowMessage
+   //   ("===> Total Run Time: %f seconds\n", (Real)(t2-t1)/CLOCKS_PER_SEC);
    
+   MessageInterface::ShowMessage
+      ("===> Total Run Time: %.3lf seconds\n", (ms/1000));
+
    #ifdef DEBUG_MEMORY
    StringArray tracks = MemoryTracker::Instance()->GetTracks(false, false);
    MessageInterface::ShowMessage
@@ -7776,13 +8110,13 @@ void Moderator::CreateTimeFile()
    theEopFile = new EopFile(filename);
    //theEopFile->Initialize();                                        // made changes by TUAN NGUYEN
    
-   TimeConverterUtil::SetLeapSecsFileReader(theLeapSecsFile);
+   theTimeConverter->SetLeapSecsFileReader(theLeapSecsFile);
 
-   // The step to initialize EOP file has to be done after Leap Second file is set to TimeConverterUtil 
+   // The step to initialize EOP file has to be done after Leap Second file is set to TimeSystemConverter
    // due to theEopFile->Initialize() has step to convert time from UTC to A1
    theEopFile->Initialize();                                        // made changes by TUAN NGUYEN
 
-   TimeConverterUtil::SetEopFile(theEopFile);
+   theTimeConverter->SetEopFile(theEopFile);
    GmatGlobal::Instance()->SetEopFile(theEopFile);
 }
 
@@ -7969,7 +8303,7 @@ void Moderator::CreateSolarSystemInUse()
           theDefaultSolarSystem);
       #endif
       
-      theSolarSystemInUse = theDefaultSolarSystem->Clone();
+      theSolarSystemInUse = (SolarSystem*) theDefaultSolarSystem->Clone();
       theSolarSystemInUse->SetName("SolarSystem");
       
       #ifdef DEBUG_MEMORY
@@ -8661,6 +8995,10 @@ void Moderator::CreateDefaultParameters()
    CreateParameter("DragArea", "DefaultSC.DragArea");
    CreateParameter("SRPArea", "DefaultSC.SRPArea");
    CreateParameter("TotalMass", "DefaultSC.TotalMass");
+
+   CreateParameter("SPADDragScaleFactor", "DefaultSC.SPADDragScaleFactor");     // made changes by TUAN NGUYEN
+   CreateParameter("SPADSRPScaleFactor", "DefaultSC.SPADSRPScaleFactor");       // made changes by TUAN NGUYEN
+
    #if DEBUG_DEFAULT_MISSION > 1
    MessageInterface::ShowMessage("-->default ballistic/mass parameters created\n");
    #endif
@@ -10602,6 +10940,8 @@ Moderator::Moderator()
    isRunReady = false;
    showFinalState = false;
    loadSandboxAndPause = false;
+   isInitialized = false;
+   thePublisher = NULL;
    theDefaultSolarSystem = NULL;
    theSolarSystemInUse = NULL;
    theInternalCoordSystem = NULL;

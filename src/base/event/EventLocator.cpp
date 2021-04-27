@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -174,6 +174,8 @@ EventLocator::EventLocator(const std::string &typeStr,
    occultingBodies.clear();
    defaultOccultingBodies.clear();
    // default occulting bodies are set in the leaf classes
+
+   theTimeConverter = TimeSystemConverter::Instance();
 }
 
 
@@ -251,6 +253,7 @@ EventLocator::EventLocator(const EventLocator& el) :
       defaultOccultingBodies.push_back((el.defaultOccultingBodies).at(i));
    }
 
+   theTimeConverter = TimeSystemConverter::Instance();
    isInitialized    = false;
 }
 
@@ -627,7 +630,7 @@ bool EventLocator::SetStringParameter(const Integer id,
    }
    if (id == INPUT_EPOCH_FORMAT)
    {
-      if (TimeConverterUtil::IsValidTimeSystem(value))
+      if (theTimeConverter->IsValidTimeSystem(value))
       {
          epochFormat = value;
          return true;
@@ -1256,7 +1259,7 @@ void EventLocator::SetEpoch(const std::string &ep, Integer id)
    Real        epochAsReal = 0.0;
    std::string timeSystem;
    std::string timeFormat;
-   TimeConverterUtil::GetTimeSystemAndFormat(epochFormat, timeSystem, timeFormat);
+   theTimeConverter->GetTimeSystemAndFormat(epochFormat, timeSystem, timeFormat);
    #ifdef DEBUG_DATE_FORMAT
       MessageInterface::ShowMessage("epochFormat = %s\n", epochFormat.c_str());
       MessageInterface::ShowMessage("timeSystem  = %s\n", timeSystem.c_str());
@@ -1280,7 +1283,7 @@ void EventLocator::SetEpoch(const std::string &ep, Integer id)
    Real epochIn = -999.999;
    std::string noQuotes = GmatStringUtil::RemoveEnclosingString(epochString, "'");
    std::string outStr;
-   TimeConverterUtil::Convert(epochFormat, epochIn, noQuotes,
+   theTimeConverter->Convert(epochFormat, epochIn, noQuotes,
                              "A1ModJulian", epochAsReal, outStr);
    if (id == INITIAL_EPOCH)
    {
@@ -1327,7 +1330,7 @@ std::string EventLocator::GetEpochString(const std::string &whichOne,
       if ((outFormat == defaultFormat) && GmatMathUtil::IsEqual(initialEp, defaultInitialEpoch))
          outStr =  initialEpoch;
       else
-         TimeConverterUtil::Convert("A1ModJulian", initialEp, "",
+         theTimeConverter->Convert("A1ModJulian", initialEp, "",
                                      outputFormat, outMjd, outStr);
    }
    else if (whichOne == "FINAL")
@@ -1335,7 +1338,7 @@ std::string EventLocator::GetEpochString(const std::string &whichOne,
       if ((outFormat == defaultFormat) && GmatMathUtil::IsEqual(finalEp, defaultFinalEpoch))
          outStr =  finalEpoch;
       else
-         TimeConverterUtil::Convert("A1ModJulian", finalEp, "",
+         theTimeConverter->Convert("A1ModJulian", finalEp, "",
                                      outputFormat, outMjd, outStr);
    }
    else
@@ -1952,7 +1955,7 @@ Real EventLocator::EpochToReal(const std::string &ep)
       }
    }
 
-   TimeConverterUtil::Convert(epochFormat, fromMjd, epNoQuote, "A1ModJulian", outMjd,
+   theTimeConverter->Convert(epochFormat, fromMjd, epNoQuote, "A1ModJulian", outMjd,
                               outStr);
    #ifdef DEBUG_DATE_FORMAT
       MessageInterface::ShowMessage
@@ -2126,9 +2129,9 @@ std::string EventLocator::GetNoEventsString(const std::string &forType)
    std::string noEvents;
 
 
-   TimeConverterUtil::Convert("A1ModJulian", findStart, "",
+   theTimeConverter->Convert("A1ModJulian", findStart, "",
                               outputFormat, resultMjd, fromGregorian);
-   TimeConverterUtil::Convert("A1ModJulian", findStop, "",
+   theTimeConverter->Convert("A1ModJulian", findStop, "",
                               outputFormat, resultMjd, toGregorian);
 
    noEvents  = "There are no ";

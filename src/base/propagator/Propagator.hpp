@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -139,10 +139,13 @@ public:
 
    virtual void Update(bool forwards = true);
    virtual void ResetInitialData();
+   virtual void UpdateInitialData(bool dynamicOnly = false, bool updateEpoch = true);
    const Real* AccessOutState();
 
-   virtual Integer GetPropagatorOrder(void) const;
+   virtual Integer GetPropagatorOrder() const;
    virtual bool UsesODEModel();
+   std::string GetPropOriginName();
+   SpacePoint* GetPropOrigin();
 
    // Methods that control behavior for analytic or interpolation evolution
    // operators
@@ -205,9 +208,9 @@ public:
 
    enum
    {
-      INITIAL_STEP_SIZE = GmatBaseParamCount, /// Stepsize for the propagation
+      INITIAL_STEP_SIZE = GmatBaseParamCount, ///< Stepsize for the propagation
       AlwaysUpdateStepsize,
-      PropagatorParamCount                    /// Count of the parameters for this class
+      PropagatorParamCount                    ///< Count of the parameters for this class
    };
 
    DEFAULT_TO_NO_CLONES
@@ -240,6 +243,8 @@ protected:
    PhysicalModel *physicalModel;
    /// Flag used to detect if the code is taking the last Propagate step
    bool finalStep;
+   /// Flag used to detect if the step is a follow up to a shortened step by GetForceMaxStep
+   bool followUpStep;
 
    // Pieces for prop with origin code
    /// Name of the common J2000 body that the state providers all use
@@ -250,6 +255,9 @@ protected:
    std::string                centralBody;
    /// Pointer to the central body
    SpacePoint                *propOrigin;
+
+   /// State accessot for derived analytic propagators; default returns nullptr
+   virtual Real* GetAnalyticState();
 
    virtual void MoveToOrigin(Real newEpoch = -1.0);
    virtual void ReturnFromOrigin(Real newEpoch = -1.0);

@@ -55,6 +55,7 @@ protected:
    Rvector3 nutationReferenceVectorNormalized;
 
    virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime);   
+   virtual void ComputeCosineMatrixAndAngularVelocity(GmatTime &atTime);          // made changes by TUAN NGUYEN
 
 private:
    // Default constructor - not implemented

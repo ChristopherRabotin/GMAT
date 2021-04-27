@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2016 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -50,18 +50,17 @@ public:
    RealMatData(const RealMatData &rd);
    RealMatData& operator=(const RealMatData &rd);
 
-   virtual bool AddData(const Matrix &data);
+   virtual bool AddData(const Matrix &data, bool isJaggedData = false);
+   virtual bool AddData(const std::vector<Matrix> &data);
    virtual void WriteData(MATFile *pmat, const std::string &obj_name,
-        mxArray *mat_struct);
+        mxArray *mat_struct, mwIndex index = 0U);
    virtual bool WriteData();
 
 protected:
    /// The data array to be written
    std::vector< RealArray> realData;
-   /// Row count for the data
-   int m_size;
-   /// Column count for the data
-   int n_size;
+   /// The 3D data array to be written
+   std::vector< Matrix> realData3D;
 
    /// The data
    double *data_tmp;

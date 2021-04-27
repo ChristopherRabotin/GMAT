@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -228,6 +228,15 @@ const StringArray& StringObjectWrapper::GetRefObjectNames()
 //---------------------------------------------------------------------------
 bool StringObjectWrapper::SetRefObject(GmatBase *obj)
 {
+   #ifdef DEBUG_STRING_WRAPPER
+   if (!obj)
+      MessageInterface::ShowMessage(
+               " StringObjectWrapper::SetRefObject with object = NULL\n");
+   else
+      MessageInterface::ShowMessage(
+            " StringObjectWrapper::SetRefObject with object %s\n",
+            (obj->GetName()).c_str());
+   #endif
    bool isOk   = false;
    if ( (obj->IsOfType("String")) && (obj->GetName() == stringName) )
    {

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -622,6 +622,7 @@ void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModifie
       mDelayBuild = true;
    }
    
+   // This yield and the next one seem superfluous; leaving for now
    wxYield();
    
    #ifdef DEBUG_ACTIVE_SCRIPT
@@ -682,6 +683,7 @@ void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModifie
       }
    }
    
+   // This yield and the previous one seem superfluous; leaving for now
    wxYield();
    
    // If continue building, set script file name and build script

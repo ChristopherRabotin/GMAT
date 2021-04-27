@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -513,6 +513,52 @@ Integer PropSetup::GetNumForces()
    return mODEModel->GetNumForces();
 }
 
+
+//------------------------------------------------------------------------------
+// void AddPropObject(GmatBase* sat)
+//------------------------------------------------------------------------------
+/**
+ * Add an object capable of being propagated to the propagation system.
+ *
+ * @param sat The object to add to the propagation system
+ */
+ //------------------------------------------------------------------------------
+void PropSetup::AddPropObject(GmatBase* sat)
+{
+   psm.SetObject(sat);
+}
+
+
+//------------------------------------------------------------------------------
+// void PrepareInternals()
+//------------------------------------------------------------------------------
+/**
+ * Prepares the internal objects: the PropagationStateManager, Propagator
+ * and ODEModel associated with the PropSetup.
+ */
+ //------------------------------------------------------------------------------
+void PropSetup::PrepareInternals()
+{
+   // Use precision time setting from ODE model
+   psm.GetState()->SetPrecisionTimeFlag(mODEModel->HasPrecisionTime());
+   psm.BuildState();
+
+   // Pass the state manager to the dynamics model
+   mODEModel->SetPropStateManager(&psm);
+   mODEModel->SetState(psm.GetState());
+
+   // Assemble all of the force model objects together
+   mODEModel->Initialize();
+
+   // Finish the force model setup
+   mODEModel->BuildModelFromMap();
+   mODEModel->UpdateInitialData();
+
+   // Initialize the Propagator components
+   Initialize();
+   mPropagator->Initialize();
+}
+
 //------------------------------------------------------------------------------
 // const std::string* GetParameterList() const
 //------------------------------------------------------------------------------
@@ -937,7 +983,7 @@ std::string PropSetup::GetStringParameter(const Integer id) const
    {
    case PROPAGATOR:
       if (mPropagator)
-         name = mPropagator->GetName();
+         name = mPropagator->GetTypeName();
       else
          name = "UndefinedPropagator";
       break;
@@ -1868,7 +1914,9 @@ Integer PropSetup::GetOwnedObjectId(Integer id, UnsignedInt objType) const
 bool PropSetup::SetPrecisionTimeFlag(bool onOff)
 {
    mPropagator->SetPrecisionTimeFlag(onOff);
-   mODEModel->SetPrecisionTimeFlag(onOff);
+   // Ephemeris propagators do not have ODE models
+   if (mODEModel)
+      mODEModel->SetPrecisionTimeFlag(onOff);
    psm.GetState()->SetPrecisionTimeFlag(onOff);
 
    return GmatBase::SetPrecisionTimeFlag(onOff);

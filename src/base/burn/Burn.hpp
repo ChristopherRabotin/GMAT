@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -113,7 +113,7 @@ public:
     * model the burn.  The parameter is provided so that the derived classes 
     * have an interface to pass in additional data as needed.
     * 
-    * @param <burnData>    Array of data specific to the derived burn class. 
+    * @param burnData    Array of data specific to the derived burn class. 
     *
     * @return true on success, false or throw on failure.
     */

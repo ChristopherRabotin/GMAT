@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -60,8 +60,8 @@
  * http://chemical.caeds.eng.uml.edu/onlinec/white/math/s1/s1num/s1num.html
  * or in Bate, Mueller and White, pp. 415-417.
  *
- * The predictor step extrapolates the next state \f$r_{i+1}\f$ of the variables
- * using the the derivative information \f$(f)\f$ at the current state and three 
+ * The predictor step extrapolates the next state \f$ r_{i+1} \f$ of the variables
+ * using the the derivative information \f$ (f) \f$ at the current state and three 
  * previous states of the variables, by applying the equation
  *
  * \f[ r_{i+1}^{*j} = r_i^j + {{h}\over{24}}\left[55 f_n^j - 59 f_{n-1}^j 
@@ -76,7 +76,7 @@
  *
  * Bate, Mueller and White give the estimated accuracy of this solution to be
  *
- * \f[ee = {{19}\over{270}} \left|r_{i+1}^{*j} - r_{i+1}^{j}\right|\f]
+ * \f[ ee = {{19}\over{270}} \left|r_{i+1}^{*j} - r_{i+1}^{j}\right| \f]
  */
  
 class GMAT_API AdamsBashforthMoulton :
@@ -91,7 +91,7 @@ public:
     AdamsBashforthMoulton(const AdamsBashforthMoulton& abm);
     AdamsBashforthMoulton    operator=(const AdamsBashforthMoulton& abm);
 
-    virtual Propagator*     Clone() const;
+    virtual GmatBase*       Clone() const;
 
 protected:
     /// The error estimate prefactor

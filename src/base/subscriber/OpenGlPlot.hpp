@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -309,7 +309,7 @@ protected:
    virtual bool Distribute(Integer len);
    virtual bool Distribute(const Real * dat, Integer len);
    
-   const static int MAX_SP_COLOR = 15;
+   static const int MAX_SP_COLOR = 15;
    static const UnsignedInt DEFAULT_ORBIT_COLOR[MAX_SP_COLOR];
    
 };

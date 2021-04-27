@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -68,6 +68,8 @@ public:
    virtual std::string GetMessage();
    virtual void PutMessage(const std::string &msg);
    virtual void ClearMessageQueue();
+
+   virtual void ToggleConsolePrinting(bool printToCon);
    
    // Other methods not implemented for the ConsoleMessageReceiver
    //virtual int  GetNumberOfMessageLines();
@@ -90,6 +92,7 @@ private:
    FILE *logFile;
    bool logEnabled;
    bool logFileSet;
+   bool printToConsole;
    std::ostream *msgStream;
    
    ConsoleMessageReceiver();

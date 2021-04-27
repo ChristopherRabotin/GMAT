@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -145,7 +145,7 @@ bool Troposphere::SetTime(GmatEpoch ep)
 *  Parameters required are determined by the Troposphere model used
 *  Supported Troposphere models are HopfieldSaastamoinen and Marini
 *  return double[] containing tropospheric refraction corrections for range (m)
-*                             elevation (arcsec) measurements
+*                             elevation (rad) measurements                     // made changes by TUAN NGUYEN
 *                             media correction time delay (second)
 */
 //------------------------------------------------------------------------------
@@ -172,7 +172,7 @@ RealArray Troposphere::Correction()
 #ifdef DEBUG_TROPOSPHERE_CORRECTION
    MessageInterface::ShowMessage(" Troposphere correction result:\n");
    MessageInterface::ShowMessage("   Range correction = %f m\n", out[0]);
-   MessageInterface::ShowMessage("   Elevation angle correction = %f arcsec", out[1]);
+   MessageInterface::ShowMessage("   Elevation angle correction = %f rad", out[1]);
    MessageInterface::ShowMessage("   Time correction = %f sec\n", out[2]); 
 #endif
 
@@ -190,7 +190,7 @@ RealArray Troposphere::Correction()
 *  E double containing elevation angle in radians
 *  rho double containing range in m
 *  return double[] containing tropospheric refraction corrections for range (m)
-*                             elevation (arcsec) measurements
+*                             elevation (rad) measurements                        // made changes by TUAN NGUYEN
 *                             media correction time delay (second)
 */
 //------------------------------------------------------------------------------
@@ -309,8 +309,8 @@ RealArray Troposphere::CalculateHS()
 		dE = dE + N[j] * 1.0E-06 * sum2 / h[j];
 	}
 	drho = Crho * drho;
-	dE = Ce * 4.0 * cosE * dE/ rho;
-	dE = dE / GmatMathConstants::RAD_PER_ARCSEC;
+	dE = Ce * 4.0 * cosE * dE/ rho;                          // unit: radian
+	//dE = dE / GmatMathConstants::RAD_PER_ARCSEC;           // keep unit to be radian          // made changes by TUAN NGUYEN
 	
 	RealArray out;
 	out.push_back(drho);
@@ -333,7 +333,7 @@ RealArray Troposphere::CalculateHS()
 *  rho double containing range in m
 *  E double containing elevation angle in radians
 *  return double[] containing tropospheric refraction corrections for range (m)
-*                             elevation (arcsec) measurements
+*                             elevation (rad) measurements                            // made changes by TUAN NGUYEN
 *                             media correction time delay (second)
 */
 //------------------------------------------------------------------------------
@@ -444,10 +444,10 @@ RealArray Troposphere::CalculateMarini()
    //DRANGE = 1.D - 6 * NS * HT * (M - 0.5D - 6 * NS * (RS * COSEA * L) ** 2 / (RHO * HT))
    drho = 1.0E-6 * NS * HT * (M - 0.5E-6 * NS * GmatMathUtil::Pow(RS * COSEA * L, 2) / (RHO * HT));
 
-   dE = 1.0E-6 * NS * COSEA * (I - RS * L / RHO);
+   dE = 1.0E-6 * NS * COSEA * (I - RS * L / RHO);         // unit: radian
 
    drho *= GmatMathConstants::KM_TO_M;
-   dE /= GmatMathConstants::RAD_PER_ARCSEC;
+   //dE /= GmatMathConstants::RAD_PER_ARCSEC;         // keep unit to be radian     // made changes by TUAN NGUYEN
 
    RealArray out;
    out.push_back(drho);
@@ -495,21 +495,25 @@ void Troposphere::TROGET(Real FLATD, Real FLOND, Integer MON, Integer &NS, Real 
 
 
 //------------------------------------------------------------------------------
-// void Troposphere::BendingIntegral(Real FLATD, Real FLOND, Integer MON, Integer &NS, Real &HT)
+// void Troposphere::BendingIntegral(Real ALPHA, Real FF1_Tropo, Real FF2_Tropo,
+//                                   Real FO, Real F1, Real P)
 //------------------------------------------------------------------------------
 /** A FUNCTION WHICH APPROXIMATES THE BENDING INTEGRAL, I(ALPHA)
 *  Based on GTDS F.F
+*  NOTE: 'FF1_Tropo' and 'FF2_Tropo' are necessary because FF1 is an OS X
+*        Macro and the code will not compile with original argument name 'FF1'
 */
 //------------------------------------------------------------------------------
-Real Troposphere::BendingIntegral(Real ALPHA, Real FF1, Real FF2, Real FO, Real F1, Real P)
+Real Troposphere::BendingIntegral(Real ALPHA, Real FF1_Tropo, Real FF2_Tropo,
+                                  Real FO, Real F1, Real P)
 {
    Real PSQ, X1, X2, X3, X4, F;
    Real Q1 = 1.0;
 
    PSQ = P * P;
-   X1 = FF1 * PSQ;
-   X2 = FF2 * PSQ / FF1 - X1;
-   X3 = FO * FO * FF1 * (Q1 + X1 / X2) - (Q1 + F1*FF1);
+   X1 = FF1_Tropo * PSQ;
+   X2 = FF2_Tropo * PSQ / FF1_Tropo - X1;
+   X3 = FO * FO * FF1_Tropo * (Q1 + X1 / X2) - (Q1 + F1*FF1_Tropo);
    X4 = FO * X1 / X3 / P*1.21313;
    X3 = X2 / X3 * 1.320903;
    X2 = X2 * 1.08885;

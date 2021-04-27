@@ -1,0 +1,331 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>API Examples in Java &#8212; GMAT Tools and Extensions R2020a documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="GMAT API Cheat Sheet" href="../userguide/usage/CheatSheet.html" />
+    <link rel="prev" title="Comparison of the SWIG Prototype with the Production API" href="PrototypeProductionComparison.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../userguide/usage/CheatSheet.html" title="GMAT API Cheat Sheet"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="PrototypeProductionComparison.html" title="Comparison of the SWIG Prototype with the Production API"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GMAT Tools and Extensions R2020a documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../apiIndex.html" >DRAFT GMAT API Design and User’s Guide</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ReviewInfo.html" accesskey="U">Review and Prototype Information</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="api-examples-in-java">
+<span id="javaexamples"></span><h1>API Examples in Java<a class="headerlink" href="#api-examples-in-java" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference internal" href="../design/Examples.html#designexamples"><span class="std std-ref">API Examples</span></a> shows Python scripting for four common GMAT API use cases.
+This section shows those same use cases in Java.</p>
+<div class="section" id="time-system-conversion">
+<h2>Time System Conversion<a class="headerlink" href="#time-system-conversion" title="Permalink to this headline">¶</a></h2>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-number">Listing 28 </span><span class="caption-text">Time System Conversion in Java</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-java notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gmat.*</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TimeConvNew</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="c1">// Get the converter</span>
+        <span class="n">TimeSystemConverter</span> <span class="n">timeConverter</span> <span class="o">=</span> <span class="n">gmat</span><span class="o">.</span><span class="na">theTimeSystemConverter</span><span class="o">;</span>
+
+        <span class="c1">// Convert an epoch</span>
+        <span class="kt">double</span> <span class="n">UTCepoch</span> <span class="o">=</span> <span class="mf">21738.22145</span><span class="o">;</span>
+        <span class="kt">double</span> <span class="n">TAIepoch</span> <span class="o">=</span> <span class="n">timeConverter</span><span class="o">.</span><span class="na">Convert</span><span class="o">(</span><span class="n">UTCepoch</span><span class="o">,</span> <span class="n">UTC</span><span class="o">,</span> <span class="n">TAI</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+</div>
+<div class="section" id="coordinate-system-conversion">
+<h2>Coordinate System Conversion<a class="headerlink" href="#coordinate-system-conversion" title="Permalink to this headline">¶</a></h2>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-number">Listing 29 </span><span class="caption-text">Coordinate Conversion in Java</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-java notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gmat.*</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CoordConvNew</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="c1">// Initialize GMAT</span>
+        <span class="n">gmat</span><span class="o">.</span><span class="na">Setup</span><span class="o">(</span><span class="s">&quot;MyCustomStartupFile.txt&quot;</span><span class="o">);</span>
+
+        <span class="c1">// Setup the GMAT data structures for the conversion</span>
+        <span class="n">A1Mjd</span> <span class="n">mjd</span> <span class="o">=</span> <span class="k">new</span> <span class="n">A1Mjd</span><span class="o">(</span><span class="mf">22326.977184</span><span class="o">);</span>
+        <span class="n">Rvector6</span> <span class="n">rvIn</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Rvector6</span><span class="o">(</span><span class="mf">6988.427</span><span class="o">,</span> <span class="mf">1073.884</span><span class="o">,</span> <span class="mf">2247.333</span><span class="o">,</span> <span class="mf">0.019982</span><span class="o">,</span> <span class="mf">7.226988</span><span class="o">,</span> <span class="o">-</span><span class="mf">1.554962</span><span class="o">);</span>
+        <span class="n">Rvector6</span> <span class="n">rvOut</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Rvector6</span><span class="o">(</span><span class="mf">0.0</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">);</span>
+
+        <span class="c1">// Create the converter</span>
+        <span class="n">CoordinateConverter</span> <span class="n">csConverter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">CoordinateConverter</span><span class="o">();</span>
+
+        <span class="c1">// Create the input and output coordinate systems</span>
+        <span class="n">CoordinateSystem</span> <span class="n">eci</span> <span class="o">=</span> <span class="n">gmat</span><span class="o">.</span><span class="na">Create</span><span class="o">(</span><span class="s">&quot;CoordinateSystem&quot;</span><span class="o">,</span>
+                <span class="s">&quot;ECI&quot;</span><span class="o">,</span> <span class="s">&quot;Earth&quot;</span><span class="o">,</span> <span class="s">&quot;MJ2000Eq&quot;</span><span class="o">);</span>
+        <span class="n">CoordinateSystem</span> <span class="n">ecef</span> <span class="o">=</span> <span class="n">gmat</span><span class="o">.</span><span class="na">Create</span><span class="o">(</span><span class="s">&quot;CoordinateSystem&quot;</span><span class="o">,</span>
+                <span class="s">&quot;ECEF&quot;</span><span class="o">,</span> <span class="s">&quot;Earth&quot;</span><span class="o">,</span> <span class="s">&quot;BodyFixed&quot;</span><span class="o">);</span>
+
+        <span class="n">csConverter</span><span class="o">.</span><span class="na">Convert</span><span class="o">(</span><span class="n">mjd</span><span class="o">,</span> <span class="n">rvIn</span><span class="o">,</span> <span class="n">eci</span><span class="o">,</span> <span class="n">rvOut</span><span class="o">,</span> <span class="n">ecef</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+</div>
+<div class="section" id="force-modeling">
+<h2>Force Modeling<a class="headerlink" href="#force-modeling" title="Permalink to this headline">¶</a></h2>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-number">Listing 30 </span><span class="caption-text">Force Model Creation and Use in Java</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
+<div class="highlight-java notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gmat.*</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ForceModelNew</span> <span class="o">{</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span>
+  <span class="o">{</span>
+    <span class="n">ODEModel</span> <span class="n">dynamics</span> <span class="o">=</span> <span class="n">gmat</span><span class="o">.</span><span class="na">Create</span><span class="o">(</span><span class="s">&quot;ODEModel&quot;</span><span class="o">,</span><span class="s">&quot;FM&quot;</span><span class="o">);</span>
+
+    <span class="n">PointMassForce</span> <span class="n">epm</span> <span class="o">=</span> <span class="n">gmat</span><span class="o">.</span><span class="na">Create</span><span class="o">(</span><span class="s">&quot;PointMassForce&quot;</span><span class="o">,</span><span class="s">&quot;EPM&quot;</span><span class="o">);</span>
+    <span class="n">dynamics</span><span class="o">.</span><span class="na">AddForce</span><span class="o">(</span><span class="n">epm</span><span class="o">);</span>
+
+    <span class="n">gmat</span><span class="o">.</span><span class="na">Initialize</span><span class="o">();</span>
+
+    <span class="n">dynamics</span><span class="o">.</span><span class="na">GetDerivatives</span><span class="o">(</span><span class="n">state</span><span class="o">,</span> <span class="n">dt</span><span class="o">);</span>
+    <span class="kt">double</span><span class="o">[]</span> <span class="n">derivatives</span> <span class="o">=</span> <span class="n">dynamics</span><span class="o">.</span><span class="na">GetDerivativeArray</span><span class="o">();</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+</div>
+<div class="section" id="propagation">
+<h2>Propagation<a class="headerlink" href="#propagation" title="Permalink to this headline">¶</a></h2>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-number">Listing 31 </span><span class="caption-text">Propagation in Java</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
+<div class="highlight-java notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gmat.*</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">PropExampleNew</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="c1">// Setup the state for propagation</span>
+        <span class="kt">double</span><span class="o">[]</span> <span class="n">state</span> <span class="o">=</span> <span class="o">{</span><span class="mf">7000.0</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">,</span> <span class="mf">1000.0</span><span class="o">,</span> <span class="mf">0.0</span><span class="o">,</span> <span class="mf">8.0</span><span class="o">,</span> <span class="o">-</span><span class="mf">0.25</span><span class="o">};</span>
+        <span class="c1">// Setup a Earth/Sun/Moon force model</span>
+        <span class="c1">// note: Use Moderator for the forces and Python memory management won&#39;t seg fault</span>
+        <span class="n">ODEModel</span> <span class="n">dynamics</span> <span class="o">=</span> <span class="n">gmat</span><span class="o">.</span><span class="na">Create</span><span class="o">(</span><span class="s">&quot;ODEModel&quot;</span><span class="o">,</span> <span class="s">&quot;Forces&quot;</span><span class="o">);</span>
+
+        <span class="n">PhysicalModel</span> <span class="n">epm</span> <span class="o">=</span> <span class="n">gmat</span><span class="o">.</span><span class="na">Create</span><span class="o">(</span><span class="s">&quot;PointMassForce&quot;</span><span class="o">,</span> <span class="s">&quot;EarthPointMass&quot;</span><span class="o">);</span>
+        <span class="n">PhysicalModel</span> <span class="n">spm</span> <span class="o">=</span> <span class="n">gmat</span><span class="o">.</span><span class="na">Create</span><span class="o">(</span><span class="s">&quot;PointMassForce&quot;</span><span class="o">,</span> <span class="s">&quot;SunPointMass&quot;</span><span class="o">);</span>
+        <span class="n">PhysicalModel</span> <span class="n">mpm</span> <span class="o">=</span> <span class="n">gmat</span><span class="o">.</span><span class="na">Create</span><span class="o">(</span><span class="s">&quot;PointMassForce&quot;</span><span class="o">,</span> <span class="s">&quot;MoonPointMass&quot;</span><span class="o">);</span>
+        <span class="n">spm</span><span class="o">.</span><span class="na">SetStringParameter</span><span class="o">(</span><span class="s">&quot;BodyName&quot;</span><span class="o">,</span> <span class="s">&quot;Sun&quot;</span><span class="o">);</span>
+        <span class="n">mpm</span><span class="o">.</span><span class="na">SetStringParameter</span><span class="o">(</span><span class="s">&quot;BodyName&quot;</span><span class="o">,</span> <span class="s">&quot;Luna&quot;</span><span class="o">);</span>
+
+        <span class="n">dynamics</span><span class="o">.</span><span class="na">AddForce</span><span class="o">(</span><span class="n">epm</span><span class="o">);</span>
+        <span class="n">dynamics</span><span class="o">.</span><span class="na">AddForce</span><span class="o">(</span><span class="n">spm</span><span class="o">);</span>
+        <span class="n">dynamics</span><span class="o">.</span><span class="na">AddForce</span><span class="o">(</span><span class="n">mpm</span><span class="o">);</span>
+
+        <span class="c1">// Propagator configuration</span>
+        <span class="n">PrinceDormand78</span> <span class="n">prop</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PrinceDormand78</span><span class="o">(</span><span class="s">&quot;Propagator&quot;</span><span class="o">);</span>
+        <span class="n">prop</span><span class="o">.</span><span class="na">SetPhysicalModel</span><span class="o">(</span><span class="n">dynamics</span><span class="o">);</span>
+
+        <span class="n">gmat</span><span class="o">.</span><span class="na">Initialize</span><span class="o">();</span>
+
+        <span class="c1">// Set the propagation state</span>
+        <span class="n">dynamics</span><span class="o">.</span><span class="na">SetState</span><span class="o">(</span><span class="n">state</span><span class="o">);</span>
+
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="n">prop</span><span class="o">.</span><span class="na">Step</span><span class="o">(</span><span class="mf">60.0</span><span class="o">);</span>
+        <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">API Examples in Java</a><ul>
+<li><a class="reference internal" href="#time-system-conversion">Time System Conversion</a></li>
+<li><a class="reference internal" href="#coordinate-system-conversion">Coordinate System Conversion</a></li>
+<li><a class="reference internal" href="#force-modeling">Force Modeling</a></li>
+<li><a class="reference internal" href="#propagation">Propagation</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="PrototypeProductionComparison.html"
+                        title="previous chapter">Comparison of the SWIG Prototype with the Production API</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../userguide/usage/CheatSheet.html"
+                        title="next chapter">GMAT API Cheat Sheet</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/API/source/appendix/JavaExamples.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../userguide/usage/CheatSheet.html" title="GMAT API Cheat Sheet"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="PrototypeProductionComparison.html" title="Comparison of the SWIG Prototype with the Production API"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GMAT Tools and Extensions R2020a documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../apiIndex.html" >DRAFT GMAT API Design and User’s Guide</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ReviewInfo.html" >Review and Prototype Information</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018-2020, United States Government as represented by the Administrator of the National Aeronautics and Space Administration..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>

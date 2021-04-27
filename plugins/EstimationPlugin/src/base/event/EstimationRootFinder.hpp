@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -54,6 +54,9 @@ class ESTIMATION_API EstimationRootFinder
 public:
    EstimationRootFinder();
    ~EstimationRootFinder();
+   
+   virtual void CleanUp();                                    // made changes by TUAN NGUYEN
+
    EstimationRootFinder(const EstimationRootFinder& rl);
    EstimationRootFinder& operator=(const EstimationRootFinder& rl);
 

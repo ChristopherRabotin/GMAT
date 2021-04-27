@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -130,6 +130,7 @@ public:
    virtual const Rvector3  GetMJ2000Velocity(const GmatTime &atTime);
 
    virtual const Rvector3  GetBodyFixedLocation(const A1Mjd &atTime);
+   virtual const Rvector3  GetSphericalLocation(const A1Mjd &atTime);
    virtual CoordinateSystem*
                            GetBodyFixedCoordinateSystem() const;
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -741,16 +741,33 @@ Real JacchiaRobertsAtmosphere::exotherm(Real space_craft[2], Real sun[3],
 
    // Compute hour angle of the sun
    sun_denom = sqrt(sun[0]*sun[0] + sun[1]*sun[1]);
-   cross_denom = fabs(sun[0]*space_craft[1]-sun[1]*space_craft[0]);
+   cross_denom = fabs(sun[0] * space_craft[1] - sun[1] * space_craft[0]);
    cos_denom = sqrt(space_craft[0]*space_craft[0] + 
          space_craft[1]*space_craft[1]);
    if ((cross_denom < GmatRealConstants::REAL_TOL) || (cos_denom < GmatRealConstants::REAL_TOL))
       throw AtmosphereException("Numerical precision error in "
             "JacchiaRobertsAtmosphere::exotherm; denominator is too close to 0.0");
 
-   hour_angle = ( (sun[0]*space_craft[1]-sun[1]*space_craft[0])/cross_denom)
+
+   // acos(x) function has problem when x = 1.0000000000000001 or x=-1.000000000000000001. It returns NaN value             // made changes by TUAN NGUYEN
+   // Therefore, we need to check value of x at its boundaries                                                              // made changes by TUAN NGUYEN
+   Real errorTolerance = 1.0e-14;                                                                                            // made changes by TUAN NGUYEN
+   Real cosAlpha = (sun[0] * space_craft[0] + sun[1] * space_craft[1]) / (sun_denom * cos_denom);                           // made changes by TUAN NGUYEN
+   if (cosAlpha >= 1.0 - errorTolerance)                                                                               // made changes by TUAN NGUYEN
+   {
+      // cos(Alpha) = 1 that means Alpha = 0 radian
+      hour_angle = 0.0;                                                                                                     // made changes by TUAN NGUYEN
+   }
+   else if (cosAlpha <= -1.0 + errorTolerance)                                                                          // made changes by TUAN NGUYEN
+   {
+      // cos(Alpha) = -1 that means Alpha = PI
+      hour_angle = ((sun[0] * space_craft[1] - sun[1] * space_craft[0]) / cross_denom) * GmatMathConstants::PI;             // made changes by TUAN NGUYEN
+   }
+   else                                                                                                                     // made changes by TUAN NGUYEN
+      hour_angle = ( (sun[0]*space_craft[1]-sun[1]*space_craft[0])/cross_denom)
                 *acos((sun[0]*space_craft[0]+sun[1]*space_craft[1])/
                 (sun_denom * cos_denom));
+
 
    // Compute sun and spacecraft position dependent part of temperature
    theta = 0.5 * fabs(geo_lat + sun_dec);

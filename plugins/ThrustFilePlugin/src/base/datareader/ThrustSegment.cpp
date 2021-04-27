@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -21,7 +21,10 @@
 #include "ThrustSegment.hpp"
 #include "MessageInterface.hpp"
 #include "ODEModelException.hpp"
+#include "StringUtil.hpp"
 
+//#define DEBUG_TSF_SOLVEFOR
+//#define DEBUG_SOLVE_FOR_PARAMETERS
 
 //------------------------------------------------------------------------------
 // Field names and types
@@ -32,10 +35,13 @@ const std::string ThrustSegment::PARAMETER_LABEL[ThrustSegmentParamCount - GmatB
 {
    "ThrustScaleFactor",          // THRUSTSCALEFACTOR
    "ThrustScaleFactorSigma",     // TSF_SIGMA
-   "ThrustScaleFactor_MassFlow", // TSF_MASSFLOW
+   "ApplyThrustScaleToMassFlow", // TSF_MASSFLOW
    "MassFlowScaleFactor",        // MASSFLOWSCALEFACTOR
    "MassSource",                 // MASSSOURCE
-   "SolveFors"                   // SOLVEFORS
+   "SolveFors",                  // SOLVEFORS
+   "TSF_Epsilon",                // TSF_EPSILON
+   "StartEpoch",                 // START_EPOCH
+   "EndEpoch"                    // END_EPOCH
 };
 
 /// Types for each field
@@ -46,7 +52,10 @@ const Gmat::ParameterType ThrustSegment::PARAMETER_TYPE[ThrustSegmentParamCount 
    Gmat::BOOLEAN_TYPE,           // TSF_MASSFLOW
    Gmat::REAL_TYPE,              // MASSFLOWSCALEFACTOR
    Gmat::STRINGARRAY_TYPE,       // MASSSOURCE
-   Gmat::STRINGARRAY_TYPE        // SOLVEFORS
+   Gmat::STRINGARRAY_TYPE,       // SOLVEFORS
+   Gmat::REAL_TYPE,              // TSF_EPSILON
+   Gmat::REAL_TYPE,              // START_EPOCH
+   Gmat::REAL_TYPE               // END_EPOCH
 };
 
 
@@ -63,15 +72,23 @@ const Gmat::ParameterType ThrustSegment::PARAMETER_TYPE[ThrustSegmentParamCount 
 ThrustSegment::ThrustSegment(const std::string &name) :
    GmatBase                (Gmat::INTERFACE, "ThrustSegment", name),
    thrustScaleFactor       (1.0),
-   tsfSigma                (1.0e-8),
+   tsfEpsilon              (0.0),
+   tsfSigma                (1.0e70),
    depleteMass             (false),
    useMassAndThrustFactor  (false),
-   massFlowFactor          (1.0)
+   massFlowFactor          (1.0),
+   tsfIndex                (-1)
 {
    objectTypes.push_back(Gmat::INTERFACE);
    objectTypeNames.push_back("Interface");
    objectTypeNames.push_back("ThrustSegment");
    parameterCount = ThrustSegmentParamCount;
+
+   // Set default value to covariance matrix
+   covariance.AddCovarianceElement("TSF_Epsilon", this);
+   Real TSF_EpsilonSigma = tsfSigma / thrustScaleFactor;
+   Rvector value(1, TSF_EpsilonSigma*TSF_EpsilonSigma);
+   covariance.ConstructRHS(value, 0);
 }
 
 //------------------------------------------------------------------------------
@@ -97,13 +114,25 @@ ThrustSegment::~ThrustSegment()
 ThrustSegment::ThrustSegment(const ThrustSegment& ts) :
    GmatBase                (ts),
    thrustScaleFactor       (ts.thrustScaleFactor),
+   tsfEpsilon              (ts.tsfEpsilon),
    tsfSigma                (ts.tsfSigma),
    depleteMass             (ts.depleteMass),
    useMassAndThrustFactor  (ts.useMassAndThrustFactor),
-   massFlowFactor          (ts.massFlowFactor)
+   massFlowFactor          (ts.massFlowFactor),
+   tsfIndex                (ts.tsfIndex)
 {
    segData = ts.segData;
+   massSourceNames = ts.massSourceNames;
    massSource = ts.massSource;
+   solveFors = ts.solveFors;
+
+   // This step was done in GmatBase(ts)                      // made changes by TUAN NGUYEN
+   ////// Set TSF covariance
+   ////Integer locationStart = covariance.GetSubMatrixLocationStart("TSF_Epsilon");          // This step may causes crash due to TSF_Epsilon was not added to covariance
+   ////Real TSF_EpsilonSigma, tsf0;
+   ////tsf0 = thrustScaleFactor / (1 + tsfEpsilon);
+   ////TSF_EpsilonSigma = tsfSigma / tsf0;
+   ////covariance(locationStart, locationStart) = TSF_EpsilonSigma * TSF_EpsilonSigma;
 }
 
 //------------------------------------------------------------------------------
@@ -124,13 +153,25 @@ ThrustSegment& ThrustSegment::operator=(const ThrustSegment& ts)
       GmatBase::operator=(ts);
 
       thrustScaleFactor      = ts.thrustScaleFactor;
+      tsfEpsilon             = ts.tsfEpsilon;
       tsfSigma               = ts.tsfSigma;
       depleteMass            = ts.depleteMass;
       useMassAndThrustFactor = ts.useMassAndThrustFactor;
       massFlowFactor         = ts.massFlowFactor;
+      tsfIndex               = ts.tsfIndex;
       segData                = ts.segData;
+      massSourceNames        = ts.massSourceNames;
       massSource             = ts.massSource;
+      solveFors              = ts.solveFors;
    }
+
+   // This step was done in GmatBase::operator=(ts);                               // made changes by TUAN NGUYEN
+   ////// Set TSF covariance
+   ////Integer locationStart = covariance.GetSubMatrixLocationStart("TSF_Epsilon");
+   ////Real TSF_EpsilonSigma, tsf0;
+   ////tsf0 = thrustScaleFactor / (1 + tsfEpsilon);
+   ////TSF_EpsilonSigma = tsfSigma / tsf0;
+   ////covariance(locationStart, locationStart) = TSF_EpsilonSigma * TSF_EpsilonSigma;
 
    return *this;
 }
@@ -147,6 +188,190 @@ ThrustSegment& ThrustSegment::operator=(const ThrustSegment& ts)
 GmatBase* ThrustSegment::Clone() const
 {
    return new ThrustSegment(*this);
+}
+
+
+//------------------------------------------------------------------------------
+// bool HasRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Returns flag indicating whether GetRefObjectTypeArray() is implemented.
+ *
+ * @return true if an array will be returned
+ */
+ //------------------------------------------------------------------------------
+bool ThrustSegment::HasRefObjectTypeArray()
+{
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by this class.
+ *
+ * @return the list of object types.
+ *
+ */
+ //------------------------------------------------------------------------------
+const ObjectTypeArray& ThrustSegment::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::FUEL_TANK);
+   return refObjectTypes;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type)
+//------------------------------------------------------------------------------
+/**
+ * This method returns an array with the names of the referenced objects.
+ *
+ * @param type Type of the object.
+ *
+ * @return a vector with the names of objects of the requested type.
+ */
+ //------------------------------------------------------------------------------
+const StringArray& ThrustSegment::GetRefObjectNameArray(const UnsignedInt type)
+{
+
+   refObjectNames.clear();
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::FUEL_TANK)
+   {
+      // Add Tank names
+      refObjectNames.insert(refObjectNames.end(), massSourceNames.begin(), massSourceNames.end());
+   }
+
+   return refObjectNames;
+}
+
+
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const UnsignedInt type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/**
+ * Renames a referenced object.
+ *
+ * @param type Type of the object.
+ * @param oldName Old name of the object.
+ * @param newName New name of the object.
+ *
+ * @return true
+ */
+ //------------------------------------------------------------------------------
+bool ThrustSegment::RenameRefObject(const UnsignedInt type,
+   const std::string &oldName,
+   const std::string &newName)
+{
+   if (type == Gmat::FUEL_TANK)
+   {
+      for (UnsignedInt i = 0; i < massSourceNames.size(); i++)
+      {
+         if (massSourceNames[i] == oldName)
+         {
+            massSourceNames[i] = newName;
+            break;
+         }
+      }
+   }
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const UnsignedInt type,
+//                   const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Sets referenced objects.
+ *
+ * @param obj The object.
+ * @param type Type of the object.
+ * @param name Name of the object.
+ *
+ * @return true if the ref object was set, false if not.
+ */
+ //------------------------------------------------------------------------------
+bool ThrustSegment::SetRefObject(GmatBase *obj, const UnsignedInt type,
+   const std::string &name)
+{
+   if (obj == NULL)
+      return false;
+
+   if (obj->IsOfType("FuelTank"))
+   {
+      if (find(massSource.begin(), massSource.end(), obj) == massSource.end())
+      {
+         // Replace old tank with new one. We don't want to delete the
+         // old tank here since Spacecraft owns it (tank is not cloned in the
+         // copy constructor)
+         bool replaced = false;
+         for (UnsignedInt i = 0; i < massSource.size(); i++)
+         {
+            if (massSource[i]->GetName() == name)
+            {
+               massSource[i] = (FuelTank*)obj;
+               replaced = true;
+            }
+         }
+         if (!replaced)
+            massSource.push_back((FuelTank*)obj);
+      }
+
+      return true;
+   }
+
+   return GmatBase::SetRefObject(obj, type, name);
+}
+
+
+//---------------------------------------------------------------------------
+//  ObjectArray& GetRefObjectArray(const UnsignedInt type)
+//---------------------------------------------------------------------------
+/**
+ * Obtains an array of GmatBase pointers by type.
+ *
+ * @param type The type of objects requested
+ *
+ * @return Reference to the array.
+ */
+ //---------------------------------------------------------------------------
+ObjectArray& ThrustSegment::GetRefObjectArray(const UnsignedInt type)
+{
+   if (type == Gmat::FUEL_TANK)
+   {
+      objectArray.clear();
+      for (UnsignedInt i = 0; i < massSource.size(); ++i)
+         objectArray.push_back(massSource[i]);
+      return objectArray;
+   }
+
+   return GmatBase::GetRefObjectArray(type);
+}
+
+
+//---------------------------------------------------------------------------
+//  ObjectArray& GetRefObjectArray(const std::string& typeString)
+//---------------------------------------------------------------------------
+/**
+ * Obtains an array of GmatBase pointers based on a string (e.g. the typename).
+ *
+ * @param typeString The string used to find the objects requested.
+ *
+ * @return Reference to the array.  This default method returns an empty vector.
+ */
+ //---------------------------------------------------------------------------
+ObjectArray& ThrustSegment::GetRefObjectArray(const std::string& typeString)
+{
+   if ((typeString == "FuelTank") || (typeString == "Tanks"))
+      return GetRefObjectArray(Gmat::FUEL_TANK);
+
+   return GmatBase::GetRefObjectArray(type);
 }
 
 
@@ -249,9 +474,11 @@ std::string ThrustSegment::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool ThrustSegment::IsParameterReadOnly(const Integer id) const
 {
-   if (id == TSF_SIGMA)
-      if (solveFors.size() == 0)
-         return true;
+   if (id == TSF_EPSILON)
+      return true;
+
+   if (id == START_EPOCH || id == END_EPOCH)
+      return true;
 
    return GmatBase::IsParameterReadOnly(id);
 }
@@ -286,13 +513,22 @@ bool ThrustSegment::IsParameterReadOnly(const std::string &label) const
 Real ThrustSegment::GetRealParameter(const Integer id) const
 {
    if (id == THRUSTSCALEFACTOR)
-      return thrustScaleFactor;
+       return thrustScaleFactor * (1.0 + tsfEpsilon);
+
+   if (id == TSF_EPSILON)
+       return tsfEpsilon;
 
    if (id == TSF_SIGMA)
       return tsfSigma;
 
    if (id == MASSFLOWSCALEFACTOR)
       return massFlowFactor;
+
+   if (id == START_EPOCH)
+      return hasPrecisionTime ? segData.startEpochGT.GetMjd() : segData.startEpoch;
+
+   if (id == END_EPOCH)
+      return hasPrecisionTime ? segData.endEpochGT.GetMjd() : segData.endEpoch;
 
    return GmatBase::GetRealParameter(id);
 }
@@ -314,41 +550,43 @@ Real ThrustSegment::SetRealParameter(const Integer id, const Real value)
 {
    if (id == THRUSTSCALEFACTOR)
    {
-      if (value >= 0.0)
-         thrustScaleFactor = value;
-      else
-      {
-         std::stringstream buffer;
-         buffer << value;
-         throw ODEModelException(
-               "The value of \"" + buffer.str() + "\" for field \"ThrustScaleFactor\""
-               " on object \"" + instanceName + "\" is not an allowed value.\n"
-               "The allowed values are: [ Real Number >= 0.0 ].");
-      }
+      thrustScaleFactor = value;
+      tsfEpsilon = 0.0;
       return thrustScaleFactor;
    }
 
    if (id == TSF_SIGMA)
    {
-      if (value > 0.0)
-         tsfSigma = value;
+      if (value <= 0.0)
+         throw ODEModelException("Error: a nonpositive number was set to ThrustScaleFactorSigma. A valid value has to be a positive number.\n");
+
+      tsfSigma = value;
+
+      Real TsfEpsilonSigma, tsf0;
+      tsf0 = thrustScaleFactor / (1 + tsfEpsilon);
+      TsfEpsilonSigma = tsfSigma / tsf0;
+
+      Integer locationStart = covariance.GetSubMatrixLocationStart("TSF_Epsilon");
+      covariance(locationStart, locationStart) = TsfEpsilonSigma * TsfEpsilonSigma;
+
       return tsfSigma;
+   }
+
+   if (id == TSF_EPSILON)
+   {
+       tsfEpsilon = value;
+       return tsfEpsilon;
    }
 
    if (id == MASSFLOWSCALEFACTOR)
    {
-      if (value >= 0.0)
-         massFlowFactor = value;
-      else
-      {
-          std::stringstream buffer;
-          buffer << value;
-          throw ODEModelException(
-                "The value of \"" + buffer.str() + "\" for field \"MassFlowFactor\""
-                " on object \"" + instanceName + "\" is not an allowed value.\n"
-                "The allowed values are: [ Real Number >= 0.0 ].");
-      }
+      massFlowFactor = value;
       return massFlowFactor;
+   }
+
+   if (id == START_EPOCH || id == END_EPOCH)
+   {
+      throw ODEModelException("Thrust segment epoch can only be set through the Thrust History File");
    }
 
    return GmatBase::SetRealParameter(id, value);
@@ -385,7 +623,8 @@ Real ThrustSegment::GetRealParameter(const Integer id, const Integer index) cons
  * @return The parameter's value.
  */
 //------------------------------------------------------------------------------
-Real ThrustSegment::GetRealParameter(const Integer id, const Integer row, const Integer col) const
+Real ThrustSegment::GetRealParameter(const Integer id, const Integer row,
+      const Integer col) const
 {
    return GmatBase::GetRealParameter(id, row, col);
 }
@@ -405,7 +644,8 @@ Real ThrustSegment::GetRealParameter(const Integer id, const Integer row, const 
  *         the parameter is not in a vector.
  */
 //---------------------------------------------------------------------------
-Real ThrustSegment::SetRealParameter(const Integer id, const Real value, const Integer index)
+Real ThrustSegment::SetRealParameter(const Integer id, const Real value,
+      const Integer index)
 {
    return GmatBase::SetRealParameter(id, value, index);
 }
@@ -427,7 +667,8 @@ Real ThrustSegment::SetRealParameter(const Integer id, const Real value, const I
  *         the parameter is not in an array.
  */
 //------------------------------------------------------------------------------
-Real ThrustSegment::SetRealParameter(const Integer id, const Real value, const Integer row, const Integer col)
+Real ThrustSegment::SetRealParameter(const Integer id, const Real value,
+      const Integer row, const Integer col)
 {
    return GmatBase::SetRealParameter(id, value, row, col);
 }
@@ -479,7 +720,8 @@ Real ThrustSegment::SetRealParameter(const std::string &label, const Real value)
  * @return The parameter's value.
  */
 //------------------------------------------------------------------------------
-Real ThrustSegment::GetRealParameter(const std::string &label, const Integer index) const
+Real ThrustSegment::GetRealParameter(const std::string &label,
+      const Integer index) const
 {
    return GetRealParameter(GetParameterID(label), index);
 }
@@ -501,7 +743,8 @@ Real ThrustSegment::GetRealParameter(const std::string &label, const Integer ind
  *         parameter type is not Real.
  */
 //------------------------------------------------------------------------------
-Real ThrustSegment::SetRealParameter(const std::string &label, const Real value, const Integer index)
+Real ThrustSegment::SetRealParameter(const std::string &label, const Real value,
+      const Integer index)
 {
    return SetRealParameter(GetParameterID(label), value, index);
 }
@@ -520,7 +763,8 @@ Real ThrustSegment::SetRealParameter(const std::string &label, const Real value,
  * @return The parameter's value.
  */
 //------------------------------------------------------------------------------
-Real ThrustSegment::GetRealParameter(const std::string &label, const Integer row, const Integer col) const
+Real ThrustSegment::GetRealParameter(const std::string &label,
+      const Integer row, const Integer col) const
 {
    return GetRealParameter(GetParameterID(label), row, col);
 }
@@ -540,7 +784,8 @@ Real ThrustSegment::GetRealParameter(const std::string &label, const Integer row
  * @return the parameter value at the end of this call.
  */
 //------------------------------------------------------------------------------
-Real ThrustSegment::SetRealParameter(const std::string &label, const Real value, const Integer row, const Integer col)
+Real ThrustSegment::SetRealParameter(const std::string &label, const Real value,
+      const Integer row, const Integer col)
 {
    return SetRealParameter(GetParameterID(label), value, row, col);
 }
@@ -563,32 +808,6 @@ std::string ThrustSegment::GetStringParameter(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
-//  bool SetStringParameter(const Integer id, const char *value)
-//------------------------------------------------------------------------------
-/**
- * Change the value of a string parameter.
- *
- * @param id The integer ID for the parameter.
- * @param value The new string for this parameter.
- *
- * @return true if the string is stored, throw if the parameter is not stored.
- */
-//------------------------------------------------------------------------------
-bool ThrustSegment::SetStringParameter(const Integer id, const char *value)
-{
-   if (id == MASSSOURCE)
-   {
-      if (find(massSource.begin(), massSource.end(), value) == massSource.end())
-      {
-         massSource.push_back(value);
-      }
-      return true;
-   }
-
-   return GmatBase::SetStringParameter(id, value);
-}
-
-//------------------------------------------------------------------------------
 //  bool SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 /**
@@ -604,19 +823,63 @@ bool ThrustSegment::SetStringParameter(const Integer id, const std::string &valu
 {
    if (id == MASSSOURCE)
    {
-      if (find(massSource.begin(), massSource.end(), value) == massSource.end())
+      // trim off braces:
+      if (GmatStringUtil::IsEnclosedWithBraces(value))
       {
-         massSource.push_back(value);
+         std::string value1 = GmatStringUtil::RemoveEnclosingString(value, "{}");
+         if (GmatStringUtil::Trim(value1) == "")
+         {
+            massSourceNames.clear();               // empty list of mass source names.
+            return true;
+         }
+      }
+
+      // verify input value:
+      if (GmatStringUtil::IsValidIdentity(value) == false)
+      {
+         throw GmatBaseException("Error: The value \"" + value + "\" cannot accepted for " + GetName() + ".MassSource ");
+         return false;
+      }
+
+      if (find(massSourceNames.begin(), massSourceNames.end(), value) == massSourceNames.end())
+      {
+         massSourceNames.push_back(value);
       }
       return true;
    }
 
    if (id == SOLVEFORS)
    {
+      // trim off braces:
+      if (GmatStringUtil::IsEnclosedWithBraces(value))
+      {
+         std::string value1 = GmatStringUtil::RemoveEnclosingString(value, "{}");
+         if (GmatStringUtil::Trim(value1) == "")
+         {
+            solveFors.clear();               // empty list of solvefors.
+            return true;
+         }
+      }
+
+      // verify input value:
+      if (GmatStringUtil::IsValidIdentity(value) == false)
+      {
+         throw ODEModelException("Error: The value \"" + value + "\" cannot be accepted for " + GetName() + ".SolveFors ");
+         return false;
+      }
+
       if (find(solveFors.begin(), solveFors.end(), value) == solveFors.end())
       {
          solveFors.push_back(value);
       }
+
+      #ifdef DEBUG_TSF_SOLVEFOR
+         MessageInterface::ShowMessage("ThrustSegment::SetStringParameter\n");
+         for (UnsignedInt i = 0; i < solveFors.size(); ++i)
+            MessageInterface::ShowMessage("ThrustSegment::SetStringParameter "
+                  "Solve For   %s\n", solveFors[i].c_str());
+      #endif
+
       return true;
    }
 
@@ -642,72 +905,24 @@ std::string ThrustSegment::GetStringParameter(const Integer id, const Integer in
    if (id == MASSSOURCE)
    {
       if ((index >= 0) && (index < massSource.size()))
-         return massSource[index];
+         return massSourceNames[index];
       return "";
    }
 
    if (id == SOLVEFORS)
    {
+      #ifdef DEBUG_TSF_SOLVEFOR
+         MessageInterface::ShowMessage("ThrustSegment::GetStringParameter\n");
+         for (UnsignedInt i = 0; i < solveFors.size(); ++i)
+            MessageInterface::ShowMessage("ThrustSegment::GetStringParameter   "
+                  "%s\n", solveFors[i].c_str());
+      #endif
       if ((index >= 0) && (index < solveFors.size()))
          return solveFors[index];
       return "";
    }
 
    return GmatBase::GetStringParameter(id, index);
-}
-
-//------------------------------------------------------------------------------
-//  bool SetStringParameter(const Integer id, const char *value,
-//                          const Integer index)
-//------------------------------------------------------------------------------
-/**
- * Change the value of a string parameter.
- *
- * @param id The integer ID for the parameter.
- * @param value The new string for this parameter.
- * @param index Index for parameters in arrays.  Use -1 or the index free
- *              version to add the value to the end of the array.
- *
- * @return true if the string is stored, false if not.
- */
-//------------------------------------------------------------------------------
-bool ThrustSegment::SetStringParameter(const Integer id, const char *value, const Integer index)
-{
-   if (index < 0)
-      return false;     // Throw here?
-
-   if (id == MASSSOURCE)
-   {
-      if (index < massSource.size())
-      {
-          massSource[index] = value;
-      }
-      else if (index == massSource.size())
-      {
-         massSource.push_back(value);
-      }
-      else
-         return false;     // Throw here?
-
-      return true;
-   }
-
-   if (id == SOLVEFORS)
-   {
-      if (index < solveFors.size())
-      {
-         solveFors[index] = value;
-      }
-      else if (index == solveFors.size())
-      {
-         solveFors.push_back(value);
-      }
-      else
-         return false;     // Throw here?
-      return true;
-   }
-
-   return GmatBase::SetStringParameter(id, value, index);
 }
 
 //------------------------------------------------------------------------------
@@ -725,20 +940,28 @@ bool ThrustSegment::SetStringParameter(const Integer id, const char *value, cons
  * @return true if the string is stored, false if not.
  */
 //------------------------------------------------------------------------------
-bool ThrustSegment::SetStringParameter(const Integer id, const std::string &value, const Integer index)
+bool ThrustSegment::SetStringParameter(const Integer id,
+      const std::string &value, const Integer index)
 {
    if (index < 0)
       return false;     // Throw here?
 
    if (id == MASSSOURCE)
    {
+      // verify input value:
+      if (GmatStringUtil::IsValidIdentity(value) == false)
+      {
+         throw GmatBaseException("Error: The value \"" + value + "\" cannot accepted for " + GetName() + ".MassSource ");
+         return false;
+      }
+
       if (index < massSource.size())
       {
-         massSource[index] = value;
+         massSourceNames[index] = value;
       }
       else if (index == massSource.size())
       {
-         massSource.push_back(value);
+         massSourceNames.push_back(value);
       }
       else
          return false;     // Throw here?
@@ -748,6 +971,12 @@ bool ThrustSegment::SetStringParameter(const Integer id, const std::string &valu
 
    if (id == SOLVEFORS)
    {
+      #ifdef DEBUG_TSF_SOLVEFOR
+	      MessageInterface::ShowMessage("ThrustSegment::SetStringParameter 3\n");
+	      for (UnsignedInt i = 0; i < solveFors.size(); ++i)
+	         MessageInterface::ShowMessage("ThrustSegment::SetStringParameter "
+	               "Solve For  %s\n", solveFors[i].c_str());
+      #endif
       if (index < solveFors.size())
       {
          solveFors[index] = value;
@@ -782,23 +1011,6 @@ std::string ThrustSegment::GetStringParameter(const std::string &label) const
 }
 
 //------------------------------------------------------------------------------
-//  bool SetStringParameter(const std::string &label, const char *value)
-//------------------------------------------------------------------------------
-/**
- * Change the value of a string parameter.
- *
- * @param label The (string) label for the parameter.
- * @param value The new string for this parameter.
- *
- * @return true if the string is stored, false if not.
- */
-//------------------------------------------------------------------------------
-bool ThrustSegment::SetStringParameter(const std::string &label, const char *value)
-{
-   return SetStringParameter(GetParameterID(label), value);
-}
-
-//------------------------------------------------------------------------------
 //  bool SetStringParameter(const std::string &label, const std::string &value)
 //------------------------------------------------------------------------------
 /**
@@ -810,7 +1022,8 @@ bool ThrustSegment::SetStringParameter(const std::string &label, const char *val
  * @return true if the string is stored, false if not.
  */
 //------------------------------------------------------------------------------
-bool ThrustSegment::SetStringParameter(const std::string &label, const std::string &value)
+bool ThrustSegment::SetStringParameter(const std::string &label,
+      const std::string &value)
 {
    return SetStringParameter(GetParameterID(label), value);
 }
@@ -829,7 +1042,8 @@ bool ThrustSegment::SetStringParameter(const std::string &label, const std::stri
  *         is no string association.
  */
 //------------------------------------------------------------------------------
-std::string ThrustSegment::GetStringParameter(const std::string &label, const Integer index) const
+std::string ThrustSegment::GetStringParameter(const std::string &label,
+      const Integer index) const
 {
    return GetStringParameter(GetParameterID(label), index);
 }
@@ -849,7 +1063,8 @@ std::string ThrustSegment::GetStringParameter(const std::string &label, const In
  * @return true if the string is stored, false if not.
  */
 //------------------------------------------------------------------------------
-bool ThrustSegment::SetStringParameter(const std::string &label, const std::string &value, const Integer index)
+bool ThrustSegment::SetStringParameter(const std::string &label,
+      const std::string &value, const Integer index)
 {
    return SetStringParameter(GetParameterID(label), value, index);
 }
@@ -869,10 +1084,18 @@ bool ThrustSegment::SetStringParameter(const std::string &label, const std::stri
 const StringArray& ThrustSegment::GetStringArrayParameter(const Integer id) const
 {
    if (id == MASSSOURCE)
-      return massSource;
+      return massSourceNames;
 
    if (id == SOLVEFORS)
+   {
+      #ifdef DEBUG_TSF_SOLVEFOR
+	      MessageInterface::ShowMessage("ThrustSegment::GetStringArrayParameter\n");
+         for (UnsignedInt i = 0; i < solveFors.size(); ++i)
+            MessageInterface::ShowMessage("ThrustSegment::GetStringArray"
+                  "Parameter   %s\n", solveFors[i].c_str());
+      #endif
       return solveFors;
+   }
 
    return GmatBase::GetStringArrayParameter(id);
 }
@@ -891,7 +1114,8 @@ const StringArray& ThrustSegment::GetStringArrayParameter(const Integer id) cons
  *         StringArray.
  */
 //------------------------------------------------------------------------------
-const StringArray& ThrustSegment::GetStringArrayParameter(const Integer id, const Integer index) const
+const StringArray& ThrustSegment::GetStringArrayParameter(const Integer id,
+      const Integer index) const
 {
    return GmatBase::GetStringArrayParameter(id, index);
 }
@@ -908,7 +1132,8 @@ const StringArray& ThrustSegment::GetStringArrayParameter(const Integer id, cons
  *         StringArray.
  */
 //------------------------------------------------------------------------------
-const StringArray& ThrustSegment::GetStringArrayParameter(const std::string &label) const
+const StringArray& ThrustSegment::GetStringArrayParameter(
+      const std::string &label) const
 {
    return GetStringArrayParameter(GetParameterID(label));
 }
@@ -927,7 +1152,8 @@ const StringArray& ThrustSegment::GetStringArrayParameter(const std::string &lab
  *         StringArray.
  */
 //------------------------------------------------------------------------------
-const StringArray& ThrustSegment::GetStringArrayParameter(const std::string &label, const Integer index) const
+const StringArray& ThrustSegment::GetStringArrayParameter(
+      const std::string &label, const Integer index) const
 {
    return GetStringArrayParameter(GetParameterID(label), index);
 }
@@ -990,7 +1216,8 @@ bool ThrustSegment::SetBooleanParameter(const Integer id, const bool value)
  *         not boolean.
  */
 //------------------------------------------------------------------------------
-bool ThrustSegment::GetBooleanParameter(const Integer id, const Integer index) const
+bool ThrustSegment::GetBooleanParameter(const Integer id,
+      const Integer index) const
 {
    return GmatBase::GetBooleanParameter(id, index);
 }
@@ -1011,7 +1238,8 @@ bool ThrustSegment::GetBooleanParameter(const Integer id, const Integer index) c
  *         not boolean.
  */
 //------------------------------------------------------------------------------
-bool ThrustSegment::SetBooleanParameter(const Integer id, const bool value, const Integer index)
+bool ThrustSegment::SetBooleanParameter(const Integer id, const bool value,
+      const Integer index)
 {
    return GmatBase::SetBooleanParameter(id, value, index);
 }
@@ -1047,7 +1275,8 @@ bool ThrustSegment::GetBooleanParameter(const std::string &label) const
  *         not boolean.
  */
 //------------------------------------------------------------------------------
-bool ThrustSegment::SetBooleanParameter(const std::string &label, const bool value)
+bool ThrustSegment::SetBooleanParameter(const std::string &label,
+      const bool value)
 {
    return SetBooleanParameter(GetParameterID(label), value);
 }
@@ -1065,7 +1294,8 @@ bool ThrustSegment::SetBooleanParameter(const std::string &label, const bool val
  *         not boolean.
  */
 //------------------------------------------------------------------------------
-bool ThrustSegment::GetBooleanParameter(const std::string &label, const Integer index) const
+bool ThrustSegment::GetBooleanParameter(const std::string &label,
+      const Integer index) const
 {
    return GetBooleanParameter(GetParameterID(label), index);
 }
@@ -1084,7 +1314,8 @@ bool ThrustSegment::GetBooleanParameter(const std::string &label, const Integer 
  *         not boolean.
  */
 //------------------------------------------------------------------------------
-bool ThrustSegment::SetBooleanParameter(const std::string &label, const bool value, const Integer index)
+bool ThrustSegment::SetBooleanParameter(const std::string &label,
+      const bool value, const Integer index)
 {
    return SetBooleanParameter(GetParameterID(label), value, index);
 }
@@ -1136,4 +1367,122 @@ void ThrustSegment::GetScaleFactors(Real scaleFactors[2])
    scaleFactors[0] = thrustScaleFactor;
    scaleFactors[1] = (useMassAndThrustFactor ?
          massFlowFactor * thrustScaleFactor : massFlowFactor);
+}
+
+//------------------------------------------------------------------------------
+// Integer GetScaleFactorIndex()
+//------------------------------------------------------------------------------
+/**
+ * Get the scale factor index so it can be linked to an STM row
+ *
+ * @return The index used to find the parameter in the STM
+ */
+ //------------------------------------------------------------------------------
+Integer ThrustSegment::GetScaleFactorIndex()
+{
+   return tsfIndex;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetScaleFactorIndex(Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Set the scale factor index so it can be linked to an STM row
+ *
+ * @param index The index used to find the parameter in the STM
+ */
+ //------------------------------------------------------------------------------
+void ThrustSegment::SetScaleFactorIndex(Integer index)
+{
+   tsfIndex = index;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ThrustSegment::IsEstimationParameterValid(const Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a parameter can be estimated
+ *
+ * @param item The ID for teh parameter, as known in the estimation system
+ *
+ * @return true if estimation is available, false if not
+ */
+//------------------------------------------------------------------------------
+bool ThrustSegment::IsEstimationParameterValid(const Integer item)
+{
+   // Convert Estimation ID to object parameter ID
+   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;
+
+   #ifdef DEBUG_SOLVE_FOR_PARAMETERS
+      MessageInterface::ShowMessage("Testing estimation capability for "
+            "ID %d (%s)\n", id, GetParameterText(id).c_str());
+   #endif
+
+   if (id == THRUSTSCALEFACTOR)
+      return true;
+
+   return GmatBase::IsEstimationParameterValid(id);
+}
+
+//-------------------------------------------------------------------------
+// Integer HasParameterCovariances(Integer parameterId)
+//-------------------------------------------------------------------------
+/**
+* This function is used to verify whether a parameter (with ID specified by
+* parameterId) has a covariance or not.
+*
+* @param parameterId      ID of a parameter
+* @return                 size of covariance matrix associated with the parameter
+*                         return -1 when the parameter has no covariance
+*/
+//-------------------------------------------------------------------------
+Integer ThrustSegment::HasParameterCovariances(Integer parameterId)
+{
+   if (parameterId == TSF_EPSILON)
+      return 1;
+
+   return GmatBase::HasParameterCovariances(parameterId);
+}
+
+
+//------------------------------------------------------------------------------
+// Rmatrix* GetParameterCovariances(Integer parameterId)
+//------------------------------------------------------------------------------
+/**
+* Get covariance of a given ThrustSegment's parameter
+*
+* @param paramId     The Id of a ThrustSegment's parameter
+*
+* @return            Covariance matrix of the parameter specified by the
+*                    parameter Id
+*/
+//------------------------------------------------------------------------------
+Rmatrix* ThrustSegment::GetParameterCovariances(Integer parameterId)
+{
+   if (isInitialized)
+      return covariance.GetCovariance(parameterId);
+   else
+      throw GmatBaseException("Error: cannot get " + GetName() + " ThrustSegment's covariance when it is not initialized.\n");
+   return NULL;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetPrecisionTimeFlag(bool onOff)
+//------------------------------------------------------------------------------
+/**
+* Set whether the thrust segment is using precision time or not
+*
+* @param onOff Flag indicating whether the thrust segment uses precision time
+*
+* @return Returns the value of the onOff flag passed in
+*/
+//------------------------------------------------------------------------------
+bool ThrustSegment::SetPrecisionTimeFlag(bool onOff)
+{
+   hasPrecisionTime = onOff;
+   segData.SetPrecisionTimeFlag(onOff);
+   return hasPrecisionTime;
 }

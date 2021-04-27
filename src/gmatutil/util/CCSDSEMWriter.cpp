@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -34,7 +34,6 @@
 #include "TimeTypes.hpp"             // for FormatCurrentTime()
 #include "UtilityException.hpp"
 #include "MessageInterface.hpp"
-#include "TimeSystemConverter.hpp"   // for TimeConverterUtil::Convert()
 #include <sstream>
 
 //#define DEBUG_INIT_EM_FILE
@@ -57,6 +56,7 @@ CCSDSEMWriter::CCSDSEMWriter() :
    creationTime  (""),
    emFileName    ("")
 {
+   theTimeConverter = TimeSystemConverter::Instance();
 }
 
 // -----------------------------------------------------------------------------
@@ -68,6 +68,7 @@ CCSDSEMWriter::CCSDSEMWriter(const CCSDSEMWriter &copy) :
    creationTime  (copy.creationTime),
    emFileName    (copy.emFileName)
 {
+   theTimeConverter = TimeSystemConverter::Instance();
 }
 
 // -----------------------------------------------------------------------------
@@ -307,7 +308,7 @@ std::string CCSDSEMWriter::A1ModJulianToUtcGregorian(Real epochInDays, Integer f
    std::string outFormat = "UTCGregorian";
    
    // Convert current epoch to specified format
-   TimeConverterUtil::Convert("A1ModJulian", epochInDays, "", outFormat,
+   theTimeConverter->Convert("A1ModJulian", epochInDays, "", outFormat,
                               toMjd, epochStr, format);
    
    if (epochStr == "")

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -107,7 +107,7 @@ bool HarmonicGravity::HaveTideModel (const int& etide)
    switch (etide) {
       case NoTide:           return true;
       case Solid:          return HaveLoveNumbers;
-      case SolidAndPole:   return (HaveLoveNumbers && BodyName == SolarSystem::EARTH_NAME);
+      case SolidAndPole:   return (HaveLoveNumbers && BodyName == GmatSolarSystemDefaults::EARTH_NAME);
       default:             return false;
       }
    }
@@ -204,7 +204,7 @@ void HarmonicGravity::CalculateFullField (const Real& jday, const Real pos[3],
    {
    TideLevel = tidelevel;
    ClearDeltaCS ();
-   if (tidelevel >= 2 && BodyName == SolarSystem::EARTH_NAME)
+   if (tidelevel >= 2 && BodyName == GmatSolarSystemDefaults::EARTH_NAME)
       IncrementEarthTide(jday,sunpos,sunmukm,otherpos,othermukm,xp,yp);
    else if (tidelevel >= 1)
       {
@@ -247,7 +247,7 @@ void HarmonicGravity::WriteCofFile (const std::string& filename)
    f << std::string(80,'C') << std::endl;
    
    f << "POTFIELD" << GmatStringUtil::ToString (NN,3) << GmatStringUtil::ToString (MM,3);
-   f << GmatStringUtil::ToString (BodyName == SolarSystem::EARTH_NAME,3);
+   f << GmatStringUtil::ToString (BodyName == GmatSolarSystemDefaults::EARTH_NAME,3);
    f << GmatStringUtil::ToString (-Factor*1e9,false,true,true,14,21);
    f << GmatStringUtil::ToString (FieldRadius*1e3,false,true,true,14,21);
    f << GmatStringUtil::ToString (1,false,true,true,14,21);
@@ -489,7 +489,7 @@ void HarmonicGravity::IncrementEarthTide (const Real& jday,
    //   Real JD = jday + 2300000.0;  // what is this number and why is it added on???  wcs
    // jday is A1 JD; we want UT1 (approximated by UTC) JD
    Real a1mjd  = jday - GmatTimeConstants::JD_JAN_5_1941;
-   Real JD     = TimeConverterUtil::Convert(a1mjd, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
+   Real JD     = theTimeConverter->Convert(a1mjd, TimeSystemConverter::A1MJD, TimeSystemConverter::UTCMJD,
                  GmatTimeConstants::JD_JAN_5_1941) + GmatTimeConstants::JD_JAN_5_1941;
    Real t  = (JD-GmatTimeConstants::JD_OF_J2000)/GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;  // (ignore difference between TDB and TDT)
    Real t2 = t*t;
@@ -703,7 +703,7 @@ void HarmonicGravity::LM_SetCoefficients (const std::string& line,
 //------------------------------------------------------------------------------
 void HarmonicGravity::LM_SetDefaultEarthTide ()
    {
-   if (!HaveLoveNumbers && BodyName == SolarSystem::EARTH_NAME)
+   if (!HaveLoveNumbers && BodyName == GmatSolarSystemDefaults::EARTH_NAME)
       {
       for (int n=0;  n<=LoveMax;  ++n)
          for (int m=0;  m<=LoveMax;  ++m)
@@ -733,21 +733,29 @@ void HarmonicGravity::LM_Load (std::string& filename, const bool& loadcoefficien
       MessageInterface::ShowMessage("Cannot open gravity file \"" + filename + "\"");
       throw GravityFileException("Cannot open gravity file \"" + filename + "\"");
       }
-   if      (filename.find (".cof") != std::string::npos)
+
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+   bool testMode = runmode == GmatGlobal::TESTING || runmode == GmatGlobal::TESTING_NO_PLOTS;
+   std::string filenameLower = GmatStringUtil::ToLower(filename);
+
+   if      (filenameLower.find (".cof") != std::string::npos)
       LM_LoadCof (instream,loadcoefficients);
-   else if (filename.find (".gfc") != std::string::npos)
-      LM_LoadGfc (instream,loadcoefficients);
-   else if (filename.find (".grv") != std::string::npos)
+   else if (filenameLower.find (".grv") != std::string::npos)
       LM_LoadGrv (instream,loadcoefficients);
-   else if (filename.find (".tab") != std::string::npos)
-      LM_LoadTab (instream,loadcoefficients);
+   else if (testMode)
+      {
+      if      (filenameLower.find (".gfc") != std::string::npos)
+         LM_LoadGfc (instream,loadcoefficients);
+      else if (filenameLower.find (".tab") != std::string::npos)
+         LM_LoadTab (instream,loadcoefficients);
+      }
    instream.close();
    }
 //------------------------------------------------------------------------------
 void HarmonicGravity::LM_LoadCof (std::ifstream& instream, const bool& loadcoefficients)
    {
    int pos1 = Filename.rfind ("\\");
-   int pos2 = Filename.find (".cof");
+   int pos2 = GmatStringUtil::ToLower(Filename).find (".cof");
    ModelName = Filename.substr (pos1+1,pos2-pos1-1);
 
    std::string line;
@@ -873,38 +881,39 @@ void HarmonicGravity::LM_LoadGrv(std::ifstream& instream, const bool& loadcoeffi
 
       // Read the next line, and respond accoring to line type
       GmatFileUtil::GetLine(&instream, rawLine);
+      rawLine = GmatStringUtil::ToUpper(rawLine);
       std::string tabFreeline = GmatStringUtil::RemoveAll(rawLine, "\t");
       if (GmatStringUtil::IsBlank(tabFreeline, true))
          ;  // blank line
       else if (tabFreeline.find("#") == 0)
          ;  // Comment
-      else if (tabFreeline.find("Begin SimpleTideModel") == 0)
+      else if (tabFreeline.find("BEGIN SIMPLETIDEMODEL") == 0)
          insimpletidemodel = true;
-      else if (tabFreeline.find("End SimpleTideModel") == 0)
+      else if (tabFreeline.find("END SIMPLETIDEMODEL") == 0)
          insimpletidemodel = false;
-      else if (tabFreeline.find("Begin TideFreeValues") == 0)
+      else if (tabFreeline.find("BEGIN TIDEFREEVALUES") == 0)
          intidefreevalues = true;
-      else if (tabFreeline.find("End TideFreeValues") == 0)
+      else if (tabFreeline.find("END TIDEFREEVALUES") == 0)
          intidefreevalues = false;
-      else if (tabFreeline.find("Begin ZeroTideValues") == 0)
+      else if (tabFreeline.find("BEGIN ZEROTIDEVALUES") == 0)
          inzerotidevalues = true;
-      else if (tabFreeline.find("End ZeroTideValues") == 0)
+      else if (tabFreeline.find("END ZEROTIDEVALUES") == 0)
          inzerotidevalues = false;
-      else if (tabFreeline.find("Begin LoveNumbers") == 0)
+      else if (tabFreeline.find("BEGIN LOVENUMBERS") == 0)
          inlovenumbers = true;
-      else if (tabFreeline.find("End LoveNumbers") == 0)
+      else if (tabFreeline.find("END LOVENUMBERS") == 0)
          inlovenumbers = false;
-      else if (tabFreeline.find("Begin SecularVariations") == 0)
+      else if (tabFreeline.find("BEGIN SECULARVARIATIONS") == 0)
          insecularvariations = true;
-      else if (tabFreeline.find("End SecularVariations") == 0)
+      else if (tabFreeline.find("END SECULARVARIATIONS") == 0)
          insecularvariations = false;
-      else if (tabFreeline.find("BEGIN ProcessNoise") == 0)
+      else if (tabFreeline.find("BEGIN PROCESSNOISE") == 0)
          inprocessnoise = true;
-      else if (tabFreeline.find("END ProcessNoise") == 0)
+      else if (tabFreeline.find("END PROCESSNOISE") == 0)
          inprocessnoise = false;
-      else if (tabFreeline.find("BEGIN Coefficients") == 0)
+      else if (tabFreeline.find("BEGIN COEFFICIENTS") == 0)
          incoefficients = true;
-      else if (tabFreeline.find("END Coefficients") == 0)
+      else if (tabFreeline.find("END COEFFICIENTS") == 0)
          incoefficients = false;
       else
          {
@@ -983,7 +992,7 @@ void HarmonicGravity::LM_LoadGrv(std::ifstream& instream, const bool& loadcoeffi
 void HarmonicGravity::LM_LoadTab (std::ifstream& instream, const bool& loadcoefficients)
    {
    int pos1 = Filename.rfind ("\\");
-   int pos2 = Filename.find (".tab");
+   int pos2 = GmatStringUtil::ToLower(Filename).find (".tab");
    ModelName = Filename.substr (pos1+1,pos2-pos1-1);
 
    std::string line;
@@ -1105,7 +1114,7 @@ void HarmonicGravity::LM_LoadTide(std::string& filename, const bool& loadcoeffic
 //------------------------------------------------------------------------------
 void HarmonicGravity::CheckEarthCoefficient()
 {
-   if (BodyName == SolarSystem::EARTH_NAME && C != NULL && NN >= 2)
+   if (BodyName == GmatSolarSystemDefaults::EARTH_NAME && C != NULL && NN >= 2)
    {
       // Special case for Earth
       bool tidefreemodel = C[2][0] > -4.84167E-04;

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -69,15 +69,17 @@ public:
    virtual bool OpenFile();
    virtual bool WriteData(const std::string &obj_name) = 0;
    virtual bool CloseFile();
-   virtual bool AddData(WriterData * MatDataContainer);
+   virtual bool AddDataBlock();
+   virtual bool AddData(WriterData * MatDataContainer, UnsignedInt index = 0U);
 //   virtual WriterData *GetDataContainer(const std::string &dataName);
-   virtual bool DescribeData (const StringArray &variableList);
+   virtual bool DescribeData (const StringArray &variableList, UnsignedInt size = 1U);
+   virtual bool ClearData();
 
 protected:
    /// vector of variable names to write to the .mat file
    std::vector<std::string> variable_names;
-   /// vector of WriterData objects
-   std::vector<WriterData*> allData;
+   /// vector of vector of WriterData objects
+   std::vector<std::vector<WriterData*>> allData;
 
    /// Name of the output file
    std::string filename;

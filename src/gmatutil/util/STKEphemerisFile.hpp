@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -30,6 +30,7 @@
 #include "utildefs.hpp"
 #include "Ephemeris.hpp"
 #include "Rvector6.hpp"
+#include "TimeSystemConverter.hpp"   // for TimeSystemConverter
 #include <fstream>
 
 class GMATUTIL_API STKEphemerisFile : public Ephemeris
@@ -51,8 +52,10 @@ public:
    void InitializeData(); // Move to protected?
    
    /// Open the ephemeris file for reading/writing
-   bool OpenForRead(const std::string &filename, const std::string &ephemType);
-   bool OpenForWrite(const std::string &filename, const std::string &ephemType);
+   bool OpenForRead(const std::string &filename, const std::string &ephemType,
+                    const std::string &ephemCovType = "");
+   bool OpenForWrite(const std::string &filename, const std::string &ephemType,
+                     const std::string &ephemCovType = "");
    void CloseForRead();
    void CloseForWrite();
 
@@ -75,7 +78,7 @@ public:
    bool WriteBlankLine();
    bool WriteString(const std::string &str);
    bool WriteDataSegment(const EpochArray &epochArray, const StateArray &stateArray,
-                         bool canFinalize = false);
+                         const std::vector<Rvector*> &covArray, bool canFinalize = false);
    void FinalizeEphemeris();
    
    std::string GetDistanceUnit();
@@ -104,6 +107,7 @@ protected:
    
    RealArray   beginSegmentArray;
    Integer     numberOfEphemPoints;
+   Integer     numberOfCovPoints;
    Integer     interpolationOrder;
    
    // Header fields
@@ -119,17 +123,22 @@ protected:
    std::string stkFileNameForRead;
    std::string stkFileNameForWrite;
    std::string stkTempFileName;
+   std::string stkTempCovFileName;
    
    // Ephemeris type for read/write
    std::string ephemTypeForRead;
    std::string ephemTypeForWrite;
+   std::string ephemCovTypeForWrite;
+   bool writeCov;
    
    // File position for updating number of ephem points
    std::ofstream::pos_type numEphemPointsBegPos;
    
     // File input/output streams
    std::ifstream stkInStream;
+   std::ifstream stkCovInStream;
    std::ofstream stkOutStream;
+   std::ofstream stkCovOutStream;
    
    // Epoch and state buffer for read/write
    std::vector<EphemData> ephemRecords;
@@ -140,6 +149,9 @@ protected:
    Rvector6      initialState;
    Rvector6      finalState;
    
+   /// Time converter singleton
+   TimeSystemConverter *theTimeConverter;
+
    // Fore ephemeris reading
    bool          GetEpochAndState(const std::string &line, Real &epoch, Rvector6 &state);
    std::string   GetLastLine();
@@ -150,6 +162,11 @@ protected:
    void WriteTimePosVel(Real time, const Rvector6 *state);
    void WriteTimePos(const EpochArray &epochArray, const StateArray &stateArray);
    void WriteTimePos(Real time, const Rvector6 *state);
+
+   void WriteCovTimePosVel(const EpochArray &epochArray, const std::vector<Rvector*> &covArray);
+   void WriteCovTimePosVel(Real time, const Rvector *cov);
+   void WriteCovTimePos(const EpochArray &epochArray, const std::vector<Rvector*> &covArray);
+   void WriteCovTimePos(Real time, const Rvector *cov);
    
    // Time conversion
    std::string A1ModJulianToUtcGregorian(Real epochInDays, Integer format);

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -52,10 +52,11 @@ public:
    MathParser& operator=(const MathParser &right);
    virtual ~MathParser();
    
-   bool         IsEquation(const std::string &str, bool checkMinusSign);
+   bool         IsEquation(const std::string &str, bool checkMinusSign,
+                           bool allowSingleElement = false);
    std::string  FindLowestOperator(const std::string &str, Integer &opIndex,
                                    Integer start = 0);
-   MathNode*    Parse(const std::string &str);
+   MathNode*    Parse(const std::string &str, bool allowSingleNode = false);
    StringArray  GetGmatFunctionNames();
    bool         IsInputRequiredForFunction(const std::string &fn);
    bool         IsFunctionWithOptionalInput(const std::string &fn);

@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2015 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -48,14 +48,9 @@ public:
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
-                                           const char *value);
-   virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value);
    virtual std::string  GetStringParameter(const Integer id,
                                            const Integer index) const;
-   virtual bool         SetStringParameter(const Integer id,
-                                           const char *value,
-                                           const Integer index);
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value,
                                            const Integer index);
@@ -65,8 +60,6 @@ public:
                         GetStringArrayParameter(const Integer id,
                                                 const Integer index) const;
    virtual std::string  GetStringParameter(const std::string &label) const;
-   virtual bool         SetStringParameter(const std::string &label,
-                                           const char *value);
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
    virtual std::string  GetStringParameter(const std::string &label,
@@ -94,9 +87,14 @@ public:
 
 
    virtual bool         ReadData();
+   virtual bool         AllDataSegmentsLoaded(StringArray &segsNotLoaded);
+   virtual void         ActivateSegments();
+   virtual void         DeactivateSegments();
 
    virtual bool         Initialize();
    FileThrust*          GetForce();
+
+   virtual bool         SetPrecisionTimeFlag(bool onOff);
 
    DEFAULT_TO_NO_CLONES
 
@@ -106,15 +104,21 @@ protected:
    std::string thrustFileName;
    /// Data blocks from the file
    std::vector<ThrustSegment> segments;
+   /// Data blocks from the script
+   std::vector<ThrustSegment*> scriptSegments;
    /// Scripted block names
    StringArray segmentNames;
    /// Mass source for each block
    std::map<std::string, StringArray> massSources;
 
+   /// Text phrases in the THF idenifyinf fields in the file
    StringArray keywords;
+   /// Keyworks that indicate the start of the thrust profile
    StringArray dataStartKeys;
+   /// List of implemented interpolators
    StringArray interpolationTypes;
 
+   /// The PhysicalModel used in conjunction with this THF
    FileThrust theForce;
 
    void SetSegmentData(ThfDataSegment seg);

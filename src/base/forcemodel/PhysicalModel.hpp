@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -115,6 +115,7 @@
 #include "CelestialBody.hpp"
 #include "Spacecraft.hpp"
 #include "GmatState.hpp"
+#include "TimeSystemConverter.hpp"   // for the TimeSystemConverter singleton
 
 #include "ODEModelException.hpp"
 
@@ -174,6 +175,8 @@ public:
    virtual void IncrementTime(Real dt);
    virtual Real GetTime();
    virtual void SetTime(Real t);
+   virtual void SetDirection(Real dir);
+   virtual Real GetStepPrecision(Real stepSize);
 
    virtual bool GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1, 
          const Integer id = -1);
@@ -181,6 +184,7 @@ public:
    virtual Real EstimateError(Real * diffs, Real * answer) const;
    virtual bool GetComponentMap(Integer * map, Integer order = 1, 
          Integer id = -1) const;
+   virtual void SetStmIndex(Integer id, Integer paramID);
 
    // Support for extra derivative calcs -- the STM contribution, for example
    virtual const IntegerArray& GetSupportedDerivativeIds();
@@ -195,7 +199,8 @@ public:
    virtual void SetSatelliteParameter(const Integer i,
                                       Integer parmID,
                                       const Real parm);
-   virtual void SetSatelliteParameter(const Integer i, 
+
+   virtual void SetSatelliteParameter(const Integer i,
                                       const std::string parmName, 
                                       const std::string parm);
    virtual void SetSpaceObject(const Integer i, GmatBase *obj);
@@ -206,8 +211,11 @@ public:
    
    virtual bool IsTransient();
    virtual bool DepletesMass();
+   virtual bool AttitudeAffectsDynamics();
    virtual bool IsUserForce();
    virtual bool IsUnique(const std::string &forBody = "");
+   virtual bool SetAllowODEDelete(bool deleteFlag);
+   virtual bool AllowODEDelete() const;
    virtual void SetPropList(ObjectArray *soList);
    virtual bool CheckQualifier(const std::string &qualifier,
          const std::string &forType = "");
@@ -215,8 +223,8 @@ public:
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
    virtual bool SetStart(Gmat::StateElementId id, Integer index, 
-                         Integer quantity, Integer sizeOfType);
-   virtual bool SetStmRowId(Integer rowNumber, Integer rowId);
+                         Integer quantity, Integer totalSize);                    // made changes by TUAN NGUYEN
+   ////virtual bool SetStmRowId(Integer rowNumber, Integer rowId);                // made changes by TUAN NGUYEN
    
 
    // Parameter accessor methods -- inherited from GmatBase
@@ -230,12 +238,15 @@ public:
    virtual GmatTime     GetGmatTimeParameter(const Integer id) const;
    virtual GmatTime     SetGmatTimeParameter(const Integer id, 
                                              const GmatTime value);
-   //virtual GmatTime     GetGmatTimeParameter(const std::string &label) const;
-   //virtual GmatTime     SetGmatTimeParameter(const std::string &label, 
-   //                                          const GmatTime value);
+   virtual GmatTime     GetGmatTimeParameter(const std::string &label) const;
+   virtual GmatTime     SetGmatTimeParameter(const std::string &label, 
+                                             const GmatTime value);
 
    virtual Real GetRealParameter(const Integer id) const;
    virtual Real SetRealParameter(const Integer id, const Real value);
+   virtual Real GetRealParameter(const std::string &label) const;
+   virtual Real SetRealParameter(const std::string &label, const Real value);
+
    virtual std::string GetStringParameter(const Integer id) const;
    virtual bool        SetStringParameter(const Integer id,
                                           const std::string &value);
@@ -260,6 +271,27 @@ public:
    virtual bool        BuildModelStateGT(GmatTime now, Real *state,
                                        Real *j2kState, Integer dimension = 6);
 
+   // Methods for getting stop epochs for force models
+   virtual Real                     GetForceMaxStep(bool forward = true);
+   virtual Real                     GetForceMaxStep(Real theEpoch, bool forward = true);
+   virtual Real                     GetForceMaxStep(const GmatTime& theEpochGT, bool forward = true);
+
+   // Used for mass Jacobian computation
+   /// Test to see if the force is conservative
+   bool                IsConservative();
+   /// Toggle mass Jacobian computation
+   void                ComputeMassJacobian(bool truefalse);
+   /// Toggle time Jacobian computation
+   void                ComputeTimeJacobian(bool truefalse);
+   /// Test to see if the mass Jacobian is implemented
+   bool                HasMassJacobian();
+   /// Test to see if the time Jacobian is implemented
+   bool                HasTimeJacobian();
+   /// Retrieve the mass Jacobian
+   const Real          *GetMassJacobian();
+   /// Retrieve the time Jacobian
+   const Real          *GetTimeJacobian();
+
 protected:
       
    /// pointer to the body for which this force is computed
@@ -272,6 +304,8 @@ protected:
    Integer dimension;
    /// Flag that is set when SetState() or SetTime() is called
    bool stateChanged;
+   /// Flag that indicates if this force is to be deleted from memory when removed from an ODEModel
+   bool allowODEDelete;
    
    /// Prop State Manager
    PropagationStateManager *psm;
@@ -289,8 +323,15 @@ protected:
    Real elapsedTime;
    /// Number of seconds previously elapsed from the base epoch
    Real prevElapsedTime;
+   /// The direction of the step
+   Real direction;
    /// Array containing the most recent derivative calculation, when needed
    Real * deriv;
+   /// Mass Jacobian vector (a single column for the Jacobian data)
+   Real * massJacobian;
+   /// Time Jacobian vector
+   Real * timeJacobian;
+
    /// IDs for each element of the derivative vector 
    IntegerArray derivativeIds;
    /// Text names for each element of the derivative vector 
@@ -312,11 +353,14 @@ protected:
    /// Starting index for STM data
    Integer                   stmStart;
    /// Number of STM matrices that need to be filled
-   Integer                   stmCount;
-   /// Number of rows/columns in the STM
-   Integer                   stmRowCount;
-   /// Mapping for the STM entries
-   IntegerArray              stmRowId;
+	Integer                   stmCount;
+   /////// Number of rows/columns in the STM                                        // made changes by TUAN NGUYEN
+   Integer                   stmRowCount;                                       // made changes by TUAN NGUYEN
+	/// Number of rows/columns in the STM                                            // made changes by TUAN NGUYEN
+	Integer                   totalSTMSize;                                          // made changes by TUAN NGUYEN
+	
+   /////////// Mapping for the STM entries                                          // made changes by TUAN NGUYEN
+   ////////IntegerArray              stmRowId;                                      // made changes by TUAN NGUYEN
 
    /// Flag indicating that the orbital A-matrix should be filled
    bool                      fillAMatrix;
@@ -325,7 +369,28 @@ protected:
    /// Number of A-matrices that need to be filled
    Integer                   aMatrixCount;
 
-   //// Methods used for PM based Parameters
+   // Separate mass derivative modeling
+   /// Flag indicating if the force is conservative
+   bool                      isConservative;
+   /// Flag indicating if the force is conservative
+   bool                      hasMassJacobian;
+   /// Trigger to build the mass Jacobian data
+   bool                      fillMassJacobian;
+
+   // Separate time derivatve modeling
+   /// Flag indicating if the force model has an analytic time Jacobian
+   bool                      hasTimeJacobian;
+   /// Trigger to build the time Jacobian data
+   bool                      fillTimeJacobian;
+
+      /// Time converter singleton
+   TimeSystemConverter *theTimeConverter;
+
+
+	/// Pointers to the spacecraft                        // made changes by TUAN NGUYEN
+	std::vector<GmatBase*> scObjs;                        // made changes by TUAN NGUYEN
+
+	//// Methods used for PM based Parameters
    //virtual bool              BuildModelState(GmatEpoch now, Real *state,
    //                                Real *j2kState, Integer dimension = 6);
 
@@ -343,6 +408,14 @@ protected:
       PARAMETER_TEXT[PhysicalModelParamCount - GmatBaseParamCount];
    static const Gmat::ParameterType 
       PARAMETER_TYPE[PhysicalModelParamCount - GmatBaseParamCount];
+
+
+   enum ShapeModel                                      // made changes by TUAN NGUYEN
+   {                                                    // made changes by TUAN NGUYEN
+      SPHERICAL_MODEL,                                   // made changes by TUAN NGUYEN
+      SPAD_FILE_MODEL,                                  // made changes by TUAN NGUYEN
+      NPLATE_MODEL                                      // made changes by TUAN NGUYEN
+   };                                                   // made changes by TUAN NGUYEN
 };
 
 #endif // PhysicalModel_hpp

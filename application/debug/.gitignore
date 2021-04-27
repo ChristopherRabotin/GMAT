@@ -12,3 +12,5 @@
 /GmatConsoled
 *.so*
 G*d-R20*
+gmatpy/*.py
+CSALT*

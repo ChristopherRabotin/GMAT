@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -992,6 +992,30 @@ void AxisSystem::GetLastRotationDotMatrix(Real *mat) const
       mat[i] = rotDotData[i];
    
 }
+
+
+// made changes by TUAN NGUYEN
+//---------------------------------------------------------------------------
+//  std::vector<Rmatrix33> GetDerivativeOfLastRotationDotMatrix()
+//---------------------------------------------------------------------------
+/**
+* Returns the last-computed derivetive of rotation matrix w.r.t. spacecraft state.
+*
+* @return derivative of last rotation matrix w.r.t. spacecraft state.
+*
+*/
+//---------------------------------------------------------------------------
+std::vector<Rmatrix33> AxisSystem::GetDerivativeOfLastRotationMatrix()
+{
+	rotMatrixDeriv.clear();
+	Rmatrix33 Zero(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	for (Integer i = 0; i<6; i++)
+		rotMatrixDeriv.push_back(Zero);
+
+	return rotMatrixDeriv;
+}
+
+
 
 //---------------------------------------------------------------------------
 //  void SetCoordinateSystemName(const std::string &csName)
@@ -2959,3 +2983,12 @@ void AxisSystem::InitializeReference(SpacePoint *refObj)
    // otherwise do nothing (for now, anyway)
 }
 
+
+// made changes by TUAN NGUYEN
+bool AxisSystem::SetCalculateRotMatrixDeriv(bool turnOn) 
+{
+	bool prevFlag = specifyRotMatrixDeriv;
+	specifyRotMatrixDeriv = turnOn;
+
+	return prevFlag;
+}

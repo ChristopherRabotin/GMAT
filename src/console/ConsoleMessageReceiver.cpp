@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -42,6 +42,7 @@
 #include "ConsoleAppException.hpp"
 #include "FileManager.hpp"         // for GetFullPathname()
 #include "FileUtil.hpp"            // for ParsePathName()
+#include "StringUtil.hpp"          // for Replace (to fix formatting)
 #include "GmatGlobal.hpp"          // for RunBachMode()
 
 #include <cstdlib>                  // For GCC4.4 support
@@ -92,7 +93,12 @@ ConsoleMessageReceiver* ConsoleMessageReceiver::Instance()
 //------------------------------------------------------------------------------
 void ConsoleMessageReceiver::ShowMessage(const std::string &msg)
 {
-   ShowMessage(msg.c_str());
+   // We assume here that there are no formatting indicators in this
+   // string, e.g. "%s", "%d", etc.  We need to make sure that
+   // end-of-line oomments (which are preceded by '%') are written
+   // out correctly.
+   std::string tempStr = GmatStringUtil::Replace(msg, "%", "%%");
+   ShowMessage(tempStr.c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -113,11 +119,11 @@ void ConsoleMessageReceiver::ShowMessage(const char *msg, ...)
    short    size;
    va_list  marker;
    char     *msgBuffer;
-   
+
    // msg is vsprintf format
    // actual max message length is MAX_MESSAGE_LENGTH
    size = strlen(msg) + MAX_MESSAGE_LENGTH;
-   
+
    // Note: 'new' throws an exception of type std::bad_alloc on failure.
    // (Note that if an exception is thrown, no memory will have been
    // allocated, so there will be no memory leak.)
@@ -131,9 +137,9 @@ void ConsoleMessageReceiver::ShowMessage(const char *msg, ...)
    va_start(marker, msg);
    ret = vsprintf(msgBuffer, msg, marker);
    va_end(marker);
-   
+      
    LogMessage(std::string(msgBuffer));
-   delete [] msgBuffer;
+   delete[] msgBuffer;
 }
 
 //------------------------------------------------------------------------------
@@ -437,7 +443,8 @@ void ConsoleMessageReceiver::CloseLogFile()
 //------------------------------------------------------------------------------
 void ConsoleMessageReceiver::LogMessage(const std::string &msg)
 {
-   std::cout << msg;
+   if (printToConsole)
+      std::cout << msg;
    
    if (!logEnabled) return;
 
@@ -455,8 +462,8 @@ void ConsoleMessageReceiver::LogMessage(const std::string &msg)
    
    if (logFile)
    {
-      //std::string tempStr = GmatStringUtil::Replace(msg, "%", "%%");
-      //fprintf(logFile, "%s", tempStr.c_str());
+//      std::string tempStr = GmatStringUtil::Replace(msg, "%", "%%");
+//      fprintf(logFile, "%s", tempStr.c_str());
       fprintf(logFile, "%s", msg.c_str());
       fflush(logFile);
    }
@@ -557,6 +564,20 @@ void ConsoleMessageReceiver::ClearMessageQueue()
    ; // do nothing here
 }
 
+//------------------------------------------------------------------------------
+// void ToggleConsolePrinting(bool printToCon)
+//------------------------------------------------------------------------------
+/**
+ * Toggles whether to print to the console screen when printing log messages
+ *
+ * @param printToCon New value of whether or not to print to the console when
+ *        LogMessage is called
+ */
+//------------------------------------------------------------------------------
+void ConsoleMessageReceiver::ToggleConsolePrinting(bool printToCon)
+{
+   printToConsole = printToCon;
+}
 
 //---------------------------------
 //  private methods
@@ -573,7 +594,8 @@ ConsoleMessageReceiver::ConsoleMessageReceiver() :
    MAX_MESSAGE_LENGTH      (10000),
    logFile                 (NULL),
    logEnabled              (false),
-   logFileSet              (false)
+   logFileSet              (false),
+   printToConsole          (true)
 {
    messageQueue.push("ConsoleMessageReceiver: Starting GMAT ...");
 }

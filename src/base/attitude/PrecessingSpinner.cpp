@@ -282,6 +282,14 @@ void PrecessingSpinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 }
 
 
+// made changes by TUAN NGUYEN
+void PrecessingSpinner::ComputeCosineMatrixAndAngularVelocity(GmatTime &atTime)
+{
+   ///@todo: it needs to add code for a high precision of time
+   ComputeCosineMatrixAndAngularVelocity(atTime.GetMjd());
+}
+
+
 //------------------------------------------------------------------------------
 //  private methods
 //------------------------------------------------------------------------------

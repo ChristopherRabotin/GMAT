@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -303,7 +303,7 @@ bool GetEphemStates::Execute(ObjectInitializer *objInit, bool reinitialize)
       return false;
    }
    
-   // Check for output info, there shoud be 4 outputs
+   // Check for output info, there should be 4 outputs
    // It is an internal coding error if not 4
    if ((outputArgMap.size() != outputWrapperTypes.size()) &&
        outputWrapperTypes.size() != 4)
@@ -619,6 +619,8 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
 
    #ifdef DEBUG_READ_EPHEM
    MessageInterface::ShowMessage("   spiceFiles.size() = %d\n", spiceFiles.size());
+   for (Integer ii = 0; ii < spiceFiles.size(); ii++)
+      MessageInterface::ShowMessage("spiceFiles(%d) = %s\n", ii, spiceFiles.at(ii).c_str());
    #endif
    
    // If no spice files, throw an exception
@@ -714,10 +716,10 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
       MessageInterface::ShowMessage("   ephemInitialA1Mjd = %.12f\n", ephemInitialA1Mjd);
       std::string epochStr1;
       Real toMjd1;
-      TimeConverterUtil::Convert("A1ModJulian", fileStart, "",
+      TimeSystemConverter::Convert("A1ModJulian", fileStart, "",
                                  outEpochFormat, toMjd1, epochStr1);
       MessageInterface::ShowMessage("   fileStart    = '%s'\n", epochStr1.c_str());
-      TimeConverterUtil::Convert("A1ModJulian", ephemInitialA1Mjd, "",
+      TimeSystemConverter::Convert("A1ModJulian", ephemInitialA1Mjd, "",
                                  outEpochFormat, toMjd1, epochStr1);
       MessageInterface::ShowMessage("   ephemInitial = '%s'\n", epochStr1.c_str());
       #endif
@@ -741,10 +743,10 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
       MessageInterface::ShowMessage("   ephemFinalA1Mjd = %.12f\n", ephemFinalA1Mjd);
       std::string epochStr2;
       Real toMjd2;
-      TimeConverterUtil::Convert("A1ModJulian", fileEnd, "",
+      TimeSystemConverter::Convert("A1ModJulian", fileEnd, "",
                                  outEpochFormat, toMjd2, epochStr2);
       MessageInterface::ShowMessage("   fileEnd      = '%s'\n", epochStr2.c_str());
-      TimeConverterUtil::Convert("A1ModJulian", ephemFinalA1Mjd, "",
+      TimeSystemConverter::Convert("A1ModJulian", ephemFinalA1Mjd, "",
                                  outEpochFormat, toMjd2, epochStr2);
       MessageInterface::ShowMessage("   ephemFinal   = '%s'\n", epochStr2.c_str());
       MessageInterface::ShowMessage
@@ -1080,7 +1082,7 @@ CoordinateSystem * GetEphemStates::CreateLocalCoordSystem(const std::string &csN
    {
       needsConversion = true;
       SpacePoint *originPtr = solarSys->GetBody(inOrigin);
-      SpacePoint *j2kBody = solarSys->GetBody(SolarSystem::EARTH_NAME);
+      SpacePoint *j2kBody = solarSys->GetBody(GmatSolarSystemDefaults::EARTH_NAME);
       localCs = CoordinateSystem::CreateLocalCoordinateSystem
          (csName, inAxisType, originPtr, NULL, NULL, j2kBody, solarSys);
    }
@@ -1113,7 +1115,7 @@ ElementWrapper* GetEphemStates::CreateOutputEpochWrapper(Real a1MjdEpoch,
    // Convert to desired epoch string output
    std::string epochStr;
    Real toMjd;
-   TimeConverterUtil::Convert("A1ModJulian", a1MjdEpoch, "",
+   TimeSystemConverter::Instance()->Convert("A1ModJulian", a1MjdEpoch, "",
                               outEpochFormat, toMjd, epochStr);
 
    // Find StringVar object with outName
@@ -1125,12 +1127,17 @@ ElementWrapper* GetEphemStates::CreateOutputEpochWrapper(Real a1MjdEpoch,
       obj = objIter->second;
       #ifdef DEBUG_WRAPPERS
       MessageInterface::ShowMessage
-         ("   outName = <%p><%s>'%s'\n", obj, obj ? obj->GetTypeName().c_str() : "NULL",
+         ("  FOUND outName = <%p><%s>'%s'\n", obj, obj ? obj->GetTypeName().c_str() : "NULL",
           obj ? obj->GetName().c_str() : "NULL");
       #endif
       outString = (StringVar*)obj;
       outString->SetString(epochStr);
    }
+   else // not found in the object store
+   {
+      return NULL;   // if outName is not found, we don't want to continue
+   }
+
    
    // Create StringObjectWrapper
    ElementWrapper *outWrapper = new StringObjectWrapper();         

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -41,6 +41,7 @@
 #include "MdiTsPlotData.hpp"            // for XY plot
 #include "MdiChildTsFrame.hpp"          // for XY plot
 #include "MdiChildGroundTrackFrame.hpp" // for GroundTrackPlot
+#include "MdiChildDynamicDataFrame.hpp" // for DynamicDataDisplay
 
 #endif
 
@@ -1854,6 +1855,8 @@ bool GuiPlotReceiver::UpdateXyPlot(const std::string &plotName,
       }
    }
 
+//   ::wxYield();
+
    return updated;
 }
 
@@ -2100,6 +2103,226 @@ bool GuiPlotReceiver::TakeXYAction(const std::string &plotName,
    }
 
    return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool CreateDynamicDataDisplay(const std::string &plotName, 
+//                               const std::string &oldName,
+//                               const std::string &plotTitle,
+//                               Real positionX, Real positionY,
+//                               Real width, Real height)
+//------------------------------------------------------------------------------
+/**
+* Creates a DynamicDataDisplay window.
+*
+* @param plotName Name of the table
+* @param oldName Former name of the table
+* @param positionX, positionY  position of the table in screen coordinates
+* @param w, h  size of the table in screen coordinates
+* @param plotTitle Title of the table
+*
+* @return true on success, false when no table was created
+*/
+//------------------------------------------------------------------------------
+bool GuiPlotReceiver::CreateDynamicDataDisplay(const std::string &plotName,
+                             const std::string &oldName,
+                             const std::string &plotTitle, Real positionX,
+                             Real positionY, Real width, Real height)
+{
+   //-------------------------------------------------------
+   // check if new MDI child frame needed
+   //-------------------------------------------------------
+   bool createNewFrame = true;
+   wxString currTableName;
+   MdiChildDynamicDataFrame *frame = NULL;
+
+   for (int i = 0; i<MdiTsPlot::numChildren; i++)
+   {
+      frame =
+         (MdiChildDynamicDataFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+      currTableName = frame->GetPlotName();
+
+      if (currTableName.IsSameAs(plotName.c_str()))
+      {
+         createNewFrame = false;
+         break;
+      }
+      else if (currTableName.IsSameAs(oldName.c_str()))
+      {
+      #if DEBUG_RENAME
+            MessageInterface::ShowMessage
+               ("GuiPlotReceiver::CreateXyPlotWindow() currPlotName=%s, "
+               "oldName=%s\n", currPlotName.c_str(), oldName.c_str());
+      #endif
+
+         // change plot name
+         frame->SetPlotName(wxString(plotName.c_str()));
+         createNewFrame = false;
+         break;
+      }
+   }
+
+   if (createNewFrame)
+   {
+      Integer x, y, w, h;
+      bool isSizePreset = false;
+      bool isUsingSaved = false;
+      ComputePlotPositionAndSize(false, positionX, positionY, width, height, x,
+         y, w, h, isUsingSaved);
+
+      if (!GmatMathUtil::IsEqual(width, 0.0) || !GmatMathUtil::IsEqual(height, 0.0))
+         isSizePreset = true;
+
+      frame =
+         new MdiChildDynamicDataFrame(GmatAppData::Instance()->GetMainFrame(),
+         plotName, plotTitle, wxPoint(x, y), wxSize(w, h), isSizePreset,
+         wxDEFAULT_FRAME_STYLE);
+
+      if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::MINIMIZED_GUI)
+         frame->Show(false);
+      else
+         frame->Show(true);
+      //frame->SetSavedConfigFlag(isUsingSaved);
+      //frame->SetSaveLocationFlag(canSaveLocation);
+
+      ++MdiTsPlot::numChildren;
+   }
+
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// bool SetDynamicDataTableSize(std::string &plotName, Integer maxRowCount,
+//                              Integer maxColCount)
+//------------------------------------------------------------------------------
+/**
+* Sets the number of rows and columns of the DynamicDataDisplay
+*
+* @param plotName Name of the table
+* @param maxRowCount The number of rows required
+* @param maxColCount The number of columns required
+*
+* @return true on success, false when the table was not sized
+*/
+//------------------------------------------------------------------------------
+bool GuiPlotReceiver::SetDynamicDataTableSize(const std::string &plotName,
+                                              Integer maxRowCount,
+                                              Integer maxColCount)
+{
+   wxString owner = plotName;
+   MdiChildDynamicDataFrame *frame = NULL;
+
+   for (Integer i = 0; i < MdiTsPlot::numChildren; ++i)
+   {
+      frame =
+         (MdiChildDynamicDataFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+
+      if (frame)
+      {
+         if (frame->GetPlotName().IsSameAs(owner))
+         {
+            frame->SetTableSize(maxRowCount, maxColCount);
+         }
+      }
+   }
+
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// bool UpdateDynamicDataDisplay(std::string &plotName, StringARray &paramNames
+//                               Rvector newData, Rvector rowIdxs)
+//------------------------------------------------------------------------------
+/**
+* Updates the data being watched to their current values
+*
+* @param plotName Name of the table
+* @param paramNames The names of the parameters being watched
+* @param newData The new data used to update the parameter values being
+*        displayed
+* @param rowIdxs The row indices for each of the parameters, used to place
+*        the parameters in the desired locations
+*
+* @return true on success, false when the table was not sized
+*/
+//------------------------------------------------------------------------------
+bool GuiPlotReceiver::UpdateDynamicDataDisplay(const std::string &plotName,
+                                               std::vector<std::vector<DDD>> newData)
+{
+   wxString owner = plotName;
+   MdiChildDynamicDataFrame *frame = NULL;
+
+   for (Integer i = 0; i < MdiTsPlot::numChildren; ++i)
+   {
+      frame =
+         (MdiChildDynamicDataFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+
+      if (frame)
+      {
+         if (frame->GetPlotName().IsSameAs(owner))
+         {
+            frame->UpdateDynamicData(newData);
+         }
+      }
+   }
+
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// bool DeleteDynamicData(const std::string &plotName,
+//                        const std::string &oldname)
+//------------------------------------------------------------------------------
+/**
+* Deletes the grid of the specified DynamicDataDisplay
+*
+* @param plotName Name of the table
+* @param oldName Former name of the table
+*
+* @return true on success, false when the grid was not deleted
+*/
+//------------------------------------------------------------------------------
+bool GuiPlotReceiver::DeleteDynamicData(const std::string &plotName,
+                                        const std::string &oldName)
+{
+   wxString owner = plotName;
+   MdiChildDynamicDataFrame *frame = NULL;
+
+   for (Integer i = 0; i < MdiTsPlot::numChildren; ++i)
+   {
+      frame =
+         (MdiChildDynamicDataFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+
+      if (frame)
+      {
+         if (frame->GetPlotName().IsSameAs(owner))
+            frame->DeleteDynamicDataGrid();
+      }
+   }
+
+   return true;
+}
+
+bool GuiPlotReceiver::SetDynamicDataTextColor(const std::string &plotName,
+                                              std::vector<std::vector<DDD>> newColors)
+{
+   wxString owner = plotName;
+   MdiChildDynamicDataFrame *frame = NULL;
+
+   for (Integer i = 0; i < MdiTsPlot::numChildren; ++i)
+   {
+      frame = (MdiChildDynamicDataFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+
+      if (frame)
+      {
+         if (frame->GetPlotName().IsSameAs(owner))
+         {
+            frame->SetDynamicDataCellTextColor(newColors);
+         }
+      }
+   }
+
+   return true;
 }
 
 //------------------------------------------------------------------------------

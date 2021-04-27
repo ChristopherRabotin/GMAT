@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -150,12 +150,12 @@ void GroundStationPanel::Create()
    StringArray centralBodyList;
    centralBodyList.push_back("Earth");
    wxArrayString wxCentralBodyLabels = ToWxArrayString(centralBodyList);
-   centralBodyComboBox = new wxComboBox( this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(120,-1),
-         wxCentralBodyLabels, wxCB_DROPDOWN|wxCB_READONLY);
+//   centralBodyComboBox = new wxComboBox( this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(120,-1),
+//         wxCentralBodyLabels, wxCB_DROPDOWN|wxCB_READONLY);
 // for now, we are only allowing Earth as the central body; when code is updated to use any body
 // as central body, un-comment the following code:
-//   centralBodyComboBox = GuiItemManager::GetInstance()->GetCelestialBodyComboBox(this, ID_COMBOBOX,
-//                                                              wxSize(150,-1));
+   centralBodyComboBox = GuiItemManager::GetInstance()->GetCelestialBodyComboBox(this, ID_COMBOBOX,
+                                                              wxSize(150,-1));
    std::string toolTip = BodyFixedPoint::PARAMETER_TEXT[BodyFixedPoint::CENTRAL_BODY-BodyFixedPoint::CENTRAL_BODY]+"Hint";
    centralBodyComboBox->SetToolTip(pConfig->Read(wxString(toolTip.c_str())));
    // centralBodyComboBox->SetToolTip(pConfig->Read(_T((BodyFixedPoint::PARAMETER_TEXT[BodyFixedPoint::CENTRAL_BODY-BodyFixedPoint::CENTRAL_BODY]+"Hint").c_str())));

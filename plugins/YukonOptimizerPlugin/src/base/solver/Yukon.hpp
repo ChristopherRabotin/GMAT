@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -144,6 +144,7 @@ private:
    Rvector constraintTypes;
    /// Boolean represnting whether optimizer is in elastic mode
    bool isModeElastic;
+   bool firstElasticStep;
    /// The weight used in elastic mode if elastic mode is required
    Real elasticWeight;
 

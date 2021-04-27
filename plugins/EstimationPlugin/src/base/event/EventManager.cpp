@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -61,6 +61,28 @@ EventManager::EventManager() :
 //-----------------------------------------------------------------------------
 EventManager::~EventManager()
 {
+   CleanUp();                         // made changes by TUAN NGUYEN
+}
+
+
+// made changes by TUAN NGUYEN
+void EventManager::CleanUp()
+{
+   eventNames.clear();
+   
+   // clean up ObjectArray events;
+   for (Integer i = 0; i < events.size(); ++i)
+   {
+      if (events[i])
+         delete events[i];
+   }
+   events.clear();
+
+   // clean up EstimationRootFinder locater;
+   locater.CleanUp();
+
+   eventStatus.clear();
+   activated.clear();
 }
 
 

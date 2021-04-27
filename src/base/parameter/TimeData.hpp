@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -36,6 +36,7 @@
 #include "RefData.hpp"
 #include "Spacecraft.hpp"
 #include "SpacePoint.hpp"
+#include "TimeSystemConverter.hpp"   // for the TimeSystemConverter singleton
 
 
 class GMAT_API TimeData : public RefData
@@ -90,6 +91,8 @@ protected:
    SpacePoint *mSpacePoint;
    
    bool handleLeapSecond;
+   /// Time converter singleton
+   TimeSystemConverter *theTimeConverter;
    
    const static Real TIME_REAL_UNDEFINED;
    const static std::string TIME_STRING_UNDEFINED;

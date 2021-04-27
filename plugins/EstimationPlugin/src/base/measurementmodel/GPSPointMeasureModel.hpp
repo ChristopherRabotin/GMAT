@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -107,6 +107,10 @@ private:
    void         GetDerivativeWRTC(GmatBase *forObj, GmatTime measTime, std::vector<RealArray>& derivative);
    void         GetDerivativeWRTCr(GmatBase *forObj, GmatTime measTime, std::vector<RealArray>& derivative);
    void         GetDerivativeWRTCd(GmatBase *forObj, GmatTime measTime, std::vector<RealArray>& derivative);
+
+   Real         GetParamDerivative(GmatBase *forObj, std::string paramName, GmatBase *associateObj, SignalData *theData);     // made changes by TUAN NGUYEN
+   void         GetCDerivativeVector(GmatBase *forObj, Rvector &deriv, const std::string &solveForType, SignalData *theData); // made changes by TUAN NGUYEN
+
 };
 
 #endif /* GPSPointMeasureModel_hpp */

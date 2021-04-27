@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -142,7 +142,7 @@ EquatorAxes::~EquatorAxes()
 //---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage EquatorAxes::UsesEopFile(const std::string &forBaseSystem) const
 {
-   if ((originName == SolarSystem::EARTH_NAME) && (forBaseSystem == baseSystem)) return GmatCoordinate::REQUIRED;
+   if ((originName == GmatSolarSystemDefaults::EARTH_NAME) && (forBaseSystem == baseSystem)) return GmatCoordinate::REQUIRED;
    return GmatCoordinate::NOT_USED;
 }
 
@@ -155,7 +155,7 @@ GmatCoordinate::ParameterUsage EquatorAxes::UsesEopFile(const std::string &forBa
 //---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage EquatorAxes::UsesItrfFile() const
 {
-   if (originName == SolarSystem::EARTH_NAME) return GmatCoordinate::REQUIRED;
+   if (originName == GmatSolarSystemDefaults::EARTH_NAME) return GmatCoordinate::REQUIRED;
    return GmatCoordinate::NOT_USED;
 }
 
@@ -168,7 +168,7 @@ GmatCoordinate::ParameterUsage EquatorAxes::UsesItrfFile() const
 //---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage EquatorAxes::UsesNutationUpdateInterval() const
 {
-   if (originName == SolarSystem::EARTH_NAME) 
+   if (originName == GmatSolarSystemDefaults::EARTH_NAME) 
       return GmatCoordinate::REQUIRED;
    return DynamicAxes::UsesNutationUpdateInterval();
 }
@@ -184,7 +184,7 @@ GmatCoordinate::ParameterUsage EquatorAxes::UsesNutationUpdateInterval() const
 bool EquatorAxes::Initialize()
 {
    DynamicAxes::Initialize();
-   if (originName == SolarSystem::EARTH_NAME) InitializeFK5();
+   if (originName == GmatSolarSystemDefaults::EARTH_NAME) InitializeFK5();
    return true;
 }
 
@@ -230,15 +230,15 @@ void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       MessageInterface::ShowMessage("Entering Equator::Calculate with epoch = %.12f\n",
          (Real) atEpoch.Get());
    #endif
-   if (originName == SolarSystem::EARTH_NAME)
+   if (originName == GmatSolarSystemDefaults::EARTH_NAME)
    {
       Real dPsi             = 0.0;
       Real longAscNodeLunar = 0.0;
       Real cosEpsbar        = 0.0;
       
       // convert epoch (A1 MJD) to TT MJD (for calculations)
-      Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
-                   TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
+      Real mjdTT = theTimeConverter->Convert(atEpoch.Get(),
+                   TimeSystemConverter::A1MJD, TimeSystemConverter::TTMJD,
                    GmatTimeConstants::JD_JAN_5_1941);      
       Real offset = GmatTimeConstants::JD_JAN_5_1941 - GmatTimeConstants::JD_OF_J2000;
       Real tTDB  = (mjdTT + offset) / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;
@@ -301,7 +301,7 @@ void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       // (assume it is negligibly small)
       
    }
-   else if ((originName == SolarSystem::MOON_NAME) && 
+   else if ((originName == GmatSolarSystemDefaults::MOON_NAME) && 
            (((CelestialBody*)origin)->GetRotationDataSource() == Gmat::DE_FILE))
    {
       #ifdef DEBUG_EQ_LUNA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~

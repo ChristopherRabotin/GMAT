@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -139,13 +139,18 @@ namespace GmatEditor
    //----------------------------------------------------------
    struct StyleInfoType
    {
-      wxChar *name;
-      wxChar *foreground;
-      wxChar *background;
-      wxChar *fontname;
+      wxChar name[24];
+      wxChar foreground[24];
+      wxChar background[24];
+      wxChar fontname[24];
+//      wxChar *name;
+//      wxChar *foreground;
+//      wxChar *background;
+//      wxChar *fontname;
       int fontsize;
       int fontstyle;
       int lettercase;
+      unsigned long foregroundRGB;
    };
 
    extern const CommonInfoType globalCommonPrefs;

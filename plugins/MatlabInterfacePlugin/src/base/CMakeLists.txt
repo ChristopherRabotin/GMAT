@@ -29,9 +29,6 @@ endif()
 
 SET(TargetName MatlabInterface)
 
-# Add Preproccessor Definitions
-ADD_DEFINITIONS("-DMATLAB_EXPORTS")
-
 # ====================================================================
 # list of directories containing source/header files
 SET(PLUGIN_DIRS command factory function include interface matwriter plugin subscriber)
@@ -68,6 +65,9 @@ endif()
 # ====================================================================
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
+
+# Rename DLL export preproccessor definition
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEFINE_SYMBOL "MATLAB_EXPORTS")
 
 # ====================================================================
 # Includes

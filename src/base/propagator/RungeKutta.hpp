@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -56,32 +56,32 @@
  * Base class for Adaptive Runge-Kutta integrators
  *
  *  The Runge-Kutta integration scheme is a single step method used to solve
- *  differential equations for \f$n\f$ coupled variables of the form
+ *  differential equations for \f$ n \f$ coupled variables of the form
  *
- *  \f[{{dr^i}\over{dt}} = f(t,r)\f]
+ *  \f[ {{dr^i}\over{dt}} = f(t,r) \f]
  *
- *  (The superscript in this discussion refers to the variables; hence \f$f^i\f$
- *  is the \f$i^{th}\f$ variable, and \f$r^{(n)}\f$ refers to all \f$n\f$
- *  variables.)  The method takes an integration step, \f$h\f$, by breaking the
+ *  (The superscript in this discussion refers to the variables; hence \f$ f^i \f$
+ *  is the \f$ i^{th} \f$ variable, and \f$ r^{(n)} \f$ refers to all \f$ n \f$
+ *  variables.)  The method takes an integration step, \f$ h \f$, by breaking the
  *  interval into several stages (usually of smaller size) and calculating
  *  estimates of the integration result at each stage.  The later stages use the
  *  results of the earlier stages.  The cumulative effect of the integration is
- *  an approximate total step \f$\delta t\f$, accurate to a given order in the
+ *  an approximate total step \f$ \delta t \f$, accurate to a given order in the
  *  series expansion of the differential equation, for the state variables
- *  \f$r_i(t+\delta t)\f$ given the state \f$r_i(t)\f$.
+ *  \f$ r_i(t+\delta t) \f$ given the state \f$ r_i(t) \f$.
  *
- *  The time increment for a given stage is given as a multiple \f$a_i\f$ of the
- *  total time step desired; thus for the \f$i^{th}\f$ stage the interval used
- *  for the calculation is \f$a_i \delta t\f$; the estimate of the integrated
+ *  The time increment for a given stage is given as a multiple \f$ a_i \f$ of the
+ *  total time step desired; thus for the \f$ i^{th} \f$ stage the interval used
+ *  for the calculation is \f$ a_i \delta t \f$; the estimate of the integrated
  *  state at this stage is given by
  *
  *  \f[ k_i^{(n)} = \delta t f(t+a_i\delta t, r^{(n)}(t) +
  *                  \sum_{j=1}^{i-1}b_{ij}k_j^{(n)}) \f]
  *
- *  where \f$b_{ij}\f$ contains a set of coefficients specific to the Runge-Kutta
+ *  where \f$ b_{ij} \f$ contains a set of coefficients specific to the Runge-Kutta
  *  instance being calculated.  Given the results of the stage calculations, the
  *  total integration step can be calculated using another set of coefficients,
- *  \f$c_j\f$ and the formula
+ *  \f$ c_j \f$ and the formula
  *
  *  \f[ r^{(n)}(t+\delta t) = r^{(n)}(t) + \sum_{j=1}^{stages}c_j k_j^{(n)} \f]
  *
@@ -91,31 +91,31 @@
  *  coefficients corresponding to this second integration scheme can be used to
  *  obtain a solution
  *
- *  \f[r'^{(n)}(t+\delta t) = r^{(n)}(t) + \sum_{j=1}^{stages}c_j^* k_j^{*(n)}\f]
+ *  \f[ r'^{(n)}(t+\delta t) = r^{(n)}(t) + \sum_{j=1}^{stages}c_j^* k_j^{*(n)} \f]
  *
- *  With care, the stage estimates \f$k_j\f$ and \f$k_j^*\f$ can be selected so
+ *  With care, the stage estimates \f$ k_j \f$ and \f$ k_j^* \f$ can be selected so
  *  that they are the same; in that case, the estimate of the error in the
- *  integration \f$\Delta^{(n)}\f$ can be written
+ *  integration \f$ \Delta^{(n)} \f$ can be written
  *
  *  \f[ \Delta^{(n)} =
  *                  \left| \sum_{j=1}^{stages}(c_j - c_j^*) k_j^{(n)} \right| \f]
  *
- *  (The difference between the coefficients \f$c_j - c_j^*\f$ is the array of
+ *  (The difference between the coefficients \f$ c_j - c_j^* \f$ is the array of
  *  error estimate coefficients (ee) in this code.)
  *
  *  Once the estimated error has been calculated, the size of the integration
  *  step can be adapted to a size more appropriate to the desired accuracy of the
  *  integration.  If the step results in a solution that is not accurate enough,
  *  the step needs to be recalculated with a smaller step size.  Labeling the
- *  desired accuracy \f$\alpha\f$ and the obtained accuracy \f$\epsilon\f$
- *  (calculated, for instance, as the largest element of the array \f$\Delta\f$),
+ *  desired accuracy \f$ \alpha \f$ and the obtained accuracy \f$ \epsilon \f$
+ *  (calculated, for instance, as the largest element of the array \f$ \Delta \f$),
  *  the new step used by the Runge-Kutta integrator is
  *
- *  \f[\delta t_{new}=
- *             \sigma\delta t\left({{\alpha}\over{\epsilon}}\right)^{1/(m-1)}\f]
+ *  \f[ \delta t_{new}=
+ *             \sigma\delta t\left({{\alpha}\over{\epsilon}}\right)^{1/(m-1)} \f]
  *
- *  where \f$m\f$ is the order of truncation of the series expansion of the
- *  differential equations being solved.  The factor \f$\sigma\f$ is a safety
+ *  where \f$ m \f$ is the order of truncation of the series expansion of the
+ *  differential equations being solved.  The factor \f$ \sigma \f$ is a safety
  *  factor incorporated into the calculation to avoid unnecessary iteration over
  *  attempted steps.  Common practice is to set this factor to 0.9; that is the
  *  default value used in this implementation.
@@ -124,8 +124,8 @@
  *  want to increase the step size parameter for the next integration step.  The
  *  new estimate for the desired stepsize is given by
  *
- *  \f[\delta t_{new}=
- *             \sigma\delta t\left({{\alpha}\over{\epsilon}}\right)^{1/(m)}\f]
+ *  \f[ \delta t_{new}=
+ *             \sigma\delta t\left({{\alpha}\over{\epsilon}}\right)^{1/(m)} \f]
  *
  *  Sometimes you do not want to increase the stepsize in this manner; for example,
  *  you may want to keep the maximum step taken at some fixed value.  This

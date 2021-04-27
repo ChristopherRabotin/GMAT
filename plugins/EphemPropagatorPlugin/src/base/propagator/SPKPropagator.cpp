@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -642,7 +642,8 @@ bool SPKPropagator::Initialize()
 
             if (spices.size() == 0)
                throw PropagatorException("Spice (SPK) propagator requires at "
-                     "least one orbit SPICE kernel,");
+                     "least one orbit SPICE kernel for spacecraft " +
+                     propObjects[i]->GetName());
             
             // Changed to use VEHICLE_EPHEM_SPK_PATH (LOJ: 2014.06.18)
             //std::string ephemPath = fm->GetPathname(FileManager::EPHEM_PATH);
@@ -691,6 +692,7 @@ bool SPKPropagator::Initialize()
                try
                {
                   Rvector6  outState;
+                  Integer   perSatDim = psm->GetState()->GetSize();
 
                   if (hasPrecisionTime)
                   {
@@ -699,6 +701,9 @@ bool SPKPropagator::Initialize()
                         std::string scName = propObjectNames[i];
                         Integer id = naifIds[i];
 
+                        if (initialEpochGT.GetMjd() < 0.0)
+                           // match GT to the Real time if it hasn't been matched
+                           initialEpochGT = initialEpoch;
                         currentEpochGT = initialEpochGT;
                         currentEpochGT.AddSeconds(timeFromEpoch);
 
@@ -728,8 +733,9 @@ bool SPKPropagator::Initialize()
                         outState = skr->GetTargetState(scName, id, currentEpochGT,
                                             spkCentralBody, spkCentralBodyNaifId);
 
-                        std::memcpy(state, outState.GetDataVector(),
-                                    dimension*sizeof(Real));
+                        // Fill in the Cartesian state data
+                        std::memcpy(state + i * perSatDim, outState.GetDataVector(),
+                                    6*sizeof(Real));
                      }
 
                      UpdateSpaceObjectGT(currentEpochGT);
@@ -772,8 +778,7 @@ bool SPKPropagator::Initialize()
                         outState = skr->GetTargetState(scName, id, A1Mjd(currentEpoch),
                                                        spkCentralBody, spkCentralBodyNaifId);
 
-                        std::memcpy(state, outState.GetDataVector(),
-                                    dimension*sizeof(Real));
+                        std::memcpy(state, outState.GetDataVector(), 6*sizeof(Real));
                      }
 
                      UpdateSpaceObject(currentEpoch);
@@ -879,8 +884,7 @@ bool SPKPropagator::Step()
                //                  dimension*sizeof(Real));
                //            ReturnFromOrigin(currentEpoch);
                //            std::memcpy(j2kState, outState.GetDataVector(),
-               std::memcpy(state, outState.GetDataVector(), 
-                  dimension*sizeof(Real));
+               std::memcpy(state, outState.GetDataVector(), 6*sizeof(Real));
                //MoveToOrigin(currentEpoch);
                UpdateSpaceObjectGT(currentEpochGT);
 
@@ -940,8 +944,7 @@ bool SPKPropagator::Step()
                //                  dimension*sizeof(Real));
                //            ReturnFromOrigin(currentEpoch);
                //            std::memcpy(j2kState, outState.GetDataVector(),
-               std::memcpy(state, outState.GetDataVector(),
-                  dimension*sizeof(Real));
+               std::memcpy(state, outState.GetDataVector(), 6*sizeof(Real));
                //MoveToOrigin(currentEpoch);
                UpdateSpaceObject(currentEpoch);
 
@@ -1071,8 +1074,7 @@ void SPKPropagator::UpdateState()
                //            std::memcpy(state, outState.GetDataVector(),
                //                  dimension*sizeof(Real));
                //            std::memcpy(j2kState, outState.GetDataVector(),
-               std::memcpy(state, outState.GetDataVector(), 
-                  dimension*sizeof(Real));
+               std::memcpy(state, outState.GetDataVector(), 6*sizeof(Real));
                //            MoveToOrigin(currentEpoch);
                //            UpdateSpaceObject(currentEpoch);
 
@@ -1124,8 +1126,7 @@ void SPKPropagator::UpdateState()
                //            std::memcpy(state, outState.GetDataVector(),
                //                  dimension*sizeof(Real));
                //            std::memcpy(j2kState, outState.GetDataVector(),
-               std::memcpy(state, outState.GetDataVector(),
-                  dimension*sizeof(Real));
+               std::memcpy(state, outState.GetDataVector(), 6*sizeof(Real));
                //            MoveToOrigin(currentEpoch);
                //            UpdateSpaceObject(currentEpoch);
 

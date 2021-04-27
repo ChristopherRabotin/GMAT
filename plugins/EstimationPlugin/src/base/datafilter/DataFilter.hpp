@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -193,8 +193,8 @@ private:
                                    const std::string &theFormat);
    bool    isEpochFormatSet;
 
-   std::map<std::string, std::string> GetDeprecatedTypeMap() {return depTypeMap;};
-   std::map<std::string, std::string> depTypeMap;
+//   std::map<std::string, std::string> GetDeprecatedTypeMap() {return depTypeMap;};
+//   std::map<std::string, std::string> depTypeMap;
 };
 
 #endif /* DataFilter_hpp */

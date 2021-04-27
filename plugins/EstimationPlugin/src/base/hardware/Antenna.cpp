@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -80,6 +80,9 @@ Antenna::Antenna(const std::string &type, const std::string &name) :
    objectTypes.push_back(Gmat::ANTENNA);
    objectTypeNames.push_back("Antenna");
    parameterCount = AntennaParamCount;
+
+   for (Integer i = HardwareParamCount; i < AntennaParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 //-----------------------------------------------------------------------------
@@ -91,7 +94,6 @@ Antenna::Antenna(const std::string &type, const std::string &name) :
 //-----------------------------------------------------------------------------
 Antenna::~Antenna()
 {
-        // TODO Auto-generated destructor stub
 }
 
 //-----------------------------------------------------------------------------
@@ -110,6 +112,8 @@ Antenna::Antenna(const Antenna & ant) :
    phaseCenterLocation2    (ant.phaseCenterLocation2),
    phaseCenterLocation3    (ant.phaseCenterLocation3)
 {
+   for (Integer i = HardwareParamCount; i < AntennaParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 
@@ -325,12 +329,17 @@ bool Antenna::IsParameterReadOnly(const std::string& label) const
 //------------------------------------------------------------------------------
 bool Antenna::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == DIRECTION_X) || (id == DIRECTION_Y) || (id == DIRECTION_Z))
-      return true;
-
    // Inactive fields: Delay, PhaseCenterLocation1,  PhaseCenterLocation2, and PhaseCenterLocation3
    if ((id == ANTENNA_DELAY)||(id == PHASE_CENTER_LOCATION1)||(id == PHASE_CENTER_LOCATION2)||(id == PHASE_CENTER_LOCATION3))
       return true;
+   
+   // Enable Hardware direction and FOV-related variables
+   if ((id == FOV_MODEL)          || (id == DIRECTION_X)        ||
+       (id == DIRECTION_Y)        || (id == DIRECTION_Z)        ||
+       (id == SECOND_DIRECTION_X) || (id == SECOND_DIRECTION_Y) ||
+       (id == SECOND_DIRECTION_Z) || (id == HW_ORIGIN_BCS_X)    ||
+       (id == HW_ORIGIN_BCS_Y)    || (id == HW_ORIGIN_BCS_Z))
+      return false;
 
    return Hardware::IsParameterReadOnly(id);
 }

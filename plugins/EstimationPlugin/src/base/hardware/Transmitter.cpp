@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -78,6 +78,9 @@ Transmitter::Transmitter(const std::string &ofType, const std::string &name) :
 
    isTransmitted1 = true;
    signal1 = new Signal();
+
+   for (Integer i = RFHardwareParamCount; i < TransmitterParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 //------------------------------------------------------------------------------
@@ -110,6 +113,9 @@ Transmitter::Transmitter(const Transmitter & trans) :
    frequency         (trans.frequency)
 {
    signal1->SetValue(frequency);
+
+   for (Integer i = RFHardwareParamCount; i < TransmitterParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 

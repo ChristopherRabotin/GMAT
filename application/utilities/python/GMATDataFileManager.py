@@ -119,8 +119,10 @@ class GMATFileManager:
        self.naifLSKDir = 'pub/naif/generic_kernels/lsk/'
        self.naifPCKDir = 'pub/naif/generic_kernels/pck/'
        self.naifLunaTFDir = 'pub/naif/generic_kernels/fk/satellites/'
-       self.eopURL = 'ftp://hpiers.obspm.fr/iers/series/opa/eopc04_IAU2000'
+       self.eopURL = 'ftp://hpiers.obspm.fr/iers/series/opa/eopc04'
        self.spaceWeatherURL = \
+           'ftp://ftp.agi.com/pub/DynamicEarthData/SpaceWeather-v1.2.txt'
+       self.spaceWeatherAllURL = \
            'ftp://ftp.agi.com/pub/DynamicEarthData/SpaceWeather-All-v1.2.txt'
        self.apDataURL = \
            'ftp://ftp.agi.com/pub/DynamicEarthData/SpaceWeather-All-v1.2.txt'
@@ -473,7 +475,7 @@ class GMATFileManager:
        isOK = True;
        # CSSI_FLUX_FILE = ATMOSPHERE_PATH/CSSI_2004To2026.txt
        try:
-          self.Downloadfile(self.spaceWeatherURL,
+          self.Downloadfile(self.spaceWeatherAllURL,
                             self.cssiSpaceWeatherAllFileName )
     
           currentLoc = self.gmatRootDirectory + self.spaceWeatherDirectory
@@ -801,9 +803,9 @@ class GMATFileManager:
 # NOTE - these must be changed to point to your GMAT location and the location
 # where you want the file(s) to be backed up.  You may also specify a name for
 # your log file.
-gmatLocation = "REPLACE WITH PATH TO GMAT ROOT DIRECTORY"
-archLoc = "REPLACE WITH PATH TO FILE ARCHIVE"
-logName = "REPLACE WITH NAME AND EXTENSION OF LOG FILE"
+gmatLocation = "C://Users//sphughe1//Desktop//LatestCompleteVersion//"
+archLoc = "C://Temp//"
+logName = "fileupdatelog.txt"
 
 try:
    fManager = GMATFileManager(gmatLocation,archiveDirectory = archLoc,

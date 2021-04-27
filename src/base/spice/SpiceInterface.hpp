@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -54,6 +54,8 @@
 #include "A1Mjd.hpp"
 #include "Rvector6.hpp"
 #include "Rmatrix33.hpp"
+#include "TimeSystemConverter.hpp"   // for the TimeSystemConverter singleton
+
 // include the appropriate SPICE C header(s)
 extern "C"  
 {
@@ -124,10 +126,15 @@ protected:
    /// the name (full path) of the leap second kernel to use
    static std::string lsKernel;
 
+   /// Time converter singleton
+   TimeSystemConverter *theTimeConverter;
+
    //   static void InitializeReader();
    static void InitializeInterface();
 
    static std::string FindKernel(const std::string &withName);
+   
+   virtual std::string GetFullKernelPath(const std::string &forKernel);
 
 };
 

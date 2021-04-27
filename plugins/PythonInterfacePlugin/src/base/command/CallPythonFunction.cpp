@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -34,6 +34,8 @@
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_CONSTRUCTOR
+//#define DEBUG_SETGET
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_EXECUTION
 
@@ -77,6 +79,10 @@ CallPythonFunction::CallPythonFunction() :
    outCol            (1),
    pythonIf          (NULL)
 {
+#ifdef DEBUG_CONSTRUCTOR
+   MessageInterface::ShowMessage("CallPythonFunction default constructor.\n");
+#endif
+
 }
 
 
@@ -99,6 +105,10 @@ CallPythonFunction::CallPythonFunction(const CallPythonFunction& cpf) :
    outCol            (cpf.outCol),
    pythonIf          (cpf.pythonIf)
 {
+#ifdef DEBUG_CONSTRUCTOR
+   MessageInterface::ShowMessage("CallPythonFunction copy constructor from <%p>.\n", cpf);
+#endif
+
 }
 
 
@@ -115,6 +125,10 @@ CallPythonFunction::CallPythonFunction(const CallPythonFunction& cpf) :
 //------------------------------------------------------------------------------
 CallPythonFunction& CallPythonFunction::operator=(const CallPythonFunction& cpf)
 {
+#ifdef DEBUG_CONSTRUCTOR
+   MessageInterface::ShowMessage("CallPythonFunction assignment command from <%p>.\n", cpf);
+#endif
+
    if (this != &cpf)
    {
       CallFunction::operator=(cpf);
@@ -237,6 +251,9 @@ std::string CallPythonFunction::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string CallPythonFunction::GetStringParameter(const Integer id) const
 {
+#ifdef DEBUG_SETGET
+   MessageInterface::ShowMessage("CallPythonFunction::GetStringParameter(id = %d)\n", id);
+#endif
    if (id == MODULENAME)
       return moduleName;
    if (id == FUNCTIONNAME)
@@ -260,6 +277,10 @@ std::string CallPythonFunction::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool CallPythonFunction::SetStringParameter(const Integer id, const char* value)
 {
+#ifdef DEBUG_SETGET
+   MessageInterface::ShowMessage("CallPythonFunction::SetStringParameter(id = %d, value = <%s>)\n", id, value);
+#endif
+
    if (id == MODULENAME)
    {
       moduleName = value;
@@ -291,6 +312,10 @@ bool CallPythonFunction::SetStringParameter(const Integer id, const char* value)
 bool CallPythonFunction::SetStringParameter(const Integer id,
       const std::string& value)
 {
+#ifdef DEBUG_SETGET
+   MessageInterface::ShowMessage("CallPythonFunction::SetStringParameter(id = %d, std::string &value = <%s>)\n", id, value.c_str());
+#endif
+
    if (id == MODULENAME)
    {
       moduleName = value;
@@ -396,7 +421,7 @@ bool CallPythonFunction::Initialize()
    try
    {
       pythonIf = PythonInterface::PyInstance();
-      FileManager *fm = FileManager::Instance();
+      FileManager *fileMgr = FileManager::Instance();
 
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("  pythonIf:  %p\n", pythonIf);
@@ -406,7 +431,7 @@ bool CallPythonFunction::Initialize()
 	   pythonIf->PyInitialize();
 
 	   // Get all Python module paths from the startup file
-	   StringArray paths = fm->GetAllPythonModulePaths();
+	   StringArray paths = fileMgr->GetAllPythonModulePaths();
 
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("  Adding %d python paths\n", paths.size());
@@ -1070,6 +1095,9 @@ void CallPythonFunction::SendInParam(std::vector<void *> &argIn, std::vector<Gma
 
             break;
          }
+         default:
+            std::cout <<
+               "type not RMATRIX_TYPE in CallPythonFunction::SendInParam";
       }
    }
 }

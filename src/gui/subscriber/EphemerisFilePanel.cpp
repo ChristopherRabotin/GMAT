@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1032,7 +1032,7 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
          try
          {
             std::string prevFmt = previousEpochFormat.WX_TO_STD_STRING;
-            TimeConverterUtil::ValidateTimeFormat(prevFmt,oldEpoch, true);
+            TimeSystemConverter::Instance()->ValidateTimeFormat(prevFmt,oldEpoch, true);
 
             if (previousEpochFormat.Find("ModJulian") == wxNOT_FOUND)
                fromVal = -999.999;
@@ -1041,7 +1041,7 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
                shownEpoch.ToDouble(&fromVal);
             }
 
-            TimeConverterUtil::Convert(previousEpochFormat.c_str(), fromVal,
+            TimeSystemConverter::Instance()->Convert(previousEpochFormat.c_str(), fromVal,
                   oldEpoch, epFormat, toVal, newInitialEpoch);
 
          }
@@ -1076,7 +1076,7 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
          try
          {
             std::string prevFmt = previousEpochFormat.WX_TO_STD_STRING;
-            TimeConverterUtil::ValidateTimeFormat(prevFmt,oldEpoch, true);
+            TimeSystemConverter::Instance()->ValidateTimeFormat(prevFmt,oldEpoch, true);
 
             if (previousEpochFormat.Find("ModJulian") == wxNOT_FOUND)
             {
@@ -1087,7 +1087,7 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
                shownEpoch.ToDouble(&fromVal);
             }
 
-            TimeConverterUtil::Convert(previousEpochFormat.c_str(), fromVal,
+            TimeSystemConverter::Instance()->Convert(previousEpochFormat.c_str(), fromVal,
                   oldEpoch, epFormat, toVal, newFinalEpoch);
 
          }

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -42,11 +42,11 @@
 
 GmatGlobal* GmatGlobal::theGmatGlobal = NULL;
 
-const Integer GmatGlobal::DATA_PRECISION = 16;
-const Integer GmatGlobal::TIME_PRECISION = 16;
-const Integer GmatGlobal::DATA_WIDTH = 16;
-const Integer GmatGlobal::TIME_WIDTH = 16;
-const Integer GmatGlobal::INTEGER_WIDTH = 4;
+// const Integer GmatGlobal::DATA_PRECISION = 16;
+// const Integer GmatGlobal::TIME_PRECISION = 16;
+// const Integer GmatGlobal::DATA_WIDTH = 16;
+// const Integer GmatGlobal::TIME_WIDTH = 16;
+// const Integer GmatGlobal::INTEGER_WIDTH = 4;
 
 //---------------------------------
 // public methods
@@ -351,6 +351,37 @@ void GmatGlobal::SetRunMode(Integer mode)
    if (runMode == EXIT_AFTER_RUN)
       isBatchMode = true;
 }
+
+
+//------------------------------------------------------------------------------
+// GmatEpoch GmatGlobal::SetBaseEpoch()
+//------------------------------------------------------------------------------
+/**
+ * Sets an earliest base epoch for the run
+ *
+ * @param The A.1 modJulian baseline epoch
+ */
+//------------------------------------------------------------------------------
+void GmatGlobal::SetBaseEpoch(const GmatEpoch theEpoch)
+{
+   baseEpoch = theEpoch;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatEpoch GmatGlobal::GetBaseEpoch()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves an earliest base epoch for the run
+ *
+ * @return The A.1 modJulian baseline epoch
+ */
+//------------------------------------------------------------------------------
+GmatEpoch GmatGlobal::GetBaseEpoch()
+{
+   return baseEpoch;
+}
+
 
 //------------------------------------------------------------------------------
 // Integer GetGuiMode()
@@ -1096,8 +1127,10 @@ GmatGlobal::GmatGlobal()
 {
    // Current GMAT version.
    // @note: Make sure to switch it to the official release number for RC1
-   gmatVersion = "R2018a";
+   gmatVersion = "R2020a";
    
+   //debug = false;
+
    isTesting = false;                      // It is a temporary fix in order to run gression test with runmode = TESTING. 
                                            // It needs to improve in the next GMAT release
 
@@ -1115,7 +1148,8 @@ GmatGlobal::GmatGlobal()
    isWritingGmatKeyword         = true;
    commandEchoMode              = false;
    runMode = NORMAL;
-   runState = Gmat::IDLE;
+   runState         = Gmat::IDLE;
+   detailedRunState = Gmat::IDLE;
    guiMode = NORMAL_GUI;
    plotMode = NORMAL_PLOT;
    matlabMode = SHARED;
@@ -1124,6 +1158,8 @@ GmatGlobal::GmatGlobal()
    SetDefaultFormat();
    SetToDefaultFormat();
    
+   baseEpoch = 21545.0;
+
    // Logfile
    logfileSrc = GmatGlobal::STARTUP;
    cmdLineLog = "";

@@ -1,0 +1,122 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Plate</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ch16.html#N1516B" title="Resources"><link rel="prev" href="NuclearPowerSystem.html" title="NuclearPowerSystem"><link rel="next" href="Propagator.html" title="Propagator"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Plate</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="NuclearPowerSystem.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Propagator.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Plate"></a><div class="titlepage"></div><a name="N199C9" class="indexterm"></a><a name="N199CC" class="indexterm"></a><a name="N199D1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Plate</span></h2><p>Plate &mdash; Used to specify the properties of a single spacecraft surface
+    (body panel, solar array side, or other surface) for high-fidelity solar
+    radiation pressure modeling, including specular, diffuse, and absorptive
+    effects.</p></div><div class="refsection"><a name="N199E4"></a><h2>Description</h2><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>The <span class="guilabel">NPlate</span> area model is an alpha-level
+      option for this release and should not be used for operational support.
+      Use of this model may be enabled by setting RUN_MODE = TESTING in the
+      Debug options section of the GMAT startup file.</p></div><p>The <span class="guilabel">Plate</span> resource allows the user to construct
+    a detailed spacecraft area model for higher-fidelity solar radiation
+    pressure (SRP) modeling. A spacecraft will typically be modeled as a
+    collection of plates; at a minimum six plates are required to represent
+    the spacecraft as a rectangular prism or box. You may also specify plates
+    to represent appendages such as solar arrays or a high-gain antenna. These
+    plates can be modeled as having a dynamic attitude with respect to the
+    spacecraft body, either by specifying them as Sun-facing or by providing
+    an external file which gives the plate attitude as a function of
+    time.</p><p>The collection of <span class="guilabel">Plate</span> resources that comprise
+    the model are assigned on the Spacecraft object using the Spacecraft
+    <span class="guilabel">AddPlates</span> field. Each Plate has an associated
+    AreaCoefficient parameter which represents a correction factor that may be
+    estimated in the orbit determination. You may estimate an individual
+    correction for each Plate in the model, or choose to associate a single
+    correction with a grouping of plates using the Spacecraft
+    <span class="guilabel">NPlateSRPEquateAreaCoefficients</span> parameter.</p><p>See Also <a class="xref" href="SpacecraftBallisticMass.html" title="Spacecraft Ballistic/Mass Properties"><span class="refentrytitle">Spacecraft Ballistic/Mass Properties</span></a></p></div><div class="refsection"><a name="N19A01"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Area</span></td><td><p>The plate area surface area. </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any positive Real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">1 m^2</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Meters^2</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>Script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AreaCoefficient</span></td><td><p>A scale factor applied to the plate area, typically
+            used for estimating errors in the plate model.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">1.0</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>Script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">AreaCoefficientSigma</span></td><td><p>A-priori uncertainty of the
+            <span class="guilabel">AreaCoefficient</span>. Only used for constraining
+            estimation of the <span class="guilabel">AreaCoefficient</span>
+            parameter.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">1e70</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>Script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DiffuseFraction</span></td><td><p>Plate coefficient of diffuse
+            reflectivity.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real number</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0 &lt;= DiffuseFraction &lt;= 1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">0</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>Script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">DiffuseFractionSigma</span></td><td><p>A-priori uncertainty of the
+            <span class="guilabel">DiffuseFraction</span>. Only used for constraining
+            estimation of the <span class="guilabel">DiffuseFraction</span>
+            parameter.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">1e70</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>Script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">LitFraction</span></td><td><p>A scale factor applied to the plate area to specify
+            the fraction of the plate that is illuminated (not in shadow).
+            This parameter can be used to model spacecraft self-shadowing, for
+            example due to a solar array casting a shadow on a side of the
+            spacecraft body.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0 &lt; LitFraction &lt;= 1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">1.0</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>Script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">PlateNormal</span></td><td><p>Plate surface normal vector. This specifies the
+            orientation of the plate in the spacecraft body frame, when the
+            <span class="guilabel">Plate</span><span class="guilabel">.Type</span> is set to
+            <span class="guilabel">FixedInBody</span>.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Vector</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Non-null 3-D vector</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">[1,0,0]</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>Script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">PlateNormalHistoryFile</span></td><td><p>Plate surface normal vector history file. This
+            specifies the orientation of the plate when the
+            <span class="guilabel">Plate</span><span class="guilabel">.Type</span> is set to
+            <span class="guilabel">File</span>.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Valid path and file name</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">None</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Not applicable</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>Script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SolveFors</span></td><td><p>List of estimated parameters for the
+            plate.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>AreaCoefficient, DiffuseFraction,
+                    SpecularFraction</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">Empty</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Not applicable</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>Script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SpecularFraction</span></td><td><p>Plate coefficient of specular
+            reflectivity.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>0 &lt;= SpecularFraction &lt;= 1</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">1</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>Script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">SpecularFractionSigma</span></td><td><p>A-priori uncertainty of the
+            <span class="guilabel">SpecularFraction</span>. Only used for constraining
+            estimation of the <span class="guilabel">SpecularFraction</span> parameter.
+            </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt; 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">1e70</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>Script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Type</span></td><td><p>Specifies the method of describing the plate
+            orientation.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>FixedInBody, SunFacing, File</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>Set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">FixedInBody</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Not applicable</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>Script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N19C52"></a><h2>Remarks</h2><p>Modeling of solar radiation pressure for each plate includes effects
+    due to individual plate specular reflectivity, diffuse reflectivity, and
+    absorption. The sum of each plate's specular, diffuse, and absorptive
+    fractions must equal 1. In the Plate resource, the user specifies the
+    specular and diffuse coefficients; the absorption fraction is the
+    remainder from 1 of the sum of the specular and diffuse fractions.</p><div class="refsection"><a name="N19C57"></a><h3>Plate normal history file format</h3><p>If the Plate Type is set to <span class="guilabel">File</span>, the user
+      must provide an external attitude history file, assigned on the
+      <span class="guilabel">Plate.PlateNormalHistoryFile</span> parameter. The plate
+      normal history file gives the plate normal vector as a function of time.
+      The file contains a header as described below.</p><div class="informaltable"><table border="1"><colgroup><col width="26%"><col width="7%"><col width="67%"></colgroup><thead><tr><th>Keyword</th><th>Required</th><th>Description and Supported Values</th></tr></thead><tbody><tr><td><span class="guilabel">Coordinate_System</span></td><td><p>Y</p></td><td><p>Reference coordinate system of the included normal
+              vectors. This may be any built-in or user defined inertial
+              frame, or 'FixedInBody' to use the spacecraft body
+              frame.</p></td></tr><tr><td><span class="guilabel">Interpolation_Method</span></td><td><p>N</p></td><td><p>Interpolation method to be used on the normal
+              vectors. Linear interpolation is the only method currently
+              supported.</p></td></tr><tr><td><span class="guilabel">Start_Epoch</span></td><td>Y</td><td>Base epoch for times in the table of normal vectors.
+              Required format is UTCGregorian 'DD Mon YYYY
+              HH:MM:SS.SSS'</td></tr></tbody></table></div><p>Following the header are a series of records, one per line, giving
+      a time in seconds from the Start_Epoch, followed by the Cartesian
+      components of the normal vector to the plate at the given time in
+      seconds past the Start_Epoch. A sample file is shown below.</p><pre class="programlisting">Start_Epoch = '11 Jun 2019 00:00:00.000'
+Coordinate_System = EarthMJ2000Eq
+Interpolation_Method = Linear
+
+   0.118      0.71134437  0.59768958  0.36980583
+  60.118      0.70844298  0.64262126  0.29179866
+ 120.117      0.70342991  0.67911896  0.20972316
+ 180.118      0.69632195  0.70683245  0.12459387
+ 240.118      0.68720633  0.72550392  0.03730319
+ 300.118      0.67618273  0.73495324  -0.05119232
+ 360.118      0.6635059   0.73500373  -0.13974778
+ 420.118      0.64938672  0.72563809  -0.22747802
+ 480.117      0.63365791  0.70727707  -0.31342751
+ 540.118      0.6166704   0.67998056  -0.39666617
+ 600.118      0.59854485  0.64412315  -0.47628713
+ 660.118      0.57958926  0.60014396  -0.55127445
+ 720.118      0.55997495  0.54842962  -0.62100966
+ 780.117      0.5399806   0.48973174  -0.68453179
+ 840.117      0.51976556  0.42453172  -0.7413613
+ 900.117      0.49951296  0.35366998  -0.79082511
+ 960.117      0.47946796  0.27785984  -0.83240879
+1020.118      0.45991923  0.19807528  -0.86558679
+1080.118      0.44098414  0.11493292  -0.8901255
+1140.118      0.42293817  0.02963382  -0.90567386
+1200.117      0.40594474  -0.05701248 -0.91211756
+1260.117      0.39029164  -0.14410621 -0.90934363
+1320.117      0.37589181  -0.23056147 -0.89752257
+1380.117      0.36306455  -0.31566225 -0.87666497
+1440.118      0.35205587  -0.39829948 -0.84700306
+</pre></div></div><div class="refsection"><a name="N19C97"></a><h2>Examples</h2><div class="informalexample"><p>This example shows how to create a simple single-plate model. In
+      this example, we model both the front and back of a single plate on the
+      X-face of the spacecraft body.</p><pre class="programlisting">Create Spacecraft SimSat;
+
+%
+%   N-Plate models
+%
+
+Create Plate PlusX MinusX;
+
+PlusX.Type             = FixedInBody;
+PlusX.PlateNormal      = [1.0, 0.0, 0.0];
+PlusX.LitFraction      = 1.0;
+PlusX.AreaCoefficient  = 1.0;
+PlusX.Area             = 12;
+PlusX.SpecularFraction = 1;
+PlusX.DiffuseFraction  = 0;
+
+MinusX.Type             = FixedInBody;
+MinusX.PlateNormal      = [-1.0, 0.0, 0.0];
+MinusX.LitFraction      = 1.0;
+MinusX.AreaCoefficient  = 1.0;
+MinusX.Area             = 12;
+MinusX.SpecularFraction = 0.5;
+MinusX.DiffuseFraction  = 0.1;
+
+SimSat.AddPlates  = {PlusX, MinusX}; </pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="NuclearPowerSystem.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ch16.html#N1516B">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Propagator.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">NuclearPowerSystem&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Propagator</td></tr></table></div></body></html>

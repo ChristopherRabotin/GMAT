@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -121,6 +121,8 @@ runOptimizer(NULL)
 //------------------------------------------------------------------------------
 Yukonad::~Yukonad()
 {
+   if (runOptimizer)
+      delete runOptimizer;
 }
 
 
@@ -885,6 +887,7 @@ Solver::SolverState  Yukonad::AdvanceState()
       MessageInterface::ShowMessage("Entered state machine; "
          "INITIALIZING\n");
 #endif
+      optIterations = 0;
       iterationsTaken = 0;
       WriteToTextFile();
       ReportProgress();
@@ -1088,7 +1091,7 @@ void Yukonad::SetResultValue(Integer id, Real value,
             ineqConstraintValues[idToUse] = value;
             setNewConValues = true;
          }
-         else if (currentState == PERTURBING & setNewConValues)
+         else if ((currentState == PERTURBING) && (setNewConValues))
          {
             gmatProblem->SetConFunction(idToUse,
                ineqConstraintAchievedValues[idToUse], "IneqCon");
@@ -1350,6 +1353,8 @@ void Yukonad::CheckCompletion()
    // methods
    if (iterationsTaken == 0)
    {
+      if (runOptimizer)
+         delete runOptimizer;
       runOptimizer = new Yukon(gmatProblem, hessianUpdateMethod,
          maxIterations, maximumFunctionEvals, feasibilityTolerance,
          optimalityTolerance, functionTolerance, maximumElasticWeight);
@@ -1548,6 +1553,11 @@ std::string Yukonad::InterpretRetCode(Integer retCode)
          "The last two step directions failed to converge.\n";
       break;
 
+   case 6:
+      retString += " failed to converge: "
+         "The problem appears to be infeasible.\n";
+      break;
+
    default:
       retString += " terminated with an unknown error code.\n";
       break;
@@ -1675,6 +1685,10 @@ std::string Yukonad::GetProgressString()
          else if (retCode == 3)
             progress << "\n*** Optimization did not converge in "
             << iterationsTaken
+            << " function evaluations";
+         else if (retCode == 6)
+            progress << "\n*** Optimization terminated in "
+            << optIterations << " iterations and " << iterationsTaken
             << " function evaluations";
          else
             progress << "\n*** An error occurred during optimization";

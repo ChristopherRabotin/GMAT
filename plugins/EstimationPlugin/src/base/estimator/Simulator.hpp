@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,10 +38,11 @@
 #include "GmatState.hpp"
 #include "MeasurementManager.hpp"
 #include "PropSetup.hpp"
+#include "TimeSystemConverter.hpp"   // for the TimeSystemConverter singleton
 
 
 // todo: Make this a propagator parameter
-#define SIMTIME_ROUNDOFF 1e-10  //1e-6
+#define SIMTIME_ROUNDOFF 1e-9  // 1.0e-10      //1e-6
 
 class ESTIMATION_API Simulator : public Solver
 {
@@ -65,7 +66,9 @@ public:
 
    Real                 GetTimeStep(GmatTime fromEpoch);
 
-   PropSetup*           GetPropagator();
+   PropSetup*           GetPropagator(const std::string &forSpacecraft);
+   std::vector<PropSetup*>
+                        *GetPropagators();
    MeasurementManager*  GetMeasurementManager();
 
    // methods overridden from GmatBase
@@ -101,8 +104,9 @@ public:
                        GetPropertyEnumStrings(const Integer id) const;
    virtual UnsignedInt
                         GetPropertyObjectType(const Integer id) const;
-
+   UnsignedInt          GetPropertyObjectType(const Integer id,
    // Access methods for the reference objects
+                                              const Integer index) const;
    virtual std::string  GetRefObjectName(const UnsignedInt type) const;
    virtual const ObjectTypeArray&
                         GetRefObjectTypeArray();
@@ -157,10 +161,23 @@ protected:
    static const Gmat::ParameterType
                                PARAMETER_TYPE[SimulatorParamCount -
                                               SolverParamCount];
-   /// The propagator configured for simulation
-   PropSetup           *propagator;
-   /// Name of the propagator
-   std::string         propagatorName;
+//   /// The propagator configured for simulation
+//   PropSetup           *propagator;
+//   /// Name of the propagator
+//   std::string         propagatorName;
+   /// Names of default PropSetup and spacecraft propagators used to evolve the system
+   std::vector<std::string> propagatorNames;
+   /// Map of spacecraft propagators that override the default propagator
+   std::map<std::string, StringArray> propagatorSatMap;
+   /// Propagator name used for sat prop filling
+   std::string             currentPropagator;
+
+   /// The propagators configured for simulation
+   std::vector<PropSetup*> propagators;
+   /// A mapping from a spacecraft name to the associated propagator
+   std::map<std::string, PropSetup*> satPropMap;
+   /// Flag indicating if the satellite propagator map needs to be built
+   bool needsSatPropMap;
 
    /// The state vector, used to buffer state information during event location
    GmatState           *simState;   // (This piece is still in flux -- do we do
@@ -221,6 +238,9 @@ protected:
    /// Local storage element for ref object names
    StringArray         refObjectList;
 
+   /// Time converter singleton
+   TimeSystemConverter *theTimeConverter;
+
    // State machine methods
    void                   CompleteInitialization();
    void                   FindTimeStep();
@@ -236,6 +256,14 @@ protected:
    // progress string for reporting
    virtual std::string    GetProgressString();
 
+   void                   BuildSatPropMap();
+
+   virtual void           WriteStringArrayValue(Gmat::WriteMode mode,
+                                                std::string &prefix,
+                                                Integer id, bool writeQuotes,
+                                                std::stringstream &stream);
+
+
 private:
    bool                   isTheFirstMeasurement;                                    // fix bug GMT-4909
    bool                   isEpochFormatSet;
@@ -245,6 +273,7 @@ private:
    StringArray            tropoWarningList;            // list contains all passes with troposphere correction to be outside acceptable range [0m, 60m]
    void                   ValidateMediaCorrection(const MeasurementData* measData);
 
+   std::string            GetUnit(const std::string type) const;                 // made changes by TUAN NGUYEN
 };
 
 #endif /* Simulator_hpp */

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -54,8 +54,8 @@
 //#define DEBUG_NO_BRACKETS
 //#define DEBUG_BALANCED_BRACKETS
 //#define DEBUG_MATH_EQ 2
-//#define DEBUG_VALID_NAME
 //#define DEBUG_VALID_NUMBER
+//#define DEBUG_VALID_NAME
 //#define DEBUG_STRING_UTIL_SEP_COMMA
 //#define DEBUG_STRING_UTIL_STRING_ARRAY
 //#define DEBUG_REPLACE
@@ -839,7 +839,7 @@ std::string GmatStringUtil::Capitalize(const std::string &str)
 //                     const std::string &to, std::string::size_type start)
 //------------------------------------------------------------------------------
 /*
- * Replaces first occurenece of <from> string to <to> string from start index
+ * Replaces first occurrence of <from> string to <to> string from start index
  *
  */
 //------------------------------------------------------------------------------
@@ -1066,7 +1066,8 @@ std::string GmatStringUtil::ReplaceName(const std::string &str, const std::strin
    std::string::size_type fromSize = from.size();
    bool replace = false;
    char underscore = '_';
-   
+   char dot        = '.';
+
    while (!done)
    {
       #ifdef DEBUG_REPLACE_NAME
@@ -1075,6 +1076,7 @@ std::string GmatStringUtil::ReplaceName(const std::string &str, const std::strin
       
       strSize = str1.size();
       pos = str1.find(from, start);
+      bool notAtEnd = (pos + fromSize) < strSize;
       
       if (pos != str1.npos)
       {
@@ -1082,20 +1084,35 @@ std::string GmatStringUtil::ReplaceName(const std::string &str, const std::strin
          
          #ifdef DEBUG_REPLACE_NAME
          MessageInterface::ShowMessage("   start=%u, pos=%u\n", start, pos);
+         MessageInterface::ShowMessage("   strSize=%d, fromSize=%d\n",
+                                       (Integer) strSize, (Integer) fromSize);
          #endif
          
          if (pos == 0 && fromSize < strSize)
          {
             if (!isalnum(str1[fromSize]) && str1[fromSize] != underscore)
+            {
+               #ifdef DEBUG_REPLACE_NAME
+               MessageInterface::ShowMessage("  PASSED first test\n");
+               #endif
                replace = true;
+            }
          }
          else if (pos > 0 && (pos + fromSize) < strSize)
          {
             if (!isalnum(str1[pos + fromSize]) && str1[pos + fromSize] != underscore)
+            {
+               #ifdef DEBUG_REPLACE_NAME
+               MessageInterface::ShowMessage("  PASSED second test\n");
+               #endif
                replace = true;
+            }
          }
          else if (pos == strSize-fromSize) // replace last name
          {
+            #ifdef DEBUG_REPLACE_NAME
+            MessageInterface::ShowMessage("  PASSED third test\n");
+            #endif
             replace = true;
          }
          
@@ -1105,13 +1122,24 @@ std::string GmatStringUtil::ReplaceName(const std::string &str, const std::strin
          
          if (replace)
          {
+            #ifdef DEBUG_REPLACE_NAME
+            MessageInterface::ShowMessage("   notAtEnd=%d, pos=%u\n", notAtEnd, pos);
+            #endif
             // Check for the system Parameter name or object property field which
             // should not be replaced, such as SMA in sat.SMA Parameter or
             // X in sat.EarthEqCS.X. If previous char is non-alphanumeric, then
             // it can be replaced, such as arr(2.2)/sat1.X. (Fix for GMT-309 LOJ:2012.08.14)
+            // WCS 2019.11.21 Fix for GMT-6544
+
+            // Replace if
+            // 1) string found at the beginning, OR
+            // 2) character before is not alphanumeric, AND
+            //    it's not a dot, OR
+            //    it's a dot and following char is a dot as well (so, not a field)
             if ((pos == 0) ||
-                ((pos > 0 && str1[pos-1] == '.') && (pos-1 != str1.find_last_of('.'))) ||
-                (pos > 0 && !isalnum(str1[pos-1])))
+                (pos > 0 && (!isalnum(str1[pos-1])) &&
+                ((str1[pos-1] != dot) ||
+                ((str1[pos-1] == dot) && notAtEnd && (str1[pos+fromSize] == dot)))))
             {
                str1.replace(pos, fromSize, to);
             }
@@ -2756,6 +2784,131 @@ BooleanArray GmatStringUtil::ToBooleanArray(const std::string &str)
    return boolArray;
 }
 
+//------------------------------------------------------------------------------
+// UnsignedInt GetType(const Generic &forGeneric)
+//------------------------------------------------------------------------------
+/**
+ * Returns the contained type from a Generic
+ *
+ * @param forGeneric The generic containing data
+ *
+ * @return The type of the contained data
+ */
+ //------------------------------------------------------------------------------
+UnsignedInt GmatStringUtil::GetGenericType(const Generic &forGeneric)
+{
+   UnsignedInt retval = Gmat::GENERIC_TYPE;
+
+   switch (forGeneric.VarIndex())
+   {
+   case 0:
+      retval = Gmat::REAL_TYPE;
+      break;
+
+   case 1:
+      retval = Gmat::INTEGER_TYPE;
+      break;
+
+   case 2:
+      retval = Gmat::STRING_TYPE;
+      break;
+
+   case 3:
+      retval = Gmat::REALARRAY_TYPE;
+      break;
+
+   case 4:
+      retval = Gmat::INTARRAY_TYPE;
+      break;
+
+   case 5:
+      retval = Gmat::STRINGARRAY_TYPE;
+      break;
+
+   default:
+      break;
+   }
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetGenericAsString(const Generic &forGeneric)
+//------------------------------------------------------------------------------
+/**
+ * Returns the generic value as a string regardless of what type it really is
+ *
+ * @param forGeneric The generic containing data
+ *
+ * @return The value of the generic as a string
+ */
+ //------------------------------------------------------------------------------
+std::string GmatStringUtil::GetGenericAsString(const Generic &forGeneric)
+{
+   std::string retval;
+   UnsignedInt genType = GetGenericType(forGeneric);
+   RealArray realVals;
+   IntegerArray intVals;
+   StringArray stringVals;
+
+   switch (genType)
+   {
+   case Gmat::REAL_TYPE:
+      retval = ToString(VarGet<Real>(forGeneric));
+      retval = RemoveMultipleSpaces(retval);
+      break;
+
+   case Gmat::INTEGER_TYPE:
+      retval = ToString(VarGet<Integer>(forGeneric));
+      retval = RemoveMultipleSpaces(retval);
+      break;
+
+   case Gmat::STRING_TYPE:
+      retval = VarGet<std::string>(forGeneric);
+      break;
+
+   case Gmat::REALARRAY_TYPE:
+      retval = "[";
+      realVals = VarGet<RealArray>(forGeneric);
+      for (Integer i = 0; i < realVals.size(); ++i)
+      {
+         retval += RemoveMultipleSpaces(ToString(realVals.at(i)));
+         if (i < realVals.size() - 1)
+            retval += ", ";
+      }
+      retval += "]";
+      break;
+
+   case Gmat::INTARRAY_TYPE:
+      retval = "[";
+      intVals = VarGet<IntegerArray>(forGeneric);
+      for (Integer i = 0; i < realVals.size(); ++i)
+      {
+         retval += RemoveMultipleSpaces(ToString(intVals.at(i)));
+         if (i < intVals.size() - 1)
+            retval += ", ";
+      }
+      retval += "]";
+      break;
+
+   case Gmat::STRINGARRAY_TYPE:
+      retval = "[";
+      stringVals = VarGet<StringArray>(forGeneric);
+      for (Integer i = 0; i < realVals.size(); ++i)
+      {
+         retval += stringVals.at(i);
+         if (i < stringVals.size() - 1)
+            retval += ", ";
+      }
+      retval += "]";
+      break;
+
+   default:
+      break;
+   }
+
+   return retval;
+}
 
 //------------------------------------------------------------------------------
 // void ParseParameter(const std::string &str, std::string &type,
@@ -3250,8 +3403,8 @@ bool GmatStringUtil::IsSimpleArrayElement(const std::string &str)
 //                       Integer &last)
 //------------------------------------------------------------------------------
 /*
- * Finds first and last index of given chracter from the string.
- * if given chracter is not found it sets to -1
+ * Finds first and last index of given character from the string.
+ * if given character is not found it sets to -1
  *
  * @param  str  input string
  * @param  ch  input character to find
@@ -4752,7 +4905,7 @@ bool GmatStringUtil::IsSingleItem(const std::string &str)
 //                              bool ignoreSingleQuotes = false)
 //------------------------------------------------------------------------------
 /*
- * This method removs extra pair of parentheses.
+ * This method removes extra pair of parentheses.
  * If input string is "(a(1,1) + 10.0)" it returns "a(1,1) + 10.0"
  *                    "1 + (a(1,1) + 10) * 2" returns "1 + (a(1,1) + 10) * 2"
  *                    "(())" returns "(())"
@@ -5151,6 +5304,8 @@ std::string GmatStringUtil::ParseFunctionName(const std::string &str, std::strin
    if (str == "")
       return "";
    
+   Integer funcNameStart = 0;  // where in the str does the function name start
+   
    // Remove all spaces and semicolons
    std::string str1 = RemoveAll(str, ' ');
    while (str1[str1.size()-1] == ';')
@@ -5172,12 +5327,14 @@ std::string GmatStringUtil::ParseFunctionName(const std::string &str, std::strin
       {
          // This code block parse function name such as [a,b] = function(x)
          std::string::size_type index1 = str1.find("=");
+         if (index1 != str1.npos)
+            funcNameStart = index1 + 1;
          #ifdef DEBUG_FUNCTION_NAME
          MessageInterface::ShowMessage("   equalSignPos = %u\n", index1);
          #endif
          std::string::size_type index2 = str1.find("(", index1 + 1);
          if (index2 == str1.npos)
-            funcName = str1.substr(index1+1);
+            funcName      = str1.substr(index1+1);
          else
             funcName = str1.substr(index1+1, index2-index1-1);
       }
@@ -5190,15 +5347,39 @@ std::string GmatStringUtil::ParseFunctionName(const std::string &str, std::strin
       MessageInterface::ShowMessage("   equalSignPos = %u\n", index1);
       #endif
       
-      // Parse function name if equal sign is not inside quotes
-      std::string::size_type strPos;
-      if (!IsStringInsideSymbols(str1, "=", "'", strPos))
+      if (index1 == str1.npos) // '=' not found
       {
-         std::string::size_type index2 = str1.find("(", index1 + 1);
-         if (index2 == str1.npos)
-            funcName = str1.substr(index1+1);
-         else
-            funcName = str1.substr(index1+1, index2-index1-1);
+         // check for case of just the name OR 'command-name' function-name
+         // Check for a user-set command name
+         Integer numQuote = NumberOfOccurrences(str1, '\'');
+         if (numQuote == 2) // remove the user-set command name/label
+         {
+            Integer theFirst, theLast;
+            FindFirstAndLast(str1, '\'', theFirst, theLast);
+            // user-set command name/label is first BUT watch out for string
+            // literal on RHS of assignment commands!! - it looks like only RHS
+            // is passed in to this method in those cases, e.g.
+            // GMAT sc1.DateFormat = 'UTCModJulian' (-> only the
+            // 'UTCModJulian' is passed in to the method)
+            if ((theFirst == 0) && (theLast < (str1.size() - 1)))
+            {
+               funcName      = str1.substr(theLast + 1);
+               funcNameStart = theLast + 1;
+            }
+         }
+      }
+      else
+      {
+         // Parse function name if equal sign is not inside quotes
+         std::string::size_type strPos;
+         if (!IsStringInsideSymbols(str1, "=", "'", strPos))
+         {
+            std::string::size_type index2 = str1.find("(", index1 + 1);
+            if (index2 == str1.npos)
+               funcName = str1.substr(index1+1);
+            else
+               funcName = str1.substr(index1+1, index2-index1-1);
+         }
       }
    }
    
@@ -5213,7 +5394,10 @@ std::string GmatStringUtil::ParseFunctionName(const std::string &str, std::strin
    }
 
    // Get function arguments
-   argStr = str.substr(funcName.size());
+   argStr = str1.substr(funcNameStart + funcName.size());
+   // this didn't work if function name didn't start with first character -
+   // the args passed out would be incorrect
+//   argStr = str.substr(funcName.size());
    
    #ifdef DEBUG_FUNCTION_NAME
    MessageInterface::ShowMessage
@@ -5233,6 +5417,12 @@ std::string GmatStringUtil::ParseFunctionName(const std::string &str, std::strin
  *    Function2(in);
  *    Function3;
  *    out = Function4(in, 'string literal')
+ *
+ * Strings of the type
+ *
+ *    out = FunctionName(in, [data1, data2,...])
+ *
+ * are now handled so that RealArray data can be passed into scripted methods.
  *
  * @param  str  Input string
  * @return  Function name and arguments
@@ -5269,26 +5459,75 @@ StringArray GmatStringUtil::ParseFunctionCall(const std::string &str)
       return nameAndArgs;
    
    std::string str1 = str.substr(firstOpenParen+1, lastCloseParen-firstOpenParen-1);
+
    #ifdef DEBUG_PARSE_EQUATION
    MessageInterface::ShowMessage("   substr within parenthesis = '%s'\n", str1.c_str());
    #endif
    
+   // Remove leading and trailing blanks
+   str1 = Trim(str1);
+
    // If no arguments, return
    if (str1 == "")
       return nameAndArgs;
+
+   bool hasArrayArg = false;
+   size_t bstart, bend;
    
-   // Use SeparateBrackets() for separating array elements such as arr22(1,1) (LOJ: 2016.06.08)
-   //StringArray args = SeparateByComma(str1, true);
-   bool checkBrackets = false;
-   if (str1.find("[") != str1.npos && str1.find("]") != str1.npos)
-      checkBrackets = true;
-   StringArray args = SeparateBrackets(str1, "[]", " ,;", checkBrackets);
-   for (unsigned int i = 0; i < args.size(); i++)
+   bstart = str1.find("[");
+   bend   = str1.find("]");
+
+   if (((bstart == 0) && (bend == str1.length()-1)) ||
+       (bstart == std::string::npos))
    {
-      #ifdef DEBUG_PARSE_EQUATION
-      MessageInterface::ShowMessage("   args[%d] = '%s'\n", i, args[i].c_str());
-      #endif
-      nameAndArgs.push_back(args[i]);
+      // Use SeparateBrackets() for separating array elements such as arr22(1,1) (LOJ: 2016.06.08)
+      bool checkBrackets = false;
+
+      if (bstart != str1.npos && bend != str1.npos)
+         checkBrackets = true;
+      StringArray args = SeparateBrackets(str1, "[]", " ,;", checkBrackets);
+      for (unsigned int i = 0; i < args.size(); i++)
+      {
+         #ifdef DEBUG_PARSE_EQUATION
+         MessageInterface::ShowMessage("   args[%d] = '%s'\n", i, args[i].c_str());
+         #endif
+         nameAndArgs.push_back(args[i]);
+      }
+   }
+   else // Args are not a simple [ ] pair, but at least one was found
+   {
+      std::string argstr = str1;
+      do
+      {
+         std::string piece;
+         size_t commaloc = argstr.find(",");
+
+         if (commaloc < bstart)
+         {
+            piece = Trim(argstr.substr(0, commaloc));
+            // Prep for next arg
+            argstr = Trim(argstr.substr(commaloc+1));
+            bstart = argstr.find("[");
+            bend   = argstr.find("]");
+            commaloc = argstr.find(",");
+         }
+         else if (bend != std::string::npos)
+         {
+            piece = argstr.substr(bstart, bend - bstart + 1);
+            if (commaloc != std::string::npos)
+               bend = commaloc;  // handle comma after ]
+            // Prep for next arg
+            argstr = Trim(argstr.substr(bend+1));
+
+            bstart = argstr.find("[");
+            bend   = argstr.find("]");
+            commaloc = argstr.find(",");
+         }
+
+         if (piece != "")
+            nameAndArgs.push_back(piece);
+
+      } while (argstr != "");
    }
    
    #ifdef DEBUG_PARSE_EQUATION
@@ -5719,7 +5958,7 @@ bool GmatStringUtil::IsBlank(const std::string &text, bool ignoreEol)
 //                      bool ignoreSpaceAfterQuote = true)
 //------------------------------------------------------------------------------
 /*
- * Checks if single string item (no commans between) has missing starting or ending quote.
+ * Checks if single string item (no commas between) has missing starting or ending quote.
  *
  * @param  str    input text
  * @param  quote  quote to be used for checking
@@ -6235,6 +6474,7 @@ bool GmatStringUtil::IsValidIdentity(const std::string &str)
    // follow by a series of alphabet, number, or underscore
    for (UnsignedInt i = 1; i < str.size(); i++)
    {
+      //if (!isalnum(str[i]) && (str[i] != '_') && (str[i] != '.'))    // allow full name such as "P1.AreaCoefficient"            // made changes by TUAN NGUYEN
       if (!isalnum(str[i]) && (str[i] != '_'))
          return false;
    }
@@ -6315,7 +6555,7 @@ bool GmatStringUtil::IsValidFileName(const std::string &str)
 
 
 //------------------------------------------------------------------------------
-// bool IsValidFileName(const std::string &str)
+// bool IsValidFullFileName(const std::string &str)
 //------------------------------------------------------------------------------
 /*
 * Checks for valid full file name. A full file name is a string containing path 

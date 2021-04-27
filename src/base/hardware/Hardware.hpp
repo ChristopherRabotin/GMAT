@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -20,6 +20,9 @@
 //
 // Author: Darrel J. Conway
 // Created: 2004/11/08
+// Modified: by Mike Stark to add option of representing field of view
+// Date modified: 2019/05/xx
+//
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under MOMS Task
 // Order 124.
@@ -34,6 +37,9 @@
 #define HARDWARE_HPP
 
 #include "GmatBase.hpp"
+#include "FieldOfView.hpp"
+#include "Rmatrix33.hpp" // for rotation from spacecraft body to hardware frame
+#include "Rvector3.hpp"  // to define target vector in FOV visibility check
 
 /**
  * Base class used for spacecraft hardware.
@@ -43,7 +49,11 @@
  * data structures that locate the center of the element in the spacecraft's 
  * body coordinate system (BCS) and that orient the elements in the same system.
  * 
- * @note The current builds of GMAT do not model torques or moments of inertia, 
+ * This class has been modified (May 2019) to allow modeling fields of view.
+ * FOV modeling includes determining whether a unit vector is in the FOV, and
+ * returning the field of view mask for graphics display.
+ *
+ * @note The current builds of GMAT do not model torques or moments of inertia,
  * so the parameter access for those pieces is commented out.
  */
 class GMAT_API Hardware : public GmatBase 
@@ -55,6 +65,17 @@ public:
    Hardware(const Hardware& hw);
    Hardware&               operator=(const Hardware& hw);
    
+   /// Field of View Operations
+   virtual bool        HasFOV();
+   virtual Rmatrix33&  GetRotationMatrix();
+   virtual bool        CheckTargetVisibility(const Rvector3 &target);
+   virtual Rvector     GetMaskConeAngles() const;
+   virtual Rvector     GetMaskClockAngles() const;
+   
+   virtual Rvector3    GetLocation() const;
+   virtual Rvector3    GetDirection() const;
+   virtual Rvector3    GetSecondDirection() const;
+   
    // Parameter access methods - overridden from GmatBase
    virtual std::string        GetParameterText(const Integer id) const;
    virtual Integer            GetParameterID(const std::string &str) const;
@@ -62,6 +83,18 @@ public:
                               GetParameterType(const Integer id) const;
    virtual std::string        GetParameterTypeString(const Integer id) const;
    
+   virtual bool        IsParameterReadOnly(const Integer id) const;
+   virtual bool        IsParameterReadOnly(const std::string &label) const;
+   
+   virtual bool        IsParameterVisible(const Integer id) const;
+
+   // string parameter operations for FOV name
+   virtual std::string GetStringParameter (const Integer id) const;
+   virtual std::string GetStringParameter (const std::string &label) const;
+   virtual bool        SetStringParameter (const Integer id,
+                                           const std::string &value);
+   virtual bool        SetStringParameter (const std::string &label,
+                                           const std::string &value);
    
    virtual Real               GetRealParameter(const Integer id) const;
    virtual Real               SetRealParameter(const Integer id,
@@ -69,8 +102,8 @@ public:
    virtual Real               GetRealParameter(const std::string &label) const;
    virtual Real               SetRealParameter(const std::string &label,
                                          const Real value);
-
-   // Unused but implemented so the derived classes can call up the hierarchy
+     
+   // used by subclasses
    virtual Real         GetRealParameter(const Integer id,
                                          const Integer index) const;
    virtual Real         SetRealParameter(const Integer id,
@@ -82,6 +115,13 @@ public:
                                          const Real value,
                                          const Integer index);
 
+   virtual std::string  GetStringParameter(const Integer id,
+                                           const Integer index) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value,
+                                           const Integer index);
+   
+// pass throughs of subclass parameter calls
    virtual const Rvector&
                         GetRvectorParameter(const Integer id) const;
    virtual const Rvector&
@@ -93,6 +133,36 @@ public:
                         SetRvectorParameter(const std::string &label,
                                             const Rvector &value);
 
+   
+   //--------------------------------------------
+   // Reference object functions
+   //--------------------------------------------
+   virtual std::string  GetRefObjectName(const UnsignedInt type) const;
+   virtual bool         HasRefObjectTypeArray();
+   virtual const        ObjectTypeArray& GetRefObjectTypeArray();
+   virtual const StringArray& GetRefObjectNameArray(const UnsignedInt type);
+   
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
+                                     const std::string &name);
+
+   virtual bool         SetRefObjectName(const UnsignedInt type,
+                                         const std::string &name = "");
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
+                                     const std::string &name = "");
+   
+   virtual bool         RenameRefObject(const UnsignedInt type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
+// pass throughs of subclass reference object calls
+   virtual GmatBase*    GetRefObject(const UnsignedInt type,
+                                     const std::string &name,
+                                     const Integer index);
+   virtual bool         SetRefObject(GmatBase *obj, const UnsignedInt type,
+                                     const std::string &name,
+                                     const Integer index);
+   
+   /// initialize body to sensor rotation
+   virtual bool         Initialize();
 
    DEFAULT_TO_NO_CLONES
 
@@ -103,20 +173,37 @@ protected:
    Real                    direction[3];
    /// Secondary direction, to complete the orientation.
    Real                    secondDirection[3];
+   
+   /// optional field of view flag, object & its name
+   bool                    fovIsModeled;
+   FieldOfView             *fov;
+   std::string             fovName;
+   
+   /// rotation from body to hardware frame
+   Rmatrix33               R_SB;  //******* compute from direction & second direction? ******
 
    /// Enumeration defining user accessible parameters for Hardware elements.
    enum
    {
-      DIRECTION_X = GmatBaseParamCount,
+      FOV_MODEL = GmatBaseParamCount,
+
+      // Use direction vectors to construct body to sensor rotation
+      DIRECTION_X,
       DIRECTION_Y,
       DIRECTION_Z,
-// These will be needed when detailed attitude is added to GMAT:
-//      SECOND_DIRECTION_X,
-//      SECOND_DIRECTION_Y,
-//      SECOND_DIRECTION_Z,
-//      BCS_X,
-//      BCS_Y,
-//      BCS_Z,
+      SECOND_DIRECTION_X,
+      SECOND_DIRECTION_Y,
+      SECOND_DIRECTION_Z,
+      
+      // Location of hardware frame origin in s/c body frame
+      // is unused for the time being
+      HW_ORIGIN_BCS_X,
+      HW_ORIGIN_BCS_Y,
+      HW_ORIGIN_BCS_Z,
+      
+      // Add read-only parameters for mask angles
+      MASK_CONE_ANGLES,
+      MASK_CLOCK_ANGLES,
       HardwareParamCount
    };
    

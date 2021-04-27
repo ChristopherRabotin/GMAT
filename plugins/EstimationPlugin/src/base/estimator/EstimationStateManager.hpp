@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,6 +38,7 @@
 #include "MeasurementManager.hpp"
 #include "PropagationStateManager.hpp"
 #include "Rmatrix.hpp"
+#include "PhysicalModel.hpp"
 
 /**
  * Mediator between objects, the estimators, and observations and measurements
@@ -51,6 +52,7 @@ class ESTIMATION_API EstimationStateManager : public StateManager
 public:
    EstimationStateManager(Integer size = 0);
    virtual ~EstimationStateManager();
+   virtual void CleanUp();                                             // made changes by TUAN NGUYEN
    EstimationStateManager(const EstimationStateManager &esm);
    EstimationStateManager& operator=(const EstimationStateManager &esm);
 
@@ -72,10 +74,16 @@ public:
    virtual bool               BuildState();
    virtual bool               MapObjectsToVector();
    virtual bool               MapVectorToObjects();
+   virtual bool               MapFullVectorToObjects();
    virtual bool               MapObjectsToSTM();
    virtual bool               MapSTMToObjects();
    virtual bool               MapObjectsToCovariances();
    virtual bool               MapCovariancesToObjects();
+
+   /// Get state offset in J2000BodyMJ2000Eq coordinates (currently it is in EarthMJ2000Eq - GMAT internal coordinates).
+   virtual GmatState*         GetStateOffset();
+   virtual bool               HasStateOffset();
+   virtual void               SetHasStateOffset(bool hasOffset);
 
    virtual Rmatrix*           GetSTM();
    virtual Covariance*        GetCovariance();
@@ -84,6 +92,7 @@ public:
 
    virtual void               BufferObjects(ObjectArray *buffer = NULL);
    virtual void               RestoreObjects(ObjectArray *fromBuffer = NULL);
+   const std::vector<PhysicalModel*>&  GetAllPhysicalModels();                  // Thrust Scale Factor Solve For
 
 //   void                       SolveFor(std::string whichOne = "");
 //   void                       Consider(std::string whichOne = "");
@@ -94,6 +103,12 @@ public:
    /// Get estimation state in form of participant's state type. State in form of Cr_Epsilon and Cd_Epsilon
    GmatState                  GetEstimationState();
    GmatState*                 SetEstimationState(GmatState& inputState);
+   GmatState*                 SetEstimationStateObjects(const GmatState& inputState);
+   GmatState*                 SetEstimationCartesianStateParticipant(const GmatState& inputState);
+
+   /// Get estimation state offset in form of participant's state type. State in form of Cr_Epsilon and Cd_Epsilon
+   GmatState                  GetEstimationStateOffset();
+   GmatState*                 SetEstimationStateOffset(GmatState& inputState);
 
 
    /// Get estimation state in MJ2000Eq Cartesian coordinate system. State in form of Cr_Epsilon and Cd_Epsilon
@@ -108,10 +123,15 @@ public:
    /// Get estimation state in form of participant's Cartesian state type. State in form of Cr and Cd
    GmatState                  GetEstimationCartesianStateForReport();
 
+   /// Get estimation state in form of participant's Keplerian state type. State in form of Cr and Cd
+   GmatState                  GetEstimationKeplerianStateForReport(std::string anomalyType = "TA");
+
    
    Rmatrix66                  CartesianToKeplerianCoverianceConvertionMatrix(GmatBase* obj, const Rvector6 state);
    Rmatrix                    CartToSolveForStateConversionDerivativeMatrix();
    Rmatrix                    SolveForStateToKeplConversionDerivativeMatrix();
+
+   std::map<Integer,Integer>  GetEqualConstrainsList();                             // made changes by TUAN NGUYEN
 
 protected:
    // Attributes
@@ -165,11 +185,19 @@ protected:
 //   /// Number of rows in the covariance matrix
 //   Integer                    covRowCount;
 
+   /// Pointers to the FileThrust              Thrust Scale Factor Solve For
+   std::vector<PhysicalModel*>    pms;
+
    // Propagation State Pieces
    /// PSM manages components that evolve over time via numerical integration
    PropagationStateManager    *psm;
    /// For convenience, the ESM has direct access to the PSM's state vector
    GmatState                  *propagationState;
+
+   /// If the esm has a state offset from the reference trajectory
+   bool                       hasStateOffset;
+   /// State offset from the reference trajectory
+   GmatState                  stateOffset;
 
    /// Pointer to the measurement manager used with this estimator
    MeasurementManager         *measMan;
@@ -193,6 +221,10 @@ private:
    /// Get participant's state in MJ2000Eq coordinate system and in a specify state type
    Rvector6                   GetParticipantMJ2000EqState(GmatBase* spaceObj, std::string inStateType, std::string anomalyType = "MA");
    bool                       SetParticipantMJ2000EqState(GmatBase* spaceObj, Rvector6& inputState, std::string inStateType);
+
+   /// Get participant's state offset in MJ2000Eq coordinate system and in a specify state type
+   Rvector6                   GetParticipantMJ2000EqStateOffset(GmatBase* spaceObj, std::string inStateType, std::string anomalyType = "MA");
+   bool                       SetParticipantMJ2000EqStateOffset(GmatBase* spaceObj, Rvector6& inputState, std::string inStateType);
 
    /// Get participant's state in its own coordinate system and Cartesian state type
    Rvector                    GetParticipantCartesianState(GmatBase* spaceObj);

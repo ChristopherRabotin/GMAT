@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -549,7 +549,7 @@ bool ConditionalBranch::Initialize()
       }
    }
    
-   // Set RHS wrapper refererences
+   // Set RHS wrapper references
    for (std::vector<ElementWrapper*>::iterator j = rhsWrappers.begin();
         j < rhsWrappers.end(); j++)
    {
@@ -1424,7 +1424,7 @@ bool ConditionalBranch::EvaluateAllConditions()
 {
    #ifdef DEBUG_CONDITIONS
       MessageInterface::ShowMessage(
-         "   Entering EvaluateAllConditions with number of conditons = %d\n",
+         "   \nEntering EvaluateAllConditions with number of conditions = %d\n",
          numberOfConditions);
    #endif
    if (numberOfConditions == 0)

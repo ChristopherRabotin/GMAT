@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,6 +39,7 @@
 class Spacecraft;
 class SpaceObject;
 class Parameter;
+class Plate;                                   // made changes by TUAN NGUYEN
 class Burn;
 class Propagator;
 class ODEModel;
@@ -55,6 +56,7 @@ class EphemerisFile;
 class AtmosphereModel;
 class Function;
 class Hardware;
+class FieldOfView;
 class AxisSystem;
 class CoordinateSystem;
 class MathNode;
@@ -65,13 +67,13 @@ class EventLocator;
 class Interface;
 
 class MeasurementModelBase;
-class CoreMeasurement;
+//class CoreMeasurement;
 class ErrorModel;
 class DataFilter;
 class DataFile;
 class ObType;
-class TrackingSystem;
-class TrackingData;
+//class TrackingSystem;
+//class TrackingData;
 
 
 /// @todo Find a clever way to allow user types here when we don't know them
@@ -86,6 +88,10 @@ public:
    // methods to return objects of specified types
    virtual SpaceObject*     CreateSpacecraft(const std::string &ofType,
                                              const std::string &withName = "");
+
+   virtual Plate*           CreatePlate(const std::string &ofType,                             // made changes by TUAN NGUYEN
+                                       const std::string &withName = "");                      // made changes by TUAN NGUYEN
+
    virtual SpacePoint*      CreateSpacePoint(const std::string &ofType,
                                              const std::string &withName = "");        
    virtual Propagator*      CreatePropagator(const std::string &ofType,
@@ -122,6 +128,8 @@ public:
                                            const std::string &withName = "");
    virtual Hardware*        CreateHardware(const std::string &ofType,
                                            const std::string &withName = "");
+   virtual FieldOfView*        CreateFieldOfView(const std::string &ofType,
+                                              const std::string &withName = "");
    virtual AxisSystem*      CreateAxisSystem(const std::string &ofType,
                                              const std::string &withName = "");
    virtual CoordinateSystem* CreateCoordinateSystem(const std::string &ofType,
@@ -133,8 +141,8 @@ public:
    virtual MeasurementModelBase*
                             CreateMeasurementModel(const std::string &ofType,
                                            const std::string &withName = "");
-   virtual CoreMeasurement* CreateMeasurement(const std::string &ofType,
-                                           const std::string &withName = "");
+//   virtual CoreMeasurement* CreateMeasurement(const std::string &ofType,
+//                                           const std::string &withName = "");
    virtual ErrorModel*      CreateErrorModel(const std::string &ofType,
                                            const std::string &withName = "");
    virtual DataFilter*      CreateDataFilter(const std::string &ofType,
@@ -143,10 +151,10 @@ public:
                                            const std::string &withName = "");
    virtual ObType*          CreateObType(const std::string &ofType,
                                          const std::string &withName = "");
-   virtual TrackingSystem*  CreateTrackingSystem(const std::string &ofType,
-                                           const std::string &withName = "");
-   virtual TrackingData*    CreateTrackingData(const std::string &ofType,
-                                           const std::string &withName = "");
+   //virtual TrackingSystem*  CreateTrackingSystem(const std::string &ofType,
+   //                                        const std::string &withName = "");
+   //virtual TrackingData*    CreateTrackingData(const std::string &ofType,
+   //                                        const std::string &withName = "");
    virtual Event*           CreateEvent(const std::string &ofType,
                                         const std::string &withName = "");
    virtual EventLocator*    CreateEventLocator(const std::string &ofType,

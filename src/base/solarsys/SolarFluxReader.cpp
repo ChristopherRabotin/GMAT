@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -53,108 +53,107 @@
 #endif
 
 
-//------------------------------------------------------------------------------
-// SolarFluxReader::FluxData struct used for holding the records
-//------------------------------------------------------------------------------
+// SolarFluxReader::FluxData struct implemented inline in the header
+// //------------------------------------------------------------------------------
+// // SolarFluxReader::FluxData struct used for holding the records
+// //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// FluxData()
-//------------------------------------------------------------------------------
-/**
- * Constructor
- */
-//------------------------------------------------------------------------------
-SolarFluxReader::FluxData::FluxData()
-{
-   // Default all to -1
-   epoch = -1.0;
-   apAvg = -1.0;
-   adjF107 = -1.0;
-   adjCtrF107a = -1.0;
-   obsF107 = -1.0;
-   obsCtrF107a = -1.0;
+// //------------------------------------------------------------------------------
+// // FluxData()
+// //------------------------------------------------------------------------------
+// /**
+//  * Constructor
+//  */
+// //------------------------------------------------------------------------------
+// SolarFluxReader::FluxData::FluxData()
+// {
+//    // Default all to -1
+//    epoch = -1.0;
+//    apAvg = -1.0;
+//    adjF107 = -1.0;
+//    adjCtrF107a = -1.0;
+//    obsF107 = -1.0;
+//    obsCtrF107a = -1.0;
 
-   for (Integer j = 0; j < 9; j++)
-      F107a[j] = -1.0;
-   for (Integer j = 0; j < 3; j++)
-      apSchatten[j] = -1.0;
-   for (Integer j = 0; j < 8; j++)
-   {
-      kp[j] = -1.0;
-      ap[j] = -1.0;
-   }
+//    for (Integer j = 0; j < 9; j++)
+//       F107a[j] = -1.0;
+//    for (Integer j = 0; j < 3; j++)
+//       apSchatten[j] = -1.0;
+//    for (Integer j = 0; j < 8; j++)
+//    {
+//       kp[j] = -1.0;
+//       ap[j] = -1.0;
+//    }
 
-   index = -1;
-   id = -1;
-   isObsData = true;
-}
-
-
-//------------------------------------------------------------------------------
-// FluxData(const FluxData& fD)
-//------------------------------------------------------------------------------
-/**
- * Copy constructor
- */
-//------------------------------------------------------------------------------
-SolarFluxReader::FluxData::FluxData(const FluxData& fD)
-{
-   epoch = fD.epoch;
-   for (Integer j = 0; j < 8; j++)
-   {
-      kp[j] = fD.kp[j];
-      ap[j] = fD.ap[j];
-   }
-   apAvg = fD.apAvg;
-   adjF107 = fD.adjF107;
-   adjCtrF107a = fD.adjCtrF107a;
-   obsF107 = fD.obsF107;
-   obsCtrF107a = fD.obsCtrF107a;
-   for (Integer j = 0; j < 9; j++)
-      F107a[j] = fD.F107a[j];
-   for (Integer j = 0; j < 3; j++)
-      apSchatten[j] = fD.apSchatten[j];
-   index = fD.index;
-   id = fD.id;
-   isObsData = fD.isObsData;
-}
+//    index = -1;
+//    id = -1;
+//    isObsData = true;
+// }
 
 
-//------------------------------------------------------------------------------
-// SolarFluxReader::FluxData& SolarFluxReader::FluxData::operator=()
-//------------------------------------------------------------------------------
-/**
-* Operator=() for FluxData data structure
-*/
-//------------------------------------------------------------------------------
-SolarFluxReader::FluxData& SolarFluxReader::FluxData::operator=(const SolarFluxReader::FluxData &fD)
-{
-   if (this != &fD)
-   {
-      epoch = fD.epoch;
-      for (Integer j = 0; j < 8; j++)
-      {
-         kp[j] = fD.kp[j];
-         ap[j] = fD.ap[j];
-      }
-      apAvg = fD.apAvg;
-      adjF107 = fD.adjF107;
-      adjCtrF107a = fD.adjCtrF107a;
-      obsF107 = fD.obsF107;
-      obsCtrF107a = fD.obsCtrF107a;
-      for (Integer j = 0; j < 9; j++)
-         F107a[j] = fD.F107a[j];
-      for (Integer j = 0; j < 3; j++)
-         apSchatten[j] = fD.apSchatten[j];
-      index = fD.index;
-      id = fD.id;
-      isObsData = fD.isObsData;
-   }
-
-   return *this;
-}
+// //------------------------------------------------------------------------------
+// // FluxData(const FluxData& fD)
+// //------------------------------------------------------------------------------
+// /**
+//  * Copy constructor
+//  */
+// //------------------------------------------------------------------------------
+// SolarFluxReader::FluxData::FluxData(const FluxData& fD)
+// {
+//    epoch = fD.epoch;
+//    for (Integer j = 0; j < 8; j++)
+//    {
+//       kp[j] = fD.kp[j];
+//       ap[j] = fD.ap[j];
+//    }
+//    apAvg = fD.apAvg;
+//    adjF107 = fD.adjF107;
+//    adjCtrF107a = fD.adjCtrF107a;
+//    obsF107 = fD.obsF107;
+//    obsCtrF107a = fD.obsCtrF107a;
+//    for (Integer j = 0; j < 9; j++)
+//       F107a[j] = fD.F107a[j];
+//    for (Integer j = 0; j < 3; j++)
+//       apSchatten[j] = fD.apSchatten[j];
+//    index = fD.index;
+//    id = fD.id;
+//    isObsData = fD.isObsData;
+// }
 
 
+// //------------------------------------------------------------------------------
+// // SolarFluxReader::FluxData& SolarFluxReader::FluxData::operator=()
+// //------------------------------------------------------------------------------
+// /**
+// * Operator=() for FluxData data structure
+// */
+// //------------------------------------------------------------------------------
+// SolarFluxReader::FluxData& SolarFluxReader::FluxData::operator=(const SolarFluxReader::FluxData &fD)
+// {
+//    if (this != &fD)
+//    {
+//       epoch = fD.epoch;
+//       for (Integer j = 0; j < 8; j++)
+//       {
+//          kp[j] = fD.kp[j];
+//          ap[j] = fD.ap[j];
+//       }
+//       apAvg = fD.apAvg;
+//       adjF107 = fD.adjF107;
+//       adjCtrF107a = fD.adjCtrF107a;
+//       obsF107 = fD.obsF107;
+//       obsCtrF107a = fD.obsCtrF107a;
+//       for (Integer j = 0; j < 9; j++)
+//          F107a[j] = fD.F107a[j];
+//       for (Integer j = 0; j < 3; j++)
+//          apSchatten[j] = fD.apSchatten[j];
+//       index = fD.index;
+//       id = fD.id;
+//       isObsData = fD.isObsData;
+//    }
+
+//    return *this;
+// }
 
 
 
@@ -305,11 +304,11 @@ bool SolarFluxReader::Open()
 
    if (!obsFileName.empty())
    {
-      inObs.open(obsFileName.c_str(), std::ios_base::in);
+      inObs.open(obsFileName.c_str(), std::ios_base::in | std::ios_base::binary);
    }
    if (!predictFileName.empty())
    {
-      inPredict.open(predictFileName.c_str(), std::ios_base::in);
+      inPredict.open(predictFileName.c_str(), std::ios_base::in | std::ios_base::binary);
    }
 
    return true;

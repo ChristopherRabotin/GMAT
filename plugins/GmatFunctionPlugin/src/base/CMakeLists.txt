@@ -16,9 +16,6 @@ MESSAGE("GMAT GmatFunction Plugin setup " ${VERSION})
 
 SET(TargetName GmatFunction)
 
-# Add Preproccessor Definitions
-ADD_DEFINITIONS("-DGMATFUNCTION_EXPORTS")
-
 # ====================================================================
 # list of directories containing source/header files
 SET(PLUGIN_DIRS command factory function include plugin)
@@ -37,3 +34,6 @@ SET(PLUGIN_SRCS
 # ====================================================================
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
+
+# Rename DLL export preproccessor definition
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEFINE_SYMBOL "GMATFUNCTION_EXPORTS")

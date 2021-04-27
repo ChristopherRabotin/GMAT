@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -144,6 +144,29 @@ SpaceObject* FactoryManager::CreateSpacecraft(const std::string &ofType,
    if (f != NULL)
       return f->CreateSpacecraft(ofType,withName);
    return NULL;
+}
+
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+//  Plate* CreatePlate(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+* Create an object of type Plate, with the name withName.
+*
+* @param <ofType> type of the new Plate object (currently defaults
+*                 to "Plate")
+* @param <withName> name of the new Plate object.
+*
+* @return pointer to the newly-created Plate object
+*/
+//------------------------------------------------------------------------------
+Plate* FactoryManager::CreatePlate(const std::string &ofType,
+	const std::string &withName)
+{
+	Factory* f = FindFactory(Gmat::PLATE, ofType);
+	if (f != NULL)
+		return f->CreatePlate(ofType, withName);
+	return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -485,6 +508,28 @@ Hardware* FactoryManager::CreateHardware(const std::string &ofType,
    return NULL;
 }
 
+//------------------------------------------------------------------------------
+//  FieldOfView* CreateFieldOfView(const std::string &ofType,
+//                                 const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Create an object of type FieldOfView, with the name withName.
+ *
+ * @param <ofType>   type name of the new FieldOfView object.
+ * @param <withName> name of the new FieldOfView object.
+ *
+ * @return pointer to the newly-created FieldOfView object
+ */
+//------------------------------------------------------------------------------
+FieldOfView* FactoryManager::CreateFieldOfView(const std::string &ofType,
+                                               const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::FIELD_OF_VIEW, ofType);
+   if (f != NULL)
+      return f->CreateFieldOfView(ofType, withName);
+   return NULL;
+}
+
 
 //------------------------------------------------------------------------------
 //  AxisSystem* CreateAxisSystem(const std::string &ofType,
@@ -618,28 +663,28 @@ PropSetup* FactoryManager::CreatePropSetup(const std::string &withName)
 }
 
 
-//------------------------------------------------------------------------------
-// CoreMeasurement* FactoryManager::CreateMeasurement(const std::string &ofType,
-//                                          const std::string &withName)
-//------------------------------------------------------------------------------
-/**
- * This method creates the measurement primitive used in a MeasurementModel
- *
- * @param ofType The type of measuremetn primitive
- * @param withName The name of the measurement prinitive.  This should be an
- *                 empty string in the current implementation.
- *
- * @return The pointer to the new object
- */
-//------------------------------------------------------------------------------
-CoreMeasurement* FactoryManager::CreateMeasurement(const std::string &ofType,
-                                         const std::string &withName)
-{
-   Factory* f = FindFactory(Gmat::CORE_MEASUREMENT, ofType);
-   if (f != NULL)
-      return f->CreateMeasurement(ofType, withName);
-   return NULL;
-}
+////------------------------------------------------------------------------------
+//// CoreMeasurement* FactoryManager::CreateMeasurement(const std::string &ofType,
+////                                          const std::string &withName)
+////------------------------------------------------------------------------------
+///**
+// * This method creates the measurement primitive used in a MeasurementModel
+// *
+// * @param ofType The type of measuremetn primitive
+// * @param withName The name of the measurement prinitive.  This should be an
+// *                 empty string in the current implementation.
+// *
+// * @return The pointer to the new object
+// */
+////------------------------------------------------------------------------------
+//CoreMeasurement* FactoryManager::CreateMeasurement(const std::string &ofType,
+//                                         const std::string &withName)
+//{
+//   Factory* f = FindFactory(Gmat::CORE_MEASUREMENT, ofType);
+//   if (f != NULL)
+//      return f->CreateMeasurement(ofType, withName);
+//   return NULL;
+//}
 
 
 //------------------------------------------------------------------------------
@@ -690,22 +735,22 @@ DataFilter* FactoryManager::CreateDataFilter(const std::string &ofType,
 }
 
 
-TrackingSystem* FactoryManager::CreateTrackingSystem(const std::string &ofType,
-         const std::string &withName)
-{
-   Factory* f = FindFactory(Gmat::TRACKING_SYSTEM, ofType);
-   if (f != NULL)
-      return f->CreateTrackingSystem(ofType, withName);
-   return NULL;
-}
+//TrackingSystem* FactoryManager::CreateTrackingSystem(const std::string &ofType,
+//         const std::string &withName)
+//{
+//   Factory* f = FindFactory(Gmat::TRACKING_SYSTEM, ofType);
+//   if (f != NULL)
+//      return f->CreateTrackingSystem(ofType, withName);
+//   return NULL;
+//}
 
-TrackingData* FactoryManager::CreateTrackingData(const std::string &withName)
-{
-   Factory* f = FindFactory(Gmat::TRACKING_DATA, "TrackingData");
-   if (f != NULL)
-      return f->CreateTrackingData("TrackingData", withName);
-   return NULL;
-}
+//TrackingData* FactoryManager::CreateTrackingData(const std::string &withName)
+//{
+//   Factory* f = FindFactory(Gmat::TRACKING_DATA, "TrackingData");
+//   if (f != NULL)
+//      return f->CreateTrackingData("TrackingData", withName);
+//   return NULL;
+//}
 
 EventLocator* FactoryManager::CreateEventLocator(const std::string &ofType,
                                           const std::string &withName)

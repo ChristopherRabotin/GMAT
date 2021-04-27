@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -64,6 +64,29 @@ EstimationRootFinder::~EstimationRootFinder()
 }
 
 
+void EstimationRootFinder::CleanUp()
+{
+   // clean up PropSetup *propagator;
+   if (propagator)
+   {
+      delete propagator;
+      propagator = NULL;
+   }
+
+   // clean up std::vector<Spacecraft *> satBuffer;
+   satBuffer.clear();
+
+   // clean up std::vector<FormationInterface *> formBuffer;
+   formBuffer.clear();
+
+   //// clean up std::vector<Event*> *events
+   //if (events)
+   //{
+   //   events->clear();
+   //   delete events;
+   //}
+}
+
 //------------------------------------------------------------------------------
 // EstimationRootFinder(const EstimationRootFinder& rl)
 //------------------------------------------------------------------------------
@@ -109,7 +132,7 @@ EstimationRootFinder& EstimationRootFinder::operator =(const EstimationRootFinde
 //------------------------------------------------------------------------------
 void EstimationRootFinder::SetPropSetup(PropSetup* ps)
 {
-   propagator = ps;
+   propagator = (PropSetup*)(ps->Clone());             // Fix bug GMT-6931  // made changes by TUAN NGUYEN
 
    #ifdef DEBUG_INITIALIZATION
       if (propagator != NULL)

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -100,18 +100,18 @@ Planet::Planet(std::string name) :
    // Set default colors
    SetDefaultColors(GmatColor::ORCHID, GmatColor::DARK_GRAY);
    
-   theCentralBodyName  = SolarSystem::SUN_NAME;
+   theCentralBodyName  = GmatSolarSystemDefaults::SUN_NAME;
    bodyType            = Gmat::PLANET;
    bodyNumber          = 1;
    referenceBodyNumber = 3;
    rotationSrc         = Gmat::IAU_SIMPLIFIED;
-   if (name == SolarSystem::EARTH_NAME) 
+   if (name == GmatSolarSystemDefaults::EARTH_NAME) 
       rotationSrc      = Gmat::FK5_IAU_1980;
-   else if (name == SolarSystem::NEPTUNE_NAME)
+   else if (name == GmatSolarSystemDefaults::NEPTUNE_NAME)
       rotationSrc      = Gmat::IAU_2002;
 
 
-   if (name == SolarSystem::EARTH_NAME)
+   if (name == GmatSolarSystemDefaults::EARTH_NAME)
    {
       #ifdef DEBUG_PLANET_CONSTRUCT
          MessageInterface::ShowMessage("In Planet constructor, setting default PCKs.\n");
@@ -162,12 +162,12 @@ Planet::Planet(std::string name, const std::string &cBody) :
    bodyNumber          = 1;
    referenceBodyNumber = 3;
    rotationSrc         = Gmat::IAU_SIMPLIFIED;
-   if (name == SolarSystem::EARTH_NAME) 
+   if (name == GmatSolarSystemDefaults::EARTH_NAME) 
       rotationSrc      = Gmat::FK5_IAU_1980;
-   else if (name == SolarSystem::NEPTUNE_NAME)
+   else if (name == GmatSolarSystemDefaults::NEPTUNE_NAME)
       rotationSrc      = Gmat::IAU_2002;
    
-   if (name == SolarSystem::EARTH_NAME)
+   if (name == GmatSolarSystemDefaults::EARTH_NAME)
    {
       #ifdef DEBUG_PLANET_CONSTRUCT
          MessageInterface::ShowMessage("In Planet constructor, setting default PCKs.\n");
@@ -284,7 +284,7 @@ bool Planet::Initialize()
 Rvector Planet::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
 {
    // Neptune is the special case for the planets
-   if (instanceName == SolarSystem::NEPTUNE_NAME)
+   if (instanceName == GmatSolarSystemDefaults::NEPTUNE_NAME)
    {
       if (rotationSrc == Gmat::IAU_2002)
       {
@@ -311,7 +311,7 @@ Rvector Planet::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
          throw SolarSystemException(errmsg);
       }
    }
-   else if (instanceName == SolarSystem::EARTH_NAME)
+   else if (instanceName == GmatSolarSystemDefaults::EARTH_NAME)
    {
       // TBD - actually, the FK5 stuff is handled in the AxesSystem class(es) for 
       // which it is appropriate (e.g. BodyFixedAxes)
@@ -338,12 +338,12 @@ Rvector Planet::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
 //------------------------------------------------------------------------------
 Real Planet::GetHourAngle(A1Mjd atTime)
 {
-   if (instanceName == SolarSystem::EARTH_NAME)
+   if (instanceName == GmatSolarSystemDefaults::EARTH_NAME)
    {
       // Convert the time to a UT1 MJD
       // 20.02.06 - arg: changed to use enum types instead of strings
-      Real mjdUT1 = TimeConverterUtil::Convert(atTime.Get(),
-                                 TimeConverterUtil::A1MJD, TimeConverterUtil::UT1MJD,
+      Real mjdUT1 = theTimeConverter->Convert(atTime.Get(),
+                                 TimeSystemConverter::A1MJD, TimeSystemConverter::UT1MJD,
                                  GmatTimeConstants::JD_JAN_5_1941);
       Real jdUT1    = mjdUT1 + GmatTimeConstants::JD_JAN_5_1941; // right?
                                                             // Compute elapsed Julian centuries (UT1)
@@ -387,7 +387,7 @@ bool Planet::SetTwoBodyEpoch(const A1Mjd &toTime)
    if (!CelestialBody::SetTwoBodyEpoch(toTime)) return false;
    bool OK = true;
    // For the Earth, send the information to the Sun
-   if (instanceName == SolarSystem::EARTH_NAME)
+   if (instanceName == GmatSolarSystemDefaults::EARTH_NAME)
    {
       if (!theCentralBody) 
          throw SolarSystemException("Central body must be set for " 
@@ -424,7 +424,7 @@ bool Planet::SetTwoBodyElements(const Rvector6 &kepl)
    if (!CelestialBody::SetTwoBodyElements(kepl)) return false;
    bool OK = true;
    // For the Earth, send the information to the Sun
-   if (instanceName == SolarSystem::EARTH_NAME)
+   if (instanceName == GmatSolarSystemDefaults::EARTH_NAME)
    {
       if (!theCentralBody) 
          throw SolarSystemException("Central body must be set for " 
@@ -651,12 +651,12 @@ bool Planet::IsParameterReadOnly(const Integer id) const
 {
    if (id == NUTATION_UPDATE_INTERVAL)
    {
-      if (instanceName == SolarSystem::EARTH_NAME) return false;
+      if (instanceName == GmatSolarSystemDefaults::EARTH_NAME) return false;
       else                                         return true;
    }
    if (id == EOP_FILE_NAME)
    {
-      if (instanceName == SolarSystem::EARTH_NAME) return false;
+      if (instanceName == GmatSolarSystemDefaults::EARTH_NAME) return false;
       else                                         return true;
    }
    return CelestialBody::IsParameterReadOnly(id);
@@ -697,7 +697,7 @@ Real Planet::SetRealParameter(const Integer id, const Real value)
 {
    if (id == NUTATION_UPDATE_INTERVAL)
    {
-      if (instanceName == SolarSystem::EARTH_NAME)
+      if (instanceName == GmatSolarSystemDefaults::EARTH_NAME)
       {
          SetNutationUpdateInterval(value);
          return true;
@@ -796,7 +796,7 @@ bool Planet::SetStringParameter(const Integer id,
 
    if (id == EOP_FILE_NAME)
    {
-      if (instanceName == SolarSystem::EARTH_NAME)
+      if (instanceName == GmatSolarSystemDefaults::EARTH_NAME)
       {
          eopFileName = value;
          return true;
@@ -806,6 +806,37 @@ bool Planet::SetStringParameter(const Integer id,
    return CelestialBody::SetStringParameter(id, value);
 }
    
+//------------------------------------------------------------------------------
+//  Integer  SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the Integer parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ * @param <value> Integer value for the requested parameter.
+ *
+ * @return  Integer value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer Planet::SetIntegerParameter(const Integer id,
+                                    const Integer value)
+{
+   if (instanceName == GmatSolarSystemDefaults::EARTH_NAME)
+   {
+      if ((id == NAIF_ID) &&
+          (value != GmatSolarSystemDefaults::PLANET_NAIF_IDS[2]))
+      {
+         std::string errmsg = "NAIF ID for body Earth may not be modified.\n";
+         throw SolarSystemException(errmsg);
+      }
+   }
+   return CelestialBody::SetIntegerParameter(id,value);
+
+}
+
+
 
 //---------------------------------------------------------------------------
 //  bool IsParameterCloaked(const Integer id) const

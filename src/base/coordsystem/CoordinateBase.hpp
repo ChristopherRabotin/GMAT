@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -40,6 +40,7 @@
 #include "SpacePoint.hpp"
 #include "EopFile.hpp"
 #include "ItrfCoefficientsFile.hpp"
+#include "TimeSystemConverter.hpp"
 
 namespace GmatCoordinate
 {
@@ -85,6 +86,9 @@ public:
    virtual SpacePoint*         GetJ2000Body() const;
    
    virtual Rmatrix33           GetLastRotationMatrix() const = 0;
+
+	virtual std::vector<Rmatrix33>  
+		                         GetDerivativeOfLastRotationMatrix() = 0;        // made changes by TUAN NGUYEN
 
    // pure virtual methods to check to see how/if an AxisSystem uses 
    // a particular parameter
@@ -206,6 +210,9 @@ protected:
    /// flag indicating whether or not this CS can currently be modified (generally
    /// only set to false for built-in CSs when the script is being interpreted)
    bool            allowModify;
+
+   /// The time system converter singleton pointer
+   TimeSystemConverter *theTimeConverter;
 
    /// Method for setting J2000Body for other reference objects
    void SetJ2000BodyForOtherRefObjects();

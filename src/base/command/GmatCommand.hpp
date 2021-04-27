@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -256,6 +256,7 @@ protected:
 
    static const std::string MISSION_CHANGE_MESSAGE;
    static const std::string UNDEFINED_KEPLERIAN_ELEMENTS;
+   static const std::string UNDEFINED_SPHERICAL_ELEMENTS;
 
 
    /// Map containing names and associated types
@@ -345,6 +346,8 @@ protected:
    static Integer       satThrusterID;
    static Integer       satDryMassID;
    static Integer       satTotalMassID;
+   static Integer       satSPADDragScaleFactorID;          // made changes by TUAN NGUYEN
+   static Integer       satSPADSRPScaleFactorID;           // made changes by TUAN NGUYEN
 
 
    // Command summary data buffers

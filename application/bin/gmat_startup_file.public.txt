@@ -57,25 +57,27 @@ PLUGIN                  = ../plugins/libMatlabInterface
 PLUGIN                  = ../plugins/libFminconOptimizer
 PLUGIN                  = ../plugins/libProductionPropagators
 PLUGIN                  = ../plugins/libGmatEstimation
-PLUGIN			         = ../plugins/libYukonOptimizer
+PLUGIN                  = ../plugins/libYukonOptimizer
 PLUGIN                  = ../plugins/libScriptTools
+PLUGIN                  = ../plugins/libThrustFile
 
 # Alpha plugins (disabled by default)
-# PLUGIN                  = ./libCInterface
-# PLUGIN                  = ../plugins/libGeometricMeasurements
 # PLUGIN                  = ../plugins/libExtraPropagators
 # PLUGIN                  = ../plugins/libPolyhedronGravity
-# PLUGIN                  = ../plugins/libSaveCommand
-# PLUGIN                  = ../plugins/libThrustFile
+# PLUGIN                  = ../plugins/libSaveCommand 
 # PLUGIN                  = ../plugins/libEKF
 
 # Internal-only plugins
 # PLUGIN                  = ../plugins/proprietary/libCsaltInterface
+# PLUGIN                  = ../plugins/proprietary/libEMTGModels
 # PLUGIN                  = ../plugins/proprietary/libMarsGRAM
 # PLUGIN                  = ../plugins/proprietary/libMsise86
 # PLUGIN                  = ../plugins/proprietary/libNRLMsise00
 # PLUGIN                  = ../plugins/proprietary/libSNOptimizer
 # PLUGIN                  = ../plugins/proprietary/libVF13Optimizer
+
+# External plugins
+PLUGIN                  = ../plugins/libOpenFramesInterface
 
 #-----------------------------------------------------------
 # Directory/file paths

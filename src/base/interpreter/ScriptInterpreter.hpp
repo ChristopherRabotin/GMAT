@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -20,7 +20,6 @@
 //
 // Author: Waka Waktola
 // Created: 2006/08/25
-// Copyright: (c) 2006 NASA/GSFC. All rights reserved.
 //
 //------------------------------------------------------------------------------
 /**
@@ -148,6 +147,8 @@ private:
          Gmat::WriteMode mode, const StringArray &odes);
    void WriteSpacecrafts(StringArray &objs, Gmat::WriteMode mode);
    void WriteHardwares(StringArray &objs, Gmat::WriteMode mode);
+   void WriteFieldOfViews(StringArray &objs, Gmat::WriteMode mode);
+
    void WriteVariablesAndArrays(StringArray &objs, Gmat::WriteMode mode);
    void WriteArrayInitialValues(const ObjectArray &arrWithValList,
                                 Gmat::WriteMode mode);

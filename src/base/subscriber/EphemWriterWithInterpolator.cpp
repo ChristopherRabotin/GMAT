@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -335,7 +335,7 @@ void EphemWriterWithInterpolator::FindNextOutputEpoch(Real reqEpochInSecs,
 
 
 //------------------------------------------------------------------------------
-// bool IsTimeToWrite(Real epochInSecs, const Real state[6])
+// bool IsTimeToWrite(Real epochInSecs, const Real state[6], const Real cov[21])
 //------------------------------------------------------------------------------
 /*
  * Determines if it is time to write to ephemeris file based on the step size.
@@ -343,7 +343,7 @@ void EphemWriterWithInterpolator::FindNextOutputEpoch(Real reqEpochInSecs,
  * @param epochInSecs Epoch in seconds
  */
 //------------------------------------------------------------------------------
-bool EphemWriterWithInterpolator::IsTimeToWrite(Real epochInSecs, const Real state[6])
+bool EphemWriterWithInterpolator::IsTimeToWrite(Real epochInSecs, const Real state[6], const Real cov[21])
 {
    #ifdef DEBUG_EPHEMFILE_TIME
    MessageInterface::ShowMessage
@@ -562,16 +562,17 @@ bool EphemWriterWithInterpolator::IsTimeToWrite(Real epochInSecs, const Real sta
 
 
 //------------------------------------------------------------------------------
-// void WriteOrbitAt(Real reqEpochInSecs, const Real state[6])
+// void WriteOrbitAt(Real reqEpochInSecs, const Real state[6], const Real cov[21])
 //------------------------------------------------------------------------------
 /**
  * Writes spacecraft orbit data to a ephemeris file at requested epoch
  *
  * @param reqEpochInSecs Requested epoch to write state in seconds
  * @param state State to write 
+ * @param cov Covariance to write
  */
 //------------------------------------------------------------------------------
-void EphemWriterWithInterpolator::WriteOrbitAt(Real reqEpochInSecs, const Real state[6])
+void EphemWriterWithInterpolator::WriteOrbitAt(Real reqEpochInSecs, const Real state[6], const Real cov[21])
 {
    #ifdef DEBUG_EPHEMFILE_ORBIT
    MessageInterface::ShowMessage
@@ -592,7 +593,7 @@ void EphemWriterWithInterpolator::WriteOrbitAt(Real reqEpochInSecs, const Real s
          ProcessEpochsOnWaiting(false, false);
       }
       else
-         WriteOrbit(reqEpochInSecs, state);
+         WriteOrbit(reqEpochInSecs, state, cov);
    }
    else
    {
@@ -724,7 +725,7 @@ void EphemWriterWithInterpolator::ProcessFinalDataOnWaiting(bool canFinish)
                MessageInterface::ShowMessage
                   ("   ===> Not using user defined final epoch, so writing final data\n");
                #endif
-               WriteOrbit(currEpochInSecs, currState);
+               WriteOrbit(currEpochInSecs, currState, currCov);
             }
          }
          else
@@ -769,6 +770,7 @@ void EphemWriterWithInterpolator::ProcessEpochsOnWaiting(bool checkFinalEpoch,
    #endif
    
    Real estimates[6];
+   Real covEstimates[21];
    Real reqEpochInSecs = 0.0;
    Integer finishDirection = 1; // forward
    
@@ -783,10 +785,9 @@ void EphemWriterWithInterpolator::ProcessEpochsOnWaiting(bool checkFinalEpoch,
       MessageInterface::ShowMessage("   ===> There are no epochs on waiting\n");
    #endif
    
-   RealArray::iterator iter = epochsOnWaiting.begin();
-   while (iter != epochsOnWaiting.end())
+   while (epochsOnWaiting.size() > 0)
    {
-      reqEpochInSecs = *iter;
+      reqEpochInSecs = epochsOnWaiting[0];
       
       #ifdef DEBUG_EPHEMFILE_ORBIT
       DebugWriteTime("   currEpochInSecs = ", currEpochInSecs);
@@ -875,7 +876,7 @@ void EphemWriterWithInterpolator::ProcessEpochsOnWaiting(bool checkFinalEpoch,
          #endif
          if (interpolator->Interpolate(reqEpochInSecs, estimates))
          {
-            WriteOrbit(reqEpochInSecs, estimates);
+            WriteOrbit(reqEpochInSecs, estimates, covEstimates);
             RemoveEpochAlreadyWritten
                (reqEpochInSecs, "   =====> ProcessEpochsOnWaiting() now erasing ");
          }
@@ -1041,8 +1042,9 @@ void EphemWriterWithInterpolator::AddNextEpochToWrite(Real epochInSecs,
       if (fileType == CODE500_EPHEM)
       {
          Real a1Mjd = epochInSecs / 86400.0;
-         Real taiMjd = TimeConverterUtil::ConvertToTaiMjd(TimeConverterUtil::A1MJD, a1Mjd);
-         isNextOutputEpochInLeapSecond = TimeConverterUtil::IsInLeapSecond(taiMjd);
+         Real taiMjd = TimeSystemConverter::Instance()->ConvertToTaiMjd(
+               TimeSystemConverter::A1MJD, a1Mjd, GmatTimeConstants::JD_NOV_17_1858,
+               &isNextOutputEpochInLeapSecond);
          
          if (isNextOutputEpochInLeapSecond)
          {
@@ -1075,6 +1077,57 @@ void EphemWriterWithInterpolator::AddNextEpochToWrite(Real epochInSecs,
       #ifdef DEBUG_EPHEMFILE_TIME
       DebugWriteTime("   ========== skipping redundant epochInSecs = ", epochInSecs);
       #endif
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void FormatErrorMessage(std::string &ephemMsg, std::string &errMsg)
+//------------------------------------------------------------------------------
+void EphemWriterWithInterpolator::FormatErrorMessage(std::string &ephemMsg, std::string &errMsg)
+{
+   std::string commonMsg = "There is not enough data available to generate the current block of "
+      "ephemeris";
+   std::string ephemFileStr = " to EphemerisWriter: \"" + fileName + "\"";
+
+   Real timeSpanInSecs = (currEpochInDays - blockBeginA1Mjd) * GmatTimeConstants::SECS_PER_DAY;
+
+#ifdef DEBUG_TIME_SPAN
+   DebugWriteTime("=> blockBeginA1Mjd = ", blockBeginA1Mjd, true, 2);
+   DebugWriteTime("=> currEpochInDays = ", currEpochInDays, true, 2);
+   MessageInterface::ShowMessage("=> timeSpanInSecs  = %f\n", timeSpanInSecs);
+#endif
+
+   // Format error message
+   if (initialEpochA1Mjd != -999.999 && (currEpochInDays < initialEpochA1Mjd))
+   {
+      //std::string initEpochStr = ToUtcGregorian(initialEpochA1Mjd, true, 2);
+      std::string currentEpochStr = ToUtcGregorian(currEpochInDays, true, 2);
+      std::string detailedMsg = ". The block ended at " + currentEpochStr + "(" +
+         GmatStringUtil::ToString(currEpochInDays) + ") before the user defined initial epoch of " +
+         initialEpochStr + "(" + GmatStringUtil::ToString(initialEpochA1Mjd) + ").";
+      ephemMsg = commonMsg + detailedMsg;
+      errMsg = commonMsg + ephemFileStr + detailedMsg;
+   }
+   else if (timeSpanInSecs < stepSizeInSecs)
+   {
+      std::string blockBeginEpochStr = ToUtcGregorian(blockBeginA1Mjd, true, 2);
+      std::string currentEpochStr = ToUtcGregorian(currEpochInDays, true, 2);
+      std::string detailedMsg = ".  The data time span (" + blockBeginEpochStr + " - " +
+         currentEpochStr + ") is less than the step size of " +
+         GmatStringUtil::ToString(stepSizeInSecs, 2, true) + " seconds.";
+      ephemMsg = commonMsg + detailedMsg;
+      errMsg = commonMsg + ephemFileStr + detailedMsg;
+   }
+   else
+   {
+      std::string detailedMsg1 = " at the requested interpolation order. ";
+      std::string detailedMsg2 = "Number of required points is " +
+         GmatStringUtil::ToString(interpolationOrder + 1, 1) + ", but received "+
+         GmatStringUtil::ToString(interpolator->GetPointCount(), 1) + ". ";
+      std::string detailedMsg3 = "There should be at least one data point more than interpolation order.";
+      ephemMsg = commonMsg + detailedMsg1 + detailedMsg3;
+      errMsg = commonMsg + ephemFileStr + detailedMsg1 + detailedMsg2 + detailedMsg3;
    }
 }
 

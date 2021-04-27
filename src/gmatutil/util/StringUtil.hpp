@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -148,6 +148,9 @@ namespace GmatStringUtil
    GMATUTIL_API UnsignedIntArray ToUnsignedIntArray(const std::string &str, bool allowOverflow = true);
    GMATUTIL_API StringArray ToStringArray(const std::string &str);
    GMATUTIL_API BooleanArray ToBooleanArray(const std::string &str);
+
+   GMATUTIL_API UnsignedInt GetGenericType(const Generic &forGeneric);
+   GMATUTIL_API std::string GetGenericAsString(const Generic &forGeneric);
 
    GMATUTIL_API void ParseParameter(const std::string &str, std::string &type,
                            std::string &owner, std::string &dep);

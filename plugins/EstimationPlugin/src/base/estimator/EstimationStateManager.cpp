@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,8 +35,12 @@
 #include "EstimatorException.hpp"
 #include "Spacecraft.hpp"
 #include "GroundstationInterface.hpp"
-#include "StateConversionUtil.hpp"
-#include "Planet.hpp"
+#include "GmatBase.hpp"              // Thrust Scale Factor Solve For
+#include "StateConversionUtil.hpp"                     // made changes by TUAN NGUYEN
+#include "Planet.hpp"                                  // made changes by TUAN NGUYEN
+#include "Plate.hpp"                                   // made changes by TUAN NGUYEN
+#include "ODEModel.hpp"
+#include "StringUtil.hpp"
 #include <sstream>                  // for stringstream
 
 
@@ -63,6 +67,8 @@ EstimationStateManager::EstimationStateManager(Integer size) :
    StateManager         (size),
    psm                  (NULL),
    propagationState     (NULL),
+   hasStateOffset       (false),
+   stateOffset          (size),
    measMan              (NULL)
 {
    // Estimation always use precision time for calculation
@@ -79,8 +85,7 @@ EstimationStateManager::EstimationStateManager(Integer size) :
 //------------------------------------------------------------------------------
 EstimationStateManager::~EstimationStateManager()
 {
-   for (UnsignedInt i = 0; i < estimationObjectClones.size(); ++i)
-      delete estimationObjectClones[i];
+   CleanUp();           // made changes by TUAN NGUYEN
 }
 
 
@@ -106,7 +111,9 @@ EstimationStateManager::EstimationStateManager(
    stmMap                  (esm.stmMap),
    stmColCount             (esm.stmColCount),
    covMap                  (esm.covMap),
-   covColCount             (esm.covColCount)
+   covColCount             (esm.covColCount),
+   hasStateOffset          (esm.hasStateOffset),
+   stateOffset             (esm.stateOffset)
 {
    for (UnsignedInt i = 0; i < solveForNames.size(); ++i)
    {
@@ -118,6 +125,69 @@ EstimationStateManager::EstimationStateManager(
       considerObjects.push_back(NULL);
       considerIDs.push_back(-1);
    }
+
+   // thrust scale factor solve for
+   for (std::vector<PhysicalModel*>::const_iterator i = esm.pms.begin();
+	   i != esm.pms.end(); ++i)
+   {
+	   pms.push_back((PhysicalModel*)((*i)->Clone()));
+   }
+}
+
+// made changes by TUAN NGUYEN
+void EstimationStateManager::CleanUp()
+{
+   solveForNames.clear();
+   solveForObjectNames.clear();
+   solveForIDNames.clear();
+   solveForIDs.clear();
+   considerNames.clear();
+   considerObjectNames.clear();
+   considerIDNames.clear();
+   considerIDs.clear();
+   participantNames.clear();
+
+   measMan = NULL;
+   chunks.clear();
+   
+   // clean up ObjectArray estimationObjectClones;
+   for (UnsignedInt i = 0; i < estimationObjectClones.size(); ++i)
+   {
+      if (estimationObjectClones[i])
+         delete estimationObjectClones[i];
+   }
+   estimationObjectClones.clear();
+   
+   // clean up ObjectArray solveForObjects;
+   solveForObjects.clear();
+
+   // clean up ObjectArray considerObjects;
+   considerObjects.clear();
+
+
+   // clean up ObjectMap stmMap;
+   stmMap.clear();
+
+   // clean up Rmatrix stm;
+   // clean up Covariance covariance;
+
+   // clean up ObjectMap covMap;
+   covMap.clear();
+   
+   /// Pointers to the FileThrust              Thrust Scale Factor Solve For
+   std::vector<PhysicalModel*>    pms;
+   for (Integer i = 0; i < pms.size(); ++i)
+   {
+      if (pms[i])
+         delete pms[i];
+   }
+   pms.clear();
+
+   // clean up PropagationStateManager *psm;
+   psm = NULL; 
+   // clean up GmatState *propagationState;
+   propagationState = NULL;
+
 }
 
 
@@ -149,6 +219,8 @@ EstimationStateManager& EstimationStateManager::operator=(
       stmColCount         = esm.stmColCount;
       covMap              = esm.covMap;
       covColCount         = esm.covColCount;
+      hasStateOffset      = esm.hasStateOffset;
+      stateOffset         = esm.stateOffset;
       for (UnsignedInt i = 0; i < solveForNames.size(); ++i)
       {
          solveForObjects.push_back(NULL);
@@ -159,6 +231,18 @@ EstimationStateManager& EstimationStateManager::operator=(
          considerObjects.push_back(NULL);
          considerIDs.push_back(-1);
       }
+
+	  // thrust scale factor solve for
+	  for (std::vector<PhysicalModel*>::iterator i = pms.begin();
+		  i != pms.end(); ++i)
+		  delete (*i);
+	  pms.clear();
+	  // thrust scale factor solve for
+	  for (std::vector<PhysicalModel*>::const_iterator i = esm.pms.begin();
+		  i != esm.pms.end(); ++i)
+	  {
+		  pms.push_back((PhysicalModel*)((*i)->Clone()));
+	  }
    }
 
    return *this;
@@ -194,7 +278,7 @@ const StringArray& EstimationStateManager::GetObjectList(std::string ofType)
       for (UnsignedInt i = 0; i < solveForObjectNames.size(); ++i)
       {
   	 		#ifdef DEBUG_INITIALIZATION
-         	MessageInterface::ShowMessage("ESM processing %s\n",
+         	MessageInterface::ShowMessage("ESM processing solveForObjectNames[%d] %s\n", i,
             	   solveForObjectNames[i].c_str());
 			#endif
 
@@ -208,6 +292,11 @@ const StringArray& EstimationStateManager::GetObjectList(std::string ofType)
    {
       for (UnsignedInt i = 0; i < considerObjectNames.size(); ++i)
       {
+#ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("ESM processing considerObjectNames[%d] %s\n", i,
+            considerObjectNames[i].c_str());
+#endif
+
          if (find(chunks.begin(), chunks.end(), considerObjectNames[i]) ==
                chunks.end())
             chunks.push_back(considerObjectNames[i]);
@@ -218,6 +307,11 @@ const StringArray& EstimationStateManager::GetObjectList(std::string ofType)
    {
       for (UnsignedInt i = 0; i < participantNames.size(); ++i)
       {
+#ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("ESM processing participantNames[%d] %s\n", i,
+            participantNames[i].c_str());
+#endif
+
          if (find(chunks.begin(), chunks.end(), participantNames[i]) ==
                chunks.end())
             chunks.push_back(participantNames[i]);
@@ -347,10 +441,16 @@ void EstimationStateManager::BufferObjects(ObjectArray *buffer)
 #endif
 
    GmatBase *clone;
+
+   // Clean up internal buffer
    for (UnsignedInt i = 0; i < estimationObjectClones.size(); ++i)
-      delete estimationObjectClones[i];
+   {                                          // made changes by TUAN NGUYEN
+      if (estimationObjectClones[i])          // made changes by TUAN NGUYEN
+         delete estimationObjectClones[i];    // made changes by TUAN NGUYEN
+   }                                          // made changes by TUAN NGUYEN
    estimationObjectClones.clear();
 
+   // Clean up external buffer if it is existed
    if (buffer != NULL)
    {
       for (UnsignedInt i = 0; i < buffer->size(); ++i)
@@ -358,6 +458,7 @@ void EstimationStateManager::BufferObjects(ObjectArray *buffer)
       buffer->clear();
    }
 
+   // Create clones for all objects and put them in internal buffer and external buffer 
    for (UnsignedInt i = 0; i < objects.size(); ++i)
    {
       clone = objects[i]->Clone();
@@ -382,9 +483,16 @@ void EstimationStateManager::RestoreObjects(ObjectArray *fromBuffer)
             " called\n", fromBuffer);
       MessageInterface::ShowMessage("   %d objects and %d clones\n",
             objects.size(), estimationObjectClones.size());
+      for (Integer i = 0; i < objects.size(); ++i)
+         MessageInterface::ShowMessage("objects[%d] = <%p,%s>\n", i, objects[i], objects[i]->GetName().c_str());
+      for (Integer i = 0; i < estimationObjectClones.size(); ++i)
+         MessageInterface::ShowMessage("estimationObjectClones[%d] = <%p,%s>\n", i, estimationObjectClones[i], estimationObjectClones[i]->GetName().c_str());
    #endif
 
+   // Set retore buffer to be external buffer
    ObjectArray *restoreBuffer = fromBuffer;
+
+   // Set retore buffer to be internal buffer if external buffer does not exist
    if (fromBuffer == NULL)
    {
       restoreBuffer = &estimationObjectClones;
@@ -393,6 +501,7 @@ void EstimationStateManager::RestoreObjects(ObjectArray *fromBuffer)
       #endif
    }
 
+   // The restore buffer has to be the same size of objects
    if (restoreBuffer->size() != objects.size())
    {
       std::stringstream errmsg;
@@ -401,7 +510,7 @@ void EstimationStateManager::RestoreObjects(ObjectArray *fromBuffer)
              << " objects and " << restoreBuffer->size() << " clones.";
       throw EstimatorException(errmsg.str());
    }
-
+   
    for (UnsignedInt i = 0; i < restoreBuffer->size(); ++i)
    {
       #ifdef DEBUG_CLONING
@@ -409,15 +518,20 @@ void EstimationStateManager::RestoreObjects(ObjectArray *fromBuffer)
                "%s\n", objects[i]->GetName().c_str(),
                (*restoreBuffer)[i]->GetName().c_str());
       #endif
-      if (objects[i]->IsOfType(Gmat::SPACECRAFT))
-         ((Spacecraft*)(objects[i]))->operator=(*((Spacecraft*)((*restoreBuffer)[i])));
-      else
-         *(objects[i]) = *((*restoreBuffer)[i]);
+      if (objects[i] != (*restoreBuffer)[i])
+      {
+         if (objects[i]->IsOfType(Gmat::SPACECRAFT))
+            ((Spacecraft*)(objects[i]))->operator=(*((Spacecraft*)((*restoreBuffer)[i])));
+         else
+            (objects[i])->operator= (*((*restoreBuffer)[i]));
+      }
+      
       #ifdef DEBUG_CLONING
          MessageInterface::ShowMessage("Object <%p,%s> data:\n%s", objects[i], objects[i]->GetName().c_str(),
                objects[i]->GetGeneratingString(Gmat::SHOW_SCRIPT, "   ").c_str());
       #endif
    }
+   
    #ifdef DEBUG_CLONING
       MessageInterface::ShowMessage("EstimationStateManager::RestoreObjects() "
             "finished\n");
@@ -552,6 +666,9 @@ bool EstimationStateManager::IsPropertiesSetupCorrect()
    if (solveForNames.size() == 0)
       throw EstimatorException("Error: No solvefor parameters are set to estimation.\n");
 
+   StringArray stateSolveFors = { "CartesianState", "KeplerianState" };
+   bool hasStateSolveFor = false;
+
    for (UnsignedInt i = 0; i < solveForNames.size(); ++i)
    {
       if (solveForObjectNames[i] == "")
@@ -575,7 +692,17 @@ bool EstimationStateManager::IsPropertiesSetupCorrect()
          if(solveForIDs[i] == -1)  // Changed from NULL to clear warning
             throw EstimatorException("Error: '" + solveForNames[i] +"' paramter which is specified in AddSolverFor was not defined in your script.\n");
       }
+
+      UnsignedInt startPos = solveForNames[i].find_last_of('.');
+      for (UnsignedInt j = 0; j < stateSolveFors.size(); ++j)
+      {
+         if (solveForNames[i].find(stateSolveFors[j], startPos) != std::string::npos)
+            hasStateSolveFor = true;
+      }
    }
+
+   if (!hasStateSolveFor)
+      throw EstimatorException("Error: No state solvefor parameters are used in estimation.\n");
 
    return true;
 }
@@ -587,8 +714,6 @@ bool EstimationStateManager::IsPropertiesSetupCorrect()
 /**
  * Sets a SolveFor parameter associated with a specific object.
  *
- * This version of the call is not currently used.
- *
  * @param sf The solveFor parameter
  * @param obj The object that supplies the parameter data
  *
@@ -597,7 +722,33 @@ bool EstimationStateManager::IsPropertiesSetupCorrect()
 //------------------------------------------------------------------------------
 bool EstimationStateManager::SetProperty(std::string sf, GmatBase *obj)
 {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Setting SolveFor parameter \"%s\" on object %s <%p>\n",
+            sf.c_str(), obj->GetName().c_str(), obj);
+   #endif
+
    bool retval = false;
+
+   if (find(solveForNames.begin(), solveForNames.end(), sf) ==
+         solveForNames.end())
+   {
+      // Save the property elements and fill out the vectors
+      solveForNames.push_back(sf);
+      solveForObjectNames.push_back(obj->GetName());
+      solveForObjects.push_back(obj);
+      solveForIDNames.push_back(sf);
+      solveForIDs.push_back(-1);
+
+      retval = true;
+   }
+
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("EstmationStateManager::SetProperty():  Current SolveFor parameters:\n");
+
+      for (UnsignedInt i = 0; i < solveForNames.size(); ++i)
+           MessageInterface::ShowMessage("  solve for name = '%s';  object name = '%s';   parameter = '%s'\n", solveForNames[i].c_str(), solveForObjectNames[i].c_str(), solveForIDNames[i].c_str());
+   #endif
+
    return retval;
 }
 
@@ -617,13 +768,23 @@ bool EstimationStateManager::SetProperty(std::string sf, GmatBase *obj)
 //------------------------------------------------------------------------------
 bool EstimationStateManager::SetProperty(GmatBase *obj)
 {
+#ifdef DEBUG_STATE_CONSTRUCTION
+   MessageInterface::ShowMessage("EstimationStateManager::SetProperty(obj = <%s>)\n", obj->GetFullName().c_str());
+#endif
    StringArray solforNames = GetSolveForList(obj);
    
    if (solforNames.empty())
       return false;
 
    for (UnsignedInt i = 0; i < solforNames.size(); ++i)
-      SetProperty(solforNames[i]);
+   {
+#ifdef DEBUG_STATE_CONSTRUCTION
+	   MessageInterface::ShowMessage("SetProperty for:  solveforNames[%d] = <%s>\n", i, solforNames[i].c_str());
+#endif
+		   SetProperty(solforNames[i]);
+
+   }
+     
 
    return true;
 }
@@ -647,8 +808,39 @@ StringArray EstimationStateManager::GetSolveForList(GmatBase* obj)
    
    if (obj->IsOfType(Gmat::SPACECRAFT))
    {
-      // 1. Load solve-for list from spacecraft
+      // 1. Load solve-for list for spacecraft
+      // 1.1. Load solve-for list from Spacecraft object
       solveforList = obj->GetStringArrayParameter("SolveFors");
+      // 1.2. Load solve-for list from Plate objects
+      ObjectArray plateList = ((Spacecraft*)obj)->GetRefObjectArray("Plate");
+      std::vector<StringArray> constraints = ((Spacecraft*)obj)->GetEqualConstrains();
+      for (Integer i = 0; i < plateList.size(); ++i)
+      {
+         StringArray plateSolvefors = ((Plate*)(plateList[i]))->GetStringArrayParameter("SolveFors");
+         for (Integer j = 0; j < plateSolvefors.size(); ++j)
+         {
+            //MessageInterface::ShowMessage("plate<%s>: %s\n", plateList[i]->GetFullName().c_str(), (plateList[i]->GetName() + "." + plateSolvefors[j]).c_str());
+            std::string sfFullName = plateList[i]->GetName() + "." + plateSolvefors[j];
+            bool addToList = true;
+            for (Integer k = 0; k < constraints.size(); ++k)
+            {
+               for (Integer kk = 1; kk < constraints[k].size(); ++kk)
+               {
+                  if (constraints[k][kk] == sfFullName)
+                  {
+                     addToList = false;
+                     break;
+                  }
+               }
+
+               if (addToList == false)
+                  break;
+            }
+
+            if (addToList)
+               solveforList.push_back(sfFullName);
+         }
+      }
    }
    else if (obj->IsOfType(Gmat::GROUND_STATION))
    {
@@ -688,6 +880,14 @@ StringArray EstimationStateManager::GetSolveForList(GmatBase* obj)
       }
    }
 
+//   else if (obj->IsOfType("ThrustSegment"))                         // Thrust Scale Factor Solve For
+   else
+   {
+	   StringArray sfList = obj->GetStringArrayParameter("SolveFors");
+	   for (UnsignedInt j = 0; j < sfList.size(); ++j)
+		   solveforList.push_back(obj->GetFullName() + "." + sfList[j]);
+   }
+
    // 3. Add prefix
    for (UnsignedInt i = 0; i < solveforList.size(); ++i)
    {
@@ -696,9 +896,9 @@ StringArray EstimationStateManager::GetSolveForList(GmatBase* obj)
    }
 
    #ifdef DEBUG_STATE_CONSTRUCTION
-      MessageInterface::ShowMessage("Solve for parameters for <%s>:\n", obj->GetName().c_str());
+      MessageInterface::ShowMessage("EstimationStateManager::GetSolveForList - Solve for parameters for <%s>:\n", obj->GetName().c_str());
       for (UnsignedInt i = 0; i < solveforList.size(); ++i)
-         MessageInterface::ShowMessage("   %s\n", solveforList[i].c_str());
+         MessageInterface::ShowMessage("%d: %s\n", i, solveforList[i].c_str());
    #endif
 
    return solveforList;
@@ -793,6 +993,11 @@ bool EstimationStateManager::SetConsider(std::string con, GmatBase *obj)
 void EstimationStateManager::SetParticipantList(StringArray &p)
 {
    participantNames = p;
+
+   // Thrust Scale Factor Solve For
+   // Somehow get the names of the thrust segments added to participantNames
+   
+  
 }
 
 
@@ -847,6 +1052,7 @@ bool EstimationStateManager::BuildState()
    }
 
    state.SetSize(stateSize);
+   stateOffset.SetSize(stateSize);
 
    // Build the data structures for the STM and covariance matrix
    stm.SetSize(stateSize, stateSize);
@@ -937,6 +1143,11 @@ bool EstimationStateManager::BuildState()
       i += size;
    }
 
+   #ifdef DEBUG_COVARIANCE
+      MessageInterface::ShowMessage("EstimationStateManager covariance info:\n");
+      covariance.ShowContent();
+   #endif
+
    #ifdef DEBUG_STATE_CONSTRUCTION
       MessageInterface::ShowMessage(
             "Estimation state vector has %d elements:\n", stateSize);
@@ -977,7 +1188,6 @@ bool EstimationStateManager::MapVectorToObjects()
       MessageInterface::ShowMessage("Mapping vector to objects\n"
             "   Epoch = %s\n", state.GetEpochGT().ToString().c_str());
    #endif
-
    for (Integer index = 0; index < stateSize; ++index)
    {
       #ifdef DEBUG_OBJECT_UPDATES
@@ -985,9 +1195,14 @@ bool EstimationStateManager::MapVectorToObjects()
          msg << stateMap[index]->subelement;
          std::string lbl = stateMap[index]->objectFullName + "." + 
             stateMap[index]->elementName + "." + msg.str() + " = ";
-         MessageInterface::ShowMessage("   %d: %s%.12lf  for object <%s, %p>\n", index, lbl.c_str(),
-            state[index], stateMap[index]->object->GetFullName().c_str(), stateMap[index]->object);
+         MessageInterface::ShowMessage("   %d: %s%.12lf  for object <%s, %p>   parameterID = %d\n", index, lbl.c_str(),
+            state[index], stateMap[index]->object->GetFullName().c_str(), stateMap[index]->object, stateMap[index]->parameterID);
       #endif
+      bool prevChoice = true;
+      if (stateMap[index]->object->IsOfType("Plate"))
+      {
+         prevChoice = ((Plate*)stateMap[index]->object)->SetErrorSelection(false);
+      }
 
       switch (stateMap[index]->parameterType)
       {
@@ -1017,6 +1232,33 @@ bool EstimationStateManager::MapVectorToObjects()
                   "%s not set; Element type not handled\n",label.c_str());
       }
 
+      if (stateMap[index]->object->IsOfType("Plate"))
+      {
+         ((Plate*)stateMap[index]->object)->SetErrorSelection(prevChoice);
+      }
+   }
+
+   // Update value for constraint variables of spacecraft
+   ObjectArray spacecrafts;
+   for (Integer i = 0; i < stateSize; ++i)
+   {
+      if (stateMap[i]->object->IsOfType(Gmat::SPACECRAFT))
+      {
+         bool found = false;
+         for (Integer j = 0; j < spacecrafts.size(); ++j)
+         {
+            if (stateMap[i]->object == spacecrafts[j])
+            {
+               found = true;
+               break;
+            }
+         }
+         if (found == false)
+         {
+            ((Spacecraft*)(stateMap[i]->object))->UpdateValueForConstraints();
+            spacecrafts.push_back(stateMap[i]->object);
+         }
+      }
    }
 
    #ifdef DEBUG_CLONING
@@ -1027,6 +1269,95 @@ bool EstimationStateManager::MapVectorToObjects()
          objects[index]->GetGeneratingString(Gmat::SHOW_SCRIPT, "   ").c_str());
    }
    #endif
+
+   GmatEpoch theEpoch = state.GetEpoch();
+   GmatTime theEpochGT = state.GetEpochGT();
+   for (UnsignedInt i = 0; i < objects.size(); ++i)
+   {
+      if (epochIDs[i] >= 0)
+      {
+         objects[i]->SetRealParameter(epochIDs[i], theEpoch);
+         if (state.HasPrecisionTime())
+            objects[i]->SetGmatTimeParameter(epochIDs[i], theEpochGT);
+         else
+            objects[i]->SetGmatTimeParameter(epochIDs[i], GmatTime(theEpoch));
+      }
+   }
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool MapFullVectorToObjects()
+//------------------------------------------------------------------------------
+/**
+ * Passes estimation state vector data, including reference state offsets,
+ * to the associated objects
+ *
+ * @return true on success
+ */
+ //------------------------------------------------------------------------------
+bool EstimationStateManager::MapFullVectorToObjects()
+{
+#ifdef DEBUG_OBJECT_UPDATES
+   MessageInterface::ShowMessage("Mapping vector with offsets to objects\n"
+      "   Epoch = %s\n", state.GetEpochGT().ToString().c_str());
+#endif
+
+   for (Integer index = 0; index < stateSize; ++index)
+   {
+      Real fullState = state[index];
+      if (hasStateOffset)
+         fullState += stateOffset[index];
+
+#ifdef DEBUG_OBJECT_UPDATES
+      std::stringstream msg("");
+      msg << stateMap[index]->subelement;
+      std::string lbl = stateMap[index]->objectFullName + "." +
+         stateMap[index]->elementName + "." + msg.str() + " = ";
+      MessageInterface::ShowMessage("   %d: %s%.12lf (%.12lf + %.12lf)  for object <%s, %p>   parameterID = %d\n", index, lbl.c_str(),
+         fullState, state[index], stateOffset[index], stateMap[index]->object->GetFullName().c_str(), stateMap[index]->object, stateMap[index]->parameterID);
+#endif
+
+      switch (stateMap[index]->parameterType)
+      {
+      case Gmat::REAL_TYPE:
+         (stateMap[index]->object)->SetRealParameter(
+            stateMap[index]->parameterID, fullState);
+         break;
+
+      case Gmat::RVECTOR_TYPE:
+         stateMap[index]->object->SetRealParameter(
+            stateMap[index]->parameterID, fullState,
+            stateMap[index]->rowIndex);
+         break;
+
+      case Gmat::RMATRIX_TYPE:
+         stateMap[index]->object->SetRealParameter(
+            stateMap[index]->parameterID, fullState,
+            stateMap[index]->rowIndex, stateMap[index]->colIndex);
+         break;
+
+      default:
+         std::stringstream sel("");
+         sel << stateMap[index]->subelement;
+         std::string label = stateMap[index]->objectName + "." +
+            stateMap[index]->elementName + "." + sel.str();
+         MessageInterface::ShowMessage(
+            "%s not set; Element type not handled\n", label.c_str());
+      }
+
+   }
+
+#ifdef DEBUG_CLONING
+   MessageInterface::ShowMessage("After map vector to object:\n");
+   for (Integer index = 0; index < objects.size(); ++index)
+   {
+      MessageInterface::ShowMessage("Object <%p,%s> data:\n%s", objects[index], objects[index]->GetName().c_str(),
+         objects[index]->GetGeneratingString(Gmat::SHOW_SCRIPT, "   ").c_str());
+   }
+#endif
 
    GmatEpoch theEpoch = state.GetEpoch();
    GmatTime theEpochGT = state.GetEpochGT();
@@ -1193,7 +1524,7 @@ bool EstimationStateManager::MapSTMToObjects()
       for (Integer i = 0; i < stateSize; ++i)
       {
          for (Integer j = 0; j < stateSize; ++j)
-            MessageInterface::ShowMessage("   %.12lf", stm(i,j));
+            MessageInterface::ShowMessage("   %.12le", stm(i,j));
          MessageInterface::ShowMessage("\n");
       }
       MessageInterface::ShowMessage("\n");
@@ -1220,6 +1551,66 @@ bool EstimationStateManager::MapSTMToObjects()
             for (Integer i = 0; i < stmSize; ++i)
                for (Integer j = 0; j < stmSize; ++j)
                   (*dstm)(i,j) = stm(h+i, h+j);
+
+            // Swap order of elements from EstimationStateManager's STM to the same order as it defined in spacecraft
+            std::map<Integer, Integer> rowIdMap;         // map show relation between row's Id and row index
+            for (Integer row = 0; row < stmSize; ++row)
+            {
+               Integer id = obj->GetStmRowId(row);
+               if ((id < obj->GetParameterID("CartesianX")) || (id > obj->GetParameterID("CartesianVZ")))
+               {
+                  std::string paramName = obj->GetParameterText(id);
+                  std::string solveforName = obj->GetParameterNameForEstimationParameter(paramName);
+                  id = obj->GetParameterID(solveforName);
+                  rowIdMap[id] = row;
+               }
+            }
+
+#ifdef DEBUG_STM_MAPPING
+            MessageInterface::ShowMessage("Spacecraft %s's STM = \n", obj->GetName().c_str());
+            for (Integer i = 0; i < stmSize; ++i)
+            {
+               MessageInterface::ShowMessage("[");
+               for (Integer j = 0; j < stmSize; ++j)
+               {
+                  MessageInterface::ShowMessage("%.12le   ", (*dstm)(i, j));
+               }
+               MessageInterface::ShowMessage("]\n");
+            }
+            Integer index = 0;
+            for (std::map<Integer, Integer>::iterator i = rowIdMap.begin(); i != rowIdMap.end(); ++i)
+            {
+               MessageInterface::ShowMessage("%d:  id = %d   row = %d\n", index, (*i).first, (*i).second);
+               ++index;
+            }
+#endif
+
+            Integer row = 6;
+            for (std::map<Integer, Integer>::iterator i = rowIdMap.begin(); i != rowIdMap.end(); ++i)
+            {
+               if ((*i).second > row)
+               {
+                  // swap row and (*i).second
+                  Real temp;
+                  // Swap row
+                  for (Integer j = 0; j < stmSize; ++j)
+                  {
+                     temp = (*dstm)(h + row, h + j);
+                     (*dstm)(h + row, h + j) = (*dstm)(h + (*i).second, h + j);
+                     (*dstm)(h + (*i).second, h + j) = temp;
+                  }
+
+                  // Swap column
+                  for (Integer j = 0; j < stmSize; ++j)
+                  {
+                     temp = (*dstm)(h + j, h + row);
+                     (*dstm)(h + j, h + row) = (*dstm)(h + j, h + (*i).second);
+                     (*dstm)(h + j, h + (*i).second) = temp;
+                  }
+               }
+               ++row;
+            }
+
          }
 
       }
@@ -1240,6 +1631,9 @@ bool EstimationStateManager::MapSTMToObjects()
 //------------------------------------------------------------------------------
 bool EstimationStateManager::MapObjectsToSTM()
 {
+#ifdef DEBUG_STM_MAPPING
+   MessageInterface::ShowMessage("Start EstimationStateManager::MapObjectsToSTM()\n");
+#endif
    bool retval = true;
 
    // Fill in the STM based on the objects that comprise the state vector
@@ -1254,42 +1648,110 @@ bool EstimationStateManager::MapObjectsToSTM()
 
          bool hasDstm = obj->HasDynamicParameterSTM(elementId);
 
-         #ifdef DEBUG_STM_MAPPING
-            Integer elementLength = stateMap[h]->length;
-            MessageInterface::ShowMessage("Prepping for STM; element %s for "
-                  "object %s has ID %d and length %d, and %s a dynamic STM "
-                  "contribution\n", stateMap[h]->elementName.c_str(),
-                  obj->GetName().c_str(), elementId, elementLength,
-                  (hasDstm ? "has" : "does not have"));
-         #endif
+#ifdef DEBUG_STM_MAPPING
+         Integer elementLength = stateMap[h]->length;
+         MessageInterface::ShowMessage("Prepping for STM; element %s for "
+            "object %s has ID %d and length %d, and %s a dynamic STM "
+            "contribution\n", stateMap[h]->elementName.c_str(),
+            obj->GetName().c_str(), elementId, elementLength,
+            (hasDstm ? "has" : "does not have"));
+#endif
 
          if (hasDstm)
          {
-            const Rmatrix* dstm = obj->GetParameterSTM(elementId);
+            Rmatrix* dstm = obj->GetParameterSTM(elementId);
             Integer stmSize = dstm->GetNumRows();
+            
             // Fill in the master stm with the current data
             for (Integer i = 0; i < stmSize; ++i)
+            {
                for (Integer j = 0; j < stmSize; ++j)
-                  stm(h+i, h+j) = (*dstm)(i,j);
+               {
+                  // The order of elements in State Transition Matrix is different in EstimationStateManager and Spacecraft
+                  // Note that: the order of elements in spacecraft STM is defined in PropagationStateManager 
+                  stm(h + i, h + j) = (*dstm)(i, j);
+               }
+            }
+            
+            // Swap order of elements from spacecraft's STM to the same order as it defined in EstimationStateManager
+            std::map<Integer,Integer> rowIdMap;         // map show relation between row's Id and row index
+            for (Integer row = 0; row < stmSize; ++row)
+            {
+               Integer id = obj->GetStmRowId(row);
+               if ((id < obj->GetParameterID("CartesianX")) || (id > obj->GetParameterID("CartesianVZ")))
+               {
+                  std::string paramName = obj->GetParameterText(id);
+                  std::string solveforName = obj->GetParameterNameForEstimationParameter(paramName);
+                  id = obj->GetParameterID(solveforName);
+                  rowIdMap[id] = row;
+               }
+            }
+            
+#ifdef DEBUG_STM_MAPPING
+            MessageInterface::ShowMessage("Spacecraft %s's STM = \n", obj->GetName().c_str());
+            for (Integer i = 0; i < stmSize; ++i)
+            {
+               MessageInterface::ShowMessage("[");
+               for (Integer j = 0; j < stmSize; ++j)
+               {
+                  MessageInterface::ShowMessage("%.12le   ",(*dstm)(i, j));
+               }
+               MessageInterface::ShowMessage("]\n");
+            }
+            Integer index = 0;
+            for (std::map<Integer, Integer>::iterator i = rowIdMap.begin(); i != rowIdMap.end(); ++i)
+            {
+               MessageInterface::ShowMessage("%d:  id = %d   row = %d\n", index, (*i).first, (*i).second);
+               ++index;
+            }
+#endif
+
+            Integer row = 6;
+            for (std::map<Integer, Integer>::iterator i = rowIdMap.begin(); i != rowIdMap.end(); ++i)
+            {
+               if ((*i).second > row)
+               {
+                  // swap row and (*i).second
+                  Real temp;
+                  // Swap row
+                  for (Integer j = 0; j < stmSize; ++j)
+                  {
+                     temp = stm(h + row, h + j);
+                     stm(h + row, h + j) = stm(h + (*i).second, h + j);
+                     stm(h + (*i).second, h + j) = temp;
+                  }
+                  
+                  // Swap column
+                  for (Integer j = 0; j < stmSize; ++j)
+                  {
+                     temp = stm(h + j, h + row);
+                     stm(h + j, h + row) = stm(h + j, h + (*i).second);
+                     stm(h + j, h + (*i).second) = temp;
+                  }
+               }
+               ++row;
+            }
+
          }
 
       }
    }
 
-   #ifdef DEBUG_STM_MAPPING
-      MessageInterface::ShowMessage("Loaded object STM's; esm STM now contains\n");
-      for (Integer i = 0; i < stateSize; ++i)
-      {
-         for (Integer j = 0; j < stateSize; ++j)
-            MessageInterface::ShowMessage("   %.12lf", stm(i,j));
-         MessageInterface::ShowMessage("\n");
-      }
+#ifdef DEBUG_STM_MAPPING
+   MessageInterface::ShowMessage("Loaded object STM's; esm STM now contains\n");
+   for (Integer i = 0; i < stateSize; ++i)
+   {
+      for (Integer j = 0; j < stateSize; ++j)
+         MessageInterface::ShowMessage("   %.12le", stm(i, j));
       MessageInterface::ShowMessage("\n");
-   #endif
-
+   }
+   MessageInterface::ShowMessage("\n");
+#endif
+#ifdef DEBUG_STM_MAPPING
+   MessageInterface::ShowMessage("End EstimationStateManager::MapObjectsToSTM()\n");
+#endif
    return retval;
 }
-
 
 //------------------------------------------------------------------------------
 // bool MapCovariancesToObjects()
@@ -1326,6 +1788,51 @@ bool EstimationStateManager::MapObjectsToCovariances()
    bool retval = false;
 
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatState* GetStateOffset()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the state offset
+ *
+ * @return A pointer to the state offset
+ */
+ //------------------------------------------------------------------------------
+GmatState* EstimationStateManager::GetStateOffset()
+{
+   return &stateOffset;
+}
+
+
+//------------------------------------------------------------------------------
+// bool HasStateOffset()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the value of the hasStateOffset flag
+ *
+ * @return The value of the hasStateOffset flag
+ */
+ //------------------------------------------------------------------------------
+bool EstimationStateManager::HasStateOffset()
+{
+   return hasStateOffset;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetHasStateOffset(bool hasOffset)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value of the hasStateOffset flag
+ *
+ * @param hasOffset The value to set the hasStateOffset flag
+ */
+ //------------------------------------------------------------------------------
+void EstimationStateManager::SetHasStateOffset(bool hasOffset)
+{
+   hasStateOffset = hasOffset;
 }
 
 
@@ -1469,8 +1976,9 @@ Integer EstimationStateManager::SortVector()
             idList.push_back(id);
             owners.push_back(current);
             property.push_back(current->GetParameterNameForEstimationParameter(*j));
-
+            
             // Put this item in the ordering list
+            bool found = false;
             oLoc = order.begin();
             while (oLoc != order.end())
             {
@@ -1483,11 +1991,45 @@ Integer EstimationStateManager::SortVector()
                   #endif
 
                   order.insert(oLoc, loc);
+                  found = true;
                   break;
                }
-               ++oLoc;
+               else if (id == val)
+               {
+                  if (current->GetName() < owners[*oLoc]->GetName())
+                  {
+                     #ifdef DEBUG_STATE_CONSTRUCTION
+                        MessageInterface::ShowMessage("Inserting; id = %d, z = %d,"
+                           "  loc = %d\n", id, (*oLoc), loc);
+                     #endif
+
+                     order.insert(oLoc, loc);
+                     found = true;
+                     break;
+                  }
+                  else if (current->GetName() == owners[*oLoc]->GetName())
+                  {
+                     if (current->GetFullName() < owners[*oLoc]->GetFullName())
+                     {
+                        #ifdef DEBUG_STATE_CONSTRUCTION
+                           MessageInterface::ShowMessage("Inserting; id = %d, z = %d,"
+                              "  loc = %d\n", id, (*oLoc), loc);
+                        #endif
+
+                        order.insert(oLoc, loc);
+                        found = true;
+                        break;
+                     }
+                     else
+                        ++oLoc;
+                  }
+                  else
+                     ++oLoc;
+               }
+               else
+                  ++oLoc;
             }
-            if (oLoc == order.end())
+            if (!found)
                order.push_back(loc);
 
             ++loc;
@@ -1498,6 +2040,7 @@ Integer EstimationStateManager::SortVector()
    ListItem *newItem;
    val = 0;
 
+   stateMap.clear();
    for (Integer i = 0; i < stateSize; ++i)
    {
       #ifdef DEBUG_STATE_CONSTRUCTION
@@ -1580,6 +2123,13 @@ Integer EstimationStateManager::SortVector()
 }
 
 
+const std::vector<PhysicalModel*>& EstimationStateManager::GetAllPhysicalModels()
+{
+	return pms;
+}
+
+
+// made changes by TUAN NGUYEN
 GmatTime EstimationStateManager::GetEstimationEpochGT()
 {
    GmatTime estEpoch;
@@ -1646,6 +2196,7 @@ Rvector6 EstimationStateManager::GetParticipantState(GmatBase* spaceObj, std::st
       Rvector6 outStateCart;
       cv->Convert(epoch, inState, internalcs, outStateCart, cs);
       delete cv;
+      cv = NULL;                                   // made changes by TUAN NGUYEN
       
       // Convert Cartesian to Keplerian if it needs
       if (inStateType == "")
@@ -1761,6 +2312,7 @@ Rvector6 EstimationStateManager::GetParticipantMJ2000EqState(GmatBase* spaceObj,
       cv->Convert(epoch, inState, internalcs, outStateCart, mj2kCS);
       delete cv;
       delete mj2kCS;
+      cv = NULL; mj2kCS = NULL;                                 // made changes by TUAN NGUYEN
 
       // Convert Cartesian to Keplerian if it needs
       if (inStateType == "")
@@ -1785,6 +2337,7 @@ Rvector6 EstimationStateManager::GetParticipantMJ2000EqState(GmatBase* spaceObj,
          outState = outStateCart;
       else
          throw EstimatorException("Error: Input state type '" + inStateType + "' is invalid. It would be Cartesian, Keplerian, or an empty string.\n");
+      
    }
    
    return outState;
@@ -1892,6 +2445,7 @@ bool EstimationStateManager::SetParticipantState(GmatBase* spaceObj,
          state[i+j] = outState[j];
 
       delete cv;
+      cv = NULL;                                // made changes by TUAN NGUYEN
    }
 
    return true;
@@ -1990,10 +2544,223 @@ bool EstimationStateManager::SetParticipantMJ2000EqState(GmatBase* spaceObj,
       cv->Convert(epoch, tempState, mj2kCS, outState, internalcs);
       delete cv;
       delete mj2kCS;
+      cv = NULL; mj2kCS = NULL;                 // made changes by TUAN NGUYEN
 
       // Set state
       for (Integer j = 0; j < 6; ++j)
          state[i + j] = outState[j];
+   }
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// Rvector& GetParticipantMJ2000EqStateOffset(GmatBase* spaceObj, std::string inStateType)
+//------------------------------------------------------------------------------
+/**
+* This method used to get state offset of a spacecraft in MJ2000Eq axis and in
+* a given state type. For Keplerian state, anomaly is in form of MA (instead of TA)
+*
+* @param spaceObj      spacecraft from which we need to get state
+* @param inStateType   state type used in the state offset. Its value can be
+*                       "Cartesian", "Keplerian", or ""
+* @param anomalyType   spacefify anomaly type to be "MA" or "TA" for Keplerian anomaly element.
+*
+* @return            spacecraft's state offset in MJ2000Eq and
+*                    If inStateType is "Cartesian", state offset will be in Cartesian state
+*                    If inStateType is "Keplerian", state offset will be in Keplerian state
+*                    If inStateType is "", state will be in state type specified in
+*                       spacecraft's DisplayStateType parameter set in script
+*
+*/
+//------------------------------------------------------------------------------
+Rvector6 EstimationStateManager::GetParticipantMJ2000EqStateOffset(GmatBase* spaceObj, std::string inStateType, std::string anomalyType)
+{
+   Rvector6 outStateOffset, outStateFull;
+
+   if (spaceObj->IsOfType(Gmat::SPACEOBJECT))
+   {
+      // 1.Get state of spacecraft in its internal coordinate system
+      Integer i = 0;
+      for (; i < stateMap.size(); ++i)
+      {
+         if (stateMap[i]->object == spaceObj)
+            break;
+      }
+
+      Rvector6 inStateFull;
+      for (Integer i = 0; i < 6; i++)
+         inStateFull[i] = state[i] + stateOffset[i];
+
+      // Convert internal state to spacecraft's Cartesian coordinate system
+      outStateFull = inStateFull;
+      GmatTime epoch = GetEstimationEpochGT();
+
+      // Get spacecraft's internal coordinate system
+      Spacecraft* obj = (Spacecraft*)spaceObj;
+      CoordinateSystem* internalcs = obj->GetInternalCoordSystem();
+      if (internalcs == NULL)
+         throw EstimatorException("Internal coordinate system for " + obj->GetName() + " is not set\n");
+
+      // Create spacecraft's MJ2000Eq Cartesian coordinate system
+      std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+      CoordinateSystem* cs = (CoordinateSystem*)obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+      if (cs == NULL)
+         throw EstimatorException("Coordinate system for " + obj->GetName() + " is not set\n");
+
+      SolarSystem* ss = cs->GetSolarSystem();
+      SpacePoint* origin = cs->GetOrigin();
+      if (origin->IsOfType(Gmat::GROUND_STATION))
+      {
+         std::string cbName = ((GroundstationInterface*)origin)->GetStringParameter("CentralBody");
+         origin = ss->GetBody(cbName);
+      }
+      CoordinateSystem* mj2kCS = CoordinateSystem::CreateLocalCoordinateSystem("mj2kCS", "MJ2000Eq", origin, NULL, NULL, cs->GetJ2000Body(), ss);
+
+      // Get spacecraft's state in MJ2000Eq Cartesian coordinate system 
+      CoordinateConverter* cv = new CoordinateConverter();
+      Rvector6 outStateFullCart;
+      cv->Convert(epoch, inStateFull, internalcs, outStateFullCart, mj2kCS);
+      delete cv;
+      delete mj2kCS;
+      cv = NULL; mj2kCS = NULL;                                 // made changes by TUAN NGUYEN
+
+      // Convert Cartesian to Keplerian if it needs
+      if (inStateType == "")
+      {
+         std::string stateType = obj->GetStringParameter("DisplayStateType");
+         if (stateType == "Keplerian")
+         {
+            Planet* pn = (Planet*)origin;
+            Real mu = pn->GetRealParameter("Mu");
+            outStateFull = StateConversionUtil::CartesianToKeplerian(mu, outStateFullCart, anomalyType);     // Keplerian anomaly element is in form of MA (instead of TA)
+         }
+         else
+            outStateFull = outStateFullCart;
+      }
+      else if (inStateType == "Keplerian")
+      {
+         Planet* pn = (Planet*)origin;
+         Real mu = pn->GetRealParameter("Mu");
+         outStateFull = StateConversionUtil::CartesianToKeplerian(mu, outStateFullCart, anomalyType);        // Keplerian anomaly emement is in form of MA (instaed of TA)
+      }
+      else if (inStateType == "Cartesian")
+         outStateFull = outStateFullCart;
+      else
+         throw EstimatorException("Error: Input state type '" + inStateType + "' is invalid. It would be Cartesian, Keplerian, or an empty string.\n");
+
+      // Subtract out the main portion of the state to leave behind just the offset
+      Rvector6 outState = GetParticipantMJ2000EqState(spaceObj, inStateType, anomalyType);
+      outStateOffset = outStateFull - outState;
+   }
+
+   return outStateOffset;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetParticipantMJ2000EqStateOffset(GmatBase* spaceObj, Rvector6& inputStateOffset,
+//                          std::string inStateType)
+//------------------------------------------------------------------------------
+/**
+* Method used to set MJ2000Eq state offset of a spacecraft. For Keplerian state, anomaly element
+* is in form of MA (instead of TA).
+*
+* @param spaceObj      spacecraft from which we need to get state offset
+* @param inputStateOffset  state offset of spacecraft in MJ2000Eq coordinate system. For
+*                          Keplerian, anomaly element in the input state offset is in form of "MA"
+* @param inStateType   state type used in the state offset. Its value can be
+*                       "Cartesian", "Keplerian", or ""
+*
+* @return            spacecraft's state offset in its coordinate system and
+*                    If inStateType is "Cartesian", state offset will be in Cartesian state
+*                    If inStateType is "Keplerian", state offset will be in Keplerian state
+*                    If inStateType is "", state offset will be in state type specified in
+*                       spacecraft's DisplayStateType parameter set in script
+*
+*/
+//------------------------------------------------------------------------------
+bool EstimationStateManager::SetParticipantMJ2000EqStateOffset(GmatBase* spaceObj,
+   Rvector6& inputStateOffset, std::string inStateType)
+{
+   if (spaceObj->IsOfType(Gmat::SPACEOBJECT))
+   {
+      // Get state of spacecraft object
+      Integer i = 0;
+      for (; i < stateMap.size(); ++i)
+      {
+         if (stateMap[i]->object == spaceObj)
+            break;
+      }
+      Spacecraft* obj = (Spacecraft*)spaceObj;
+
+      Rvector6 inputStateFull;
+      Rvector6 inputState = GetParticipantMJ2000EqState(spaceObj, inStateType, "MA");
+      for (Integer i = 0; i < 6; i++)
+         inputStateFull[i] = inputState[i] + inputStateOffset[i];
+
+      // Create spaceraft's coordinate system
+      std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+      CoordinateSystem* cs = (CoordinateSystem*)obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+      if (cs == NULL)
+         throw EstimatorException("Coordinate system for " + obj->GetName() + " is not set\n");
+
+      SolarSystem* ss = cs->GetSolarSystem();
+      SpacePoint* origin = cs->GetOrigin();
+      if (origin->IsOfType(Gmat::GROUND_STATION))
+      {
+         std::string cbName = ((GroundstationInterface*)origin)->GetStringParameter("CentralBody");
+         origin = ss->GetBody(cbName);
+      }
+
+      // Convert Keplerian to Cartesian if it needs
+      Rvector6 tempState;
+      if (inStateType == "")
+      {
+         std::string stateType = obj->GetStringParameter("DisplayStateType");
+         if (stateType == "Keplerian")
+         {
+            Planet* pn = (Planet*)origin;
+
+            Real mu = pn->GetRealParameter("Mu");
+            tempState = StateConversionUtil::KeplerianToCartesian(mu, inputStateFull, "MA");
+         }
+         else
+            tempState = inputStateFull;
+      }
+      else if (inStateType == "Keplerian")
+      {
+         Planet* pn = (Planet*)origin;
+         Real mu = pn->GetRealParameter("Mu");
+         tempState = StateConversionUtil::KeplerianToCartesian(mu, inputStateFull, "MA");
+      }
+      else if (inStateType == "Cartesian")
+         tempState = inputStateFull;
+      else
+         throw EstimatorException("Error: Input state type '" + inStateType + "' is invalid. It would be Cartesian, Keplerian, or an empty string.\n");
+
+
+      // Get internal coordinate system
+      CoordinateSystem* internalcs = obj->GetInternalCoordSystem();
+      if (internalcs == NULL)
+         throw EstimatorException("Internal coordinate system for " + obj->GetName() + " is not set\n");
+
+      // Create spacecraft's MJ2000Eq Cartesian coordinate system
+      CoordinateSystem* mj2kCS = CoordinateSystem::CreateLocalCoordinateSystem("mj2kCS", "MJ2000Eq", origin, NULL, NULL, cs->GetJ2000Body(), ss);
+
+      // Convert from spacecraft coordiante system to internal coordinate system
+      CoordinateConverter* cv = new CoordinateConverter();
+      Rvector6 outStateFull;
+      GmatTime epoch = GetEstimationEpochGT();
+      cv->Convert(epoch, tempState, mj2kCS, outStateFull, internalcs);
+      delete cv;
+      delete mj2kCS;
+      cv = NULL; mj2kCS = NULL;                 // made changes by TUAN NGUYEN
+
+      // Set state
+      for (Integer j = 0; j < 6; ++j)
+         stateOffset[i + j] = outStateFull[j] - state[j];
    }
 
    return true;
@@ -2048,6 +2815,7 @@ Rvector EstimationStateManager::GetParticipantCartesianState(GmatBase* spaceObj)
       Rvector6 outStateCart;
       cv->Convert(epoch, inState, internalcs, outStateCart, cs);
       delete cv;
+      cv = NULL;                                   // made changes by TUAN NGUYEN
 
       outState = outStateCart;
    }
@@ -2116,6 +2884,7 @@ Rvector EstimationStateManager::GetParticipantMJ2000EqCartesianState(GmatBase* s
 
       delete cv;
       delete mj2kCS;
+      cv = NULL; mj2kCS = NULL;                 // made changes by TUAN NGUYEN
 
       outState = outStateCart;
    }
@@ -2147,10 +2916,16 @@ GmatState EstimationStateManager::GetEstimationState()
 
    for (UnsignedInt i = 0; i < map->size(); ++i)
    {
-      // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+      // Get Cr_Epsilon and Cd_Epsilon instead of Cr and Cd
       if (((*map)[i]->elementName == "Cr_Epsilon") ||
          ((*map)[i]->elementName == "Cd_Epsilon") ||
-         ((*map)[i]->elementName == "Bias"))
+         (GmatStringUtil::EndsWith((*map)[i]->elementName, ".TSF_Epsilon")) ||
+         ((*map)[i]->elementName == "Bias")||
+         ((*map)[i]->elementName == "Area") || 
+         ((*map)[i]->elementName == "AreaCoefficient") || 
+         ((*map)[i]->elementName == "LitFraction") || 
+         ((*map)[i]->elementName == "DiffuseFraction") ||
+         ((*map)[i]->elementName == "SpecularFraction"))
       {
          outputState[i] = state[i];
       }
@@ -2182,15 +2957,20 @@ GmatState EstimationStateManager::GetEstimationState()
 GmatState* EstimationStateManager::SetEstimationState(GmatState& inputState)
 {
    const std::vector<ListItem*> *map = GetStateMap();
-
    for (UnsignedInt i = 0; i < map->size(); ++i)
    {
-      // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+      // Set Cr_Epsilon and Cd_Epsilon instead of Cr and Cd
       if (((*map)[i]->elementName == "Cr_Epsilon") ||
          ((*map)[i]->elementName == "Cd_Epsilon") ||
-         ((*map)[i]->elementName == "Bias"))
+         (GmatStringUtil::EndsWith((*map)[i]->elementName, ".TSF_Epsilon")) ||
+         ((*map)[i]->elementName == "Bias") ||
+         ((*map)[i]->elementName == "Area") ||
+         ((*map)[i]->elementName == "AreaCoefficient") ||
+         ((*map)[i]->elementName == "LitFraction") ||
+         ((*map)[i]->elementName == "DiffuseFraction") ||
+         ((*map)[i]->elementName == "SpecularFraction"))
       {
-         state[i] = inputState[i];
+         state[i] = inputState[i];                      // state contains epsilon variables only
       }
       else if (((*map)[i]->elementName == "CartesianState") ||
          ((*map)[i]->elementName == "KeplerianState") ||
@@ -2218,6 +2998,256 @@ GmatState* EstimationStateManager::SetEstimationState(GmatState& inputState)
 
 
 //-------------------------------------------------------------------------
+// GmatState* SetEstimationStateObjects(const GmatState& inputState)
+//-------------------------------------------------------------------------
+/**
+* This is used to directly set the estimation state objects in their base coordinate system.
+* The epoch in the input state will be used to set the epoch of the objects
+*
+* @param inputState The state to set to the objects
+*
+* @return The estimation state vector
+*
+*/
+//-------------------------------------------------------------------------
+GmatState* EstimationStateManager::SetEstimationStateObjects(const GmatState& inputState)
+{
+
+   for (Integer index = 0; index < stateSize; ++index)
+   {
+      Integer stateParameterID = stateMap[index]->parameterID;
+
+      // Get non-epsilon parameter ID if needed
+      std::string stateParameterName = (stateMap[index]->object)->GetParameterText(stateParameterID);
+      stateParameterName = (stateMap[index]->object)->GetParameterNameFromEstimationParameter(stateParameterName);
+      stateParameterID = (stateMap[index]->object)->GetParameterID(stateParameterName);
+
+      #ifdef DEBUG_OBJECT_UPDATES
+         std::stringstream msg("");
+         msg << stateMap[index]->subelement;
+         std::string lbl = stateMap[index]->objectFullName + "." + 
+            stateMap[index]->elementName + "." + msg.str() + " = ";
+         MessageInterface::ShowMessage("   %d: %s%.12lf  for object <%s, %p>   parameterID = %d\n", index, lbl.c_str(),
+            state[index], stateMap[index]->object->GetFullName().c_str(), stateMap[index]->object, stateParameterID);
+      #endif
+
+      switch (stateMap[index]->parameterType)
+      {
+         case Gmat::REAL_TYPE:
+            (stateMap[index]->object)->SetRealParameter(
+                   stateParameterID, inputState[index]);
+            break;
+
+         case Gmat::RVECTOR_TYPE:
+            stateMap[index]->object->SetRealParameter(
+                     stateParameterID, inputState[index],
+                     stateMap[index]->rowIndex);
+            break;
+
+         case Gmat::RMATRIX_TYPE:
+            stateMap[index]->object->SetRealParameter(
+                     stateParameterID, inputState[index],
+                     stateMap[index]->rowIndex, stateMap[index]->colIndex);
+            break;
+
+         default:
+            std::stringstream sel("");
+            sel << stateMap[index]->subelement;
+            std::string label = stateMap[index]->objectName + "." +
+                  stateMap[index]->elementName + "." + sel.str();
+            MessageInterface::ShowMessage(
+                  "%s not set; Element type not handled\n",label.c_str());
+      }
+
+   }
+
+   GmatEpoch theEpoch = inputState.GetEpoch();
+   GmatTime theEpochGT = inputState.GetEpochGT();
+   for (UnsignedInt i = 0; i < objects.size(); ++i)
+   {
+      if (epochIDs[i] >= 0)
+      {
+         objects[i]->SetRealParameter(epochIDs[i], theEpoch);
+         if (inputState.HasPrecisionTime())
+            objects[i]->SetGmatTimeParameter(epochIDs[i], theEpochGT);
+         else
+            objects[i]->SetGmatTimeParameter(epochIDs[i], GmatTime(theEpoch));
+      }
+   }
+
+   // Update the state vector from the objects that were just set
+   MapObjectsToVector();
+
+   return &state;
+}
+
+
+//-------------------------------------------------------------------------
+// GmatState* SetEstimationCartesianStateParticipant(GmatState& inputState)
+//-------------------------------------------------------------------------
+/**
+* This is used to directly set the estimation state objects in the Cartesian
+* coordinate system specified by solve-for variable. The epoch in the
+* input state will be used to set the epoch of the objects
+*
+* @param inputState The state to set to the objects
+*
+* @return The estimation state vector
+*
+*/
+//-------------------------------------------------------------------------
+GmatState* EstimationStateManager::SetEstimationCartesianStateParticipant(const GmatState& inputState)
+{
+   GmatState objectState = inputState;
+
+   for (Integer i = 0; i < stateSize; ++i)
+   {
+      if ((stateMap[i]->elementName == "CartesianState") ||
+         (stateMap[i]->elementName == "KeplerianState") ||
+         (stateMap[i]->elementName == "Position"))
+      {
+         if (stateMap[i]->subelement == 1)
+         {
+            Rvector6 inState(inputState[i], inputState[i + 1], inputState[i + 2], inputState[i + 3], inputState[i + 4], inputState[i + 5]);
+            Rvector6 outState = inState;
+            GmatTime epoch = inputState.GetEpochGT();
+
+            Spacecraft* obj = (Spacecraft*)stateMap[i]->object;
+
+            std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+            CoordinateSystem* cs = (CoordinateSystem*)obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+            CoordinateSystem* internalcs = obj->GetInternalCoordSystem();
+
+            if (cs == NULL)
+               throw EstimatorException("Coordinate system for " + obj->GetName() + " is not set\n");
+            if (internalcs == NULL)
+               throw EstimatorException("Internal coordinate system for " + obj->GetName() + " is not set\n");
+
+            CoordinateConverter* cv = new CoordinateConverter();
+            Rvector6 outStateCart;
+            cv->Convert(epoch, inState, cs, outStateCart, internalcs);
+            delete cv;
+            cv = NULL;                                   // made changes by TUAN NGUYEN
+
+            outState = outStateCart;
+
+            for (Integer j = 0; j < 6; ++j)
+               objectState[i + j] = outState[j];
+
+            i = i + 5;
+         }
+      }
+   }
+
+   return SetEstimationStateObjects(objectState);
+}
+
+
+//-------------------------------------------------------------------------
+// GmatState& GetEstimationStateOffset()
+//-------------------------------------------------------------------------
+/**
+* This Method used to get estimation state offset in Cartesian or Keplerian
+* as specified by solve-for variable. Cr_Epsilon and Cd_Epsilon will be use
+* instead of Cr and Cd.
+*
+* @return     estimation state offset in participants' coordinate systems
+*              andstate type, Cr_Epsilon, Cd_Epsilon and bias
+*
+*/
+//-------------------------------------------------------------------------
+GmatState EstimationStateManager::GetEstimationStateOffset()
+{
+   GmatState outputStateOffset;
+   const std::vector<ListItem*> *map = GetStateMap();
+
+   Real outputStateOffsetElement;
+   outputStateOffset.SetSize(map->size());
+
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+      if (((*map)[i]->elementName == "Cr_Epsilon") ||
+         ((*map)[i]->elementName == "Cd_Epsilon") ||
+         (GmatStringUtil::EndsWith((*map)[i]->elementName, ".TSF_Epsilon")) ||
+         ((*map)[i]->elementName == "Bias") ||
+         ((*map)[i]->elementName == "Area") ||
+         ((*map)[i]->elementName == "AreaCoefficient") ||
+         ((*map)[i]->elementName == "LitFraction") ||
+         ((*map)[i]->elementName == "DiffuseFraction") ||
+         ((*map)[i]->elementName == "SpecularFraction"))
+      {
+         outputStateOffset[i] = stateOffset[i];
+      }
+      else if (((*map)[i]->elementName == "CartesianState") ||
+         ((*map)[i]->elementName == "KeplerianState") ||
+         ((*map)[i]->elementName == "Position"))
+      {
+         if ((*map)[i]->subelement == 1)
+         {
+            std::string stateType = "Cartesian";
+            if ((*map)[i]->elementName == "KeplerianState")
+               stateType = "Keplerian";
+
+            // get a solve-for state. Note that: solve-for state in normal equation has Keplerian anomaly element in form of "MA"
+            //Rvector outState = GetParticipantState((*map)[i]->object, stateType, "MA");
+            Rvector outStateOffset = GetParticipantMJ2000EqStateOffset((*map)[i]->object, stateType, "MA");
+            for (Integer j = 0; j < 6; ++j)
+               outputStateOffset[i + j] = outStateOffset[j];
+
+            i = i + 5;
+         }
+      }
+   }
+
+   return outputStateOffset;
+}
+
+
+GmatState* EstimationStateManager::SetEstimationStateOffset(GmatState& inputStateOffset)
+{
+   const std::vector<ListItem*> *map = GetStateMap();
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+      if (((*map)[i]->elementName == "Cr_Epsilon") ||
+         ((*map)[i]->elementName == "Cd_Epsilon") ||
+         (GmatStringUtil::EndsWith((*map)[i]->elementName, ".TSF_Epsilon")) ||
+         ((*map)[i]->elementName == "Bias") ||
+         ((*map)[i]->elementName == "Area") ||
+         ((*map)[i]->elementName == "AreaCoefficient") ||
+         ((*map)[i]->elementName == "LitFraction") ||
+         ((*map)[i]->elementName == "DiffuseFraction") ||
+         ((*map)[i]->elementName == "SpecularFraction"))
+      {
+         stateOffset[i] = inputStateOffset[i];
+      }
+      else if (((*map)[i]->elementName == "CartesianState") ||
+         ((*map)[i]->elementName == "KeplerianState") ||
+         ((*map)[i]->elementName == "Position"))
+      {
+         if ((*map)[i]->subelement == 1)
+         {
+            Rvector6 setVal;
+            for (Integer j = 0; j < 6; ++j)
+               setVal[j] = inputStateOffset[i + j];
+
+            std::string stateType = "Cartesian";
+            if ((*map)[i]->elementName == "KeplerianState")
+               stateType = "Keplerian";
+            //SetParticipantState((*map)[i]->object, setVal, stateType);
+            SetParticipantMJ2000EqStateOffset((*map)[i]->object, setVal, stateType);
+
+            i = i + 5;
+         }
+      }
+   }
+
+   return &stateOffset;
+}
+
+
+//-------------------------------------------------------------------------
 // GmatState& GetEstimationCartesianState()
 //-------------------------------------------------------------------------
 /**
@@ -2240,10 +3270,16 @@ GmatState EstimationStateManager::GetEstimationCartesianState()
 
    for (UnsignedInt i = 0; i < map->size(); ++i)
    {
-      // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+      // Get Cr_Epsilon and Cd_Epsilon instead of Cr and Cd
       if (((*map)[i]->elementName == "Cr_Epsilon") ||
          ((*map)[i]->elementName == "Cd_Epsilon") ||
-         ((*map)[i]->elementName == "Bias"))
+         (GmatStringUtil::EndsWith((*map)[i]->elementName, ".TSF_Epsilon")) ||
+         ((*map)[i]->elementName == "Bias") ||
+         ((*map)[i]->elementName == "Area") ||
+         ((*map)[i]->elementName == "AreaCoefficient") ||
+         ((*map)[i]->elementName == "LitFraction") ||
+         ((*map)[i]->elementName == "DiffuseFraction") ||
+         ((*map)[i]->elementName == "SpecularFraction"))
       {
          outputState[i] = state[i];
       }
@@ -2290,10 +3326,16 @@ GmatState EstimationStateManager::GetEstimationMJ2000EqCartesianState()
 
    for (UnsignedInt i = 0; i < map->size(); ++i)
    {
-      // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+      // Get Cr_Epsilon and Cd_Epsilon instead of Cr and Cd
       if (((*map)[i]->elementName == "Cr_Epsilon") ||
          ((*map)[i]->elementName == "Cd_Epsilon") ||
-         ((*map)[i]->elementName == "Bias"))
+         (GmatStringUtil::EndsWith((*map)[i]->elementName, ".TSF_Epsilon")) ||
+         ((*map)[i]->elementName == "Bias") ||
+         ((*map)[i]->elementName == "Area") ||
+         ((*map)[i]->elementName == "AreaCoefficient") ||
+         ((*map)[i]->elementName == "LitFraction") ||
+         ((*map)[i]->elementName == "DiffuseFraction") ||
+         ((*map)[i]->elementName == "SpecularFraction"))
       {
          outputState[i] = state[i];
       }
@@ -2338,24 +3380,159 @@ GmatState EstimationStateManager::GetEstimationCartesianStateForReport()
 
    for (UnsignedInt i = 0; i < map->size(); ++i)
    {
-      // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
-      if ((*map)[i]->elementName == "Cr_Epsilon")
-         outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("Cr");
-      else if ((*map)[i]->elementName == "Cd_Epsilon")
-         outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("Cd");
-      else if((*map)[i]->elementName == "Bias")
-         outputState[i] = state[i];
-      else if (((*map)[i]->elementName == "CartesianState") ||
-         ((*map)[i]->elementName == "KeplerianState") ||
-         ((*map)[i]->elementName == "Position"))
+      if ((*map)[i]->object->IsOfType("Plate"))
       {
-         if ((*map)[i]->subelement == 1)
+         if ((*map)[i]->elementName == "AreaCoefficient")
          {
-            Rvector outState = GetParticipantCartesianState((*map)[i]->object);
-            for (Integer j = 0; j < 6; ++j)
-               outputState[i + j] = outState[j];
+            outputState[i] = ((Plate*)(*map)[i]->object)->GetRealParameter("AreaCoefficient");
+         }
+         else if ((*map)[i]->elementName == "Area")
+         {
+            outputState[i] = ((Plate*)(*map)[i]->object)->GetRealParameter("Area");
+         }
+         else if ((*map)[i]->elementName == "LitFraction")
+         {
+            outputState[i] = ((Plate*)(*map)[i]->object)->GetRealParameter("LitFraction");
+         }
+         else if ((*map)[i]->elementName == "SpecularFraction")
+         {
+            outputState[i] = ((Plate*)(*map)[i]->object)->GetRealParameter("SpecularFraction");
+         }
+         else if ((*map)[i]->elementName == "DiffuseFraction")
+         {
+            outputState[i] = ((Plate*)(*map)[i]->object)->GetRealParameter("DiffuseFraction");
+         }
+      }
+      else
+      {
+         // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+         if ((*map)[i]->elementName == "Cr_Epsilon")
+         {
+            if (((Spacecraft*)(*map)[i]->object)->GetSRPShapeModel() == "Spherical")                         // made changes by TUAN NGUYEN
+               outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("Cr");
+            else if (((Spacecraft*)(*map)[i]->object)->GetSRPShapeModel() == "SPADFile")                     // made changes by TUAN NGUYEN
+               outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("SPADSRPScaleFactor");    // made changes by TUAN NGUYEN
+         }
+         else if ((*map)[i]->elementName == "Cd_Epsilon")
+         {
+            if (((Spacecraft*)(*map)[i]->object)->GetDragShapeModel() == "Spherical")                        // made changes by TUAN NGUYEN
+               outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("Cd");
+            else if (((Spacecraft*)(*map)[i]->object)->GetDragShapeModel() == "SPADFile")                    // made changes by TUAN NGUYEN
+               outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("SPADDragScaleFactor");   // made changes by TUAN NGUYEN
+         }
+         else if (GmatStringUtil::EndsWith((*map)[i]->elementName, ".TSF_Epsilon")) {    // <segmentName>.TSF_Epsilon
+            StringArray parts = GmatStringUtil::SeparateBy((*map)[i]->elementName, ".");
+            std::string tsfName = parts.at(0) + ".ThrustScaleFactor";
+            outputState[i] = (*map)[i]->object->GetRealParameter(tsfName);
+         }
+         else if ((*map)[i]->elementName == "Bias")
+            outputState[i] = state[i];
+         else if (((*map)[i]->elementName == "CartesianState") ||
+            ((*map)[i]->elementName == "KeplerianState") ||
+            ((*map)[i]->elementName == "Position"))
+         {
+            if ((*map)[i]->subelement == 1)
+            {
+               Rvector outState = GetParticipantCartesianState((*map)[i]->object);
+               for (Integer j = 0; j < 6; ++j)
+                  outputState[i + j] = outState[j];
 
-            i = i + 5;
+               i = i + 5;
+            }
+         }
+      }
+   }
+
+   return outputState;
+}
+
+
+//-------------------------------------------------------------------------
+// GmatState& GetEstimationKeplerianStateForReport(std::string anomalyType)
+//-------------------------------------------------------------------------
+/**
+* This Method used to convert result of estimation state to participants'
+* coordinate system and state type. For report, it reports Cr and Cd.
+*
+* @param anomalyType    form of anomaly is used. It would be "TA" or "MA".
+*                       Default value is "TA".
+*
+* @return     estimation state in participants' coordinate systems and
+*             state type, Cr, Cd, and bias
+*
+*/
+//-------------------------------------------------------------------------
+GmatState EstimationStateManager::GetEstimationKeplerianStateForReport(std::string anomalyType)
+{
+   GmatState outputState;
+   const std::vector<ListItem*> *map = GetStateMap();
+
+   Real outputStateElement;
+   outputState.SetSize(map->size());
+
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      if ((*map)[i]->object->IsOfType("Plate"))
+      {
+         if ((*map)[i]->elementName == "AreaCoefficient")
+         {
+            outputState[i] = ((Plate*)(*map)[i]->object)->GetRealParameter("AreaCoefficient");
+         }
+         else if ((*map)[i]->elementName == "Area")
+         {
+            outputState[i] = ((Plate*)(*map)[i]->object)->GetRealParameter("Area");
+         }
+         else if ((*map)[i]->elementName == "LitFraction")
+         {
+            outputState[i] = ((Plate*)(*map)[i]->object)->GetRealParameter("LitFraction");
+         }
+         else if ((*map)[i]->elementName == "SpecularFraction")
+         {
+            outputState[i] = ((Plate*)(*map)[i]->object)->GetRealParameter("SpecularFraction");
+         }
+         else if ((*map)[i]->elementName == "DiffuseFraction")
+         {
+            outputState[i] = ((Plate*)(*map)[i]->object)->GetRealParameter("DiffuseFraction");
+         }
+      }
+      else
+      {
+         // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+         if ((*map)[i]->elementName == "Cr_Epsilon")
+         {
+            if (((Spacecraft*)(*map)[i]->object)->GetSRPShapeModel() == "Spherical")                         // made changes by TUAN NGUYEN
+               outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("Cr");
+            else if (((Spacecraft*)(*map)[i]->object)->GetSRPShapeModel() == "SPADFile")                     // made changes by TUAN NGUYEN
+               outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("SPADSRPScaleFactor");    // made changes by TUAN NGUYEN
+
+         }
+         else if ((*map)[i]->elementName == "Cd_Epsilon")
+         {
+            if (((Spacecraft*)(*map)[i]->object)->GetDragShapeModel() == "Spherical")                        // made changes by TUAN NGUYEN
+               outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("Cd");
+            else if (((Spacecraft*)(*map)[i]->object)->GetDragShapeModel() == "SPADFile")                    // made changes by TUAN NGUYEN
+               outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("SPADDragScaleFactor");   // made changes by TUAN NGUYEN
+
+         }
+         else if (GmatStringUtil::EndsWith((*map)[i]->elementName, ".TSF_Epsilon")) {    // <segmentName>.TSF_Epsilon
+            StringArray parts = GmatStringUtil::SeparateBy((*map)[i]->elementName, ".");
+            std::string tsfName = parts.at(0) + ".ThrustScaleFactor";
+            outputState[i] = (*map)[i]->object->GetRealParameter(tsfName);
+         }
+         else if ((*map)[i]->elementName == "Bias")
+            outputState[i] = state[i];
+         else if (((*map)[i]->elementName == "CartesianState") ||
+            ((*map)[i]->elementName == "KeplerianState") ||
+            ((*map)[i]->elementName == "Position"))
+         {
+            if ((*map)[i]->subelement == 1)
+            {
+               Rvector6 outState = GetParticipantState((*map)[i]->object, "Keplerian", anomalyType);
+               for (Integer j = 0; j < 6; ++j)
+                  outputState[i + j] = outState[j];
+
+               i = i + 5;
+            }
          }
       }
    }
@@ -2390,28 +3567,69 @@ GmatState EstimationStateManager::GetEstimationStateForReport(std::string anomal
 
    for (UnsignedInt i = 0; i < map->size(); ++i)
    {
-      // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
-      if ((*map)[i]->elementName == "Cr_Epsilon")
-         outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("Cr");
-      else if ((*map)[i]->elementName == "Cd_Epsilon")
-         outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("Cd");
-      else if (((*map)[i]->elementName == "CartesianState") ||
-         ((*map)[i]->elementName == "KeplerianState") ||
-         ((*map)[i]->elementName == "Position"))
+      if ((*map)[i]->object->IsOfType("Plate"))
       {
-         if ((*map)[i]->subelement == 1)
+         if ((*map)[i]->elementName == "AreaCoefficient")
          {
-            // In estimation report file or GmatLog.txt anomaly is always in "TA" form
-            Rvector outState = GetParticipantState((*map)[i]->object, "", anomalyType);     // inStateType = "" that means get participant state in its own DisplayStateType
-            for (Integer j = 0; j < 6; ++j)
-               outputState[i + j] = outState[j];
-
-            i = i + 5;
+            outputState[i] = ((Plate*)(*map)[i]->object)->GetRealParameter("AreaCoefficient");
+         }
+         else if ((*map)[i]->elementName == "Area")
+         {
+            outputState[i] = ((Plate*)(*map)[i]->object)->GetRealParameter("Area");
+         }
+         else if ((*map)[i]->elementName == "LitFraction")
+         {
+            outputState[i] = ((Plate*)(*map)[i]->object)->GetRealParameter("LitFraction");
+         }
+         else if ((*map)[i]->elementName == "SpecularFraction")
+         {
+            outputState[i] = ((Plate*)(*map)[i]->object)->GetRealParameter("SpecularFraction");
+         }
+         else if ((*map)[i]->elementName == "DiffuseFraction")
+         {
+            outputState[i] = ((Plate*)(*map)[i]->object)->GetRealParameter("DiffuseFraction");
          }
       }
-      else if ((*map)[i]->elementName == "Bias")
+      else
       {
-         outputState[i] = state[i];
+         // Get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+         if ((*map)[i]->elementName == "Cr_Epsilon")
+         {
+            if (((Spacecraft*)(*map)[i]->object)->GetSRPShapeModel() == "Spherical")                         // made changes by TUAN NGUYEN
+               outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("Cr");
+            else if (((Spacecraft*)(*map)[i]->object)->GetSRPShapeModel() == "SPADFile")                     // made changes by TUAN NGUYEN
+               outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("SPADSRPScaleFactor");    // made changes by TUAN NGUYEN
+         }
+         else if ((*map)[i]->elementName == "Cd_Epsilon")
+         {
+            if (((Spacecraft*)(*map)[i]->object)->GetDragShapeModel() == "Spherical")                        // made changes by TUAN NGUYEN
+               outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("Cd");
+            else if (((Spacecraft*)(*map)[i]->object)->GetDragShapeModel() == "SPADFile")                    // made changes by TUAN NGUYEN
+               outputState[i] = ((Spacecraft*)(*map)[i]->object)->GetRealParameter("SPADDragScaleFactor");   // made changes by TUAN NGUYEN
+         }
+         else if (GmatStringUtil::EndsWith((*map)[i]->elementName, ".TSF_Epsilon")) {    // <segmentName>.TSF_Epsilon
+            StringArray parts = GmatStringUtil::SeparateBy((*map)[i]->elementName, ".");
+            std::string tsfName = parts.at(0) + ".ThrustScaleFactor";
+            outputState[i] = ((ODEModel*)(*map)[i]->object)->GetRealParameter(tsfName);
+         }
+         else if (((*map)[i]->elementName == "CartesianState") ||
+            ((*map)[i]->elementName == "KeplerianState") ||
+            ((*map)[i]->elementName == "Position"))
+         {
+            if ((*map)[i]->subelement == 1)
+            {
+               // In estimation report file or GmatLog.txt anomaly is always in "TA" form
+               Rvector outState = GetParticipantState((*map)[i]->object, "", anomalyType);     // inStateType = "" that means get participant state in its own DisplayStateType
+               for (Integer j = 0; j < 6; ++j)
+                  outputState[i + j] = outState[j];
+
+               i = i + 5;
+            }
+         }
+         else if ((*map)[i]->elementName == "Bias")
+         {
+            outputState[i] = state[i];
+         }
       }
    }
 
@@ -2661,6 +3879,176 @@ Rmatrix EstimationStateManager::SolveForStateToKeplConversionDerivativeMatrix()
    }
 
    return conversion;
+}
+
+
+// made changes by TUAN NGUYEN
+std::map<Integer,Integer> EstimationStateManager::GetEqualConstrainsList()
+{
+   // Get full names of all constrains
+   std::vector<StringArray> constrainsList;
+   ObjectArray sats;
+   GetStateObjects(sats, Gmat::SPACECRAFT);
+   for (Integer i = 0; i < sats.size(); ++i)
+   {
+      std::vector<StringArray> constrains = ((Spacecraft*)sats[i])->GetEqualConstrains();
+      for (Integer j = 0; j < constrains.size(); ++j)
+      {
+         StringArray names = constrains[j];
+         for (Integer k = 0; k < names.size(); ++k)
+            names[k] = sats[i]->GetName() + "." + names[k];            // example: "estSat" + ". " + "P1.AreaCoefficient"
+         constrainsList.push_back(names);
+      }
+   }
+
+   //MessageInterface::ShowMessage("List of constraints:\n");
+   //for (Integer i = 0; i < constrainsList.size(); ++i)
+   //{
+   //   MessageInterface::ShowMessage("%d: ", i);
+   //   for (Integer j = 0; j < constrainsList[i].size(); ++j)
+   //      MessageInterface::ShowMessage("<%s>  ", constrainsList[i].at(j).c_str());
+   //   MessageInterface::ShowMessage("\n");
+   //}
+
+   // Get full names of solvefor variables
+   StringArray fullNameList;
+   for (Integer i = 0; i < stateSize; ++i)
+   {
+      std::stringstream ss;
+      std::string elementName = stateMap[i]->elementName;
+      if ((elementName == "CartesianState") || (elementName == "KeplerianState"))
+      {
+         // element name has to be the name of spacecraft's coordinate system following by state element name
+         // Get spacecraft's coordinate system name
+         ss << ((Spacecraft*)(stateMap[i]->object))->GetRefObject(Gmat::COORDINATE_SYSTEM, "")->GetName() << ".";
+
+         if (elementName == "KeplerianState")
+         {
+            switch (stateMap[i]->subelement)
+            {
+            case 1:
+               ss << "SMA";
+               break;
+            case 2:
+               ss << "ECC";
+               break;
+            case 3:
+               ss << "INC";
+               break;
+            case 4:
+               ss << "RAAN";
+               break;
+            case 5:
+               ss << "AOP";
+               break;
+            case 6:
+               ss << "TA";
+               //ss << anomalyType;
+               break;
+            }
+         }
+         else
+         {
+            switch (stateMap[i]->subelement)
+            {
+            case 1:
+               ss << "X";
+               break;
+            case 2:
+               ss << "Y";
+               break;
+            case 3:
+               ss << "Z";
+               break;
+            case 4:
+               ss << "VX";
+               break;
+            case 5:
+               ss << "VY";
+               break;
+            case 6:
+               ss << "VZ";
+               break;
+            }
+         }
+
+         elementName = ss.str();
+      }
+
+      std::string fullName = stateMap[i]->object->GetFullName() + "." + elementName;
+      ////MessageInterface::ShowMessage("------>   %d: <%s>\n", i, fullName.c_str());
+      fullNameList.push_back(fullName);
+   }
+
+   //MessageInterface::ShowMessage("Full name list:\n");
+   //for (Integer i = 0; i < fullNameList.size(); ++i)
+   //{
+   //   MessageInterface::ShowMessage("%d: <%s>\n", i, fullNameList[i].c_str());
+   //}
+
+
+
+   // Create information matrix's indexes associated to the constrains
+   Integer index = 0;
+   std::map<Integer,Integer> indexMap;
+   for (Integer i = 0; i < fullNameList.size(); ++i)
+   {
+      // Check fullNameList[i] to be in constrainsList
+      std::string name = fullNameList[i];
+      Integer constrRow = -1;
+      Integer constrCol = -1;
+      for (Integer j = 0; j < constrainsList.size(); ++j)
+      {
+         for (Integer k = 0; k < constrainsList[j].size(); ++k)
+         {
+            if (name == constrainsList[j][k])
+            {
+               constrRow = j;
+               constrCol = k;
+               break;
+            }
+         }
+         if (constrRow >= 0)
+            break;
+      }
+
+
+      // if it is in constrainsList
+      if (constrRow >= 0)
+      {
+         // Check it is the first element in the constrain or not
+         Integer theFirst = -1;
+         for (Integer j = 0; j < constrainsList[constrRow].size(); ++j)
+         {
+            std::string eleName = constrainsList[constrRow][j];
+            for (Integer k = 0; k < i; ++k)
+            {
+               if (eleName == fullNameList[indexMap[k]])
+               {
+                  theFirst = indexMap[k];
+                  break;
+               }
+            }
+            if (theFirst >= 0)
+               break;
+         }
+
+         if (theFirst >= 0)
+            indexMap[i] = theFirst;
+         else
+         {
+            indexMap[i] = index;
+            ++index;
+         }
+      }
+      else
+      {
+         indexMap[i] = index;
+         ++index;
+      }
+   }
+
+   return indexMap;
 }
 
 

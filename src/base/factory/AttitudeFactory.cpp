@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -41,7 +41,7 @@
 #ifdef __USE_SPICE__
    #include "SpiceAttitude.hpp"
 #endif
-//#include "ThreeAxis.hpp"
+#include "ThreeAxisKinematic.hpp"
 
 
 //---------------------------------
@@ -93,8 +93,8 @@ Attitude* AttitudeFactory::CreateAttitude(const std::string &ofType,
       return new NadirPointing(withName);
    else if (ofType == "CCSDS-AEM")
       return new CCSDSAttitude(withName);
-//   //else if (ofType == "ThreeAxis")   // TBD
-//   //   return new ThreeAxis(withName);
+   else if (ofType == "ThreeAxisKinematic")
+      return new ThreeAxisKinematic(withName);
    #ifdef __USE_SPICE__
       else if (ofType == "SpiceAttitude")
          return new SpiceAttitude();
@@ -131,7 +131,8 @@ Factory(Gmat::ATTITUDE)
          creatables.push_back("SpiceAttitude");
       #endif
 
-      //creatables.push_back("ThreeAxis");
+      creatables.push_back("ThreeAxisKinematic");
+      
       // others TBD
    }
    GmatType::RegisterType(Gmat::ATTITUDE, "Attitude");
@@ -162,7 +163,7 @@ Factory(createList,Gmat::ATTITUDE)
       #ifdef __USE_SPICE__
          creatables.push_back("SpiceAttitude");
       #endif
-      //creatables.push_back("ThreeAxis");
+      creatables.push_back("ThreeAxisKinematic");
       // others TBD
    }
 }
@@ -191,7 +192,7 @@ Factory(fact)
       #ifdef __USE_SPICE__
          creatables.push_back("SpiceAttitude");
       #endif
-      //creatables.push_back("ThreeAxis");
+      creatables.push_back("ThreeAxisKinematic");
       // others TBD
    }
 }
@@ -223,7 +224,7 @@ AttitudeFactory& AttitudeFactory::operator= (const AttitudeFactory& fact)
       #ifdef __USE_SPICE__
          creatables.push_back("SpiceAttitude");
       #endif
-      //creatables.push_back("ThreeAxis");
+      creatables.push_back("ThreeAxisKinematic");
       // others TBD
    }
    return *this;

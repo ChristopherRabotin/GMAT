@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -109,7 +109,10 @@ LinearInterpolator& LinearInterpolator::operator=(const LinearInterpolator &li)
 bool LinearInterpolator::Interpolate(const Real ind, Real *results)
 {
     if (pointCount < requiredPoints)
-        return false;
+       throw InterpolatorException("ERROR - LinearInterpolator: " +
+          GmatStringUtil::ToString(requiredPoints, 1) + " points "
+          "are required for interpolation, but only " +
+          GmatStringUtil::ToString(pointCount, 1) + " were provided.\n");
         
     Integer index         = latestPoint;
     Integer previousPoint = latestPoint-1;

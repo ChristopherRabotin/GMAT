@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,8 +35,8 @@
 #include "DateUtil.hpp"
 #include "GmatBase.hpp"
 #include "MessageInterface.hpp"
-#include "StatisticAcceptFilter.hpp"             //@todo: StatisticsAcceptFilter is deprecated and will be removed in a future GMAT build
-#include "StatisticRejectFilter.hpp"             //@todo: StatisticsRejectFilter is deprecated and will be removed in a future GMAT build
+//#include "StatisticAcceptFilter.hpp"             //@todo: StatisticsAcceptFilter is deprecated and will be removed in a future GMAT build
+//#include "StatisticRejectFilter.hpp"             //@todo: StatisticsRejectFilter is deprecated and will be removed in a future GMAT build
 #include "AcceptFilter.hpp"
 #include "RejectFilter.hpp"
 #include <sstream>
@@ -129,8 +129,16 @@ DataFile::DataFile(const std::string name) :
 //------------------------------------------------------------------------------
 DataFile::~DataFile()
 {
-   if (theDatastream)
-      delete theDatastream;
+   // The delete of theDatastream objects are handled by delete createdObjects
+   //if (theDatastream)                                         // made changes by TUAN NGUYEN
+   //   delete theDatastream;                                   // made changes by TUAN NGUYEN
+
+   // clean up std::vector<DataFilter*>  filterList;
+   // The delete of DataFilter objects are handled by delete createdObjects
+   // filterList.clear();
+
+   selectedStationIDs.clear();
+
 }
 
 
@@ -147,7 +155,7 @@ DataFile::DataFile(const DataFile& df) :
    GmatBase          (df),
    streamName        (df.streamName),
    obsType           (df.obsType),
-   filterList        (df.filterList),
+   //filterList        (df.filterList),                     // made changes by TUAN NGUYEN
    thinningRatio     (df.thinningRatio),
    selectedStationIDs(df.selectedStationIDs),
    estimationStart   (df.estimationStart),
@@ -159,13 +167,26 @@ DataFile::DataFile(const DataFile& df) :
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DataFile copy constructor from <%s,%p>  to  <%s,%p>\n", df.GetName().c_str(), &df, GetName().c_str(), this);
 #endif
-
+   GmatBase* clonedObj = NULL;                                      // made changes by TUAN NGUYEN
    if (df.theDatastream != NULL)
    {
-      theDatastream = (ObType*)df.theDatastream->Clone();
+      clonedObj = df.theDatastream->Clone();                        // made changes by TUAN NGUYEN
+      theDatastream = (ObType*)clonedObj;                           // made changes by TUAN NGUYEN
+      createdObjects.push_back(clonedObj);                          // made changes by TUAN NGUYEN
    }
    else
       theDatastream = NULL;
+
+   filterList.clear();                                               // made changes by TUAN NGUYEN
+   for (Integer i = 0; i < df.filterList.size(); ++i)                // made changes by TUAN NGUYEN
+   {                                                                 // made changes by TUAN NGUYEN
+      if (df.filterList[i])                                          // made changes by TUAN NGUYEN
+      {                                                              // made changes by TUAN NGUYEN
+         clonedObj = df.filterList[i]->Clone();            // made changes by TUAN NGUYEN
+         filterList.push_back((DataFilter*)clonedObj);               // made changes by TUAN NGUYEN
+         createdObjects.push_back(clonedObj);                        // made changes by TUAN NGUYEN
+      }                                                              // made changes by TUAN NGUYEN
+   }                                                                 // made changes by TUAN NGUYEN
 }
 
 
@@ -195,7 +216,17 @@ DataFile& DataFile::operator=(const DataFile& df)
       obsType    = df.obsType;
 
       // This section is for new design filter 
-      filterList = df.filterList;
+      //filterList = df.filterList;                                     // made changes by TUAN NGUYEN
+      filterList.clear();                                               // made changes by TUAN NGUYEN
+      for (Integer i = 0; i < df.filterList.size(); ++i)                // made changes by TUAN NGUYEN
+      {                                                                 // made changes by TUAN NGUYEN
+         if (df.filterList[i])                                          // made changes by TUAN NGUYEN
+         {                                                              // made changes by TUAN NGUYEN
+            GmatBase* clonedObj = df.filterList[i]->Clone();            // made changes by TUAN NGUYEN
+            filterList.push_back((DataFilter*)clonedObj);               // made changes by TUAN NGUYEN
+            createdObjects.push_back(clonedObj);                        // made changes by TUAN NGUYEN
+         }                                                              // made changes by TUAN NGUYEN
+      }                                                                 // made changes by TUAN NGUYEN
 
 	   // This section is for old design filter
       thinningRatio			= df.thinningRatio;
@@ -207,7 +238,11 @@ DataFile& DataFile::operator=(const DataFile& df)
 	   endEpoch             = df.endEpoch;
 
       if (df.theDatastream)
-         theDatastream = (ObType*)df.theDatastream->Clone();
+      {
+         GmatBase* clonedObj = df.theDatastream->Clone();       // made changes by TUAN NGUYEN
+         theDatastream = (ObType*)clonedObj;                    // made changes by TUAN NGUYEN
+         createdObjects.push_back(clonedObj);                   // made changes by TUAN NGUYEN
+      }
       else
          theDatastream = NULL;
 
@@ -881,14 +916,13 @@ ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject
    {
       for (UnsignedInt i = 0; i < filterList.size(); ++i)
       {
-         if (filterList[i]->IsOfType("StatisticsRejectFilter")||               //@todo: StatisticsRejectFilter is deprecated and will be removed in a furure GMAT build.
-             filterList[i]->IsOfType("RejectFilter"))
+         if (filterList[i]->IsOfType("RejectFilter"))
          {
             rejReason = 0;
-            if (filterList[i]->IsOfType("RejectFilter"))
+            //if (filterList[i]->IsOfType("RejectFilter"))
                obdata = ((RejectFilter*)filterList[i])->FilteringData(dataObject, rejReason);
-            else
-               obdata = ((StatisticRejectFilter*)filterList[i])->FilteringData(dataObject, rejReason);
+            //else
+            //   obdata = ((StatisticRejectFilter*)filterList[i])->FilteringData(dataObject, rejReason);
             
             // it is rejected when it has been rejected by any reject filter
             if (obdata == NULL)
@@ -908,15 +942,14 @@ ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject
       bool hasAcceptFilter = false;
       for (UnsignedInt i = 0; i < filterList.size(); ++i)
       {
-         if (filterList[i]->IsOfType("StatisticsAcceptFilter") ||               //@todo: StatisticsAcceptFilter is deprecated and will be removed in the future GMAT build.
-             filterList[i]->IsOfType("AcceptFilter"))
+         if (filterList[i]->IsOfType("AcceptFilter"))
          {
             hasAcceptFilter = true;
             rejReason = 0;
-            if (filterList[i]->IsOfType("AcceptFilter"))
+            //if (filterList[i]->IsOfType("AcceptFilter"))
                od = ((AcceptFilter*)filterList[i])->FilteringData(dataObject, rejReason);
-            else
-               od = ((StatisticAcceptFilter*)filterList[i])->FilteringData(dataObject, rejReason);
+            //else
+            //   od = ((StatisticAcceptFilter*)filterList[i])->FilteringData(dataObject, rejReason);
 
             // it is accepted when it has been accepted by any accept filter
             if (od)
@@ -958,8 +991,8 @@ ObservationData* DataFile::FilteringDataForOldSyntax(ObservationData* dataObject
       // Get start epoch and end epoch when od != NULL
       if (epoch1 == 0.0)
       {
-         epoch1 = TimeConverterUtil::Convert(estimationStart, TimeConverterUtil::A1MJD, od->epochSystem);
-         epoch2 = TimeConverterUtil::Convert(estimationEnd, TimeConverterUtil::A1MJD, od->epochSystem);
+         epoch1 = TimeSystemConverter::Instance()->Convert(estimationStart, TimeSystemConverter::A1MJD, od->epochSystem);
+         epoch2 = TimeSystemConverter::Instance()->Convert(estimationEnd, TimeSystemConverter::A1MJD, od->epochSystem);
       }
       
       // Data thinning filter
@@ -998,11 +1031,11 @@ ObservationData* DataFile::FilteringDataForOldSyntax(ObservationData* dataObject
       // Duplication or time order filter
       if (od_old.epochGT >= (od->epochGT + TIME_EPSILON))
       {
-         //#ifdef DEBUG_FILTER
+         #ifdef DEBUG_FILTER
             MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %s   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to duplication or time order\n", obsType.c_str(), od->epochGT.ToString().c_str(), od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
             MessageInterface::ShowMessage("  old epoch = %s\n", od_old.epochGT.ToString().c_str());
 
-         //#endif
+         #endif
          rejectedReason = 4;           // filter due to duplication or time order filter
       }
       
@@ -1236,7 +1269,7 @@ Real DataFile::ConvertToRealEpoch(const std::string &theEpoch,
    Real retval = -999.999;
    std::string outStr;
 
-   TimeConverterUtil::Convert(theFormat, fromMjd, theEpoch, "A1ModJulian",
+   TimeSystemConverter::Instance()->Convert(theFormat, fromMjd, theEpoch, "A1ModJulian",
          retval, outStr);
 
    if (retval == -999.999)

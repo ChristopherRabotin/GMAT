@@ -1,0 +1,293 @@
+
+Create Spacecraft SimSat;
+
+SimSat.DateFormat       = UTCGregorian;
+SimSat.Epoch            = '01 Mar 2005 00:00:00.000';
+SimSat.CoordinateSystem = EarthMJ2000Eq;
+SimSat.DisplayStateType = Cartesian;
+SimSat.X                = 8000.0;
+SimSat.Y                = 0.0;
+SimSat.Z                = 0.0;
+SimSat.VX               = 0.0;
+SimSat.VY               = 8.7;
+SimSat.VZ               = 4.2;
+SimSat.DryMass          = 850;
+SimSat.Cd               = 2.2;
+SimSat.Cr               = 1.8;
+SimSat.DragArea         = 15;
+SimSat.SRPArea          = 1;
+SimSat.Id               = 'LEOSat';
+SimSat.AddHardware      = {Transponder1, Antenna2};
+SimSat.Tanks            = {ChemicalTank1};
+
+Create Spacecraft SimSatCopy;
+SimSatCopy = SimSat
+
+Create Spacecraft EstSat;
+
+EstSat.DateFormat       = UTCGregorian;
+EstSat.Epoch            = '01 Mar 2005 00:00:00.000';
+EstSat.CoordinateSystem = EarthMJ2000Eq;
+EstSat.DisplayStateType = Cartesian;
+EstSat.X                = 8000.0;
+EstSat.Y                = 0.0;
+EstSat.Z                = 0.0;
+EstSat.VX               = 0.0;
+EstSat.VY               = 8.7;
+EstSat.VZ               = 4.2;
+EstSat.DryMass          = 850;
+EstSat.Cd               = 42.2;
+EstSat.Cr               = 1.8;
+EstSat.DragArea         = 15;
+EstSat.SRPArea          = 1;
+EstSat.Id               = 'LEOSat';
+EstSat.AddHardware      = {Transponder1, Antenna2};
+EstSat.Tanks            = {ChemicalTank1};
+EstSat.SolveFors        = {CartesianState};     
+
+Create ChemicalTank ChemicalTank1
+
+ChemicalTank1.FuelMass = 500;
+
+%
+%   Communications Hardware
+%
+
+Create Antenna Antenna1 Antenna2;
+Create Transmitter Transmitter1;
+Create Receiver Receiver1;
+
+Receiver1.PrimaryAntenna    = Antenna1;
+Transmitter1.PrimaryAntenna = Antenna1;
+Transmitter1.Frequency      = 2067.5; % MHz
+
+Create Transponder Transponder1;
+
+Transponder1.PrimaryAntenna  = Antenna2;
+Transponder1.HardwareDelay   = 0.0;
+Transponder1.TurnAroundRatio = '240/221' 
+
+%
+%   Ground stations
+%
+
+Create GroundStation GDS;
+
+GDS.CentralBody           = Earth;
+GDS.StateType             = Cartesian;
+GDS.HorizonReference      = Ellipsoid;
+GDS.Location1             = -2353621.251e-3;
+GDS.Location2             = -4641341.542e-3;
+GDS.Location3             = 3677052.370e-3;
+GDS.Id                    = 'GDS';
+GDS.AddHardware           = {Transmitter1, Receiver1, Antenna1};
+GDS.MinimumElevationAngle = 10;
+GDS.ErrorModels           = {Range_ErrorModel};
+
+Create GroundStation CAN;
+
+CAN.CentralBody           = Earth;
+CAN.StateType             = Cartesian;
+CAN.HorizonReference      = Ellipsoid;
+CAN.Location1             = -4461083.514e-3;
+CAN.Location2             = 2682281.745e-3;
+CAN.Location3             = -3674570.392e-3;
+CAN.Id                    = 'CAN';
+CAN.AddHardware           = {Transmitter1, Receiver1, Antenna1};
+CAN.MinimumElevationAngle = 0;
+CAN.ErrorModels           = {Range_ErrorModel};
+
+Create GroundStation MAD;
+
+MAD.CentralBody           = Earth;
+MAD.StateType             = Cartesian;
+MAD.HorizonReference      = Ellipsoid;
+MAD.Location1             = 4849519.988e-3;
+MAD.Location2             = -0360641.653e-3;
+MAD.Location3             = 4114504.590e-3;
+MAD.Id                    = 'MAD';
+MAD.AddHardware           = {Transmitter1, Receiver1, Antenna1};
+MAD.MinimumElevationAngle = 0;
+MAD.ErrorModels           = {Range_ErrorModel};
+
+%
+%   Error models
+%
+
+Create ErrorModel Range_ErrorModel;
+
+Range_ErrorModel.Type         = Range;
+Range_ErrorModel.NoiseSigma   = 0.01;  %10  meters
+Range_ErrorModel.Bias         = 0.0;
+Range_ErrorModel.SolveFors    = {};
+
+%
+%   Tracking file sets
+%
+
+Create TrackingFileSet simData;
+
+simData.AddTrackingConfig       = {{GDS, SimSat, GDS}, 'Range'};
+simData.AddTrackingConfig       = {{CAN, SimSat, CAN}, 'Range'};
+simData.AddTrackingConfig       = {{MAD, SimSat, MAD}, 'Range'};
+simData.FileName                = {BatchEstimator_InversionAlgorithm.gmd};
+simData.RampTable               = {};
+simData.UseLightTime            = true  
+simData.UseRelativityCorrection = false;
+simData.UseETminusTAI           = false;  
+simData.DataFilters             = {};
+
+Create TrackingFileSet estData;
+
+estData.AddTrackingConfig       = {{GDS, EstSat, GDS}, 'Range'}
+estData.AddTrackingConfig       = {{CAN, EstSat, CAN}, 'Range'}
+estData.AddTrackingConfig       = {{MAD, EstSat, MAD}, 'Range'}
+estData.FileName                = {BatchEstimator_InversionAlgorithm.gmd};
+estData.RampTable               = {};
+estData.UseLightTime            = true  
+estData.UseETminusTAI           = false; 
+estData.DataFilters             = {};
+
+%
+%   Propagators
+%
+
+Create ForceModel ODProp_ForceModel;
+
+ODProp_ForceModel.CentralBody  = Earth;
+ODProp_ForceModel.PointMasses  = {Earth};
+ODProp_ForceModel.Drag         = None;
+ODProp_ForceModel.SRP          = Off;
+ODProp_ForceModel.ErrorControl = None;
+
+
+Create Propagator ODProp;
+
+ODProp.FM                      = ODProp_ForceModel;
+ODProp.Type                    = RungeKutta89;
+ODProp.InitialStepSize         = 60 
+ODProp.Accuracy                = 1e-13;
+ODProp.MinStep                 = 0;
+ODProp.MaxStep                 = 2700;
+ODProp.MaxStepAttempts         = 50;
+
+%
+%   Simulator and estimator
+%
+
+Create Simulator sim;
+
+sim.AddData                     = {simData};
+sim.EpochFormat                 = UTCGregorian;
+sim.InitialEpoch                = '01 Mar 2005 00:00:00.000';
+sim.FinalEpoch                  = '01 Mar 2005 12:00:00.000';   
+sim.MeasurementTimeStep         = 60;
+sim.Propagator                  = ODProp;
+sim.AddNoise                    = On  
+
+Create BatchEstimatorInv bat
+
+bat.ShowProgress                = True;
+bat.Measurements                = {estData} 
+bat.AbsoluteTol                 = 1e-4  
+bat.RelativeTol                 = 0.0001;
+bat.MaximumIterations           = 10;      
+bat.MaxConsecutiveDivergences   = 10;
+bat.Propagator                  = ODProp;
+bat.ShowAllResiduals            = On;
+bat.OLSEInitialRMSSigma         = 30000;
+bat.OLSEMultiplicativeConstant  = 3;   
+bat.OLSEAdditiveConstant        = 0;
+bat.InversionAlgorithm          = 'Internal';
+bat.EstimationEpochFormat       = 'FromParticipants';
+bat.EstimationEpoch             = 'FromParticipants'; 
+bat.ReportFile                  = 'Simulate_Continuous_thrust_SolveFor_ScaleFactor.txt';
+bat.OLSEUseRMSP 					  = false;
+
+Create CoordinateSystem VNB;
+
+VNB.Origin    = SimSat;
+VNB.Axes      = ObjectReferenced;
+VNB.XAxis     = V;
+VNB.YAxis     = N;
+VNB.Primary   = Earth;
+VNB.Secondary = SimSat;
+
+
+Create CoordinateSystem VNB_Est;
+
+VNB_Est.Origin    = EstSat;
+VNB_Est.Axes      = ObjectReferenced;
+VNB_Est.XAxis     = V;
+VNB_Est.YAxis     = N;
+VNB_Est.Primary   = Earth;
+VNB_Est.Secondary = EstSat;
+
+%
+%   ThrustHistoryFile
+%
+
+Create ThrustHistoryFile simThrustHistoryFile
+
+simThrustHistoryFile.AddThrustSegment = {Thruster1_SetPoint1}   
+simThrustHistoryFile.FileName         = '../data/navdata/Thrust_CSF.thrust'
+
+Create ThrustHistoryFile estThrustHistoryFile
+
+estThrustHistoryFile.AddThrustSegment = {Thruster1_SetPoint1_Est}  
+estThrustHistoryFile.FileName         = '../data/navdata/Thrust_CSF_Est.thrust'
+
+Create ThrustSegment Thruster1_SetPoint1; 
+ 
+Thruster1_SetPoint1.ThrustScaleFactor          = 1.0
+Thruster1_SetPoint1.ApplyThrustScaleToMassFlow = False
+Thruster1_SetPoint1.MassFlowScaleFactor        = 1.0
+Thruster1_SetPoint1.SolveFors                  = {};  
+Thruster1_SetPoint1.MassSource                 = {ChemicalTank1}
+
+Create ThrustSegment Thruster1_SetPoint1_Est;
+
+Thruster1_SetPoint1_Est.ThrustScaleFactor          = 0.75
+Thruster1_SetPoint1_Est.ApplyThrustScaleToMassFlow = False
+Thruster1_SetPoint1_Est.MassFlowScaleFactor        = 1.0
+Thruster1_SetPoint1_Est.SolveFors                  = {ThrustScaleFactor}  
+Thruster1_SetPoint1_Est.MassSource                 = {ChemicalTank1}
+
+
+Create Variable PosError VelError 
+
+Create ReportFile rf
+
+rf.Filename     = Simulate_Continuous_thrust_SolveFor_ScaleFactor.report
+rf.WriteHeaders = false
+
+
+%
+%   Mission sequence
+%
+
+BeginMissionSequence
+
+SetSeed(1)
+
+BeginFileThrust simThrustHistoryFile (SimSat);
+  RunSimulator sim;
+EndFileThrust simThrustHistoryFile (SimSat);
+
+BeginFileThrust estThrustHistoryFile (EstSat); 
+  RunEstimator bat
+EndFileThrust estThrustHistoryFile (EstSat);
+
+PosError = sqrt (  (EstSat.X - SimSatCopy.X)^2 + (EstSat.Y - SimSatCopy.Y)^2 + (EstSat.Z - SimSatCopy.Z)^2 )
+VelError = sqrt (  (EstSat.VX - SimSatCopy.VX)^2  + (EstSat.VY - SimSatCopy.VY)^2  + (EstSat.VZ - SimSatCopy.VZ)^2 )
+
+
+Report rf SimSatCopy.TAIModJulian ...
+   SimSatCopy.EarthMJ2000Eq.X SimSatCopy.EarthMJ2000Eq.Y SimSatCopy.EarthMJ2000Eq.Z ...
+	SimSatCopy.EarthMJ2000Eq.VX SimSatCopy.EarthMJ2000Eq.VY SimSatCopy.EarthMJ2000Eq.VZ;
+	
+Report rf EstSat.TAIModJulian ...
+   EstSat.EarthMJ2000Eq.X EstSat.EarthMJ2000Eq.Y EstSat.EarthMJ2000Eq.Z ...
+	EstSat.EarthMJ2000Eq.VX EstSat.EarthMJ2000Eq.VY EstSat.EarthMJ2000Eq.VZ;
+
+Report rf PosError VelError  

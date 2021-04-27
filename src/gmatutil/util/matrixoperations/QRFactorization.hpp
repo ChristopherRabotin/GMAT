@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -43,7 +43,7 @@ public:
    ~QRFactorization();
    QRFactorization& operator=(const QRFactorization &qrfactorization);
 
-   void Factor(const Rmatrix A, Rmatrix &R, Rmatrix &Q);
+   void Factor(const Rmatrix &A, Rmatrix &R, Rmatrix &Q);
    void RemoveFromQR(Rmatrix R, Rmatrix Q,
       std::string dimensionToRemove, Integer locationToRemove, Rmatrix &R1, Rmatrix &Q1);
    void AddToQR(Rmatrix R, Rmatrix Q,

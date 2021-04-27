@@ -1,8 +1,8 @@
 <html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Configure Coordinate Systems, Spacecraft, Optimizer, Propagators, Maneuvers, Variables, and Graphics</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="OptimalLunarFlyby.html" title="Chapter&nbsp;9.&nbsp;Optimal Lunar Flyby using Multiple Shooting"><link rel="prev" href="OptimalLunarFlyby.html" title="Chapter&nbsp;9.&nbsp;Optimal Lunar Flyby using Multiple Shooting"><link rel="next" href="ch09s03.html" title="Configure the Mission Sequence"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Configure Coordinate Systems, Spacecraft, Optimizer, Propagators,
-    Maneuvers, Variables, and Graphics</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="OptimalLunarFlyby.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;9.&nbsp;Optimal Lunar Flyby using Multiple Shooting</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ch09s03.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N12A58"></a>Configure Coordinate Systems, Spacecraft, Optimizer, Propagators,
+    Maneuvers, Variables, and Graphics</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="OptimalLunarFlyby.html">Prev</a>&nbsp;</td><th align="center" width="60%">Chapter&nbsp;9.&nbsp;Optimal Lunar Flyby using Multiple Shooting</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ch09s03.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N12A4E"></a>Configure Coordinate Systems, Spacecraft, Optimizer, Propagators,
     Maneuvers, Variables, and Graphics</h2></div></div></div><p>For this tutorial, you&rsquo;ll need GMAT open, with a blank script editor
     open. To open a blank script editor, click the <span class="guilabel">New
-    Script</span> button in the toolbar.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12A60"></a>Create a Moon-centered Coordinate System</h3></div></div></div><p>You will need a Moon-centered
+    Script</span> button in the toolbar.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12A56"></a>Create a Moon-centered Coordinate System</h3></div></div></div><p>You will need a Moon-centered
       <span class="guilabel">CoordinateSystem</span> for the lunar flyby control point
       so we begin by creating an inertial system centered at the moon. Use the
       <span class="guilabel">MJ2000Eq</span> axes for this system.</p><div class="informalexample"><pre class="programlisting"><code class="code">%----------------------------------------------------
@@ -12,7 +12,7 @@
 Create CoordinateSystem MoonMJ2000Eq
 MoonMJ2000Eq.Origin = Luna
 MoonMJ2000Eq.Axes   = MJ2000Eq
-</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12A6F"></a>Create the Spacecraft</h3></div></div></div><p>You will need 5 <span class="guilabel">Spacecraft</span> for this mission
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12A65"></a>Create the Spacecraft</h3></div></div></div><p>You will need 5 <span class="guilabel">Spacecraft</span> for this mission
       design. The epoch and state information will be set in the mission
       sequence and here we only need to configure coordinate systems for the
       <span class="guilabel">Spacecraft</span>. The <span class="guilabel">Spacecraft</span>
@@ -59,7 +59,7 @@ satMOI_Backward.CoordinateSystem   = EarthMJ2000Eq
 Create Spacecraft satMOI_Forward
 satMOI_Forward.DateFormat          = TAIModJulian
 satMOI_Forward.CoordinateSystem    = EarthMJ2000Eq
-</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12AB0"></a>Create the Propagators</h3></div></div></div><p>Modeling the motion of the spacecraft when near the earth and near
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12AA6"></a>Create the Propagators</h3></div></div></div><p>Modeling the motion of the spacecraft when near the earth and near
       the moon requires two propagators; one Earth-centered, and one
       Moon-centered. The script below configures the
       <span class="guilabel">ForceModel</span> named
@@ -102,7 +102,7 @@ NearMoonProp.InitialStepSize           = 60
 NearMoonProp.Accuracy                  = 1e-11
 NearMoonProp.MinStep                   = 0
 NearMoonProp.MaxStep                   = 86400
-</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12AC9"></a>Create the Maneuvers</h3></div></div></div><p>We will require one <span class="guilabel">ImpulsiveBurn</span> to insert
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12ABF"></a>Create the Maneuvers</h3></div></div></div><p>We will require one <span class="guilabel">ImpulsiveBurn</span> to insert
       the spacecraft into the mission orbit. Define the maneuver as
       <span class="guilabel">MOI</span> and configure the maneuver to be applied in the
       <span class="guilabel">VNB</span> (Earth-referenced)
@@ -114,7 +114,7 @@ Create ImpulsiveBurn MOI
 MOI.CoordinateSystem   = Local
 MOI.Origin             = Earth
 MOI.Axes               = VNB
-</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12ADE"></a>Create the User Variables</h3></div></div></div><p>IThe optimization sequence requires many user variables that will
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12AD4"></a>Create the User Variables</h3></div></div></div><p>IThe optimization sequence requires many user variables that will
       be discussed in detail later in the tutorial when we define those
       variables. For now, we simply create the variables (which initializes
       them to zero). The naming convention used here is that variables used to
@@ -144,7 +144,7 @@ Create Variable deltaTimeFlyBy
 %  Constants and miscellaneous variables
 Create Variable earthRadius earthMu launchEnergy launchVehicleDeltaV
 Create Variable toiDeltaV launchCircularVelocity loopIdx Cost
-</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12AED"></a>Create the Optimizer</h3></div></div></div><p>The script below creates a <span class="guilabel">VF13ad</span> optimizer
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12AE3"></a>Create the Optimizer</h3></div></div></div><p>The script below creates a <span class="guilabel">VF13ad</span> optimizer
       provided in the Harwell Subroutine Library. <span class="guilabel">VF13ad</span>
       is an Sequential Quadratic Programming (SQP) optimizer that uses a line
       search method to solve the Non-linear Programming Problem (NLP). Here we
@@ -162,7 +162,7 @@ NLPOpt.MaximumIterations     = 200
 NLPOpt.Tolerance             = 1e-004
 NLPOpt.UseCentralDifferences = false
 NLPOpt.FeasibilityTolerance  = 0.1
-</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12AFC"></a>Create the 3-D Graphics</h3></div></div></div><p>You will need an <span class="guilabel">OrbitView</span> 3-D graphics
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12AF2"></a>Create the 3-D Graphics</h3></div></div></div><p>You will need an <span class="guilabel">OrbitView</span> 3-D graphics
       window to visualize the trajectory and especially the initial guess.
       Below we configure an orbit view to view the entire trajectory in the
       <span class="guilabel">EarthMJ2000Eq</span> coordinate system. Note that we must
@@ -200,7 +200,7 @@ EarthView.NumPointsToRedraw      = 300
 EarthView.ViewScaleFactor        = 35
 EarthView.ViewUpAxis             = X
 EarthView.UseInitialView         = On
-</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12B1A"></a>Create XPPlots/Reports</h3></div></div></div><p>Below we create several <span class="guilabel">XYPlots</span> and a
+</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N12B10"></a>Create XPPlots/Reports</h3></div></div></div><p>Below we create several <span class="guilabel">XYPlots</span> and a
       <span class="guilabel">ReportFile</span>. We will use
       <span class="guilabel">XYPlots</span> to monitor the progress of the optimizer in
       satisfying constraints. <span class="guilabel">PositionError1</span> plots the

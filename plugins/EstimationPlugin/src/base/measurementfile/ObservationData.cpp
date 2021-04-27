@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -51,7 +51,7 @@ ObservationData::ObservationData() :
    typeName          (""),
    type              (Gmat::UNKNOWN_MEASUREMENT),
    uniqueID          (-1),
-   epochSystem       (TimeConverterUtil::A1MJD),
+   epochSystem       (TimeSystemConverter::A1MJD),
    epoch             (-1.0),
    epochGT           (-1.0),
    noiseCovariance   (NULL),
@@ -252,28 +252,29 @@ StringArray ObservationData::GetAvailableMeasurementTypes()
    typeList.push_back("DSN_SeqRange");
    typeList.push_back("DSN_TCP");
    typeList.push_back("GPS_PosVec");
-   //typeList.push_back("Range_KM");
    typeList.push_back("Range");
-   //typeList.push_back("Doppler_RangeRate");
+   typeList.push_back("Range_Skin");
    typeList.push_back("RangeRate");
+   //typeList.push_back("SN_Range");                // made changes by TUAN NGUYEN
+   //typeList.push_back("SN_Doppler");              // made changes by TUAN NGUYEN
+   typeList.push_back("Azimuth");
+   typeList.push_back("Elevation");
+   typeList.push_back("XEast");
+   typeList.push_back("YNorth");
+   typeList.push_back("XSouth");
+   typeList.push_back("YEast");
+   //typeList.push_back("RightAscension");          // made changes by TUAN NGUYEN
+   //typeList.push_back("Declination");             // made changes by TUAN NGUYEN
 
-   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
-   if (runmode == GmatGlobal::TESTING)
-   {
-      // Old syntax's measurement types
-      typeList.push_back("DSNTwoWayRange");
-      typeList.push_back("DSNTwoWayDoppler");
-      typeList.push_back("USNTwoWayRange");
-      typeList.push_back("GeometricRange");
-      typeList.push_back("GeometricRangeRate");
-      typeList.push_back("GeometricRADec");
-      typeList.push_back("GeometricAzEl");
-
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();   // made changes by TUAN NGUYEN
+   if (runmode == GmatGlobal::TESTING)                              // made changes by TUAN NGUYEN
+   {                                                                // made changes by TUAN NGUYEN
       // new syntax's untested measurement types
-      typeList.push_back("SN_Range");
-      //typeList.push_back("TDRSDoppler_HZ");
-      typeList.push_back("SN_Doppler");
-   }
+      typeList.push_back("SN_Range");                               // made changes by TUAN NGUYEN
+      typeList.push_back("SN_Doppler");                             // made changes by TUAN NGUYEN
+      typeList.push_back("RightAscension");                         // made changes by TUAN NGUYEN
+      typeList.push_back("Declination");                            // made changes by TUAN NGUYEN
+   }                                                                // made changes by TUAN NGUYEN
 
    return typeList;
 }

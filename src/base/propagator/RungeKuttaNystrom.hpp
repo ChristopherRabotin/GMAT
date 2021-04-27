@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -57,10 +57,10 @@
   differential equations.  The equations solved by this integration class have
   the form
 
-  \f[{{d^2\vec r^i}\over{dt^2}} = \vec g(t,\vec r)\f]
+  \f[ {{d^2\vec r^i}\over{dt^2}} = \vec g(t,\vec r) \f]
 
-  (The superscript in this discussion refers to the variables; hence \f$f^i\f$
-  is the \f$i^{th}\f$ variable, and \f$r^{(n)}\f$ refers to all \f$n\f$ 
+  (The superscript in this discussion refers to the variables; hence \f$ f^i \f$
+  is the \f$ i^{th} \f$ variable, and \f$ r^{(n)} \f$ refers to all \f$ n \f$ 
   variables.)  The method works similarly to the Runge-Kutta method; refer to 
   that discussion for details of the methodology.  Note that the equation of 
   motion given here is independent of teh first dervative information.  This is
@@ -70,20 +70,20 @@
   The Nystrom integrators use the following equations to propagate the state 
   variables.  The intermediate stages are given by
 
-  \f[\vec k_i = \vec g\left(t_0 + a_i h, \vec r_0 + a_i h \vec{\dot r_0} + 
-                  h^2 \sum_{j=0}^{i-1}b_{ij} \vec k_j\right)\f]
+  \f[ \vec k_i = \vec g\left(t_0 + a_i h, \vec r_0 + a_i h \vec{\dot r_0} + 
+                  h^2 \sum_{j=0}^{i-1}b_{ij} \vec k_j\right) \f]
 
   These stage calculations are then accumulated to give the estimated state 
-  after time \f$h\f$:
+  after time \f$ h \f$:
 
-  \f[\vec r(t_0 + h) = \vec r(t_0) + \sum_{i=0}^{n-1} c_j \vec k_j\f]
+  \f[ \vec r(t_0 + h) = \vec r(t_0) + \sum_{i=0}^{n-1} c_j \vec k_j \f]
 
-  where \f$n\f$ is the number of stages set for the integrator.  The state 
+  where \f$ n \f$ is the number of stages set for the integrator.  The state 
   parameters for the first derivative data (e.g. the velocity data) are given
   using a separate set of coefficients:
 
-  \f[\vec{\dot r}(t_0 + h) = \vec{\dot r}(t_0) + 
-                             \sum_{i=0}^{n-1} \dot c_j \vec k_j\f]
+  \f[ \vec{\dot r}(t_0 + h) = \vec{\dot r}(t_0) + 
+                             \sum_{i=0}^{n-1} \dot c_j \vec k_j \f]
 
   The Runge-Kutta-Nystrom integrators need to know the mapping between the 
   state variables and their first derivatives in order to calculate the 

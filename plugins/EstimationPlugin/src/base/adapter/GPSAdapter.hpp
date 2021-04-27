@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -22,6 +22,9 @@
 #define GPSAdapter_hpp
 
 #include "TrackingDataAdapter.hpp"
+
+#include "CoordinateSystem.hpp"
+#include "CoordinateConverter.hpp"
 
 
 /**
@@ -82,6 +85,11 @@ public:
    Real                 GetIonoCorrection();
    Real                 GetTropoCorrection();
 
+   
+   bool                 SetGPSReceiverName(const std::string name) { gpsReceiverName = name; return true; };      // made changes by TUAN NGUYEN
+   std::string          GetGPSReceiverName() { return gpsReceiverName; };                                         // made changes by TUAN NGUYEN
+
+
    DEFAULT_TO_NO_CLONES
 protected:
    /// Parameter IDs for the GPSAdapter
@@ -89,6 +97,12 @@ protected:
    {
       GPSAdapterParamCount = AdapterParamCount,
    };
+
+   CoordinateSystem *ecf;
+   CoordinateSystem *ej2k;
+   CoordinateConverter *cv;
+
+   std::string gpsReceiverName;                                                  // made changes by TUAN NGUYEN
 
 
 private:

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -164,11 +164,13 @@ MathParser::~MathParser()
  * @param checkMinusSign Check for leading minus sign.
  *        Set this flag to true if minus sign is a part of string and is not considered
  *        math unary operator
- * @return  true if string is an equation, means has math operators and/or functions
+ * @param Flag indicating that the equation can consist of a single entity
  *
+ * @return  true if string is an equation, means has math operators and/or functions
  */
 //------------------------------------------------------------------------------
-bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
+bool MathParser::IsEquation(const std::string &str, bool checkMinusSign,
+      bool allowSingleElement)
 {
    // Convert tabs to spaces as we start
    std::string strNoTab = GmatStringUtil::Replace(str, "\t", " ");
@@ -241,7 +243,7 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
             #endif
             return true;
          }
-         else
+         else if (!allowSingleElement)
          {
             #if DEBUG_PARSE_EQUATION
             MessageInterface::ShowMessage
@@ -550,6 +552,8 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
          // Check for matrix transpose and inverse operator
          if (str1.find(transposeOpStr) != str1.npos || str1.find(inverseOpStr) != str1.npos)
             isEq = true;
+         else if (allowSingleElement)
+            isEq = true;
       }
    }
    
@@ -806,14 +810,16 @@ std::string MathParser::FindLowestOperator(const std::string &str,
 // MathNode*  Parse(const std::string &str)
 //------------------------------------------------------------------------------
 /**
- * Breaks apart the text representation of an equation and uses the compoment
+ * Breaks apart the text representation of an equation and uses the component
  * pieces to construct the MathTree.
  *
- * @param  str  Input equation to be parsed
+ * @param str  Input equation to be parsed
+ * @param allowSingleNode Allow a "tree" with only a top node
+ *
  * @return constructed MathTree pointer
  */
 //------------------------------------------------------------------------------
-MathNode* MathParser::Parse(const std::string &str)
+MathNode* MathParser::Parse(const std::string &str, bool allowSingleNode)
 {
    std::string strNoTab = GmatStringUtil::Replace(str, "\t", " ");
 

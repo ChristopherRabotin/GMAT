@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,6 +38,7 @@
 #include <sstream>
 #include "Spacecraft.hpp"
 #include "MessageInterface.hpp"
+#include "ConfigManager.hpp" // FIXME: Temporary workaround until GMT-7066 is fixed
 #include "SpaceObjectException.hpp"
 #include "StateConversionUtil.hpp"
 #include "StringUtil.hpp"
@@ -47,9 +48,11 @@
 #include "PrecessingSpinner.hpp"
 #include "NadirPointing.hpp"
 #include "CCSDSAttitude.hpp"
+#include "ThreeAxisKinematic.hpp"
 #include "FileManager.hpp"           // for GetFullPathname()
 #include "AngleUtil.hpp"             // for PutAngleInDegRange()
 #include "EphemManager.hpp"
+#include "Plate.hpp"                                             // made changes by TUAN NGUYEN
 
 #ifdef __USE_SPICE__
 #include "SpiceAttitude.hpp"         // for SpiceAttitude - to set object name and ID
@@ -96,6 +99,10 @@
 //#define DEBUG_ESTIMATION
 //#define DEBUG_ATTRIB_COMMENT
 //#define DEBUG_CHANGE_EPOCH_PRECISION
+//#define DEBUG_EXTERNAL_STM_SETTING
+//#define DEBUG_STM
+
+
 
 #ifdef DEBUG_SPACECRAFT
 #include <iostream>
@@ -137,6 +144,7 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::ENUMERATION_TYPE, // DateFormat
       Gmat::STRING_TYPE,      // EstimationStateType
       Gmat::RMATRIX_TYPE,     // OrbitErrorCovariance
+      Gmat::OBJECT_TYPE,      // ProcessNoiseModel
       Gmat::REAL_TYPE,        // Cd
       Gmat::REAL_TYPE,        // Cr
       Gmat::REAL_TYPE,        // CdSigma
@@ -158,6 +166,16 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::FILENAME_TYPE,    // SPADSRPFile
       Gmat::FILENAME_TYPE,    // SPADSRPFileFullPath
       Gmat::REAL_TYPE,        // SPADSRPScaleFactor
+      Gmat::ENUMERATION_TYPE, // SPADSRPInterpolationMethod
+      Gmat::REAL_TYPE,        // SPADSRPScaleFactorSigma           // made changes by TUAN NGUYEN
+      Gmat::FILENAME_TYPE,    // SPADDragFile
+      Gmat::FILENAME_TYPE,    // SPADDragFileFullPath
+      Gmat::REAL_TYPE,        // SPADDragScaleFactor
+      Gmat::ENUMERATION_TYPE, // SPADDragInterpolationMethod
+      Gmat::REAL_TYPE,        // SPADDragScaleFactorSigma          // made changes by TUAN NGUYEN      
+
+      Gmat::OBJECTARRAY_TYPE, // AddPlates                         // made changes by TUAN NGUYEN
+
       Gmat::REAL_TYPE,        // CartesianX
       Gmat::REAL_TYPE,        // CartesianY
       Gmat::REAL_TYPE,        // CartesianZ
@@ -170,6 +188,8 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::STRINGARRAY_TYPE, // StmElementNames
       Gmat::REAL_TYPE,        // CD_EPSILON
       Gmat::REAL_TYPE,        // CR_EPSILON
+      Gmat::STRINGARRAY_TYPE, // ADD_EQUAL_CONSTRAINT                                // made changes by TUAN NGUYEN
+      Gmat::STRINGARRAY_TYPE, // ADD_AREA_COEFFICIENT_EQUATE_CONSTRAINT              // made changes by TUAN NGUYEN
       Gmat::FILENAME_TYPE,    // Model File
       Gmat::FILENAME_TYPE,    // ModelFileFullPath
       Gmat::REAL_TYPE,        // Model Offset X
@@ -205,6 +225,7 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "DateFormat",
       "EstimationStateType",
       "OrbitErrorCovariance",
+      "ProcessNoiseModel",
       "Cd",
       "Cr",
       "CdSigma",
@@ -226,6 +247,16 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "SPADSRPFile",
       "SPADSRPFileFullPath",
       "SPADSRPScaleFactor",
+      "SPADSRPInterpolationMethod",
+      "SPADSRPScaleFactorSigma",           // made changes by TUAN NGUYEN
+      "SPADDragFile",
+      "SPADDragFileFullPath",
+      "SPADDragScaleFactor",
+      "SPADDragInterpolationMethod",
+      "SPADDragScaleFactorSigma",          // made changes by TUAN NGUYEN
+
+      "AddPlates",                         // made changes by TUAN NGUYEN
+
       "CartesianX",
       "CartesianY",
       "CartesianZ",
@@ -238,6 +269,8 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "StmElementNames",
       "Cd_Epsilon",
       "Cr_Epsilon",
+      "NPlateSRPAddEqualityConstraint",                     // made changes by TUAN NGUYEN
+      "NPlateSRPEquateAreaCoefficients",                    // made changes by TUAN NGUYEN
       "ModelFile",
       "ModelFileFullPath",
       "ModelOffsetX",
@@ -297,7 +330,7 @@ const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] =
    // Alternate Equnoctial by HYKim
    "AltEquinoctialP",
    "AltEquinoctialQ",
-   // Delaunay	by M.H.
+   // Delaunay   by M.H.
    "Delaunayl",
    "Delaunayg",
    "Delaunayh",
@@ -371,6 +404,8 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    reflectCoeff         (1.8),
    reflectCoeffSigma    (1.0e70),                 // set a large number to parameter's covariance
    orbitErrorCovariance (6,6),                    // 6x6 matrix
+   processNoiseModel    (NULL),
+   processNoiseName     (""),
    epochSystem          ("TAI"),
    epochFormat          ("ModJulian"),
    epochType            ("TAIModJulian"),  // Should be A1ModJulian?
@@ -407,11 +442,24 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    fullSTM              (6,6),
    fullAMatrix          (6,6),
    fullSTMRowCount      (6),
+   srpShapeModel        ("Spherical"),    // Its value should be "Spherical", "SPADFile", or "NPlate"     // made changes by TUAN NGUYEN
+
    spadSRPFile          (""),
    spadSrpFileFullPath  (""),
    spadSRPScaleFactor   (1.0),
+   spadSRPScaleFactorSigma  (1.0e70),                 // made changes by TUAN NGUYEN
    spadSRPReader        (NULL),
    spadBFCS             (NULL),
+   spadSRPInterpolationMethod ("Bilinear"),
+   dragShapeModel       ("Spherical"),   // Its value should be "Spherical" or"SPADFile"     // made changes by TUAN NGUYEN
+   spadDragFile         (""),
+   spadDragFileFullPath (""),
+   spadDragScaleFactor  (1.0),
+   spadDragScaleFactorSigma (1.0e70),                 // made changes by TUAN NGUYEN
+   spadDragReader       (NULL),
+   spadDragBFCS         (NULL),
+   spadDragInterpolationMethod ("Bilinear"),
+   attitudeDynamics     (false),
    ephemMgr             (NULL),
    includeCartesianState(0),
    cdEpsilon            (0.0),
@@ -419,8 +467,17 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    constrainCd          (true),
    constrainCr          (true),
    csTransformMatrix    (6, 6),
-   isCSTransformMatrixSet (false)
+   isCSTransformMatrixSet (false),
+   skipSTM              (false),
+   runningCommandFlag   (0),             // initially it is set to 0: not running any command       // made changes by TUAN NGUYEN
+   currentConstraintIndex (0)                         // made changes by TUAN NGUYEN
 {
+   StringArray sa;                                    // made changes by TUAN NGUYEN
+   constraintsList.push_back(sa);                     // made changes by TUAN NGUYEN
+   areaCoefficientConstraintsList.push_back(sa);      // made changes by TUAN NGUYEN
+   scInertialCS = NULL;                               // made changes by TUAN NGUYEN
+   reflectance.Set(0.0,0.0,0.0);                      // made changes by TUAN NGUYEN
+
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft() <%p>'%s' entered\n", this, name.c_str());
@@ -452,7 +509,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    Real taimjd = GmatTimeConstants::MJD_OF_J2000;
 
    // Internal epoch is in A1ModJulian, so convert
-   TimeConverterUtil::Convert("TAIModJulian", taimjd, "",
+   theTimeConverter->Convert("TAIModJulian", taimjd, "",
                               "A1ModJulian", a1mjd, outStr);
 
    //state.SetEpoch(GmatTimeConstants::MJD_OF_J2000);
@@ -534,8 +591,14 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
 //   orbitSTM(0,0) = orbitSTM(1,1) = orbitSTM(2,2) =
 //   orbitSTM(3,3) = orbitSTM(4,4) = orbitSTM(5,5) = 1.0;
 
-   fullSTM(0,0) = fullSTM(1,1) = fullSTM(2,2) =
-   fullSTM(3,3) = fullSTM(4,4) = fullSTM(5,5) = 1.0;
+   for (Integer i = 0; i < fullSTM.GetNumRows(); ++i)
+   {
+      for (Integer j = 0; j < fullSTM.GetNumColumns(); ++j)
+      {
+         fullSTM(i, j) = (i == j ? 1.0 : 0.0);
+      }
+   }
+
 
    stmIndices.push_back(CARTESIAN_X);
    stmIndices.push_back(CARTESIAN_Y);
@@ -558,22 +621,22 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    for (Integer i = 0; i < 6; ++i)
       orbitErrorCovariance(i,i) = 1.0e70;
 
-   Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;
-   Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;
+
+   // In Spacecraft default constructor, srpShapeModel and dragShapeModel are "Spherical. 
+   // Therefor Cr and Cd noises are used in covariance instead of spadSRPScaleFactorSigma and spadDragScaleFactorSigma. 
+   Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;             // stdiv[CrEpsilon] = stdiv[Cr]/Cr0
+   Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;                   // stdiv[CdEpsilon] = stdiv[Cd]/Cd0
    Rvector value(8, 1.0e70, 1.0e70, 1.0e70, 1.0e70, 1.0e70, 1.0e70,
       Cd_EpsilonSigma*Cd_EpsilonSigma, Cr_EpsilonSigma*Cr_EpsilonSigma);
    covariance.ConstructRHS(value, 0);
    
    // Load default model file
-   // Find file name and full path (LOJ: 2014.06.17)
-   //modelFile = FileManager::Instance()->GetFullPathname("SPACECRAFT_MODEL_FILE");
-   
-   // modelFile = FileManager::Instance()->GetFilename("SPACECRAFT_MODEL_FILE");
-   // modelFileFullPath = FileManager::Instance()->FindPath(modelFile, "SPACECRAFT_MODEL_FILE", true, false);
-   
    // Use GmatBase::GetFullPathFileName() (LOJ: 2014.06.24)
    modelFileFullPath = GmatBase::GetFullPathFileName(modelFile, GetName(), modelFile, "SPACECRAFT_MODEL_FILE", true);
    
+   // Plate processing
+   plateList.clear();
+
    #ifdef DEBUG_FILEPATH
    MessageInterface::ShowMessage
       ("modelFile = '%s', modelFileFullPath = '%s'\n", modelFile.c_str(),
@@ -598,25 +661,38 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
 //---------------------------------------------------------------------------
 Spacecraft::~Spacecraft()
 {
-   #ifdef DEBUG_SPACECRAFT
+#ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
-      ("Spacecraft::~Spacecraft() <%p>'%s' entered, attitude=<%p>\n",
-       this, GetName().c_str(), attitude);
-   #endif
+   ("Spacecraft::~Spacecraft() <%p>'%s' entered, attitude=<%p>\n",
+      this, GetName().c_str(), attitude);
+#endif
 
    // Delete the attached hardware (it was set as clones in the ObjectInitializer)
    // It is not anymore setting the clone (LOJ: 2009.07.24)
    //@see ObjectInitializer::BuildAssociations()
    DeleteOwnedObjects(true, true, true, true, true);
 
-   if (spadSRPReader)  delete spadSRPReader;
-   if (spadBFCS)       delete spadBFCS;
+   if (spadSRPReader)   delete spadSRPReader;
+   if (spadBFCS)        delete spadBFCS;
+
+   if (spadDragReader)  delete spadDragReader;
+   if (spadDragBFCS)    delete spadDragBFCS;
+
+   for (Integer i = 0; i < plateList.size(); ++i)                  // made changes by TUAN NGUYEN
+   {                                                               // made changes by TUAN NGUYEN
+      if (plateList[i])                                            // made changes by TUAN NGUYEN
+         delete plateList[i];                                      // made changes by TUAN NGUYEN
+   }                                                               // made changes by TUAN NGUYEN
+   plateList.clear();                                              // made changes by TUAN NGUYEN
+
    if (ephemMgr)
    {
       ephemMgr->StopRecording();
       delete ephemMgr;
    }
 
+   if (scInertialCS)                                               // made changes by TUAN NGUYEN
+      delete scInertialCS;                                         // made changes by TUAN NGUYEN
 
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -651,6 +727,8 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    reflectCoeff         (a.reflectCoeff),
    reflectCoeffSigma    (a.reflectCoeffSigma),
    orbitErrorCovariance (a.orbitErrorCovariance),
+   processNoiseModel    (a.processNoiseModel),
+   processNoiseName     (a.processNoiseName),
    epochSystem          (a.epochSystem),
    epochFormat          (a.epochFormat),
    epochType            (a.epochType),
@@ -685,11 +763,27 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    csSet                (a.csSet),
    isThrusterSettingMode(a.isThrusterSettingMode),
    fullSTMRowCount      (a.fullSTMRowCount),
+   srpShapeModel        (a.srpShapeModel),                       // made changes by TUAN NGUYEN
+
+   plateNames           (a.plateNames),                          // made changes by TUAN NGUYEN
+
    spadSRPFile          (a.spadSRPFile),
    spadSrpFileFullPath  (a.spadSrpFileFullPath),
    spadSRPScaleFactor   (a.spadSRPScaleFactor),
+   spadSRPScaleFactorSigma   (a.spadSRPScaleFactorSigma),        // made changes by TUAN NGUYEN   
    spadSRPReader        (NULL),
    spadBFCS             (NULL),
+   spadSRPInterpolationMethod (a.spadSRPInterpolationMethod),
+   
+   dragShapeModel       (a.dragShapeModel),                      // made changes by TUAN NGUYEN
+   spadDragFile         (a.spadDragFile),
+   spadDragFileFullPath (a.spadDragFileFullPath),
+   spadDragScaleFactor  (a.spadDragScaleFactor),
+   spadDragScaleFactorSigma  (a.spadDragScaleFactorSigma),       // made changes by TUAN NGUYEN
+   spadDragReader       (NULL),
+   spadDragBFCS         (NULL),
+   spadDragInterpolationMethod (a.spadDragInterpolationMethod),
+   attitudeDynamics     (a.attitudeDynamics),
    ephemMgr             (NULL),
    includeCartesianState(a.includeCartesianState),
    solveforNames        (a.solveforNames),
@@ -699,8 +793,21 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    constrainCd          (a.constrainCd),
    constrainCr          (a.constrainCr),
    csTransformMatrix    (a.csTransformMatrix),
-   isCSTransformMatrixSet (a.isCSTransformMatrixSet)
+   isCSTransformMatrixSet (a.isCSTransformMatrixSet),
+   skipSTM              (false),
+   runningCommandFlag   (a.runningCommandFlag),                                                  // made changes by TUAN NGUYEN
+   currentConstraintIndex  (a.currentConstraintIndex)                                            // made changes by TUAN NGUYEN
 {
+   constraintsList.clear();                                                                      // made changes by TUAN NGUYEN
+   for (Integer i = 0; i < a.constraintsList.size(); ++i)                                        // made changes by TUAN NGUYEN
+      constraintsList.push_back(a.constraintsList[i]);                                           // made changes by TUAN NGUYEN
+   areaCoefficientConstraintsList.clear();                                                       // made changes by TUAN NGUYEN
+   for (Integer i = 0; i < a.areaCoefficientConstraintsList.size(); ++i)                         // made changes by TUAN NGUYEN
+      areaCoefficientConstraintsList.push_back(a.areaCoefficientConstraintsList[i]);             // made changes by TUAN NGUYEN
+
+   scInertialCS = NULL;                                                                          // made changes by TUAN NGUYEN
+   reflectance.Set(0.0, 0.0, 0.0);                                                               // made changes by TUAN NGUYEN
+
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(copy) <%p>'%s' entered\n", this, GetName().c_str());
@@ -711,12 +818,6 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    parameterCount = a.parameterCount;
    ownedObjectCount = 0;
 
-   //state[0] = a.state[0];
-   //state[1] = a.state[1];
-   //state[2] = a.state[2];
-   //state[3] = a.state[3];
-   //state[4] = a.state[4];
-   //state[5] = a.state[5];
    state = a.state;
 
    trueAnomaly = a.trueAnomaly;
@@ -728,18 +829,49 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    thrusterNames     = a.thrusterNames;
 
    // resize the matrices first, then copy the contents
-   Integer r,c;
-
-   r = a.fullSTM.GetNumRows();
-   c = a.fullSTM.GetNumColumns();
-   fullSTM.SetSize(r,c);
+   fullSTM.SetSize(a.fullSTM.GetNumRows(), a.fullSTM.GetNumColumns());
    fullSTM = a.fullSTM;
+   
    stmIndices = a.stmIndices;
 
-   r = a.fullAMatrix.GetNumRows();
-   c = a.fullAMatrix.GetNumColumns();
-   fullAMatrix.SetSize(r,c);
+   fullAMatrix.SetSize(a.fullAMatrix.GetNumRows(), a.fullAMatrix.GetNumColumns());
    fullAMatrix = a.fullAMatrix;
+
+   // made changes by TUAN NGUYEN
+   externalStmSources = a.externalStmSources;
+   externalStmEntries = a.externalStmEntries;
+   externalStmIndices = a.externalStmIndices;
+
+   // made changes by TUAN NGUYEN
+   // Set Plate objects
+   for (Integer i = 0; i < a.plateList.size(); ++i)
+   {
+      if (a.plateList[i])
+      {
+         // Add to Plate object list
+         GmatBase* pl = ((Plate*)(a.plateList[i]))->Clone();
+         plateList.push_back(pl);
+
+         // Create extra STM entries for Plate object
+         StringArray sfList = ((Plate*)pl)->GetStringArrayParameter("SolveFors");
+         for (Integer index = 0; index < sfList.size(); ++index)
+         {
+            std::string paramName = pl->GetName() + "." + sfList[index];        // example: Plate1.DiffuseFact
+            ////AddExternalStmSetting(paramName, pl, pl->GetParameterID(sfList[index]));
+            for (Integer k = 0; k < externalStmEntries.size(); ++k)
+            {
+               if (paramName == externalStmEntries[k])
+               {
+                  externalStmSources[k] = pl;
+                  break;
+               }
+            }
+         }
+      }
+      else
+         plateList.push_back(NULL);
+   }
+   
 
    hardwareNames     = a.hardwareNames;
 //   hardwareList      = a.hardwareList;
@@ -759,17 +891,48 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
 
    // Set Cd covariance
    locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");
-   // Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;
-   Real Cd0 = coeffDrag / (1 + crEpsilon);                                            // Cd0 = Cd / (1+Cd_epsilon)
-   Real Cd_EpsilonSigma = coeffDragSigma / Cd0;                                       // stdiv[Cd_epsilon] = stdiv[Cd]/Cd0
-   covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;      // var[Cd_epsilon] = (stdiv[Cr_epsilon]) ^ 2
+   Real Cd_EpsilonSigma, Cd0;                                                                      // made changes by TUAN NGUYEN
+   if (dragShapeModel == "Spherical")                                                              // made changes by TUAN NGUYEN
+   {
+      //Cd0 = coeffDrag / (1 + cdEpsilon);                                                         // made changes by TUAN NGUYEN
+      Cd0 = coeffDrag;                                     // Note that: coeffDarg is Cd0          // made changes by TUAN NGUYEN
+      Cd_EpsilonSigma = coeffDragSigma / Cd0;              // stdiv[Cd_epsilon] = stdiv[Cd]/Cd0
+      covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;      // var[Cd_epsilon] = (stdiv[Cr_epsilon]) ^ 2
+   }                                                                                               // made changes by TUAN NGUYEN
+   else if (dragShapeModel == "SPADFile")                                                          // made changes by TUAN NGUYEN
+   {                                                                                               // made changes by TUAN NGUYEN
+      //Cd0 = spadDragScaleFactor / (1 + cdEpsilon);                                               // made changes by TUAN NGUYEN
+      Cd0 = spadDragScaleFactor;          // Note that: spadDragScaleFactor is SpadCd0             // made changes by TUAN NGUYEN
+      Cd_EpsilonSigma = spadDragScaleFactorSigma / Cd0;   // stdiv[Cd_epsilon] = stdiv[Cd]/Cd0     // made changes by TUAN NGUYEN
+      covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;      // var[Cd_epsilon] = (stdiv[Cr_epsilon]) ^ 2
+   }                                                                                               // made changes by TUAN NGUYEN
+   //covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;      // var[Cd_epsilon] = (stdiv[Cr_epsilon]) ^ 2
+
    // Set Cr covariance
    locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");
-   // Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;
-   Real Cr0 = reflectCoeff / (1 + crEpsilon);                                         // Cr0 = Cr / (1+Cr_epsilon)
-   Real Cr_EpsilonSigma = reflectCoeffSigma / Cr0;                                    // stdiv[Cr_epsilon] = stdiv[Cr]/Cr0
-   covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;      // var[Cr_epsilon] = (stdiv[Cr_epsilon])^2
-
+   Real Cr_EpsilonSigma, Cr0;
+   if (srpShapeModel == "Spherical")                                                            // made changes by TUAN NGUYEN
+   {                                                                                            // made changes by TUAN NGUYEN
+      //Cr0 = reflectCoeff / (1 + crEpsilon);                                                   // made changes by TUAN NGUYEN
+      Cr0 = reflectCoeff;                                // Note that: reflectCoeff is Cr0      // made changes by TUAN NGUYEN
+      Cr_EpsilonSigma = reflectCoeffSigma / Cr0;         // stdiv[Cr_epsilon] = stdiv[Cr]/Cr0
+   }                                                                                            // made changes by TUAN NGUYEN
+   else if (srpShapeModel == "SPADFile")                                                        // made changes by TUAN NGUYEN
+   {                                                                                            // made changes by TUAN NGUYEN
+      //Cr0 = spadSRPScaleFactor / (1 + crEpsilon);                                             // made changes by TUAN NGUYEN
+      Cr0 = spadSRPScaleFactor;        // Note that: spadSRPScaleFactor is SpadCr0              // made changes by TUAN NGUYEN
+      Cr_EpsilonSigma = spadSRPScaleFactorSigma / Cr0;   // stdiv[Cr_epsilon] = stdiv[Cr]/Cr0   // made changes by TUAN NGUYEN
+      covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;      // var[Cr_epsilon] = (stdiv[Cr_epsilon])^2
+   }                                                                                            // made changes by TUAN NGUYEN
+   if (srpShapeModel == "NPlate")                                                               // made changes by TUAN NGUYEN
+   {                                                                                            // made changes by TUAN NGUYEN
+      // Set values but not using them                                                          // made changes by TUAN NGUYEN
+      Cr0 = reflectCoeff / (1 + crEpsilon);              // Cr0 = Cr / (1+Cr_epsilon)           // made changes by TUAN NGUYEN
+      Cr_EpsilonSigma = reflectCoeffSigma / Cr0;         // stdiv[Cr_epsilon] = stdiv[Cr]/Cr0   // made changes by TUAN NGUYEN
+      covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;      // var[Cr_epsilon] = (stdiv[Cr_epsilon])^2
+   }                                                                                            // made changes by TUAN NGUYEN
+   // made changes by TUAN NGUYEN
+   //covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;      // var[Cr_epsilon] = (stdiv[Cr_epsilon])^2
 
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -820,6 +983,8 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    srpArea              = a.srpArea;
    reflectCoeff         = a.reflectCoeff;
    reflectCoeffSigma    = a.reflectCoeffSigma;
+   processNoiseModel    = a.processNoiseModel;
+   processNoiseName     = a.processNoiseName;
    epochSystem          = a.epochSystem;
    epochFormat          = a.epochFormat;
    epochType            = a.epochType;
@@ -864,12 +1029,6 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 //       a.trueAnomaly.GetTypeString().c_str());
    #endif
 
-   //state[0] = a.state[0];
-   //state[1] = a.state[1];
-   //state[2] = a.state[2];
-   //state[3] = a.state[3];
-   //state[4] = a.state[4];
-   //state[5] = a.state[5];
    state = a.state;
 
    stateElementLabel = a.stateElementLabel;
@@ -877,6 +1036,35 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    representations   = a.representations;
    tankNames         = a.tankNames;
    thrusterNames     = a.thrusterNames;
+   
+   // external STM setting
+   externalStmEntries = a.externalStmEntries;
+   externalStmSources = a.externalStmSources;
+   externalStmIndices = a.externalStmIndices;
+   
+   // set plates
+   plateNames        = a.plateNames;
+   for (Integer i = 0; i < plateList.size(); ++i)
+   {
+      for (Integer j = 0; j < a.plateList.size(); ++j)
+      {
+         if (plateList[i]->GetName() == a.plateList[j]->GetName())
+         {
+            ((Plate*)plateList[i])->operator=(*((Plate*)(a.plateList[j])));
+            break;
+         }
+      }
+   }
+   
+
+   constraintsList.clear();                                                                 // made changes by TUAN NGUYEN
+   for (Integer i = 0; i < a.constraintsList.size(); ++i)                                   // made changes by TUAN NGUYEN
+      constraintsList.push_back(a.constraintsList[i]);                                      // made changes by TUAN NGUYEN
+   areaCoefficientConstraintsList.clear();                                                  // made changes by TUAN NGUYEN
+   for (Integer i = 0; i < a.areaCoefficientConstraintsList.size(); ++i)                    // made changes by TUAN NGUYEN
+      areaCoefficientConstraintsList.push_back(a.areaCoefficientConstraintsList[i]);        // made changes by TUAN NGUYEN
+   currentConstraintIndex = a.currentConstraintIndex;                                       // made changes by TUAN NGUYEN
+   
 
    hardwareNames     = a.hardwareNames;
 //   hardwareList      = a.hardwareList;
@@ -887,7 +1075,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(=) about to delete all owned objects\n");
-      #endif
+   #endif
 
    // Preserve thrusters that are "turned on"
    StringArray activeThrusters;
@@ -903,7 +1091,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(=) about to clone all owned objects\n");
-      #endif
+   #endif
    CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem, a.hardwareList);              // made changes on 09/23/2014
 
    for (UnsignedInt i = 0; i < activeThrusters.size(); ++i)
@@ -922,27 +1110,37 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    BuildStateElementLabelsAndUnits();
 
    // resize the matrices first, then copy the contents
-   Integer r,c;
-
-   r = a.fullSTM.GetNumRows();
-   c = a.fullSTM.GetNumColumns();
-   fullSTM.SetSize(r,c);
+   fullSTM.SetSize(a.fullSTM.GetNumRows(), a.fullSTM.GetNumColumns());
    fullSTM = a.fullSTM;
+   
    stmIndices = a.stmIndices;
 
-   r = a.fullAMatrix.GetNumRows();
-   c = a.fullAMatrix.GetNumColumns();
-   fullAMatrix.SetSize(r,c);
+   fullAMatrix.SetSize(a.fullAMatrix.GetNumRows(), a.fullAMatrix.GetNumColumns()); 
    fullAMatrix = a.fullAMatrix;
 
    fullSTMRowCount = a.fullSTMRowCount;
 
+   srpShapeModel      = a.srpShapeModel;                    // made changes by TUAN NGUYEN
 
    spadSRPFile        = a.spadSRPFile;
    spadSrpFileFullPath = a.spadSrpFileFullPath;
    spadSRPScaleFactor = a.spadSRPScaleFactor;
+   spadSRPScaleFactorSigma  = a.spadSRPScaleFactorSigma;    // made changes by TUAN NGUYEN
    spadSRPReader      = NULL;
    spadBFCS           = NULL;
+   spadSRPInterpolationMethod = a.spadSRPInterpolationMethod;
+   
+   dragShapeModel       = a.dragShapeModel;                 // made changes by TUAN NGUYEN
+   spadDragFile         = a.spadDragFile;
+   spadDragFileFullPath = a.spadDragFileFullPath;
+   spadDragScaleFactor  = a.spadDragScaleFactor;
+   spadDragScaleFactorSigma = a.spadDragScaleFactorSigma;   // made changes by TUAN NGUYEN
+   spadDragReader       = NULL;
+   spadDragBFCS         = NULL;
+   spadDragInterpolationMethod = a.spadDragInterpolationMethod;
+
+   attitudeDynamics = a.attitudeDynamics;
+
    // We don't want to delete any ephem manager here or the event
    // location will not work
 //   if (ephemMgr) delete ephemMgr;
@@ -968,17 +1166,43 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
    // Set Cd covariance
    locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");
-   // Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag; 
-   Real Cd0 = coeffDrag / (1 + cdEpsilon);                                           // Cd0 = Cd/(1+Cd_epsilon)
-   Real Cd_EpsilonSigma = coeffDragSigma / Cd0;                                      // stdiv[Cd_epsilon] = stdiv[Cd]/Cd0
-   covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;     // var[Cd_epsilon] = (stdiv[Cd_epsilon])^2
+   Real Cd_EpsilonSigma, Cd0;                                                                       // made changes by TUAN NGUYEN
+   if (dragShapeModel == "Spherical")                                                               // made changes by TUAN NGUYEN
+   {                                                                                                // made changes by TUAN NGUYEN
+      //Cd0 = coeffDrag / (1 + cdEpsilon);                   // Cd0 = Cd/(1+Cd_epsilon)             // made changes by TUAN NGUYEN
+      Cd0 = coeffDrag;                                     // Note that: coeffDrag is Cd0           // made changes by TUAN NGUYEN
+      Cd_EpsilonSigma = coeffDragSigma / Cd0;              // stdiv[Cd_epsilon] = stdiv[Cd]/Cd0
+      covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;     // var[Cd_epsilon] = (stdiv[Cd_epsilon])^2
+   }                                                                                                // made changes by TUAN NGUYEN
+   else if (dragShapeModel == "SPADFile")                                                           // made changes by TUAN NGUYEN
+   {                                                                                                // made changes by TUAN NGUYEN
+      //Cd0 = spadDragScaleFactor / (1 + cdEpsilon);                                                // made changes by TUAN NGUYEN
+      Cd0 = spadDragScaleFactor;                             // spadDragScaleFactor is SpadCd0      // made changes by TUAN NGUYEN
+      Cd_EpsilonSigma = spadDragScaleFactorSigma / Cd0;    // stdiv[Cd_epsilon] = stdiv[Cd]/Cd0     // made changes by TUAN NGUYEN
+      covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;     // var[Cd_epsilon] = (stdiv[Cd_epsilon])^2
+   }                                                                                                // made changes by TUAN NGUYEN
+   //covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;     // var[Cd_epsilon] = (stdiv[Cd_epsilon])^2
+
    // Set Cr covariance
    locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");
-   // Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff; 
-   Real Cr0 = reflectCoeff / (1 + crEpsilon);                                        // Cr0 = Cr/(1+Cr_epsilon)
-   Real Cr_EpsilonSigma = reflectCoeffSigma / Cr0;                                   // stdiv[Cr_epsilon] = stdiv[Cr]/Cr0
-   covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;     // var[Cd_epsilon] = (stdiv[Cd_epsilon])^2
+   Real Cr_EpsilonSigma, Cr0;                                                                       // made changes by TUAN NGUYEN
+   if (srpShapeModel == "Spherical")                                                                // made changes by TUAN NGUYEN
+   {                                                                                                // made changes by TUAN NGUYEN
+      Cr0 = reflectCoeff / (1 + crEpsilon);                // Cr0 = Cr/(1+Cr_epsilon)
+      Cr_EpsilonSigma = reflectCoeffSigma / Cr0;           // stdiv[Cr_epsilon] = stdiv[Cr]/Cr0
+      covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;     // var[Cd_epsilon] = (stdiv[Cd_epsilon])^2
+   }                                                                                                // made changes by TUAN NGUYEN
+   else if (srpShapeModel == "SPADFile")                                                            // made changes by TUAN NGUYEN
+   {                                                                                                // made changes by TUAN NGUYEN
+      //Cr0 = spadSRPScaleFactor / (1 + crEpsilon);                                                 // made changes by TUAN NGUYEN
+      Cr0 = spadSRPScaleFactor;                       // Note that: spadSRPScaleFactor is SpadCr0   // made changes by TUAN NGUYEN
+      Cr_EpsilonSigma = spadSRPScaleFactorSigma / Cr0;     // stdiv[Cr_epsilon] = stdiv[Cr]/Cr0     // made changes by TUAN NGUYEN
+      covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;     // var[Cd_epsilon] = (stdiv[Cd_epsilon])^2
+   }                                                                                                // made changes by TUAN NGUYEN
+   //covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;     // var[Cd_epsilon] = (stdiv[Cd_epsilon])^2
 
+   runningCommandFlag = a.runningCommandFlag;         // made changes by TUAN NGUYEN
+   skipSTM = false;
 
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -1361,6 +1585,254 @@ const UnsignedIntArray& Spacecraft::GetEulerAngleSequence() const
    }
 }
 
+
+// made changes by TUAN NGUYEN
+//-------------------------------------------------------------------------
+// Rmatrix33 GetAttitudeRotationMatrix(GmatTime &epochGT)
+//-------------------------------------------------------------------------
+/**
+* This function is used to get rotation matrix from spacecraft's attitude
+* frame to the spacecraft's inertial frame at a given epoch.
+*
+* @param epochGT     time at which rotation matrix to specified
+* 
+* @return   rotation matrix from spacecraft's attitude frame to inertial frame
+*/
+//-------------------------------------------------------------------------
+Rmatrix33 Spacecraft::GetAttitudeRotationMatrix(GmatTime &epochGT)
+{
+   // Get rotation matrix from attitude frame to MJ2000Eq inertial frame (XI = [MT] * XB) 
+   return attitude->GetRotationMatrix(epochGT);
+}
+
+
+// made changes by TUAN NGUYEN
+//-------------------------------------------------------------------------
+// Rmatrix33 GetAttitudeRotationMatrixDerivative(GmatTime &epochGT)
+//-------------------------------------------------------------------------
+/**
+* This function is used to get derivative of the rotation matrix from 
+* spacecraft's attitude frame to the spacecraft's inertial frame at a 
+* given epoch.
+*
+* @param epochGT     time at which the derivative to specified
+*
+* @return   derivative of rotation matrix from spacecraft's attitude 
+*           frame to inertial frame
+*/
+//-------------------------------------------------------------------------
+std::vector<Rmatrix33> Spacecraft::GetAttitudeRotationMatrixDerivative(GmatTime &epochGT)
+{
+   CoordinateSystem *j2k = CoordinateSystem::CreateLocalCoordinateSystem("j2k", "MJ2000Eq",
+      origin, NULL, NULL, j2000Body, solarSystem);
+   std::vector<Rmatrix33> MTDeriv = attitude->GetRotationMatrixDerivative(epochGT, j2k);
+
+   delete j2k;
+   return MTDeriv;
+}
+
+
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// Rvector3 GetNPlateSRPReflectance(const Rvector3 &sunSC, Rmatrix33 &MT, GmatTime &epochGT)
+//------------------------------------------------------------------------------
+/**
+* Get spacecraft's SRP reflectance in inertial frame.
+*
+* @param sunSC      vector from the Sun to spacecraft in inertial frame
+* @param MT         rotation matrix from attitude frame (B-frame) to inertial frame (I-frame)
+* @param epochGT    time needed to specify nHat in NPlate history file
+*
+* @return           spacecraft's SRP reflectance presenting in inertial frame
+*/
+//------------------------------------------------------------------------------
+Rvector3 Spacecraft::GetNPlateSRPReflectance(const Rvector3 &sunSC, Rmatrix33 &MT, GmatTime &epochGT)
+{
+   // 1. Specify the Sun unit vector in inertial frame
+   Rvector3 sHatI = (-sunSC).GetUnitVector();
+   
+   ////// 2. Specify the Sun unit vector in spacecraft's attitude frame    // made changes by TUAN NGUYEN
+   ////Rvector3 sHatB = MT.Transpose() * sHatI;                            // made changes by TUAN NGUYEN
+
+   // 3. Specify total reflectance in spacecraft's attitude frame (B-frame) (Eq.18 SRP N-Plates MathSpec)
+
+   if (scInertialCS == NULL)
+   {
+      scInertialCS = CoordinateSystem::CreateLocalCoordinateSystem("scInertialCS", "MJ2000Eq", origin,
+         NULL, NULL, j2000Body, solarSystem);
+   }
+   
+   Rvector3 reflectance(0.0, 0.0, 0.0);                                   // made changes by TUAN NGUYEN
+   for (Integer i = 0; i < plateList.size(); ++i)
+   {
+      ((Plate*)plateList[i])->StoreSpacecraftInertialCoordinateSystem(scInertialCS);
+
+      ////Rvector3 plateReflectance = ((Plate*)plateList[i])->GetReflectance(sHatB, epochGT, MT);   // made changes by TUAN NGUYEN
+      Rvector3 plateReflectance = ((Plate*)plateList[i])->GetReflectanceI(sHatI, epochGT, MT);      // made changes by TUAN NGUYEN
+      reflectance = reflectance + plateReflectance;                                                 // made changes by TUAN NGUYEN
+   }
+
+   ////// 4. Convert reflectance to spacecraft's inertial frame           // made changes by TUAN NGUYEN
+   ////Rvector3 reflectanceI = MT * reflectance;                          // made changes by TUAN NGUYEN
+
+   ////return reflectanceI;                                               // made changes by TUAN NGUYEN
+   return reflectance;                                                    // made changes by TUAN NGUYEN
+}
+
+
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// Rvector3 GetNPlateSRPReflectance(const Rvector3 &sunSC, GmatTime &epochGT)
+//------------------------------------------------------------------------------
+/**
+* Get spacecraft's SRP reflectance in inertial frame.
+*
+* @param sunSC      vector from the Sun to spacecraft in inertial frame
+* @param epochGT    time needed to specify spacecraft's attitude and nHat in 
+*                       NPlate history file
+*
+* @return           spacecraft's SRP reflectance presenting in inertial frame
+*/
+//------------------------------------------------------------------------------
+Rvector3 Spacecraft::GetNPlateSRPReflectance(const Rvector3 &sunSC, GmatTime &epochGT)
+{
+   Rmatrix33 MT = GetAttitudeRotationMatrix(epochGT);
+   reflectance = GetNPlateSRPReflectance(sunSC, MT, epochGT);
+   
+   return reflectance;
+}
+
+
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// Rvector3 GetNPlateSRPReflectanceDerivative(const Rvector3 &sunSC, 
+//                                            GmatTime &epochGT)
+//------------------------------------------------------------------------------
+/**
+* Get spacecraft's SRP reflectance in inertial frame.
+*
+* @param sunSC      vector from the Sun to spacecraft in inertial frame
+* @param epochGT    time needed to specify spacecraft's attitude
+*
+* @return           spacecraft's SRP reflectance presenting in inertial frame
+*/
+//------------------------------------------------------------------------------
+std::vector<Rvector3> Spacecraft::GetNPlateSRPReflectanceDerivative(const Rvector3 &sunSC, GmatTime& epochGT)
+{
+   // Get spacecraft's attitude rotation matrix MT and its derivative [d/dX](MT)
+   Rmatrix33 MT = GetAttitudeRotationMatrix(epochGT);
+   std::vector<Rmatrix33> dMT = GetAttitudeRotationMatrixDerivative(epochGT);
+   
+   // Calculate spacecraft reflectance derivative
+   reflectanceDeriv.clear();
+   if (plateList.size() == 0)
+   {
+      for (Integer i = 0; i < 6; ++i)
+      {
+         Rvector3 zero(0.0, 0.0, 0.0);
+         reflectanceDeriv.push_back(zero);
+      }
+   }
+   else
+   {
+      // Create a MJ2000Eq coordinate system with origin at the center of j2000 body
+      if (scInertialCS == NULL)
+      {
+         scInertialCS = CoordinateSystem::CreateLocalCoordinateSystem("scInertialCS", "MJ2000Eq", origin,
+            NULL, NULL, j2000Body, solarSystem);
+      }
+      
+      StringArray variableNames;
+      for (Integer plateIndex = 0; plateIndex < plateList.size(); ++plateIndex)
+      {
+         ((Plate*)plateList[plateIndex])->StoreSpacecraftInertialCoordinateSystem(scInertialCS);
+
+         // Get a list of solve-fors for the plate plateList[plateIndex]
+         StringArray solvefors = ((Plate*)plateList[plateIndex])->GetSolveForList();        // made changes by TUAN NGUYEN
+
+         // Get plate reflectance derivative in I-frame
+         //std::vector<Rvector3> plateDerivI = ((Plate*)plateList[plateIndex])->GetReflectanceDerivative(sunSC, MT, dMT, epochGT);
+         std::vector<Rvector3> plateDerivI = ((Plate*)plateList[plateIndex])->GetReflectanceDerivativeI(sunSC, MT, dMT, epochGT);
+
+         // Accumulate all derivative
+         for (Integer stateIndex = 0; stateIndex < plateDerivI.size(); ++stateIndex)
+         {
+            if (stateIndex < 6)                     // derivative w.r.t. x, y, z, vx, vy, or vz
+            {
+               // Accumulate dA/dr and dA/dv
+               if (plateIndex == 0)
+               {
+                  // Append derivative for the first plate
+                  reflectanceDeriv.push_back(plateDerivI[stateIndex]);
+               }
+               else
+               {
+                  // Accumulate derivative w.r.t. spacecraft state (x,y,z,vx,vy,vz) for all other plates
+                  reflectanceDeriv[stateIndex] = reflectanceDeriv[stateIndex] + plateDerivI[stateIndex];
+               }
+            }
+            else                            // derivative w.r.t. a plate's parameter
+            {
+               // Accumulate dA/dPlateSolve-for
+               std::string sfName = "";
+               if ((stateIndex - 6) < solvefors.size())
+                  sfName = solvefors[stateIndex - 6];
+
+               bool append = true;
+
+               // constraint solve-for is the first solve-for in a constraint list. Initially we do not know it, so we set its name to ""
+               std::string constraintPlate = "";
+
+               // Get full name of a plate's solve-for
+               std::string sfFullName = plateList[plateIndex]->GetName() + "." + sfName;
+               for (Integer k1 = 0; k1 < constraintsList.size(); ++k1)
+               {
+                  for (Integer k2 = 1; k2 < constraintsList[k1].size(); ++k2)
+                  {
+                     // if that solve-for is in a list of constraint, then accumulate its derivative to the constraint solve-for
+                     if (sfFullName == constraintsList[k1][k2])
+                     {
+                        // Accumate for equal constraint
+                        constraintPlate = constraintsList[k1][0];
+                        for (Integer k3 = 0; k3 < variableNames.size(); ++k3)
+                        {
+                           if (variableNames[k3] == constraintPlate)
+                           {
+                              reflectanceDeriv[k3 + 6] = reflectanceDeriv[k3 + 6] + plateDerivI[stateIndex];
+                              break;
+                           }
+                        }
+                        append = false;
+                        break;
+                     }
+                  }
+                  if (append == false)
+                     break;
+               }
+
+               // append derivative for other solve-fors
+               if (append)
+               {
+                  reflectanceDeriv.push_back(plateDerivI[stateIndex]);
+                  std::string solveforName = plateList[plateIndex]->GetName() + "." + sfName;
+                  variableNames.push_back(solveforName);
+               }
+            }
+         }
+      }
+
+      if ((runningCommandFlag == 1)|| (runningCommandFlag == 2))
+      {
+         // When running simulation command or propagation command, only derivative w.r.t. spacecraft position and velocity are kept.
+         Integer numRemove = reflectanceDeriv.size() - 6;
+         for (Integer i = 0; i < numRemove; ++i)
+            reflectanceDeriv.pop_back();
+      }
+   }
+   return reflectanceDeriv;
+}
+
+
 //------------------------------------------------------------------------------
 // Rvector3 GetSPADSRPArea(const Real ep, const Rvector3 &sunVector)
 //------------------------------------------------------------------------------
@@ -1372,49 +1844,128 @@ Rvector3 Spacecraft::GetSPADSRPArea(const Real ep, const Rvector3 &sunVector)
       //if (spadSRPFile == "")
       if (spadSrpFileFullPath == "")
       {
-         std::string errmsg = "SPAD data requested for Spacecraft ";
+         std::string errmsg = "SPAD SRP data requested for Spacecraft ";
          errmsg            += instanceName + " but no SPAD file ";
          errmsg            += "has been provided.\n";
          throw SpaceObjectException(errmsg);
       }
       else
       {
-         spadSRPReader = new SPADFileReader();
+         spadSRPReader = new SPADFileReader("Area");
          //spadSRPReader->SetFile(spadSRPFile);
          spadSRPReader->SetFile(spadSrpFileFullPath);
+         spadSRPReader->SetInterpolator(spadSRPInterpolationMethod);
          spadSRPReader->Initialize();
       }
    }
    if (spadBFCS == NULL)
    {
       spadBFCS  = CoordinateSystem::CreateLocalCoordinateSystem("bfcs", "BodyFixed", this,
-                                    NULL, NULL, GetJ2000Body(), solarSystem, false);
+                                                                NULL, NULL, GetJ2000Body(), solarSystem, false);
       spadBFCS->SetAllowWithoutRates(true);
       spadBFCS->Initialize();
-      #ifdef DEBUG_SPAD_DATA
-         MessageInterface::ShowMessage(" -------> in SC, just created spadBFCS\n");
-      #endif
+#ifdef DEBUG_SPAD_DATA
+      MessageInterface::ShowMessage(" -------> in SC, just created spadBFCS\n");
+#endif
    }
-   #ifdef DEBUG_SPAD_DATA
-      MessageInterface::ShowMessage(" -------> in SC, input to GetSPADSRPArea sun-to-sat  = %12.10f  %12.10f  %12.10f\n",
-         sunVector[0], sunVector[1], sunVector[2]);
-   #endif
+#ifdef DEBUG_SPAD_DATA
+   MessageInterface::ShowMessage(" -------> in SC, input to GetSPADSRPArea sun-to-sat  = %12.10f  %12.10f  %12.10f\n",
+                                 sunVector[0], sunVector[1], sunVector[2]);
+#endif
    // Convert the sun-to-sat input vector to sat-to-sun
    Rvector6 sunBody, resI;
    Rvector6 sunSC(-sunVector[0], -sunVector[1], -sunVector[2], 0.0, 0.0, 0.0);
    // Convert the sat-to-sun vector to the body frame
    coordConverter.Convert(ep, sunSC, internalCoordSystem, sunBody, spadBFCS, true, true);
    Rvector3 sunBody3(sunBody[0], sunBody[1], sunBody[2]);
-   #ifdef DEBUG_SPAD_DATA
-      MessageInterface::ShowMessage(" -------> in SC, after conversion to BFCS, sat-to-sun-in-body = %12.10f  %12.10f  %12.10f\n",
-            sunBody3[0], sunBody3[1], sunBody3[2]);
-   #endif
-   Rvector3 result1 = spadSRPScaleFactor * spadSRPReader->GetSRPArea(sunBody3);
+#ifdef DEBUG_SPAD_DATA
+   MessageInterface::ShowMessage(" -------> in SC, after conversion to BFCS, sat-to-sun-in-body = %12.10f  %12.10f  %12.10f\n",
+                                 sunBody3[0], sunBody3[1], sunBody3[2]);
+#endif
+   bool wasItScaled = false;
+   Rvector3 result1 = spadSRPReader->GetSRPArea(sunBody3, wasItScaled);
+   
+   // Note that: spadSRPScaleFactor is SpadCr0 and result1 = SPAD_Cr0 * (1+ CrEpsilon) * SPADSRP_Area 
+   //result1 = spadSRPScaleFactor * result1;                                // made changes by TUAN NGUYEN
+   result1 = spadSRPScaleFactor * (1+crEpsilon) * result1;                  // made changes by TUAN NGUYEN
+
    Rvector6 res6(result1[0], result1[1], result1[2], 0.0,0.0,0.0);
    // Convert the result back to inertial
    coordConverter.Convert(ep, res6, spadBFCS, resI, internalCoordSystem, true, true);
    Rvector3 result(resI[0], resI[1], resI[2]);
+   
+   return result;
+}
 
+//------------------------------------------------------------------------------
+// Rvector3 GetSPADDragArea(const Real ep, const Rvector3 &velVector) // ***
+//------------------------------------------------------------------------------
+Rvector3 Spacecraft::GetSPADDragArea(const Real ep, const Rvector3 &velVector)
+{
+   if (spadDragReader == NULL)
+   {
+      // Changed to use full path spad file (LOJ: 2014.06.24)
+      //if (spadDragFile == "")
+      if (spadDragFileFullPath == "")
+      {
+         std::string errmsg = "SPAD drag data requested for Spacecraft ";
+         errmsg            += instanceName + " but no SPAD file ";
+         errmsg            += "has been provided.\n";
+         throw SpaceObjectException(errmsg);
+      }
+      else
+      {
+         spadDragReader = new SPADFileReader("Area"); // "Drag"); ???
+         //spadSRPReader->SetFile(spadSRPFile);
+         spadDragReader->SetFile(spadDragFileFullPath);
+         spadDragReader->SetInterpolator(spadDragInterpolationMethod);
+         spadDragReader->Initialize();
+      }
+   }
+   if (spadDragBFCS == NULL)
+   {
+      spadDragBFCS  = CoordinateSystem::CreateLocalCoordinateSystem(
+                      "bfcsDrag", "BodyFixed", this,
+                      NULL, NULL, GetJ2000Body(), solarSystem, false);
+      spadDragBFCS->SetAllowWithoutRates(true);
+      spadDragBFCS->Initialize();
+      #ifdef DEBUG_SPAD_DATA
+         MessageInterface::ShowMessage(
+                        " -------> in SC, just created spadDragBFCS\n");
+      #endif
+   }
+   #ifdef DEBUG_SPAD_DATA
+      MessageInterface::ShowMessage(
+                     " -------> in SC, input to GetSPADDragArea vel vector "
+                     " = %12.10f  %12.10f  %12.10f\n",
+                     velVector[0], velVector[1], velVector[2]);
+   #endif
+   // Convert the sun-to-sat input vector to sat-to-sun
+   Rvector6 velBody, resI;
+   Rvector6 velSC(-velVector[0], -velVector[1], -velVector[2], 0.0, 0.0, 0.0);
+   // Convert the sat-to-sun vector to the body frame
+   coordConverter.Convert(ep, velSC, internalCoordSystem, velBody, spadDragBFCS,
+                          true, true);
+   Rvector3 velBody3(velBody[0], velBody[1], velBody[2]);
+   #ifdef DEBUG_SPAD_DATA
+      MessageInterface::ShowMessage(
+                     " -------> in SC, after conversion to BFCS (drag), "
+                     "velocity-in-body = %12.10f  %12.10f  %12.10f\n",
+                     velBody3[0], velBody3[1], velBody3[2]);
+   #endif
+   bool wasItScaled = false;
+   Rvector3 result1 = spadDragReader->GetDragArea(velBody3, wasItScaled);
+
+   // Note that: spadDragScaleFactor is SpadCd0 and result1 = SPAD_Cd0 * (1+CdEpsilon) * SPADDrag_Area
+   //result1 = spadDragScaleFactor * result1;                         // made changes by TUAN NGUYEN
+   result1 = spadDragScaleFactor * (1+cdEpsilon) * result1;           // made changes by TUAN NGUYEN
+   
+   Rvector6 res6(result1[0], result1[1], result1[2], 0.0,0.0,0.0);
+   // Convert the result back to inertial
+   coordConverter.Convert(ep, res6, spadDragBFCS, resI, internalCoordSystem,
+                          true, true);
+   Rvector3 result(resI[0], resI[1], resI[2]);
+   
    return result;
 }
 
@@ -1627,7 +2178,8 @@ const std::string Spacecraft::GetAttributeCommentLine(Integer index)
    #endif
    
    // Return attribute comment for multiple state reps here
-   if (((paramId >= CART_X) && (paramId < EndMultipleReps)) || (paramId == ATTITUDE))
+   if (((paramId >= CART_X) && (paramId < EndMultipleReps)) ||
+       (paramId == ATTITUDE))
    {
       if (attribCommentLineMap.find(text) != attribCommentLineMap.end())
          comment = attribCommentLineMap[text];
@@ -1642,7 +2194,8 @@ const std::string Spacecraft::GetAttributeCommentLine(Integer index)
    else if (paramId >= ATTITUDE_ID_OFFSET)
    {
       if (attitude)
-         comment = attitude->GetAttributeCommentLine(paramId - ATTITUDE_ID_OFFSET);
+         comment = attitude->GetAttributeCommentLine(
+                             paramId - ATTITUDE_ID_OFFSET);
       
       #ifdef DEBUG_ATTRIB_COMMENT
       MessageInterface::ShowMessage
@@ -1678,7 +2231,8 @@ void Spacecraft::SetAttributeCommentLine(Integer index,
    #ifdef DEBUG_ATTRIB_COMMENT
    MessageInterface::ShowMessage("   => parameter text='%s'\n", text.c_str());
    MessageInterface::ShowMessage
-      ("   CART_X=%d, EndMultipleReps=%d, ATTITUDE=%d\n", CART_X, EndMultipleReps, ATTITUDE);
+      ("   CART_X=%d, EndMultipleReps=%d, ATTITUDE=%d\n", CART_X,
+       EndMultipleReps, ATTITUDE);
    #endif
    
    // Save attribute comment for multiple state reps here
@@ -1724,7 +2278,8 @@ const std::string Spacecraft::GetInlineAttributeComment(Integer index)
    #endif
    
    // Return inline attribute comment for multiple state reps here
-   if (((paramId >= CART_X) && (paramId < EndMultipleReps)) || (paramId == ATTITUDE))
+   if (((paramId >= CART_X) && (paramId < EndMultipleReps)) ||
+       (paramId == ATTITUDE))
    {
       if (inlineAttribCommentMap.find(text) != inlineAttribCommentMap.end())
          comment = inlineAttribCommentMap[text];
@@ -1824,6 +2379,8 @@ std::string Spacecraft::GetRefObjectName(const UnsignedInt type) const
       return coordSysName;
    }
    if (type == Gmat::ATTITUDE)   return "";   // Attitude objects don't have names
+   if (type == GmatType::GetTypeId("ProcessNoiseModel"))
+      return processNoiseName;
 
    return SpaceObject::GetRefObjectName(type);
 }
@@ -1858,6 +2415,7 @@ const ObjectTypeArray& Spacecraft::GetRefObjectTypeArray()
 
    refObjectTypes.push_back(Gmat::COORDINATE_SYSTEM);
    refObjectTypes.push_back(Gmat::HARDWARE);  // includes PowerSystem
+
    if (attitude)
    {
       ObjectTypeArray attRefObjTypes = attitude->GetRefObjectTypeArray();
@@ -1867,6 +2425,10 @@ const ObjectTypeArray& Spacecraft::GetRefObjectTypeArray()
    }
    // Now Attitude is local object it will be created all the time
    //refObjectTypes.push_back(Gmat::ATTITUDE);
+   refObjectTypes.push_back(GmatType::GetTypeId("ProcessNoiseModel"));
+
+   // for adding Plate objects                                          // made changes by TUAN NGUYEN
+   refObjectTypes.push_back(Gmat::PLATE);                               // made changes by TUAN NGUYEN
 
    return refObjectTypes;
 }
@@ -1932,6 +2494,9 @@ Spacecraft::GetRefObjectNameArray(const UnsignedInt type)
       // Add other hardware names and it's ref. object names
       fullList.insert(fullList.end(), hardwareNames.begin(), hardwareNames.end());
 
+      // Add plate names                                                         // made changes by TUAN NGUYEN
+      fullList.insert(fullList.end(), plateNames.begin(), plateNames.end());     // made changes by TUAN NGUYEN
+                                                                                 
       // Add Attitude's ref. object names
 //      std::string attRefObjName = attitude->GetRefObjectName(type);
 //      if (find(fullList.begin(), fullList.end(), attRefObjName) == fullList.end())
@@ -1943,6 +2508,9 @@ Spacecraft::GetRefObjectNameArray(const UnsignedInt type)
          if (find(fullList.begin(), fullList.end(), (*j)) == fullList.end())
             fullList.push_back(*j);
       }
+
+      // Add Process Noise Model
+      fullList.push_back(processNoiseName);
 
       #ifdef DEBUG_SC_REF_OBJECT
       MessageInterface::ShowMessage
@@ -2028,6 +2596,12 @@ Spacecraft::GetRefObjectNameArray(const UnsignedInt type)
          return fullList;
       }
 
+      if (type == Gmat::PLATE)                      // made changes by TUAN NGUYEN
+      {                                             // made changes by TUAN NGUYEN
+         fullList = plateNames;                     // made changes by TUAN NGUYEN
+         return fullList;                           // made changes by TUAN NGUYEN
+      }                                             // made changes by TUAN NGUYEN
+
       if (type == Gmat::COORDINATE_SYSTEM)
       {
          // Add Spacecraft's CoordinateSystem name
@@ -2058,6 +2632,13 @@ Spacecraft::GetRefObjectNameArray(const UnsignedInt type)
             MessageInterface::ShowMessage("   '%s'\n", fullList[i].c_str());
          #endif
 
+         return fullList;
+      }
+
+      if (type == GmatType::GetTypeId("ProcessNoiseModel"))
+      {
+         if (processNoiseName != "")
+            fullList.push_back(processNoiseName);
          return fullList;
       }
    }
@@ -2135,6 +2716,18 @@ GmatBase* Spacecraft::GetRefObject(const UnsignedInt type,
    // the search in the tank and thruster name lists only need to be coded once.
    switch (type)
    {
+      case Gmat::UNKNOWN_OBJECT:
+      {
+         ObjectArray objList = GetRefObjectArray(Gmat::UNKNOWN_OBJECT);
+         for (Integer i = 0; i < objList.size(); ++i)
+         {
+            if (objList[i] && name == objList[i]->GetFullName())
+               return objList[i];
+         }
+         return NULL;
+      }
+      break;
+
       case Gmat::COORDINATE_SYSTEM:
          return coordinateSystem;
          break;
@@ -2145,6 +2738,16 @@ GmatBase* Spacecraft::GetRefObject(const UnsignedInt type,
          "In SC::GetRefObject - returning Attitude pointer <%p>\n", attitude);
          #endif
          return attitude;
+         break;
+
+      // made changes by TUAN NGUYEN
+      case Gmat::PLATE:
+         for (Integer i = 0; i < plateList.size(); ++i)
+         {
+            if (plateList[i]->GetName() == name)
+               return plateList[i];
+         }
+         return NULL;
          break;
 
       case Gmat::HARDWARE:
@@ -2189,8 +2792,12 @@ GmatBase* Spacecraft::GetRefObject(const UnsignedInt type,
          // Other Hardware cases go here...
 
          return NULL;      // Hardware requested, but not in the hardware lists
-
       default:
+
+         // Handle unknown types from plugins
+         if (type == GmatType::GetTypeId("ProcessNoiseModel"))
+            return processNoiseModel;
+
          break;
    }
 
@@ -2231,6 +2838,47 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const UnsignedInt type,
             originEqRadius   = ((CelestialBody*) origin)->GetEquatorialRadius();
          }
       }
+   }
+
+   // made changes by TUAN NGUYEN
+   // work on plates
+   if ((type == Gmat::PLATE)||(obj->IsOfType(Gmat::PLATE)))
+   {
+      #ifdef DEBUG_SC_REF_OBJECT
+         MessageInterface::ShowMessage
+            ("Spacecraft::SetRefObject() plateList.size()=%d\n", plateList.size());
+      #endif
+      
+      std::string name = obj->GetName();
+      bool found = false;
+      for (Integer i = 0; i < plateNames.size(); ++i)
+      {
+         if (name == plateNames[i])
+         {
+            found = true;
+            break;
+         }
+      }
+      if (found)
+      {
+         found = false;
+         for (Integer i = 0; i < plateList.size(); ++i)
+         {
+            if (name == plateList[i]->GetName())
+            {
+               found = true;
+               break;
+            }
+         }
+
+         if (!found)
+         {
+            GmatBase* clone = ((Plate*)obj)->Clone();
+            clone->SetFullName(GetName() + "." + clone->GetName());
+            plateList.push_back(clone);
+         }
+      }
+      return true;
    }
 
    // now work on hardware
@@ -2479,6 +3127,16 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const UnsignedInt type,
 
       return true;
    }
+   else if (type == GmatType::GetTypeId("ProcessNoiseModel"))
+   {
+      // If noise model name is not the spacecraft noise model name, we are done.
+      if (objName != processNoiseName)
+         return true;
+
+      processNoiseModel = obj;
+
+      return true;
+   }
    else if (type == Gmat::ATTITUDE)
    {
       if ((attitude != NULL) && (attitude != (Attitude*) obj))
@@ -2589,6 +3247,24 @@ ObjectArray& Spacecraft::GetRefObjectArray(const UnsignedInt type)
       powerSysList.push_back(powerSystem);
       return powerSysList;
    }
+   if (type == Gmat::PLATE)                                  // made changes by TUAN NGUYEN
+      return plateList;                                      // made changes by TUAN NGUYEN
+
+   if (type == Gmat::UNKNOWN_OBJECT)                         // made changes by TUAN NGUYEN
+   {                                                         // made changes by TUAN NGUYEN
+      static ObjectArray objList;                            // made changes by TUAN NGUYEN
+      objList = plateList;                                   // made changes by TUAN NGUYEN
+      for (Integer i = 0; i < hardwareList.size(); ++i)      // made changes by TUAN NGUYEN
+         objList.push_back(hardwareList[i]);                 // made changes by TUAN NGUYEN
+      for (Integer i = 0; i < tanks.size(); ++i)             // made changes by TUAN NGUYEN
+         objList.push_back(tanks[i]);                        // made changes by TUAN NGUYEN
+      for (Integer i = 0; i < thrusters.size(); ++i)         // made changes by TUAN NGUYEN
+         objList.push_back(thrusters[i]);                    // made changes by TUAN NGUYEN
+
+      objList.push_back(powerSystem);                        // made changes by TUAN NGUYEN
+      return objList;                                        // made changes by TUAN NGUYEN
+   }                                                         // made changes by TUAN NGUYEN
+
    return SpaceObject::GetRefObjectArray(type);
 }
 
@@ -2618,6 +3294,9 @@ ObjectArray& Spacecraft::GetRefObjectArray(const std::string& typeString)
       powerSysList.push_back(powerSystem);
       return powerSysList;
    }
+   if (typeString == "Plate")                           // made changes by TUAN NGUYEN
+      return plateList;                                 // made changes by TUAN NGUYEN
+
    return SpaceObject::GetRefObjectArray(typeString);
 }
 
@@ -2633,8 +3312,9 @@ ObjectArray& Spacecraft::GetRefObjectArray(const std::string& typeString)
  * @return the parameter ID, or -1 if there is no associated ID.
  */
 //---------------------------------------------------------------------------
-Integer Spacecraft::GetParameterID(const std::string &str) const
+Integer Spacecraft::GetParameterID(const std::string &strInput) const
 {
+   std::string str = strInput;
    #ifdef DEBUG_PARM_PERFORMANCE
       MessageInterface::ShowMessage("Spacecraft::GetParameterID(%s)\n", str.c_str());
    #endif
@@ -2644,6 +3324,30 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
 
    try
    {
+      size_t pos = str.find_last_of('.');
+      if (pos != str.npos)
+      {
+         //seach for str is in the list of equal constraint or not
+         bool found = false;
+         for (Integer i = 0; i < constraintsList.size(); ++i)
+         {
+            for (Integer j = 1; j < constraintsList[i].size(); ++j)
+            {
+               if (str == constraintsList[i][j])
+               {
+                  str = constraintsList[i][0];           // due to equalilty constraint, the first parameter in the constraint list is chosen as a solve-for
+                  found = true;
+                  break;
+               }
+            }
+            if (found)
+               break;
+         }
+      }
+
+      if (str == "FullSTMRowCount")          // made changes by TUAN NGUYEN
+         return FULL_STM_ROWCOUNT;
+
       // handle AddHardware parameter:
       if (str == "AddHardware")
          return ADD_HARDWARE;
@@ -2696,6 +3400,11 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
       if (str == "CartesianVZ")  return CARTESIAN_VZ;
 
       if (str == "KeplerianState") return CARTESIAN_X;
+
+      // Could be an external solve-for parameter
+      for (UnsignedInt i = 0; i < externalStmEntries.size(); ++i)
+         if (str == externalStmEntries[i])
+            return externalStmIndices[i];
 
       // check for hardware object
       if (hardwareNames.size() != 0)
@@ -2821,7 +3530,8 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
       return true;
    }
 
-   if (id == MODEL_FILE_FULL_PATH || id == SPAD_SRP_FILE_FULL_PATH)
+   if (id == MODEL_FILE_FULL_PATH || id == SPAD_SRP_FILE_FULL_PATH ||
+       id == SPAD_DRAG_FILE_FULL_PATH)
       return true;
    
    if ((id > MODEL_FILE) && (id < MODEL_MAX))
@@ -2847,6 +3557,13 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
    // if (id == STATE_TYPE) return true;   when deprecated stuff goes away
 
    if (id == ESTIMATION_STATE_TYPE_ID) return true;
+
+   // Make read-only if type is not registered
+   if (id == PROCESS_NOISE_MODEL_ID)
+      return GmatType::GetTypeId("ProcessNoiseModel") == Gmat::UNKNOWN_OBJECT;
+
+   // Make this parameter read-only
+   if (id == ADD_EQUAL_CONSTRAINT) return true;
 
    return SpaceObject::IsParameterReadOnly(id);
 }
@@ -2891,6 +3608,9 @@ bool Spacecraft::IsParameterCommandModeSettable(const Integer id) const
        (id == FRAME_SPICE_KERNEL_NAME))
       return false;
 
+   if (id == SOLVEFORS)                       // made changes by TUAN NGUYEN
+      return false;                           // made changes by TUAN NGUYEN
+
    return true;
 }
 
@@ -2913,7 +3633,7 @@ bool Spacecraft::ParameterAffectsDynamics(const Integer id) const
       return true;
 
    //if (includeCartesianState > 0)
-   if (isManeuvering)
+   if (isManeuvering || attitudeDynamics)
    {
       if (id == CARTESIAN_X)
          return true;
@@ -3029,6 +3749,11 @@ std::string Spacecraft::GetParameterText(const Integer id) const
       if (attitude)
          return attitude->GetParameterText(id - ATTITUDE_ID_OFFSET);
    }
+
+   // Could be an external solve-for parameter
+   for (UnsignedInt i = 0; i < externalStmEntries.size(); ++i)
+      if (id == externalStmIndices[i])
+         return externalStmEntries[i];
 
    #ifdef DEBUG_SC_PARAMETER_TEXT
    MessageInterface::ShowMessage(
@@ -3157,13 +3882,50 @@ Real Spacecraft::GetRealParameter(const Integer id) const
    if (id == DRY_MASS_ID)   return dryMass;
 
    if (id == CD_ID)
-      return coeffDrag * (1.0 + cdEpsilon);
+   {                                                      // made changes by TUAN NGUYEN
+      // It returns value of Cd (not Cd0)
+      if (dragShapeModel == "Spherical")                  // made changes by TUAN NGUYEN
+         return coeffDrag * (1.0 + cdEpsilon);    // It returns Cd = Cd0 * (1+CdEpsilon)
+      else                                                // made changes by TUAN NGUYEN
+         return coeffDrag;                                // made changes by TUAN NGUYEN
+   }                                                      // made changes by TUAN NGUYEN
 
    if (id == CR_ID)
-      return reflectCoeff * (1.0 + crEpsilon);
+   {                                                      // made changes by TUAN NGUYEN
+      // It returns value of Cr (not Cr0)
+      if (srpShapeModel == "Spherical")                   // made changes by TUAN NGUYEN
+         return reflectCoeff * (1.0 + crEpsilon);  // It returns Cr = Cr0 * (1+CrEpsilon)
+      else                                                // made changes by TUAN NGUYEN
+         return reflectCoeff;                             // made changes by TUAN NGUYEN
+   }                                                      // made changes by TUAN NGUYEN
    
    if (id == CD_SIGMA_ID)   return coeffDragSigma;
    if (id == CR_SIGMA_ID)   return reflectCoeffSigma;
+
+   if (id == SPAD_DRAG_SCALE_FACTOR)                      // made changes by TUAN NGUYEN
+   {                                                      // made changes by TUAN NGUYEN
+      // It returns SpadCd (not SpadCd0)
+      if (dragShapeModel == "SPADFile")                   // made changes by TUAN NGUYEN
+         return spadDragScaleFactor * (1.0 + cdEpsilon);  // made changes by TUAN NGUYEN
+      else                                                // made changes by TUAN NGUYEN
+         return spadDragScaleFactor;                      // made changes by TUAN NGUYEN
+   }                                                      // made changes by TUAN NGUYEN
+
+   if (id == SPAD_SRP_SCALE_FACTOR)                       // made changes by TUAN NGUYEN
+   {                                                      // made changes by TUAN NGUYEN
+      // It returns SpadCr (not SpadCr0)
+      if (srpShapeModel == "SPADFile")                    // made changes by TUAN NGUYEN
+         return spadSRPScaleFactor * (1.0 + crEpsilon);   // made changes by TUAN NGUYEN
+      else                                                // made changes by TUAN NGUYEN
+         return spadSRPScaleFactor;                       // made changes by TUAN NGUYEN
+   }                                                      // made changes by TUAN NGUYEN
+
+   if (id == SPAD_DRAG_SCALE_FACTOR_NOISESIGMA)           // made changes by TUAN NGUYEN
+      return spadDragScaleFactorSigma;                    // made changes by TUAN NGUYEN
+
+   if (id == SPAD_SRP_SCALE_FACTOR_NOISESIGMA)            // made changes by TUAN NGUYEN
+      return spadSRPScaleFactorSigma;                     // made changes by TUAN NGUYEN
+
 
    if (id == DRAG_AREA_ID)  return dragArea;
    if (id == SRP_AREA_ID)   return srpArea;
@@ -3189,8 +3951,10 @@ Real Spacecraft::GetRealParameter(const Integer id) const
          return attitude->GetRealParameter(id - ATTITUDE_ID_OFFSET);
       }
 
-   if (id == SPAD_SRP_SCALE_FACTOR) return spadSRPScaleFactor;
-
+   //if (id == SPAD_SRP_SCALE_FACTOR) return spadSRPScaleFactor;        // made changes by TUAN NGUYEN
+   
+   //if (id == SPAD_DRAG_SCALE_FACTOR) return spadDragScaleFactor;      // made changes by TUAN NGUYEN
+   
    if (id == MODEL_OFFSET_X)     return modelOffsetX;
    if (id == MODEL_OFFSET_Y)     return modelOffsetY;
    if (id == MODEL_OFFSET_Z)     return modelOffsetZ;
@@ -3268,29 +4032,88 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 
    if (id == DRY_MASS_ID)
    {
-      parmsChanged = true;
-      return SetRealParameter("DryMass", value);
+      //parmsChanged = true;                                   // made changes by TUAN NGUYEN
+      //return SetRealParameter("DryMass", value);             // made changes by TUAN NGUYEN
+
+      if (value >= 0.0)                                        // made changes by TUAN NGUYEN
+         dryMass = value;                                      // made changes by TUAN NGUYEN
+      else                                                     // made changes by TUAN NGUYEN
+      {                                                        // made changes by TUAN NGUYEN
+         SpaceObjectException soe("");                         // made changes by TUAN NGUYEN
+         soe.SetDetails(errorMessageFormat.c_str(),            // made changes by TUAN NGUYEN
+            GmatStringUtil::ToString(value, 16).c_str(),       // made changes by TUAN NGUYEN
+            "DryMass", "Real Number >= 0.0");                  // made changes by TUAN NGUYEN
+         throw soe;                                            // made changes by TUAN NGUYEN
+      }                                                        // made changes by TUAN NGUYEN
+      parmsChanged = true;                                     // made changes by TUAN NGUYEN
+      return dryMass;                                          // made changes by TUAN NGUYEN
    }
 
    if (id == CD_ID)
    {
-      parmsChanged = true;
-      return SetRealParameter("Cd",value);
+      if ((value >= 0.0) || (constrainCd == false))            // made changes by TUAN NGUYEN
+      {                                                        // made changes by TUAN NGUYEN
+         coeffDrag = value;                                    // made changes by TUAN NGUYEN
+         cdEpsilon = 0.0;                                      // made changes by TUAN NGUYEN
+         if (value < 0.0)                                      // made changes by TUAN NGUYEN
+            MessageInterface::ShowMessage("Warning: The Cd value %lf is "      // made changes by TUAN NGUYEN
+            "outside of the expected range of 0.0 <= Cd\n", value);            // made changes by TUAN NGUYEN
+      }                                                        // made changes by TUAN NGUYEN
+      else                                                     // made changes by TUAN NGUYEN
+      {                                                        // made changes by TUAN NGUYEN
+         SpaceObjectException soe("");                         // made changes by TUAN NGUYEN
+         soe.SetDetails(errorMessageFormat.c_str(),            // made changes by TUAN NGUYEN
+            GmatStringUtil::ToString(value, 16).c_str(),       // made changes by TUAN NGUYEN
+            "Cd", "Real Number >= 0.0");                       // made changes by TUAN NGUYEN
+         throw soe;                                            // made changes by TUAN NGUYEN
+      }                                                        // made changes by TUAN NGUYEN
+      parmsChanged = true;                                     // made changes by TUAN NGUYEN
+      return coeffDrag;                                        // made changes by TUAN NGUYEN
    }
+
    if (id == CR_ID)
    {
-      parmsChanged = true;
-      return SetRealParameter("Cr",value);
+      if ((value >= 0.0) || (constrainCr == false))   // GMT-6523          // made changes by TUAN NGUYEN
+      {                                                                    // made changes by TUAN NGUYEN
+         reflectCoeff = value;                                             // made changes by TUAN NGUYEN
+         crEpsilon = 0.0;                                                  // made changes by TUAN NGUYEN
+         if ((value < 0.0) || (value > 2.0))                               // made changes by TUAN NGUYEN
+            MessageInterface::ShowMessage("Warning: The Cr value %lf is "  // made changes by TUAN NGUYEN
+            "outside of the expected range of 0.0 <= Cr <= 2.0\n", value); // made changes by TUAN NGUYEN
+      }                                                                    // made changes by TUAN NGUYEN
+      else                                                                 // made changes by TUAN NGUYEN
+      {                                                                    // made changes by TUAN NGUYEN
+         SpaceObjectException soe("");                                     // made changes by TUAN NGUYEN
+         soe.SetDetails(errorMessageFormat.c_str(),                        // made changes by TUAN NGUYEN
+            GmatStringUtil::ToString(value, 16).c_str(),                   // made changes by TUAN NGUYEN
+            "Cr", "0.0 <= Real");                                          // made changes by TUAN NGUYEN
+         throw soe;                                                        // made changes by TUAN NGUYEN
+      }                                                                    // made changes by TUAN NGUYEN
+      parmsChanged = true;                                                 // made changes by TUAN NGUYEN
+      return reflectCoeff;                                                 // made changes by TUAN NGUYEN
    }
+
    if (id == CD_SIGMA_ID)
    {
       if (value <= 0.0)
          throw SpaceObjectException("Error: a nonpositive number was set to CrSigma. A valid value has to be a positive number.\n");
       
       coeffDragSigma = value;
-      // Real CdEpsilonSigma = coeffDragSigma / coeffDrag; 
-      Real Cd0 = coeffDrag / (1 + cdEpsilon);                                      // Cd0 = Cd/(1+Cd_epsilon)
-      Real CdEpsilonSigma = coeffDragSigma / Cd0;                                  // stdiv[Cd_epsilon] = stdiv[Cd] / Cd0
+      
+      Real CdEpsilonSigma, Cd0;                                                                       // made changes by TUAN NGUYEN
+      if (dragShapeModel == "Spherical")                                                              // made changes by TUAN NGUYEN
+      {                                                                                               // made changes by TUAN NGUYEN
+         //Cd0 = coeffDrag / (1 + cdEpsilon);                   // Cd0 = Cd/(1+Cd_epsilon)            // made changes by TUAN NGUYEN
+         Cd0 = coeffDrag;                                     // Note that: coeffDrag is Cd0          // made changes by TUAN NGUYEN
+         CdEpsilonSigma = coeffDragSigma / Cd0;               // stdiv[Cd_epsilon] = stdiv[Cd] / Cd0
+      }                                                                                               // made changes by TUAN NGUYEN
+      else if (dragShapeModel == "SPADFile")                                                          // made changes by TUAN NGUYEN
+      {                                                                                               // made changes by TUAN NGUYEN
+         //Cd0 = spadDragScaleFactor / (1 + cdEpsilon);                                               // made changes by TUAN NGUYEN
+         Cd0 = spadDragScaleFactor;         // Note that: spadDragScaleFactor id SpadCd0              // made changes by TUAN NGUYEN
+         CdEpsilonSigma = spadDragScaleFactorSigma / Cd0;     // stdiv[Cd_epsilon] = stdiv[Cd] / Cd0  // made changes by TUAN NGUYEN
+      }                                                                                               // made changes by TUAN NGUYEN
+
       Integer locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");
       covariance(locationStart, locationStart) = CdEpsilonSigma * CdEpsilonSigma;  // var[Cd_epsilon] = (stdiv[Cd_epsilon])^2
 
@@ -3302,9 +4125,21 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
          throw SpaceObjectException("Error: a nonpositive number was set to CdSigma. A valid value has to be a positive number.\n");
 
       reflectCoeffSigma = value;
-      // Real CrEpsilonSigma = reflectCoeffSigma / reflectCoeff; 
-      Real Cr0 = reflectCoeff / (1 + crEpsilon);                                    // Cr0 = Cr/(1+Cr_epsilon)
-      Real CrEpsilonSigma = reflectCoeffSigma / Cr0;                                // stdiv[Cr_epsilon] = stdiv[Cr]/Cr0
+      
+      Real CrEpsilonSigma, Cr0;                                                                  // made changes by TUAN NGUYEN
+      if (srpShapeModel == "Spherical")                                                          // made changes by TUAN NGUYEN
+      {                                                                                          // made changes by TUAN NGUYEN
+         //Cr0 = reflectCoeff / (1 + crEpsilon);             // Cr0 = Cr/(1+Cr_epsilon)          // made changes by TUAN NGUYEN
+         Cr0 = reflectCoeff;                               // Note that: reflectCoeff is Cr0     // made changes by TUAN NGUYEN
+         CrEpsilonSigma = reflectCoeffSigma / Cr0;         // stdiv[Cr_epsilon] = stdiv[Cr]/Cr0
+      }                                                                                          // made changes by TUAN NGUYEN
+      else if (srpShapeModel == "SPADFile")                                                      // made changes by TUAN NGUYEN
+      {                                                                                          // made changes by TUAN NGUYEN
+         //Cr0 = spadSRPScaleFactor / (1 + crEpsilon);       // Cr0 = Cr/(1+Cr_epsilon)          // made changes by TUAN NGUYEN
+         Cr0 = spadSRPScaleFactor;       // Note that: spadSRPScaleFactor is Cr0                 // made changes by TUAN NGUYEN
+         CrEpsilonSigma = spadSRPScaleFactorSigma / Cr0;   // stdiv[Cr_epsilon] = stdiv[Cr]/Cr0  // made changes by TUAN NGUYEN
+      }                                                                                          // made changes by TUAN NGUYEN
+
       Integer locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");
       covariance(locationStart, locationStart) = CrEpsilonSigma * CrEpsilonSigma;   // var[Cr_epsilon] = (stdiv[Cr_epsilon])^2
 
@@ -3313,17 +4148,50 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 
    if (id == DRAG_AREA_ID)
    {
-      parmsChanged = true;
-      return SetRealParameter("DragArea",value);
+      //parmsChanged = true;                                   // made changes by TUAN NGUYEN
+      //return SetRealParameter("DragArea",value);             // made changes by TUAN NGUYEN
+
+      if (value >= 0.0)                                        // made changes by TUAN NGUYEN
+         dragArea = value;                                     // made changes by TUAN NGUYEN
+      else                                                     // made changes by TUAN NGUYEN
+      {                                                        // made changes by TUAN NGUYEN
+         SpaceObjectException soe("");                         // made changes by TUAN NGUYEN
+         soe.SetDetails(errorMessageFormat.c_str(),            // made changes by TUAN NGUYEN
+            GmatStringUtil::ToString(value, 16).c_str(),       // made changes by TUAN NGUYEN
+            "DragArea", "Real Number >= 0.0");                 // made changes by TUAN NGUYEN
+         throw soe;                                            // made changes by TUAN NGUYEN
+      }                                                        // made changes by TUAN NGUYEN
+      parmsChanged = true;                                     // made changes by TUAN NGUYEN
+      return dragArea;                                         // made changes by TUAN NGUYEN
    }
+
    if (id == SRP_AREA_ID)
    {
-      parmsChanged = true;
-      return SetRealParameter("SRPArea",value);
+      //parmsChanged = true;                                   // made changes by TUAN NGUYEN
+      //return SetRealParameter("SRPArea",value);              // made changes by TUAN NGUYEN
+
+      if (value >= 0.0)                                        // made changes by TUAN NGUYEN
+         srpArea = value;                                      // made changes by TUAN NGUYEN
+      else                                                     // made changes by TUAN NGUYEN
+      {                                                        // made changes by TUAN NGUYEN
+         SpaceObjectException soe("");                         // made changes by TUAN NGUYEN
+         soe.SetDetails(errorMessageFormat.c_str(),            // made changes by TUAN NGUYEN
+            GmatStringUtil::ToString(value, 16).c_str(),       // made changes by TUAN NGUYEN
+            "SRPArea", "Real Number >= 0.0");                  // made changes by TUAN NGUYEN
+         throw soe;                                            // made changes by TUAN NGUYEN
+      }                                                        // made changes by TUAN NGUYEN
+      parmsChanged = true;                                     // made changes by TUAN NGUYEN
+      return srpArea;                                          // made changes by TUAN NGUYEN
    }
 
    // We should not allow users to set this one -- it's a calculated parameter
-   if (id == TOTAL_MASS_ID) return SetRealParameter("TotalMass",value);
+   //if (id == TOTAL_MASS_ID) return SetRealParameter("TotalMass",value);         // made changes by TUAN NGUYEN
+   if (id == TOTAL_MASS_ID)                                                       // made changes by TUAN NGUYEN
+   {                                                                              // made changes by TUAN NGUYEN
+      throw SpaceObjectException("The parameter \"TotalMass\" is a calculated "   // made changes by TUAN NGUYEN
+         "parameter and cannot be set on the spacecraft " + instanceName);        // made changes by TUAN NGUYEN
+   }                                                                              // made changes by TUAN NGUYEN
+
 
    if (id >= ATTITUDE_ID_OFFSET)
       if (attitude)
@@ -3384,18 +4252,84 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 
    if (id == SPAD_SRP_SCALE_FACTOR)
    {
-      if (value < (-GmatRealConstants::REAL_EPSILON))
-      {
-         SpaceObjectException soe("");
-         soe.SetDetails(errorMessageFormat.c_str(),
-                        GmatStringUtil::ToString(value, 16).c_str(),
-                        "SPADSRPScaleFactor", "Real Number >= 0.0");
-         throw soe;
-      }
+      // GMT-6523
+      //if (value < (-GmatRealConstants::REAL_EPSILON))
+      //{
+      //   SpaceObjectException soe("");
+      //   soe.SetDetails(errorMessageFormat.c_str(),
+      //                  GmatStringUtil::ToString(value, 16).c_str(),
+      //                  "SPADSRPScaleFactor", "Real Number >= 0.0");
+      //   throw soe;
+      //}
+
+      // It sets value for SpadCr0
+      parmsChanged = true;                                     // made changes by TUAN NGUYEN
+      crEpsilon = 0.0;                                         // made changes by TUAN NGUYEN
       spadSRPScaleFactor = value;
       return spadSRPScaleFactor;
    }
+   
+   if (id == SPAD_DRAG_SCALE_FACTOR)                             // made changes by TUAN NGUYEN
+   {                                                             // made changes by TUAN NGUYEN
+      // GMT-6523
+      //if (value < (-GmatRealConstants::REAL_EPSILON))            // made changes by TUAN NGUYEN
+      //{                                                          // made changes by TUAN NGUYEN
+      //   SpaceObjectException soe("");                           // made changes by TUAN NGUYEN
+      //   soe.SetDetails(errorMessageFormat.c_str(),              // made changes by TUAN NGUYEN
+      //      GmatStringUtil::ToString(value, 16).c_str(),         // made changes by TUAN NGUYEN
+      //      "SPADDragScaleFactor", "Real Number >= 0.0");        // made changes by TUAN NGUYEN
+      //   throw soe;                                              // made changes by TUAN NGUYEN
+      //}                                                          // made changes by TUAN NGUYEN
+      
+      // It sets value for SpadCd0
+      parmsChanged = true;                                       // made changes by TUAN NGUYEN
+      cdEpsilon = 0.0;                                           // made changes by TUAN NGUYEN
+      spadDragScaleFactor = value;                               // made changes by TUAN NGUYEN
+      return spadDragScaleFactor;                                // made changes by TUAN NGUYEN
+   }                                                             // made changes by TUAN NGUYEN
 
+   // made changes by TUAN NGUYEN
+   if (id == SPAD_DRAG_SCALE_FACTOR_NOISESIGMA)
+   {
+      if (value <= 0.0)
+         throw SpaceObjectException("Error: a nonpositive number was set to SPADDragScaleFactorSigma. A valid value has to be a positive number.\n");
+
+      spadDragScaleFactorSigma = value;
+      
+      if (dragShapeModel == "SPADFile")                                                                      // made changes by TUAN NGUYEN
+      {                                                                                                      // made changes by TUAN NGUYEN
+         // Only change value of covariance when drag shape model is "SPADFile"
+         //Real spadDragScaleFactor0 = spadDragScaleFactor / (1 + cdEpsilon);                                // made changes by TUAN NGUYEN
+         Real spadDragScaleFactor0 = spadDragScaleFactor;    // Note that: spadDragScaleFactor is SpadCd0    // made changes by TUAN NGUYEN
+         Real CdEpsilonSigma = spadDragScaleFactorSigma / spadDragScaleFactor0;       // stdiv[Cd_epsilon] = stdiv[Cd] / Cd0
+         Integer locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");
+         covariance(locationStart, locationStart) = CdEpsilonSigma * CdEpsilonSigma;  // var[Cd_epsilon] = (stdiv[Cd_epsilon])^2
+      }                                                                                                      // made changes by TUAN NGUYEN
+
+      return spadDragScaleFactorSigma;
+   }
+
+   // made changes by TUAN NGUYEN
+   if (id == SPAD_SRP_SCALE_FACTOR_NOISESIGMA)
+   {
+      if (value <= 0.0)
+         throw SpaceObjectException("Error: a nonpositive number was set to SPADSRPScaleFactorSigma. A valid value has to be a positive number.\n");
+
+      spadSRPScaleFactorSigma = value;
+      
+      if (srpShapeModel == "SPADFile")                                                                        // made changes by TUAN NGUYEN
+      {                                                                                                       // made changes by TUAN NGUYEN
+         // Only change value of covariance when SRP shape model is "SPADFile"
+         //Real spadSRPScaleFactor0 = spadSRPScaleFactor / (1 + crEpsilon);                                   // made changes by TUAN NGUYEN
+         Real spadSRPScaleFactor0 = spadSRPScaleFactor;        // Note that: spadSRPScaleFactor is SpadCr0    // made changes by TUAN NGUYEN
+         Real CrEpsilonSigma = spadSRPScaleFactorSigma / spadSRPScaleFactor0;          // stdiv[Cr_epsilon] = stdiv[Cr]/Cr0
+         Integer locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");
+         covariance(locationStart, locationStart) = CrEpsilonSigma * CrEpsilonSigma;   // var[Cr_epsilon] = (stdiv[Cr_epsilon])^2
+      }                                                                                                       // made changes by TUAN NGUYEN
+
+      return spadSRPScaleFactorSigma;
+   }
+   
 
    if (id == MASS_FLOW)
    {
@@ -3561,112 +4495,114 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
       return value;
    }
 
-   if (label == "DryMass")
-   {
-      if (value >= 0.0)
-         dryMass = value;
-      else
-      {
-         SpaceObjectException soe("");
-         soe.SetDetails(errorMessageFormat.c_str(),
-                        GmatStringUtil::ToString(value, 16).c_str(),
-                        "DryMass", "Real Number >= 0.0");
-         throw soe;
-      }
-      parmsChanged = true;
-      return dryMass;
-   }
+   return SetRealParameter(GetParameterID(label), value);
 
-   if (label == "Cd")
-   {
-      if ((value >= 0.0) || (constrainCd == false))
-      {
-         coeffDrag = value;
-         cdEpsilon = 0.0;
-         if (value < 0.0)
-            MessageInterface::ShowMessage("Warning: The Cd value %lf is "
-                  "outside of the expected range of 0.0 <= Cd\n", value);
-      }
-      else
-      {
-         SpaceObjectException soe("");
-         soe.SetDetails(errorMessageFormat.c_str(),
-                        GmatStringUtil::ToString(value, 16).c_str(),
-                        "Cd", "Real Number >= 0.0");
-         throw soe;
-      }
-      parmsChanged = true;
-      return coeffDrag;
-   }
-   if (label == "DragArea")
-   {
-      if (value >= 0.0)
-         dragArea = value;
-      else
-      {
-         SpaceObjectException soe("");
-         soe.SetDetails(errorMessageFormat.c_str(),
-                        GmatStringUtil::ToString(value, 16).c_str(),
-                        "DragArea", "Real Number >= 0.0");
-         throw soe;
-      }
-      parmsChanged = true;
-      return dragArea;
-   }
-   if (label == "SRPArea")
-   {
-      if (value >= 0.0)
-         srpArea = value;
-      else
-      {
-         SpaceObjectException soe("");
-         soe.SetDetails(errorMessageFormat.c_str(),
-                        GmatStringUtil::ToString(value, 16).c_str(),
-                        "SRPArea", "Real Number >= 0.0");
-         throw soe;
-      }
-      parmsChanged = true;
-      return srpArea;
-   }
-   if (label == "Cr")
-   {
-      if (((value >= 0.0) && (value <= 2.0)) || (constrainCr == false))
-      {
-         reflectCoeff = value;
-         crEpsilon = 0.0;
-         if ((value < 0.0) || (value > 2.0))
-            MessageInterface::ShowMessage("Warning: The Cr value %lf is "
-                  "outside of the expected range of 0.0 <= Cr <= 2.0\n", value);
-      }
-      else
-      {
-         SpaceObjectException soe("");
-         soe.SetDetails(errorMessageFormat.c_str(),
-                        GmatStringUtil::ToString(value, 16).c_str(),
-                        "Cr", "0.0 <= Real Number <= 2.0");
-         throw soe;
-      }
-      parmsChanged = true;
-      return reflectCoeff;
-   }
-   if (label == "Cd_Epsilon")
-   {
-      cdEpsilon = value;
-      constrainCd = false;
-      return cdEpsilon;
-   }
-   if (label == "Cr_Epsilon")
-   {
-      crEpsilon = value;
-      constrainCr = false;
-      return crEpsilon;
-   }
+   //if (label == "DryMass")
+   //{
+   //   if (value >= 0.0)
+   //      dryMass = value;
+   //   else
+   //   {
+   //      SpaceObjectException soe("");
+   //      soe.SetDetails(errorMessageFormat.c_str(),
+   //                     GmatStringUtil::ToString(value, 16).c_str(),
+   //                     "DryMass", "Real Number >= 0.0");
+   //      throw soe;
+   //   }
+   //   parmsChanged = true;
+   //   return dryMass;
+   //}
 
-   if (label == "TotalMass")// return totalMass;    // Don't change the total mass
-      throw SpaceObjectException("The parameter \"TotalMass\" is a calculated "
-            "parameter and cannot be set on the spacecraft " + instanceName);
+   //if (label == "Cd")
+   //{
+   //   if ((value >= 0.0) || (constrainCd == false))
+   //   {
+   //      coeffDrag = value;
+   //      cdEpsilon = 0.0;
+   //      if (value < 0.0)
+   //         MessageInterface::ShowMessage("Warning: The Cd value %lf is "
+   //               "outside of the expected range of 0.0 <= Cd\n", value);
+   //   }
+   //   else
+   //   {
+   //      SpaceObjectException soe("");
+   //      soe.SetDetails(errorMessageFormat.c_str(),
+   //                     GmatStringUtil::ToString(value, 16).c_str(),
+   //                     "Cd", "Real Number >= 0.0");
+   //      throw soe;
+   //   }
+   //   parmsChanged = true;
+   //   return coeffDrag;
+   //}
+   //if (label == "DragArea")
+   //{
+   //   if (value >= 0.0)
+   //      dragArea = value;
+   //   else
+   //   {
+   //      SpaceObjectException soe("");
+   //      soe.SetDetails(errorMessageFormat.c_str(),
+   //                     GmatStringUtil::ToString(value, 16).c_str(),
+   //                     "DragArea", "Real Number >= 0.0");
+   //      throw soe;
+   //   }
+   //   parmsChanged = true;
+   //   return dragArea;
+   //}
+   //if (label == "SRPArea")
+   //{
+   //   if (value >= 0.0)
+   //      srpArea = value;
+   //   else
+   //   {
+   //      SpaceObjectException soe("");
+   //      soe.SetDetails(errorMessageFormat.c_str(),
+   //                     GmatStringUtil::ToString(value, 16).c_str(),
+   //                     "SRPArea", "Real Number >= 0.0");
+   //      throw soe;
+   //   }
+   //   parmsChanged = true;
+   //   return srpArea;
+   //}
+   //if (label == "Cr")
+   //{
+   //   if (((value >= 0.0) && (value <= 2.0)) || (constrainCr == false))
+   //   {
+   //      reflectCoeff = value;
+   //      crEpsilon = 0.0;
+   //      if ((value < 0.0) || (value > 2.0))
+   //         MessageInterface::ShowMessage("Warning: The Cr value %lf is "
+   //               "outside of the expected range of 0.0 <= Cr <= 2.0\n", value);
+   //   }
+   //   else
+   //   {
+   //      SpaceObjectException soe("");
+   //      soe.SetDetails(errorMessageFormat.c_str(),
+   //                     GmatStringUtil::ToString(value, 16).c_str(),
+   //                     "Cr", "0.0 <= Real Number <= 2.0");
+   //      throw soe;
+   //   }
+   //   parmsChanged = true;
+   //   return reflectCoeff;
+   //}
+   //if (label == "Cd_Epsilon")
+   //{
+   //   cdEpsilon = value;
+   //   constrainCd = false;
+   //   return cdEpsilon;
+   //}
+   //if (label == "Cr_Epsilon")
+   //{
+   //   crEpsilon = value;
+   //   constrainCr = false;
+   //   return crEpsilon;
+   //}
 
-   return SpaceObject::SetRealParameter(label, value);
+   //if (label == "TotalMass")// return totalMass;    // Don't change the total mass
+   //   throw SpaceObjectException("The parameter \"TotalMass\" is a calculated "
+   //         "parameter and cannot be set on the spacecraft " + instanceName);
+
+   //return SpaceObject::SetRealParameter(label, value);
 }
 
 
@@ -3709,7 +4645,8 @@ Integer Spacecraft::SetIntegerParameter(const Integer id, const Integer value)
       fullSTMRowCount = value;
       fullSTM.SetSize(fullSTMRowCount, fullSTMRowCount, true);
       for (Integer i = 0; i < fullSTMRowCount; ++i)
-         fullSTM(i,i) = 1.0;
+         fullSTM(i, i) = 1.0;
+      
       return fullSTMRowCount;
    }
 
@@ -3787,7 +4724,7 @@ const Rvector& Spacecraft::GetRvectorParameter(const Integer id) const
    if (id >= ATTITUDE_ID_OFFSET)
       if (attitude)
          return attitude->GetRvectorParameter(id - ATTITUDE_ID_OFFSET);
-   
+
    return SpaceObject::GetRvectorParameter(id);
 }
 
@@ -3830,7 +4767,7 @@ const Rvector& Spacecraft::SetRvectorParameter(const Integer id,
    if (id >= ATTITUDE_ID_OFFSET)
       if (attitude)
          return attitude->SetRvectorParameter(id - ATTITUDE_ID_OFFSET, value);
-   
+
    return SpaceObject::SetRvectorParameter(id, value);
 }
 
@@ -3902,6 +4839,9 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
     //if (id == ESTIMATION_STATE_TYPE_ID)
     //   return estimationStateType;
 
+    if (id == PROCESS_NOISE_MODEL_ID)
+       return processNoiseName;
+
     if ((id >= ELEMENT1UNIT_ID) && (id <= ELEMENT6UNIT_ID))
        return stateElementUnits[id - ELEMENT1UNIT_ID];
 
@@ -3919,23 +4859,35 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
           return attitude->GetStringParameter(id - ATTITUDE_ID_OFFSET);
        }
 
-    if (id == SPAD_SRP_FILE)
-       return spadSRPFile;
-    
-    if (id == SPAD_SRP_FILE_FULL_PATH)
-       return spadSrpFileFullPath;
-    
-    if (id == MODEL_FILE)
-       return modelFile;
+   if (id == SPAD_SRP_FILE)
+      return spadSRPFile;
+   
+   if (id == SPAD_SRP_FILE_FULL_PATH)
+      return spadSrpFileFullPath;
+   
+   if (id == SPAD_SRP_INTERPOLATION_METHOD)
+      return spadSRPInterpolationMethod;
+   
+   if (id == SPAD_DRAG_FILE)
+      return spadDragFile;
+   
+   if (id == SPAD_DRAG_FILE_FULL_PATH)
+      return spadDragFileFullPath;
+   
+   if (id == SPAD_DRAG_INTERPOLATION_METHOD)
+      return spadDragInterpolationMethod;
+   
+   if (id == MODEL_FILE)
+      return modelFile;
 
-    if (id == MODEL_FILE_FULL_PATH)
-       return modelFileFullPath;
+   if (id == MODEL_FILE_FULL_PATH)
+      return modelFileFullPath;
 
-    if (id == POWER_SYSTEM_ID)
-       return powerSystemName;
+   if (id == POWER_SYSTEM_ID)
+      return powerSystemName;
 
-    if (id == EPHEMERIS_NAME)
-       return ephemerisName;
+   if (id == EPHEMERIS_NAME)
+      return ephemerisName;
 
     return SpaceObject::GetStringParameter(id);
 }
@@ -3991,6 +4943,24 @@ std::string Spacecraft::GetStringParameter(const Integer id,
          }
          break;
 
+      case ADD_AREA_COEFFICIENT_EQUATE_CONSTRAINT:                                                // made changes by TUAN NGUYEN
+         {                                                                                        // made changes by TUAN NGUYEN
+            if ((0 <= index)&(index < (Integer)(areaCoefficientConstraintsList[currentConstraintIndex].size())))   // made changes by TUAN NGUYEN
+               return areaCoefficientConstraintsList[currentConstraintIndex][index];              // made changes by TUAN NGUYEN
+            else                                                                                  // made changes by TUAN NGUYEN
+               return "";                                                                         // made changes by TUAN NGUYEN
+         }                                                                                        // made changes by TUAN NGUYEN
+         break;                                                                                   // made changes by TUAN NGUYEN
+
+      case ADD_EQUAL_CONSTRAINT:                                                                  // made changes by TUAN NGUYEN
+         {                                                                                        // made changes by TUAN NGUYEN
+            if ((0 <= index)&(index < (Integer)(constraintsList[currentConstraintIndex].size()))) // made changes by TUAN NGUYEN
+               return constraintsList[currentConstraintIndex][index];                             // made changes by TUAN NGUYEN
+            else                                                                                  // made changes by TUAN NGUYEN
+               return "";                                                                         // made changes by TUAN NGUYEN
+         }                                                                                        // made changes by TUAN NGUYEN
+         break;                                                                                   // made changes by TUAN NGUYEN
+
       case STMELEMENTS:
          if ((index >= 0) && (index < (Integer)stmElementNames.size()))
             return stmElementNames[index];
@@ -4039,17 +5009,25 @@ std::string Spacecraft::GetStringParameter(const std::string & label,
 //---------------------------------------------------------------------------
 const StringArray& Spacecraft::GetStringArrayParameter(const Integer id) const
 {
+   if (id == NPLATE_ADD_PLATE)                                         // made changes by TUAN NGUYEN
+      return plateNames;                                               // made changes by TUAN NGUYEN
+
+   if (id == ADD_EQUAL_CONSTRAINT)                                     // made changes by TUAN NGUYEN
+      return constraintsList[currentConstraintIndex];                  // made changes by TUAN NGUYEN
+   if (id == ADD_AREA_COEFFICIENT_EQUATE_CONSTRAINT)                   // made changes by TUAN NGUYEN
+      return areaCoefficientConstraintsList[currentConstraintIndex];   // made changes by TUAN NGUYEN
+
    if (id == ADD_HARDWARE)
       return hardwareNames;
    if (id == SOLVEFORS)
       return solveforNames;
-   if (id == STMELEMENTS)
-      return stmElementNames;
    if (id == FUEL_TANK_ID)
       return tankNames;
    if (id == THRUSTER_ID)
       return thrusterNames;
+
    if (id >= ATTITUDE_ID_OFFSET)
+   {
       if (attitude)
       {
          #ifdef DEBUG_SC_ATTITUDE
@@ -4059,6 +5037,20 @@ const StringArray& Spacecraft::GetStringArrayParameter(const Integer id) const
          #endif
          return attitude->GetStringArrayParameter(id - ATTITUDE_ID_OFFSET);
       }
+   }
+
+   if (id == STMELEMENTS)
+   {
+      static StringArray stmEls;
+      stmEls = stmElementNames;
+      for (UnsignedInt i = 0; i < externalStmEntries.size(); ++i)
+      {
+         if (std::find(stmEls.begin(), stmEls.end(), externalStmEntries[i]) == stmEls.end())
+            stmEls.push_back(externalStmEntries[i]);
+      }
+      return stmEls;
+   }
+
    return SpaceObject::GetStringArrayParameter(id);
 }
 
@@ -4134,6 +5126,8 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          else if (newAttType == "SpiceAttitude")
             newAtt = new SpiceAttitude();
          #endif
+         else if (newAttType == "ThreeAxisKinematic")
+            newAtt = new ThreeAxisKinematic();
          else
          {
             std::string errmsg = "Cannot create Attitude object of unknown attitude type \"";
@@ -4174,6 +5168,36 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
 
+   // made changes by TUAN NGUYEN
+   if (id == ADD_AREA_COEFFICIENT_EQUATE_CONSTRAINT)
+   {
+      // trim off braces:
+      if (GmatStringUtil::IsEnclosedWithBraces(value))
+      {
+         std::string value1 = GmatStringUtil::RemoveEnclosingString(value, "{}");
+         if (GmatStringUtil::Trim(value1) == "")
+            return true;                           // empty list of constraint. Nothing to add
+      }
+
+      // verify input value:
+      if (GmatStringUtil::IsValidIdentity(value) == false)
+      {
+         throw GmatBaseException("Error: The value \"" + value + "\" cannot accepted for " + GetName() + ".NPlateSRPEquateAreaCoefficients\n");
+         return false;
+      }
+
+      // Only add the constrain variable if it is not in the list already
+      if (find(areaCoefficientConstraintsList[currentConstraintIndex].begin(), 
+               areaCoefficientConstraintsList[currentConstraintIndex].end(), value) ==
+          areaCoefficientConstraintsList[currentConstraintIndex].end())
+      {
+         areaCoefficientConstraintsList[currentConstraintIndex].push_back(value);
+         constraintsList[currentConstraintIndex].push_back(value + ".AreaCoefficient");
+      }
+      
+      return true;
+   }
+
    if (id == ADD_HARDWARE)
    {
       // trim off braces:
@@ -4202,12 +5226,6 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 
    if ((id == SOLVEFORS) || (id == STMELEMENTS))
    {
-      //if ((id == SOLVEFORS) && (value.substr(0,2) == "{}"))
-      //{
-      //   solveforNames.clear();
-      //   return true;
-      //}
-
       if (id == SOLVEFORS)
       {
          // trim off braces:
@@ -4228,70 +5246,112 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
             return false;
          }
 
-         if ((value == "CartesianState") || (value == "KeplerianState"))
-         {
-            // Remove CartesianState or KeplerianState from the list
-            for (Integer i = 0; i < solveforNames.size(); ++i)
+         // Verify Cr and SPADSRPScaleFactor, Cd and SPADDragScaleFactor                           // made changes by TUAN NGUYEN
+         VerifySolveFor(value);                                                                    // made changes by TUAN NGUYEN
+
+         // Adding value to solveforNames list
+         if (find(solveforNames.begin(), solveforNames.end(), value) == solveforNames.end())       // made changes by TUAN NGUYEN
+         {                                                                                         // made changes by TUAN NGUYEN
+            if ((value == "CartesianState") || (value == "KeplerianState"))
             {
-               if ((solveforNames[i] == "CartesianState") || (solveforNames[i] == "KeplerianState"))
+               // "CartesianState" or "KeplerianState" is on the first place of the solvefor list
+               if (solveforNames.size() == 0)
+                  solveforNames.push_back(value);                                                  // made changes by TUAN NGUYEN
+               else
                {
-                  solveforNames[i] = solveforNames[solveforNames.size() - 1];
-                  solveforNames.pop_back();
+                  if ((solveforNames[0] == "CartesianState") || (solveforNames[0] == "KeplerianState"))
+                     solveforNames[0] = value;
+                  else
+                  {
+                     solveforNames.insert(solveforNames.begin(), value);                           // made changes by TUAN NGUYEN
+                  }
                }
             }
-         }
+            else
+            {
+               // Cr, Cd, or other parameters
+               solveforNames.push_back(value);                                                     // made changes by TUAN NGUYEN
+            }
+         }                                                                                    // made changes by TUAN NGUYEN
 
-         if (find(solveforNames.begin(), solveforNames.end(), value) == solveforNames.end())
-         {
-            // Only add the solvefor parameter if it is not in the list already
-            solveforNames.push_back(value);
-         }
-      }
-
-      // Make sure the solve-for list is in the STM
-      for (UnsignedInt i = 0; i < solveforNames.size(); ++i)
-      {
+         // Adding value to stmElementNames list
          if (find(stmElementNames.begin(), stmElementNames.end(), value) ==
-               stmElementNames.end())
-            stmElementNames.push_back(value);
+            stmElementNames.end())
+         {
+            if ((value == "CartesianState") || (value == "KeplerianState"))
+            {
+               // "CartesianState" or "KeplerianState" is on the first place of the STM list
+               if (stmElementNames.size() == 0)
+               {
+                  stmElementNames.push_back(value);                                             // made changes by TUAN NGUYEN
+               }
+               else
+               {
+                  if ((stmElementNames[0] == "CartesianState") || (stmElementNames[0] == "KeplerianState"))
+                     stmElementNames[0] = value;
+                  else
+                  {
+                     stmElementNames.insert(stmElementNames.begin(), value);                    // made changes by TUAN NGUYEN
+                  }
+               }
+            }
+            else
+            {
+               stmElementNames.push_back(value);                                                // made changes by TUAN NGUYEN
+            }
+         }
       }
 
       // Add extras
       if (id == STMELEMENTS)
       {
          if (find(stmElementNames.begin(), stmElementNames.end(), value) ==
-               stmElementNames.end())
+            stmElementNames.end())
+         {
             stmElementNames.push_back(value);
+         }
       }
 
       // Reset length and indices
-      Integer length = 6;
+      //Integer length = 6;                                            // made changes by TUAN NGUYEN
+      Integer length = 0;                                              // made changes by TUAN NGUYEN
 
       stmIndices.clear();
-      stmIndices.push_back(GetParameterID("CartesianX"));
-      stmIndices.push_back(GetParameterID("CartesianY"));
-      stmIndices.push_back(GetParameterID("CartesianZ"));
-      stmIndices.push_back(GetParameterID("CartesianVX"));
-      stmIndices.push_back(GetParameterID("CartesianVY"));
-      stmIndices.push_back(GetParameterID("CartesianVZ"));
+      ////stmIndices.push_back(GetParameterID("CartesianX"));          // made changes by TUAN NGUYEN
+      ////stmIndices.push_back(GetParameterID("CartesianY"));          // made changes by TUAN NGUYEN
+      ////stmIndices.push_back(GetParameterID("CartesianZ"));          // made changes by TUAN NGUYEN
+      ////stmIndices.push_back(GetParameterID("CartesianVX"));         // made changes by TUAN NGUYEN
+      ////stmIndices.push_back(GetParameterID("CartesianVY"));         // made changes by TUAN NGUYEN
+      ////stmIndices.push_back(GetParameterID("CartesianVZ"));         // made changes by TUAN NGUYEN
 
       for (UnsignedInt i = 0; i < stmElementNames.size(); ++i)
       {
          // Cartesian state handled above
          if ((stmElementNames[i] != "CartesianState") && (stmElementNames[i] != "KeplerianState"))
          {
-            length += GetEstimationParameterSize(GetParameterID(stmElementNames[i]));
-            for (Integer j = 0; j < GetEstimationParameterSize(
-                  GetParameterID(stmElementNames[i])); ++j)
+            Integer id = GetParameterID(stmElementNames[i]);                                  // made changes by TUAN NGUYEN
+            Integer size = GetEstimationParameterSize(id);                                    // made changes by TUAN NGUYEN
+            length += size;                                                                   // made changes by TUAN NGUYEN
+
+            for (Integer j = 0; j < size; ++j)                                                // made changes by TUAN NGUYEN
             {
-               stmIndices.push_back(GetParameterID(stmElementNames[i]));
+               stmIndices.push_back(id);                                                      // made changes by TUAN NGUYEN
                #ifdef DEBUG_SPACECRAFT_STM
                   MessageInterface::ShowMessage("Looking up %s --> %d\n",
-                        stmElementNames[i].c_str(),
-                        GetParameterID(stmElementNames[i]));
+                        stmElementNames[i].c_str(), id);                                      // made changes by TUAN NGUYEN
                #endif
             }
          }
+         else                                                                   // made changes by TUAN NGUYEN
+         {                                                                      // made changes by TUAN NGUYEN
+            stmIndices.push_back(GetParameterID("CartesianX"));                 // made changes by TUAN NGUYEN
+            stmIndices.push_back(GetParameterID("CartesianY"));                 // made changes by TUAN NGUYEN
+            stmIndices.push_back(GetParameterID("CartesianZ"));                 // made changes by TUAN NGUYEN
+            stmIndices.push_back(GetParameterID("CartesianVX"));                // made changes by TUAN NGUYEN
+            stmIndices.push_back(GetParameterID("CartesianVY"));                // made changes by TUAN NGUYEN
+            stmIndices.push_back(GetParameterID("CartesianVZ"));                // made changes by TUAN NGUYEN
+            length += 6;                                                        // made changes by TUAN NGUYEN
+         }                                                                      // made changes by TUAN NGUYEN
       }
 
       #ifdef DEBUG_SPACECRAFT_STM
@@ -4417,6 +5477,10 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       coordSysName = value;
       coordSysSet  = true;
    }
+   else if (id == PROCESS_NOISE_MODEL_ID)
+   {
+      processNoiseName = value;
+   }
    else if (id == SPACECRAFT_ID)
    {
       spacecraftId = value;
@@ -4450,6 +5514,28 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
    {
       ephemerisName = value;
    }
+   else if (id == NPLATE_ADD_PLATE)                         // made changes by TUAN NGUYEN
+   {
+      ////// verify input value:
+      ////if (GmatStringUtil::IsValidIdentity(value) == false)
+      ////{
+      ////   throw GmatBaseException("Error: The value \"" + value + "\" cannot accepted for " + GetName() + ".AddPlate ");
+      ////   return false;
+      ////}
+
+      ////bool found = false;
+      ////for (Integer i = 0; plateNames.size(); ++i)
+      ////{
+      ////   if (value == plateNames[i])
+      ////   {
+      ////      found = true;
+      ////      break;
+      ////   }
+      ////}
+      ////if (!found)
+      ////   plateNames.push_back(value);
+      throw GmatBaseException("Error: Syntax error: Missing '{' and/or '}' arround "+ value+"\n");
+   }
    else if (id == SPAD_SRP_FILE)
    {
       if (value != spadSRPFile)
@@ -4465,9 +5551,50 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       if (spadSrpFileFullPath == "")
       {
          MessageInterface::ShowMessage
-            ("*** WARNING *** The SPAD SRP file '%s' does not exist for the spacecraft '%s'\n",
-             spadSRPFile.c_str(), GetName().c_str());
+         ("*** WARNING *** The SPAD SRP file '%s' does not exist for the spacecraft '%s'\n",
+          spadSRPFile.c_str(), GetName().c_str());
       }
+   }
+   else if (id == SPAD_SRP_INTERPOLATION_METHOD)
+   {
+      if ((value != "Bilinear") && (value != "Bicubic"))
+      {
+         SpaceObjectException ex;
+         ex.SetDetails("The value %s is not allowed for field \"%s\"",
+                       value.c_str(), GetParameterText(id).c_str());
+         throw ex;
+      }
+      spadSRPInterpolationMethod = value;
+   }
+   else if (id == SPAD_DRAG_FILE)
+   {
+      if (value != spadDragFile)
+      {
+         delete spadDragReader;
+         spadDragReader = NULL;
+      }
+      spadDragFile = value;
+      
+      // Use FileManager::FindPath() for full path file name (2014.06.24)
+      spadDragFileFullPath = FileManager::Instance()->FindPath(value, "SPAD_DRAG_FILE", true, false, true);
+      // Write warning or throw an exception?
+      if (spadDragFileFullPath == "")
+      {
+         MessageInterface::ShowMessage
+         ("*** WARNING *** The SPAD Drag file '%s' does not exist for the spacecraft '%s'\n",
+          spadDragFile.c_str(), GetName().c_str());
+      }
+   }
+   else if (id == SPAD_DRAG_INTERPOLATION_METHOD)
+   {
+      if ((value != "Bilinear") && (value != "Bicubic"))
+      {
+         SpaceObjectException ex;
+         ex.SetDetails("The value %s is not allowed for field \"%s\"",
+                       value.c_str(), GetParameterText(id).c_str());
+         throw ex;
+      }
+      spadDragInterpolationMethod = value;
    }
    else if (id == MODEL_FILE)
    {
@@ -4554,6 +5681,60 @@ bool Spacecraft::SetStringParameter(const std::string &label,
  * @see GmatBase
  */
 //---------------------------------------------------------------------------
+bool Spacecraft::VerifySolveFor(std::string value)
+{
+   if (value == "Cr")
+   {
+      for (Integer i = 0; i < solveforNames.size(); ++i)
+      {
+         if (solveforNames[i] == "SPADSRPScaleFactor")
+         {
+            throw SpaceObjectException("Error: Cr and SPADSRPScaleFactor cannot simultaneously to be solve-for variables for spacecraft '" + GetName() + "'.\n");
+            return false;
+         }
+      }
+   }
+
+   if (value == "SPADSRPScaleFactor")
+   {
+      for (Integer i = 0; i < solveforNames.size(); ++i)
+      {
+         if (solveforNames[i] == "Cr")
+         {
+            throw SpaceObjectException("Error: Cr and SPADSRPScaleFactor cannot simultaneously to be solve-for variables for spacecraft '" + GetName() + "'.\n");
+            return false;
+         }
+      }
+   }
+
+   if (value == "Cd")
+   {
+      for (Integer i = 0; i < solveforNames.size(); ++i)
+      {
+         if (solveforNames[i] == "SPADDragScaleFactor")
+         {
+            throw SpaceObjectException("Error: Cd and SPADDragScaleFactor cannot simultaneously to be solve-for variables for spacecraft '" + GetName() + "'.\n");
+            return false;
+         }
+      }
+   }
+
+   if (value == "SPADDragScaleFactor")          // made changes by TUAN NGUYEN
+   {
+      for (Integer i = 0; i < solveforNames.size(); ++i)
+      {
+         if (solveforNames[i] == "Cd")
+         {
+            throw SpaceObjectException("Error: Cd and SPADDragScaleFactor cannot simultaneously to be solve-for variables for spacecraft '" + GetName() + "'.\n");
+            return false;
+         }
+      }
+   }
+
+   return true;
+}
+
+
 bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
                                     const Integer index)
 {
@@ -4604,17 +5785,71 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
       }
       break;
 
+   case ADD_AREA_COEFFICIENT_EQUATE_CONSTRAINT:                     // made changes by TUAN NGUYEN
+      {
+         // verify input value:
+         if (GmatStringUtil::IsValidIdentity(value) == false)
+         {
+            throw GmatBaseException("Error: The value \"" + value + "\" cannot accepted for " + GetName() + ".NPlateSRPEquateAreaCoefficients\n");
+            return false;
+         }
+
+         if (index < (Integer)areaCoefficientConstraintsList[currentConstraintIndex].size())
+         {
+            areaCoefficientConstraintsList[currentConstraintIndex][index] = value;
+            constraintsList[currentConstraintIndex][index] = value + ".AreaCoefficient";
+         }
+         else
+         {
+            // Only add the constraint variable if it is not in the list already
+            if (find(areaCoefficientConstraintsList[currentConstraintIndex].begin(),
+               areaCoefficientConstraintsList[currentConstraintIndex].end(), value) ==
+               areaCoefficientConstraintsList[currentConstraintIndex].end())
+            {
+               areaCoefficientConstraintsList[currentConstraintIndex].push_back(value);
+               constraintsList[currentConstraintIndex].push_back(value + ".AreaCoefficient");
+            }
+         }
+
+         return true;
+      }
+      break;
+
+   case NPLATE_ADD_PLATE:                         // made changes by TUAN NGUYEN
+      {
+         // verify input value:
+         if (GmatStringUtil::IsValidIdentity(value) == false)
+         {
+            throw GmatBaseException("Error: The value \"" + value + "\" cannot accepted for " + GetName() + ".AddPlate ");
+            return false;
+         }
+
+         if (index < (Integer)plateNames.size())
+            plateNames[index] = value;
+         else
+            // Only add the plate if it is not in the list already
+            if (find(plateNames.begin(), plateNames.end(), value) == plateNames.end())
+               plateNames.push_back(value);
+
+         return true;
+      }
+      break;
+
    case SOLVEFORS:
       {
          if (index < (Integer)solveforNames.size())
             solveforNames[index] = value;
          else
+         {
+            // Verify Cr and SPADSRPScaleFactor, Cd and SPADDragScaleFactor
+            VerifySolveFor(value);
+
             // Only add the solvefor parameter if it is not in the list already
             if (find(solveforNames.begin(), solveforNames.end(), value) == solveforNames.end())
             {
                solveforNames.push_back(value);
             }
-
+         }
          return true;
       }
       break;
@@ -4681,6 +5916,7 @@ bool Spacecraft::SetStringParameter(const std::string &label,
    return SetStringParameter(GetParameterID(label), value, index);
 }
 
+
 // todo: Comment these methods
 //---------------------------------------------------------------------------
 // const Rmatrix& GetRmatrixParameter(const Integer id) const
@@ -4738,6 +5974,7 @@ const Rmatrix& Spacecraft::SetRmatrixParameter(const Integer id,
 //         orbitSTM = value;
 //         return orbitSTM;
       fullSTM = value;
+      
       return fullSTM;
    }
 
@@ -4758,6 +5995,7 @@ const Rmatrix& Spacecraft::SetRmatrixParameter(const Integer id,
          MessageInterface::ShowMessage("Setting full STM\n");
       #endif
       fullSTM = value;
+      
       return fullSTM;
    }
 
@@ -4872,6 +6110,8 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value,
 {
    if (id == ORBIT_STM)
    {
+      if (!skipSTM)     // A hack for the ephem propagators, which have no STM data
+      {
 //      if ((row < 0) || (row >= orbitSTM.GetNumRows()))
 //         throw SpaceObjectException("SetRealParameter: row requested for orbitSTM is out-of-range\n");
 //      if ((col < 0) || (col >= orbitSTM.GetNumColumns()))
@@ -4882,14 +6122,18 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value,
          throw SpaceObjectException("SetRealParameter: row requested for orbitSTM is out-of-range\n");
       if ((col < 0) || (col >= fullSTM.GetNumColumns()))
          throw SpaceObjectException("SetRealParameter: col requested for orbitSTM is out-of-range\n");
+      
       fullSTM(row, col) = value;
 
-      #ifdef DEBUG_SPACECRAFT_STM
-         if ((row == col) && (row + 1 == fullSTMRowCount))
-            MessageInterface::ShowMessage("Full STM:\n%s\n", fullSTM.ToString().c_str());
-      #endif
+         #ifdef DEBUG_SPACECRAFT_STM
+            if ((row == col) && (row + 1 == fullSTMRowCount))
+               MessageInterface::ShowMessage("Full STM:\n%s\n", fullSTM.ToString().c_str());
+         #endif
 
-      return fullSTM(row, col);
+         return fullSTM(row, col);
+      }
+      else
+         return value;
    }
 
    if (id == ORBIT_A_MATRIX)
@@ -4910,18 +6154,23 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value,
 
    if (id == FULL_STM)
    {
-      if ((row < 0) || (row >= fullSTM.GetNumRows()))
-         throw SpaceObjectException("SetRealParameter: row requested for fullSTM is out-of-range\n");
-      if ((col < 0) || (col >= fullSTM.GetNumColumns()))
-         throw SpaceObjectException("SetRealParameter: col requested for fullSTM is out-of-range\n");
-      fullSTM(row, col) = value;
+      if (!skipSTM)     // A hack for the ephem propagators, which have no STM data
+      {
+         if ((row < 0) || (row >= fullSTM.GetNumRows()))
+            throw SpaceObjectException("SetRealParameter: row requested for fullSTM is out-of-range\n");
+         if ((col < 0) || (col >= fullSTM.GetNumColumns()))
+            throw SpaceObjectException("SetRealParameter: col requested for fullSTM is out-of-range\n");
+         fullSTM(row, col) = value;
 
-      #ifdef DEBUG_SPACECRAFT_STM
-         if ((row == col) && (row == fullSTMRowCount-1))
-            MessageInterface::ShowMessage("Full STM; setting rc %d, %d:  \n%s\n", row, col, fullSTM.ToString(12).c_str());
-      #endif
+         #ifdef DEBUG_SPACECRAFT_STM
+            if ((row == col) && (row == fullSTMRowCount-1))
+               MessageInterface::ShowMessage("Full STM; setting rc %d, %d:  \n%s\n", row, col, fullSTM.ToString(12).c_str());
+         #endif
 
-      return fullSTM(row, col);
+         return fullSTM(row, col);
+      }
+      else
+         return value;
    }
 
    if (id == FULL_A_MATRIX)
@@ -5253,25 +6502,25 @@ bool Spacecraft::TakeAction(const std::string &action,
       {
          if (epochSystem != "A1")
          {
-            Integer epochSystemID = TimeConverterUtil::GetTimeTypeID(epochSystem);
+            Integer epochSystemID = theTimeConverter->GetTimeTypeID(epochSystem);
             if (state.HasPrecisionTime())
             {
-               currEpochGT = TimeConverterUtil::Convert(currEpochGT, 
-                  TimeConverterUtil::A1, 
+               currEpochGT = theTimeConverter->Convert(currEpochGT,
+                  TimeSystemConverter::A1,
                   epochSystemID, 
                   GmatTimeConstants::JD_JAN_5_1941);
             }
             else
             {
-               currEpoch = TimeConverterUtil::Convert(currEpoch,
-                  TimeConverterUtil::A1,
+               currEpoch = theTimeConverter->Convert(currEpoch,
+                  TimeSystemConverter::A1,
                   epochSystemID,
-                  GmatTimeConstants::JD_JAN_5_1941);
+                  GmatTimeConstants::JD_JAN_5_1941, &isInLeapSecond);
             }
 
-            isInLeapSecond = TimeConverterUtil::HandleLeapSecond();
-            if ((epochSystemID == TimeConverterUtil::UTCMJD) ||
-                (epochSystemID == TimeConverterUtil::UTC))
+//            isInLeapSecond = TimeSystemConverter::HandleLeapSecond();
+            if ((epochSystemID == TimeSystemConverter::UTCMJD) ||
+                (epochSystemID == TimeSystemConverter::UTC))
                isUTC = true;
          }
       }
@@ -5282,9 +6531,9 @@ bool Spacecraft::TakeAction(const std::string &action,
          {
             bool handleLeapSecond = isInLeapSecond && isUTC;
             if (state.HasPrecisionTime())
-               scEpochStr = TimeConverterUtil::ConvertMjdToGregorian(currEpochGT.GetMjd(), handleLeapSecond);
+               scEpochStr = theTimeConverter->ConvertMjdToGregorian(currEpochGT.GetMjd(), handleLeapSecond);
             else
-               scEpochStr = TimeConverterUtil::ConvertMjdToGregorian(currEpoch, handleLeapSecond);
+               scEpochStr = theTimeConverter->ConvertMjdToGregorian(currEpoch, handleLeapSecond);
          }
          else
          {
@@ -5343,6 +6592,12 @@ bool Spacecraft::TakeAction(const std::string &action,
          }
       }
    }
+
+   if (action == "SkipSTM")
+      skipSTM = true;
+
+   if (action == "UseSTM")
+      skipSTM = false;
 
    return SpaceObject::TakeAction(action, actionData);
 }
@@ -5408,6 +6663,37 @@ UnsignedInt Spacecraft::GetPropertyObjectType(const Integer id) const
       return Gmat::POWER_SYSTEM;
    default:
       return SpaceObject::GetPropertyObjectType(id);
+   }
+}
+
+//---------------------------------------------------------------------------
+// const StringArray& GetPropertyEnumStrings(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves eumeration symbols of parameter of given id.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return list of enumeration symbols
+ */
+//---------------------------------------------------------------------------
+const StringArray& Spacecraft::GetPropertyEnumStrings(const Integer id) const
+{
+   static StringArray enumStrings;
+   switch (id)
+   {
+      case SPAD_SRP_INTERPOLATION_METHOD:
+         enumStrings.clear();
+         enumStrings.push_back("Bilinear");
+         enumStrings.push_back("Bicubic");
+         return enumStrings;
+      case SPAD_DRAG_INTERPOLATION_METHOD:
+         enumStrings.clear();
+         enumStrings.push_back("Bilinear");
+         enumStrings.push_back("Bicubic");
+         return enumStrings;
+      default:
+         return SpaceObject::GetPropertyEnumStrings(id);
    }
 }
 
@@ -5544,6 +6830,85 @@ bool Spacecraft::Initialize()
          #endif
       }
 
+      #ifdef DEBUG_PLATE
+         MessageInterface::ShowMessage("Plate list names:\n");
+         for (UnsignedInt i = 0; i < plateNames.size(); ++i)
+         {
+            MessageInterface::ShowMessage("   %s\n", plateNames[i].c_str());
+         }
+
+         MessageInterface::ShowMessage("Plate list objects:\n");
+         for (UnsignedInt i = 0; i < plateList.size(); ++i)
+         {
+            MessageInterface::ShowMessage("   %s\n", plateList[i]->GetName().c_str());
+         }
+      #endif
+
+      // Set plates
+      for (Integer i = 0; i < plateList.size(); ++i)
+      {
+         if (plateList[i]->IsOfType(Gmat::PLATE))
+         {
+            Plate *current = (Plate*)plateList[i];
+            if (current->Initialize() == false)
+            {
+               throw SpaceObjectException("Error: Cannot initialize plate '" + current->GetName() + "'.\n");
+               return false;
+            }
+         }
+      }
+      
+      // Verify constraints
+      for (Integer i = 0; i < areaCoefficientConstraintsList.size(); ++i)
+      {
+         Plate* theFirstPlate = NULL;                          // The first plate in the constraint 
+         for (Integer j = 0; j < areaCoefficientConstraintsList[i].size(); ++j)
+         {
+            std::string plateName = areaCoefficientConstraintsList[i][j];
+            bool plateFound = false;
+            for (Integer k = 0; k < plateList.size(); ++k)
+            {
+               if (areaCoefficientConstraintsList[i][j] == plateList[k]->GetName())
+               {
+                  if (theFirstPlate == NULL)
+                     theFirstPlate = (Plate*)plateList[k];
+                  else
+                  {
+                     if (theFirstPlate->GetRealParameter("AreaCoefficient") !=
+                        ((Plate*)plateList[k])->GetRealParameter("AreaCoefficient"))
+                     {
+                        std::stringstream ss;
+                        ss << "Error: Values of " << theFirstPlate->GetName() << ".AreaCoefficient (" 
+                           << theFirstPlate->GetRealParameter("AreaCoefficient") << ") and " 
+                           << ((Plate*)plateList[k])->GetName() << ".AreaCoefficient ("
+                           << ((Plate*)plateList[k])->GetRealParameter("AreaCoefficient") << ") are not equal. Their setting values have to be the same due to equality constraint setting.\n";
+                        throw GmatBaseException(ss.str());
+                     }
+                  }
+
+                  plateFound = true;
+                  StringArray plateSolveforList = ((Plate*)(plateList[k]))->GetStringArrayParameter("SolveFors");
+                  bool areaCoefficientFound = false;
+                  for (Integer l = 0; l < plateSolveforList.size(); ++l)
+                  {
+                     if (plateSolveforList[l] == "AreaCoefficient")
+                     {
+                        areaCoefficientFound = true;
+                        break;
+                     }
+                  }
+
+                  if (!areaCoefficientFound)
+                     throw GmatBaseException("Error: You have chosen to include " + areaCoefficientConstraintsList[i][j] + " in the " + GetName() + ".NPlateSRPEquateAreaCoefficients list, but estimation of the AreaCoefficient is not specified in the " + areaCoefficientConstraintsList[i][j] + ".SolveFors list.\n");
+                     //throw GmatBaseException("Error: " + areaCoefficientConstraintsList[i][j] + ".SolveFors does not contain AreaCoefficient parameter but it was set to " + GetName() + ".NPlateSRPEquateAreaCoefficients parameter.\n");
+               }
+            }
+
+            if (!plateFound)
+               throw GmatBaseException("Error: Plate '" + areaCoefficientConstraintsList[i][j] + "' set to " + GetName() + ".NPlateSRPEquateAreaCoefficients parameter was not added to spacecraft '"+ GetName() + "'.\n");
+         }
+      }
+
       #ifdef DEBUG_HARDWARE
          MessageInterface::ShowMessage("Hardware list names:\n");
          for (UnsignedInt i = 0; i < hardwareNames.size(); ++i)
@@ -5589,7 +6954,7 @@ bool Spacecraft::Initialize()
                   continue;
 
                // connecting up to ErrorModels
-               GmatBase* obj = GetConfiguredObject(refs[j])->Clone();
+               GmatBase* obj = ConfigManager::Instance()->GetItem(refs[j])->Clone(); // FIXME: Temporary workaround until GMT-7066 is fixed
                if (obj)
                   current->SetRefObject(obj, obj->GetType(), obj->GetName());
                else
@@ -5623,6 +6988,25 @@ bool Spacecraft::Initialize()
 
       if (powerSystem) powerSystem->Initialize();
 
+      ////// Set size for STM matrix
+      //////MessageInterface::ShowMessage("*****  spacecraft = <%s>, plateList.size() = %d\n", GetName().c_str(), plateList.size());
+      ////Integer addedSize = 0;
+      ////for (UnsignedInt i = 0; i < plateList.size(); ++i)
+      ////{
+      ////   // Processing plate ith
+      ////   Plate* pl = (Plate*)plateList[i];
+      ////   StringArray sfNames = pl->GetStringArrayParameter("SolveFors");
+      ////   //MessageInterface::ShowMessage("*****  plate = <%s>, sfNames.size() = %d\n", pl->GetName().c_str(), sfNames.size());
+      ////   for (UnsignedInt j = 0; j < sfNames.size(); ++j)
+      ////   {
+      ////      Integer   id = pl->GetEstimationParameterID(sfNames[j]);
+      ////      Integer size = pl->GetEstimationParameterSize(id);
+      ////      Real*  value = pl->GetEstimationParameterValue(id);
+      ////      addedSize = addedSize + size;
+      ////   }
+      ////}
+      //////MessageInterface::ShowMessage("*****   addedSize = %d\n", addedSize);
+
 //      if (!ephemMgr)
 //      {
 //         ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
@@ -5652,7 +7036,7 @@ std::string Spacecraft::GetEpochString()
    Real outMjd = -999.999;
    std::string outStr;
 
-   TimeConverterUtil::Convert("A1ModJulian", GetEpoch(), "",
+   theTimeConverter->Convert("A1ModJulian", GetEpoch(), "",
                               epochType, outMjd, outStr);
 
    return outStr;
@@ -5676,7 +7060,7 @@ void Spacecraft::SetDateFormat(const std::string &dateType)
          dateType.c_str(), scEpochStr.c_str());
    #endif
 
-   if (TimeConverterUtil::IsValidTimeSystem(dateType))
+   if (theTimeConverter->IsValidTimeSystem(dateType))
    {
       epochType = dateType;
       scEpochStr = GetEpochString();
@@ -5685,7 +7069,7 @@ void Spacecraft::SetDateFormat(const std::string &dateType)
    {
       char msg[512];
       std::string timeRepList;
-      StringArray validReps = TimeConverterUtil::GetValidTimeRepresentations();
+      StringArray validReps = theTimeConverter->GetValidTimeRepresentations();
       for (UnsignedInt i = 0; i < validReps.size(); ++i)
       {
          if (i != 0)
@@ -5693,7 +7077,7 @@ void Spacecraft::SetDateFormat(const std::string &dateType)
          timeRepList += validReps[i];
       }
 
-      // The valid format list here should be retrieved from TimeconverterUtil,
+      // The valid format list here should be retrieved from TimeSystemConverter,
       // once that code is refactored
       std::sprintf(msg, errorMessageFormat.c_str(), dateType.c_str(),
             PARAMETER_LABEL[DATE_FORMAT_ID - SpaceObjectParamCount].c_str(),
@@ -5723,7 +7107,7 @@ void Spacecraft::SetEpoch(const std::string &ep)
 
    std::string timeSystem;
    std::string timeFormat;
-   TimeConverterUtil::GetTimeSystemAndFormat(epochType, timeSystem, timeFormat);
+   theTimeConverter->GetTimeSystemAndFormat(epochType, timeSystem, timeFormat);
    if (timeFormat == "ModJulian") // numeric - save and output without quotes
       scEpochStr = GmatStringUtil::RemoveEnclosingString(ep, "'");
    else // "Gregorian" - not numeric - save and output with quotes
@@ -5749,8 +7133,8 @@ void Spacecraft::SetEpoch(const std::string &ep)
 
    // remove enclosing quotes for the conversion
    std::string epNoQuote = GmatStringUtil::RemoveEnclosingString(ep, "'");
-   TimeConverterUtil::Convert(epochType, fromMjdGT, epNoQuote, "A1ModJulian", outMjdGT, outStr);
-   TimeConverterUtil::Convert(epochType, fromMjd, epNoQuote, "A1ModJulian", outMjd, outStr);
+   theTimeConverter->Convert(epochType, fromMjdGT, epNoQuote, "A1ModJulian", outMjdGT, outStr);
+   theTimeConverter->Convert(epochType, fromMjd, epNoQuote, "A1ModJulian", outMjd, outStr);
 
    if (hasPrecisionTime)
    {
@@ -5843,7 +7227,7 @@ void Spacecraft::SetEpoch(const std::string &type, const std::string &ep, Real a
    MessageInterface::ShowMessage("In SC::SetEpoch, type = %s, ep = %s, a1mjd = %.12f\n",
    type.c_str(), ep.c_str(), a1mjd);
    #endif
-   TimeConverterUtil::GetTimeSystemAndFormat(type, epochSystem, epochFormat);
+   theTimeConverter->GetTimeSystemAndFormat(type, epochSystem, epochFormat);
    epochType = type;
    scEpochStr = ep;
    if (hasPrecisionTime)
@@ -6094,6 +7478,11 @@ Integer Spacecraft::GetEstimationParameterID(const std::string &param)
       if (param == "Cr")
          parmID = CR_EPSILON;
 
+      if (param == "SPADDragScaleFactor")           // made changes by TUAN NGUYEN
+         parmID = CD_EPSILON;                       // made changes by TUAN NGUYEN
+      if (param == "SPADSRPScaleFactor")            // made changes by TUAN NGUYEN
+         parmID = CR_EPSILON;                       // made changes by TUAN NGUYEN
+
       id += parmID;
    }
    catch (BaseException &)
@@ -6112,15 +7501,37 @@ std::string Spacecraft::GetParameterNameForEstimationParameter(const std::string
    if (parmName == "Cr")
       return (GetParameterText(CR_EPSILON));
 
+   if (parmName == "SPADDragScaleFactor")              // made changes by TUAN NGUYEN
+      return (GetParameterText(CD_EPSILON));           // made changes by TUAN NGUYEN
+   if (parmName == "SPADSRPScaleFactor")               // made changes by TUAN NGUYEN
+      return (GetParameterText(CR_EPSILON));           // made changes by TUAN NGUYEN
+
    return SpaceObject::GetParameterNameForEstimationParameter(parmName);
 }
 
 std::string Spacecraft::GetParameterNameFromEstimationParameter(const std::string &parmName)
 {
-   if (parmName == "Cd_Epsilon")
-      return (GetParameterText(CD_ID));
-   if (parmName == "Cr_Epsilon")
-      return (GetParameterText(CR_ID));
+   if (dragShapeModel == "Spherical")                          // made changes by TUAN NGUYEN
+   {                                                           // made changes by TUAN NGUYEN
+      if (parmName == "Cd_Epsilon")
+         return (GetParameterText(CD_ID));
+   }
+   else if (dragShapeModel == "SPADFile")                      // made changes by TUAN NGUYEN
+   {                                                           // made changes by TUAN NGUYEN
+      if (parmName == "Cd_Epsilon")                            // made changes by TUAN NGUYEN
+         return (GetParameterText(SPAD_DRAG_SCALE_FACTOR));    // made changes by TUAN NGUYEN
+   }                                                           // made changes by TUAN NGUYEN
+
+   if (srpShapeModel == "Spherical")                           // made changes by TUAN NGUYEN
+   {                                                           // made changes by TUAN NGUYEN
+      if (parmName == "Cr_Epsilon")
+         return (GetParameterText(CR_ID));
+   }                                                           // made changes by TUAN NGUYEN
+   else if (srpShapeModel == "SPADFile")                       // made changes by TUAN NGUYEN
+   {                                                           // made changes by TUAN NGUYEN
+      if (parmName == "Cr_Epsilon")                            // made changes by TUAN NGUYEN
+         return (GetParameterText(SPAD_SRP_SCALE_FACTOR));     // made changes by TUAN NGUYEN
+   }                                                           // made changes by TUAN NGUYEN
 
    return SpaceObject::GetParameterNameFromEstimationParameter(parmName);
 }
@@ -6200,6 +7611,13 @@ Integer Spacecraft::GetEstimationParameterSize(const Integer item)
          retval = 1;
          break;
 
+      case SPAD_DRAG_SCALE_FACTOR:         // made changes by TUAN NGUYEN
+         retval = 1;                       // made changes by TUAN NGUYEN
+         break;                            // made changes by TUAN NGUYEN
+      case SPAD_SRP_SCALE_FACTOR:          // made changes by TUAN NGUYEN
+         retval = 1;                       // made changes by TUAN NGUYEN
+         break;                            // made changes by TUAN NGUYEN
+
       case Gmat::MASS_FLOW:
          // todo: Access tanks for mass information to handle mass flow
          break;
@@ -6229,13 +7647,37 @@ Real* Spacecraft::GetEstimationParameterValue(const Integer item)
          break;
 
       case CD_ID:
-         retval = &coeffDrag;
+      {
+         // Note that: coeffDrag is Cd0. Cd variable holds value of Cd
+         //retval = &coeffDrag;                 // made changes by TUAN NGUYEN
+         Cd = coeffDrag * (1 + cdEpsilon);      // made changes by TUAN NGUYEN
+         retval = &Cd;                          // made changes by TUAN NGUYEN
          break;
-
+      }
       case CR_ID:
-         retval = &reflectCoeff;
+      {
+         // Note that: reflectCoeff is Cr0. Cr variable holds value of Cr
+         //retval = &reflectCoeff;
+         Cr = reflectCoeff * (1 + crEpsilon);            // made changes by TUAN NGUYEN
+         retval = &Cr;                                   // made changes by TUAN NGUYEN
          break;
-
+      }
+      case SPAD_DRAG_SCALE_FACTOR:                       // made changes by TUAN NGUYEN
+      {
+         // Note that: spadDragScaleFactor is SpadCd0. spadCd variable holds value of SpadCd
+         //retval = &spadDragScaleFactor;                // made changes by TUAN NGUYEN
+         spadCd = spadDragScaleFactor * (1 + cdEpsilon); // made changes by TUAN NGUYEN
+         retval = &spadCd;                               // made changes by TUAN NGUYEN
+         break;                                          // made changes by TUAN NGUYEN
+      }
+      case SPAD_SRP_SCALE_FACTOR:                        // made changes by TUAN NGUYEN
+      {
+         // Note that: spadSRPScaleFactor is SPadCr0. spadCr variable holds value of SpadCr
+         //retval = &spadSRPScaleFactor;                 // made changes by TUAN NGUYEN
+         spadCr = spadSRPScaleFactor *(1 + crEpsilon);   // made changes by TUAN NGUYEN
+         retval = &spadCr;
+         break;                                          // made changes by TUAN NGUYEN
+      }
 //      case Gmat::MASS_FLOW:
 //         // todo: Access tanks for mass information to handle mass flow
 //         break;
@@ -6348,6 +7790,24 @@ void Spacecraft::UpdateClonedObject(GmatBase *obj)
       }
    }
 
+   
+   // made changes by TUAN NGUYEN
+   if (obj->IsOfType(Gmat::PLATE))
+   {
+      std::string name = obj->GetName();
+      for (UnsignedInt i = 0; i < plateList.size(); ++i)
+      {
+         if (name == plateList[i]->GetName())
+         {
+            ((Plate*)plateList[i])->operator=(*((Plate*)obj));
+            // Update init flag
+            if (isInitialized)
+               isInitialized = plateList[i]->IsInitialized();
+         }
+      }
+   }
+
+
    if (obj->IsOfType(Gmat::ATTITUDE))
    {
       Attitude *newAtt = (Attitude*) (obj->Clone());
@@ -6409,6 +7869,14 @@ void Spacecraft::UpdateClonedObjectParameter(GmatBase *obj,
          for (UnsignedInt i = 0; i < hardwareList.size(); ++i)
             if (obj->GetName() == hardwareList[i]->GetName())
                theClone = hardwareList[i];
+   }
+
+   // made changes by TUAN NGUYEN
+   if (obj->IsOfType(Gmat::PLATE))
+   {
+      for (UnsignedInt i = 0; i < plateList.size(); ++i)
+         if (obj->GetName() == plateList[i]->GetName())
+            theClone = plateList[i];
    }
 
    if (theClone != NULL)
@@ -7312,6 +8780,12 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    parmOrder[parmIndex++] = CR_ID;
    parmOrder[parmIndex++] = DRAG_AREA_ID;
    parmOrder[parmIndex++] = SRP_AREA_ID;
+   parmOrder[parmIndex++] = SPAD_DRAG_SCALE_FACTOR;            // made changes by TUAN NGUYEN
+   parmOrder[parmIndex++] = SPAD_SRP_SCALE_FACTOR;             // made changes by TUAN NGUYEN
+
+   parmOrder[parmIndex++] = NPLATE_ADD_PLATE;                  // made changes by TUAN NGUYEN
+   parmOrder[parmIndex++] = ADD_AREA_COEFFICIENT_EQUATE_CONSTRAINT;     // made changes by TUAN NGUYEN
+
    parmOrder[parmIndex++] = FUEL_TANK_ID;
    parmOrder[parmIndex++] = THRUSTER_ID;
    parmOrder[parmIndex++] = POWER_SYSTEM_ID;
@@ -7496,7 +8970,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
          MessageInterface::ShowMessage
             ("==> It is %Read-Only\n", IsParameterReadOnly(parmOrder[i]) ? "" : "NOT ");
          #endif
-   }
+      }
    }
    
    // Prep in case spacecraft "own" the attached hardware
@@ -7544,7 +9018,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
 //------------------------------------------------------------------------------
 void Spacecraft::UpdateElementLabels()
 {
-	UpdateElementLabels(displayStateType);
+   UpdateElementLabels(displayStateType);
 }
 
 //------------------------------------------------------------------------------
@@ -8174,7 +9648,9 @@ Rmatrix* Spacecraft::GetParameterSTM(Integer parameterId)
       return &fullSTM;
    if (parameterId == CR_EPSILON)
       return &fullSTM;
-//      return &orbitSTM;
+
+   if (std::find(externalStmIndices.begin(), externalStmIndices.end(), parameterId) == externalStmIndices.end())
+      return &fullSTM;
 
    return SpaceObject::GetParameterSTM(parameterId);
 }
@@ -8198,8 +9674,17 @@ Integer Spacecraft::GetStmRowId(const Integer forRow)
 {
    Integer retval = -1;
 
-   if ((forRow < (Integer)stmIndices.size()) && (forRow >= 0))
-      retval = stmIndices[forRow];
+   if (forRow >= 0) 
+   {                                                                       // made changes by TUAN NGUYEN
+      if (forRow < (Integer)stmIndices.size())                             // made changes by TUAN NGUYEN
+         retval = stmIndices[forRow];                                      // made changes by TUAN NGUYEN
+      else if (forRow - stmIndices.size() < externalStmIndices.size())     // made changes by TUAN NGUYEN
+         retval = externalStmIndices[forRow - stmIndices.size()];          // made changes by TUAN NGUYEN
+   }
+   #ifdef DEBUG_SPACECRAFT_STM
+      MessageInterface::ShowMessage("Spacecraft::GetSTMRowId(%d) returning %d\n",
+            forRow, retval);
+   #endif
 
    return retval;
 }
@@ -8230,6 +9715,25 @@ Integer Spacecraft::HasParameterCovariances(Integer parameterId)
 
    if (parameterId == CD_EPSILON)
       return 1;
+
+   for (Integer i = 0; i < externalStmIndices.size(); ++i)                    // made changes by TUAN NGUYEN
+   {                                                                          // made changes by TUAN NGUYEN
+      if (externalStmIndices[i] == parameterId)                               // made changes by TUAN NGUYEN
+      {                                                                       // made changes by TUAN NGUYEN
+         // extract parameter name                                            // made changes by TUAN NGUYEN
+         // example: "Plate1.DiffuseFrac". It needs to extracts "DiffuseFrac"  
+         size_t pos = externalStmEntries[i].find_last_of('.');                // made changes by TUAN NGUYEN
+         std::string paramName;                                               // made changes by TUAN NGUYEN
+         if (pos == externalStmEntries[i].npos)                               // made changes by TUAN NGUYEN
+            paramName = externalStmEntries[i];                                // made changes by TUAN NGUYEN
+         else                                                                 // made changes by TUAN NGUYEN
+            paramName = externalStmEntries[i].substr(pos + 1);                // made changes by TUAN NGUYEN
+         
+         // get parameter id                                                  // made changes by TUAN NGUYEN
+         Integer id = externalStmSources[i]->GetParameterID(paramName);       // made changes by TUAN NGUYEN
+         return externalStmSources[i]->HasParameterCovariances(id);           // made changes by TUAN NGUYEN
+      }
+   }
 
    return SpaceObject::HasParameterCovariances(parameterId);
 }
@@ -8312,6 +9816,56 @@ void Spacecraft::RecomputeStateAtEpochGT(const GmatTime &toEpoch)
    }
    // otherwise, state stays the same
 }
+
+
+//------------------------------------------------------------------------------
+// std::string  GetHelpString(const std::string &forItem)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the help string for the class or for documented class members
+ *
+ * Spacecraft needs a custom help string because of the attitude settings
+ *
+ * @param forItem Subitems for the system help
+ *
+ * @return The help string
+ */
+//------------------------------------------------------------------------------
+std::string  Spacecraft::GetHelpString(const std::string &forItem)
+{
+   std::string helpStr = "\n" + typeName + "  " + instanceName + "\n\n";
+
+   if (forItem == "")
+   {
+      helpStr += "   Field                                       Type   Value\n"
+                 "   ----------------------------------------------------------"
+                 "------\n\n";
+      for (auto i = 0; i < parameterCount; ++i)
+      {
+         if ((!IsParameterReadOnly(i)) && (i != ATTITUDE))
+         {
+            helpStr += "   " + GmatBase::GetParameterText(i, 28) + "   " +
+                  GetTypeAndValue(i) + "\n";
+         }
+      }
+   }
+   else
+      helpStr += "Help for " + forItem + " is not available.\n\n";
+
+   // Add attitude settings
+   if (attitude)
+   {
+      helpStr += "   " + GmatBase::GetParameterText(ATTITUDE, 28) +
+                 "             Object   " +
+                 attitude->GetAttitudeModelName() + "\n";
+   }
+   else
+      helpStr += "   " + GmatBase::GetParameterText(ATTITUDE, 28) +
+                 "             Object   <not set>\n";
+
+   return helpStr;
+}
+
 
 
 //-------------------------------------------------------------------------
@@ -9215,6 +10769,92 @@ void Spacecraft::IsManeuvering(bool mnvrFlag)
 }
 
 
+//------------------------------------------------------------------------------
+// void Spacecraft::AttitudeAffectsDynamics(bool attFlag)
+//------------------------------------------------------------------------------
+/**
+ * Toggles the attitudeDynamics flag
+ *
+ * @param attFlag The desired attitudeDynamics state
+ */
+//------------------------------------------------------------------------------
+void Spacecraft::AttitudeAffectsDynamics(bool attFlag)
+{
+   attitudeDynamics = attFlag;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer AddExternalStmSetting(const std::string stmLabel,
+//                      GmatBase *stmObj, const Integer parmIndex)
+//------------------------------------------------------------------------------
+/**
+ * Adds an entry to the list of STM settings.
+ *
+ * This method is used to add rows to the stm that come from an external source.
+ * It is used to increase the size of the Spacecraft STM for new solve-for
+ * parameters set from things like transient forces in a force model.
+ *
+ * @param stmLabel The name of the new STM entry
+ * @param stmObj   The object the ses the entry (not sure this is needed)
+ * @param parmIndex The base index identifying the parameter
+ *
+ * @return The index used to find the parameter in the STM
+ */
+//------------------------------------------------------------------------------
+Integer Spacecraft::AddExternalStmSetting(const std::string stmLabel,
+                     GmatBase *stmObj, const Integer parmIndex)
+{
+#ifdef DEBUG_EXTERNAL_STM_SETTING
+   MessageInterface::ShowMessage("Spacecraft::AddExternalStmSetting(stmLabel = <%s>, stmObj = <%p,%s>, parmIndex = %d) start\n",
+      stmLabel.c_str(), stmObj, (stmObj == NULL ? "NULL" : stmObj->GetName().c_str()), parmIndex);
+#endif
+   Integer retval = -1;
+
+   if (stmLabel == "")
+   {
+      externalStmEntries.clear();
+      externalStmSources.clear();
+      externalStmIndices.clear();
+   }
+   else
+   {
+      bool found = false;                                    // made changes by TUAN NGUYEN
+      Integer i = 0;                                         // made changes by TUAN NGUYEN
+      for (; i < externalStmEntries.size(); ++i)             // made changes by TUAN NGUYEN
+      {                                                      // made changes by TUAN NGUYEN
+         if (stmLabel == externalStmEntries[i])              // made changes by TUAN NGUYEN
+         {                                                   // made changes by TUAN NGUYEN
+            found = true;                                    // made changes by TUAN NGUYEN
+            break;                                           // made changes by TUAN NGUYEN
+         }                                                   // made changes by TUAN NGUYEN
+      }                                                      // made changes by TUAN NGUYEN
+
+      if (found)                                             // made changes by TUAN NGUYEN
+      {                                                      // made changes by TUAN NGUYEN
+         externalStmSources[i] = stmObj;                     // made changes by TUAN NGUYEN
+         retval = i;                                         // made changes by TUAN NGUYEN
+      }                                                      // made changes by TUAN NGUYEN
+      else                                                   // made changes by TUAN NGUYEN
+      {
+         externalStmEntries.push_back(stmLabel);
+         externalStmSources.push_back(stmObj);
+
+         Integer index = SpacecraftParamCount + externalStmEntries.size();
+         externalStmIndices.push_back(index);
+
+         retval = index;
+      }
+   }
+
+#ifdef DEBUG_EXTERNAL_STM_SETTING
+   MessageInterface::ShowMessage("Spacecraft::AddExternalStmSetting(stmLabel = <%s>, stmObj = <%p,%s>, parmIndex = %d) end\n",
+      stmLabel.c_str(), stmObj, (stmObj == NULL ? "NULL" : stmObj->GetName().c_str()), parmIndex);
+#endif
+   return retval;
+}
+
+
 Rmatrix66 Spacecraft::GetCoordinateSystemTransformMatrix()
 {
    if (!isCSTransformMatrixSet)
@@ -9343,3 +10983,369 @@ void Spacecraft::RecomputeStateDueToChangeOfEpochPrecision(bool fromLowToHi)
 
 }
 
+
+// made changes by TUAN NGUYEN
+bool Spacecraft::SetSRPShapeModel(std::string model)
+{
+   // Verify the compatibility 
+   if (model == "Spherical")
+   {
+      // throw an error when using SPADSRPScaleFactor as a solve-for variable in spherical model
+      for (Integer i = 0; i < solveforNames.size(); ++i)
+      {
+         if (solveforNames[i] == "SPADSRPScaleFactor")
+         {
+            throw SpaceObjectException("Error: Estimation of " + GetName() +
+               "." + solveforNames[i] + 
+            "parameter is not allowed when using Spherical SRP model.\n");
+         }
+      }
+      std::stringstream ss;
+      bool foundError = false;
+      for (Integer i = 0; i < plateList.size(); ++i)
+      {
+         StringArray sfList = plateList[i]->GetStringArrayParameter("SolveFors");
+         if (sfList.size() > 0)
+         {
+            foundError = true;
+            ss << plateList[i]->GetName() << ".SolveFors (";
+            for (Integer j = 0; j < sfList.size(); ++j)
+            {
+               ss << "'" << sfList[j];
+               if (j < sfList.size() - 1)
+                  ss << "', ";
+               else
+                  ss << "'";
+            }
+         }
+         if (i < plateList.size()-1)
+            ss << "), ";
+         else
+            ss << ")";
+      }
+      if (foundError)
+         throw SpaceObjectException("Error: All solve-for variables in " + ss.str() + " are not allowed in Spherical SRP Model.\n");
+   }
+   else if (model == "SPADFile")
+   {
+      // throw an error when using Cr as a solve-for variable in SPADFile model
+      for (Integer i = 0; i < solveforNames.size(); ++i)
+      {
+         if (solveforNames[i] == "Cr")
+         {
+            throw SpaceObjectException("Error: Estimation of " + GetName() +
+               "." + solveforNames[i] +
+            " parameter is not allowed when using SPADFile SRP model.\n");
+         }
+
+         std::stringstream ss;
+         bool foundError = false;
+         for (Integer i = 0; i < plateList.size(); ++i)
+         {
+            StringArray sfList = plateList[i]->GetStringArrayParameter("SolveFors");
+            if (sfList.size() > 0)
+            {
+               foundError = true;
+               ss << plateList[i]->GetName() << ".SolveFors (";
+               for (Integer j = 0; j < sfList.size(); ++j)
+               {
+                  ss << "'" << sfList[j];
+                  if (j < sfList.size() - 1)
+                     ss << "', ";
+                  else
+                     ss << "'";
+               }
+            }
+            if (i < plateList.size()-1)
+               ss << "), ";
+            else
+               ss << ")";
+         }
+         if (foundError)
+            throw SpaceObjectException("Error: All solve-for variables in " + ss.str() + " are not allowed in SPADFile SRP Model.\n");
+      }
+   }
+   else if (model == "NPlate")
+   {
+      // throw an error when using Cr or SPADSRPScaleFactor as a solve-for variable in NPlate model
+      for (Integer i = 0; i < solveforNames.size(); ++i)
+      {
+         if ((solveforNames[i] == "Cr")|| (solveforNames[i] == "SPADSRPScaleFactor"))
+         {
+            throw SpaceObjectException("Error: Estimation of " + GetName() +
+              "." + solveforNames[i] +
+              " parameter is not allowed when using NPlate SRP model.\n");
+         }
+      }
+   }
+
+
+
+   if (srpShapeModel != model)
+   {
+      srpShapeModel = model;
+
+      // made changes by TUAN NGUYEN
+      if (srpShapeModel == "NPlate")
+      {
+         for (Integer i = 0; i < plateList.size(); ++i)
+         {
+            // 1. Get a list of solve-fors belong to plateList[i]
+            ((Plate*)plateList[i])->SetRunningCommandFlag(runningCommandFlag);
+            StringArray sfList = ((Plate*)plateList[i])->GetStringArrayParameter("SolveFors");
+
+            // 2. Add plateList[i]'s solve-for variables covariance to spacecraft's covariance
+            std::string plateName = plateList[i]->GetName();
+            for (Integer j = 0; j < sfList.size(); ++j)
+            {
+               // 2.1 Get covariance matrix associated to solve-for sfList[j]
+               Covariance* plateCovariance = plateList[i]->GetCovariance();
+               Integer forParameterID = ((Plate*)plateList[i])->GetParameterID(sfList[j]);
+               Rmatrix* covMatrix = plateCovariance->GetCovariance(forParameterID);
+
+               // 2.2 Add covariance associated to the solve-for specified by sfList[j] to spacecraft's covariance
+               std::string sfName = plateName + "." + sfList[j];
+               if (covariance.GetElementIndex(sfName) == -1)
+               {
+                  // if spacecraft's covariance does not has element with full name specified by sfName then add that element to the covariance
+                  //covariance.AddCovarianceElement(sfName, plateList[i]);          // made changes by TUAN NGUYEN
+                  covariance.AddCovarianceElement(sfName, this);                    // made changes by TUAN NGUYEN
+               }
+               Integer locationStart = covariance.GetSubMatrixLocationStart(sfName);
+               for (Integer row = 0; row < covMatrix->GetNumRows(); ++row)
+               {
+                  for (Integer col = 0; col < covMatrix->GetNumColumns(); ++col)
+                  {
+                     covariance(locationStart + row, locationStart + col) = (*covMatrix)(row, col);
+                  }
+               }
+            }
+         }
+
+      }                                                                                          // made changes by TUAN NGUYEN
+      else
+      {
+         // Update value of covariance
+         Real Cr0, CrEpsilonSigma;
+         if (srpShapeModel == "Spherical")
+         {
+            // Update SPADSRPScaleFactor and reset crEpsilon
+            spadSRPScaleFactor = spadSRPScaleFactor * (1 + crEpsilon);
+            crEpsilon = 0.0;
+
+            // Update CrEpsilonSigma
+            Cr0 = reflectCoeff;
+            CrEpsilonSigma = reflectCoeffSigma / Cr0;       // stdiv[Cr_Epsilon] = stdiv[Cr] / Cr0 
+            Integer locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");         // made changes by TUAN NGUYEN
+            covariance(locationStart, locationStart) = CrEpsilonSigma * CrEpsilonSigma;         // made changes by TUAN NGUYEN
+         }
+         else if (srpShapeModel == "SPADFile")
+         {
+            // Update Cr and reset crEpsilon
+            reflectCoeff = reflectCoeff * (1 + crEpsilon);
+            crEpsilon = 0.0;
+
+            // Update CrEpsilonSigma
+            Cr0 = spadSRPScaleFactor;
+            CrEpsilonSigma = spadSRPScaleFactorSigma / Cr0;       // stdiv[Cr_Epsilon] = stdiv[Cr] / Cr0 
+            Integer locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");         // made changes by TUAN NGUYEN
+            covariance(locationStart, locationStart) = CrEpsilonSigma * CrEpsilonSigma;         // made changes by TUAN NGUYEN
+         }
+
+         // NPlate model does not use these lines                                               // made changes by TUAN NGUYEN
+         // Integer locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");         // made changes by TUAN NGUYEN
+         // covariance(locationStart, locationStart) = CrEpsilonSigma * CrEpsilonSigma;         // made changes by TUAN NGUYEN
+      }
+   }
+
+   return true;
+}
+
+
+// made changes by TUAN NGUYEN
+std::string Spacecraft::GetSRPShapeModel()
+{
+   return srpShapeModel;
+}
+
+
+// made changes by TUAN NGUYEN
+bool Spacecraft::SetDragShapeModel(std::string model)
+{
+   if (model == "Spherical")
+   {
+      // throw an error when using SPADDragScaleFactor as a solve-for variable
+      for (Integer i = 0; i < solveforNames.size(); ++i)
+      {
+         if (solveforNames[i] == "SPADDragScaleFactor")
+         {
+            throw SpaceObjectException("Error: Estimation of " + GetName() +
+               ".SPADDragScaleFactor parameter is not allowed when using Spherical Drag model.\n");
+         }
+      }
+   }
+   else if (model == "SPADFile")
+   {
+      // throw an error when using Cd as a solve-for variable
+      for (Integer i = 0; i < solveforNames.size(); ++i)
+      {
+         if (solveforNames[i] == "Cd")
+         {
+            throw SpaceObjectException("Error: Estimation of " + GetName() +
+               ".Cd parameter is not allowed when using SPADFile Drag model.\n");
+         }
+      }
+   }
+
+
+   if (dragShapeModel != model)
+   {
+      dragShapeModel = model;
+
+      // Update value of covariance
+      Real Cd0, CdEpsilonSigma;
+      if (dragShapeModel == "Spherical")
+      {
+         // Update SPADDragScaleFactor and reset cdEpsilon
+         spadDragScaleFactor = spadDragScaleFactor * (1 + cdEpsilon);
+         cdEpsilon = 0.0;
+
+         // Update CdEpsilonSigma
+         Cd0 = coeffDrag;
+         CdEpsilonSigma = coeffDragSigma / Cd0;       // stdiv[Cd_Epsilon] = stdiv[Cd] / Cd0 
+         Integer locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");                  // made changes by TUAN NGUYEN
+         covariance(locationStart, locationStart) = CdEpsilonSigma * CdEpsilonSigma;                  // made changes by TUAN NGUYEN
+      }
+      else if (dragShapeModel == "SPADFile")
+      {
+         // Update Cd and reset cdEpsilon
+         coeffDrag = coeffDrag * (1 + cdEpsilon);
+         cdEpsilon = 0.0;
+
+         // Update CdEpsilonSigma
+         Cd0 = spadDragScaleFactor;
+         CdEpsilonSigma = spadDragScaleFactorSigma / Cd0;       // stdiv[Cd_Epsilon] = stdiv[Cd] / Cd0 
+         Integer locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");                  // made changes by TUAN NGUYEN
+         covariance(locationStart, locationStart) = CdEpsilonSigma * CdEpsilonSigma;                  // made changes by TUAN NGUYEN
+      }    
+
+      // NPlate model does not use these lines                                                        // made changes by TUAN NGUYEN
+      // Integer locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");                  // made changes by TUAN NGUYEN
+      // covariance(locationStart, locationStart) = CdEpsilonSigma*CdEpsilonSigma;                    // made changes by TUAN NGUYEN
+   }
+
+   return true;
+}
+
+
+// made changes by TUAN NGUYEN
+std::string Spacecraft::GetDragShapeModel()
+{
+   return dragShapeModel;
+}
+
+// made changes by TUAN NGUYEN
+std::vector<StringArray> Spacecraft::GetEqualConstrains()
+{
+   return constraintsList;
+}
+
+// made changes by TUAN NGUYEN
+void Spacecraft::UpdateValueForConstraints()
+{
+   for (Integer i = 0; i < constraintsList.size(); ++i)
+   {
+      if (constraintsList[i].size() > 1)
+      {
+         // Get value of the first variable in constraint list
+         Real val;
+         std::string name = constraintsList[i][0];
+         size_t pos = name.find('.');
+         if (pos == name.npos)                // the first constraint variable in the list is a spacecraft's parameter
+            val = GetRealParameter(name);     // get value of spacecraft's parameter
+         else                                 // the first constraint variable in the list is another object's parameter (ex: Plate, ...)
+         {
+            std::string objName = name.substr(0, pos);        // name of an object
+            std::string paramName = name.substr(pos + 1);     // name of a parameter belonging to the object
+            for (Integer k = 0; k < plateList.size(); ++k)
+            {
+               if (plateList[k]->GetName() == objName)
+               {
+                  val = ((Plate*)plateList[k])->GetRealParameter(paramName);
+                  break;
+               }
+            }
+         }
+
+         // Set that value to all remain variables in the list
+         for (Integer j = 1; j < constraintsList[i].size(); ++j)
+         {
+            std::string name = constraintsList[i][j];
+            size_t pos = name.find('.');
+            if (pos == name.npos)                // the current constraint variable is a spacecraft's parameter
+               SetRealParameter(name, val);      // set the value to the parameter
+            else                                 // the current constraint variable is another object's parameter (ex: Plate, ...)
+            {
+               std::string objName = name.substr(0, pos);        // name of an object
+               std::string paramName = name.substr(pos + 1);     // name of a parameter belonging to the object
+               for (Integer k = 0; k < plateList.size(); ++k)
+               {
+                  if (plateList[k]->GetName() == objName)
+                  {
+                     bool prevChoice = ((Plate*)plateList[k])->SetErrorSelection(false);
+                     ((Plate*)plateList[k])->SetRealParameter(paramName, val);
+                     ((Plate*)plateList[k])->SetErrorSelection(prevChoice);
+                     break;
+                  }
+               }
+            }
+         }
+      }
+   }
+}
+
+
+Rmatrix Spacecraft::SetSTMToIdentityMatrix()
+{
+   Rmatrix prevFullSTM = fullSTM;
+   
+   for (Integer row = 0; row < fullSTM.GetNumRows(); ++row)
+      for (Integer col = 0; col < fullSTM.GetNumColumns(); ++col)
+         fullSTM(row, col) = (row == col ? 1.0 : 0.0);
+
+   return prevFullSTM;
+}
+
+
+// made changes by TUAN NGUYEN
+//-------------------------------------------------------------------------------
+// Integer SetRunningCommandFlag(Integer runningCommand)
+//-------------------------------------------------------------------------------
+/**
+* This function is used to set a flag to indicate simulation, propagation, or 
+* estimation command is running and using this spacecraft for its command.
+*
+* @param runningCommand    flag is used to indicate what command is running
+*                          0: not running; 
+*                          1: running simulation command
+*                          2: running propagation command
+*                          3: running estimation command
+*
+* @return  its previous flag
+*/
+//-------------------------------------------------------------------------------
+Integer Spacecraft::SetRunningCommandFlag(Integer runningCommand)
+{
+   Integer temp = runningCommandFlag;
+   runningCommandFlag = runningCommand;
+   //MessageInterface::ShowMessage("Spacecraft %s runningCommandFlag is set to %d.\n", GetName().c_str(), runningCommand);
+
+   // Pass flag to all plates
+   for (Integer i = 0; i < plateList.size(); ++i)
+   {
+      ((Plate*)plateList[i])->SetRunningCommandFlag(runningCommandFlag);
+      //MessageInterface::ShowMessage("Spacecraft %s passes flag setting to Plate %s.\n", GetName().c_str(), plateList[i]->GetName().c_str());
+   }
+
+   return temp;
+};

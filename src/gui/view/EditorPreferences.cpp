@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -138,7 +138,7 @@ const GmatEditor::LanguageInfoType GmatEditor::globalLanguagePrefs [] =
     _T("*.script;*.m;*.gmf"),
     #if 1
     // using matlab style - the order is defined in stc.h
-    wxSTC_LEX_MATLAB, // Shows GMAT comments, but no commands in predefined color
+    wxSTC_LEX_CONTAINER, // Shows GMAT comments, but no commands in predefined color
     {{GMAT_STC_TYPE_DEFAULT, NULL},            //  0 DEFAULT
      {GMAT_STC_TYPE_COMMENT, NULL},            //  1 COMMENT
      {GMAT_STC_TYPE_COMMAND, NULL},			   //  2 COMMAND
@@ -266,7 +266,7 @@ const GmatEditor::LanguageInfoType GmatEditor::globalLanguagePrefs [] =
      {GMAT_STC_TYPE_STRING, NULL},             //  5 STRING
      {GMAT_STC_TYPE_OPERATOR, NULL},           //  6 OPERATOR
      {GMAT_STC_TYPE_IDENTIFIER, NULL},         //  7 IDENTIFIER
-     {-1, NULL},
+     {-1, NULL},              //  8 KEYWORDS
      {-1, NULL},
      {-1, NULL},
      {-1, NULL},
@@ -425,161 +425,161 @@ const GmatEditor::StyleInfoType GmatEditor::globalStylePrefs [] =
    // GMAT_STC_TYPE_DEFAULT 0
    {_T("Default"),
     _T("BLACK"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_WORD1 (with wxSTC_LEX_PYTHON, GMAT KeyWords shows in this color)
    {_T("Keyword1"),
-    _T("BLUE"), _T("WHITE"),
+    _T("Custom"), _T("WHITE"),
     //_T(""), 10, GMAT_STC_STYLE_BOLD, 0},
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 11505963},
 
    // GMAT_STC_TYPE_WORD2
    {_T("Keyword2"),
     _T("RED"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_WORD3
    {_T("Keyword3"),
     _T("CORNFLOWER BLUE"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_WORD4
    {_T("Keyword4"),
     _T("CYAN"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_WORD5
    {_T("Keyword5"),
     _T("DARK GREY"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_WORD6
    {_T("Keyword6"),
     _T("GREY"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_COMMENT 7
    {_T("Comment"),
     _T("FOREST GREEN"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_COMMENT_DOC 8
    {_T("Comment (Doc)"),
     _T("FOREST GREEN"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_COMMENT_LINE 9
    {_T("Comment line"),
     _T("FOREST GREEN"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_COMMENT_SPECIAL 10
    {_T("Special comment"),
     _T("FOREST GREEN"), _T("WHITE"),
-    _T(""), 10, GMAT_STC_STYLE_ITALIC, 0},
+    _T(""), 10, GMAT_STC_STYLE_ITALIC, 0, 0},
 
    // GMAT_STC_TYPE_CHARACTER (with wxSTC_LEX_PYTHON, string inside single quote) 11
    {_T("Character"),
     _T("PURPLE"), _T("WHITE"),
     //_T("KHAKI"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_CHARACTER_EOL 12
    {_T("Character (EOL)"),
     _T("PURPLE"), _T("WHITE"),
     //_T("KHAKI"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_STRING (with wxSTC_LEX_PYTHON, string inside double quote) 13
    {_T("String"),
     _T("BROWN"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_STRING_EOL 14
    {_T("String (EOL)"),
     _T("BROWN"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_DELIMITER 15
    {_T("Delimiter"),
     _T("ORANGE"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_PUNCTUATION 16
    {_T("Punctuation"),
     _T("ORANGE"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_OPERATOR (with wxSTC_LEX_PYTHON, () [] math operators shown in this color) 17
    {_T("Operator"),
     _T("BLACK"), _T("WHITE"),
     //_T(""), 10, GMAT_STC_STYLE_BOLD, 0},
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_BRACE 18
    {_T("Label"),
     _T("VIOLET"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_COMMAND 19
    {_T("Command"),
     _T("BLUE"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_IDENTIFIER (with wxSTC_LEX_PYTHON, statesments showns in this color) 20
    {_T("Identifier"),
     _T("BLACK"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_LABEL 21
    {_T("Label"),
     _T("VIOLET"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_NUMBER 22
    {_T("Number"),
     _T("SIENNA"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_PARAMETER 23
    {_T("Parameter"),
     _T("VIOLET"), _T("WHITE"),
-    _T(""), 10, GMAT_STC_STYLE_ITALIC, 0},
+    _T(""), 10, GMAT_STC_STYLE_ITALIC, 0, 0},
 
    // GMAT_STC_TYPE_REGEX 24
    {_T("Regular expression"),
     _T("ORCHID"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_UUID 25
    {_T("UUID"),
     _T("ORCHID"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_VALUE 26
    {_T("Value"),
     _T("ORCHID"), _T("WHITE"),
-    _T(""), 10, GMAT_STC_STYLE_ITALIC, 0},
+    _T(""), 10, GMAT_STC_STYLE_ITALIC, 0, 0},
 
    // GMAT_STC_TYPE_PREPROCESSOR 27
    {_T("Preprocessor"),
     _T("GREY"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_SCRIPT 28
    {_T("Script"),
     _T("DARK GREY"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_ERROR 29
    {_T("Error"),
     _T("RED"), _T("WHITE"),
-    _T(""), 10, 0, 0},
+    _T(""), 10, 0, 0, 0},
 
    // GMAT_STC_TYPE_UNDEFINED 30
    {_T("Undefined"),
     _T("ORANGE"), _T("WHITE"),
-    _T(""), 10, 0, 0}
+    _T(""), 10, 0, 0, 0}
 
 };
 

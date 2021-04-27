@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -820,7 +820,7 @@ Rvector6 StateConversionUtil::ConvertFromModEquinoctial(const std::string &toTyp
    }
    else if (toType == "Keplerian" || toType == "ModifiedKeplerian")
    {
-      Rvector6 kepl = CartesianToKeplerian(mu, state, anomalyType);
+      Rvector6 kepl = CartesianToKeplerian(mu, cartState, anomalyType);
       
       if (toType == "ModifiedKeplerian")
          outState =  KeplerianToModKeplerian(kepl);
@@ -5777,9 +5777,171 @@ Rvector6 StateConversionUtil::CartesianToAngularMomentum(Real mu, const Rvector3
    return h;
 }
 
+//------------------------------------------------------------------------------
+// general derivative conversion methods
+//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+// Rmatrix66 StateConvJacobian(Rvector6 stateIn, StateType stateInputType,
+//    StateType jacInputType, StateType jacOutputType, Real mu)
+//--------------------------------------------------------------------------------------
+/**
+* Calculates Jacobian of conversion of spacecraft state from one type to another
+*
+* @param stateIn Input state in inputType
+* @param stateInputType The type of the input state
+* @param inputType The type of the input state (i.e., the variable
+*        representation in the denominator of the partial derivatives)
+* @param jacInputType The variable representation in the denominator of the
+*        partial derivatives
+* @param jacOutputType Tthe variable representation in the numerator of the
+*        partial derivatives
+* @param mu Gravitational parameter of central body (default value is Earth's in
+*        km^3/s^2)
+*
+* @return jacobian Jacobian of the tranformation from state in inputType to
+*         outputType
+*/
+//--------------------------------------------------------------------------------------
+Rmatrix66 StateConversionUtil::StateConvJacobian(const Rvector6 &stateIn,
+                                                 const std::string &stateInputType,
+                                                 const std::string &jacInputType,
+                                                 const std::string &jacOutputType,
+                                                 Real mu,
+                                                 Real flattening,
+                                                 Real eqRadius,
+                                                 const std::string &anomalyType)
+{
+   Rvector6 state;
+   Rmatrix66 jacobian;
+   if (jacInputType == jacOutputType)
+   {
+      jacobian.Identity(6);
+      return jacobian;
+   }
+
+   if (stateInputType == "Cartesian")
+      state = stateIn;
+   else
+      state = Convert(stateIn, stateInputType, "Cartesian", mu, flattening,
+         eqRadius, anomalyType);
+
+   if (jacInputType == "Cartesian")
+      jacobian =
+         JacobianWrtCartesian(state, stateInputType, jacOutputType, mu);
+   else if (jacOutputType == "Cartesian")
+      jacobian =
+         JacobianOfCartesian(state, stateInputType, jacInputType, mu);
+   else
+   {
+      Rmatrix66 jacobianOfCartWrtInput =
+         JacobianOfCartesian(state, stateInputType, jacInputType, mu);
+      Rmatrix66 jacobianOfOutputWrtCar =
+         JacobianWrtCartesian(state, stateInputType, jacOutputType, mu);
+      jacobian =
+         jacobianOfOutputWrtCar.ElementWiseMultiply(jacobianOfCartWrtInput);
+   }
+
+   return jacobian;
+}
+
+//--------------------------------------------------------------------------------------
+// Rmatrix66 JacobianOfCartesian(Rvector6 stateIn, StateType stateInputType,
+//    StateType jacInputType, Real mu)
+//--------------------------------------------------------------------------------------
+/**
+* Jacobian of conversion of spacecraft state from another representation to
+* inertial cartesian
+*
+* @param stateIn Input state in inputType
+* @param stateInputType The type of the input state
+* @param inputType The type of the input state (i.e., the variable
+*        representation in the denominator of the partial derivatives)
+* @param jacInputType The variable representation in the denominator of the
+*        partial derivatives
+* @param mu Gravitational parameter of central body (default value is Earth's in
+*        km^3/s^2)
+*
+* @return jacobian Jacobian of transformation of stateIn from jacInputType to
+*         Cartesian
+*/
+//--------------------------------------------------------------------------------------
+Rmatrix66 StateConversionUtil::JacobianOfCartesian(const Rvector6 &stateIn,
+                                                   const std::string &stateInputType,
+                                                   const std::string &jacInputType,
+                                                   Real mu,
+                                                   Real flattening,
+                                                   Real eqRadius,
+                                                   const std::string &anomalyType)
+{
+   Rvector6 state;
+   Rmatrix66 jacobian;
+
+   if (stateInputType == "Cartesian")
+      state = stateIn;
+   else
+      state = Convert(stateIn, stateInputType, "Cartesian", mu, flattening,
+         eqRadius, anomalyType);
+
+   if (jacInputType == "Cartesian")
+      jacobian.Identity(6);
+   else if (jacInputType == "Keplerian")
+      jacobian = CartesianToKeplerianDerivativeConversion(mu, state);
+   else if (jacInputType == "SphericalAZFPA")
+      jacobian = CartesianToSphericalAzFPADerivativeConversion(mu, state);
+
+   return jacobian;
+}
+
+//--------------------------------------------------------------------------------------
+// Rmatrix66 JacobianWrtCartesian(Rvector6 stateIn, StateType stateInputType,
+//    StateType jacOutputType, Real mu)
+//--------------------------------------------------------------------------------------
+/**
+* Jacobian of conversion of spacecraft state from inertial cartesian to another
+* representation
+*
+* @param stateIn Input state in inputType
+* @param stateInputType The type of the input state
+* @param inputType The type of the input state (i.e., the variable
+*        representation in the denominator of the partial derivatives)
+* @param jacOutputType Tthe variable representation in the numerator of the
+*        partial derivatives
+* @param mu Gravitational parameter of central body (default value is Earth's in
+*        km^3/s^2)
+*
+* @return jacobian Jacobian of transformation of stateIn from Cartesian to
+*         jacOutputType
+*/
+//--------------------------------------------------------------------------------------
+Rmatrix66 StateConversionUtil::JacobianWrtCartesian(const Rvector6 &stateIn,
+                                                    const std::string &stateInputType,
+                                                    const std::string &jacOutputType,
+                                                    Real mu,
+                                                    Real flattening,
+                                                    Real eqRadius,
+                                                    const std::string &anomalyType)
+{
+   Rvector6 state;
+   Rmatrix66 jacobian;
+
+   if (stateInputType == "Cartesian")
+      state = stateIn;
+   else
+      state = Convert(stateIn, stateInputType, "Cartesian", mu, flattening,
+         eqRadius, anomalyType);
+
+   if (jacOutputType == "Cartesian")
+      jacobian.Identity(6);
+   else if (jacOutputType == "Keplerian")
+      jacobian = KeplerianToCartesianDerivativeConversion(mu, state);
+   else if (jacOutputType == "SphericalAZFPA")
+      jacobian = SphericalAzFPAToCartesianDerivativeConversion(mu, state);
+
+   return jacobian;
+}
 
 //------------------------------------------------------------------------------
-// derivative conversion methods
+// specific derivative conversion methods
 //------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------
 // Rmatrix66 CartesianToKeplerianDerivativeConversion(Real mu, const Rvector6 &cartesianState)
@@ -5796,12 +5958,20 @@ Rvector6 StateConversionUtil::CartesianToAngularMomentum(Real mu, const Rvector3
 */
 //--------------------------------------------------------------------------------------
 Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversion(
-   Real mu, const Rvector6 &cartesianState)
+   Real mu, const Rvector6 &cartesianState, const std::string &anomalyType)
 {
    static Rmatrix66 result;
 
    // 1. Convert Cartesian state to Keplerian state (angles in degree)
-   Rvector6 keplerState = StateConversionUtil::CartesianToKeplerian(mu, cartesianState, StateConversionUtil::MA);
+   Rvector6 keplerState;
+   if (anomalyType == "MA")
+      keplerState = StateConversionUtil::CartesianToKeplerian(mu, cartesianState, StateConversionUtil::MA);
+   else if (anomalyType == "TA")
+      keplerState = StateConversionUtil::CartesianToKeplerian(mu, cartesianState, StateConversionUtil::TA);
+   else
+      throw UtilityException("Error: The anomaly type " + anomalyType +
+         " is currently not supported for the Cartesian to Keplerian "
+         "conversion");
 
    // 2. Convert INC, RAAN, AOP, MA from degree to radian
    for (UnsignedInt i = 2; i < 6; ++i)
@@ -5811,7 +5981,7 @@ Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversion(
    if ((keplerState[1] >= 0.0) && (keplerState[1] < 1.0))
    {
       // Use analytical solution for Ellipse case
-      result = CartesianToKeplerianDerivativeConversionWithKeplInput(mu, keplerState);        // It is the matrix [dX/dK] where X is Cartesian state and K is Keplerian state
+      result = CartesianToKeplerianDerivativeConversionWithKeplInput(mu, keplerState, anomalyType);        // It is the matrix [dX/dK] where X is Cartesian state and K is Keplerian state
    }
    else if (keplerState[1] >= 1.0)
    {
@@ -5827,6 +5997,216 @@ Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversion(
    return result;
 }
 
+//--------------------------------------------------------------------------------------
+// Rmatrix66 KeplerianToCartesianDerivativeConversion(Real mu, const Rvector6 &keplerState)
+// Rmatrix66 CartesianToKeplerianDerivativeConversionWithKeplInput(
+//   Real mu, const Rvector6 &keplerState)
+
+//--------------------------------------------------------------------------------------
+/**
+* This function is used to calculate [dX/dK] derivative conversion matrix for a given Keplerian state.
+* Only apply for Keplerian state presented in mean anomaly
+*
+* @param mu             mu value of primary body
+* @param keplerState    state presented in Keplerian coordiante system
+*
+* return                derivative state conversion matrix
+*/
+//--------------------------------------------------------------------------------------
+//Rmatrix66 StateConversionUtil::KeplerianToCartesianDerivativeConversion(
+//   Real mu, const Rvector6 &keplerState)
+Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversionWithKeplInput(
+   Real mu, const Rvector6 &keplerState, const std::string &anomalyType)
+{
+   static Rmatrix66 result;
+
+   // Specify a,e,M, Ohm, omega, i
+   Real a, e, anom, Ohm, omega, iAngle;
+   a = keplerState(0);                  // SMA
+   e = keplerState(1);                  // ECC
+   iAngle = keplerState(2);             // INC            // unit: radian
+   Ohm = keplerState(3);                // RAAN           // unit: radian
+   omega = keplerState(4);              // AOP            // unit: radian
+   anom = keplerState(5);               // anomaly        // unit: radian
+
+   if ((e < 0.0) || e >= 1.0)
+      throw UtilityException("Error: Eccentricity (" + GmatStringUtil::ToString(e) + ") is out of range [0,1)\n");
+
+   // Specify E from e and M
+   Real E;         // eccentric anomaly
+   if (anomalyType == "MA")
+      E = CalculateEccentricAnomaly(e, anom);
+   else if (anomalyType == "TA")
+      E = TrueToEccentricAnomaly(anom, e);                               // Equation 3-178 GTDS MathSpec   
+   else
+      throw UtilityException("Error: The anomaly type " + anomalyType +
+         " is currently not supported for the Cartesian to Keplerian "
+         "conversion");
+
+   Rvector3 rpVec;
+   Rvector3 rpdotVec;
+   if ((0.0 <= e) && (e < 1.0))            // Ellipse case
+   {
+      // Specify rp:                                                          // Equation 3-176 GTDS MathSpec
+      rpVec[0] = a * (Cos(E) - e);
+      rpVec[1] = a * Sin(E)*Sqrt(1 - e * e);
+      rpVec[2] = 0;
+
+      // Specify rpdot:                                                       // Equation 3-177 GTDS MathSpec 
+      rpdotVec[0] = -Sin(E);
+      rpdotVec[1] = Cos(E)*Sqrt(1 - e * e);
+      rpdotVec[2] = 0;
+      rpdotVec = (Sqrt(mu / a) / (1 - e * Cos(E))) * rpdotVec;
+   }
+   else if (e > 1.0)                            // Hyperbola case
+   {
+      // Specify rp:                                                          // Equation 3-183 GTDS MathSpec
+      rpVec[0] = a * (Cosh(E) - e);
+      rpVec[1] = -a * Sinh(E)*Sqrt(e*e - 1);
+      rpVec[2] = 0;
+
+      // Specify rpdot:                                                       // Equation 3-184 GTDS MathSpec 
+      rpdotVec[0] = Sinh(E);
+      rpdotVec[1] = -Cosh(E)*Sqrt(e*e - 1);
+      rpdotVec[2] = 0;
+      rpdotVec = (Sqrt(-mu / a) / (e*Cosh(E) - 1)) * rpdotVec;
+   }
+
+   // Specify P
+   Rmatrix33 P;
+   P(0, 0) = Cos(Ohm)*Cos(omega) - Sin(Ohm)*Cos(iAngle)*Sin(omega);         // Equation 3-192a GTDS MathSpec
+   P(0, 1) = -Cos(Ohm)*Sin(omega) - Sin(Ohm)*Cos(iAngle)*Cos(omega);        // Equation 3-192b GTDS MathSpec
+   P(0, 2) = Sin(Ohm)*Sin(iAngle);                                          // Equation 3-192c GTDS MathSpec
+   P(1, 0) = Sin(Ohm)*Cos(omega) + Cos(Ohm)*Cos(iAngle)*Sin(omega);         // Equation 3-192d GTDS MathSpec
+   P(1, 1) = -Sin(Ohm)*Sin(omega) + Cos(Ohm)*Cos(iAngle)*Cos(omega);        // Equation 3-192e GTDS MathSpec
+   P(1, 2) = -Cos(Ohm)*Sin(iAngle);                                         // Equation 3-192f GTDS MathSpec
+   P(2, 0) = Sin(iAngle)*Sin(omega);                                        // Equation 3-192g GTDS MathSpec
+   P(2, 1) = Sin(iAngle)*Cos(omega);                                        // Equation 3-192h GTDS MathSpec
+   P(2, 2) = Cos(iAngle);                                                   // Equation 3-192i GTDS MathSpec
+
+   // Specify rVec and rdotVec
+   Rvector3 rVec = P * rpVec;                                              // Equation 3-193 GTDS MathSpec
+   Rvector3 rdotVec = P * rpdotVec;                                        // Equation 3-194 GTDS MathSpec
+
+   // Mean motion n:
+   Real n = (1 / a)*Sqrt(mu / a);                                              // Equation 3-201 GTDS MathSpec
+
+   // Conversion matrix
+   Rmatrix33 c1, c2, A, B;
+   // Partial derivative of rp w.r.t. semi-major axis a, eccentricity e, and mean anomaly M (Equation 3-199 GTDS MathSpec)
+   c1(0, 0) = rpVec[0] / a;
+   c1(1, 0) = rpVec[1] / a;
+   c1(2, 0) = 0.0;
+   if (anomalyType == "MA")
+   {
+      c1(0, 1) = -a - rpVec[1] * rpVec[1] / (rVec.Norm()*(1 - e * e));
+      c1(1, 1) = rpVec[0] * rpVec[1] / (rVec.Norm()*(1 - e * e));
+      c1(2, 1) = 0.0;
+      c1(0, 2) = -a * rpVec[1] / (rVec.Norm()*Sqrt(1 - e * e));
+      c1(1, 2) = a * Sqrt(1 - e * e)*(rpVec[0] + a * e) / rVec.Norm();
+      c1(2, 2) = 0.0;
+   }
+   else if (anomalyType == "TA")
+   {
+      Real r = a * (1 - e * e) / (1.0 + e * Cos(anom));
+      Real dedrvCoef = -2.0 * r * e / (1 - e * e) - a * (1 - e * e) / pow(1.0 + e * Cos(anom), 2.0) * Cos(anom);
+      c1(0, 1) = dedrvCoef * Cos(anom);
+      c1(1, 1) = dedrvCoef * Sin(anom);
+      c1(2, 1) = 0.0;
+      c1(0, 2) = a * -(1.0 - e * e) * Sin(anom) / (pow(1.0 + e * Cos(anom), 2.0));
+      c1(1, 2) = (1.0 - e * e) * (Sin(anom) * Sin(anom) * e + Cos(anom) + e * Cos(anom) * Cos(anom)) * a / (pow(1.0 + e * Cos(anom), 2.0));
+      c1(2, 2) = 0.0;
+   }
+   A = P * c1;                                                               // Equation 3-195 GTDS MatSpec
+
+   // Partial derivative of rpdot w.r.t. semi-major axis a, eccentricity e, and mean anomaly M  (Equation 3-200 GTDS MathSpec)
+   c2(0, 0) = -rpdotVec[0] / (2 * a);
+   c2(1, 0) = -rpdotVec[1] / (2 * a);
+   c2(2, 0) = 0.0;
+   if (anomalyType == "MA")
+   {
+      c2(0, 1) = rpdotVec[0] * Pow(a / rVec.Norm(), 2)*(2 * rpVec[0] / a + e * Pow(rpVec[1] / a, 2) / (1 - e * e));
+      c2(1, 1) = n * Pow(a / rVec.Norm(), 2)*(rpVec[0] * rpVec[0] / rVec.Norm() - rpVec[1] * rpVec[1] / a / (1 - e * e)) / Sqrt(1 - e * e);
+      c2(2, 1) = 0.0;
+      c2(0, 2) = -n * Pow(a / rVec.Norm(), 3)*rpVec[0];
+      c2(1, 2) = -n * Pow(a / rVec.Norm(), 3)*rpVec[1];
+      c2(2, 2) = 0.0;
+   }
+   else if (anomalyType == "TA")
+   {
+      c2(0, 1) = -1.0 / Sqrt(mu / a / (1 - e * e)) * Sin(anom) * mu / a / pow(1 - e * e, 2.0) * e;
+      c2(1, 1) = 1.0 / Sqrt(mu / a / (1 - e * e)) * (e + Cos(anom)) * mu / a / pow(1 - e * e, 2.0) * e + Sqrt(mu / a / (1 - e * e));
+      c2(2, 1) = 0.0;
+      c2(0, 2) = -Sqrt(mu / a / (1 - e * e)) * Cos(anom);
+      c2(1, 2) = -Sqrt(mu / a / (1 - e * e)) * Sin(anom);
+      c2(2, 2) = 0.0;
+   }
+   B = P * c2;                                                               // Equation 3-196 GTDS MatSpec
+
+   // Partial derivative w.r.t. Ohm  (Equation 3-202 GTDS MathSpec)
+   Rmatrix33 dPdOhm;
+   dPdOhm(0, 0) = -P(1, 0);
+   dPdOhm(0, 1) = -P(1, 1);
+   dPdOhm(0, 2) = -P(1, 2);         // 0.0;  // Equation 3-202 GTDS MatSpec is incorrect at here
+   dPdOhm(1, 0) = P(0, 0);
+   dPdOhm(1, 1) = P(0, 1);
+   dPdOhm(1, 2) = P(0, 2);          // 0.0;  // Equation 3-202 GTDS MatSpec is incorrect at here
+   dPdOhm(2, 0) = 0.0;
+   dPdOhm(2, 1) = 0.0;
+   dPdOhm(2, 2) = 0.0;
+   Rvector3 drdOhm = dPdOhm * rpVec;                                       // Equation 3-197 GTDS MathSpec
+   Rvector3 drdotdOhm = dPdOhm * rpdotVec;                                 // Equation 3-198 GTDS MathSpec
+
+   // Partial derivative w.r.t. omega  (Equation 3-203 GTDS MathSpec)
+   Rmatrix33 dPdomega;
+   dPdomega(0, 0) = P(0, 1);
+   dPdomega(0, 1) = -P(0, 0);
+   dPdomega(0, 2) = 0.0;
+   dPdomega(1, 0) = P(1, 1);
+   dPdomega(1, 1) = -P(1, 0);
+   dPdomega(1, 2) = 0.0;
+   dPdomega(2, 0) = P(2, 1);
+   dPdomega(2, 1) = -P(2, 0);
+   dPdomega(2, 2) = 0.0;
+   Rvector3 drdomega = dPdomega * rpVec;                                   // Equation 3-197 GTDS MathSpec
+   Rvector3 drdotdomega = dPdomega * rpdotVec;                             // Equation 3-198 GTDS MathSpec
+
+   // Partial derivative w.r.t. i  (Equation 3-204 GTDS MathSpec)
+   Rmatrix33 dPdi;
+   dPdi(0, 0) = Sin(Ohm)*Sin(iAngle)*Sin(omega);
+   dPdi(0, 1) = Sin(Ohm)*Sin(iAngle)*Cos(omega);
+   dPdi(0, 2) = Sin(Ohm)*Cos(iAngle);                   // 0.0;    // Equation 3-204 GTDS MathSpec is incorrect here
+   dPdi(1, 0) = -Cos(Ohm)*Sin(iAngle)*Sin(omega);
+   dPdi(1, 1) = -Cos(Ohm)*Sin(iAngle)*Cos(omega);
+   dPdi(1, 2) = -Cos(Ohm)*Cos(iAngle);                  // 0.0;    // Equation 3-204 GTDS MathSpec is incorrect here
+   dPdi(2, 0) = Cos(iAngle)*Sin(omega);
+   dPdi(2, 1) = Cos(iAngle)*Cos(omega);
+   dPdi(2, 2) = -Sin(iAngle);                           // 0.0;    // Equation 3-204 GTDS MathSpec is incorrect here
+   Rvector3 drdi = dPdi * rpVec;                                           // Equation 3-197 GTDS MathSpec
+   Rvector3 drdotdi = dPdi * rpdotVec;                                     // Equation 3-198 GTDS MathSpec
+
+   result(0, 0) = A(0, 0); result(0, 1) = A(0, 1); result(0, 5) = A(0, 2);
+   result(1, 0) = A(1, 0); result(1, 1) = A(1, 1); result(1, 5) = A(1, 2);
+   result(2, 0) = A(2, 0); result(2, 1) = A(2, 1); result(2, 5) = A(2, 2); //A(0,2);
+   result(3, 0) = B(0, 0); result(3, 1) = B(0, 1); result(3, 5) = B(0, 2);
+   result(4, 0) = B(1, 0); result(4, 1) = B(1, 1); result(4, 5) = B(1, 2);
+   result(5, 0) = B(2, 0); result(5, 1) = B(2, 1); result(5, 5) = B(2, 2); //B(0,2);
+
+   result(0, 2) = drdi[0];    result(0, 3) = drdOhm[0];    result(0, 4) = drdomega[0];
+   result(1, 2) = drdi[1];    result(1, 3) = drdOhm[1];    result(1, 4) = drdomega[1];
+   result(2, 2) = drdi[2];    result(2, 3) = drdOhm[2];    result(2, 4) = drdomega[2];
+   result(3, 2) = drdotdi[0]; result(3, 3) = drdotdOhm[0]; result(3, 4) = drdotdomega[0];
+   result(4, 2) = drdotdi[1]; result(4, 3) = drdotdOhm[1]; result(4, 4) = drdotdomega[1];
+   result(5, 2) = drdotdi[2]; result(5, 3) = drdotdOhm[2]; result(5, 4) = drdotdomega[2];
+
+
+   // convert radian to degree INC, RAAN, AOP, and MA from radian to degree
+   for (UnsignedInt row = 0; row < 6; ++row)
+      for (UnsignedInt col = 2; col < 6; ++col)
+         result(row, col) = result(row, col)*GmatMathConstants::RAD_PER_DEG;      // Note that: di, dOhm, domega, and dM are in denominator 
+
+   return result;
+}
 
 //--------------------------------------------------------------------------------------
 // Rmatrix66 CartesianToKeplerianDerivativeConversion_FiniteDiff(Real mu, const Rvector6 &cartesianState)
@@ -5843,13 +6223,23 @@ Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversion(
 */
 //--------------------------------------------------------------------------------------
 Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversion_FiniteDiff(
-   Real mu, const Rvector6 &cartesianState)
+   Real mu, const Rvector6 &cartesianState, const std::string &anomalyType)
 {
    static Rmatrix66 result;
    Rmatrix66 dKdX;                   // It is matrix [dK/dX]
    
    // 1. Convert Cartesian state to Keplerian state (angles in degree)
-   Rvector6 K0 = StateConversionUtil::CartesianToKeplerian(mu, cartesianState, StateConversionUtil::MA);
+   AnomalyType anomTypeEnum;
+   if (anomalyType == "MA")
+      anomTypeEnum = StateConversionUtil::MA;
+   else if (anomalyType == "TA")
+      anomTypeEnum = StateConversionUtil::TA;
+   else
+      throw UtilityException("Error: The anomaly type " + anomalyType +
+         " is currently not supported for the Cartesian to Keplerian "
+         "conversion");
+
+   Rvector6 K0 = StateConversionUtil::CartesianToKeplerian(mu, cartesianState, anomTypeEnum);
 
    // 2. Calculate derivative conversion matrix
    if (K0[1] >= 0.0)
@@ -5866,7 +6256,7 @@ Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversion_FiniteDi
          //   K1[col] = K1[col] * 1.00000001;
          X1[col] = X1[col] * 1.000001;
 
-         Rvector6 K1 = CartesianToKeplerian(mu, X1, StateConversionUtil::MA);
+         Rvector6 K1 = CartesianToKeplerian(mu, X1, anomTypeEnum);
          Rvector6 dK = K1 - K0;
 
          for (Integer row = 0; row < 6; ++row)
@@ -5907,12 +6297,21 @@ Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversion_FiniteDi
 */
 //--------------------------------------------------------------------------------------
 Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversionWithKeplInput_FiniteDiff(
-   Real mu, const Rvector6 &keplerianState)
+   Real mu, const Rvector6 &keplerianState, const std::string &anomalyType)
 {
    static Rmatrix66 result;
 
    // 1. Convert Keplerian state (angles in degree) to Cartesian state
-   Rvector6 X0 = StateConversionUtil::KeplerianToCartesian(mu, keplerianState, StateConversionUtil::MA);
+   AnomalyType anomTypeEnum;
+   if (anomalyType == "MA")
+      anomTypeEnum = StateConversionUtil::MA;
+   else if (anomalyType == "TA")
+      anomTypeEnum = StateConversionUtil::TA;
+   else
+      throw UtilityException("Error: The anomaly type " + anomalyType +
+         " is currently not supported for the Cartesian to Keplerian "
+         "conversion");
+   Rvector6 X0 = StateConversionUtil::KeplerianToCartesian(mu, keplerianState, anomTypeEnum);
 
    // 2. Calculate derivative conversion matrix
    for (Integer col = 0; col < 6; ++col)
@@ -5924,7 +6323,7 @@ Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversionWithKeplI
       else
          K1[col] = K1[col] * 1.00000001;
 
-      Rvector6 X1 = KeplerianToCartesian(mu, K1, StateConversionUtil::MA);
+      Rvector6 X1 = KeplerianToCartesian(mu, K1, anomTypeEnum);
       Rvector6 dX = X1 - X0;
 
       for (Integer row = 0; row < 6; ++row)
@@ -5939,6 +6338,577 @@ Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversionWithKeplI
    return result;
 }
 
+//--------------------------------------------------------------------------------------
+// Rmatrix66 KeplerianToCartesianDerivativeConversion(Real mu,
+//    const Rvector6 &cartesianState)
+//--------------------------------------------------------------------------------------
+/**
+* This function is used to calculate derivative conversion matrix [dK/dX] where K is
+* Keplerian state and X is Cartesian state using finite difference method
+*
+* @param mu                 mu value of primary body
+* @param cartesianState     state presented in Cartesian coordiante system
+*
+* return                    derivative state conversion matrix [dK/dX] where K is
+*                           Keplerian state and X is Cartesian state
+*/
+//--------------------------------------------------------------------------------------
+Rmatrix66 StateConversionUtil::KeplerianToCartesianDerivativeConversion(Real mu,
+   const Rvector6 &cartesianState)
+{
+   // Basic orbit properties
+   Rvector3 rv, vv;
+   for (Integer i = 0; i < 3; ++i)
+      rv(i) = cartesianState(i);
+   for (Integer i = 0; i < 3; ++i)
+      vv(i) = cartesianState(i + 3);
+
+   Real r = rv.Norm();
+   Real v = vv.Norm();
+   
+   Rvector3 hv;
+   hv(0) = rv(1)*vv(2) - rv(2)*vv(1);
+   hv(1) = -(rv(0)*vv(2) - rv(2)*vv(0));
+   hv(2) = rv(0)*vv(1) - rv(1)*vv(0);
+   Real h = hv.Norm();
+   Real hvz = hv(2);
+
+   // Useful unit vectors in calculating RAAN and AOP
+   Rvector3 zhat(0.0, 0.0, 1.0);
+   Rvector3 xhat(1.0, 0.0, 0.0);
+
+   // The node vector
+   Rvector3 nv;
+   nv(0) = zhat(1)*hv(2) - zhat(2)*hv(1);
+   nv(1) = -(zhat(0)*hv(2) - zhat(2)*hv(0));
+   nv(2) = zhat(0)*hv(1) - zhat(1)*hv(0);
+   Real n = nv.Norm();
+   Real nvx = nv(0);
+
+   // The eccentricity vector, energy, and SMA
+   Real rvdotvv = rv(0)*vv(0) + rv(1)*vv(1) + rv(2)*vv(2);
+   Rvector3 ev = ((v * v - mu / r) * rv - rvdotvv * vv) / mu;
+   Real ECC = ev.Norm();
+   Real E = v * v * 0.5 - mu / r;
+
+   // Check eccentricity for parabolic orbit
+   Real eps = std::numeric_limits<Real>::epsilon();
+   if (GmatMathUtil::Abs(ECC - 1.0) < 2.0 * eps)
+   {
+      MessageInterface::ShowMessage("KeplerianToCartesianDerivativeConversion: "
+         "orbit is nearly parabolic via ECC and state conversion routine is near "
+         "numerical singularity\n");
+   }
+
+   if (GmatMathUtil::Abs(E) < 2.0 * eps)
+   {
+      MessageInterface::ShowMessage("KeplerianToCartesianDerivativeConversion: "
+         "orbit is nearly parabolic via Energy and state conversion routine is near "
+         "numerical singularity\n");
+   }
+
+   // Determine SMA depending on orbit type
+   Real SMA;
+   if (GmatMathUtil::Abs(ECC - 1.0) < eps)
+      SMA = std::numeric_limits<Real>::infinity();
+   else
+      SMA = -mu / 2.0 / E;
+
+   // Derivatives of intermediate quantities
+
+   // Derivatives of eccentricity vector and eccentricity unit vector
+   Rmatrix33 rvOuter(false), vvOuter(false), rvvvOuter(false), vvrvOuter(false),
+      evOuter(false), hvOuter(false);
+   for (Integer i = 0; i < 3; ++i)
+   {
+      for (Integer j = 0; j < 3; ++j)
+      {
+         rvOuter(i, j) = rv(i) * rv(j);
+         vvOuter(i, j) = vv(i) * vv(j);
+         rvvvOuter(i, j) = rv(i) * vv(j);
+         vvrvOuter(i, j) = vv(i) * rv(j);
+         evOuter(i, j) = ev(i) * ev(j);
+         hvOuter(i, j) = hv(i) * hv(j);
+      }
+   }
+   Rmatrix33 iden33(true);
+   
+   Rmatrix33 devdrv = ((v * v - mu / r) * iden33 +
+      mu * rvOuter / pow(r, 3.0) - vvOuter) / mu;
+   Rmatrix33 devdvv = 1.0 / mu * (2.0 * rvvvOuter -
+      rvdotvv * iden33 - vvrvOuter);
+   Rmatrix33 dehatdrv = devdrv / ECC - evOuter * devdrv / pow(ECC, 3.0);
+   Rmatrix33 dehatdvv = devdvv / ECC - evOuter * devdvv / pow(ECC, 3.0);
+
+   // Derivatives of the node vector and node unit vector
+   Rmatrix33 rvSkew(0.0, -rv(2), rv(1), rv(2), 0.0, -rv(0), -rv(1), rv(0), 0.0);
+   Rmatrix33 vvSkew(0.0, -vv(2), vv(1), vv(2), 0.0, -vv(0), -vv(1), vv(0), 0.0);
+   Rmatrix33 zhatSkew(0.0, -zhat(2), zhat(1), zhat(2), 0.0, -zhat(0), -zhat(1),
+      zhat(0), 0.0);
+
+   Rmatrix33 zhatTimesvv = zhatSkew * vvSkew;
+   Rmatrix33 zhatTimesrv = zhatSkew * rvSkew;
+   Rvector3 dndrv, dndvv;
+   for (Integer i = 0; i < 3; ++i)
+   {
+      for (Integer j = 0; j < 3; ++j)
+      {
+         dndrv(i) += (-1.0 / n) * nv(j) * zhatTimesvv(j, i);
+         dndvv(i) += (1.0 / n) * nv(j) * zhatTimesrv(j, i);
+      }
+   }
+
+   Rmatrix33 dnvdrv = -zhatSkew * vvSkew;
+   Rmatrix33 dnvdvv = zhatSkew * rvSkew;
+
+   Rmatrix33 nvdndrvOuter(false), nvdndvvOuter(false);
+   for (Integer i = 0; i < 3; ++i)
+   {
+      for (Integer j = 0; j < 3; ++j)
+      {
+         nvdndrvOuter(i, j) = nv(i) * dndrv(j);
+         nvdndvvOuter(i, j) = nv(i) * dndvv(j);
+      }
+   }
+   Rmatrix33 dnhatdrv = dnvdrv / n - nvdndrvOuter / (n * n);
+   Rmatrix33 dnhatdvv = dnvdvv / n - nvdndvvOuter / (n * n);
+
+   // Derivatives of orbital elements
+
+   // SMA
+   Rvector3 dSMAdrv = 2.0 * (SMA / r) * (SMA / r) / r * rv;
+   Rvector3 dSMAdvv = 2.0 * SMA * SMA / mu * vv;
+
+   // ECC
+   Rmatrix33 tempMat1 = (v * v - mu / r) * iden33;
+   Rmatrix33 tempMat2 = mu / pow(r, 3.0) * rvOuter;
+   Rmatrix33 tempMat3 = tempMat1 + tempMat2 - vvOuter;
+   Rvector3 dECCdrv, dECCdvv;
+   for (Integer i = 0; i < 3; ++i)
+   {
+      for (Integer j = 0; j < 3; ++j)
+      {
+         dECCdrv(i) += (1.0 / ECC / mu) * ev(j) * tempMat3(j, i);
+         dECCdvv(i) += (1.0 / ECC / mu) * ev(j) * 
+            (2.0 * rvvvOuter(j, i) - rvdotvv * iden33(j, i) - vvrvOuter(j, i));
+      }
+   }
+
+   // INC
+   Rvector3 dINCdrv, dINCdvv;
+   Rvector3 tempVec1;
+   for (Integer i = 0; i < 3; ++i)
+   {
+      for (Integer j = 0; j < 3; ++j)
+         tempVec1(i) += zhat(j) * (1.0 / h * iden33(j, i) - 1.0 / pow(h, 3.0) *
+            hvOuter(j, i));
+   }
+
+   for (Integer i = 0; i < 3; ++i)
+   {
+      for (Integer j = 0; j < 3; ++j)
+      {
+         dINCdrv(i) += (1.0 / GmatMathUtil::Sqrt(1.0 - (hvz / h * hvz / h))) *
+            tempVec1(j) * vvSkew(j, i);
+         dINCdvv(i) += (-1.0 / GmatMathUtil::Sqrt(1.0 - (hvz / h * hvz / h))) *
+            tempVec1(j) * rvSkew(j, i);
+      }
+   }
+
+   // RAAN
+   Rvector3 dRAANdrv, dRAANdvv, tempVec2;
+   tempVec1 = (nvx / pow(n, 3.0)) * nv;
+   tempVec2 = (1.0 / n) * xhat;
+   tempMat1 = zhatSkew * vvSkew;
+   tempMat2 = zhatSkew * rvSkew;
+
+   for (Integer i = 0; i < 3; ++i)
+   {
+      for (Integer j = 0; j < 3; ++j)
+      {
+         dRAANdrv(i) += (-1.0 / GmatMathUtil::Sqrt(1.0 - (nvx / n * nvx / n))) *
+            (tempVec1(j) - tempVec2(j)) * tempMat1(j, i);
+         dRAANdvv(i) += (1.0 / GmatMathUtil::Sqrt(1.0 - (nvx / n * nvx / n))) *
+            (tempVec1(j) - tempVec2(j)) * tempMat2(j, i);
+      }
+   }
+
+   if (nv(1) < 0.0)
+   {
+      dRAANdrv = -dRAANdrv;
+      dRAANdvv = -dRAANdvv;
+   }
+
+   // AOP
+   Rvector3 dAOPdrv, dAOPdvv;
+   tempVec1.MakeZeroVector();
+   tempVec2.MakeZeroVector();
+   for (Integer i = 0; i < 3; ++i)
+   {
+      for (Integer j = 0; j < 3; ++j)
+      {
+         tempVec1(i) += (1.0 / n) * nv(j) * dehatdrv(j, i);
+         tempVec2(i) += (1.0 / ECC) * ev(j) * dnhatdrv(j, i);
+      }
+   }
+   dAOPdrv = -1.0 / GmatMathUtil::Sqrt(1.0 - pow((ev * nv / ECC / n), 2.0)) *
+      (tempVec1 + tempVec2);
+
+   tempVec1.MakeZeroVector();
+   tempVec2.MakeZeroVector();
+   for (Integer i = 0; i < 3; ++i)
+   {
+      for (Integer j = 0; j < 3; ++j)
+      {
+         tempVec1(i) += (1.0 / n) * nv(j) * dehatdvv(j, i);
+         tempVec2(i) += (1.0 / ECC) * ev(j) * dnhatdvv(j, i);
+      }
+   }
+   dAOPdvv = -1.0 / GmatMathUtil::Sqrt(1.0 - pow(ev * nv / ECC / n, 2.0)) *
+      (tempVec1 + tempVec2);
+
+   if (ev(2) < 0.0)
+   {
+      dAOPdrv = -dAOPdrv;
+      dAOPdvv = -dAOPdvv;
+   }
+
+   // TA
+   Rvector3 dTAdrv, dTAdvv;
+   tempVec1.MakeZeroVector();
+   tempVec2.MakeZeroVector();
+   for (Integer i = 0; i < 3; ++i)
+   {
+      for (Integer j = 0; j < 3; ++j)
+         tempVec1(i) += (1.0 / r) * rv(j) * dehatdrv(j, i);
+   }
+   tempVec2 = (1.0 / ECC) * ev;
+   tempMat1 = (1.0 / r) * iden33 - (1.0 / pow(r, 3.0)) * rvOuter;
+
+   Real leadCoef = (-1.0 / GmatMathUtil::Sqrt(1.0 -
+      pow(ev * rv / ECC / r, 2.0)));
+   for (Integer i = 0; i < 3; ++i)
+   {
+      dTAdrv(i) += leadCoef * tempVec1(i);
+      for (Integer j = 0; j < 3; ++j)
+         dTAdrv(i) += leadCoef * tempVec2(j) * tempMat1(j, i);
+   }
+
+   tempVec1.MakeZeroVector();
+   for (Integer i = 0; i < 3; ++i)
+   {
+      for (Integer j = 0; j < 3; ++j)
+         tempVec1(i) += (1.0 / r) * rv(j) * dehatdvv(j, i);
+   }
+   dTAdvv = leadCoef * tempVec1;
+
+   if (rv * vv < 0.0)
+   {
+      dTAdrv = -dTAdrv;
+      dTAdvv = -dTAdvv;
+   }
+
+   // Construct Jacobian
+   Rmatrix66 jacobian;
+   for (Integer i = 0; i < 6; ++i)
+   {
+      for (Integer j = 0; j < 6; ++j)
+      {
+         if (i == 0)
+         {
+            if (j < 3)
+               jacobian(i, j) = dSMAdrv(j);
+            else
+               jacobian(i, j) = dSMAdvv(j - 3);
+         }
+         else if (i == 1)
+         {
+            if (j < 3)
+               jacobian(i, j) = dECCdrv(j);
+            else
+               jacobian(i, j) = dECCdvv(j - 3);
+         }
+         else if (i == 2)
+         {
+            if (j < 3)
+               jacobian(i, j) = dINCdrv(j);
+            else
+               jacobian(i, j) = dINCdvv(j - 3);
+         }
+         else if (i == 3)
+         {
+            if (j < 3)
+               jacobian(i, j) = dRAANdrv(j);
+            else
+               jacobian(i, j) = dRAANdvv(j - 3);
+         }
+         else if (i == 4)
+         {
+            if (j < 3)
+               jacobian(i, j) = dAOPdrv(j);
+            else
+               jacobian(i, j) = dAOPdvv(j - 3);
+         }
+         else if (i == 5)
+         {
+            if (j < 3)
+               jacobian(i, j) = dTAdrv(j);
+            else
+               jacobian(i, j) = dTAdvv(j - 3);
+         }
+      }
+   }
+
+   return jacobian;
+}
+
+//--------------------------------------------------------------------------------------
+// Rmatrix66 CartesianToSphericalAzFPADerivativeConversion(Real mu,
+//    const Rvector6 &cartesianState)
+//--------------------------------------------------------------------------------------
+/**
+* This function is used to calculate derivative conversion matrix [dX/dS] where X is
+* Cartesian state and S is Spherical AzFPA state using finite difference method
+*
+* @param mu                 mu value of primary body
+* @param cartesianState     state presented in Cartesian coordiante system
+*
+* return                    derivative state conversion matrix [dX/dS] where X is
+*                           Cartesian state and S is Spherical AzFPA state
+*/
+//--------------------------------------------------------------------------------------
+Rmatrix66 StateConversionUtil::CartesianToSphericalAzFPADerivativeConversion(Real mu,
+   const Rvector6 &cartesianState)
+{
+   Real *state = new Real[6];
+   for (Integer i = 0; i < 6; ++i)
+      state[i] = cartesianState(i);
+   Rvector6 sphAzFPAstate = Convert(state, STATE_TYPE_TEXT[CARTESIAN],
+      STATE_TYPE_TEXT[SPH_AZFPA], mu);
+
+   Real RMAG, RA, DEC, VMAG, AZI, FPA;
+   RMAG = sphAzFPAstate(0);
+   RA = sphAzFPAstate(1);
+   DEC = sphAzFPAstate(2);
+   VMAG = sphAzFPAstate(3);
+   AZI = sphAzFPAstate(4);
+   FPA = sphAzFPAstate(5);
+
+   // Repeatedly used terms
+   Real cosRA = GmatMathUtil::Cos(RA * RAD_PER_DEG);
+   Real sinRA = GmatMathUtil::Sin(RA * RAD_PER_DEG);
+   Real cosDEC = GmatMathUtil::Cos(DEC * RAD_PER_DEG);
+   Real sinDEC = GmatMathUtil::Sin(DEC * RAD_PER_DEG);
+   Real cosAZI = GmatMathUtil::Cos(AZI * RAD_PER_DEG);
+   Real sinAZI = GmatMathUtil::Sin(AZI * RAD_PER_DEG);
+   Real cosFPA = GmatMathUtil::Cos(FPA * RAD_PER_DEG);
+   Real sinFPA = GmatMathUtil::Sin(FPA * RAD_PER_DEG);
+
+   // Derivatives of position
+   Rvector3 drvdRMAG(cosDEC * cosRA, cosDEC * sinRA, sinDEC);
+   Rvector3 drvdRA(RMAG * -cosDEC * sinRA, RMAG * cosDEC * cosRA, 0.0);
+   Rvector3 drvdDEC(RMAG * -sinDEC * cosRA, RMAG * -sinDEC * sinRA,
+      RMAG * cosDEC);
+   Rvector3 drvdVMAG;
+   Rvector3 drvdAZI;
+   Rvector3 drvdFPA;
+
+   // Derivatives of velocity
+   Rvector3 dvvdRMAG;
+   Rvector3 dvvdRA;
+   dvvdRA(0) = -cosFPA * cosDEC * sinRA - sinFPA *
+      (sinAZI * cosRA - cosAZI * sinDEC * sinRA);
+   dvvdRA(1) = cosFPA * cosDEC * cosRA + sinFPA *
+      (-sinAZI * sinRA - cosAZI * sinDEC * cosRA);
+   dvvdRA(2) = 0.0;
+   dvvdRA *= VMAG;
+   Rvector3 dvvdDEC;
+   dvvdDEC(0) = -cosFPA * sinDEC * cosRA - sinFPA * cosAZI * cosDEC * cosRA;
+   dvvdDEC(1) = -cosFPA * sinDEC * sinRA + sinFPA * -cosAZI * cosDEC * sinRA;
+   dvvdDEC(2) = cosFPA * cosDEC - sinFPA * cosAZI * sinDEC;
+   dvvdDEC *= VMAG;
+   Rvector3 dvvdVMAG;
+   dvvdVMAG(0) = cosFPA * cosDEC * cosRA - sinFPA *
+      (sinAZI * sinRA + cosAZI * sinDEC * cosRA);
+   dvvdVMAG(1) = cosFPA * cosDEC * sinRA + sinFPA *
+      (sinAZI * cosRA - cosAZI * sinDEC * sinRA);
+   dvvdVMAG(2) = cosFPA * sinDEC + sinFPA * cosAZI * cosDEC;
+   Rvector3 dvvdAZI;
+   dvvdAZI(0) = -sinFPA * (cosAZI * sinRA - sinAZI * sinDEC * cosRA);
+   dvvdAZI(1) = sinFPA * (cosAZI * cosRA + sinAZI * sinDEC * sinRA);
+   dvvdAZI(2) = -sinFPA * sinAZI * cosDEC;
+   dvvdAZI *= VMAG;
+   Rvector3 dvvdFPA;
+   dvvdFPA(0) = -sinFPA * cosDEC * cosRA - cosFPA *
+      (sinAZI * sinRA + cosAZI * sinDEC * cosRA);
+   dvvdFPA(1) = -sinFPA * cosDEC * sinRA + cosFPA *
+      (sinAZI * cosRA - cosAZI * sinDEC * sinRA);
+   dvvdFPA(2) = -sinFPA * sinDEC + cosFPA * cosAZI * cosDEC;
+   dvvdFPA *= VMAG;
+
+   // Construct Jacobian
+   Rmatrix66 jacobian;
+   for (Integer j = 0; j < 6; ++j)
+   {
+      for (Integer i = 0; i < 6; ++i)
+      {
+         if (j == 0)
+         {
+            if (i < 3)
+               jacobian(i, j) = drvdRMAG(i);
+            else
+               jacobian(i, j) = dvvdRMAG(i - 3);
+         }
+         else if (j == 1)
+         {
+            if (i < 3)
+               jacobian(i, j) = drvdRA(i);
+            else
+               jacobian(i, j) = dvvdRA(i - 3);
+         }
+         else if (j == 2)
+         {
+            if (i < 3)
+               jacobian(i, j) = drvdDEC(i);
+            else
+               jacobian(i, j) = dvvdDEC(i - 3);
+         }
+         else if (j == 3)
+         {
+            if (i < 3)
+               jacobian(i, j) = drvdVMAG(i);
+            else
+               jacobian(i, j) = dvvdVMAG(i - 3);
+         }
+         else if (j == 4)
+         {
+            if (i < 3)
+               jacobian(i, j) = drvdAZI(i);
+            else
+               jacobian(i, j) = dvvdAZI(i - 3);
+         }
+         else if (j == 5)
+         {
+            if (i < 3)
+               jacobian(i, j) = drvdFPA(i);
+            else
+               jacobian(i, j) = dvvdFPA(i - 3);
+         }
+      }
+   }
+
+   return jacobian;
+}
+
+//--------------------------------------------------------------------------------------
+// Rmatrix66 SphericalAzFPAToCartesianDerivativeConversion(Real mu,
+//    const Rvector6 &cartesianState)
+//--------------------------------------------------------------------------------------
+/**
+* This function is used to calculate derivative conversion matrix [dS/dX] where S is
+* Spherical AzFPA state and X is Cartesian state using finite difference method
+*
+* @param mu                 mu value of primary body
+* @param cartesianState     state presented in Cartesian coordiante system
+*
+* return                    derivative state conversion matrix [dS/dX] where S is
+*                           Spherical AzFPA state and X is Cartesian state
+*/
+//--------------------------------------------------------------------------------------
+Rmatrix66 StateConversionUtil::SphericalAzFPAToCartesianDerivativeConversion(Real mu,
+   const Rvector6 &cartesianState)
+{
+   Rvector3 rv(cartesianState(0), cartesianState(1), cartesianState(2));
+   Rvector3 vv(cartesianState(3), cartesianState(4), cartesianState(5));
+
+   // Frequently used terms
+   Real RMAG = rv.Norm();
+   Real VMAG = vv.Norm();
+   Real RMAGdot = (rv * vv) / RMAG;
+   Real v2MinsRMAGdot2 = VMAG * VMAG - RMAGdot * RMAGdot;
+   Real rx2PlusRy2 = rv(0) * rv(0) + rv(1) * rv(1);
+
+   // Derivatives w.r.t position
+   Rvector3 dRMAGdrv = (1.0 / RMAG) * rv;
+   Rvector3 dRAdrv(-rv(1) / rx2PlusRy2, rv(0) / rx2PlusRy2, 0.0);
+   Rvector3 dDECdrv(-rv(0) * rv(2), -rv(1) * rv(2), rx2PlusRy2);
+   dDECdrv *= 1.0 / (RMAG * RMAG * GmatMathUtil::Sqrt(rx2PlusRy2));
+   Rvector3 dVMAGdrv;
+   Rvector3 dAZIdrv;
+   dAZIdrv(0) = vv(1) * (RMAG * vv(2) - rv(2) * RMAGdot) -
+      ((rv(0) * vv(1) - rv(1) * vv(0)) / RMAG) *
+      (rv(0) * vv(2) - rv(2) * vv(0) + ((rv(0) * rv(2) * RMAGdot) / RMAG));
+   dAZIdrv(1) = -vv(0) * (RMAG * vv(2) - rv(2) * RMAGdot) -
+      ((rv(0) * vv(1) - rv(1) * vv(0)) / RMAG) *
+      (rv(1) * vv(2) - rv(2) * vv(1) + ((rv(1) * rv(2) * RMAGdot) / RMAG));
+   dAZIdrv(2) = ((rv(0) * vv(1) - rv(1) * vv(0)) * rx2PlusRy2 * RMAGdot) /
+      (RMAG * RMAG);
+   dAZIdrv *= 1.0 / (v2MinsRMAGdot2 * rx2PlusRy2);
+   Rvector3 dFPAdrv = 1.0 / (RMAG * GmatMathUtil::Sqrt(v2MinsRMAGdot2)) *
+      (RMAGdot / RMAG * rv - vv);  // GTDS has RMAG*RMAG, which is wrong
+
+   // Derivatives w.r.t. velocity
+   Rvector3 dRMAGdvv, dRAdvv, dDECdvv;
+   Rvector3 dVMAGdvv = vv / VMAG;
+   Rvector3 dAZIdvv(rv(2) * vv(1) - rv(1) * vv(2),
+      rv(0) * vv(2) - rv(2) * vv(0), rv(1) * vv(0) - rv(0) * vv(1));
+   dAZIdvv *= 1.0 / (RMAG * v2MinsRMAGdot2);
+   Rvector3 dFPAdvv = 1.0 / (RMAG * GmatMathUtil::Sqrt(v2MinsRMAGdot2)) *
+      ((rv * vv / (VMAG * VMAG)) * vv - rv);  // GTDS has RMAG * RMAG, which is wrong
+
+   // Contruct Jacobian
+   Rmatrix66 jacobian;
+   for (Integer i = 0; i < 6; ++i)
+   {
+      for (Integer j = 0; j < 6; ++j)
+      {
+         if (i == 0)
+         {
+            if (j < 3)
+               jacobian(i, j) = dRMAGdrv(j);
+            else
+               jacobian(i, j) = dRMAGdvv(j - 3);
+         }
+         else if (i == 1)
+         {
+            if (j < 3)
+               jacobian(i, j) = dRAdrv(j);
+            else
+               jacobian(i, j) = dRAdvv(j - 3);
+         }
+         else if (i == 2)
+         {
+            if (j < 3)
+               jacobian(i, j) = dDECdrv(j);
+            else
+               jacobian(i, j) = dDECdvv(j - 3);
+         }
+         else if (i == 3)
+         {
+            if (j < 3)
+               jacobian(i, j) = dVMAGdrv(j);
+            else
+               jacobian(i, j) = dVMAGdvv(j - 3);
+         }
+         else if (i == 4)
+         {
+            if (j < 3)
+               jacobian(i, j) = dAZIdrv(j);
+            else
+               jacobian(i, j) = dAZIdvv(j - 3);
+         }
+         else if (i == 5)
+         {
+            if (j < 3)
+               jacobian(i, j) = dFPAdrv(j);
+            else
+               jacobian(i, j) = dFPAdvv(j - 3);
+         }
+      }
+   }
+
+   return jacobian;
+}
 
 //-------------------------------------------------------------------------------------
 // Real CalculateEccentricAnomaly(Real e, Real M)
@@ -6011,184 +6981,6 @@ Real StateConversionUtil::CalculateEccentricAnomalyParabola(Real e, Real M)
    // It is not implemented yet
 
    return newE;
-}
-
-//--------------------------------------------------------------------------------------
-// Rmatrix66 KeplerianToCartesianDerivativeConversion(Real mu, const Rvector6 &keplerState)
-// Rmatrix66 CartesianToKeplerianDerivativeConversionWithKeplInput(
-//   Real mu, const Rvector6 &keplerState)
-
-//--------------------------------------------------------------------------------------
-/**
-* This function is used to calculate [dX/dK] derivative conversion matrix for a given Keplerian state.
-* Only apply for Keplerian state presented in mean anomaly 
-*
-* @param mu             mu value of primary body
-* @param keplerState    state presented in Keplerian coordiante system
-*
-* return                derivative state conversion matrix
-*/
-//--------------------------------------------------------------------------------------
-//Rmatrix66 StateConversionUtil::KeplerianToCartesianDerivativeConversion(
-//   Real mu, const Rvector6 &keplerState)
-Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversionWithKeplInput(
-   Real mu, const Rvector6 &keplerState)
-{
-   static Rmatrix66 result;
-   
-   // Specify a,e,M, Ohm, omega, i
-   Real a, e, M, Ohm, omega, iAngle;
-   a      = keplerState(0);                  // SMA
-   e      = keplerState(1);                  // ECC
-   iAngle = keplerState(2);                  // INC            // unit: radian
-   Ohm    = keplerState(3);                  // RAAN           // unit: radian
-   omega  = keplerState(4);                  // AOP            // unit: radian
-   M      = keplerState(5);                  // MA             // unit: radian
-
-   if ((e < 0.0)|| e >= 1.0)
-      throw UtilityException("Error: Eccentricity (" + GmatStringUtil::ToString(e) + ") is out of range [0,1)\n");
-
-   // Specify E from e and M
-   Real E;         // eccentric anomaly
-   E = CalculateEccentricAnomaly(e,M);                                     // Equation 3-178 GTDS MathSpec   
-
-   Rvector3 rpVec;
-   Rvector3 rpdotVec;
-   if ((0.0 <= e) && (e < 1.0))            // Ellipse case
-   {
-      // Specify rp:                                                          // Equation 3-176 GTDS MathSpec
-   rpVec[0] = a*(Cos(E) - e);
-   rpVec[1] = a*Sin(E)*Sqrt(1 - e*e);
-   rpVec[2] = 0;
-   
-   // Specify rpdot:                                                       // Equation 3-177 GTDS MathSpec 
-   rpdotVec[0] = -Sin(E);
-   rpdotVec[1] = Cos(E)*Sqrt(1 - e*e);
-   rpdotVec[2] = 0;
-   rpdotVec = (Sqrt(mu/a)/(1 - e*Cos(E))) * rpdotVec;
-   }
-   else if (e > 1.0)                            // Hyperbola case
-   {
-      // Specify rp:                                                          // Equation 3-183 GTDS MathSpec
-      rpVec[0] = a*(Cosh(E) - e);
-      rpVec[1] = -a*Sinh(E)*Sqrt(e*e - 1);
-      rpVec[2] = 0;
-
-      // Specify rpdot:                                                       // Equation 3-184 GTDS MathSpec 
-      rpdotVec[0] = Sinh(E);
-      rpdotVec[1] = -Cosh(E)*Sqrt(e*e - 1);
-      rpdotVec[2] = 0;
-      rpdotVec = (Sqrt(-mu / a) / (e*Cosh(E) - 1)) * rpdotVec;
-   }
-   
-   // Specify P
-   Rmatrix33 P;
-   P(0,0) = Cos(Ohm)*Cos(omega) - Sin(Ohm)*Cos(iAngle)*Sin(omega);         // Equation 3-192a GTDS MathSpec
-   P(0,1) = -Cos(Ohm)*Sin(omega) - Sin(Ohm)*Cos(iAngle)*Cos(omega);        // Equation 3-192b GTDS MathSpec
-   P(0,2) = Sin(Ohm)*Sin(iAngle);                                          // Equation 3-192c GTDS MathSpec
-   P(1,0) = Sin(Ohm)*Cos(omega) + Cos(Ohm)*Cos(iAngle)*Sin(omega);         // Equation 3-192d GTDS MathSpec
-   P(1,1) = -Sin(Ohm)*Sin(omega) + Cos(Ohm)*Cos(iAngle)*Cos(omega);        // Equation 3-192e GTDS MathSpec
-   P(1,2) = -Cos(Ohm)*Sin(iAngle);                                         // Equation 3-192f GTDS MathSpec
-   P(2,0) = Sin(iAngle)*Sin(omega);                                        // Equation 3-192g GTDS MathSpec
-   P(2,1) = Sin(iAngle)*Cos(omega);                                        // Equation 3-192h GTDS MathSpec
-   P(2,2) = Cos(iAngle);                                                   // Equation 3-192i GTDS MathSpec
-   
-   // Specify rVec and rdotVec
-   Rvector3 rVec = P * rpVec;                                              // Equation 3-193 GTDS MathSpec
-   Rvector3 rdotVec = P * rpdotVec;                                        // Equation 3-194 GTDS MathSpec
-   
-   // Mean motion n:
-   Real n = (1 / a)*Sqrt(mu / a);                                              // Equation 3-201 GTDS MathSpec
-   
-   // Conversion matrix
-   Rmatrix33 c1, c2, A, B;
-   // Partial derivative of rp w.r.t. semi-major axis a, eccentricity e, and mean anomaly M (Equation 3-199 GTDS MathSpec)
-   c1(0,0) = rpVec[0]/a;
-   c1(1,0) = rpVec[1]/a;
-   c1(2,0) = 0.0;
-   c1(0,1) = -a - rpVec[1] * rpVec[1] / (rVec.Norm()*(1 - e*e));        
-   c1(1,1) = rpVec[0] * rpVec[1] / (rVec.Norm()*(1 - e*e));
-   c1(2,1) = 0.0;
-   c1(0,2) = -a*rpVec[1] / (rVec.Norm()*Sqrt(1 - e*e));
-   c1(1,2) = a*Sqrt(1 - e*e)*(rpVec[0] + a*e) / rVec.Norm();
-   c1(2,2) = 0.0;
-   A = P*c1;                                                               // Equation 3-195 GTDS MatSpec
-
-   // Partial derivative of rpdot w.r.t. semi-major axis a, eccentricity e, and mean anomaly M  (Equation 3-200 GTDS MathSpec)
-   c2(0,0) = -rpdotVec[0]/(2*a);
-   c2(1,0) = -rpdotVec[1]/(2*a);
-   c2(2,0) = 0.0;
-   c2(0,1) = rpdotVec[0] * Pow(a / rVec.Norm(), 2)*(2 * rpVec[0] / a + e*Pow(rpVec[1] / a, 2) / (1 - e*e));
-   c2(1,1) = n*Pow(a / rVec.Norm(), 2)*(rpVec[0] * rpVec[0] / rVec.Norm() - rpVec[1] * rpVec[1] / a / (1 - e*e)) / Sqrt(1 - e*e);
-   c2(2,1) = 0.0;
-   c2(0,2) = -n*Pow(a / rVec.Norm(), 3)*rpVec[0];
-   c2(1,2) = -n*Pow(a / rVec.Norm(), 3)*rpVec[1];
-   c2(2,2) = 0.0;
-   B = P*c2;                                                               // Equation 3-196 GTDS MatSpec
-
-   // Partial derivative w.r.t. Ohm  (Equation 3-202 GTDS MathSpec)
-   Rmatrix33 dPdOhm;
-   dPdOhm(0,0) = -P(1,0);
-   dPdOhm(0,1) = -P(1,1);
-   dPdOhm(0,2) = -P(1,2);         // 0.0;  // Equation 3-202 GTDS MatSpec is incorrect at here
-   dPdOhm(1,0) = P(0,0);
-   dPdOhm(1,1) = P(0,1);
-   dPdOhm(1,2) = P(0,2);          // 0.0;  // Equation 3-202 GTDS MatSpec is incorrect at here
-   dPdOhm(2,0) = 0.0;
-   dPdOhm(2,1) = 0.0;
-   dPdOhm(2,2) = 0.0;
-   Rvector3 drdOhm = dPdOhm * rpVec;                                       // Equation 3-197 GTDS MathSpec
-   Rvector3 drdotdOhm = dPdOhm * rpdotVec;                                 // Equation 3-198 GTDS MathSpec
-
-   // Partial derivative w.r.t. omega  (Equation 3-203 GTDS MathSpec)
-   Rmatrix33 dPdomega;
-   dPdomega(0,0) = P(0,1);
-   dPdomega(0,1) = -P(0,0);
-   dPdomega(0,2) = 0.0;
-   dPdomega(1,0) = P(1,1);
-   dPdomega(1,1) = -P(1,0);
-   dPdomega(1,2) = 0.0;
-   dPdomega(2,0) = P(2,1);
-   dPdomega(2,1) = -P(2,0);
-   dPdomega(2,2) = 0.0;
-   Rvector3 drdomega = dPdomega * rpVec;                                   // Equation 3-197 GTDS MathSpec
-   Rvector3 drdotdomega = dPdomega * rpdotVec;                             // Equation 3-198 GTDS MathSpec
-
-   // Partial derivative w.r.t. i  (Equation 3-204 GTDS MathSpec)
-   Rmatrix33 dPdi;
-   dPdi(0,0) = Sin(Ohm)*Sin(iAngle)*Sin(omega);
-   dPdi(0,1) = Sin(Ohm)*Sin(iAngle)*Cos(omega);
-   dPdi(0,2) = Sin(Ohm)*Cos(iAngle);                   // 0.0;    // Equation 3-204 GTDS MathSpec is incorrect here
-   dPdi(1,0) = -Cos(Ohm)*Sin(iAngle)*Sin(omega);
-   dPdi(1,1) = -Cos(Ohm)*Sin(iAngle)*Cos(omega);
-   dPdi(1,2) = -Cos(Ohm)*Cos(iAngle);                  // 0.0;    // Equation 3-204 GTDS MathSpec is incorrect here
-   dPdi(2,0) = Cos(iAngle)*Sin(omega);
-   dPdi(2,1) = Cos(iAngle)*Cos(omega);
-   dPdi(2,2) = -Sin(iAngle);                           // 0.0;    // Equation 3-204 GTDS MathSpec is incorrect here
-   Rvector3 drdi = dPdi * rpVec;                                           // Equation 3-197 GTDS MathSpec
-   Rvector3 drdotdi = dPdi * rpdotVec;                                     // Equation 3-198 GTDS MathSpec
-
-   result(0,0) = A(0,0); result(0,1) = A(0,1); result(0,5) = A(0,2);
-   result(1,0) = A(1,0); result(1,1) = A(1,1); result(1,5) = A(1,2);
-   result(2,0) = A(2,0); result(2,1) = A(2,1); result(2,5) = A(2,2); //A(0,2);
-   result(3,0) = B(0,0); result(3,1) = B(0,1); result(3,5) = B(0,2);
-   result(4,0) = B(1,0); result(4,1) = B(1,1); result(4,5) = B(1,2);
-   result(5,0) = B(2,0); result(5,1) = B(2,1); result(5,5) = B(2,2); //B(0,2);
-   
-   result(0,2) = drdi[0];    result(0,3) = drdOhm[0];    result(0,4) = drdomega[0];
-   result(1,2) = drdi[1];    result(1,3) = drdOhm[1];    result(1,4) = drdomega[1];
-   result(2,2) = drdi[2];    result(2,3) = drdOhm[2];    result(2,4) = drdomega[2];
-   result(3,2) = drdotdi[0]; result(3,3) = drdotdOhm[0]; result(3,4) = drdotdomega[0];
-   result(4,2) = drdotdi[1]; result(4,3) = drdotdOhm[1]; result(4,4) = drdotdomega[1];
-   result(5,2) = drdotdi[2]; result(5,3) = drdotdOhm[2]; result(5,4) = drdotdomega[2];
-
-
-   // convert radian to degree INC, RAAN, AOP, and MA from radian to degree
-   for(UnsignedInt row = 0; row < 6; ++row)
-      for (UnsignedInt col = 2; col < 6; ++col)
-         result(row,col) = result(row,col)*GmatMathConstants::RAD_PER_DEG;      // Note that: di, dOhm, domega, and dM are in denominator 
-   
-   return result;
 }
 
 

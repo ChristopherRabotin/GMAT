@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1008,6 +1008,119 @@ bool PlotInterface::TakeXYAction(const std::string& plotName,
 {
    if (thePlotReceiver != NULL)
       return thePlotReceiver->TakeXYAction(plotName, action);
+
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// bool CreateDynamicDataDisplay(const std::string &plotName, 
+//                               const std::string &oldName,
+//                               const std::string &plotTitle,
+//                               Real positionX, Real positionY,
+//                               Real width, Real height)
+//------------------------------------------------------------------------------
+/**
+* Creates a DynamicDataDisplay window.
+*
+* @param plotName Name of the table
+* @param oldName Former name of the table
+* @param positionX, positionY  position of the table in screen coordinates
+* @param w, h  size of the table in screen coordinates
+* @param plotTitle Title of the table
+*
+* @return true on success, false when no table was created
+*/
+//------------------------------------------------------------------------------
+bool PlotInterface::CreateDynamicDataDisplay(const std::string &plotName,
+                             const std::string &oldName,
+                             const std::string &plotTitle, Real positionX,
+                             Real positionY, Real width, Real height)
+{
+   if (thePlotReceiver != NULL)
+      return thePlotReceiver->CreateDynamicDataDisplay(plotName, oldName,
+         plotTitle, positionX, positionY, width, height);
+
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// bool SetDynamicDataTableSize(std::string &plotName, Integer maxRowCount,
+//                              Integer maxColCount)
+//------------------------------------------------------------------------------
+/**
+* Sets the number of rows and columns of the DynamicDataDisplay
+*
+* @param plotName Name of the table
+* @param maxRowCount The number of rows required
+* @param maxColCount The number of columns required
+*
+* @return true on success, false when the table was not sized
+*/
+//------------------------------------------------------------------------------
+bool PlotInterface::SetDynamicDataTableSize(const std::string &plotName,
+                                            Integer maxRowCount,
+                                            Integer maxColCount)
+{
+   if (thePlotReceiver != NULL)
+      return thePlotReceiver->SetDynamicDataTableSize(plotName, maxRowCount,
+         maxColCount);
+
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// bool UpdateDynamicDataDisplay(std::string &plotName, StringARray &paramNames
+//                               Rvector newData, Rvector rowIdxs)
+//------------------------------------------------------------------------------
+/**
+* Updates the data being watched to their current values
+*
+* @param plotName Name of the table
+* @param paramNames The names of the parameters being watched
+* @param newData The new data used to update the parameter values being
+*        displayed
+* @param rowIdxs The row indices for each of the parameters, used to place
+*        the parameters in the desired locations
+*
+* @return true on success, false when the table was not sized
+*/
+//------------------------------------------------------------------------------
+bool PlotInterface::UpdateDynamicDataDisplay(const std::string &plotName,
+                                             std::vector<std::vector<DDD>> newData)
+{
+   if (thePlotReceiver != NULL)
+      return thePlotReceiver->UpdateDynamicDataDisplay(plotName, newData);
+
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// bool DeleteDynamicData(const std::string &plotName,
+//                        const std::string &oldname)
+//------------------------------------------------------------------------------
+/**
+* Deletes the grid of the specified DynamicDataDisplay
+*
+* @param plotName Name of the table
+* @param oldName Former name of the table
+*
+* @return true on success, false when the grid was not deleted
+*/
+//------------------------------------------------------------------------------
+bool PlotInterface::DeleteDynamicData(const std::string &plotName,
+                                      const std::string &oldName)
+{
+   if (thePlotReceiver != NULL)
+      return thePlotReceiver->DeleteDynamicData(plotName, oldName);
+
+   return false;
+}
+
+bool PlotInterface::SetDynamicDataTextColor(const std::string &plotName,
+                                            std::vector<std::vector<DDD>> newColors)
+{
+   if (thePlotReceiver != NULL)
+      return thePlotReceiver->SetDynamicDataTextColor(plotName, newColors);
 
    return false;
 }

@@ -1,0 +1,365 @@
+%General Mission Analysis Tool(GMAT) Script
+%Created: 2018-04-25 10:04:44
+
+% script using  GMAT's ThreeAxisKinematics for quaternion propagation in support
+% of the animation of satellite rotation and for producing a dynamic data display
+%
+%
+% Author: Mike Stark (attitude) & Ravi Mathur (OpenFrames animation)
+% April 2020
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft DefaultSC;
+GMAT DefaultSC.DateFormat = TAIModJulian;
+GMAT DefaultSC.Epoch  = '28755.995';
+GMAT DefaultSC.CoordinateSystem = EarthMJ2000Eq;
+GMAT DefaultSC.DisplayStateType = Cartesian;
+GMAT DefaultSC.X = 7100;
+GMAT DefaultSC.Y = 0;
+GMAT DefaultSC.Z = 1300;
+GMAT DefaultSC.VX = 0;
+GMAT DefaultSC.VY = 7.35;
+GMAT DefaultSC.VZ = 1;
+GMAT DefaultSC.DryMass = 850;
+GMAT DefaultSC.Cd = 2.2;
+GMAT DefaultSC.Cr = 1.8;
+GMAT DefaultSC.DragArea = 15;
+GMAT DefaultSC.SRPArea = 1;
+GMAT DefaultSC.SPADDragScaleFactor = 1;
+GMAT DefaultSC.SPADSRPScaleFactor = 1;
+GMAT DefaultSC.NAIFId = -10000001;
+GMAT DefaultSC.NAIFIdReferenceFrame = -9000001;
+GMAT DefaultSC.OrbitColor = Red;
+GMAT DefaultSC.TargetColor = Teal;
+GMAT DefaultSC.OrbitErrorCovariance = [ 1e+70 0 0 0 0 0 ; 0 1e+70 0 0 0 0 ; 0 0 1e+70 0 0 0 ; 0 0 0 1e+70 0 0 ; 0 0 0 0 1e+70 0 ; 0 0 0 0 0 1e+70 ];
+GMAT DefaultSC.CdSigma = 1e+70;
+GMAT DefaultSC.CrSigma = 1e+70;
+GMAT DefaultSC.Id = 'SatId';
+GMAT DefaultSC.Attitude = ThreeAxisKinematic;
+GMAT DefaultSC.SPADSRPInterpolationMethod = Bilinear;
+GMAT DefaultSC.SPADSRPScaleFactorSigma = 1e+70;
+GMAT DefaultSC.SPADDragInterpolationMethod = Bilinear;
+GMAT DefaultSC.SPADDragScaleFactorSigma = 1e+70;
+GMAT DefaultSC.ModelFile = 'aura.3ds';
+GMAT DefaultSC.ModelOffsetX = 0;
+GMAT DefaultSC.ModelOffsetY = 0;
+GMAT DefaultSC.ModelOffsetZ = 0;
+GMAT DefaultSC.ModelRotationX = 0;
+GMAT DefaultSC.ModelRotationY = 0;
+GMAT DefaultSC.ModelRotationZ = 0;
+GMAT DefaultSC.ModelScale = 1;
+GMAT DefaultSC.AttitudeDisplayStateType = 'EulerAngles';
+GMAT DefaultSC.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT DefaultSC.EulerAngleSequence = '321';
+GMAT DefaultSC.EulerAngle1 = 0;
+GMAT DefaultSC.EulerAngle2 = -0;
+GMAT DefaultSC.EulerAngle3 = 0;
+GMAT DefaultSC.AngularVelocityX = 0.05;
+GMAT DefaultSC.AngularVelocityY = 0;
+GMAT DefaultSC.AngularVelocityZ = 0.005;
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel DefaultProp_ForceModel;
+GMAT DefaultProp_ForceModel.CentralBody = Earth;
+GMAT DefaultProp_ForceModel.PrimaryBodies = {Earth};
+GMAT DefaultProp_ForceModel.Drag = None;
+GMAT DefaultProp_ForceModel.SRP = Off;
+GMAT DefaultProp_ForceModel.RelativisticCorrection = Off;
+GMAT DefaultProp_ForceModel.ErrorControl = RSSStep;
+GMAT DefaultProp_ForceModel.GravityField.Earth.Degree = 4;
+GMAT DefaultProp_ForceModel.GravityField.Earth.Order = 4;
+GMAT DefaultProp_ForceModel.GravityField.Earth.StmLimit = 100;
+GMAT DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
+GMAT DefaultProp_ForceModel.GravityField.Earth.TideModel = 'None';
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator DefaultProp;
+GMAT DefaultProp.FM = DefaultProp_ForceModel;
+GMAT DefaultProp.Type = RungeKutta56;
+GMAT DefaultProp.InitialStepSize = 60;
+GMAT DefaultProp.Accuracy = 9.999999999999999e-12;
+GMAT DefaultProp.MinStep = 0.001;
+GMAT DefaultProp.MaxStep = 2700;
+GMAT DefaultProp.MaxStepAttempts = 50;
+GMAT DefaultProp.StopIfAccuracyIsViolated = true;
+
+%----------------------------------------
+%---------- Coordinate Systems
+%----------------------------------------
+
+Create CoordinateSystem SC_Inertial;
+GMAT SC_Inertial.Origin = DefaultSC;
+GMAT SC_Inertial.Axes = MJ2000Eq;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create DynamicDataDisplay AngleRateDisplay;
+GMAT AngleRateDisplay.UpperLeft = [ 0.2401041666666667 0.05925925925925926 ];
+GMAT AngleRateDisplay.Size = [ 0.5947916666666667 0.2083333333333333 ];
+GMAT AngleRateDisplay.RelativeZOrder = 20;
+GMAT AngleRateDisplay.Maximized = false;
+GMAT AngleRateDisplay.AddParameters = {1, timeTag, roll, pitch, yaw};
+GMAT AngleRateDisplay.AddParameters = {2, t, wx, wy, wz};
+GMAT AngleRateDisplay.RowTextColors = {1, [0 0 0], [0 0 0], [0 0 0], [0 0 0]};
+GMAT AngleRateDisplay.RowTextColors = {2, [0 0 0], [0 0 0], [0 0 0], [0 0 0]};
+GMAT AngleRateDisplay.WarnColor = [218 165 32];
+GMAT AngleRateDisplay.CritColor = [255 0 0];
+
+Create OpenFramesInterface OpenFrames1;
+GMAT OpenFrames1.SolverIterations = Current;
+GMAT OpenFrames1.UpperLeft = [ 0.3864705882352941 0.1833333333333333 ];
+GMAT OpenFrames1.Size = [ 0.4941176470588236 0.5773809523809523 ];
+GMAT OpenFrames1.RelativeZOrder = 32;
+GMAT OpenFrames1.Maximized = true;
+GMAT OpenFrames1.Add = {DefaultSC, Earth, Sun};
+GMAT OpenFrames1.View = {SC_InertialView, SC_EarthView};
+GMAT OpenFrames1.Vector = {ToSun};
+GMAT OpenFrames1.CoordinateSystem = EarthMJ2000Eq;
+GMAT OpenFrames1.DrawObject = [ true true true ];
+GMAT OpenFrames1.DrawTrajectory = [ true true true ];
+GMAT OpenFrames1.DrawAxes = [ false false false ];
+GMAT OpenFrames1.DrawXYPlane = [ false false false ];
+GMAT OpenFrames1.DrawLabel = [ false true true ];
+GMAT OpenFrames1.DrawUsePropLabel = [ false false false ];
+GMAT OpenFrames1.DrawCenterPoint = [ true true true ];
+GMAT OpenFrames1.DrawEndPoints = [ true true true ];
+GMAT OpenFrames1.DrawVelocity = [ false false false ];
+GMAT OpenFrames1.DrawGrid = [ false false false ];
+GMAT OpenFrames1.DrawLineWidth = [ 2 2 2 ];
+GMAT OpenFrames1.DrawMarkerSize = [ 10 10 10 ];
+GMAT OpenFrames1.DrawFontSize = [ 14 14 14 ];
+GMAT OpenFrames1.Axes = Off;
+GMAT OpenFrames1.AxesLength = 1;
+GMAT OpenFrames1.AxesLabels = On;
+GMAT OpenFrames1.FrameLabel = Off;
+GMAT OpenFrames1.XYPlane = Off;
+GMAT OpenFrames1.EclipticPlane = Off;
+GMAT OpenFrames1.EnableStars = On;
+GMAT OpenFrames1.StarCatalog = 'inp_StarsHYGv3.txt';
+GMAT OpenFrames1.StarCount = 40000;
+GMAT OpenFrames1.MinStarMag = -2;
+GMAT OpenFrames1.MaxStarMag = 6;
+GMAT OpenFrames1.MinStarPixels = 1;
+GMAT OpenFrames1.MaxStarPixels = 10;
+GMAT OpenFrames1.MinStarDimRatio = 0.5;
+GMAT OpenFrames1.ShowPlot = true;
+GMAT OpenFrames1.ShowToolbar = true;
+GMAT OpenFrames1.SolverIterLastN = 1;
+GMAT OpenFrames1.ShowVR = false;
+GMAT OpenFrames1.PlaybackTimeScale = 3600;
+GMAT OpenFrames1.MultisampleAntiAliasing = On;
+GMAT OpenFrames1.MSAASamples = 8;
+GMAT OpenFrames1.DrawFontPosition = {'Top-Right', 'Top-Right', 'Top-Right'};
+
+% report file with time, RPY and rates
+% should match what is on dynamic displays
+Create ReportFile RPY_view;
+GMAT RPY_view.SolverIterations = Current;
+GMAT RPY_view.UpperLeft = [ 0 0 ];
+GMAT RPY_view.Size = [ 0 0 ];
+GMAT RPY_view.RelativeZOrder = 0;
+GMAT RPY_view.Maximized = false;
+GMAT RPY_view.Filename = 'AnglesAndRates.txt';
+GMAT RPY_view.Precision = 16;
+GMAT RPY_view.WriteHeaders = true;
+GMAT RPY_view.LeftJustify = On;
+GMAT RPY_view.ZeroFill = Off;
+GMAT RPY_view.FixedWidth = true;
+GMAT RPY_view.Delimiter = ' ';
+GMAT RPY_view.ColumnWidth = 23;
+GMAT RPY_view.WriteReport = true;
+
+% detailed debug file for every propagation step
+Create ReportFile DebugOut;
+GMAT DebugOut.SolverIterations = Current;
+GMAT DebugOut.UpperLeft = [ 0 0 ];
+GMAT DebugOut.Size = [ 0 0 ];
+GMAT DebugOut.RelativeZOrder = 0;
+GMAT DebugOut.Maximized = false;
+GMAT DebugOut.Filename = 'Debug.txt';
+GMAT DebugOut.Precision = 14;
+GMAT DebugOut.WriteHeaders = true;
+GMAT DebugOut.LeftJustify = On;
+GMAT DebugOut.ZeroFill = Off;
+GMAT DebugOut.FixedWidth = true;
+GMAT DebugOut.Delimiter = ' ';
+GMAT DebugOut.ColumnWidth = 20;
+GMAT DebugOut.WriteReport = true;
+
+%----------------------------------------
+%---------- Open Frames User Objects
+%----------------------------------------
+
+Create OpenFramesView SC_InertialView;
+GMAT SC_InertialView.ViewFrame = DefaultSC;
+GMAT SC_InertialView.ViewTrajectory = Off;
+GMAT SC_InertialView.InertialFrame = On;
+GMAT SC_InertialView.SetDefaultLocation = Off;
+GMAT SC_InertialView.SetCurrentLocation = On;
+GMAT SC_InertialView.CurrentEye = [ 0 -205.0596160888672 0 ];
+GMAT SC_InertialView.CurrentCenter = [ 0 0 0 ];
+GMAT SC_InertialView.CurrentUp = [ 0 0 1 ];
+GMAT SC_InertialView.FOVy = 45;
+
+Create OpenFramesView SC_EarthView;
+GMAT SC_EarthView.ViewFrame = DefaultSC;
+GMAT SC_EarthView.ViewTrajectory = Off;
+GMAT SC_EarthView.InertialFrame = On;
+GMAT SC_EarthView.LookAtFrame = Earth;
+GMAT SC_EarthView.ShortestAngle = Off;
+GMAT SC_EarthView.SetDefaultLocation = Off;
+GMAT SC_EarthView.SetCurrentLocation = On;
+GMAT SC_EarthView.CurrentEye = [ 0 -205.0596160888672 0 ];
+GMAT SC_EarthView.CurrentCenter = [ 0 0 0 ];
+GMAT SC_EarthView.CurrentUp = [ 0 0 1 ];
+GMAT SC_EarthView.FOVy = 45;
+
+Create OpenFramesVector ToSun;
+GMAT ToSun.VectorColor = [255 255 128];
+GMAT ToSun.SourceObject = DefaultSC;
+GMAT ToSun.VectorType = Relative Position;
+GMAT ToSun.DestinationObject = Sun;
+GMAT ToSun.VectorLabel = 'Sun';
+GMAT ToSun.VectorLengthType = 'Auto';
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+
+% conversion constants
+Create Variable SECONDS_PER_DAY, RTD;
+SECONDS_PER_DAY = 86400;
+% radian to degree multiplier = 180/pi
+%RTD = 180.0 / 3.14159265358979323846264338327950288419716939937511;
+
+% variables for dynamic display
+Create Variable timeTag; % time tag of attitude & rate data points
+Create Variable t;        % elapsed time from start of propagation
+Create Variable  roll pitch yaw wx wy wz % attitude and rates
+
+% variables for inner loop debug
+Create Array  Q[1,4];    % quaternion
+Create Array  W[1,3];    % angular velocity  (rad/sec)
+
+% loop control for real time propagation
+Create Variable i, j;
+% assures attitude displays, reports and graphics change at realtime pace
+Create Variable next now; % system clock time for current and next step
+Create Variable delay     % time to wait before propagating again
+
+%Time & duration tracking variables
+Create Variable date;     % Modified Julian Date controlling propagation
+Create Variable dt;       % realtime stepsize in seconds
+Create Variable dtInDays; % stepsize converted to days for MJD arithmetic
+t = 0;
+dt = 0.025;
+%dtInDays = dt/SECONDS_PER_DAY; % step size for MJD arithmetic
+
+% output flags
+Create Variable debugDetailEnabled     % enable detailed write every step
+Create Variable attitudeReportEnabled  % enable writing of angles and rates
+                                       %   when data is read
+debugDetailEnabled    = 0
+attitudeReportEnabled = 1
+
+% variables to time initial propagation
+Create Variable tstart,tend dtprop
+
+% Strings
+Create String gregorianTimeString; % time for report header [& perhaps more]
+Create String textString           % used to insert text into reports
+
+%---------------------------------------------------------------
+% Quaternion propagation for animation & dynamic data display
+%---------------------------------------------------------------
+
+BeginMissionSequence;
+
+% INITIAL SETUP
+% constants
+dtInDays = dt/SECONDS_PER_DAY; % step size for MJD arithmetic
+RTD = 180.0 / 3.14159265358979323846264338327950288419716939937511;
+
+
+% set up synchronization with system clock.
+[now] = Python.time.time;
+next = now+dt;
+
+% get initial time, s/c attitude & rates for output
+timeTag = 28755.995 % Initial value correspondsw to spacecraft epoch
+roll = DefaultSC.EulerAngle3;
+pitch = DefaultSC.EulerAngle2;
+yaw = DefaultSC.EulerAngle1;
+wx = DefaultSC.AngularVelocityX;
+wy = DefaultSC.AngularVelocityY;
+wz = DefaultSC.AngularVelocityZ;
+  
+% write data to display and (optionally) file with same data
+UpdateDynamicData AngleRateDisplay;
+If 'write initial angles and rates' attitudeReportEnabled ~= 0
+   Report RPY_view timeTag roll pitch yaw wx wy wz 
+EndIf
+
+% PROPAGATION LOOP:
+
+% outer loop represents 1 second; dynamic data display updates at this rate
+For i = 1:20
+   % inner loop represents 40 Hz update rate for animation
+   For j = 1:40
+	   % delay until next time
+      [now] = Python.time.time;
+      delay = next-now;
+      If delay > 0.0
+         GMAT Python.time.sleep(delay);
+      EndIf;
+		
+      % Propagate to next time
+      timeTag = timeTag + dtInDays;
+      t = t+dt
+      next = next + dt
+      Propagate DefaultProp(DefaultSC) {DefaultSC.TAIModJulian = timeTag}
+      
+      % optionally write debug
+		If 'write angles and rates' debugDetailEnabled ~= 0
+         roll = DefaultSC.EulerAngle3;
+         pitch = DefaultSC.EulerAngle2;
+         yaw = DefaultSC.EulerAngle1;
+         wx = DefaultSC.AngularVelocityX;
+         wy = DefaultSC.AngularVelocityY;
+         wz = DefaultSC.AngularVelocityZ;
+			Report DebugOut timeTag t roll pitch yaw wx wy wz now next delay
+		EndIf
+      % delay until next time
+      [now] = Python.time.time;
+      delay = next-now;
+      If delay > 0.0
+          GMAT Python.time.sleep(delay);
+       EndIf;
+   EndFor
+
+   % get s/c attitude & rates for output
+   roll = DefaultSC.EulerAngle3;
+   pitch = DefaultSC.EulerAngle2;
+   yaw = DefaultSC.EulerAngle1;
+   wx = DefaultSC.AngularVelocityX;
+   wy = DefaultSC.AngularVelocityY;
+   wz = DefaultSC.AngularVelocityZ;
+   
+   % write data to display and (optionally) file with same data
+   UpdateDynamicData AngleRateDisplay;
+   If 'write angles and rates' attitudeReportEnabled ~= 0
+      Report RPY_view timeTag t roll pitch yaw wx wy wz
+   EndIf
+   
+EndFor

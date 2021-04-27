@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -27,12 +27,22 @@
 #include "Propagator.hpp"
 #include "ODEModel.hpp"
 #include "SpaceObject.hpp"
+#include "StringUtil.hpp"
 #include <sstream>
 
 //#define DEBUG_SET_PARAMETER
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_LIGHTTIME
 //#define DEBUG_MOVETOEPOCH
+//#define DEBUG_SOLVEFORS
+//#define DEBUG_API
+
+#ifdef DEBUG_API
+   #include <fstream>
+   std::ofstream apisbFile;
+   bool apisbFileOpen = false;
+#endif
+
 
 //---------------------------------
 // static data
@@ -71,8 +81,18 @@ SignalBase::SignalBase(const std::string &typeStr, const std::string &name) :
    includeLightTime     (true),
    solarSystem          (NULL),
    navLog               (NULL),
-   logLevel             (1)
+   logLevel             (1),
+   ionosphereCache      (NULL)
 {
+#ifdef DEBUG_API
+   if (!apisbFileOpen)
+   {
+      apisbFile.open("SignalBase_API.txt");
+      apisbFileOpen = true;
+   }
+   apisbFile << "Signal base class debug for the API\n" << std::endl;
+#endif
+
    type = GmatType::GetTypeId("Signal");
 }
 
@@ -86,20 +106,47 @@ SignalBase::SignalBase(const std::string &typeStr, const std::string &name) :
 //------------------------------------------------------------------------------
 SignalBase::~SignalBase()
 {
-   // Clear the entire list
-   if (next)
-      delete next;
-
-   if (tcs) 
-      delete tcs;
+   //MessageInterface::ShowMessage("SignalBase::~SignalBase() for leg <%p> start\n", this);
+   if (tcs)
+   {
+      if (tcs->GetAxisSystem()->GetTypeName() != "BodyFixed")
+         delete tcs;
+   }
+   
    if (rcs)
-      delete rcs;
+   {
+      if (rcs->GetAxisSystem()->GetTypeName() != "BodyFixed")
+         delete rcs;
+   }
+   
    if (ocs)
       delete ocs;
+   
    if (j2k)
       delete j2k;
    
+   //MessageInterface::ShowMessage("SignalBase::~SignalBase() 1\n");
+   #ifdef DEBUG_API
+      if (apisbFileOpen)
+      {
+         apisbFile.close();
+         apisbFileOpen = false;
+      }
+   #endif
+
    theData.CleanUp();
+   
+   // clean up std::vector<RealArray> theDataDerivatives;
+   for (Integer i = 0; i < theDataDerivatives.size(); ++i)
+      theDataDerivatives[i].clear();
+   theDataDerivatives.clear();
+   
+   //MessageInterface::ShowMessage("SignalBase::~SignalBase() 2\n");
+   // This step is handled by the delete of createdObjects in GmatBase
+   // Clear the entire list
+   //if (next)
+   //   delete next;
+//MessageInterface::ShowMessage("SignalBase::~SignalBase() for leg <%p> end\n", this);
 }
 
 
@@ -127,11 +174,16 @@ SignalBase::SignalBase(const SignalBase& sb) :
    includeLightTime     (sb.includeLightTime),
    solarSystem          (sb.solarSystem),
    navLog               (sb.navLog),
-   logLevel             (sb.logLevel)
+   logLevel             (sb.logLevel),
+   ionosphereCache      (NULL)
 {
    // Clone the list
    if (sb.next)
-      Add((SignalBase*)(sb.next->Clone()));
+   {
+      GmatBase* clonedObj = sb.next->Clone();               // made changes by TUAN NGUYEN
+      createdObjects.push_back(clonedObj);                  // made changes by TUAN NGUYEN
+      Add((SignalBase*)clonedObj);                          // made changes by TUAN NGUYEN
+   }
 }
 
 
@@ -154,11 +206,17 @@ SignalBase& SignalBase::operator=(const SignalBase& sb)
 
       theData             = sb.theData;
 
-      if (tcs) 
-         delete tcs;
+      if (tcs)
+      {
+         if (tcs->GetAxisSystem()->GetTypeName() != "BodyFixed")
+            delete tcs;
+      }
       tcs = NULL;
       if (rcs)
-         delete rcs;
+      {
+         if (rcs->GetAxisSystem()->GetTypeName() != "BodyFixed")
+            delete rcs;
+      }
       rcs = NULL;
       if (ocs)
          delete ocs;
@@ -175,15 +233,19 @@ SignalBase& SignalBase::operator=(const SignalBase& sb)
       navLog              = sb.navLog;
       logLevel            = sb.logLevel;
 
-      if (next)
-      {
-         delete next;
-         next = NULL;
-      }
+      //if (next)                                             // made changes by TUAN NGUYEN
+      //{                                                     // made changes by TUAN NGUYEN
+      //   delete next;                                       // made changes by TUAN NGUYEN
+      //   next = NULL;                                       // made changes by TUAN NGUYEN
+      //}                                                     // made changes by TUAN NGUYEN
+      next = NULL;                                            // made changes by TUAN NGUYEN
       previous = NULL;
       if (sb.next)
-         Add((SignalBase*)(sb.next->Clone()));
-
+      {
+         GmatBase* clonedObj = sb.next->Clone();              // made changes by TUAN NGUYEN
+         createdObjects.push_back(clonedObj);                 // made changes by TUAN NGUYEN
+         Add((SignalBase*)clonedObj);                         // made changes by TUAN NGUYEN
+      }
 
       isInitialized = false;
    }
@@ -775,6 +837,14 @@ void SignalBase::InitializeSignal(bool chainForwards)
       (theData.rNode == NULL?"":theData.rNode->GetName().c_str()));
    #endif
 
+#ifdef DEBUG_API
+   if (apisbFileOpen)
+   {
+      apisbFile << "Entered SignalBase::InitializeSignal for path "
+                << GetPathDescription(false) << std::endl;
+   }
+#endif
+
    if (isInitialized)
    {
       return;
@@ -801,12 +871,18 @@ void SignalBase::InitializeSignal(bool chainForwards)
 
          origin = ((SpaceObject*)theData.rNode)->GetOrigin();
          if (rcs)
-            delete rcs;
+         {
+            if (rcs->GetAxisSystem()->GetTypeName() != "BodyFixed")
+               delete rcs;
+         }
          rcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
             origin, NULL, NULL, earth, solarSystem);
 
          if (tcs)
+         {
+            if (tcs->GetAxisSystem()->GetTypeName() != "BodyFixed")
             delete tcs;
+         }
          tcs = CoordinateSystem::CreateLocalCoordinateSystem("TCS", "MJ2000Eq",
             origin, NULL, NULL, earth, solarSystem);
 
@@ -825,67 +901,160 @@ void SignalBase::InitializeSignal(bool chainForwards)
    }
    else
    {
-#ifdef DEBUG_INITIALIZATION
+   #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("case 2: Initializing with epoch %.12lf\n", satPrecEpoch.GetMjd());
-#endif
+   #endif
 
-      // 2. Set tcs, rcs, ocs, and j2k coordinate systems
-      if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
-      {
-         BodyFixedPoint *bf = (BodyFixedPoint*)theData.tNode;
-         tcs = bf->GetBodyFixedCoordinateSystem();
 
-         spObj = (SpaceObject*)theData.rNode;
-         origin = spObj->GetOrigin();
+    #ifdef DEBUG_API
+       if (apisbFileOpen)
+       {
+          apisbFile << "   Building coordinate systems; ss = <"
+                    << solarSystem << ">\n   Data dump:" << std::endl;
 
          if (rcs)
-            delete rcs;
+         {
+            if (rcs->GetAxisSystem()->GetTypeName() != "BodyFixed")
+               delete rcs;
+         }
          rcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
             origin, NULL, NULL, earth, solarSystem);
          if (ocs)
             delete ocs;
          ocs = CoordinateSystem::CreateLocalCoordinateSystem("OCS", "Topocentric",
             bf, NULL, NULL, bf->GetJ2000Body(), solarSystem);
+          apisbFile << "      epoch:  " << gsPrecEpoch.GetMjd()
+                    << "\n      t node: " << theData.tNode
+                    << " named "
+                    << (theData.tNode != NULL ? theData.tNode->GetName() : "???")
+                    << " of type "
+                    << (theData.tNode != NULL ? theData.tNode->GetTypeName() : "NULL")
+                    << "\n      r node: " << theData.rNode
+                    << " named "
+                    << (theData.rNode != NULL ? theData.rNode->GetName() : "???")
+                    << " of type "
+                    << (theData.rNode != NULL ? theData.rNode->GetTypeName() : "NULL")
+                    << std::endl;
+       }
+    #endif
 
-         if (j2k)
-            delete j2k;
-         j2k = CoordinateSystem::CreateLocalCoordinateSystem("j2k", "MJ2000Eq",
-            tcs->GetOrigin(), NULL, NULL, earth, solarSystem);
-      }
-      else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
-      {
-         gsPrecEpoch = theData.rPrecTime;
-         BodyFixedPoint *bf = (BodyFixedPoint*)theData.rNode;
-         rcs = bf->GetBodyFixedCoordinateSystem();
+       // 2. Set tcs, rcs, ocs, and j2k coordinate systems
+       if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
+       {
+    #ifdef DEBUG_API
+       if (apisbFileOpen)
+       {
+          apisbFile << "         1.0";
+       }
+    #endif
+          BodyFixedPoint *bf = (BodyFixedPoint*)theData.tNode;
+          CoordinateSystem *bfcs = bf->GetBodyFixedCoordinateSystem();
+          tcs = CoordinateSystem::CreateLocalCoordinateSystem("TCS", bfcs->GetAxisSystem()->GetTypeName(),
+              bfcs->GetOrigin(), NULL, NULL, bfcs->GetJ2000Body(), bfcs->GetSolarSystem());
 
-         spObj = (SpaceObject*)theData.tNode;
-         origin = spObj->GetOrigin();
+    #ifdef DEBUG_API
+       if (apisbFileOpen)
+       {
+          apisbFile << " tcs = " << tcs << std::endl;
+          apisbFile << "         1.1";
+       }
+    #endif
+          spObj  = (SpaceObject*) theData.rNode;
+          origin = spObj->GetOrigin();
 
-         if (tcs)
-            delete tcs;
-         tcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
+    #ifdef DEBUG_API
+       if (apisbFileOpen)
+       {
+          apisbFile << " origin = " << origin << std::endl;
+          apisbFile << "         1.2";
+       }
+    #endif
+          if (rcs)
+             delete rcs;
+          rcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
+                   origin, NULL, NULL, earth, solarSystem);
+    #ifdef DEBUG_API
+       if (apisbFileOpen)
+       {
+          apisbFile << " rcs = " << rcs << std::endl;
+          apisbFile << "         1.3";
+       }
+    #endif
+          if (ocs)
+             delete ocs;
+          ocs = CoordinateSystem::CreateLocalCoordinateSystem("OCS","Topocentric",
+                   bf, NULL, NULL, bf->GetJ2000Body(), solarSystem);
+          
+    #ifdef DEBUG_API
+       if (apisbFileOpen)
+       {
+          apisbFile << " ocs = " << ocs << std::endl;
+          apisbFile << "         1.4";
+       }
+    #endif
+          if (j2k)
+             delete j2k;
+          j2k = CoordinateSystem::CreateLocalCoordinateSystem("j2k", "MJ2000Eq",
+                   tcs->GetOrigin(), NULL, NULL, earth, solarSystem);
+    #ifdef DEBUG_API
+       if (apisbFileOpen)
+       {
+          apisbFile << " j2k = " << j2k << std::endl;
+          apisbFile << "         1.5 Groundstation transmit code CS's set"
+                    << std::endl;
+       }
+    #endif
+       }
+       else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
+       {
+          gsPrecEpoch = theData.rPrecTime;
+          BodyFixedPoint *bf = (BodyFixedPoint*)theData.rNode;
+          CoordinateSystem *bfcs = bf->GetBodyFixedCoordinateSystem();
+          rcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", bfcs->GetAxisSystem()->GetTypeName(),
+              bfcs->GetOrigin(), NULL, NULL, bfcs->GetJ2000Body(), bfcs->GetSolarSystem());
+          if (tcs)
+          {
+             if (tcs->GetAxisSystem()->GetTypeName() != "BodyFixed")
+             delete tcs;
+          }
+          tcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
             origin, NULL, NULL, earth, solarSystem);
 
-         if (ocs)
-            delete ocs;
-         ocs = CoordinateSystem::CreateLocalCoordinateSystem("OCS", "Topocentric",
-            bf, NULL, NULL, earth, solarSystem);
-
-         if (j2k)
-            delete j2k;
-         j2k = CoordinateSystem::CreateLocalCoordinateSystem("j2k", "MJ2000Eq",
-            rcs->GetOrigin(), NULL, NULL, earth, solarSystem);
-      }
+          spObj  = (SpaceObject*) theData.tNode;
+          origin = spObj->GetOrigin();
+          
+          if (tcs)
+             delete tcs;
+          tcs = CoordinateSystem::CreateLocalCoordinateSystem("TCS", "MJ2000Eq",
+                   origin, NULL, NULL, earth, solarSystem);
+          
+          if (ocs)
+             delete ocs;
+          ocs = CoordinateSystem::CreateLocalCoordinateSystem("OCS","Topocentric",
+                   bf, NULL, NULL, earth, solarSystem);
+          
+          if (j2k)
+             delete j2k;
+          j2k = CoordinateSystem::CreateLocalCoordinateSystem("j2k", "MJ2000Eq",
+                   rcs->GetOrigin(), NULL, NULL, earth, solarSystem);
+       }
       else
       {
          origin = ((SpaceObject*)theData.tNode)->GetOrigin();
+
          if (rcs)
-            delete rcs;
+         {
+            if (rcs->GetAxisSystem()->GetTypeName() != "BodyFixed")
+               delete rcs;
+         }
          rcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
             origin, NULL, NULL, earth, solarSystem);
 
          if (tcs)
-            delete tcs;
+         {
+            if (tcs->GetAxisSystem()->GetTypeName() != "BodyFixed")
+               delete tcs;
+         }
          tcs = CoordinateSystem::CreateLocalCoordinateSystem("TCS", "MJ2000Eq",
             origin, NULL, NULL, earth, solarSystem);
 
@@ -900,8 +1069,15 @@ void SignalBase::InitializeSignal(bool chainForwards)
             origin, NULL, NULL, earth, solarSystem);
       }
    }
+#ifdef DEBUG_API
+   if (apisbFileOpen)
+   {
+      apisbFile << "   Updating rotation matrices" << std::endl;
+   }
+#endif
    // 3. Update all rotation matrixes at gs time (or at transmit time when both nodes are spacecrafts
    std::string updateAll = "All";
+
    UpdateRotationMatrix(gsPrecEpoch.GetMjd(), updateAll);
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("Late Binding Initialization complete:\n"
@@ -928,6 +1104,13 @@ void SignalBase::InitializeSignal(bool chainForwards)
       }
    }
 
+#ifdef DEBUG_API
+   if (apisbFileOpen)
+   {
+      apisbFile << "   Signal " << GetPathDescription(false)
+                << " is ready" << std::endl;
+   }
+#endif
    isInitialized = true;
 }
 
@@ -970,15 +1153,25 @@ void SignalBase::CalculateRangeVectorInertial()
    theData.rangeVecInertial = theData.rLoc + theData.j2kOriginSep - theData.tLoc;
    
    // GMAT MathSpec Eq. 6.10
-   CelestialBody* forceOrigin = NULL;
+   SpacePoint* propOrigin = nullptr;
    if (theData.tNode->IsOfType(Gmat::SPACECRAFT))
-      forceOrigin = theData.tPropagator->GetODEModel()->GetForceOrigin();
+   {
+      if (theData.tPropagator->GetPropagator()->UsesODEModel())
+         propOrigin = theData.tPropagator->GetODEModel()->GetForceOrigin();        // the origin of the coordinate system used in forcemodel       // fix bug GMT-5364
+      else
+         propOrigin = theData.tPropagator->GetPropagator()->GetPropOrigin();
+   }
    else
-      forceOrigin = theData.rPropagator->GetODEModel()->GetForceOrigin();
+   {
+      if (theData.rPropagator->GetPropagator()->UsesODEModel())
+         propOrigin = theData.rPropagator->GetODEModel()->GetForceOrigin();        // the origin of the coordinate system used in forcemodel       // fix bug GMT-5364
+      else
+         propOrigin = theData.rPropagator->GetPropagator()->GetPropOrigin();
+   }
    
-   Rvector6 tSSB2SunState = forceOrigin->GetMJ2000PrecState(theData.tPrecTime) 
+   Rvector6 tSSB2SunState = propOrigin->GetMJ2000PrecState(theData.tPrecTime)
       - ssb->GetMJ2000PrecState(theData.tPrecTime);
-   Rvector6 rSSB2SunState = forceOrigin->GetMJ2000PrecState(theData.rPrecTime) 
+   Rvector6 rSSB2SunState = propOrigin->GetMJ2000PrecState(theData.rPrecTime)
       - ssb->GetMJ2000PrecState(theData.rPrecTime);
    Rvector3 disp = (rSSB2SunState - tSSB2SunState).GetR();
    theData.rangeVecI = theData.rangeVecInertial - disp;
@@ -1076,72 +1269,216 @@ void SignalBase::CalculateRangeRateVectorObs()
 }
 
 
-Real SignalBase::GetCrDerivative(GmatBase *forObj)
+
+Real SignalBase::GetParamDerivative(GmatBase *forObj, std::string paramName, GmatBase *associateObj)
 {
+   //MessageInterface::ShowMessage("SignalBase::GetParamDerivative(forObj = <%s>, paramName = <%s>, associateObj = <%s>) start\n", forObj->GetName().c_str(), paramName.c_str(), (associateObj == NULL?"":associateObj->GetName().c_str()));
+   // Get index for paramName
+   StringArray stmElemNames;
+   std::string paramFullName;
+   if (associateObj)
+   {
+      // associateObj is a Spacecraft object (example: estSat.Plate1.DiffuseFraction, associateObj is estSat, forObj is Plate1, and paramName is DiffuseFraction)
+      stmElemNames = associateObj->GetStringArrayParameter("StmElementNames");
+      paramFullName = forObj->GetName() + "." + paramName;
+   }
+   else
+   {
+      // forObj is a Spacecraft object (example: estSat.Cr, forObj is estSat, paramName is Cr)
+      stmElemNames = forObj->GetStringArrayParameter("StmElementNames");
+      paramFullName = paramName;
+   }
+
+   UnsignedInt paramIndex = 0;
+   bool found = false;
+   //for (int i = 0; i < stmElemNames.size(); i++)
+   //   MessageInterface::ShowMessage("for i = %d: stmElemNames[%d] = <%s>\n", i, i, stmElemNames[i].c_str());
+
+   for (int i = 0; i < stmElemNames.size(); i++)
+   {
+      if (stmElemNames.at(i) == "CartesianState" || stmElemNames.at(i) == "KeplerianState")
+         paramIndex += 0;  // vector that GetCDerivativeVector() returns does not include cartesian state
+      else if (stmElemNames.at(i) == paramFullName)
+      {
+         found = true;
+         break;
+      }
+      else
+      {
+         std::string name = stmElemNames.at(i);
+         size_t pos = name.find_last_of('.');
+         if (pos != name.npos)
+            name = name.substr(pos + 1);
+         paramIndex += forObj->GetEstimationParameterSize(forObj->GetParameterID(name));
+      }
+   }
+
+   if (!found)
+   {
+      //MessageInterface::ShowMessage("Not found paramFullName <%s> in StmElementNames: deriv = 0.0\n", paramFullName.c_str());
+      //MessageInterface::ShowMessage("SignalBase::GetParamDerivative(forObj = <%s>) end\n", forObj->GetName().c_str());
+      return 0.0;
+   }
+
    // Get C derivative vector
    Rvector dVector;
-   GetCDerivativeVector(forObj, dVector);
+   if (associateObj)
+      GetCDerivativeVector(associateObj, dVector, paramFullName);
+   else
+      GetCDerivativeVector(forObj, dVector, paramFullName);
 
-   // @todo: It needs to modify code for Cr index whenever a new spacecraft's solve-for is added
-   // Specify Cr index
+   // Get paramName partial derivative
+   Real deriv = dVector[paramIndex];
+
+   //MessageInterface::ShowMessage("Found parameter with name <%s> in StmElementNames: deriv = %.12le    Index = %d\n", paramFullName.c_str(), deriv, paramIndex);
+   //MessageInterface::ShowMessage("SignalBase::GetParamDerivative(forObj = <%s>) end\n", forObj->GetName().c_str());
+   return deriv;
+}
+
+
+Real SignalBase::GetCrDerivative(GmatBase *forObj)
+{
+   //MessageInterface::ShowMessage("SignalBase::GetCrDerivative(forObj = <%s>) start\n", forObj->GetName().c_str());
+   // get index for Cr
+   StringArray stmElemNames = forObj->GetStringArrayParameter("StmElementNames");
    UnsignedInt CrIndex = 0;
+   bool found = false;
+   for (int i = 0; i < stmElemNames.size(); i++) 
+   {
+      //MessageInterface::ShowMessage("for i = %d: stmElemNames[%d] = <%s>\n", i, i, stmElemNames[i].c_str());
+      if (stmElemNames.at(i) == "CartesianState" || stmElemNames.at(i) == "KeplerianState")
+         CrIndex += 0;  // vector that GetCDerivativeVector() returns does not include cartesian state
+      else if ((stmElemNames.at(i) == "Cr") || (stmElemNames.at(i) == "SPADSRPScaleFactor"))      // made changes by TUAN NGUYEN
+      {
+         found = true;
+         break;
+      }
+      else
+      {
+         CrIndex += forObj->GetEstimationParameterSize(forObj->GetParameterID(stmElemNames.at(i)));
+      }
+   }
+
+   if (!found)
+   {
+      //MessageInterface::ShowMessage("Not found Cr in StmElementNames: deriv = 0.0\n");
+      //MessageInterface::ShowMessage("SignalBase::GetCrDerivative(forObj = <%s>) end\n", forObj->GetName().c_str());
+      return 0.0;
+   }
+
+   // Get C derivative vector
+   Rvector dVector;
+   GetCDerivativeVector(forObj, dVector, "Cr");
 
    // Get Cr partial derivative
    Real deriv = dVector[CrIndex];
-   
+
+   //MessageInterface::ShowMessage("Found Cr in StmElementNames: deriv = %.12le    CrIndex = %d\n", deriv, CrIndex);
+   //MessageInterface::ShowMessage("SignalBase::GetCrDerivative(forObj = <%s>) end\n", forObj->GetName().c_str());
    return deriv;
 }
 
 
 Real SignalBase::GetCdDerivative(GmatBase *forObj)
 {
-   // Get C derivative vector
-   Rvector dVector;
-   GetCDerivativeVector(forObj, dVector);
-
-   // @todo: It needs to modify code forCd index whenever a new spacecraft's solve-for is added
-   // Specify Cd index
-   StringArray sa = ((Spacecraft*)forObj)->GetStringArrayParameter("SolveFors");   // get spacecraft solve-for variables
-   UnsignedInt i = 0;
-   for (; i < sa.size(); ++i)
-   {
-      if (sa[i] == "Cr")
+   // get index for Cd
+   StringArray stmElemNames = forObj->GetStringArrayParameter("StmElementNames");
+   UnsignedInt CdIndex = 0;
+   bool found = false;
+   for (int i = 0; i < stmElemNames.size(); i++) {
+      if (stmElemNames.at(i) == "CartesianState" || stmElemNames.at(i) == "KeplerianState")
+         CdIndex += 0;  // vector that GetCDerivativeVector() returns does not include cartesian state
+      else if ((stmElemNames.at(i) == "Cd") || (stmElemNames.at(i) == "SPADDragScaleFactor"))       // made changes by TUAN NGUYEN
+      {
+         found = true;
          break;
+      }
+      else 
+      {
+         CdIndex += forObj->GetEstimationParameterSize(forObj->GetParameterID(stmElemNames.at(i)));
+      }
    }
 
-   UnsignedInt CdIndex = 1;
-   if (i == sa.size())
-      CdIndex = 0;
+   if (!found)
+      return 0.0;
+
+   // Get C derivative vector
+   Rvector dVector;
+   GetCDerivativeVector(forObj, dVector, "Cd");
 
    // Get Cr partial derivative
    Real deriv = dVector[CdIndex];
-
+   
    return deriv;
 }
 
+// Added for Thrust Scale Factor Solve For
+Real SignalBase::GetTSFDerivative(GmatBase *forObj, const std::string &paramName)
+{
+   // paramName looks like <segmentName>.TSF_Epsilon
+   StringArray parts = GmatStringUtil::SeparateBy(paramName, ".");
+   std::string tsfName = parts.at(0) + ".ThrustScaleFactor";
 
-void SignalBase::GetCDerivativeVector(GmatBase *forObj,Rvector &deriv)
+   // get index for TSF
+   StringArray stmElemNames = forObj->GetStringArrayParameter("StmElementNames");
+   UnsignedInt TSFIndex = 0;
+   bool found = false;
+   for (int i = 0; i < stmElemNames.size(); i++) {
+      if (stmElemNames.at(i) == "CartesianState" || stmElemNames.at(i) == "KeplerianState")
+         TSFIndex += 0;  // vector that GetCDerivativeVector() returns does not include cartesian state
+      else if (stmElemNames.at(i) == tsfName) {
+         found = true;
+         break;
+      }
+      else {
+         TSFIndex += forObj->GetEstimationParameterSize(forObj->GetParameterID(stmElemNames.at(i)));
+      }
+   }
+
+   if (!found)
+      return 0.0;
+
+   // Get C derivative vector
+   Rvector dVector;
+   GetCDerivativeVector(forObj, dVector, "TSF");
+
+	// Get TSF partial derivative
+	Real deriv = dVector[TSFIndex];
+
+	return deriv;
+}
+
+
+void SignalBase::GetCDerivativeVector(GmatBase *forObj, Rvector &deriv, const std::string &solveForType)
 {
    // 1. Calculate phi matrix
+   //MessageInterface::ShowMessage("forObj = <%p,%s>      theData.tNode = <%p,%s>    theData.rNode = <%p,%s>\n",
+   //   forObj, forObj->GetName().c_str(),
+   //   theData.tNode, theData.tNode->GetName().c_str(),
+   //   theData.rNode, theData.rNode->GetName().c_str());
+
+
    bool forTransmitter = true;
    if (theData.rNode == forObj)
       forTransmitter = false;
    else
    {
       if (theData.tNode != forObj)
-         throw MeasurementException("Cr derivative requested, but "
-         "neither participant is the \"for\" object");
+         throw MeasurementException(solveForType + " derivative requested, but "
+            "neither participant is the \"for\" object");
    }
    Rmatrix phi = (forTransmitter ? (theData.tSTM*theData.tSTMtm.Inverse()) : (theData.rSTM*theData.rSTMtm.Inverse()));
-
 
    // 2. Calculate E matrix
    Integer m = phi.GetNumColumns() - 6;
    Rmatrix E(3,m);
    for (Integer i = 0; i < 3; ++i)
+   {
       for (Integer j = 0; j < m; ++j)
-         E(i, j) = phi(i, j+6);
-
+      {
+         E(i, j) = phi(i, j + 6);
+      }
+   }
    
    // 3. Calculate: sign * R * phi
    Real sign = (forTransmitter ? -1.0 : 1.0);
@@ -1447,7 +1784,7 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
             (moveAll ? ", Moving all participants" : ""));
    #endif
 
-   // 1. Propagate receive node at time theEpoch and update it's SignalData
+   // 1. Propagate receive node at time theEpoch and update its SignalData
    if (epochAtReceive || moveAll)
    {
 
@@ -1460,22 +1797,36 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
                t.GetMjd(), theData.rPrecTime.GetMjd(), dt);
       #endif
 
-   // Update model epoch
-   ODEModel *ode = NULL;
+      // Update model epoch
+      ODEModel *ode = NULL;
       if (theData.tNode->IsOfType(Gmat::SPACEOBJECT))
       {
          if (theData.tPropagator != NULL)
          {
-            ode = theData.tPropagator->GetODEModel();
-            ode->UpdateInitialData();
+            if (theData.tPropagator->GetPropagator()->UsesODEModel())
+            {
+               ode = theData.tPropagator->GetODEModel();
+               ode->UpdateInitialData();
+            }
+            else
+            {
+               theData.tPropagator->GetPropagator()->UpdateSpaceObjectGT(theData.rPrecTime);
+            }
          }
       }
       if (theData.rNode->IsOfType(Gmat::SPACEOBJECT))
       {
          if (theData.rPropagator != NULL)
          {
-            ode = theData.rPropagator->GetODEModel();
-            ode->UpdateInitialData();
+            if (theData.rPropagator->GetPropagator()->UsesODEModel())
+            {
+               ode = theData.rPropagator->GetODEModel();
+               ode->UpdateInitialData();
+            }
+            else
+            {
+               theData.rPropagator->GetPropagator()->UpdateSpaceObjectGT(theData.rPrecTime);
+            }
          }
       }
 
@@ -1506,8 +1857,14 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
             // This step is used to convert spacecraft's state to Spacecraft.CoordinateSystem
             state.Set(pstate);
             SpacePoint* spacecraftOrigin = ((Spacecraft*)(theData.rNode))->GetOrigin();                 // the origin of the transmit spacecraft's cooridinate system   // fix bug GMT-5364
-            SpacePoint* forcemodelOrigin = theData.rPropagator->GetODEModel()->GetForceOrigin();        // the origin of the coordinate system used in forcemodel       // fix bug GMT-5364
-            state = state + (forcemodelOrigin->GetMJ2000PrecState(theData.rPrecTime) - spacecraftOrigin->GetMJ2000PrecState(theData.rPrecTime));                        // fix bug GMT-5364
+
+            SpacePoint* propOrigin = nullptr;
+            if (theData.rPropagator->GetPropagator()->UsesODEModel())
+               propOrigin = theData.rPropagator->GetODEModel()->GetForceOrigin();        // the origin of the coordinate system used in forcemodel       // fix bug GMT-5364
+            else
+               propOrigin = theData.rPropagator->GetPropagator()->GetPropOrigin();
+
+            state = state + (propOrigin->GetMJ2000PrecState(theData.rPrecTime) - spacecraftOrigin->GetMJ2000PrecState(theData.rPrecTime));                        // fix bug GMT-5364
 
 			   // Set size for stm
             Integer stmRowCount = theData.rNode->GetIntegerParameter("FullSTMRowCount");
@@ -1583,8 +1940,14 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
             // This step is used to convert spacecraft's state to Spacecraft.CoordinateSystem
             state.Set(pstate);
             SpacePoint* spacecraftOrigin = ((Spacecraft*)(theData.tNode))->GetOrigin();                 // the origin of the transmit spacecraft's cooridinate system   // fix bug GMT-5364
-            SpacePoint* forcemodelOrigin = theData.tPropagator->GetODEModel()->GetForceOrigin();        // the origin of the coordinate system used in forcemodel       // fix bug GMT-5364
-            state = state + (forcemodelOrigin->GetMJ2000PrecState(theData.tPrecTime) - spacecraftOrigin->GetMJ2000PrecState(theData.tPrecTime));                        // fix bug GMT-5364
+
+            SpacePoint* propOrigin = nullptr;
+            if (theData.tPropagator->GetPropagator()->UsesODEModel())
+               propOrigin = theData.tPropagator->GetODEModel()->GetForceOrigin();        // the origin of the coordinate system used in forcemodel       // fix bug GMT-5364
+            else
+               propOrigin = theData.tPropagator->GetPropagator()->GetPropOrigin();
+
+            state = state + (propOrigin->GetMJ2000PrecState(theData.tPrecTime) - spacecraftOrigin->GetMJ2000PrecState(theData.tPrecTime));                        // fix bug GMT-5364
 
 			   // Set size for stm
             Integer stmRowCount = theData.tNode->GetIntegerParameter("FullSTMRowCount");
@@ -1624,6 +1987,39 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
             MessageInterface::ShowMessage("Move to epoch: %.12lf  participant %s  position in %s [%.12lf   %.12lf   %.12lf]   velocity [%.12lf   %.12lf   %.12lf]\n", t.GetMjd(), theData.tNode->GetName().c_str(), theData.tNode->GetStringParameter("CoordinateSystem").c_str(), theData.tLoc[0], theData.tLoc[1], theData.tLoc[2], theData.tVel[0], theData.tVel[1], theData.tVel[2]);
       #endif
    }
+}
+
+//------------------------------------------------------------------------------
+// void SetIonosphereCache(SignalDataCache::SimpleSignalDataCache* cache)
+//------------------------------------------------------------------------------
+/**
+ * Sets the ionosphere cache for the signal
+ *
+ * @param cache The ionosphere cache
+ */
+ //------------------------------------------------------------------------------
+void SignalBase::SetIonosphereCache(SignalDataCache::SimpleSignalDataCache * cache)
+{
+   // Set it to all signals in the path
+   ionosphereCache = cache;
+
+   if (next)
+      next->SetIonosphereCache(cache);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetStrandId(unsigned long id)
+//------------------------------------------------------------------------------
+/**
+ * Sets the strand ID
+ *
+ * @param id The strand id
+ */
+ //------------------------------------------------------------------------------
+void SignalBase::SetStrandId(unsigned long id)
+{
+   strandId = id;
 }
 
 //------------------------------------------------------------------------------
@@ -1696,6 +2092,9 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
    Rvector6 state;
    Rmatrix stm;         // state transition matrix
 
+   GmatTime tPrecTimeNew = theData.tPrecTime + stepToTake / GmatTimeConstants::SECS_PER_DAY;
+   GmatTime rPrecTimeNew = theData.rPrecTime + stepToTake / GmatTimeConstants::SECS_PER_DAY;
+
    if (prop)      // Handle spacecraft
    {
       #ifdef DEBUG_LIGHTTIME
@@ -1721,18 +2120,30 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
 
       // This step is used to convert spacecraft's state to Spacecraft.CoordinateSystem
       state.Set(outState);
-      if (forTransmitter)                                                                                                                                            // fix bug GMT-5364
-      {                                                                                                                                                              // fix bug GMT-5364
-         SpacePoint* spacecraftOrigin = ((Spacecraft*)(theData.tNode))->GetOrigin();                 // the origin of the transmit spacecraft's cooridinate system   // fix bug GMT-5364
-         SpacePoint* forcemodelOrigin = theData.tPropagator->GetODEModel()->GetForceOrigin();        // the origin of the coordinate system used in forcemodel       // fix bug GMT-5364
-         state = state + (forcemodelOrigin->GetMJ2000PrecState(theData.tPrecTime) - spacecraftOrigin->GetMJ2000PrecState(theData.tPrecTime));                        // fix bug GMT-5364
-      }                                                                                                                                                              // fix bug GMT-5364
-      else                                                                                                                                                           // fix bug GMT-5364
-      {                                                                                                                                                              // fix bug GMT-5364
-         SpacePoint* spacecraftOrigin = ((Spacecraft*)(theData.rNode))->GetOrigin();                 // the origin of the transmit spacecraft's cooridinate system   // fix bug GMT-5364
-         SpacePoint* forcemodelOrigin = theData.rPropagator->GetODEModel()->GetForceOrigin();        // the origin of the coordinate system used in forcemodel       // fix bug GMT-5364
-         state = state + (forcemodelOrigin->GetMJ2000PrecState(theData.rPrecTime) - spacecraftOrigin->GetMJ2000PrecState(theData.rPrecTime));                        // fix bug GMT-5364
-      }                                                                                                                                                              // fix bug GMT-5364
+      if (forTransmitter)
+      {
+         SpacePoint* spacecraftOrigin = ((Spacecraft*)(theData.tNode))->GetOrigin();                 // the origin of the transmit spacecraft's cooridinate system
+
+         SpacePoint* propOrigin = nullptr;
+         if (theData.tPropagator->GetPropagator()->UsesODEModel())
+            propOrigin = theData.tPropagator->GetODEModel()->GetForceOrigin();        // the origin of the coordinate system used in forcemodel       // fix bug GMT-5364
+         else
+            propOrigin = theData.tPropagator->GetPropagator()->GetPropOrigin();
+
+         state = state + (propOrigin->GetMJ2000PrecState(tPrecTimeNew) - spacecraftOrigin->GetMJ2000PrecState(tPrecTimeNew));
+      }
+      else
+      {
+         SpacePoint* spacecraftOrigin = ((Spacecraft*)(theData.rNode))->GetOrigin();                 // the origin of the transmit spacecraft's cooridinate system
+
+         SpacePoint* propOrigin = nullptr;
+         if (theData.rPropagator->GetPropagator()->UsesODEModel())
+            propOrigin = theData.rPropagator->GetODEModel()->GetForceOrigin();        // the origin of the coordinate system used in forcemodel       // fix bug GMT-5364
+         else
+            propOrigin = theData.rPropagator->GetPropagator()->GetPropOrigin();
+
+         state = state + (propOrigin->GetMJ2000PrecState(rPrecTimeNew) - spacecraftOrigin->GetMJ2000PrecState(rPrecTimeNew));
+      }
 
       // Set size for stm
       Integer stmRowCount;
@@ -1796,13 +2207,11 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
       #endif
       if (forTransmitter)
       {
-         state = theData.tNode->GetMJ2000PrecState(theData.tPrecTime +
-               stepToTake / GmatTimeConstants::SECS_PER_DAY);
+         state = theData.tNode->GetMJ2000PrecState(tPrecTimeNew);
       }
       else
       {
-         state = theData.rNode->GetMJ2000PrecState(theData.rPrecTime +
-               stepToTake / GmatTimeConstants::SECS_PER_DAY);
+         state = theData.rNode->GetMJ2000PrecState(rPrecTimeNew);
       }
       
       // For ground station, its STM is a 6x6 I matrix

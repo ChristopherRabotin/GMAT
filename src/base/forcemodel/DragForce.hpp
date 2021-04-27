@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -66,7 +66,11 @@ public:
                                               const std::string parmName, 
                                               const std::string parm);
    virtual void         ClearSatelliteParameters(const std::string parmName = "");
-   
+
+//   virtual void         SetSpaceObject(const Integer i, GmatBase *obj);       // made changes by TUAN NGUYEN
+
+   virtual bool         AttitudeAffectsDynamics();
+
    virtual bool         IsUnique(const std::string &forBody = "");
 
    bool                 Initialize();
@@ -104,6 +108,9 @@ public:
                                            const char *value);
    virtual bool         SetStringParameter(const std::string &label, 
                                            const std::string &value);
+   virtual const StringArray&
+                        GetPropertyEnumStrings(const Integer id) const;
+
    virtual Integer      GetIntegerParameter(const Integer id) const;
    virtual Integer      SetIntegerParameter(const Integer id,
                                             const Integer value);
@@ -138,7 +145,7 @@ public:
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
    virtual bool SetStart(Gmat::StateElementId id, Integer index, 
-                         Integer quantity, Integer sizeOfType);
+                         Integer quantity, Integer totalSize);
 
    // Made public so it can be called for the AtmosDensity parameter
    Real                 GetDensity(Real *state,
@@ -184,6 +191,9 @@ protected:
    Integer              satCount;
    /// Central bodies used for atmosphere source
    StringArray          dragBody;
+   /////// Pointers to the spacecraft                   // made changes by TUAN NGUYEN
+   ////std::vector<GmatBase*> scObjs;                   // made changes by TUAN NGUYEN
+
    /// Spacecraft drag areas
    std::vector <Real>   area;
    /// Spacecraft masses
@@ -216,16 +226,15 @@ protected:
    /// ID used to set Schatten Weather File name
    Integer schattenWFileID;
 
-   /// Flag indicating if Cd is being estimated
-   bool estimatingCd;
+   ///// Flag indicating if Cd is being estimated                       // made changes by TUAN NGUYEN
+   //bool estimatingCd;                                                 // made changes by TUAN NGUYEN
    /// ID for the CdEpsilon parameter
    Integer cdEpsilonID;
-   /// Row/Column for the Cd entries in the A-matrix and STM
-   Integer cdEpsilonRow;
+   ///// Row/Column for the Cd entries in the A-matrix and STM          // made changes by TUAN NGUYEN
+   //Integer cdEpsilonRow;                                              // made changes by TUAN NGUYEN
    /// Current value(s) of Cd
    std::vector<Real> cdEpsilon;
-   /// Initial value(s) of Cd
-   std::vector<Real> cdInitial;
+
    /// Flag used to indicate that central differences are used for the A-matrix
    bool useCentralDifferences;
    /// Flag used to finite difference the velocity derivatives
@@ -259,8 +268,7 @@ protected:
 
    /// Start index for the Cartesian state
    Integer              cartIndex;
-   /// Flag indicating if the Cartesian state should be populated
-   bool                 fillCartesian;
+
    /// CS used to get the w cross r piece
    CoordinateSystem     *cbFixed;
    /// CS used to for conversions
@@ -268,14 +276,18 @@ protected:
    /// Index used to select Kp/Ap conversion method.  Default is a table lookup
    Integer              kpApConversion;
 
-
+   // the model to use - Spherical or SPADFile
+   std::string          dragShapeModel;                                // made changes by TUAN NGUYEN
+   ShapeModel           dragShapeModelIndex;                           // made changes by TUAN NGUYEN
    
-   void                 BuildPrefactors();
+   void                 BuildPrefactors(const std::string &forModel = "Spherical");
    void                 TranslateOrigin(const Real *state, const Real now);
 //   void                 GetDensity(Real *state, Real when = GmatTimeConstants::MJD_OF_J2000);
       
    Real                 CalculateAp(Real kp);
-   Rvector3             Accelerate(Real *theState, GmatEpoch &theEpoch, Real prefactor);
+   Rvector3             Accelerate(Integer scID, Real *theState,
+                                   GmatEpoch &theEpoch, Real prefactor);
+
    
    /// Parameter IDs
    enum
@@ -292,9 +304,12 @@ protected:
       MAGNETIC_INDEX,
       SCHATTEN_ERROR_MODEL,
       SCHATTEN_TIMING_MODEL,
+      DRAG_MODEL,
       FIXED_COORD_SYSTEM,
       W_UPDATE_INTERVAL,
       KP2AP_METHOD,
+      DENSITY_MODEL,                            // made changes by TUAN NGUYEN
+      INPUT_FILE,                               // made changes by TUAN NGUYEN
       DragForceParamCount
    };
    

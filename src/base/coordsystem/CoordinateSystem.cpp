@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -46,6 +46,7 @@
 #include "BodyFixedAxes.hpp"
 #include "Rmatrix33.hpp"
 #include "GmatGlobal.hpp"               // for GetEopFile(), GetItrfCoefficientsFile()
+#include "CoordinateConverter.hpp"
 #include "MessageInterface.hpp"
 
 #include <algorithm>                    // Required by GCC 4.3
@@ -210,7 +211,8 @@ const CoordinateSystem& CoordinateSystem::operator=(
  * @return true if "this" is the same as the input coordSys
  */
 //---------------------------------------------------------------------------
-bool CoordinateSystem::operator==(const CoordinateSystem &coordSys){
+bool CoordinateSystem::operator==(const CoordinateSystem &coordSys)
+{
    if (&coordSys == this)
       return true;
 
@@ -976,6 +978,32 @@ void CoordinateSystem::GetLastRotationDotMatrix(Real *mat) const
    axes->GetLastRotationDotMatrix(mat);
 }
 
+
+//---------------------------------------------------------------------------
+// std::vector<Rmatrix33> GetDerivativeOfLastRotationMatrix()
+//---------------------------------------------------------------------------
+/**
+* Returns derivative of the rotation matrix last computed by this coordinate system
+*
+* @return derivative of the last-computed rotation matrix (matrix from this 
+*            coordinate system to its base system)
+*
+*/
+//---------------------------------------------------------------------------
+std::vector<Rmatrix33> CoordinateSystem::GetDerivativeOfLastRotationMatrix()
+{
+	if (!axes)
+	{
+		std::string errmsg = "No AxisSystem defined for coordinate system \"";
+		errmsg += instanceName + "\".\n";
+		throw CoordinateSystemException(errmsg);
+	}
+	return axes->GetDerivativeOfLastRotationMatrix();
+}
+
+
+
+
 //---------------------------------------------------------------------------
 // bool AreAxesOfType(const std::string &ofType) const
 //---------------------------------------------------------------------------
@@ -1053,6 +1081,8 @@ bool CoordinateSystem::Initialize()
       axes->SetRefObject(j2000Body,Gmat::SPACE_POINT,j2000BodyName);
       axes->SetCoordinateSystemName(instanceName);
       axes->Initialize();
+
+      isInitialized = true;
    }
    
    return true;
@@ -2789,17 +2819,16 @@ bool CoordinateSystem::TranslateToBaseSystem(const A1Mjd &epoch,
       for (Integer i=0; i<6; i++) outState[i] = inState[i];
    else
    {
-      #ifdef DEBUG_INPUTS_OUTPUTS
-      Rvector6 originState = origin->GetMJ2000State(epoch);
+      Rvector6 originState    = origin->GetMJ2000State(epoch);
       Rvector6 j2000BodyState = j2000Body->GetMJ2000State(epoch);
-      MessageInterface::ShowMessage
-         ("   originState =\n   %s\n", originState.ToString().c_str());
-      MessageInterface::ShowMessage
-         ("   j2000BodyState =\n   %s\n", j2000BodyState.ToString().c_str());
+      #ifdef DEBUG_INPUTS_OUTPUTS
+         MessageInterface::ShowMessage
+            ("   originState =\n   %s\n", originState.ToString().c_str());
+         MessageInterface::ShowMessage
+            ("   j2000BodyState =\n   %s\n", j2000BodyState.ToString().c_str());
       #endif
       
-      Rvector6 rif =  origin->GetMJ2000State(epoch) -
-                      (j2000Body->GetMJ2000State(epoch));
+      Rvector6 rif =  originState - j2000BodyState;
       
 	  if (this->GetBaseSystem() == "ICRF")
 	  {
@@ -2857,17 +2886,16 @@ bool CoordinateSystem::TranslateToBaseSystem(const GmatTime &epoch,
       for (Integer i=0; i<6; i++) outState[i] = inState[i];
    else
    {
-      #ifdef DEBUG_INPUTS_OUTPUTS
-      Rvector6 originState = origin->GetMJ2000State(epoch);
+      Rvector6 originState    = origin->GetMJ2000State(epoch);
       Rvector6 j2000BodyState = j2000Body->GetMJ2000State(epoch);
-      MessageInterface::ShowMessage
-         ("   originState =\n   %s\n", originState.ToString().c_str());
-      MessageInterface::ShowMessage
-         ("   j2000BodyState =\n   %s\n", j2000BodyState.ToString().c_str());
+      #ifdef DEBUG_INPUTS_OUTPUTS
+         MessageInterface::ShowMessage
+            ("   originState =\n   %s\n", originState.ToString().c_str());
+         MessageInterface::ShowMessage
+            ("   j2000BodyState =\n   %s\n", j2000BodyState.ToString().c_str());
       #endif
       
-      Rvector6 rif =  origin->GetMJ2000State(epoch) -
-                      (j2000Body->GetMJ2000State(epoch));
+      Rvector6 rif =  originState - j2000BodyState;
       
 	  if (this->GetBaseSystem() == "ICRF")
 	  {
@@ -2985,7 +3013,7 @@ bool CoordinateSystem::TranslateFromBaseSystem(const GmatTime &epoch,
             (axes->GetTypeName()).c_str(), (origin->GetName()).c_str(), (j2000Body->GetName()).c_str());
       MessageInterface::ShowMessage("   inState  = %le  %le  %le  %le  %le  %le\n",
             inState[0], inState[1], inState[2], inState[3], inState[4], inState[5]);
-      MessageInterface::ShowMessage("   epoch = %le\n", epoch.Get());
+//      MessageInterface::ShowMessage("   epoch = %le\n", epoch.Get());
    #endif
    if (origin == j2000Body)  
    {
@@ -3163,3 +3191,14 @@ bool CoordinateSystem::TranslateFromBaseSystem(const GmatTime &epoch,
    return true;
 }
 
+
+// made changes by TUAN NGUYEN
+bool  CoordinateSystem::SetCalculateRotMatrixDeriv(bool turnOn)
+{
+	if (axes)
+		return axes->SetCalculateRotMatrixDeriv(turnOn);
+	else
+		throw GmatBaseException("Error: cannot turn on calculation rotation matrix derivative in Coordinate system '" + GetName() + "' due to no axes was set to this coordinate system\n");
+
+	return false;    // for turn off
+}

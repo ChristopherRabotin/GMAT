@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -532,6 +532,19 @@ bool Publisher::Publish(Integer id, Integer *data, Integer count)
    delete [] stream;
    return true;
 }
+
+
+//------------------------------------------------------------------------------
+// void Ping()
+//------------------------------------------------------------------------------
+/**
+ * Pings the system so that GUI overrides can hand control off for messages.
+ */
+//------------------------------------------------------------------------------
+void Publisher::Ping()
+{
+}
+
 
 //------------------------------------------------------------------------------
 // bool FlushBuffers(bool endOfDataBlock = true)

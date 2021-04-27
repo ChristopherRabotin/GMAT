@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -626,15 +626,39 @@ bool GNDopplerAdapter::SetMeasurement(MeasureModel* meas)
  *       PropSetup objects.
  */
 //------------------------------------------------------------------------------
-void GNDopplerAdapter::SetPropagator(PropSetup* ps)
+void GNDopplerAdapter::SetPropagators(std::vector<PropSetup*> *ps,
+      std::map<std::string, StringArray> *spMap)
 {
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("Setting propagator to %p in "
             "GNDopplerAdapter\n", ps);
    #endif
 
-   adapterS->SetPropagator(ps);
-   RangeAdapterKm::SetPropagator(ps);
+   adapterS->SetPropagators(ps, spMap);
+   RangeAdapterKm::SetPropagators(ps, spMap);
+}
+
+
+//------------------------------------------------------------------------------
+//  void SetTransientForces(std::vector<PhysicalModel*> *tf)
+//------------------------------------------------------------------------------
+/**
+* Passes the transient force vector into the adapter
+*
+* The transient force vector is a set of models used in GMAT's ODEModel for
+* affects that are turned on and off over the course of a mission.  An example
+* of a transient force is a finite burn, which is toggled by the
+* BeginFiniteBurn and EndFiniteBurn commands.  These components are only used
+* by commands that need them.  Typical usage is found in the propagation
+* enabled commands.
+*
+* @param tf The vector of transient forces
+*/
+//------------------------------------------------------------------------------
+void GNDopplerAdapter::SetTransientForces(std::vector<PhysicalModel*> *tf)
+{
+    GetMeasurementModel()->SetTransientForces(tf);
+    adapterS->SetTransientForces(tf);
 }
 
 
@@ -767,8 +791,11 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
    adapterS->CalculateMeasurement(withEvents, obData, rampTB, forSimulation);
    
    if (obData)
+   {
       delete obData;
-   
+      obData = NULL;
+   }
+
    measDataS = adapterS->GetMeasurement();
    // measDataS.value[0] = measDataS.value[0] / adapterS->GetMultiplierFactor();                                         // convert to full range in km
    measDataS.value[0] = (measDataS.value[0] - 2 * adapterS->GetIonoCorrection()) / adapterS->GetMultiplierFactor();      // convert to full range in km
@@ -895,6 +922,10 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
       }
 
       cMeasurement.value[i] = dtdt/dopplerCountInterval;  // GN doppler                      (unit: km/s)
+
+      // Update media corrections
+      cMeasurement.ionoCorrectValue = -(GetIonoCorrection() - adapterS->GetIonoCorrection()) / dopplerCountInterval;
+      cMeasurement.tropoCorrectValue = (GetTropoCorrection() - adapterS->GetTropoCorrection()) / dopplerCountInterval;
 
       cMeasurement.uplinkFreq = uplinkFreq*1.0e6;                       // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
       cMeasurement.uplinkFreqAtRecei = uplinkFreqAtRecei*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreqAtRecei's unit is Hz

@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2015 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -480,6 +480,8 @@ bool EndFileThrust::Execute()
          (*s)->IsManeuvering(false);
       }
 
+      thrustFile->DeactivateSegments();
+
       // Remove the force from the list of transient forces
       for (std::vector<PhysicalModel*>::iterator j = transientForces->begin();
            j != transientForces->end(); ++j)
@@ -498,6 +500,8 @@ bool EndFileThrust::Execute()
       // Reset maneuvering to Publisher so that any subscriber can do its own action
       if (!sats.empty())
       {
+         // could do: if (sats[0]->HasPrecisionTime()) { GmatTime epoch = sats[0]->GetEpochGT(); publisher->SetManeuvering(...); }
+         // but publisher->SetManeuvering() only takes a Real epoch, it doesn't have a precision time overload
          Real epoch = sats[0]->GetEpoch();
          publisher->SetManeuvering(this, false, epoch, satNames, "end of file "
                "based maneuver");

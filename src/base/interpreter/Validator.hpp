@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -47,6 +47,7 @@ class Function;
 class Parameter;
 class AxisSystem;
 class ElementWrapper;
+class RHSEquation;
 
 class GMAT_API Validator
 {
@@ -64,6 +65,7 @@ public:
          bool includeOwnedObjects = false*/);
    bool ValidateCommand(GmatCommand *cmd, bool contOnError = true,
                         Integer manage = 1);
+   bool ValidateEquation(RHSEquation *eq);
    
    void HandleCcsdsEphemerisFile(ObjectMap *objMap, bool deleteOld = false);
    
@@ -100,6 +102,7 @@ public:
 private:
 
    bool CreateAssignmentWrappers(GmatCommand *cmd, Integer manage);
+   bool CreateEquationWrappers(RHSEquation *obj);
    
    ElementWrapper* CreateSolarSystemWrapper(GmatBase *obj, const std::string &owner,
                                             const std::string &depobj,

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -718,9 +718,10 @@ bool TextEphemFile::IsTimeToWrite()
 void TextEphemFile::WriteTime(Real epoch)
 {
    
-   Real time = TimeConverterUtil::Convert(epoch, TimeConverterUtil::A1MJD, 
-                                          mEpochSysId, GmatTimeConstants::JD_JAN_5_1941);
-   bool handleLeapSecond = TimeConverterUtil::HandleLeapSecond();
+   bool handleLeapSecond;
+   Real time = TimeSystemConverter::Instance()->Convert(epoch, TimeSystemConverter::A1MJD,
+                                          mEpochSysId, GmatTimeConstants::JD_JAN_5_1941,
+                                          &handleLeapSecond);
 
    dstream.width(mColWidth[0]);
    dstream.precision(precision);
@@ -734,9 +735,9 @@ void TextEphemFile::WriteTime(Real epoch)
    
    if (mIsGregorian)
    {
-      bool isUTC = ((mEpochSysId == TimeConverterUtil::UTCMJD) ||
-                    (mEpochSysId == TimeConverterUtil::UTC));
-      std::string timeStr = TimeConverterUtil::ConvertMjdToGregorian(time, (isUTC && handleLeapSecond));
+      bool isUTC = ((mEpochSysId == TimeSystemConverter::UTCMJD) ||
+                    (mEpochSysId == TimeSystemConverter::UTC));
+      std::string timeStr = TimeSystemConverter::Instance()->ConvertMjdToGregorian(time, (isUTC && handleLeapSecond));
       dstream << timeStr << "   ";
    }
    else
@@ -923,7 +924,7 @@ void TextEphemFile::SaveEpochType()
           mEpochFormat + "'; could not find 'Gregorian' or 'ModJulian' substring.");
    
    std::string epochSys = mEpochFormat.substr(0, loc);
-   mEpochSysId = TimeConverterUtil::GetTimeTypeID(epochSys);
+   mEpochSysId = TimeSystemConverter::Instance()->GetTimeTypeID(epochSys);
    mIsGregorian = false;
    
    if (mEpochFormat.substr(loc) == "Gregorian")

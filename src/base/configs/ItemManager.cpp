@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2017, Emergent Space Technologies, Inc.
+// THIS COMPONENT Copyright (c) 2020, Emergent Space Technologies, Inc.
 // All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@
 // governing permissions and limitations under the License.
 //
 // Developed jointly by Emergent Space Technologies, Inc. and
-// Thinking Systems, Inc.
+// Thinking Systems, Inc. under SBIR contract NNX16CG16C
 //
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: Oct 4, 2017

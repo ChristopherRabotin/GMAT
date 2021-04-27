@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -241,6 +241,10 @@ public:
    const StringArray& GetPluginList();
    
    void AdjustSettings(const std::string &suffix, const StringArray &forEntries);
+   
+
+   /// Add a file (or path) type to the list - USE THIS WITH CARE!
+   void AddFileType(const std::string &type, const std::string &name);
 
 private:
    
@@ -300,7 +304,8 @@ private:
    
    std::string GetGmatPath(GmatPathType type, std::list<std::string> &pathList,
                            const std::string &name);
-   void AddFileType(const std::string &type, const std::string &name);
+
+   //   void AddFileType(const std::string &type, const std::string &name);
    void AddAvailablePotentialFiles();
    void WriteHeader(std::ofstream &outStream);
    void WriteFiles(std::ofstream &outStream, const std::string &type);

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -129,37 +129,47 @@ Real SolverData::GetSolverReal(const std::string& str)
 {
    Real retval = -3.0;
 
-   if (str == "State")
+   if (mSolver == NULL)
+      //Find the solver to use
+      GetSolver();
+
+   if (mSolver)
    {
-      Integer status = mSolver->GetIntegerParameter(
-            mSolver->GetParameterID("SolverStatus"));
 
-      switch (status)
+      if (str == "State")
       {
-      case Solver::CREATED:
-      case Solver::COPIED:
-      case Solver::INITIALIZED:
-      case Solver::RUN:
-         retval = 0.0;
-         break;
+         Integer status = mSolver->GetIntegerParameter(
+               mSolver->GetParameterID("SolverStatus"));
+  
+         switch (status)
+         {
+         case Solver::CREATED:
+         case Solver::COPIED:
+         case Solver::INITIALIZED:
+         case Solver::RUN:
+            retval = 0.0;
+            break;
 
-      case Solver::CONVERGED:
-         retval = 1.0;
-         break;
+         case Solver::CONVERGED:
+            retval = 1.0;
+            break;
 
-      case Solver::EXCEEDED_ITERATIONS:
-         retval = -1.0;
-         break;
+         case Solver::EXCEEDED_ITERATIONS:
+            retval = -1.0;
+            break;
 
-      case Solver::FAILED:
-         retval = -2.0;
-         break;
+         case Solver::FAILED:
+            retval = -2.0;
+            break;
 
-      case Solver::UNKNOWN_STATUS:
-      default:
-         break;
+         case Solver::UNKNOWN_STATUS:
+         default:
+            break;
+         }
       }
    }
+   else
+      retval = -4.0;
 
    return retval;
 }
@@ -180,46 +190,57 @@ std::string SolverData::GetSolverString(const std::string &str)
    std::string retval = SOLVER_STRING_UNDEFINED;
 
    if (mSolver == NULL)
-      throw ParameterException("Solver object not set");
+      //throw ParameterException("Solver object not set");
+      //Find the solver to use
+      GetSolver();
 
-   if (str == "Status")
+   if (mSolver)
    {
-      Integer status = mSolver->GetIntegerParameter(
-            mSolver->GetParameterID("SolverStatus"));
 
-      switch (status)
-      {
-      case Solver::CREATED:
-      case Solver::COPIED:
-         retval = "Ready";
-         break;
+	   if (str == "Status")
+	   {
+	      Integer status = mSolver->GetIntegerParameter(
+	            mSolver->GetParameterID("SolverStatus"));
 
-      case Solver::INITIALIZED:
-         retval = "Initialized";
-         break;
+	      switch (status)
+	      {
+	      case Solver::CREATED:
+	      case Solver::COPIED:
+	         retval = "Ready";
+	         break;
 
-      case Solver::RUN:
-         retval = "Running";
-         break;
+	      case Solver::INITIALIZED:
+	         retval = "Initialized";
+	         break;
 
-      case Solver::CONVERGED:
-         retval = "Converged";
-         break;
+	      case Solver::RUN:
+	         retval = "Running";
+	         break;
 
-      case Solver::EXCEEDED_ITERATIONS:
-         retval = "ExceededIterations";
-         break;
+	      case Solver::CONVERGED:
+	         retval = "Converged";
+	         break;
 
-      case Solver::FAILED:
-         retval = "DidNotConverge";
-         break;
+	      case Solver::EXCEEDED_ITERATIONS:
+	         retval = "ExceededIterations";
+	         break;
 
-      case Solver::UNKNOWN_STATUS:
-      default:
-         break;
-      }
+	      case Solver::FAILED:
+	         retval = "DidNotConverge";
+	         break;
+
+	      case Solver::UNKNOWN_STATUS:
+	      default:
+	         break;
+	      }
+	   }
+
+   }
+   else {
+      retval = "SolverNotFound";
    }
 
+   solverStatuses.push_back(retval);
    return retval;
 }
 
@@ -321,7 +342,29 @@ bool SolverData::AddRefObject(const UnsignedInt type, const std::string &name,
                            GmatBase *obj, bool replaceName)
 {
    if (type == Gmat::SOLVER)
-      mSolver = (Solver*)obj;
+   {
+      //instead of having msolver be a single pointer, maybe have a collection of pointers and go to see which changed
+      //mSolver = (Solver*)obj;
+      mSolver = NULL;
+      mSolvers.push_back((Solver*) obj);
+      //solverStatuses.push_back()
+      //MessageInterface::ShowMessage("In SolverData %p, adding %s at %p\n", this, name.c_str(), obj);
+   }
 
    return RefData::AddRefObject(type, name, obj, replaceName);
+}
+
+void SolverData::GetSolver()
+{
+   for (int i = mSolvers.size() - 1; i>=0; --i)
+   {
+      if (mSolvers[i]->GetIntegerParameter(mSolvers[i]->GetParameterID("SolverStatus")) != Solver::INITIALIZED)
+      {
+         mSolver = mSolvers[i];
+         break;
+      }
+   }
+   if (mSolver == NULL && mSolvers.size() > 0)
+      mSolver = mSolvers[0];
+   mSolvers.clear();
 }

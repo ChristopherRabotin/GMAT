@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -121,7 +121,7 @@ AdamsBashforthMoulton AdamsBashforthMoulton::operator=(
 
 
 //------------------------------------------------------------------------------
-// Propagator* Clone() const
+// GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * Method used to create a copy of the object
@@ -129,7 +129,7 @@ AdamsBashforthMoulton AdamsBashforthMoulton::operator=(
  * @return A clone of this instance
  */
 //------------------------------------------------------------------------------
-Propagator* AdamsBashforthMoulton::Clone() const
+GmatBase* AdamsBashforthMoulton::Clone() const
 {
    return new AdamsBashforthMoulton(*this);
 }

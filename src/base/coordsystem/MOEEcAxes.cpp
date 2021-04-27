@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -125,8 +125,8 @@ bool MOEEcAxes::Initialize()
    InertialAxes::Initialize();
 
    // convert epoch (A1 MJD) to TT MJD (for calculations)
-   Real mjdTT = TimeConverterUtil::Convert(epoch.Get(),
-                 TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
+   Real mjdTT = theTimeConverter->Convert(epoch.Get(),
+                 TimeSystemConverter::A1MJD, TimeSystemConverter::TTMJD,
                  GmatTimeConstants::JD_JAN_5_1941);      
 
    // Compute Julian centuries of TDB from the base epoch (J2000) 

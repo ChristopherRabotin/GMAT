@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2016 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -55,7 +55,7 @@ public:
    MatData& operator=(const MatData &md);
 
    virtual void WriteData(MATFile *pmat, const std::string &obj_name,
-         mxArray *mat_struct) = 0;
+         mxArray *mat_struct, mwIndex index) = 0;
 
 protected:
    // Buffered data so WriteData() can call to the parameterized version
@@ -65,6 +65,9 @@ protected:
    std::string obj_name;
    /// MATLAB data structure that contains the container receiving data
    mxArray *mat_struct;
+
+   /// Number of dimensions in the array
+   UnsignedInt numDim;
 };
 
 #endif

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -47,6 +47,9 @@ public:
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
+
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const std::string &label) const;
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
@@ -115,6 +118,8 @@ protected:
    Real          biasSigma;                     // specify bias sigma of a measurement
    /// Solve-for parameters
    StringArray   solveforNames;                 // It contains a name list of solve-for parameters
+   /// ErrorModel ID
+   std::string   modelId;                       // Similar to the instanceName, but uses object ids instead of object names
 
    /// Class parameter ID enumeration
    enum
@@ -127,6 +132,7 @@ protected:
       BIAS,
       BIAS_SIGMA,
       SOLVEFORS,
+      MODEL_ID,
       ErrorModelParamCount
    };
 
@@ -140,8 +146,8 @@ protected:
 
 private:
    StringArray    GetAllAvailableTypes();
-   std::string    CheckTypeDeprecation(const std::string datatype);
-   std::map<std::string, std::string> depTypeMap;
+//   std::string    CheckTypeDeprecation(const std::string datatype);
+//   std::map<std::string, std::string> depTypeMap;
 };
 
 #endif /* ErrorModel_hpp */

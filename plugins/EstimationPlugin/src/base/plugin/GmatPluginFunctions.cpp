@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -36,12 +36,9 @@
 
 #include "EstimatorFactory.hpp"
 #include "EstimationCommandFactory.hpp"
-#include "MeasurementFactory.hpp"
 #include "MeasurementModelFactory.hpp"
-#include "EventFactory.hpp"
+//#include "EventFactory.hpp"                           // made changes by TUAN NGUYEN
 #include "EstimatorHardwareFactory.hpp"
-#include "TrackingSystemFactory.hpp"
-#include "TrackingDataFactory.hpp"
 #include "ErrorModelFactory.hpp"
 #include "EstimationDataFilterFactory.hpp"
 #include "NavPropagatorFactory.hpp"
@@ -68,9 +65,9 @@ extern "C"
    Integer GetFactoryCount()
    {
 	   #ifdef USE_DATAFILE_PLUGIN
-   	   return 11;
+   	   return 10;
    	#else 
-   		return 13;
+   		return 8;
       #endif
    }
 
@@ -114,47 +111,41 @@ extern "C"
             break;
 
          case 2:
-            factory = new MeasurementFactory;
-            break;
-
-         case 3:
             factory = new MeasurementModelFactory;
             break;
 
-         case 4:
-            factory = new EventFactory;
-            break;
+         //case 3:
+         //   factory = new EventFactory;
+         //   break;
 
-         case 5:
+         //case 4:
+         case 3:
             factory = new EstimatorHardwareFactory;
             break;
 
-         case 6:
-            factory = new TrackingSystemFactory;
-            break;
-
-         case 7:
-            factory = new TrackingDataFactory;
-            break;
-
-         case 8:
+         //case 5:
+         case 4:
             factory = new EstimationDataFilterFactory;
             break;
 
-         case 9:
+         //case 6:
+         case 5:
             factory = new ErrorModelFactory;
             break;
 
-         case 10:
+         //case 7:
+         case 6:
             factory = new NavPropagatorFactory;
             break;
 
          #ifndef USE_DATAFILE_PLUGIN
-            case 11:
+            //case 8:
+            case 7:
                factory = new DataFileFactory;
                break;
 
-            case 12:
+            //case 9:
+            case 8:
                factory = new ObTypeFactory;
                break;
          #endif

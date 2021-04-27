@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -833,11 +833,6 @@ void MdiChildTsFrame::RedrawCurve()
       #endif
       
       mXyPlot->Update();
-      
-      // On linux, this call gives the GUI a time slice to update the plot
-      #ifdef __WXGTK__
-         ::wxYield();
-      #endif
    }
    #ifdef DEBUG_REDRAW_CURVE
    MessageInterface::ShowMessage("==========> MdiChildTsFrame::RedrawCurve() leaving\n");

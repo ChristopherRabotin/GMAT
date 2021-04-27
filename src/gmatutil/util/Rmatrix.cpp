@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -44,6 +44,8 @@
 //#define DEBUG_DETERMINANT
 //#define DEBUG_MULTIPLY
 //#define DEBUG_DIVIDE
+
+template class TableTemplate<Real>;
 
 //---------------------------------
 //  public
@@ -1109,7 +1111,7 @@ Rmatrix Rmatrix::Inverse(Real zeroValue) const  //ekf mod 12/16 added Real zeroV
    {
       for (Integer j = i; j < A.GetNumColumns(); ++j)
       {
-         if ((i != j) && (A.GetElement(i, j) != 0.0))
+         if ((i != j) && (A.GetElement(i, j) != 0.0 || A.GetElement(j, i) != 0.0))
          {
             isDiagonal = false;
             break;

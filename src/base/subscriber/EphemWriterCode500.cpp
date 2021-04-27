@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -225,9 +225,9 @@ void EphemWriterCode500::Copy(const EphemerisWriter* orig)
 //--------------------------------------
 
 //------------------------------------------------------------------------------
-// void BufferOrbitData(Real epochInDays, const Real state[6])
+// void BufferOrbitData(Real epochInDays, const Real state[6], const Real cov[21])
 //------------------------------------------------------------------------------
-void EphemWriterCode500::BufferOrbitData(Real epochInDays, const Real state[6])
+void EphemWriterCode500::BufferOrbitData(Real epochInDays, const Real state[6], const Real cov[21])
 {
    #ifdef DEBUG_EPHEMFILE_BUFFER
    MessageInterface::ShowMessage
@@ -255,13 +255,14 @@ void EphemWriterCode500::BufferOrbitData(Real epochInDays, const Real state[6])
 
 //------------------------------------------------------------------------------
 // void CreateEphemerisFile(bool useDefaultFileName, const std::string &stType,
-//                          const std::string &outFormat))
+//                          const std::string &outFormat, const std::string &covFormat)
 //------------------------------------------------------------------------------
 void EphemWriterCode500::CreateEphemerisFile(bool useDefaultFileName,
                                              const std::string &stType,
-                                             const std::string &outFormat)
+                                             const std::string &outFormat,
+                                             const std::string &covFormat)
 {
-   EphemerisWriter::CreateEphemerisFile(useDefaultFileName, stType, outFormat);
+   EphemerisWriter::CreateEphemerisFile(useDefaultFileName, stType, outFormat, covFormat);
    CreateCode500EphemerisFile();
    isEphemFileOpened = true;
 }
@@ -402,7 +403,7 @@ void EphemWriterCode500::HandleOrbitData()
    #endif
    
    // Check if it is time to write
-   bool timeToWrite = IsTimeToWrite(currEpochInSecs, currState);
+   bool timeToWrite = IsTimeToWrite(currEpochInSecs, currState, currCov);
    
    #if DBGLVL_EPHEMFILE_DATA > 0
    MessageInterface::ShowMessage

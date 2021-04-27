@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -98,6 +98,8 @@ public:
    virtual const StringArray&
                         GetStringArrayParameter(const std::string &label) const;
    
+   virtual void         SetOutputName(const std::string &outputName);
+
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
 
@@ -136,7 +138,7 @@ protected:
       FUNCTION_NAME,
       FUNCTION_INPUT,
       FUNCTION_OUTPUT,
-      FunctionParamCount  /// Count of the parameters for this class
+      FunctionParamCount  ///< Count of the parameters for this class
    };
    
    static const std::string

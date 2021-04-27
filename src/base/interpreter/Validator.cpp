@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -50,6 +50,7 @@
 #include "ObjectWrapper.hpp"
 #include "StringUtil.hpp"               // for GmatStringUtil::
 #include "Assignment.hpp"
+#include "RHSEquation.hpp"
 #include "ParameterInfo.hpp"            // for IsSettable()
 #include "UserDefinedFunction.hpp"    // for AddAutomaticObject()
 
@@ -345,9 +346,16 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError/*,
                   #endif
                   if (!theInterpreter->IsObjectType(refNames[j]))
                   {
+                     std::string itsType =
+                          GmatBase::GetObjectTypeString(refTypes[i]);
+                     // if the object type is not in the list (e.g. the
+                     // type is in a plugin), get the refType instead
+                     if (itsType == "")
+                        itsType = GmatType::GetTypeName(refTypes[i]);
                      theErrorMsg = "Nonexistent " +
-                        GmatBase::GetObjectTypeString(refTypes[i]) +
+                        itsType +
                         " \"" + refNames[j] + "\" referenced in the " + objName;
+
                      retval = HandleError() && retval;
                   }
                }
@@ -356,7 +364,7 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError/*,
                   #ifdef DEBUG_CHECK_OBJECT
                   MessageInterface::ShowMessage
                      ("refObj->IsOfType(refTypes[i])=%d, %s\n", refTypes[i],
-                      GmatBase::GetObjectTypeString(refTypes[i]).c_str());
+                        GmatType::GetTypeName(refTypes[i]).c_str());
                   #endif
                   
                   if (includeOwnedObjects)
@@ -373,14 +381,14 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError/*,
                         theErrorMsg = "\"" + refNames[j] +
                            "\" referenced in the " + objName + " is not an "
                            "object of type " +
-                           GmatBase::GetObjectTypeString(refTypes[i]) +
+                           GmatType::GetTypeName(refTypes[i]) +
                            " and does not reference such objects";
                         retval = HandleError() && retval;
                      }
                   }
                   else
                   {
-                     std::string rType = GmatBase::GetObjectTypeString(refTypes[i]);
+                     std::string rType = GmatType::GetTypeName(refTypes[i]);
                      if (rType == "SpacePoint")
                         rType += " (for example, Spacecraft, CelestialBody, etc.)";
                      theErrorMsg = "\"" + refNames[j] + "\" referenced in the " + objName +
@@ -416,7 +424,7 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError/*,
    #ifdef DEBUG_CHECK_OBJECT
    MessageInterface::ShowMessage
       ("Validator::CheckUndefinedReference() validatorErrorList.size()=%s, returning %d\n",
-       validatorErrorList.size(), (retval? "true" : "false"));
+        (retval? "true" : "false"), validatorErrorList.size());
    #endif
    
    return retval;
@@ -661,6 +669,26 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// bool ValidateEquation(RHSEquation *eq)
+//------------------------------------------------------------------------------
+/**
+ * Ensures that an equation is properly formed
+ *
+ * @param eq The equation object, containing a constructed MathTree
+ *
+ * @return true if the equation is ready for use, false if not
+ */
+//------------------------------------------------------------------------------
+bool Validator::ValidateEquation(RHSEquation *eq)
+{
+//   bool retval = false;
+
+   bool retval = CreateEquationWrappers(eq);
+
+   return retval;
+}
+
 
 //------------------------------------------------------------------------------
 // void HandleCcsdsEphemerisFile(ObjectMap *objMap, bool deleteOld = false)
@@ -822,7 +850,8 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
                   // Check if it is string function call such as: sprintf('arr33 = [%s]', arr33)
                   // Figure out how to get list of builtin functions (LOJ: 2016.03.04)
                   #if DBGLVL_WRAPPERS > 1
-                  MessageInterface::ShowMessage("   Check if it is string function call\n");
+                  MessageInterface::ShowMessage("   Check if '%s' is string function call\n",
+                        theDescription.c_str());
                   #endif
                   bool isValid = GmatStringUtil::IsValidFunctionCall(theDescription);
                   if (!isValid)
@@ -1219,7 +1248,7 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
          createDefaultStringWrapper = false;
       else
       {
-         // Check if left is ParameterWapper and it is a time parameter returing
+         // Check if left is ParameterWapper and it is a time parameter returning
          // string, such as Gregorian time, do not create default string wrapper
          // NOTE: This may break GmatFunction since all scripts in the function
          // will be assignment command and some objects can be created later in
@@ -1540,6 +1569,80 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
    
    return retval;
 }
+
+
+//------------------------------------------------------------------------------
+// bool CreateEquationWrappers(RHSEquation *eqn)
+//------------------------------------------------------------------------------
+/**
+ * Build the wrappers needed for an equation
+ *
+ * @param eqn The RHSEquation object that needs wrapper code
+ *
+ * @return true on success
+ */
+//------------------------------------------------------------------------------
+bool Validator::CreateEquationWrappers(RHSEquation *eqn)
+{
+   bool retval = true;
+   StringArray wrapperNames = eqn->GetWrapperObjectNames();
+
+   for (StringArray::const_iterator i = wrapperNames.begin();
+        i != wrapperNames.end(); ++i)
+   {
+      std::string origVal = (*i);
+
+      std::string name = origVal;
+      bool addedQuotes = false;
+      ElementWrapper* rightEw;
+
+      if (name != "")
+      {
+         try
+         {
+            if (IsParameterType(name))
+               rightEw = CreateElementWrapper(name, true, 0);
+            else
+               rightEw = CreateElementWrapper(name, false, 0);
+
+            std::string strToUse = name;
+            if (addedQuotes)
+               strToUse = origVal;
+
+            if (rightEw)
+            {
+               retval = eqn->SetElementWrapper(rightEw, strToUse);
+               if (retval == false)
+               {
+                  theErrorMsg = "Failed to set ElementWrapper for equation "
+                        "setting \"" + strToUse + "\" in an equation";
+                  return HandleError();
+               }
+            }
+            else
+            {
+               retval = false;
+               break;
+            }
+         }
+         catch (BaseException &ex)
+         {
+            theErrorMsg = ex.GetFullMessage();
+            // remove 'Interpreter Exception:' part of message (to avoid duplicates)
+            theErrorMsg = GmatStringUtil::Replace(theErrorMsg,
+                          "Interpreter Exception: ", "");
+            return HandleError(false);
+         }
+      }
+   }
+
+   // Set math wrappers to math tree
+   if (retval)
+      eqn->SetMathWrappers();
+
+   return retval;
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -2623,7 +2726,7 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
    // e.g. Sat.Thruster1.K1
    if (numberOfDots > 1)
    {
-      // See if reallay create a ParameterWrapper first, there are a few exceptions.
+      // See if really create a ParameterWrapper first, there are a few exceptions.
       bool paramFirst = true;
       if (parametersFirst)
       {
@@ -2684,7 +2787,7 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
          #if DBGLVL_WRAPPERS > 1
          MessageInterface::ShowMessage
             ("   depType=%d, ownedObjType=%d(%s)\n", depType, ownedObjType,
-             GmatBase::GetObjectTypeString(ownedObjType).c_str());
+             GmatType::GetTypeName(ownedObjType).c_str());
          #endif
          
          if (depType == GmatParam::NO_DEP)
@@ -3315,7 +3418,7 @@ bool Validator::ValidateSaveCommand(GmatBase *obj)
    #ifdef DEBUG_VALIDATE_COMMAND
    for (UnsignedInt i=0; i<refTypes.size(); i++)
       MessageInterface::ShowMessage
-         ("   %s\n", GmatBase::GetObjectTypeString(refTypes[i]).c_str());
+         ("   %s\n", GmatType::GetTypeName(refTypes[i]).c_str());
    #endif
    
    StringArray refNames = obj->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);

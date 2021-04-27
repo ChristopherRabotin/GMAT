@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -174,17 +174,17 @@ SlpFile::~SlpFile()
 //------------------------------------------------------------------------------
 Integer SlpFile::GetBodyID(std::string bodyName)
 {
-   if (bodyName == SolarSystem::SUN_NAME)     return SlpFile::SUN_ID;
-   if (bodyName == SolarSystem::MERCURY_NAME) return SlpFile::MERCURY_ID;
-   if (bodyName == SolarSystem::VENUS_NAME)   return SlpFile::VENUS_ID;
-   if (bodyName == SolarSystem::EARTH_NAME)   return SlpFile::EARTH_ID;
-   if (bodyName == SolarSystem::MOON_NAME)    return SlpFile::MOON_ID;
-   if (bodyName == SolarSystem::MARS_NAME)    return SlpFile::MARS_ID;
-   if (bodyName == SolarSystem::JUPITER_NAME) return SlpFile::JUPITER_ID;
-   if (bodyName == SolarSystem::SATURN_NAME)  return SlpFile::SATURN_ID;
-   if (bodyName == SolarSystem::URANUS_NAME)  return SlpFile::URANUS_ID;
-   if (bodyName == SolarSystem::NEPTUNE_NAME) return SlpFile::NEPTUNE_ID;
-   if (bodyName == SolarSystem::PLUTO_NAME)   return SlpFile::PLUTO_ID;
+   if (bodyName == GmatSolarSystemDefaults::SUN_NAME)     return SlpFile::SUN_ID;
+   if (bodyName == GmatSolarSystemDefaults::MERCURY_NAME) return SlpFile::MERCURY_ID;
+   if (bodyName == GmatSolarSystemDefaults::VENUS_NAME)   return SlpFile::VENUS_ID;
+   if (bodyName == GmatSolarSystemDefaults::EARTH_NAME)   return SlpFile::EARTH_ID;
+   if (bodyName == GmatSolarSystemDefaults::MOON_NAME)    return SlpFile::MOON_ID;
+   if (bodyName == GmatSolarSystemDefaults::MARS_NAME)    return SlpFile::MARS_ID;
+   if (bodyName == GmatSolarSystemDefaults::JUPITER_NAME) return SlpFile::JUPITER_ID;
+   if (bodyName == GmatSolarSystemDefaults::SATURN_NAME)  return SlpFile::SATURN_ID;
+   if (bodyName == GmatSolarSystemDefaults::URANUS_NAME)  return SlpFile::URANUS_ID;
+   if (bodyName == GmatSolarSystemDefaults::NEPTUNE_NAME) return SlpFile::NEPTUNE_ID;
+   if (bodyName == GmatSolarSystemDefaults::PLUTO_NAME)   return SlpFile::PLUTO_ID;
 
    return -1;
 }
@@ -1198,22 +1198,22 @@ int SlpFile::a1_utc_offset(double refmjd, double *a1utc, double *ut1utc, double 
  
    // interpolations
    // 20.02.06 - arg: changed to use enum types instead of strings
-//   Real mjdA1  = TimeConverterUtil::Convert(refmjd,
+//   Real mjdA1  = theTimeConverter->Convert(refmjd,
 //                 "UtcMjd", "A1Mjd", GmatTimeConstants::JD_JAN_5_1941);
-   Real mjdA1  = TimeConverterUtil::Convert(refmjd,
-                 TimeConverterUtil::UTCMJD, TimeConverterUtil::A1MJD, 
+   Real mjdA1  = theTimeConverter->Convert(refmjd,
+                 TimeSystemConverter::UTCMJD, TimeSystemConverter::A1MJD,
                  GmatTimeConstants::JD_JAN_5_1941);
    *a1utc      = (mjdA1 - refmjd) * GmatTimeConstants::SECS_PER_DAY;
-//   Real mjdUT1 = TimeConverterUtil::Convert(refmjd,
+//   Real mjdUT1 = theTimeConverter->Convert(refmjd,
 //                 "UtcMjd", "Ut1Mjd", GmatTimeConstants::JD_JAN_5_1941);
-   Real mjdUT1 = TimeConverterUtil::Convert(refmjd,
-                 TimeConverterUtil::UTCMJD, TimeConverterUtil::UT1MJD, 
+   Real mjdUT1 = theTimeConverter->Convert(refmjd,
+                 TimeSystemConverter::UTCMJD, TimeSystemConverter::UT1MJD,
                  GmatTimeConstants::JD_JAN_5_1941);
    *ut1utc     = (mjdUT1 - refmjd) * GmatTimeConstants::SECS_PER_DAY;
-//   Real mjdTT  = TimeConverterUtil::Convert(refmjd,
+//   Real mjdTT  = theTimeConverter->Convert(refmjd,
 //                 "UtcMjd", "TtMjd", GmatTimeConstants::JD_JAN_5_1941);
-   Real mjdTT  = TimeConverterUtil::Convert(refmjd,
-                 TimeConverterUtil::UTCMJD, TimeConverterUtil::TTMJD, 
+   Real mjdTT  = theTimeConverter->Convert(refmjd,
+                 TimeSystemConverter::UTCMJD, TimeSystemConverter::TTMJD,
                  GmatTimeConstants::JD_JAN_5_1941);
    *tdtutc     = (mjdTT - refmjd) * GmatTimeConstants::SECS_PER_DAY;
    return 0;

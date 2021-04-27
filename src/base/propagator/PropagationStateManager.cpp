@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -399,15 +399,18 @@ bool PropagationStateManager::BuildState()
    std::string name;
    for (Integer index = 0; index < stateSize; ++index)
    {
-      name = stateMap[index]->objectName;
-      if (associateMap.find(name) == associateMap.end())
-         associateMap[name] = index;
+      // name = stateMap[index]->objectName;                         // made changes by TUAN NGUYEN
+		name = stateMap[index]->objectFullName;                        // made changes by TUAN NGUYEN
+		if (associateMap.find(name) == associateMap.end())
+			associateMap[name] = index;
    }   
    
    state.SetSize(stateSize);
+
    for (Integer index = 0; index < stateSize; ++index)
    {
-      name = stateMap[index]->objectName;
+      // name = stateMap[index]->objectName;                         // made changes by TUAN NGUYEN
+		name = stateMap[index]->objectFullName;                        // made changes by TUAN NGUYEN
       std::stringstream sel("");
       sel << stateMap[index]->subelement;
       state.SetElementProperties(index, stateMap[index]->elementID, 
@@ -448,16 +451,16 @@ bool PropagationStateManager::BuildState()
 bool PropagationStateManager::MapObjectsToVector()
 {
    #ifdef DEBUG_OBJECT_UPDATES
-      MessageInterface::ShowMessage("Mapping objects to vector\n");
+		MessageInterface::ShowMessage("Mapping objects to vector\n");
 
-      // Look at state data before
-      MessageInterface::ShowMessage("O -> V: Real object data before: [");
-      for (Integer index = 0; index < stateSize; ++index)
-         if (stateMap[index]->parameterType ==  Gmat::REAL_TYPE)
-            MessageInterface::ShowMessage(" %lf ",
-                  (stateMap[index]->object)->GetRealParameter(
-                        stateMap[index]->parameterID));
-      MessageInterface::ShowMessage("]\n");
+		// Look at state data before
+		MessageInterface::ShowMessage("O -> V: Real object data before: [");
+		for (Integer index = 0; index < stateSize; ++index)
+			if (stateMap[index]->parameterType == Gmat::REAL_TYPE)
+				MessageInterface::ShowMessage(" %.12le ",
+				(stateMap[index]->object)->GetRealParameter(
+					stateMap[index]->parameterID));
+		MessageInterface::ShowMessage("]\n");
    #endif
 
    Real value;
@@ -561,27 +564,27 @@ bool PropagationStateManager::MapObjectsToVector()
    }
    
    #ifdef DEBUG_OBJECT_UPDATES
-      MessageInterface::ShowMessage(
-            "After mapping %d objects to vector, contents are\n"
-            "   Epoch = %.12lf\n", objects.size(), state.GetEpoch());
-      for (Integer index = 0; index < stateSize; ++index)
-      {
-         std::stringstream msg("");
-         msg << stateMap[index]->subelement;
-         std::string lbl = stateMap[index]->objectName + "." + 
-            stateMap[index]->elementName + "." + msg.str() + " = ";
-         MessageInterface::ShowMessage("   %d: %s%.12lf\n", index, lbl.c_str(), 
-               state[index]);
-      }
+		MessageInterface::ShowMessage(
+			"After mapping %d objects to vector, contents are\n"
+			"   Epoch = %.12le\n", objects.size(), state.GetEpoch());
+		for (Integer index = 0; index < stateSize; ++index)
+		{
+			std::stringstream msg("");
+			msg << stateMap[index]->subelement;
+			std::string lbl = stateMap[index]->objectName + "." +
+				stateMap[index]->elementName + "." + msg.str() + " = ";
+			MessageInterface::ShowMessage("   %d: %s%.12le\n", index, lbl.c_str(),
+				state[index]);
+		}
 
-      // Look at state data after
-      MessageInterface::ShowMessage("Real object data after: [");
-      for (Integer index = 0; index < stateSize; ++index)
-         if (stateMap[index]->parameterType ==  Gmat::REAL_TYPE)
-            MessageInterface::ShowMessage(" %lf ",
-                  (stateMap[index]->object)->GetRealParameter(
-                        stateMap[index]->parameterID));
-      MessageInterface::ShowMessage("]\n");
+		// Look at state data after
+		MessageInterface::ShowMessage("Real object data after: [");
+		for (Integer index = 0; index < stateSize; ++index)
+			if (stateMap[index]->parameterType == Gmat::REAL_TYPE)
+				MessageInterface::ShowMessage(" %.12le ",
+				(stateMap[index]->object)->GetRealParameter(
+					stateMap[index]->parameterID));
+		MessageInterface::ShowMessage("]\n");
    #endif
 
    return true;
@@ -601,32 +604,32 @@ bool PropagationStateManager::MapObjectsToVector()
 bool PropagationStateManager::MapVectorToObjects()
 {
    #ifdef DEBUG_OBJECT_UPDATES
-      if (state.HasPrecisionTime())
-         MessageInterface::ShowMessage("Mapping vector to objects\n"
-            "   EpochGT = %s\n", state.GetEpochGT().ToString().c_str());
-      else
-         MessageInterface::ShowMessage("Mapping vector to objects\n"
-            "   Epoch = %.12lf\n", state.GetEpoch());
+		if (state.HasPrecisionTime())
+			MessageInterface::ShowMessage("Mapping vector to objects\n"
+				"   EpochGT = %s\n", state.GetEpochGT().ToString().c_str());
+		else
+			MessageInterface::ShowMessage("Mapping vector to objects\n"
+				"   Epoch = %.12lf\n", state.GetEpoch());
 
-      // Look at state data before
-      MessageInterface::ShowMessage("V -> O: Real object data before: [");
-      for (Integer index = 0; index < stateSize; ++index)
-         if (stateMap[index]->parameterType ==  Gmat::REAL_TYPE)
-            MessageInterface::ShowMessage(" %lf ",
-                  (stateMap[index]->object)->GetRealParameter(
-                        stateMap[index]->parameterID));
-      MessageInterface::ShowMessage("]\n");
+		// Look at state data before
+		MessageInterface::ShowMessage("V -> O: Real object data before: [");
+		for (Integer index = 0; index < stateSize; ++index)
+			if (stateMap[index]->parameterType == Gmat::REAL_TYPE)
+				MessageInterface::ShowMessage(" %.12le ",
+				(stateMap[index]->object)->GetRealParameter(
+					stateMap[index]->parameterID));
+		MessageInterface::ShowMessage("]\n");
    #endif
 
    for (Integer index = 0; index < stateSize; ++index)
    {
       #ifdef DEBUG_OBJECT_UPDATES
-         std::stringstream msg("");
-         msg << stateMap[index]->subelement;
-         std::string lbl = stateMap[index]->objectName + "." + 
-            stateMap[index]->elementName + "." + msg.str() + " = ";
-         MessageInterface::ShowMessage("   %d: %s%.12lf\n", index, lbl.c_str(), 
-               state[index]);
+			std::stringstream msg("");
+			msg << stateMap[index]->subelement;
+			std::string lbl = stateMap[index]->objectName + "." +
+				stateMap[index]->elementName + "." + msg.str() + " = ";
+			MessageInterface::ShowMessage("   %d: %s%.12le\n", index, lbl.c_str(),
+				state[index]);
       #endif
 
       switch (stateMap[index]->parameterType)
@@ -674,14 +677,14 @@ bool PropagationStateManager::MapVectorToObjects()
    }
 
    #ifdef DEBUG_OBJECT_UPDATES
-      // Look at object data after
-      MessageInterface::ShowMessage("Real object data after: [");
-      for (Integer index = 0; index < stateSize; ++index)
-         if (stateMap[index]->parameterType ==  Gmat::REAL_TYPE)
-            MessageInterface::ShowMessage(" %lf ",
-                  (stateMap[index]->object)->GetRealParameter(
-                        stateMap[index]->parameterID));
-      MessageInterface::ShowMessage("]\n");
+		// Look at object data after
+		MessageInterface::ShowMessage("Real object data after: [");
+		for (Integer index = 0; index < stateSize; ++index)
+			if (stateMap[index]->parameterType == Gmat::REAL_TYPE)
+				MessageInterface::ShowMessage(" %.12le ",
+				(stateMap[index]->object)->GetRealParameter(
+					stateMap[index]->parameterID));
+		MessageInterface::ShowMessage("]\n");
    #endif
 
    return true;
@@ -720,7 +723,7 @@ bool PropagationStateManager::ObjectEpochsMatch()
 {
    bool retval = true;
 
-   if (objects.size() > 0)
+   if (objects.size() > 1)
    {
       if (((SpacePoint*)objects[0])->HasPrecisionTime())
       {
@@ -828,20 +831,27 @@ Integer PropagationStateManager::GetCompletionSize(const Integer which)
 // Integer GetSTMIndex(Integer forParameterID)
 //------------------------------------------------------------------------------
 /**
- * Finds the STM row/column index for the ID'd parameter
+ * Finds the STM row/column index for the ID'd parameter of a given object
  *
- * @param forParameterID The ID of the parameter
+ * @param forParameterID    The ID of the parameter
+ * @param obj               the object having the parameter ID
  *
  * @return The STM row, or -1 if not in the STM
  */
 //------------------------------------------------------------------------------
-Integer PropagationStateManager::GetSTMIndex(Integer forParameterID)
+Integer PropagationStateManager::GetSTMIndex(Integer forParameterID, GmatBase* obj)
 {
    Integer retval = -1;
 
-   for (UnsignedInt i = 0; i < stmRowMap.size(); ++i)
+   for (UnsignedInt i = 0; i < stmRowMapID.size(); ++i)                           // made changes by TUAN NGUYEN
    {
-      if (stmRowMap[i] == forParameterID)
+      #ifdef DEBUG_STM
+         MessageInterface::ShowMessage("PSM %p, STM Row map %d, val = <id = %d, obj = %p> parm %d, "           // made changes by TUAN NGUYEN
+               "prop state size %d\n", this, i, stmRowMapID[i], stmRowMapObj[i], forParameterID,               // made changes by TUAN NGUYEN
+               stateSize);
+      #endif
+
+      if ((stmRowMapID[i] == forParameterID)&& ((stmRowMapObj[i] == obj)||(obj == NULL)))          // made changes by TUAN NGUYEN
       {
          retval = i;
          break;
@@ -900,25 +910,27 @@ Integer PropagationStateManager::SortVector()
       }
    #endif
 
-   // Sync up the STMs that are propagated
-   StringArray stmEntries;
-   for (UnsignedInt q = 0; q < objects.size(); ++q)
-   {
-      if (objects[q]->IsOfType(Gmat::SPACECRAFT))
-      {
-         StringArray currentSTMEntries = objects[q]->GetStringArrayParameter("StmElementNames");
-         for (UnsignedInt i = 0; i < currentSTMEntries.size(); ++i)
-         {
-            if (find(stmEntries.begin(), stmEntries.end(), currentSTMEntries[i]) == stmEntries.end())
-               stmEntries.push_back(currentSTMEntries[i]);
-         }
-      }
-   }
-   for (UnsignedInt q = 0; q < objects.size(); ++q)
-   {
-      for (UnsignedInt p = 0; p < stmEntries.size(); ++p)
-         objects[q]->SetStringParameter("StmElementNames", stmEntries[p]);
-   }
+	// made change by TUAN NGUYEN
+	// It does not need to sync up the STMs due to the code handles varied size of STMs
+   ////// Sync up the STMs that are propagated
+   ////StringArray stmEntries;
+   ////for (UnsignedInt q = 0; q < objects.size(); ++q)
+   ////{
+   ////   if (objects[q]->IsOfType(Gmat::SPACECRAFT))
+   ////   {
+   ////      StringArray currentSTMEntries = objects[q]->GetStringArrayParameter("StmElementNames");
+   ////      for (UnsignedInt i = 0; i < currentSTMEntries.size(); ++i)
+   ////      {
+   ////         if (find(stmEntries.begin(), stmEntries.end(), currentSTMEntries[i]) == stmEntries.end())
+   ////            stmEntries.push_back(currentSTMEntries[i]);
+   ////      }
+   ////   }
+   ////}
+   ////for (UnsignedInt q = 0; q < objects.size(); ++q)
+   ////{
+   ////   for (UnsignedInt p = 0; p < stmEntries.size(); ++p)
+   ////      objects[q]->SetStringParameter("StmElementNames", stmEntries[p]);
+   ////}
 
 
    // First build a list of the property IDs and objects, measuring state size 
@@ -955,6 +967,7 @@ Integer PropagationStateManager::SortVector()
             property.push_back(*j);
 
             // Put this item in the ordering list
+            bool found = false;
             oLoc = order.begin();
             while (oLoc != order.end())
             {
@@ -967,12 +980,13 @@ Integer PropagationStateManager::SortVector()
                   #endif
                      
                   order.insert(oLoc, loc);
+                  found = true;
                   break;
                }
                ++oLoc;
             }
-            if (oLoc == order.end())
-               order.push_back(loc);
+            if (!found)
+                order.push_back(loc);
             
             ++loc;
          }
@@ -983,7 +997,8 @@ Integer PropagationStateManager::SortVector()
    val = 0;
    completionIndexList.clear();
    completionSizeList.clear();
-   stmRowMap.clear();
+   stmRowMapID.clear();                                    // made changes by TUAN NGUYEN
+	stmRowMapObj.clear();                                   // made changes by TUAN NGUYEN
 
    #ifdef DEBUG_STATE_CONSTRUCTION
       MessageInterface::ShowMessage(
@@ -991,6 +1006,7 @@ Integer PropagationStateManager::SortVector()
    #endif
    
    // Next build the state
+   stateMap.clear();
    for (Integer i = 0; i < stateSize; ++i)
    {
       #ifdef DEBUG_STATE_CONSTRUCTION
@@ -1001,6 +1017,7 @@ Integer PropagationStateManager::SortVector()
 
       newItem = new ListItem;
       newItem->objectName  = owners[order[i]]->GetName();
+		newItem->objectFullName = owners[order[i]]->GetFullName();          // made changes by TUAN NGUYEN
       newItem->elementName = property[order[i]];
       if (owners[order[i]]->HasAssociatedStateObjects())
          newItem->associateName = owners[order[i]]->GetAssociateName(val);
@@ -1057,8 +1074,8 @@ Integer PropagationStateManager::SortVector()
          if ((newItem->elementID == Gmat::ORBIT_STATE_TRANSITION_MATRIX) &&
              (newItem->rowIndex == 0))
          {
-            stmRowMap.push_back(owners[order[i]]->GetStmRowId(newItem->colIndex));
-
+            stmRowMapID.push_back(owners[order[i]]->GetStmRowId(newItem->colIndex));      // made changes by TUAN NGUYEN
+				stmRowMapObj.push_back(owners[order[i]]);                                     // made changes by TUAN NGUYEN
             #ifdef DEBUG_STATE_CONSTRUCTION
                MessageInterface::ShowMessage("   STM column for %d\n",
                      stmRowMap[newItem->colIndex]);

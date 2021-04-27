@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -61,6 +61,8 @@
 #include "GmatConstants.hpp"
 #include "GmatDefaults.hpp"
 #include "PropagationStateManager.hpp"
+
+#define NPLATE_ANALYTICAL_SOLUTION                    // made changes by TUAN NGUYEN
 
 //#define DEBUG_SRP_ORIGIN
 //#define DEBUG_SOLAR_RADIATION_PRESSURE
@@ -136,10 +138,12 @@ const Real SolarRadiationPressure::NOMINAL_SUN_UPPER_BOUND   = 165.0e6;
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// SolarRadiationPressure::SolarRadiationPressure(const std::string &name)
+// SolarRadiationPressure(const std::string &name)
 //------------------------------------------------------------------------------
 /**
+ * Constructor
  * 
+ * @param name Name of the force object
  */
 //------------------------------------------------------------------------------
 SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
@@ -154,9 +158,10 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    forceVector         (NULL),
    sunRadius           (GmatSolarSystemDefaults::STAR_EQUATORIAL_RADIUS),
    hasMoons            (false),
-   flux                (1367.0),                  // W/m^2, IERS 1996
+   flux                (1367.0),                  // W/m, IERS 1996
    fluxPressure        (flux / GmatPhysicalConstants::c),   // converted to N/m^2
-   srpModel            ("Spherical"),
+   srpShapeModel       ("Spherical"),
+   srpShapeModelIndex  (ShapeModel::SPHERICAL_MODEL),    // made changes by TUAN NGUYEN
    sunDistance         (149597870.691),
    nominalSun          (149597870.691),
    bodyIsTheSun        (false),
@@ -169,22 +174,26 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    massID              (-1),
    crID                (-1),
    areaID              (-1),
-   estimatingCr        (false),
-   crEpsilonID         (-1),
-   crEpsilonRow        (-1)
+   //estimatingCr        (false),                       // made changes by TUAN NGUYEN
+   crEpsilonID         (-1)//,                          // made changes by TUAN NGUYEN
+   //crEpsilonRow        (-1)                           // made changes by TUAN NGUYEN
 {
    parameterCount = SRPParamCount;
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
    objectTypeNames.push_back("SolarRadiationPressure");
 
    shadowState = new ShadowState();
+   isConservative = false;
+   hasMassJacobian = true;
 }
 
 //------------------------------------------------------------------------------
 // SolarRadiationPressure(SolarRadiationPressure &srp)
 //------------------------------------------------------------------------------
 /**
+ * Copy constructor
  * 
+ * @param srp The force copied to this one.
  */
 //------------------------------------------------------------------------------
 SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp) :
@@ -195,16 +204,17 @@ SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp
    shadowModel         (srp.shadowModel),
    vectorModel         (srp.vectorModel),
    bodyRadius          (srp.bodyRadius),
-   cbSunVector         (srp.cbSunVector),
-   forceVector         (srp.forceVector),
+   cbSunVector         (NULL),
+   forceVector         (NULL),
    sunRadius           (srp.sunRadius),
    hasMoons            (srp.hasMoons),
    cr                  (srp.cr),
    area                (srp.area),
    mass                (srp.mass),
-   flux                (srp.flux),           // W/m^2, IERS 1996
+   flux                (srp.flux),           // W/m, IERS 1996
    fluxPressure        (srp.fluxPressure),   // converted to N/m^2
-   srpModel            (srp.srpModel),
+   srpShapeModel       (srp.srpShapeModel),
+   srpShapeModelIndex  (srp.srpShapeModelIndex),         // made changes by TUAN NGUYEN
    sunDistance         (srp.sunDistance),
    nominalSun          (srp.nominalSun),
    bodyIsTheSun        (srp.bodyIsTheSun),
@@ -217,20 +227,27 @@ SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp
    massID              (srp.massID),
    crID                (srp.crID),
    areaID              (srp.areaID),
-   estimatingCr        (srp.estimatingCr),
+   //estimatingCr        (srp.estimatingCr),             // made changes by TUAN NGUYEN
    crEpsilonID         (srp.crEpsilonID),
-   crEpsilonRow        (srp.crEpsilonRow),
-   crInitial           (srp.crInitial)
+   //crEpsilonRow        (srp.crEpsilonRow),
+   crEpsilon           (srp.crEpsilon)              // made changes by TUAN NGUYEN
+   //crInitial           (srp.crInitial)            // made changes by TUAN NGUYEN
 {
    parameterCount = SRPParamCount;
    shadowState = new ShadowState();
+
+   isInitialized = false;
 }
 
 //------------------------------------------------------------------------------
 // SolarRadiationPressure& operator=(SolarRadiationPressure &srp)
 //------------------------------------------------------------------------------
 /**
+ * Assignment operator
  * 
+ * @param srp The force passing values to this one
+ *
+ * @return This SRP force, set to match the srp input model
  */
 //------------------------------------------------------------------------------
 SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPressure &srp)
@@ -243,17 +260,18 @@ SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPr
       shadowModel  = srp.shadowModel;
       vectorModel  = srp.vectorModel;
       bodyRadius   = srp.bodyRadius;
-      cbSunVector  = srp.cbSunVector;
-      forceVector  = srp.forceVector;
+      cbSunVector  = NULL;
+      forceVector  = NULL;
       sunRadius    = srp.sunRadius;
       hasMoons     = srp.hasMoons;
       cr           = srp.cr;
       area         = srp.area;
       mass         = srp.mass;
-      scObjs       = srp.scObjs;
+      //scObjs       = srp.scObjs;                              // made changes by TUAN NGUYEN
       flux         = srp.flux;           // W/m^2, IERS 1996
       fluxPressure = srp.fluxPressure;   // converted to N/m^2
-      srpModel     = srp.srpModel;
+      srpShapeModel = srp.srpShapeModel;
+      srpShapeModelIndex = srp.srpShapeModelIndex;              // made changes by TUAN NGUYEN
       sunDistance  = srp.sunDistance;
       nominalSun   = srp.nominalSun;
       bodyIsTheSun = srp.bodyIsTheSun;
@@ -268,10 +286,11 @@ SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPr
       crID         = srp.crID;
       areaID       = srp.areaID;
 
-      estimatingCr = srp.estimatingCr;
+      //estimatingCr = srp.estimatingCr;                    // made changes by TUAN NGUYEN
       crEpsilonID  = srp.crEpsilonID;
-      crEpsilonRow = srp.crEpsilonRow;
-      crInitial    = srp.crInitial;
+      //crEpsilonRow = srp.crEpsilonRow;
+      crEpsilon    = srp.crEpsilon;
+      //crInitial    = srp.crInitial;                  // made changes by TUAN NGUYEN
 
       if (shadowState)
       {
@@ -280,6 +299,8 @@ SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPr
       }
 
       shadowState           = new ShadowState();
+
+      isInitialized = false;
 }
    
    return *this;
@@ -615,7 +636,7 @@ Integer SolarRadiationPressure::SetIntegerParameter(const Integer id, const Inte
 
 std::string SolarRadiationPressure::GetStringParameter(const Integer id) const
 {
-   if (id == SRP_MODEL)  return srpModel;
+   if (id == SRP_MODEL)  return srpShapeModel;
 
    return PhysicalModel::GetStringParameter(id);
 }
@@ -630,7 +651,8 @@ bool SolarRadiationPressure::SetStringParameter(const Integer id,
 {
    if (id == SRP_MODEL)
    {
-      if ((value != "Spherical") && (value != "SPADFile"))
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      if ((value == "NPlate") && (runmode != GmatGlobal::TESTING && runmode != GmatGlobal::TESTING_NO_PLOTS))
       {
          ODEModelException odee("");
          odee.SetDetails(errorMessageFormat.c_str(),
@@ -638,7 +660,25 @@ bool SolarRadiationPressure::SetStringParameter(const Integer id,
                         "SrpModel", "\"Spherical\" or \"SPADFile\"");
          throw odee;
       }
-      srpModel = value;
+
+      if ((value != "Spherical") && (value != "SPADFile") && (value != "NPlate"))         // made changes by TUAN NGUYEN
+      {
+         ODEModelException odee("");
+         odee.SetDetails(errorMessageFormat.c_str(),
+                        value.c_str(),
+                        "SrpModel", "\"Spherical\", \"SPADFile\", or \"NPlate\"");       // made changes by TUAN NGUYEN
+         throw odee;
+      }
+      srpShapeModel = value;
+
+      // Set value for srpShapeModelIndex                                                // made changes by TUAN NGUYEN
+      if (value == "Spherical")                                                          // made changes by TUAN NGUYEN
+         srpShapeModelIndex = ShapeModel::SPHERICAL_MODEL;                               // made changes by TUAN NGUYEN
+      else if (value == "SPADFile")                                                      // made changes by TUAN NGUYEN
+         srpShapeModelIndex = ShapeModel::SPAD_FILE_MODEL;                               // made changes by TUAN NGUYEN
+      else if (value == "NPlate")                                                        // made changes by TUAN NGUYEN
+         srpShapeModelIndex = ShapeModel::NPLATE_MODEL;                                  // made changes by TUAN NGUYEN
+
       return true;
    }
 
@@ -686,7 +726,7 @@ bool SolarRadiationPressure::Initialize()
 
    if (solarSystem) 
    {
-      theSun    = solarSystem->GetBody(SolarSystem::SUN_NAME);
+      theSun    = solarSystem->GetBody(GmatSolarSystemDefaults::SUN_NAME);
       sunRadius = theSun->GetEquatorialRadius();
       
       if (!theSun)
@@ -696,7 +736,7 @@ bool SolarRadiationPressure::Initialize()
       if (forceOrigin)
          body = forceOrigin;
       else
-         body = solarSystem->GetBody(SolarSystem::EARTH_NAME);
+         body = solarSystem->GetBody(GmatSolarSystemDefaults::EARTH_NAME);
 
       #ifdef DEBUG_SRP_ORIGIN
          MessageInterface::ShowMessage("SRP body is %s\n", 
@@ -721,6 +761,10 @@ bool SolarRadiationPressure::Initialize()
          delete [] cbSunVector;
       
       cbSunVector = new Real[3];
+
+      // if (srpShapeModel == "Spherical")                              // made changes by TUAN NGUYEN
+      if (srpShapeModelIndex == ShapeModel::SPHERICAL_MODEL)            // made changes by TUAN NGUYEN
+         hasTimeJacobian = true;
       
       isInitialized = true;
    }
@@ -744,7 +788,7 @@ bool SolarRadiationPressure::SetCentralBody()
    if (!solarSystem)
       throw ODEModelException("Solar system not set in call to SRP::SetCentralBody.");
    
-   theSun = solarSystem->GetBody(SolarSystem::SUN_NAME);
+   theSun = solarSystem->GetBody(GmatSolarSystemDefaults::SUN_NAME);
    
    if (!theSun)
       throw ODEModelException("Solar system does not contain the Sun for SRP force.");
@@ -753,7 +797,7 @@ bool SolarRadiationPressure::SetCentralBody()
    if (forceOrigin)
       body = forceOrigin;
    else
-      body = solarSystem->GetBody(SolarSystem::EARTH_NAME);
+      body = solarSystem->GetBody(GmatSolarSystemDefaults::EARTH_NAME);
 
    #ifdef DEBUG_SRP_ORIGIN
       MessageInterface::ShowMessage("SRP body is %s\n", 
@@ -793,18 +837,18 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
 {
    if (!isInitialized)
       return false;
-        
+   
    if (!theSun)
       throw ODEModelException("The Sun is not set in SRP::GetDerivatives");
-
+   
    if (!body)
       throw ODEModelException(
          "The central body is not set in SRP::GetDerivatives");
-    
+   
    if (!cbSunVector)
       throw ODEModelException(
          "The sun vector is not initialized in SRP::GetDerivatives");
-
+   
    if ((Integer)cr.size() != satCount)
    {
       std::stringstream msg;
@@ -812,7 +856,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
           << ") and radiation coefficient count (" << cr.size() << ")"; 
       throw ODEModelException(msg.str());
    }
-
+   
    if ((Integer)area.size() != satCount)
    {
       std::stringstream msg;
@@ -820,7 +864,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
           << ") and area count (" << area.size() << ")"; 
       throw ODEModelException(msg.str());
    }
-
+   
    if ((Integer)mass.size() != satCount)
    {
       std::stringstream msg;
@@ -828,7 +872,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
           << ") and mass count (" << mass.size() << ")"; 
       throw ODEModelException(msg.str());
    }
-
+   
    if ((Integer)scObjs.size() != satCount)
    {
       std::stringstream msg;
@@ -836,13 +880,13 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
           << ") and object count (" << scObjs.size() << ")";
       throw ODEModelException(msg.str());
    }
-
+   
    Real distancefactor = 1.0, mag, magInitial, sSquared;
    bool inSunlight = true, inShadow = false;
 
-   Real ep = epoch + dt / GmatTimeConstants::SECS_PER_DAY;
+   Real ep = epoch + (elapsedTime + dt) / GmatTimeConstants::SECS_PER_DAY;
    sunrv = theSun->GetState(ep);
-    
+   
    // Rvector6 is initialized to all 0.0's; only change it if the body is not 
    // the Sun
    if (!bodyIsTheSun)
@@ -869,14 +913,18 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          showData = true;
       }
    #endif
- 
+   
    if (order > 2)
       return false;
-
-   Integer i6, ix;
+   
+   //Integer i6, ix;          // made changes by TUAN NGUYEN
+   Integer ix;                // made changes by TUAN NGUYEN
    Real sunSat[3];
    Rvector3 spadArea;
+   Real appSunRad, appBodyRad, appDistFromSunToBody;
     
+   Rvector3 scReflectance;    // made changes by TUAN NGUYEN
+   
    if (fillCartesian)
    {
       for (Integer i = 0; i < satCount; ++i) 
@@ -885,8 +933,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             MessageInterface::ShowMessage(
                   "Filling Cartesian state for spacecraft %d\n", i);
          #endif
-         i6 = cartesianStart + i*6;
-
+         Integer i6 = cartesianStart + i*6;                                  // made changes by TUAN NGUYEN
+         
          // Build vector from the Sun to the current spacecraft
          sunSat[0] = state[ i6 ] - cbSunVector[0];
          sunSat[1] = state[i6+1] - cbSunVector[1];
@@ -901,16 +949,13 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          forceVector[2] = sunSat[2] / sunDistance;
         
          distancefactor = nominalSun / sunDistance;        // it has no unit (Km/Km)
-
-         // Convert m/s^2 to km/s^2
-         //distancefactor *= distancefactor * GmatMathConstants::M_TO_KM;
-         distancefactor *= distancefactor;
+         distancefactor *= distancefactor;                 // (1AU/rs)^2
 
          #ifdef DEBUG_SRP_ORIGIN
             if (shadowModel == 0) 
                shadowModel = CONICAL_MODEL;
          #endif
-        
+         
          // Test shadow condition for current spacecraft (only if body isn't Sol)
          if (!bodyIsTheSun)
          {
@@ -935,7 +980,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
 
                percentSun = shadowState->FindShadowState(inSunlight, inShadow,
                      shModel, &state[i6], cbSunVector, sunSat, forceVector,
-                     sunRadius, bodyRadius, psunrad);
+                     sunRadius, bodyRadius, psunrad, appSunRad, appBodyRad,
+                     appDistFromSunToBody);
             }
             else
             {
@@ -950,7 +996,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
              inShadow = false;
              percentSun = 1.0;
          }
-
+         
          #ifdef IGNORE_SHADOWS
             percentSun = 1.0;
          #endif
@@ -978,12 +1024,14 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             mag = percentSun * fluxPressure * distancefactor /
                                 mass[i];                               // its current unit is (N/m^2)/Kg = 1/(m*s^2)
             
-            if (srpModel == "Spherical")
+            // if (srpShapeModel == "Spherical")                                                   // made changes by TUAN NGUYEN
+            if (srpShapeModelIndex == ShapeModel::SPHERICAL_MODEL)                                 // made changes by TUAN NGUYEN
             {
                #ifdef DEBUG_CR_UPDATES
                   MessageInterface::ShowMessage("SRP using Cr = %.12lf\n", cr[i]);
                #endif
-               mag *= cr[i] * area[i];                                // Its current unit is [1/(m*s^2)]*(m^2) = m/s^2
+               
+               mag *= cr[i] * area[i];                             // Its current unit is [1/(m*s^2)]*(m^2) = m/s^2   // made changes by TUAN NGUYEN
                mag = mag*GmatMathConstants::M_TO_KM;                  // convert m/s^2 to Km/s^2
                
                if (order == 1)
@@ -1001,7 +1049,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                   deriv[i6 + 3] = deriv[i6 + 4] = deriv[i6 + 5] = 0.0;
                }
             }
-            else  // SPADFile
+            // else if (srpShapeModel == "SPADFile")  // SPADFile   // made changes by TUAN NGUYEN
+            else if (srpShapeModelIndex == ShapeModel::SPAD_FILE_MODEL)  // SPADFile   // made changes by TUAN NGUYEN
             {
                #ifdef DEBUG_SPAD_DATA
                   MessageInterface::ShowMessage("in SRP, using SPAD file and mag = %12.16le \n", mag);
@@ -1041,59 +1090,137 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                         deriv[ i6+3 ], deriv[ i6+4 ], deriv[ i6+5 ]);
                #endif
             }
+            // else if (srpShapeModel == "NPlate")  // NPlate   // made changes by TUAN NGUYEN
+            else if (srpShapeModelIndex == ShapeModel::NPLATE_MODEL)  // NPlate   // made changes by TUAN NGUYEN
+            {
+               #ifdef DEBUG_NPLATE_DATA
+                  MessageInterface::ShowMessage("in SRP, using N-Plates file and mag = %12.16le \n", mag);
+               #endif
+               if (!scObjs.at(i)->IsOfType("Spacecraft"))
+               {
+                  std::stringstream msg;
+                  msg << "Satellite " << scObjs.at(i)->GetName();
+                  msg << " is not of type Spacecraft.  N-Plates SRP area cannot ";
+                  msg << "be obtained.\n";
+                  throw ODEModelException(msg.str());
+               }
+
+               // Get spacecraft's refectance vector in inertial frame in Eq.1 SRP N-Plates MathSpec
+               Rvector3 sunSC(sunSat[0], sunSat[1], sunSat[2]);
+               ///@todo: It needs to verify epochGT at this point to make sure input a correct value
+               GmatTime gtep = GmatTime(ep);
+               scReflectance = ((Spacecraft*)scObjs.at(i))->GetNPlateSRPReflectance(sunSC, gtep);          // unit: m^2
+
+               #ifdef DEBUG_NPLATE_DATA
+                  MessageInterface::ShowMessage("in SRP, N-Plates reflectance from spacecraft (which calls filereader) = %12.10f  %12.10f  %12.10f\n",
+                     scReflectance[0], scReflectance[1], scReflectance[2]);
+                  MessageInterface::ShowMessage(" dot(s,A) = %le. It should be a negative number.\n", sunSat[0] * scReflectance[0] + sunSat[1] * scReflectance[1] + sunSat[2] * scReflectance[2]);
+               #endif
+               if (order == 1)
+               {
+                  deriv[i6] = deriv[i6 + 1] = deriv[i6 + 2] = 0.0;
+                  // Eq.1 SRP N-Plates MathSpec. Spacecraft's reflection vector has opposite direction of SRP force. Therefore, -mag is used instead of mag.
+                  deriv[i6 + 3] = (-mag) * scReflectance[0] * GmatMathConstants::M_TO_KM;                  // unit: [1/(m*s^2)]*(m^2)*(Km/m) = Km/s^2
+                  deriv[i6 + 4] = (-mag) * scReflectance[1] * GmatMathConstants::M_TO_KM;                  // unit: [1/(m*s^2)]*(m^2)*(Km/m) = Km/s^2
+                  deriv[i6 + 5] = (-mag) * scReflectance[2] * GmatMathConstants::M_TO_KM;                  // unit: [1/(m*s^2)]*(m^2)*(Km/m) = Km/s^2
+               }
+               else
+               {
+                  // Eq.1 SRP N-Plates MathSpec. Spacecraft's reflection vector has opposite direction of SRP force. Therefore, -mag is used instead of mag.
+                  deriv[i6] = (-mag) * scReflectance[0] * GmatMathConstants::M_TO_KM;                      // unit: [1/(m*s^2)]*(m^2)*(Km/m) = Km/s^2
+                  deriv[i6 + 1] = (-mag) * scReflectance[1] * GmatMathConstants::M_TO_KM;                  // unit: [1/(m*s^2)]*(m^2)*(Km/m) = Km/s^2
+                  deriv[i6 + 2] = (-mag) * scReflectance[2] * GmatMathConstants::M_TO_KM;                  // unit: [1/(m*s^2)]*(m^2)*(Km/m) = Km/s^2
+                  deriv[i6 + 3] = deriv[i6 + 4] = deriv[i6 + 5] = 0.0;
+               }
+            }
+            else                                  // made changes by TUAN NGUYEN
+            {
+               throw ODEModelException("Error: SolarRadiationPressure SRP Model was not specified. It needs to set to Spherical, SPADFile, or NPlate.\n");  // made changes by TUAN NGUYEN
+            }
          }
          else 
          {
             deriv[i6] = deriv[i6 + 1] = deriv[i6 + 2] = 
             deriv[i6 + 3] = deriv[i6 + 4] = deriv[i6 + 5] = 0.0;
-         }
-      }
-   }
-
+         } // endif/else !inShadow
+      } // endfor i = 0->satcount
+   }  // endif fillCartesian
+   
+   
    if (fillSTM || fillAMatrix)
    {
-
       if (warnSRPMath && (percentSun < 1.0))
       {
-         if (srpModel == "Spherical")
+         // if ((srpShapeModel == "Spherical") || (srpShapeModel == "SPADFile") || (srpShapeModel == "NPlate"))   // made changes by TUAN NGUYEN
+         if ((srpShapeModelIndex == ShapeModel::SPHERICAL_MODEL) || (srpShapeModelIndex == ShapeModel::SPAD_FILE_MODEL) || (srpShapeModelIndex == ShapeModel::NPLATE_MODEL))   // made changes by TUAN NGUYEN
          {
             MessageInterface::ShowMessage("Warning: The orbit state transition "
                   "matrix does not currently contain SRP contributions from shadow "
-                  "partial derivatives when using Spherical SRP.\n");
+                  "partial derivatives when using " + srpShapeModel + " SRP.\n");
 
             warnSRPMath = false;
          }
       }
-
-      Integer stmSize = stmRowCount * stmRowCount;
-      Real *aTilde;
-      aTilde = new Real[stmSize];
-
-      Integer index = psm->GetSTMIndex(crID);
-      if (index >= 0)
-      {
-         estimatingCr = true;
-         crEpsilonRow = index;
-      }
-
+      
+      
+      //Integer index = psm->GetSTMIndex(crID);                                 // made changes by TUAN NGUYEN
+      //if (index >= 0)                                                         // made changes by TUAN NGUYEN
+      //{                                                                       // made changes by TUAN NGUYEN
+      //   estimatingCr = true;                                                 // made changes by TUAN NGUYEN
+      //   crEpsilonRow = index;                                                // made changes by TUAN NGUYEN
+      //}                                                                       // made changes by TUAN NGUYEN
+      
+      stmRowCount = 0;
+      Integer aTildeRowCount = 0;                                               // made changes by TUAN NGUYEN
       Integer associate, element;
+      Integer iStart = stmStart;                                                // made changes by TUAN NGUYEN
       for (Integer i = 0; i < stmCount; ++i)
       {
-         #ifdef DEBUG_STM_MATRIX
-            MessageInterface::ShowMessage("Filling STM for spacecraft %d\n", i);
-         #endif
-         Integer iStart = stmStart + i * stmRowCount*stmRowCount;
-         associate = theState->GetAssociateIndex(iStart);
+         Integer crEpsilonRow = psm->GetSTMIndex(crID, scObjs[i]) - stmRowCount;   // made changes by TUAN NGUYEN
 
-         // Calculate A-tilde
+         StringArray sfs = scObjs[i]->GetStringArrayParameter("SolveFors");        // made changes by TUAN NGUYEN
+         bool estimatingCr = false;                                                // made changes by TUAN NGUYEN
+         for (Integer j = 0; j < sfs.size(); ++j)                                  // made changes by TUAN NGUYEN
+         {                                                                         // made changes by TUAN NGUYEN
+            //if (GmatGlobal::Instance()->GetDebug())
+            //   MessageInterface::ShowMessage("sfs[%d] = <%s>\n", j, sfs[j].c_str());
+            if ((sfs[j] == "Cr")|| (sfs[j] == "SPADSRPScaleFactor"))               // made changes by TUAN NGUYEN
+            {                                                                      // made changes by TUAN NGUYEN
+               estimatingCr = true;                                                // made changes by TUAN NGUYEN
+               break;                                                              // made changes by TUAN NGUYEN
+            }                                                                      // made changes by TUAN NGUYEN
+         }                                                                         // made changes by TUAN NGUYEN
+
+         // with thout this line, i6 always points to the last spacrcraft's state  // made changes by TUAN NGUYEN
+         Integer i6 = cartesianStart + i * 6;                                      // made changes by TUAN NGUYEN
+
+         // Get size of spacecraft's STM
+         Spacecraft *sc = (Spacecraft*)scObjs[i];
+         
+         // Create aTilde matrix
+         stmRowCount = sc->GetIntegerParameter("FullSTMRowCount");
+         //if (GmatGlobal::Instance()->GetDebug())
+         //   MessageInterface::ShowMessage("stmRowCount = %d   estimatingCr = %s\n", stmRowCount, (estimatingCr?"true":"false"));
+
+         //Integer stmSize = stmRowCount * stmRowCount;                            // made changea by TUAN NGUYEN
+         //Real *aTilde = new Real[stmSize];                                       // made changea by TUAN NGUYEN
+         aTildeRowCount = stmRowCount;                                             // made changea by TUAN NGUYEN
+         Real *aTilde = new Real[stmRowCount*stmRowCount];                         // made changea by TUAN NGUYEN
          for (Integer j = 0; j < stmRowCount; ++j)
          {
             ix = j * stmRowCount;
             for (Integer k = 0; k < stmRowCount; ++k)
-               aTilde[ix+k] = 0.0;
+               aTilde[ix + k] = 0.0;
          }
 
+         #ifdef DEBUG_STM_MATRIX
+            MessageInterface::ShowMessage("Filling STM for spacecraft %d\n", i);
+         #endif
+         // Integer iStart = stmStart + i * stmRowCount*stmRowCount;           // made changes by TUAN NGUYEN
+         
+         // Calculate A-tilde
          // Build vector from Sun to the current spacecraft; (-s in math spec)
+         associate = theState->GetAssociateIndex(iStart);
          sunSat[0] = state[ associate ] - cbSunVector[0];
          sunSat[1] = state[associate+1] - cbSunVector[1];
          sunSat[2] = state[associate+2] - cbSunVector[2];
@@ -1103,15 +1230,13 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             sunDistance = 1.0;
 
          distancefactor = nominalSun / sunDistance;     // It has no unit (Km/Km)
-         // Convert m/s^2 to km/s^2
-         //distancefactor *= distancefactor * GmatMathConstants::M_TO_KM * GmatMathConstants::M_TO_KM;
          distancefactor *= distancefactor;
 
          #ifdef DEBUG_SRP_ORIGIN
             if (shadowModel == 0)
                shadowModel = CONICAL_MODEL;
          #endif
-
+         
          // Test shadow condition for current spacecraft (only if body isn't Sol)
          if (!bodyIsTheSun)
          {
@@ -1123,7 +1248,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                percentSun = shadowState->FindShadowState(inSunlight, inShadow,
                   // shModel, &state[i6], cbSunVector, sunSat, forceVector,
                   shModel, &state[associate], cbSunVector, sunSat, forceVector,
-                  sunRadius, bodyRadius, psunrad);
+                  sunRadius, bodyRadius, psunrad, appSunRad, appBodyRad,
+                  appDistFromSunToBody);
                //FindShadowState(inSunlight, inShadow, &state[i6]);
             }
             else
@@ -1143,21 +1269,14 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          #ifdef IGNORE_SHADOWS
             percentSun = 1.0;
          #endif
-            
+         
          if (!inShadow)
          {
-            if (srpModel == "Spherical")
+            //if (srpShapeModel == "Spherical")                                        // made changes by TUAN NGUYEN
+            if (srpShapeModelIndex == ShapeModel::SPHERICAL_MODEL)                     // made changes by TUAN NGUYEN
             {
-               /// @todo Make Cr value reporting more elegant
-               static Real old_cr = 0.0;
-               if ((old_cr != cr[i]))
-               {
-                  old_cr = cr[i];
-                  //MessageInterface::ShowMessage("Cr = %.12lf   Cr0 = %.12lf\n", cr[i], crInitial[i]);
-               }
-
                // All of the common terms for C_s
-               mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor /
+               mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor / 
                   (mass[i] * sunDistance);                              // its unit is (N/m^2)*(m^2)/(Kg*Km) = m/(Km*s^2)
                mag = mag*GmatMathConstants::M_TO_KM;                    // convert m/(Km*s^2) to Km/(Km*s^2) = 1/s^2
 
@@ -1169,30 +1288,37 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                aTilde[ix + 1] = mag * (    - 3.0 * sunSat[0] * sunSat[1] / sSquared);       // unit: 1/s^2
                aTilde[ix + 2] = mag * (    - 3.0 * sunSat[0] * sunSat[2] / sSquared);       // unit: 1/s^2
 
-               // VX term for estimating Cr
+               // ax term for estimating Cr
                if (estimatingCr)
-                  aTilde[ix+crEpsilonRow] = deriv[i6 + 3] * crInitial[i] / cr[i];
+               {
+                  aTilde[ix + crEpsilonRow] = deriv[i6 + 3] / (1 + crEpsilon[i]);          // made changes by TUAN NGUYEN
+               }
 
                ix = stmRowCount * 4;
                aTilde[ix]     = mag * (    - 3.0 * sunSat[1] * sunSat[0] / sSquared);      // unit: 1/s^2
                aTilde[ix + 1] = mag * (1.0 - 3.0 * sunSat[1] * sunSat[1] / sSquared);      // unit: 1/s^2
                aTilde[ix + 2] = mag * (    - 3.0 * sunSat[1] * sunSat[2] / sSquared);      // unit: 1/s^2
 
-               // VY term for estimating Cr
+               // ay term for estimating Cr
                if (estimatingCr)
-                  aTilde[ix+crEpsilonRow] = deriv[i6 + 4] * crInitial[i] / cr[i];
+               {
+                  aTilde[ix + crEpsilonRow] = deriv[i6 + 4] / (1 + crEpsilon[i]);          // made changes by TUAN NGUYEN
+               }
 
                ix = stmRowCount * 5;
                aTilde[ix]     = mag * (    - 3.0 * sunSat[2] * sunSat[0] / sSquared);     // unit: 1/s^2
                aTilde[ix + 1] = mag * (    - 3.0 * sunSat[2] * sunSat[1] / sSquared);     // unit: 1/s^2
                aTilde[ix + 2] = mag * (1.0 - 3.0 * sunSat[2] * sunSat[2] / sSquared);     // unit: 1/s^2
 
-               // VZ term for estimating Cr
+               // az term for estimating Cr
                if (estimatingCr)
-                  aTilde[ix+crEpsilonRow] = deriv[i6 + 5] * crInitial[i] / cr[i];
+               {
+                  aTilde[ix + crEpsilonRow] = deriv[i6 + 5] / (1 + crEpsilon[i]);          // made changes by TUAN NGUYEN
+               }
 
             }
-            else // SPADFile
+            // else if (srpShapeModel == "SPADFile")  // SPADFile  // made changes by TUAN NGUYEN
+            else if (srpShapeModelIndex == ShapeModel::SPAD_FILE_MODEL)  // SPADFile  // made changes by TUAN NGUYEN
             {
                Real     nominalState[3];
                nominalState[0] = state[associate];
@@ -1219,6 +1345,9 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                theState[0]     = nominalState[0] + dx;
                theState[1]     = nominalState[1];
                theState[2]     = nominalState[2];
+               // @todo Modify the spacecraft state with each perturbation, to make sure attitude is correct
+               // Must save current sc state first, then reset after perturbations <<<<<<<<<<<<<<<<<<TBD
+               // BUT question - how to reset the state (stat variable is passed in)???
                accelPertX      = ComputeSPADAcceleration(i, ep, theState, cbSunVector);      // expected unit: Km/s^2
                // Compute acceleration perturbed in Y
                theState[0]     = nominalState[0];
@@ -1235,15 +1364,33 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                aTilde[ix]   = (accelPertX[3] - nominalAccel[3]) / dx;       // unit: 1/s^2
                aTilde[ix+1] = (accelPertY[3] - nominalAccel[3]) / dy;       // unit: 1/s^2
                aTilde[ix+2] = (accelPertZ[3] - nominalAccel[3]) / dz;       // unit: 1/s^2
+
+               // ax term for estimating Cr                                                      // made changes by TUAN NGUYEN
+               if (estimatingCr)                                                                 // made changes by TUAN NGUYEN
+               {
+                  aTilde[ix + crEpsilonRow] = deriv[i6 + 3] / (1 + crEpsilon[i]);                // made changes by TUAN NGUYEN
+               }
                ix = stmRowCount * 4;
                aTilde[ix]   = (accelPertX[4] - nominalAccel[4]) / dx;       // unit: 1/s^2
                aTilde[ix+1] = (accelPertY[4] - nominalAccel[4]) / dy;       // unit: 1/s^2
                aTilde[ix+2] = (accelPertZ[4] - nominalAccel[4]) / dz;       // unit: 1/s^2
+
+               // ay term for estimating Cr                                                      // made changes by TUAN NGUYEN
+               if (estimatingCr)                                                                 // made changes by TUAN NGUYEN
+               {
+                  aTilde[ix + crEpsilonRow] = deriv[i6 + 4] / (1 + crEpsilon[i]);                // made changes by TUAN NGUYEN
+               }
+
                ix = stmRowCount * 5;
                aTilde[ix]   = (accelPertX[5] - nominalAccel[5]) / dx;       // unit: 1/s^2
                aTilde[ix+1] = (accelPertY[5] - nominalAccel[5]) / dy;       // unit: 1/s^2
                aTilde[ix+2] = (accelPertZ[5] - nominalAccel[5]) / dz;       // unit: 1/s^2
 
+               // az term for estimating Cr                                                      // made changes by TUAN NGUYEN
+               if (estimatingCr)                                                                 // made changes by TUAN NGUYEN
+               {
+                  aTilde[ix + crEpsilonRow] = deriv[i6 + 5] / (1 + crEpsilon[i]);                // made changes by TUAN NGUYEN
+               }
                #ifdef DEBUG_SPAD_DATA
                   MessageInterface::ShowMessage("    accelPertX          = %12.16le  %12.16le  %12.16le  %12.16le  %12.16le  %12.16le\n",
                         accelPertX[0], accelPertX[1], accelPertX[2],accelPertX[3],accelPertX[4],accelPertX[5]);
@@ -1271,45 +1418,175 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                         "                resulting aTilde[32]  = %12.16le\n", aTilde[32]);
                 #endif
             }
+            // else if (srpShapeModel == "NPlate")  // NPlate  // made changes by TUAN NGUYEN
+            else if (srpShapeModelIndex == ShapeModel::NPLATE_MODEL)  // NPlate  // made changes by TUAN NGUYEN
+            {
+               Rvector3 sunSC(sunSat[0], sunSat[1], sunSat[2]);
+
+               // Calculate K
+               mag = percentSun * fluxPressure * distancefactor / mass[i];     // its unit is (N/m^2)/Kg = (Kg*m/s^2)/(m^2*Kg) = (m/s^2)/(m^2) 
+               mag = mag * GmatMathConstants::M_TO_KM;                         // convert (m/s^2)/(m^2) to (Km/s^2)/(m^2)
+               Real K = -mag;                                                  // unit: (Km/s^2)/(m^2)
+
+               // Calculate A and dA/dX
+               // Reflectance onply depends on spacecarft's attitude at a given epoch and the Sun light direction
+               GmatTime gtep2 = GmatTime(ep);
+               Rvector3 A = ((Spacecraft*)(scObjs[i]))->GetNPlateSRPReflectance(sunSC, gtep2);                             //unit: m^2     // reflectance in inertial frame
+               std::vector<Rvector3> dAdX = ((Spacecraft*)(scObjs[i]))->GetNPlateSRPReflectanceDerivative(sunSC, gtep2);   //unit: m^2/km  // derivative of reflectance in inertial frame
+               
+               // Calculate dK/dX
+               Rvector dKdX;                                                          // unit: [(km/s^2)/(m^2)]/km = 1/s^2/m^2
+               dKdX.SetSize(dAdX.size());
+               for (Integer col = 3; col < dKdX.GetSize(); ++col)
+                  dKdX[col] = 0.0;                     // dKdv = 0 and dK/dCp = 0
+               Real term = 2.0 * K / (sunDistance * sunDistance);                     // unit: (Km/s^2)/(m^2)/Km^2 = 1/s^2/m^2/Km
+               Rvector3 rs(-sunSat[0], -sunSat[1], -sunSat[2]);        // The Sun vector. It points from spacecraft to the Sun
+               dKdX[0] = term * rs[0];            // It is dK/dx                // unit: 1/s^2/m^2
+               dKdX[1] = term * rs[1];            // It is dK/dy                // unit: 1/s^2/m^2
+               dKdX[2] = term * rs[2];            // It is dK/dz                // unit: 1/s^2/m^2               
+
+               // Calculate dKdX*A + K*dAdX:
+               // When running RunSimulator command, stmRowCount = 6 always, but dAdX.size > 6. So we need to resize aTilde matrix as need
+               Integer ix0, ix1, ix2;
+               aTildeRowCount = dAdX.size();
+               if (stmRowCount < aTildeRowCount)
+               {
+                  // Resize of aTilde matrix if it needs
+                  Real* temp = new Real[aTildeRowCount*aTildeRowCount];
+                  for (Integer row = 0; row < aTildeRowCount; ++row)
+                  {
+                     for (Integer col = 0; col < aTildeRowCount; ++col)
+                        temp[row * aTildeRowCount + col] = 0.0;
+                  }
+                  delete [] aTilde;
+                  aTilde = temp;
+
+                  // Specify starting index of 4th, 5th, and 6th row of A-matrix 
+                  ix0 = aTildeRowCount * 3;          // start index of row 4th
+                  ix1 = aTildeRowCount * 4;          // start index of row 5th
+                  ix2 = aTildeRowCount * 5;          // start index of row 6th
+               }
+               else
+               {
+                  ix0 = stmRowCount * 3;             // start index of row 4th
+                  ix1 = stmRowCount * 4;             // start index of row 5th
+                  ix2 = stmRowCount * 5;             // start index of row 6th
+               }
+
+               Rvector3 vec;
+               for (Integer col = 0; col < dAdX.size(); ++col)
+               {
+                  // Eq.8 in SRP N-Plates MathSpec: dF/dX = d(K.A)/dX = [dK/dX]*A + K*[dA/dX]; where: A is relectance in inertial frame
+                  vec = dKdX[col] * A + K * dAdX[col];                              // unit: (1/s^2/m^2)*(m^2) + (Km/s^2)/(m^2)*(m^2/Km) = 1/s^2
+                  aTilde[ix0 + col] = vec[0];        // aTilde(3,col)               // unit: 1/s^2
+                  aTilde[ix1 + col] = vec[1];        // aTilde(4,col)               // unit: 1/s^2
+                  aTilde[ix2 + col] = vec[2];        // aTilde(5,col)               // unit: 1/s^2
+               }
+               
+               #ifdef DEBUG_NPLATE_DATA
+                  //if (GmatGlobal::Instance()->GetDebug())
+                  //{
+                     MessageInterface::ShowMessage("In STM section, aTilde = [\n");
+                     for (Integer row = 0; row < stmRowCount; ++row)
+                     {
+                        for (Integer col = 0; col < stmRowCount; ++col)
+                           MessageInterface::ShowMessage("%12.16le   ", aTilde[row*stmRowCount + col]);
+                        MessageInterface::ShowMessage("\n");
+                     }
+                     MessageInterface::ShowMessage("]\n");
+                  //}
+               #endif
+            }
+            else                                  // made changes by TUAN NGUYEN
+            {
+               throw ODEModelException("Error: SolarRadiationPressure SRP Model was not specified. It needs to set to Spherical, SPADFile, or NPlate.\n");  // made changes by TUAN NGUYEN
+            }
          }
          else
          {
+            // in shadow, it has no SRP force so acceleration equals 0. Thus da/dX = Zero
             ix = stmRowCount * 3;
-            aTilde[ix] = aTilde[ix+1] = aTilde[ix+2] = 0.0;
-            ix = stmRowCount * 4;
-            aTilde[ix] = aTilde[ix+1] = aTilde[ix+2] = 0.0;
-            ix = stmRowCount * 5;
-            aTilde[ix] = aTilde[ix+1] = aTilde[ix+2] = 0.0;
+            for (Integer j = 0; j < 3*stmRowCount; ++j)                // made changes by TUAN NGUYEN
+               aTilde[ix + j] = 0.0;                                   // made changes by TUAN NGUYEN
          }
-
+         
          for (Integer j = 0; j < stmRowCount; ++j)
          {
             for (Integer k = 0; k < stmRowCount; ++k)
             {
                element = j * stmRowCount + k;
-               deriv[iStart+element] = aTilde[element];
+               if (stmRowCount == aTildeRowCount)                                     // made changes by TUAN NGUYEN
+                  deriv[iStart + element] = aTilde[element]; 
+               else                                                                   // made changes by TUAN NGUYEN
+                  deriv[iStart + element] = aTilde[j * aTildeRowCount + k];           // made changes by TUAN NGUYEN
             }
          }
+
+         //if (GmatGlobal::Instance()->GetDebug())
+         //{
+         //   MessageInterface::ShowMessage("aTilde for scObj[%d] <%s> srpShapeModel <%s> = [  stmRowCount = %d\n", i, scObjs[i]->GetName().c_str(), srpShapeModel.c_str(), stmRowCount);
+         //   for (Integer j = 0; j < stmRowCount; ++j)
+         //   {
+         //      for (Integer k = 0; k < stmRowCount; ++k)
+         //      {
+         //         element = j * stmRowCount + k;
+         //         MessageInterface::ShowMessage("%.12le   ", aTilde[element]);
+         //      }
+         //      MessageInterface::ShowMessage("\n");
+         //   }
+         //   MessageInterface::ShowMessage("]\n\n");
+         //}
+         
+         // increment index to the next spacecraft's STM matrix
+         iStart = iStart + stmRowCount*stmRowCount;                               // made changes by TUAN NGUYEN
+         delete [] aTilde;                                                        // made changes by TUAN NGUYEN
       }
 
+      
+      iStart = aMatrixStart;                                                      // made changes by TUAN NGUYEN
+      stmRowCount = 0;                                                            // made changes by TUAN NGUYEN
+      aTildeRowCount = 0;                                                         // made changes by TUAN NGUYEN
       for (Integer i = 0; i < aMatrixCount; ++i)
       {
-         #ifdef DEBUG_A_MATRIX
-            MessageInterface::ShowMessage(
-                  "Filling A-matrix for spacecraft %d\n", i);
-         #endif
-         Integer iStart = aMatrixStart + i * stmRowCount*stmRowCount;
-         associate = theState->GetAssociateIndex(iStart);
+         Integer crEpsilonRow = psm->GetSTMIndex(crID, scObjs[i]) - stmRowCount;   // made changes by TUAN NGUYEN
 
-         // Calculate A-tilde
+         StringArray sfs = scObjs[i]->GetStringArrayParameter("SolveFors");        // made changes by TUAN NGUYEN
+         bool estimatingCr = false;                                                // made changes by TUAN NGUYEN
+         for (Integer j = 0; j < sfs.size(); ++j)                                  // made changes by TUAN NGUYEN
+         {                                                                         // made changes by TUAN NGUYEN
+            if (sfs[j] == "Cr")                                                    // made changes by TUAN NGUYEN
+            {                                                                      // made changes by TUAN NGUYEN
+               estimatingCr = true;                                                // made changes by TUAN NGUYEN
+               break;                                                              // made changes by TUAN NGUYEN
+            }                                                                      // made changes by TUAN NGUYEN
+         }                                                                         // made changes by TUAN NGUYEN
+
+         // Get size of spacecraft's STM
+         Spacecraft *sc = (Spacecraft*)scObjs[i];
+         
+         // Define size of A tilde matrix
+         stmRowCount = sc->GetIntegerParameter("FullSTMRowCount");
+         // Integer stmSize = stmRowCount * stmRowCount;                           // made changes by TUAN NGUYEN
+         // Real *aTilde = new Real[stmSize];                                      // made changes by TUAN NGUYEN
+         aTildeRowCount = stmRowCount;                                             // made changes by TUAN NGUYEN
+         Real *aTilde = new Real[stmRowCount*stmRowCount];                         // made changes by TUAN NGUYEN
          for (Integer j = 0; j < stmRowCount; ++j)
          {
             ix = j * stmRowCount;
             for (Integer k = 0; k < stmRowCount; ++k)
-               aTilde[ix+k] = 0.0;
+               aTilde[ix + k] = 0.0;
          }
 
+         #ifdef DEBUG_A_MATRIX
+            MessageInterface::ShowMessage(
+                  "Filling A-matrix for spacecraft %d\n", i);
+         #endif
+         
+         // Integer iStart = aMatrixStart + i * stmRowCount*stmRowCount;          // made changes by TUAN NGUYEN
+         
+         // Calculate A-tilde
          // Build vector from Sun to the current spacecraft; (-s in math spec)
+         associate = theState->GetAssociateIndex(iStart);
          sunSat[0] = state[ associate ] - cbSunVector[0];
          sunSat[1] = state[associate+1] - cbSunVector[1];
          sunSat[2] = state[associate+2] - cbSunVector[2];
@@ -1327,7 +1604,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             if (shadowModel == 0)
                shadowModel = CONICAL_MODEL;
          #endif
-
+         
          // Test shadow condition for current spacecraft (only if body isn't Sol)
          if (!bodyIsTheSun)
          {
@@ -1339,7 +1616,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                percentSun = shadowState->FindShadowState(inSunlight, inShadow,
                   //shModel, &state[i6], cbSunVector, sunSat, forceVector,
                   shModel, &state[associate], cbSunVector, sunSat, forceVector,
-                  sunRadius, bodyRadius, psunrad);
+                  sunRadius, bodyRadius, psunrad, appSunRad, appBodyRad,
+                  appDistFromSunToBody);
                //            FindShadowState(inSunlight, inShadow, &state[i6]);
             }
             else
@@ -1360,13 +1638,14 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             percentSun = 1.0;
          #endif
 
-
+         
          if (!inShadow)
          {
-            if (srpModel == "Spherical")
+            //if (srpShapeModel == "Spherical")                                          // made changes by TUAN NGUYEN
+            if (srpShapeModelIndex == ShapeModel::SPHERICAL_MODEL)                       // made changes by TUAN NGUYEN
             {
                // All of the common terms for C_s
-               mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor /
+               mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor /                                                     // made changes by TUAN NGUYEN
                   (mass[i] * sunDistance);                                               // its unit is (N/m^2)*(m^2)/(Kg*Km) = m/(Km*s^2)
                mag = mag * GmatMathConstants::M_TO_KM;                                   // convert m/(Kg*s^2) to Km/(Km*s^2) = 1/s^2
 
@@ -1386,7 +1665,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                aTilde[ix+1] = mag * (    - 3.0 * sunSat[2]*sunSat[1] / sSquared);
                aTilde[ix+2] = mag * (1.0 - 3.0 * sunSat[2]*sunSat[2] / sSquared);
             }
-            else // SPADFile
+            //else if (srpShapeModel == "SPADFile") // SPADFile    // made changes by TUAN NGUYEN
+            else if (srpShapeModelIndex == ShapeModel::SPAD_FILE_MODEL) // SPADFile    // made changes by TUAN NGUYEN
             {
                Real     nominalState[3];
                nominalState[0] = state[associate];
@@ -1432,17 +1712,81 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                aTilde[ix + 1] = (accelPertY[5] - nominalAccel[5]) / dy;          // unit: 1/s^2
                aTilde[ix + 2] = (accelPertZ[5] - nominalAccel[5]) / dz;          // unit: 1/s^2
             }
+            // else if (srpShapeModel == "NPlate") // NPlate    // made changes by TUAN NGUYEN
+            else if (srpShapeModelIndex == ShapeModel::NPLATE_MODEL) // NPlate    // made changes by TUAN NGUYEN
+            {
+               Rvector3 sunSC(sunSat[0], sunSat[1], sunSat[2]);
+
+               // Calculate K
+               mag = percentSun * fluxPressure * distancefactor / mass[i];     // its unit is (N/m^2)/Kg = (Kg*m/s^2)/(m^2*Kg) = (m/s^2)/(m^2) 
+               mag = mag * GmatMathConstants::M_TO_KM;                         // convert (m/s^2)/(m^2) to (Km/s^2)/(m^2)
+               Real K = -mag;                                                  // unit: (Km/s^2)/(m^2)
+
+               // Calculate dK/dX
+               Rvector dKdX;
+               dKdX.SetSize(stmRowCount);
+               for (Integer col = 3; col < dKdX.GetSize(); ++col)
+                  dKdX[col] = 0.0;                     // dKdv = 0 and dK/dCp = 0
+               Real term = 2.0 * K / (sunDistance * sunDistance);
+               Rvector3 rs(-sunSat[0], -sunSat[1], -sunSat[2]);          // the Sun vector. It points from spacecraft to the Sun
+               dKdX[0] = term * rs[0];              // It is dK/dx
+               dKdX[1] = term * rs[1];              // It is dK/dy
+               dKdX[2] = term * rs[2];              // It is dK/dz
+
+               // Calculate A and dA/dX
+               GmatTime gtep3(ep);
+               Rvector3 A = ((Spacecraft*)(scObjs[i]))->GetNPlateSRPReflectance(sunSC, gtep3);
+               std::vector<Rvector3> dAdX = ((Spacecraft*)(scObjs[i]))->GetNPlateSRPReflectanceDerivative(sunSC, gtep3);
+
+               // Calculate dKdX*A + K*dAdX:
+               // aTilde matrix needs to resize when stmRowCount < dAdX.size()
+               aTildeRowCount = dAdX.size();
+               Integer ix0, ix1, ix2;
+               if (stmRowCount < aTildeRowCount)
+               {
+                  Real* temp = new Real[aTildeRowCount*aTildeRowCount];
+                  for (Integer row = 0; row < aTildeRowCount; ++row)
+                  {
+                     for (Integer col = 0; col < aTildeRowCount; ++col)
+                     {
+                        temp[row*aTildeRowCount + col] = 0.0;
+                     }
+                  }
+                  delete [] aTilde;
+                  aTilde = temp;
+
+                  ix0 = aTildeRowCount * 3;          // start index of row 4th
+                  ix1 = aTildeRowCount * 4;          // start index of row 5th
+                  ix2 = aTildeRowCount * 5;          // start index of row 6th
+               }
+               else
+               {
+                  ix0 = stmRowCount * 3;             // start index of row 4th
+                  ix1 = stmRowCount * 4;             // start index of row 5th
+                  ix2 = stmRowCount * 5;             // start index of row 6th
+               }
+
+               Rvector3 vec;
+               for (Integer col = 0; col < dAdX.size(); ++col)
+               {
+                  vec = dKdX[col] * A + K * dAdX[col];
+                  aTilde[ix0 + col] = vec[0];        // aTilde(3,col)
+                  aTilde[ix1 + col] = vec[1];        // aTilde(4,col)
+                  aTilde[ix2 + col] = vec[2];        // aTilde(5,col)
+               }
+            }
+            else
+            {
+               throw ODEModelException("Error: SolarRadiationPressure SRP Model was not specified. It needs to set to Spherical, SPADFile, or NPlate.\n");  // made changes by TUAN NGUYEN
+            }
          }
          else
          {
             ix = stmRowCount * 3;
-            aTilde[ix] = aTilde[ix+1] = aTilde[ix+2] = 0.0;
-            ix = stmRowCount * 4;
-            aTilde[ix] = aTilde[ix+1] = aTilde[ix+2] = 0.0;
-            ix = stmRowCount * 5;
-            aTilde[ix] = aTilde[ix+1] = aTilde[ix+2] = 0.0;
+            for (Integer j = 0; j < 3*stmRowCount; ++j)
+               aTilde[ix + j] = 0.0;
          }
-
+         
          #ifdef DEBUG_A_MATRIX
             MessageInterface::ShowMessage(
                   "A-Matrix contribution[%d] from SRP:\n", i);
@@ -1452,19 +1796,250 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             for (Integer k = 0; k < stmRowCount; ++k)
             {
                element = j * stmRowCount + k;
-               deriv[iStart+element] = aTilde[element];
+               if (stmRowCount == aTildeRowCount)                                 // made changes by TUAN NGUYEN
+                  deriv[iStart+element] = aTilde[element];
+               else                                                               // made changes by TUAN NGUYEN
+                  deriv[iStart + element] = aTilde[j * aTildeRowCount + k];       // made changes by TUAN NGUYEN
                #ifdef DEBUG_A_MATRIX
-                  MessageInterface::ShowMessage("  %le  ", deriv[i6+element]);
+                  MessageInterface::ShowMessage("  %le  ", deriv[iStart+element]);
                #endif
             }
             #ifdef DEBUG_A_MATRIX
                MessageInterface::ShowMessage("\n");
             #endif
          }
-      }
 
-	  delete [] aTilde;
+         // increment index to the next spacecraft's STM matrix
+         iStart = iStart + stmRowCount * stmRowCount;                              // made changes by TUAN NGUYEN
+         delete [] aTilde;                                                         // made changes by TUAN NGUYEN
+      }
+      
    }
+
+   Integer i6;
+   // if (fillMassJacobian && srpShapeModel == "Spherical")                        // made changes by TUAN NGUYEN
+   if (fillMassJacobian && srpShapeModelIndex == ShapeModel::SPHERICAL_MODEL)      // made changes by TUAN NGUYEN
+   {
+      for (Integer i = 0; i < satCount; ++i)
+      {
+         i6 = i * 6;
+         for (Integer k = 0; k < 6; ++k)
+            massJacobian[i6+k] = -deriv[i6+k] / mass[i];
+      }
+   }
+
+   // if (fillTimeJacobian && srpShapeModel == "Spherical")                        // made changes by TUAN NGUYEN
+   if (fillTimeJacobian && srpShapeModelIndex == ShapeModel::SPHERICAL_MODEL)      // made changes by TUAN NGUYEN
+   {
+      for (Integer i = 0; i < satCount; ++i)
+      {
+         // Currently, this i6 value is used to determine the associated rv 
+         // state vector to send to the FindShadowState method, but this may
+         // cause issues in the future when multiple spacecraft are used with
+         // state transition matrices since an associated index is not taken
+         // from the GetAssociateIndex state method
+         i6 = cartesianStart + i * 6;
+
+         std::string shModel = "DualCone";
+         if (shadowModel == CYLINDRICAL_MODEL) shModel = "Cylindrical";
+
+         Rvector3 scToSunVec;
+         scToSunVec[0] = cbSunVector[0] - state[i6];
+         scToSunVec[1] = cbSunVector[1] - state[i6 + 1];
+         scToSunVec[2] = cbSunVector[2] - state[i6 + 2];
+         Real scToSunVecMag = scToSunVec.GetMagnitude();
+
+         Rvector3 cbSunVelVec;
+         if (!bodyIsTheSun)
+         {
+            percentSun = shadowState->FindShadowState(inSunlight, inShadow,
+               shModel, &state[i6], cbSunVector, sunSat, forceVector,
+               sunRadius, bodyRadius, psunrad, appSunRad, appBodyRad,
+               appDistFromSunToBody);
+
+            cbSunVelVec[0] = sunrv[3] - cbrv[3];
+            cbSunVelVec[1] = sunrv[4] - cbrv[4];
+            cbSunVelVec[2] = sunrv[5] - cbrv[5];
+         }
+         else
+         {
+            percentSun = 1.0;
+            inSunlight = true;
+            inShadow = false;
+
+            cbSunVelVec[0] = 0.0;
+            cbSunVelVec[1] = 0.0;
+            cbSunVelVec[2] = 0.0;
+         }
+
+         // Currently it is assumed the occulting body and the central body
+         // are considered the same.  Should this change, the difference
+         // between the occulting body's velocity and central body's velocity
+         // will have to be taken here
+         Rvector3 cbOccVelVec;
+         cbOccVelVec[0] = 0.0;
+         cbOccVelVec[1] = 0.0;
+         cbOccVelVec[2] = 0.0;
+
+         Real dpdt = 0;
+
+         // If this is a penumbra or antumbra case, dp/dt will not be zero and
+         // requires further calculations
+         if (percentSun != 0.0 && percentSun != 1.0)
+         {
+            Rvector3 bodyToSC;
+            bodyToSC[0] = state[0];
+            bodyToSC[1] = state[1];
+            bodyToSC[2] = state[2];
+            Real bodyToSCMag = bodyToSC.GetMagnitude();
+
+            // dR'_sun/dt
+            Real dAppSunRaddt = -sunRadius / (pow(scToSunVecMag, 3) *
+               GmatMathUtil::Sqrt(1 - pow(sunRadius, 2) /
+               pow(scToSunVecMag, 2))) * (scToSunVec[0] * cbSunVelVec[0] +
+               scToSunVec[1] * cbSunVelVec[1] + scToSunVec[2] * cbSunVelVec[2]);
+
+            // dR'_body/dt
+            Real dAppBodyRaddt = -bodyRadius / (pow(bodyToSCMag, 3) *
+               GmatMathUtil::Sqrt(1 - pow(bodyRadius, 2) / pow(bodyToSCMag, 2))) *
+               (bodyToSC[0] * -cbOccVelVec[0] + bodyToSC[1] * -cbOccVelVec[1] +
+               bodyToSC[2] * -cbOccVelVec[2]);
+
+            if ((GmatMathUtil::Abs(appSunRad - appBodyRad) <
+               appDistFromSunToBody) && (appDistFromSunToBody <
+               (appSunRad + appBodyRad)))
+            {
+               // Penumbra case
+               Real c1 = (appDistFromSunToBody * appDistFromSunToBody +
+                  appSunRad * appSunRad - appBodyRad * appBodyRad) /
+                  (2.0 * appDistFromSunToBody);
+               Real c2 = sqrt(appSunRad * appSunRad - c1 * c1);
+
+               Real overlapA = appSunRad * appSunRad *
+                  GmatMathUtil::ACos(c1 / appSunRad) + appBodyRad * appBodyRad *
+                  GmatMathUtil::ACos((appDistFromSunToBody - c1) / appBodyRad) -
+                  appDistFromSunToBody * c2;
+
+               // s x d
+               Rvector3 scrossd;
+               scrossd[0] = bodyToSC[1] * scToSunVec[2] -
+                  bodyToSC[2] * scToSunVec[1];
+               scrossd[1] = bodyToSC[2] * scToSunVec[0] -
+                  bodyToSC[0] * scToSunVec[2];
+               scrossd[2] = bodyToSC[0] * scToSunVec[1] -
+                  bodyToSC[1] * scToSunVec[0];
+               Real scrossdMag = scrossd.GetMagnitude();
+
+               // d(s x d)/dt
+               Rvector3 dscrossddt;
+               dscrossddt[0] = -cbOccVelVec[1] * scToSunVec[2] +
+                  bodyToSC[1] * cbSunVelVec[2] + cbOccVelVec[2] *
+                  scToSunVec[1] - bodyToSC[2] * cbSunVelVec[1];
+               dscrossddt[1] = -cbOccVelVec[2] * scToSunVec[0] +
+                  bodyToSC[2] * cbSunVelVec[0] + cbOccVelVec[0] *
+                  scToSunVec[2] - bodyToSC[0] * cbSunVelVec[2];
+               dscrossddt[2] = -cbOccVelVec[0] * scToSunVec[1] +
+                  bodyToSC[0] * cbSunVelVec[1] + cbOccVelVec[1] *
+                  scToSunVec[0] - bodyToSC[1] * cbSunVelVec[0];
+
+               // d||s x d||/dt
+               Real dcrossmagdt = (scrossd[0] * dscrossddt[0] +
+                  scrossd[1] * dscrossddt[1] + scrossd[2] * dscrossddt[2]) /
+                  scrossdMag;
+
+               // s_transpose * d
+               Real sTimesD = bodyToSC[0] * scToSunVec[0] +
+                  bodyToSC[1] * scToSunVec[1] + bodyToSC[2] * scToSunVec[2];
+
+               // d(s_transpose * d)/dt
+               Real dsTimesDdt = bodyToSC[0] * cbSunVelVec[0] +
+                  bodyToSC[1] * cbSunVelVec[1] + bodyToSC[2] * cbSunVelVec[2] +
+                  scToSunVec[0] * -cbOccVelVec[0] + scToSunVec[1] *
+                  -cbOccVelVec[1] + scToSunVec[2] * -cbOccVelVec[2];
+
+               // dD'/dt
+               Real dAppDistdt = 1.0 / (pow(scrossdMag, 2) + pow(-sTimesD, 2)) *
+                  (-sTimesD * dcrossmagdt - scrossdMag * -dsTimesDdt);
+
+               // dc1/dt
+               Real dc1dt = 0.5 * (-1.0 / pow(appDistFromSunToBody, 2) *
+                  (pow(appDistFromSunToBody, 2) + pow(appSunRad, 2) -
+                  pow(appBodyRad, 2)) * dAppDistdt + 2.0 /
+                  appDistFromSunToBody * (appDistFromSunToBody * dAppDistdt +
+                  appSunRad * dAppSunRaddt - appBodyRad * dAppBodyRaddt));
+
+               // dc2/dt
+               Real dc2dt = 1.0 / c2 * (appSunRad * dAppSunRaddt - c1 * dc1dt);
+
+               // d(c1/R'_sun)/dt
+               Real dc1AppSunRaddt = 1.0 / appSunRad * dc1dt - c1 /
+                  pow(appSunRad, 2) * dAppSunRaddt;
+
+               // d(atan2[c2, D'-c1])/dt
+               Real datan2dt = 1.0 / (pow(c2, 2) +
+                  pow(appDistFromSunToBody - c1, 2)) *
+                  ((appDistFromSunToBody - c1) * dc2dt -
+                  c2 * (dAppDistdt - dc1dt));
+
+               // dA/dt
+               Real dAreadt = 2.0 * appSunRad * acos(c1 / appSunRad) *
+                  dAppSunRaddt - pow(appSunRad, 2) /
+                  GmatMathUtil::Sqrt(1.0 - pow(c1, 2) / pow(appSunRad, 2)) *
+                  dc1AppSunRaddt + 2.0 * appBodyRad *
+                  atan2(c2, appDistFromSunToBody - c1) * dAppBodyRaddt +
+                  pow(appBodyRad, 2) * datan2dt - appDistFromSunToBody *
+                  dc2dt - c2 * dAppDistdt;
+
+               // dp/dt
+               dpdt = 100.0 / GmatMathConstants::PI * (1.0 / pow(appSunRad, 2) *
+                  dAreadt - 2.0 * overlapA / (pow(appSunRad, 3)) *
+                  dAppSunRaddt);
+            }
+            else
+            {
+               // Antumbra case
+
+               // dp/dt
+               dpdt = 100.0 * (2.0 * appBodyRad / pow(appSunRad, 2) *
+                  dAppBodyRaddt - 2.0 * pow(appBodyRad, 2) /
+                  pow(appSunRad, 3) * dAppSunRaddt);
+            }
+         }
+
+         Rvector3 sunToSCVec = -scToSunVec;
+         Real sunToSCVecMag = sunToSCVec.GetMagnitude();
+         Real elementCoef = fluxPressure * pow(149597871.0, 2) * cr[i] * area[i] /
+            (mass[i] * pow(sunToSCVecMag, 3));
+
+         for (Integer i = 0; i < stmRowCount; ++i)
+            timeJacobian[i] = 0.0;
+         
+         // Calculate the SRP time Jacobian
+         Real timeJacElement;
+         for (Integer ii = 0; ii < 3; ++ii)
+         {
+            for (Integer jj = 0; jj < 3; ++jj)
+            {
+               if (ii == jj)
+               {
+                  timeJacElement = 1.0 - 3.0 * sunToSCVec[ii] *
+                     sunToSCVec[jj] / pow(sunToSCVecMag, 2);
+               }
+               else
+               {
+                  timeJacElement = -3.0 * sunToSCVec[ii] *
+                     sunToSCVec[jj] / pow(sunToSCVecMag, 2);
+               }
+
+               timeJacobian[i6 + ii + 3] += percentSun *
+                  elementCoef * timeJacElement * -cbSunVelVec[jj] / 1000.0;
+            }
+            timeJacobian[i6 + ii + 3] += elementCoef * sunToSCVec[ii] * -dpdt /
+               100000.0;
+         }
+      }
+   }
+
     
    #ifdef DEBUG_SOLAR_RADIATION_PRESSURE    
       MessageInterface::ShowMessage(
@@ -1497,7 +2072,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             mag);
       }
    #endif
-
+   
    return true;
 }
 
@@ -1528,11 +2103,33 @@ Rvector6 SolarRadiationPressure::GetDerivativesForSpacecraft(Spacecraft *sc)
       throw ODEModelException(
          "The sun vector is not initialized in SRP::GetDerivatives");
 
-   Real cr, area, mass;
+   //Real cr, area, mass;
+   Rvector cr;
+   Real area, mass;
+
    Real distancefactor = 1.0, mag;
    bool inSunlight = true, inShadow = false;
 
-   cr   = sc->GetRealParameter("Cr");
+   // if (srpShapeModel == "Spherical")                         // made changes by TUAN NGUYEN
+   if (srpShapeModelIndex == ShapeModel::SPHERICAL_MODEL)       // made changes by TUAN NGUYEN
+   {
+      cr.SetSize(1);                                            // made changes by TUAN NGUYEN
+      cr[0] = sc->GetRealParameter("Cr");                       // made changes by TUAN NGUYEN
+   }
+   // else if (srpShapeModel == "SPADFile")                     // made changes by TUAN NGUYEN
+   else if (srpShapeModelIndex == ShapeModel::SPAD_FILE_MODEL)  // made changes by TUAN NGUYEN
+   {
+      cr.SetSize(1);                                            // made changes by TUAN NGUYEN
+      cr[0] = sc->GetRealParameter("SPADSRPScaleFactor");       // made changes by TUAN NGUYEN
+   }
+   // else if (srpShapeModel == "NPlate")                       // made changes by TUAN NGUYEN
+   else if (srpShapeModelIndex == ShapeModel::NPLATE_MODEL)     // made changes by TUAN NGUYEN
+   {
+      // do nothing here
+   }
+   else                                                         // made changes by TUAN NGUYEN
+      throw ODEModelException("Error: SRP model is not specified in SolarRadiationPressure object. The value should be Spherical, SPADFile, or NPlate.\n");  // made changes by TUAN NGUYEN
+
    area = sc->GetRealParameter("SRPArea");
    mass = sc->GetRealParameter("TotalMass");
 
@@ -1586,19 +2183,20 @@ Rvector6 SolarRadiationPressure::GetDerivativesForSpacecraft(Spacecraft *sc)
    forceVector[1] = sunSat[1] / sunDistance;
    forceVector[2] = sunSat[2] / sunDistance;
 
-   distancefactor = nominalSun / sunDistance;
-   // Convert m/s^2 to km/s^2
-   distancefactor *= distancefactor * GmatMathConstants::M_TO_KM;
+   distancefactor = nominalSun / sunDistance;                 // It has no unit (Km/Km)
+   distancefactor *= distancefactor;                          // made changes by TUAN NGUYEN
 
    // Test shadow condition for current spacecraft (only if body isn't Sol)
    if (!bodyIsTheSun)
    {
       psunrad = asin(sunRadius / sunDistance);
       std::string shModel = "DualCone";
+      Real appSunRad, appBodyRad, appDistFromSunToBody;
       if (shadowModel == CYLINDRICAL_MODEL) shModel = "Cylindrical";
       percentSun = shadowState->FindShadowState(inSunlight, inShadow,
             shModel, state, cbSunVector, sunSat, forceVector,
-            sunRadius, bodyRadius, psunrad);
+            sunRadius, bodyRadius, psunrad, appSunRad, appBodyRad,
+            appDistFromSunToBody);
 //      FindShadowState(inSunlight, inShadow, state);
    }
    else
@@ -1609,23 +2207,33 @@ Rvector6 SolarRadiationPressure::GetDerivativesForSpacecraft(Spacecraft *sc)
    }
 
    Rvector3 spadArea;
+
+   // It is spacecraft's reflectance vector in N-paltes model              // made changes by TUAN NGUYEN
+   Rvector3 nplatesReflectance;                                            // made changes by TUAN NGUYEN
+
    if (!inShadow)
    {
-      if (srpModel == "Spherical")
+      // if (srpShapeModel == "Spherical")                                 // made changes by TUAN NGUYEN
+      if (srpShapeModelIndex == ShapeModel::SPHERICAL_MODEL)               // made changes by TUAN NGUYEN
       {
          // Montenbruck and Gill, eq. 3.75
-         mag = percentSun * cr * fluxPressure * area * distancefactor /
-                             mass;
+         mag = percentSun * cr[0] * fluxPressure * area * distancefactor /              // made changes by TUAN NGUYEN
+                             mass;                                         // its unit is (N/m^2)(m^2)/Kg = m/(s^2)     // made changes by TUAN NGUYEN
+         mag = mag * GmatMathConstants::M_TO_KM;                           // convert m/(s^2) to Km/(s^2)               // made changes by TUAN NGUYEN
+
          dv[0] = dv[1] = dv[2] = 0.0;
          dv[3] = mag * forceVector[0];
          dv[4] = mag * forceVector[1];
          dv[5] = mag * forceVector[2];
       }
-      else   // SPADFile
+      // else if (srpShapeModel == "SPADFile")                     // SPADFile    // made changes by TUAN NGUYEN
+      else if (srpShapeModelIndex == ShapeModel::SPAD_FILE_MODEL)  // SPADFile    // made changes by TUAN NGUYEN
       {
          // Montenbruck and Gill, eq. 3.75
          mag = percentSun * fluxPressure * distancefactor /
-                             mass;
+                             mass;                                      // its unit is (N/m^2)/Kg = (1/m^2).(m/s^2)    // made changes by TUAN NGUYEN
+         mag = mag * GmatMathConstants::M_TO_KM;                        // convert (1/m^2).(m/s^2) to (1/m^2).(Km/s^2) // made changes by TUAN NGUYEN
+
          #ifdef DEBUG_SPAD_DATA
          MessageInterface::ShowMessage(" \n------> now using spad data (per SC) for %s\n",
                sc->GetName().c_str());
@@ -1653,11 +2261,60 @@ Rvector6 SolarRadiationPressure::GetDerivativesForSpacecraft(Spacecraft *sc)
                   spadArea[0],spadArea[1],spadArea[2]);
          #endif
          dv[0] = dv[1] = dv[2] = 0.0;
-         dv[3] = mag * spadArea[0];
-         dv[4] = mag * spadArea[1];
-         dv[5] = mag * spadArea[2];
+         dv[3] = mag * spadArea[0];         // Its unit is (1/m^2).(Km/s^2).(m^2) = Km/s^2 
+         dv[4] = mag * spadArea[1];         // Its unit is (1/m^2).(Km/s^2).(m^2) = Km/s^2
+         dv[5] = mag * spadArea[2];         // Its unit is (1/m^2).(Km/s^2).(m^2) = Km/s^2
       }
+      // else if (srpShapeModel == "NPlate")                    // NPlate    // made changes by TUAN NGUYEN
+      else if (srpShapeModelIndex == ShapeModel::NPLATE_MODEL)  // NPlate    // made changes by TUAN NGUYEN
+      {
+         // Eq.1 N-Plates SRP MathSpec: -K/mass 
+         mag = percentSun * fluxPressure * distancefactor /
+                             mass;                                      // its unit is (N/m^2)/Kg = (1/m^2).(m/s^2)    // made changes by TUAN NGUYEN
+         mag = mag * GmatMathConstants::M_TO_KM;                        // convert (1/m^2).(m/s^2) to (1/m^2).(Km/s^2) // made changes by TUAN NGUYEN
 
+         #ifdef DEBUG_NPLATE_DATA
+         MessageInterface::ShowMessage(" \n------> now using N-plates data (per SC) for %s\n",
+            sc->GetName().c_str());
+         MessageInterface::ShowMessage("   nominalSun     = %12.10f\n", nominalSun);
+         MessageInterface::ShowMessage("   sunDistance    = %12.10f\n", sunDistance);
+         MessageInterface::ShowMessage("   state          = %12.10f  %12.10f  %12.10f\n",
+            state[0], state[1], state[2]);
+         MessageInterface::ShowMessage("   cbSunVector    = %12.10f  %12.10f  %12.10f\n",
+            cbSunVector[0], cbSunVector[1], cbSunVector[2]);
+         MessageInterface::ShowMessage("   sunSat    = %12.10f  %12.10f  %12.10f\n",
+            sunSat[0], sunSat[1], sunSat[2]);
+         MessageInterface::ShowMessage("   percentSun     = %12.10f\n", percentSun);
+         MessageInterface::ShowMessage("   fluxPressure   = %12.10f\n", fluxPressure);
+         MessageInterface::ShowMessage("   distancefactor = %12.10f\n", distancefactor);
+         MessageInterface::ShowMessage("   mass           = %12.10f\n", mass);
+         #endif
+         Rvector3 sunSC(sunSat[0], sunSat[1], sunSat[2]);
+         Rvector6 scState(state[0], state[1], state[2], state[3], state[4], state[5]);
+
+         if (hasPrecisionTime)
+            nplatesReflectance = sc->GetNPlateSRPReflectance(sunSC, epGT);                    // made changes by TUAN NGUYEN
+         else
+         {
+            GmatTime gtep4(ep);
+            nplatesReflectance = sc->GetNPlateSRPReflectance(sunSC, gtep4);            // made changes by TUAN NGUYEN
+         }
+
+         #ifdef DEBUG_NPLATE_DATA
+         MessageInterface::ShowMessage("in SRP, N-Plates reflectance (per SC) from file = %12.10f  %12.10f  %12.10f\n",
+            nplatesReflectance[0], nplatesReflectance[1], nplatesReflectance[2]);
+         #endif
+
+         dv[0] = dv[1] = dv[2] = 0.0;
+         // Eq.1. in SRP N-Plates MathSpec. Spacecraft's reflectance vector has opposite deriection to SRP force. Therefore, -mag is used instead of mag.
+         dv[3] = (-mag) * nplatesReflectance[0];         // Its unit is (1/m^2).(Km/s^2).(m^2) = Km/s^2 
+         dv[4] = (-mag) * nplatesReflectance[1];         // Its unit is (1/m^2).(Km/s^2).(m^2) = Km/s^2
+         dv[5] = (-mag) * nplatesReflectance[2];         // Its unit is (1/m^2).(Km/s^2).(m^2) = Km/s^2
+      }
+      else                                  // made changes by TUAN NGUYEN
+      {
+         throw ODEModelException("Error: SolarRadiationPressure SRP Model was not specified. It needs to set to Spherical, SPADFile, or NPlate.\n");  // made changes by TUAN NGUYEN
+      }
    }
    else
    {
@@ -1871,19 +2528,20 @@ Rvector6 SolarRadiationPressure::ComputeSPADAcceleration(Integer scID,
    Rvector6 result;
    Rvector3 spadArea;
    Real sunSat[3];
-   sunSat[0] = state[0] - cbSunVector[0];
-   sunSat[1] = state[1] - cbSunVector[1];
-   sunSat[2] = state[2] - cbSunVector[2];
+   sunSat[0] = state[0] - cbSunVector[0];           // ???? it needs to change cbSunVector[0] to cbSun[0]
+   sunSat[1] = state[1] - cbSunVector[1];           // ???? it needs to change cbSunVector[0] to cbSun[1]
+   sunSat[2] = state[2] - cbSunVector[2];           // ???? it needs to change cbSunVector[0] to cbSun[2]
    Real sunDistance = sqrt(sunSat[0]*sunSat[0] + sunSat[1]*sunSat[1] +
                            sunSat[2]*sunSat[2]);
    if (sunDistance == 0.0)
       sunDistance = 1.0;
 
-   Real distancefactor = nominalSun / sunDistance;
-   // Convert m/s^2 to km/s^2
-   distancefactor *= distancefactor * GmatMathConstants::M_TO_KM;
+   Real distancefactor = nominalSun / sunDistance;            // It has no unit (Km/Km)
+   distancefactor *= distancefactor;                                      // made changes by TUAN NGUYEN
 
-   Real mag = percentSun * fluxPressure * distancefactor / mass[scID];
+   Real mag = percentSun * fluxPressure * distancefactor / mass[scID];    // Its unit is (N/m^2)/Kg = (1/m^2).(m/s^2)  // made changes by TUAN NGUYEN
+   // Convert m/s^2 to km/s^2
+   mag = mag  * GmatMathConstants::M_TO_KM;                               // Its unit is (1/m^2).(Km/s^2) // made changes by TUAN NGUYEN
 
    #ifdef DEBUG_SPAD_ACCEL
       MessageInterface::ShowMessage("--- Computed in ComputeSPADAcceleration:\n");
@@ -1906,14 +2564,95 @@ Rvector6 SolarRadiationPressure::ComputeSPADAcceleration(Integer scID,
    #endif
 
    result[0] = result[1] = result[2] = 0.0;
-   result[3] = mag * spadArea[0];
-   result[4] = mag * spadArea[1];
-   result[5] = mag * spadArea[2];
+   result[3] = mag * spadArea[0];     // Its unit is (1/m^2).(Km/s^2).(m^2) = Km/s^2
+   result[4] = mag * spadArea[1];     // Its unit is (1/m^2).(Km/s^2).(m^2) = Km/s^2
+   result[5] = mag * spadArea[2];     // Its unit is (1/m^2).(Km/s^2).(m^2) = Km/s^2
 
    #ifdef DEBUG_SPAD_ACCEL
       MessageInterface::ShowMessage("--- AT END, result = %12.16le  %12.16le  %12.16le  %12.16le  %12.16le  %12.16le\n",
             result[0],result[1],result[2],result[3],result[4],result[5]);
    #endif
+
+   return result;
+}
+
+
+//---------------------------------------------------------------------------
+// Rvector6 ComputeNPlateAcceleration(Integer scID, Real ep,
+//                                  Real *state, Real *cbSun)
+//---------------------------------------------------------------------------
+/**
+* This function is use to compute spacecraft acceleration associate with 
+* N-plates SRP force.
+*
+* @param scID     the ID of a spacecraft
+* @param state    State of the spacecraft in central body MJ2000Eq coordinate system
+* @param cbSun    the Sun's coordinate in central body MJ2000Eq coordinate system
+* 
+* @return         the last 3 elements in Rvector6 contains acceleration
+*/
+//---------------------------------------------------------------------------
+Rvector6 SolarRadiationPressure::ComputeNPlateAcceleration(Integer scID, Real ep,
+   Rvector6 state, Real *cbSun)
+{
+#ifdef DEBUG_NPLATE_ACCEL
+   MessageInterface::ShowMessage("Entering ComputeNPlateAcceleration with inputs:\n");
+   MessageInterface::ShowMessage("    scID           = %d\n", scID);
+   MessageInterface::ShowMessage("    state          = %12.16le  %12.16le  %12.16le  %12.16le  %12.16le  %12.16le\n",
+      state[0], state[1], state[2], state[3], state[4], state[5]);
+   MessageInterface::ShowMessage("    cbSun          = %12.16le  %12.16le  %12.16le\n",
+      cbSun[0], cbSun[1], cbSun[2]);
+#endif
+   Rvector6 result;
+   Rvector3 nplatesReflectance;
+
+   Rvector3 sunSC;
+   sunSC[0] = state[0] - cbSun[0];
+   sunSC[1] = state[1] - cbSun[1];
+   sunSC[2] = state[2] - cbSun[2];
+
+   Real sunDistance = sunSC.GetMagnitude();
+   if (sunDistance == 0.0)
+      sunDistance = 1.0;
+
+   Real distancefactor = nominalSun / sunDistance;            // It has no unit (Km/Km)
+   distancefactor *= distancefactor;
+
+   Real mag = percentSun * fluxPressure * distancefactor / mass[scID];    // Its unit is (N/m^2)/Kg = (1/m^2).(m/s^2)
+    // Convert m/s^2 to km/s^2
+   mag = mag * GmatMathConstants::M_TO_KM;                               // Its unit is (1/m^2).(Km/s^2)
+
+#ifdef DEBUG_NPLATE_ACCEL
+   MessageInterface::ShowMessage("--- Computed in ComputeNPlateAcceleration:\n");
+   MessageInterface::ShowMessage("    sunSC         = %12.16le  %12.16le  %12.16le\n",
+      sunSC[0], sunSC[1], sunSC[2]);
+   MessageInterface::ShowMessage("    sunDistance    = %12.16le\n",
+      sunDistance);
+   MessageInterface::ShowMessage("    percentSun     = %12.16le\n", percentSun);
+   MessageInterface::ShowMessage("    fluxPressure   = %12.16le\n", fluxPressure);
+   MessageInterface::ShowMessage("    distancefactor = %12.16le\n", distancefactor);
+   MessageInterface::ShowMessage("    mass           = %12.16le\n", mass[scID]);
+   MessageInterface::ShowMessage("    mag            = %12.16le\n", mag);
+#endif
+   
+   GmatTime gtep5(ep);
+   nplatesReflectance = ((Spacecraft*)scObjs.at(scID))->GetNPlateSRPReflectance(sunSC, gtep5);  // unit: m^2
+#ifdef DEBUG_NPLATE_ACCEL
+   MessageInterface::ShowMessage("    N-plates reflectance      = %12.16le  %12.16le  %12.16le\n",
+      nplatesReflectance[0], nplatesReflectance[1], nplatesReflectance[2]);
+#endif
+
+   result[0] = result[1] = result[2] = 0.0;
+   // Eq.1 in N-Plates SRP MathSpec
+   result[3] = (-mag) * nplatesReflectance[0];     // Its unit is (1/m^2).(Km/s^2).(m^2) = Km/s^2
+   result[4] = (-mag) * nplatesReflectance[1];     // Its unit is (1/m^2).(Km/s^2).(m^2) = Km/s^2
+   result[5] = (-mag) * nplatesReflectance[2];     // Its unit is (1/m^2).(Km/s^2).(m^2) = Km/s^2
+
+#ifdef DEBUG_SPAD_ACCEL
+   MessageInterface::ShowMessage("--- AT END, result = %12.16le  %12.16le  %12.16le  %12.16le  %12.16le  %12.16le\n",
+      result[0], result[1], result[2], result[3], result[4], result[5]);
+#endif
+
    return result;
 }
 
@@ -1938,6 +2677,7 @@ const StringArray& SolarRadiationPressure::GetPropertyEnumStrings(const Integer 
       enumStrings.clear();
       enumStrings.push_back("Spherical");
       enumStrings.push_back("SPADFile");
+      enumStrings.push_back("NPlate");         // made changes by TUAN NGUYEN
       return enumStrings;
    default:
       return PhysicalModel::GetPropertyEnumStrings(id);
@@ -1951,9 +2691,10 @@ const StringArray& SolarRadiationPressure::GetPropertyEnumStrings(const Integer 
 /**
  * Passes spacecraft parameters to the SRP force.
  * 
- * @param i ID for the spacecraft
- * @param parmName name of the Spacecraft parameter 
- * @param parm Parameter value
+ * @param i           ID for the spacecraft
+ * @param parmName    name of the Spacecraft parameter 
+ * @param parm        Parameter value
+ * @param parmID      ID for the parameter
  */
 //------------------------------------------------------------------------------
 void SolarRadiationPressure::SetSatelliteParameter(const Integer i, 
@@ -1979,23 +2720,37 @@ void SolarRadiationPressure::SetSatelliteParameter(const Integer i,
         if (parmID >= 0)
            massID = parmID;
     }
+
     if (parmName == "Cr")
     {
-        if (parmNumber < cr.size())
-        {
-           cr[i] = parm;
-           if (crInitial[i] == -99999999.9999)
-              crInitial[i] = parm;
-        }
-        else
-        {
-           cr.push_back(parm);
-           crInitial.push_back(parm);
-        }
+       // if ((srpShapeModel == "Spherical")|| (srpShapeModel == "NPlate"))                                            // made changes by TUAN NGUYEN
+       if ((srpShapeModelIndex == ShapeModel::SPHERICAL_MODEL) || (srpShapeModelIndex == ShapeModel::NPLATE_MODEL))    // made changes by TUAN NGUYEN
+       {
+          if (parmNumber < cr.size())
+             cr[i] = parm;
+          else
+             cr.push_back(parm);
 
-        if (parmID >= 0)
-           crID = parmID;
+          if (parmID >= 0)
+             crID = parmID;
+       }
     }
+
+    if (parmName == "SPADSRPScaleFactor")          // made changes by TUAN NGUYEN
+    {                                              // made changes by TUAN NGUYEN
+       // if (srpShapeModel == "SPADFile")                               // made changes by TUAN NGUYEN
+       if (srpShapeModelIndex == ShapeModel::SPAD_FILE_MODEL)            // made changes by TUAN NGUYEN
+       {                                           // made changes by TUAN NGUYEN
+          if (parmNumber < cr.size())              // made changes by TUAN NGUYEN
+             cr[i] = parm;                         // made changes by TUAN NGUYEN
+          else                                     // made changes by TUAN NGUYEN
+             cr.push_back(parm);                   // made changes by TUAN NGUYEN
+
+          if (parmID >= 0)                         // made changes by TUAN NGUYEN
+             crID = parmID;                        // made changes by TUAN NGUYEN
+       }                                           // made changes by TUAN NGUYEN
+    }                                              // made changes by TUAN NGUYEN
+
     if (parmName == "SRPArea")
     {
        if (parmNumber < area.size())
@@ -2005,7 +2760,7 @@ void SolarRadiationPressure::SetSatelliteParameter(const Integer i,
         if (parmID >= 0)
             areaID = parmID;
     }
-    if (parmName == "CrEpsilon")
+    if (parmName == "Cr_Epsilon")                  // made changes by TUAN NGUYEN
     {
         if (parmNumber < crEpsilon.size())
             crEpsilon[i] = parm;
@@ -2091,12 +2846,11 @@ void SolarRadiationPressure::ClearSatelliteParameters(
    #endif
    if ((parmName == "Mass") || (parmName == ""))
       mass.clear();
-   if ((parmName == "Cr") || (parmName == ""))
-   {
+
+   if ((parmName == "Cr") || (parmName == "SPADSRPScaleFactor") || (parmName == ""))   // made changes by TUAN NGUYEN
       cr.clear();
-      crInitial.clear();
-   }
-   if ((parmName == "CrEpsilon") || (parmName == ""))
+   
+   if ((parmName == "Cr_Epsilon") || (parmName == ""))     // made changes by TUAN NGUYEN
       crEpsilon.clear();
    if ((parmName == "SRPArea") || (parmName == ""))
       area.clear();
@@ -2104,24 +2858,44 @@ void SolarRadiationPressure::ClearSatelliteParameters(
       scObjs.clear();
 }
 
+////////------------------------------------------------------------------------------
+//////// void PhysicalModel::SetSpaceObject(const Integer i, GmatBase *obj)
+////////------------------------------------------------------------------------------
+///////**
+////// * Passes spacecraft pointers to the force model.
+////// *
+////// * @param i   ID for the spacecraft
+////// * @param obj pointer to the Spacecraft
+////// */
+////////------------------------------------------------------------------------------
+//////void SolarRadiationPressure::SetSpaceObject(const Integer i, GmatBase *obj)
+//////{
+//////   unsigned parmNumber = (unsigned)(i);
+//////
+//////   if (parmNumber < scObjs.size())
+//////      scObjs[i] = obj;
+//////   else
+//////      scObjs.push_back(obj);
+//////}
+
 //------------------------------------------------------------------------------
-// void PhysicalModel::SetSpaceObject(const Integer i, GmatBase *obj)
+// bool SolarRadiationPressure::AttitudeAffectsDynamics()
 //------------------------------------------------------------------------------
 /**
- * Passes spacecraft pointers to the force model.
+ * Detects if a the SolarRadiationPressure is dependant on its attitude
  *
- * @param i   ID for the spacecraft
- * @param obj pointer to the Spacecraft
+ * @return true if the model's dynamics are affected by its attitude,
+ *         false if it does not
  */
 //------------------------------------------------------------------------------
-void SolarRadiationPressure::SetSpaceObject(const Integer i, GmatBase *obj)
+bool SolarRadiationPressure::AttitudeAffectsDynamics()
 {
-   unsigned parmNumber = (unsigned)(i);
+   bool retValue = false;                                                   // made changes by TUAN NGUYEN
+   // if ((srpShapeModel == "SPADFile") || (srpShapeModel == "NPlate"))                                                // made changes by TUAN NGUYEN
+   if ((srpShapeModelIndex == ShapeModel::SPAD_FILE_MODEL) || (srpShapeModelIndex == ShapeModel::NPLATE_MODEL))        // made changes by TUAN NGUYEN
+      retValue = true;                                                      // made changes by TUAN NGUYEN
 
-   if (parmNumber < scObjs.size())
-      scObjs[i] = obj;
-   else
-      scObjs.push_back(obj);
+   return retValue;                                                         // made changes by TUAN NGUYEN
 }
 
 //------------------------------------------------------------------------------
@@ -2148,7 +2922,7 @@ bool SolarRadiationPressure::SupportsDerivative(Gmat::StateElementId id)
    
    if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
    {
-//      if (srpModel == "Spherical")
+//      if (srpShapeModel == "Spherical")
 //      {
 //         MessageInterface::ShowMessage("Warning: The orbit state transition "
 //               "matrix does not currently contain SRP contributions from shadow "
@@ -2172,17 +2946,17 @@ bool SolarRadiationPressure::SupportsDerivative(Gmat::StateElementId id)
  * vector, so that the derivative information can be placed in the correct place 
  * in the derivative vector.
  * 
- * @param id State Element ID for the derivative type
- * @param index Starting index in the state vector for this type of derivative
- * @param quantity Number of objects that supply this type of data
- * @param sizeOfType For sizable types, the size to use.  For example, for STM,
- *                   this is the number of rows or columns in the STM
+ * @param id           State Element ID for the derivative type
+ * @param index        Starting index in the state vector for this type of derivative
+ * @param quantity     Number of objects that supply this type of data
+ * @param totalSize    For sizable types, the size to use.  For example, for STM,
+ *                     this is the number of elements of STM                         // made changes by TUAN NGUYEN
  * 
  * @return true if the type is supported, false otherwise. 
  */
 //------------------------------------------------------------------------------
 bool SolarRadiationPressure::SetStart(Gmat::StateElementId id, Integer index, 
-                      Integer quantity, Integer sizeOfType)
+                        Integer quantity, Integer totalSize)                       // made changes by TUAN NGUYEN
 {
    #ifdef DEBUG_REGISTRATION
       MessageInterface::ShowMessage("SolarRadiationPressure setting start data "
@@ -2206,7 +2980,7 @@ bool SolarRadiationPressure::SetStart(Gmat::StateElementId id, Integer index,
          stmCount = quantity;
          stmStart = index;
          fillSTM = true;
-         stmRowCount = Integer(sqrt((Real)sizeOfType));
+         totalSTMSize = totalSize;                         // made changes by TUAN NGUYEN
          retval = true;
          break;
          
@@ -2214,7 +2988,7 @@ bool SolarRadiationPressure::SetStart(Gmat::StateElementId id, Integer index,
          aMatrixCount = quantity;
          aMatrixStart = index;
          fillAMatrix = true;
-         stmRowCount = Integer(sqrt((Real)sizeOfType));
+         totalSTMSize = totalSize;                         // made changes by TUAN NGUYEN
          retval = true;
          break;
 
@@ -2224,4 +2998,5 @@ bool SolarRadiationPressure::SetStart(Gmat::StateElementId id, Integer index,
    
    return retval;
 }
+
 

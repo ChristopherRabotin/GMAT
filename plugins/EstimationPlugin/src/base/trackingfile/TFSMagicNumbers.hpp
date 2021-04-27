@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -53,9 +53,9 @@ public:
    StringArray GetKnownTypes();
    StringArray GetAvailableTypes();
 
-   ///@todo: this function will be removed when users no longer use
-   ///       type names DSNRange, Doppler in their script and data files
-   std::map<std::string,std::string> GetDeprecatedTypeMap();
+   /////@todo: this function will be removed when users no longer use
+   /////       type names DSNRange, Doppler in their script and data files
+   //std::map<std::string,std::string> GetDeprecatedTypeMap();
 
    Integer     GetMagicNumber(const std::vector<StringArray> &nodelist,
                               const std::string &type);
@@ -97,8 +97,8 @@ private:
    StringArray knownTypes;
    /// List of available types
    StringArray availableTypes;
-   /// Map of deprecated types
-   std::map<std::string, std::string> depTypeMap;
+   ///// Map of deprecated types
+   //std::map<std::string, std::string> depTypeMap;
 
    TFSMagicNumbers();
    ~TFSMagicNumbers();

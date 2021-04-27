@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -49,6 +49,7 @@
 #include "Rmatrix33.hpp"
 
 #include "GmatTime.hpp"
+#include "TimeSystemConverter.hpp"   // for the TimeSystemConverter singleton
 
 
 // forward reference for SolarSystem
@@ -119,7 +120,7 @@ public:
    /**
     * Method returning the MJ2000 state of the SpacePoint at the time atTime.
     *
-    * @param <atTime> Time for which the state is requested.
+    * @param atTime Time for which the state is requested.
     *
     * @return state of the SpacePoint at time atTime.
     *
@@ -137,7 +138,7 @@ public:
    /**
     * Method returning the MJ2000 position of the SpacePoint at the time atTime.
     *
-    * @param <atTime> Time for which the position is requested.
+    * @param atTime Time for which the position is requested.
     *
     * @return position of the SpacePoint at time atTime.
     *
@@ -155,7 +156,7 @@ public:
    /**
     * Method returning the MJ2000 velocity of the SpacePoint at the time atTime.
     *
-    * @param <atTime> Time for which the velocity is requested.
+    * @param atTime Time for which the velocity is requested.
     *
     * @return velocity of the SpacePoint at time atTime.
     *
@@ -277,6 +278,9 @@ protected:
    /// NAIF Id for the observer
    Integer         naifIdObserver;
 
+   /// Time converter singleton
+   TimeSystemConverter *theTimeConverter;
+
    // saved default values
    std::string     default_j2000BodyName;
    /// default value for NAIF ID
@@ -324,7 +328,7 @@ protected:
    std::string targetColorStr;
    
    /// Automatic default orbit and target colors
-   const static int MAX_SP_COLOR = 20;
+   static const int MAX_SP_COLOR = 20;
    static const UnsignedInt DEFAULT_ORBIT_COLOR[MAX_SP_COLOR];
    static const UnsignedInt DEFAULT_TARGET_COLOR[MAX_SP_COLOR];
    

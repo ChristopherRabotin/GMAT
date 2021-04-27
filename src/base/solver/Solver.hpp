@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -171,7 +171,10 @@ public:
    virtual const StringArray&
                        GetPropertyEnumStrings(const Integer id) const;
    virtual bool        GetBooleanParameter(const Integer id) const;
+   virtual bool        GetBooleanParameter(const std::string &label) const;
    virtual bool        SetBooleanParameter(const Integer id,
+                                           const bool value);
+   virtual bool        SetBooleanParameter(const std::string &label,
                                            const bool value);
                                            
    virtual void        ReportProgress(const SolverState forState = UNDEFINED_STATE);
@@ -200,9 +203,9 @@ public:
    /**
     * Sets up the data fields used for the results of an iteration.
     *
-    * @param <data> An array of data appropriate to the results used in the
+    * @param data An array of data appropriate to the results used in the
     *               algorithm (for instance, tolerances for targeter goals).
-    * @param <name> A label for the data parameter.  Defaults to the empty
+    * @param name A label for the data parameter.  Defaults to the empty
     *               string.
     *
     * @return The ID used for this variable.
@@ -218,8 +221,8 @@ public:
    /**
     * Passes in the results obtained from a run in the solver loop.
     *
-    * @param <id>    The ID used for this result.
-    * @param <value> The corresponding result.
+    * @param id    The ID used for this result.
+    * @param value The corresponding result.
     */
    //---------------------------------------------------------------------------
    virtual void        SetResultValue(Integer id, Real value,

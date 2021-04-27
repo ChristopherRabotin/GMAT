@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -604,3 +604,33 @@ void MessageInterface::ClearMessageQueue()
       theMessageReceiver->ClearMessageQueue();
 }
 
+//------------------------------------------------------------------------------
+// void SetEchoMode(bool echo)
+//------------------------------------------------------------------------------
+/**
+ * Toggles echo mode for message receivers taht support echoing
+ *
+ * @param echo The new mode setting
+ */
+//------------------------------------------------------------------------------
+void MessageInterface::SetEchoMode(bool echo)
+{
+   if (theMessageReceiver)
+      theMessageReceiver->SetEchoMode(echo);
+}
+
+//------------------------------------------------------------------------------
+// void ToggleConsolePrinting(bool printToCon)
+//------------------------------------------------------------------------------
+/**
+ * Toggles whether to print to the console screen when printing log messages
+ *
+ * @param printToCon New value of whether or not to print to the console when
+ *        LogMessage is called
+ */
+//------------------------------------------------------------------------------
+void MessageInterface::ToggleConsolePrinting(bool printToCon)
+{
+   if (theMessageReceiver)
+      theMessageReceiver->ToggleConsolePrinting(printToCon);
+}

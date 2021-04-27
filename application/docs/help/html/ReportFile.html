@@ -1,4 +1,4 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>ReportFile</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="RejectFilter.html" title="RejectFilter"><link rel="next" href="Simulator.html" title="Simulator"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">ReportFile</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="RejectFilter.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Simulator.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="ReportFile"></a><div class="titlepage"></div><a name="N1CE9B" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ReportFile</span></h2><p>ReportFile &mdash; Report data to a text file</p></div><div class="refsection"><a name="N1CEAC"></a><h2>Description</h2><p>The <span class="guilabel">ReportFile</span> resource allows you to write
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>ReportFile</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ch17.html#N201C5" title="Resources"><link rel="prev" href="OrbitView.html" title="OrbitView"><link rel="next" href="XYPlot.html" title="XYPlot"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">ReportFile</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="OrbitView.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="XYPlot.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="ReportFile"></a><div class="titlepage"></div><a name="N21AB7" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ReportFile</span></h2><p>ReportFile &mdash; Report data to a text file</p></div><div class="refsection"><a name="N21AC8"></a><h2>Description</h2><p>The <span class="guilabel">ReportFile</span> resource allows you to write
     data to a text file that can be viewed after a mission run has been
     completed. GMAT allows you to report user-defined <span class="guilabel">Variables,
     Arrays</span>, <span class="guilabel">Strings</span> and <span class="guilabel">Object
@@ -11,7 +11,7 @@
     <span class="guilabel">On</span>/<span class="guilabel">Off</span> command. See the <a class="xref" href="ReportFile.html#ReportFile_Remarks" title="Remarks">Remarks</a> section below for
     detailed discussion of the interaction between
     <span class="guilabel">ReportFile</span> resource and <span class="guilabel">Toggle</span>
-    command.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Report.html" title="Report"><span class="refentrytitle">Report</span></a>, <a class="xref" href="Toggle.html" title="Toggle"><span class="refentrytitle">Toggle</span></a></p></div><div class="refsection"><a name="N1CEDD"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Add</span></td><td><p>Allows a user to add any number of user-defined
+    command.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Report.html" title="Report"><span class="refentrytitle">Report</span></a>, <a class="xref" href="Toggle.html" title="Toggle"><span class="refentrytitle">Toggle</span></a></p></div><div class="refsection"><a name="N21AF9"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">Add</span></td><td><p>Allows a user to add any number of user-defined
             <span class="guilabel">Variables</span>, <span class="guilabel">Arrays</span>,
             <span class="guilabel">Strings</span> or <span class="guilabel">Object
             Parameters</span> to a report file. To add multiple
@@ -91,15 +91,15 @@
             Mission Sequence.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Any Real number</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>[ 0 0 ]</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">WriteHeaders</span></td><td><p> This field specifies whether to include headers that
             describe the variables in a report file.</p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>True, False</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>True</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">WriteReport</span></td><td><p> This field specifies whether to write data to the
             report <span class="guilabel">FileName</span>. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>True, False</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>True</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">ZeroFill</span></td><td><p>Allows zeros to be placed in data written to a report
-            to match set precision. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>On, Off</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Off</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1D232"></a><h2>GUI</h2><p>Figure below shows default name and settings for the
-    <span class="guilabel">ReportFile</span> resource:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ReportFile_GUI_3.png" align="middle" height="413"></td></tr></table></div></div></div><div class="refsection"><a name="ReportFile_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N1D247"></a><h3>Behavior When using Filename field</h3><p>GMAT allows you to specify the name of the report file in two
+            to match set precision. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Boolean</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>On, Off</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>Off</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N21E4E"></a><h2>GUI</h2><p>Figure below shows default name and settings for the
+    <span class="guilabel">ReportFile</span> resource:</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ReportFile_GUI_3.png" align="middle" height="413"></td></tr></table></div></div></div><div class="refsection"><a name="ReportFile_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N21E63"></a><h3>Behavior When using Filename field</h3><p>GMAT allows you to specify the name of the report file in two
       ways. The default naming convention for a report file when using
       <span class="guilabel">FileName</span> field is shown below:</p><pre class="programlisting"><code class="code">Create ReportFile aReport
 aReport.Filename = 'ReportFile1.txt'
 aReport.WriteReport = true</code></pre><p>An alternate method for naming a report file is to name the file
       without using any single quotes around the report file&rsquo;s name.</p><pre class="programlisting"><code class="code">Create ReportFile aReport
 aReport.Filename = ReportFile1.txt
-aReport.WriteReport = true</code></pre></div><div class="refsection"><a name="N1D257"></a><h3>How data is reported to a report file</h3><p>GMAT allows you to report data to a report file in two ways: You
+aReport.WriteReport = true</code></pre></div><div class="refsection"><a name="N21E73"></a><h3>How data is reported to a report file</h3><p>GMAT allows you to report data to a report file in two ways: You
       can use <span class="guilabel">ReportFile.Add</span> field or a
       <span class="guilabel">Report</span> command.</p><p>You can add data using the <span class="guilabel">.Add</span> field of
       <span class="guilabel">ReportFile</span> resource and this method reports data to
@@ -135,7 +135,7 @@ aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN
 Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}
 
 Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
-aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN</code></pre></div><div class="refsection"><a name="N1D289"></a><h3>Behavior and Interactions when using ReportFile Resource &amp;
+aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN</code></pre></div><div class="refsection"><a name="N21EA5"></a><h3>Behavior and Interactions when using ReportFile Resource &amp;
       Report Command</h3><p>Suppose you utilize a <span class="guilabel">ReportFile</span> resource and
       opt not to write a report and select <span class="guilabel">false</span> for the
       field name <span class="guilabel">WriteReport</span>, as shown in the example
@@ -156,7 +156,7 @@ Report aReport aSat.A1ModJulian aSat.Earth.SMA aSat.Earth.ECC</code></pre><p>At 
       data that was requested using the <span class="guilabel">Report</span> command.
       <code class="literal">ReportFile1.txt</code> text file will contain epoch,
       semi-major-axis and eccentricity only at specific points of the
-      mission.</p></div><div class="refsection"><a name="N1D2B9"></a><h3>Behavior when reporting data in Iterative Processes</h3><p>GMAT allows you to specify how data is written to reports during
+      mission.</p></div><div class="refsection"><a name="N21ED5"></a><h3>Behavior when reporting data in Iterative Processes</h3><p>GMAT allows you to specify how data is written to reports during
       iterative processes such as differential correction or optimization.
       <span class="guilabel">SolverIterations</span> field of
       <span class="guilabel">ReportFile</span> resource supports 3 options which are
@@ -166,7 +166,7 @@ Report aReport aSat.A1ModJulian aSat.Earth.SMA aSat.Earth.ECC</code></pre><p>At 
               process and reports all iterations/perturbations to a report
               file. </p></td></tr><tr><td><span class="guilabel">None</span></td><td><p> Shows only final solution after the end of an
               iterative process and reports only final solution to a report
-              file. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1D2EB"></a><h3>Where Reports are written</h3><p>GMAT allows you to write reports to any desired path or location.
+              file. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N21F07"></a><h3>Where Reports are written</h3><p>GMAT allows you to write reports to any desired path or location.
       You can do this by going to GMAT&rsquo;s startup file called
       <code class="literal">gmat_startup_file.txt </code>and define an absolute path
       under <code class="literal">OUTPUT_PATH</code>. This allows you to save report
@@ -206,7 +206,7 @@ aReport.Add = {aSat.A1ModJulian, aSat.Earth.ECC}</code></pre><p>An alternate met
       <code class="literal">ReportFile.FileName =
       C:\Users\rqureshi\Desktop\GMAT\mytestfolder\ReportFile.txt</code>,
       then report file will be saved in
-      <code class="literal">mytestfolder</code>.</p></div><div class="refsection"><a name="N1D331"></a><h3>Behavior when using ReportFile Resource &amp; Toggle
+      <code class="literal">mytestfolder</code>.</p></div><div class="refsection"><a name="N21F4D"></a><h3>Behavior when using ReportFile Resource &amp; Toggle
       Command</h3><p>GMAT allows you to use <span class="guilabel">Toggle</span> command while
       using the <span class="guilabel">Add</span> field of
       <span class="guilabel">ReportFile</span> resource. When <span class="guilabel">Toggle
@@ -231,7 +231,7 @@ BeginMissionSequence
 Toggle aReport Off
 Propagate aProp(aSat) {aSat.ElapsedDays = 2}
 Toggle aReport On
-Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></pre></div><div class="refsection"><a name="N1D35C"></a><h3>Behavior When Specifying Empty Brackets in ReportFile's Add
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></pre></div><div class="refsection"><a name="N21F78"></a><h3>Behavior When Specifying Empty Brackets in ReportFile's Add
       Field</h3><p>When using <span class="guilabel">ReportFile.Add</span> field, GMAT does
       not allow brackets to be left empty. The brackets must always be
       populated with values that you wish to report. If brackets are left
@@ -245,7 +245,7 @@ Create ReportFile aReport
 aReport.Add = {}
 
 BeginMissionSequence
-Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}</code></pre></div></div><div class="refsection"><a name="N1D367"></a><h2>Examples</h2><div class="informalexample"><p>Propagate an orbit and write cartesian state to a report file at
+Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}</code></pre></div></div><div class="refsection"><a name="N21F83"></a><h2>Examples</h2><div class="informalexample"><p>Propagate an orbit and write cartesian state to a report file at
       every integrator step</p><pre class="programlisting"><code class="code">Create Spacecraft aSat
 Create Propagator aProp
 
@@ -276,4 +276,4 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 1}
 Report aReport aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
 aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX ...
 aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ
-</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="RejectFilter.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Simulator.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">RejectFilter&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Simulator</td></tr></table></div></body></html>
+</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="OrbitView.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ch17.html#N201C5">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="XYPlot.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">OrbitView&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;XYPlot</td></tr></table></div></body></html>

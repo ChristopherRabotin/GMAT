@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -65,6 +65,7 @@
 #include "gmatdefs.hpp"
 #include "ShadowState.hpp"
 
+
 /** 
  * Solar radiation pressure model -- currently incomplete
  * 
@@ -91,7 +92,7 @@ public:
    virtual bool Initialize();
    virtual bool SetCentralBody();
    virtual bool GetDerivatives(Real *state, Real dt = 0.0, Integer order = 1, 
-         const Integer id = -1);
+                               const Integer id = -1);
    virtual Rvector6 GetDerivativesForSpacecraft(Spacecraft *sc);
 
    // inherited from GmatBase
@@ -130,14 +131,17 @@ public:
    virtual void SetSatelliteParameter(const Integer i,
                                       Integer parmID,
                                       const Real parm);
+
    virtual void ClearSatelliteParameters(const std::string parmName = "");
    
-   virtual void SetSpaceObject(const Integer i, GmatBase *obj);
+//   virtual void SetSpaceObject(const Integer i, GmatBase *obj);       // made changes by TUAN NGUYEN
+
+   virtual bool AttitudeAffectsDynamics();
 
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
    virtual bool SetStart(Gmat::StateElementId id, Integer index, 
-                         Integer quantity, Integer sizeOfType);
+                         Integer quantity, Integer totalSize);
 
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
@@ -147,9 +151,9 @@ protected:
    // Parameter IDs
    enum
    {
-      SHADOWMODELTYPE,   /// ID for the type of shadow model to use
-      VECTORTYPE        /// ID for the force orientation model to use
-//      ParamCount         /// Count of the parameters for this class waw: 04/19/04
+      SHADOWMODELTYPE,   ///< ID for the type of shadow model to use
+      VECTORTYPE        ///< ID for the force orientation model to use
+//      ParamCount         ///< Count of the parameters for this class waw: 04/19/04
    };
     
    /// Enumeration to ease pain of figuring out which shadow model is active
@@ -188,20 +192,25 @@ protected:
    /// Flag used to indicate that there are other bodies casting shadows
    bool hasMoons;
 
-   /// Basically the reflectivity of the body experiencing the force
+   /// Basically the reflectivity of the body experiencing the force for SRP spherical and SPAD shape models
    std::vector<Real> cr;
+
    /// Reflective surface area of the body, in square meters
    std::vector<Real> area;
    /// Mass of the body, in kg
    std::vector<Real> mass;
-   /// Pointers to the spacecraft
-   std::vector<GmatBase*> scObjs;
-   /// Solar flux, in W/m^2
+
+   /////// Pointers to the spacecraft                                      // made changes by TUAN NGUYEN
+   ////std::vector<GmatBase*> scObjs;                                      // made changes by TUAN NGUYEN
+   
+	/// Solar flux, in W/m^2
    Real flux;
    /// Solar flux, in N/m^2
    Real fluxPressure;
-   // the model to use - Spherical or SPADFile
-   std::string srpModel;
+   // the model to use - Spherical, SPADFile, or NPlate            // made changes by TUAN NGUYEN
+   std::string srpShapeModel;                                       // made changes by TUAN NGUYEN
+   ShapeModel  srpShapeModelIndex;                                  // made changes by TUAN NGUYEN
+
    /// Distance from the Sun, currently set to a dummy value
    Real sunDistance;
    /// Nominal distance to the Sun used in the model: 1 AU
@@ -216,7 +225,7 @@ protected:
    Real pcbrad;
    /// Weighting for partial lighting
    Real percentSun;
-   /// Flag used to track is the SRP STM partial sun message has posted
+   /// Flag used to track if the SRP STM partial sun message has posted
    bool warnSRPMath;
    /// Central body ID for the model
    Integer bodyID;
@@ -242,16 +251,20 @@ protected:
    Integer crID;
    Integer areaID;
 
-   bool estimatingCr;
+   //bool estimatingCr;                        // made changes by TUAN NGUYEN
    Integer crEpsilonID;
-   Integer crEpsilonRow;
+   //Integer crEpsilonRow;                     // made changes by TUAN NGUYEN
    std::vector<Real> crEpsilon;
-   std::vector<Real> crInitial;
+
 
 //   void     FindShadowState(bool &lit, bool &dark, Real *state);
 //   Real     ShadowFunction(Real *state);
    Rvector6 ComputeSPADAcceleration(Integer scID, Real ep,
                                     Real *state, Real *cbSun);
+
+   /// It is used for N-Plates model
+   Rvector6 ComputeNPlateAcceleration(Integer scID, Real ep,                // made changes by TUAN NGUYEN
+                                      Rvector6 state, Real *cbSun);         // made changes by TUAN NGUYEN
 
    static const Real FLUX_LOWER_BOUND;
    static const Real FLUX_UPPER_BOUND;

@@ -5,7 +5,7 @@
 
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,6 +38,7 @@
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "Spacecraft.hpp"
+#include "Plate.hpp"                                 // made changes by TUAN NGUYEN
 #include "Parameter.hpp"
 #include "Propagator.hpp"
 #include "ODEModel.hpp"
@@ -59,13 +60,13 @@
 #include "Attitude.hpp"
 
 class MeasurementModelBase;
-class CoreMeasurement;
+//class CoreMeasurement;
 class ErrorModel;
 class DataFilter;
 class DataFile;
 class ObType;
-class TrackingSystem;
-class TrackingData;
+//class TrackingSystem;
+//class TrackingData;
 class EphemerisFile;
 class Interface;
 class EventLocator;
@@ -96,6 +97,10 @@ public:
    // methods to create and return objects of the various types
    SpaceObject*           CreateSpacecraft(const std::string &ofType,
                                            const std::string &withName = "");
+
+   Plate*                 CreatePlate(const std::string &ofType,                         // made changes by TUAN NGUYEN
+                                      const std::string &withName = "");                 // made changes by TUAN NGUYEN
+
    Parameter*             CreateParameter(const std::string &ofType,
                                           const std::string &withName = "");
    Propagator*            CreatePropagator(const std::string &ofType,
@@ -124,6 +129,8 @@ public:
                                          const std::string &withName = "");
    Hardware*              CreateHardware(const std::string &ofType,
                                          const std::string &withName = "");
+   FieldOfView*           CreateFieldOfView(const std::string &ofType,
+                                            const std::string &withName = "");
    AxisSystem*            CreateAxisSystem(const std::string &ofType,
                                            const std::string &withName = "");
    MathNode*              CreateMathNode(const std::string &ofType,
@@ -133,8 +140,8 @@ public:
    SpacePoint*            CreateSpacePoint(const std::string &ofType,
                                            const std::string &withName = "");
 
-   CoreMeasurement*       CreateMeasurement(const std::string &ofType,
-                                            const std::string &withName = "");
+//   CoreMeasurement*       CreateMeasurement(const std::string &ofType,
+//                                            const std::string &withName = "");
 
    ErrorModel*            CreateErrorModel(const std::string &ofType,
                                             const std::string &withName = "");
@@ -159,9 +166,9 @@ public:
                                                  const std::string &withName);
    DataFile*              CreateDataFile(const std::string &ofType,
                                          const std::string &withName);
-   TrackingSystem*        CreateTrackingSystem(const std::string &ofType,
-                                               const std::string &withName);
-   TrackingData*          CreateTrackingData(const std::string &withName = "");
+   //TrackingSystem*        CreateTrackingSystem(const std::string &ofType,
+   //                                            const std::string &withName);
+   //TrackingData*          CreateTrackingData(const std::string &withName = "");
    EventLocator*          CreateEventLocator(const std::string &ofType,
                                              const std::string &withName = "");
 
@@ -180,7 +187,7 @@ public:
                                 const std::string &theSubtype);
 
    // method to return the base type for the input string
-   UnsignedInt       GetBaseTypeOf(const std::string &typeName);
+   UnsignedInt            GetBaseTypeOf(const std::string &typeName);
    
 protected:
    StringArray            entireList;

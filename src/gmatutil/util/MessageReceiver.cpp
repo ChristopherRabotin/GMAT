@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -31,11 +31,41 @@
 //------------------------------------------------------------------------------
 
 #include "MessageReceiver.hpp"
-#include "FileManager.hpp"
 #include "FileUtil.hpp"
 #include "StringUtil.hpp"
 #include <fstream>                  // for checking GmatFunction declaration
 #include <sstream>                  // for checking GmatFunction declaration
+
+
+//------------------------------------------------------------------------------
+// void SetEchoMode(bool echo)
+//------------------------------------------------------------------------------
+/**
+ * Sets the echo mode for derived classes that support echoing
+ *
+ * The APIMessageReceiver uses this setting to echo log messages to the user
+ *
+ * @param echo The mode setting
+ */
+//------------------------------------------------------------------------------
+void MessageReceiver::SetEchoMode(bool echo)
+{
+}
+
+//------------------------------------------------------------------------------
+// void ToggleConsolePrinting(bool printToCon)
+//------------------------------------------------------------------------------
+/**
+ * Toggle whether to print to the console screen for derived classes that are
+ * console type message receivers
+ *
+ * @param printToCon New value of whether or not to print to the console when
+ *        LogMessage is called
+ */
+//------------------------------------------------------------------------------
+void MessageReceiver::ToggleConsolePrinting(bool printToCon)
+{
+}
 
 //---------------------------------
 //  protected methods

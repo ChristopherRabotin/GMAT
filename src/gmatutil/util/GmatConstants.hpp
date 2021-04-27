@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -220,15 +220,15 @@ namespace GmatMathConstants
 namespace GmatOrbitConstants
 {
    // Undefined
-   const static Real ORBIT_REAL_UNDEFINED = GmatRealConstants::REAL_UNDEFINED_LARGE;
+   static const Real ORBIT_REAL_UNDEFINED = GmatRealConstants::REAL_UNDEFINED_LARGE;
 
    // Tolerance
-   const static Real KEP_TOL         = 1.0e-11;
-   const static Real KEP_ANOMALY_TOL = 1.0e-12;
-   const static Real KEP_ZERO_TOL    = 1.0e-30;
-   const static Real KEP_ECC_TOL     = 1.0e-7;  // Determined to using numerical experiments
+   static const Real KEP_TOL         = 1.0e-11;
+   static const Real KEP_ANOMALY_TOL = 1.0e-12;
+   static const Real KEP_ZERO_TOL    = 1.0e-30;
+   static const Real KEP_ECC_TOL     = 1.0e-7;  // Determined to using numerical experiments
                                              // after multiple transformations
-   const static Real ECC_RANGE_TOL   = 1.0e-5;
+   static const Real ECC_RANGE_TOL   = 1.0e-5;
 
 } // GmatOrbitConstants
 
@@ -236,7 +236,7 @@ namespace GmatOrbitConstants
 namespace GmatAttitudeConstants
 {
    // Undefined
-   const static Real ATTITUDE_REAL_UNDEFINED = GmatRealConstants::REAL_UNDEFINED_LARGE;
+   static const Real ATTITUDE_REAL_UNDEFINED = GmatRealConstants::REAL_UNDEFINED_LARGE;
 
    // Tolerance
    const Real     QUAT_MIN_MAG                 = 1.0e-10;

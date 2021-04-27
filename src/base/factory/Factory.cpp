@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -82,6 +82,32 @@ SpaceObject* Factory::CreateSpacecraft(const std::string &ofType,
                                        const std::string &withName)
 {
    throw FactoryException("requested object must be of type SpaceObject");
+}
+
+
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+//  Plate* CreatePlate(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+* Must be implemented by derived classes that create Plate objects -
+* in that case, it returns a new Plate object.  Otherwise, it
+* throws an exception indicating that the class does not create objects of
+* type Plate.
+*
+* @param <ofType>   specific type of Plate object to create.
+* @param <withName> name to give to the newly created Plate object.
+*
+* @return pointer to a new Plate object.
+*
+* @exception <FactoryException> thrown if the factory does not create
+* objects of type Plate.
+*/
+//------------------------------------------------------------------------------
+Plate* Factory::CreatePlate(const std::string &ofType,
+	const std::string &withName)
+{
+	throw FactoryException("requested object must be of type Plate");
 }
 
 //------------------------------------------------------------------------------
@@ -595,6 +621,33 @@ Hardware* Factory::CreateHardware(const std::string &ofType,
    ("Factory::CreateHardware() must be implemented by the HardwareFactory\n");
 }
 
+//------------------------------------------------------------------------------
+//  FieldOfView* CreateFieldOfView(const std::string &ofType,
+//                           const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ *
+ * Must be implemented by derived classes that create FieldOfView objects -
+ * in that case, it returns a new FieldOfView object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type FieldOfView.
+ *
+ * @param <ofType>   specific type of FieldOfView object to create.
+ * @param <withName> name to give to the newly created FieldOfView object.
+ *
+ * @return pointer to a new FieldOfView object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type FieldOfView.
+ */
+//------------------------------------------------------------------------------
+FieldOfView* Factory::CreateFieldOfView(const std::string &ofType,
+                                  const std::string &withName)
+{
+   throw FactoryException
+   ("Factory::CreateFieldOfView() must be implemented by the FieldOfViewFactory\n");
+}
+
 
 //------------------------------------------------------------------------------
 //  AxisSystem* CreateAxisSystem(const std::string &ofType,
@@ -742,33 +795,33 @@ MeasurementModelBase* Factory::CreateMeasurementModel(const std::string & ofType
 }
 
 
-//------------------------------------------------------------------------------
-// CoreMeasurement* CreateMeasurement(const std::string & ofType,
-//    const std::string & withName)
-//------------------------------------------------------------------------------
-/**
- * Creates a fundamental measurement object.
- *
- * Must be implemented by derived classes that create CoreMeasurement objects -
- * in that case, it returns a new CoreMeasurement object.  Otherwise, it
- * throws an exception indicating that the class does not create objects of
- * type CoreMeasurement.
- *
- * @param <ofType>   specific type of CoreMeasurement object to create.
- * @param <withName> name to give to the newly created CoreMeasurement object.
- *
- * @return pointer to a new CoreMeasurement object.
- *
- * @exception <FactoryException> thrown if the factory does not create
- *                               objects of type CoreMeasurement.
- */
-//------------------------------------------------------------------------------
-CoreMeasurement* Factory::CreateMeasurement(const std::string & ofType,
-                                        const std::string & withName)
-{
-   throw FactoryException
-   ("Factory::CreateMeasurement() must be implemented by a MeasurementFactory\n");
-}
+////------------------------------------------------------------------------------
+//// CoreMeasurement* CreateMeasurement(const std::string & ofType,
+////    const std::string & withName)
+////------------------------------------------------------------------------------
+///**
+// * Creates a fundamental measurement object.
+// *
+// * Must be implemented by derived classes that create CoreMeasurement objects -
+// * in that case, it returns a new CoreMeasurement object.  Otherwise, it
+// * throws an exception indicating that the class does not create objects of
+// * type CoreMeasurement.
+// *
+// * @param <ofType>   specific type of CoreMeasurement object to create.
+// * @param <withName> name to give to the newly created CoreMeasurement object.
+// *
+// * @return pointer to a new CoreMeasurement object.
+// *
+// * @exception <FactoryException> thrown if the factory does not create
+// *                               objects of type CoreMeasurement.
+// */
+////------------------------------------------------------------------------------
+//CoreMeasurement* Factory::CreateMeasurement(const std::string & ofType,
+//                                        const std::string & withName)
+//{
+//   throw FactoryException
+//   ("Factory::CreateMeasurement() must be implemented by a MeasurementFactory\n");
+//}
 
 
 //------------------------------------------------------------------------------
@@ -968,64 +1021,64 @@ Interface* Factory::CreateInterface(const std::string &ofType, const std::string
 }
 
 
-//------------------------------------------------------------------------------
-// TrackingSystem* Factory::CreateTrackingSystem(const std::string &ofType,
-//                                         const std::string &withName)
-//------------------------------------------------------------------------------
-/**
- * Creates a TrackingSystem object.
- *
- * Must be implemented by derived classes that create TrackingSystem objects -
- * in that case, it returns a new TrackingSystem object.  Otherwise, it
- * throws an exception indicating that the class does not create objects of
- * type TrackingSystem.
- *
- * @param <ofType>   specific type of TrackingSystem object to create.
- * @param <withName> name to give to the newly created TrackingSystem object.
- *
- * @return pointer to a new TrackingSystem object.
- *
- * @exception <FactoryException> thrown if the factory does not create
- *                               objects of type TrackingSystem.
- */
-//------------------------------------------------------------------------------
-TrackingSystem* Factory::CreateTrackingSystem(const std::string &ofType,
-         const std::string &withName)
-{
-   throw FactoryException
-      ("Factory::CreateTrackingSystem() must be implemented by a "
-               "TrackingSystemFactory\n");
-}
+//////------------------------------------------------------------------------------
+////// TrackingSystem* Factory::CreateTrackingSystem(const std::string &ofType,
+//////                                         const std::string &withName)
+//////------------------------------------------------------------------------------
+/////**
+//// * Creates a TrackingSystem object.
+//// *
+//// * Must be implemented by derived classes that create TrackingSystem objects -
+//// * in that case, it returns a new TrackingSystem object.  Otherwise, it
+//// * throws an exception indicating that the class does not create objects of
+//// * type TrackingSystem.
+//// *
+//// * @param <ofType>   specific type of TrackingSystem object to create.
+//// * @param <withName> name to give to the newly created TrackingSystem object.
+//// *
+//// * @return pointer to a new TrackingSystem object.
+//// *
+//// * @exception <FactoryException> thrown if the factory does not create
+//// *                               objects of type TrackingSystem.
+//// */
+//////------------------------------------------------------------------------------
+////TrackingSystem* Factory::CreateTrackingSystem(const std::string &ofType,
+////         const std::string &withName)
+////{
+////   throw FactoryException
+////      ("Factory::CreateTrackingSystem() must be implemented by a "
+////               "TrackingSystemFactory\n");
+////}
 
 
-//------------------------------------------------------------------------------
-// TrackingData* Factory::CreateTrackingData(const std::string &ofType,
-//                                         const std::string &withName)
-//------------------------------------------------------------------------------
-/**
- * Creates a TrackingData object.
- *
- * Must be implemented by derived classes that create TrackingData objects -
- * in that case, it returns a new TrackingData object.  Otherwise, it
- * throws an exception indicating that the class does not create objects of
- * type TrackingData.
- *
- * @param <ofType>   specific type of TrackingData object to create.
- * @param <withName> name to give to the newly created TrackingData object.
- *
- * @return pointer to a new TrackingData object.
- *
- * @exception <FactoryException> thrown if the factory does not create
- *                               objects of type TrackingData.
- */
-//------------------------------------------------------------------------------
-TrackingData* Factory::CreateTrackingData(const std::string &ofType,
-         const std::string &withName)
-{
-   throw FactoryException
-      ("Factory::CreateTrackingData() must be implemented by a "
-               "TrackingDataFactory\n");
-}
+////------------------------------------------------------------------------------
+//// TrackingData* Factory::CreateTrackingData(const std::string &ofType,
+////                                         const std::string &withName)
+////------------------------------------------------------------------------------
+///**
+// * Creates a TrackingData object.
+// *
+// * Must be implemented by derived classes that create TrackingData objects -
+// * in that case, it returns a new TrackingData object.  Otherwise, it
+// * throws an exception indicating that the class does not create objects of
+// * type TrackingData.
+// *
+// * @param <ofType>   specific type of TrackingData object to create.
+// * @param <withName> name to give to the newly created TrackingData object.
+// *
+// * @return pointer to a new TrackingData object.
+// *
+// * @exception <FactoryException> thrown if the factory does not create
+// *                               objects of type TrackingData.
+// */
+////------------------------------------------------------------------------------
+//TrackingData* Factory::CreateTrackingData(const std::string &ofType,
+//         const std::string &withName)
+//{
+//   throw FactoryException
+//      ("Factory::CreateTrackingData() must be implemented by a "
+//               "TrackingDataFactory\n");
+//}
 
 //------------------------------------------------------------------------------
 //  StringArray GetListOfCreatableObjects() const

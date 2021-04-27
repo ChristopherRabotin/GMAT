@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -105,6 +105,10 @@ public:
    virtual void                  GetLastRotationMatrix(Real *mat) const;
    virtual Rmatrix33             GetLastRotationDotMatrix() const;
    virtual void                  GetLastRotationDotMatrix(Real *mat) const;
+
+	virtual std::vector<Rmatrix33>                                        // made changes by TUAN NGUYEN
+		                           GetDerivativeOfLastRotationMatrix();    // made changes by TUAN NGUYEN
+
    virtual bool                  AreAxesOfType(const std::string &ofType) const;
    virtual std::string           GetBaseSystem() const;
    
@@ -208,6 +212,8 @@ public:
                             SpacePoint *secondary, SpacePoint *j2000Body,
                             SolarSystem *solarSystem, bool initializeIt = true);
    
+	bool  SetCalculateRotMatrixDeriv(bool turnOn);                            // made changes by TUAN NGUYEN
+
 protected:
 
    enum

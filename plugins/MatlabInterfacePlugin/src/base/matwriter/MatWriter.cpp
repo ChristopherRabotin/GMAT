@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2016 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -185,7 +185,8 @@ bool MatWriter::OpenFile()
 {
     // check mat_file_rev
    if ( (format != "w4") && (format != "w6") &&
-        (format != "w7") && (format != "w7.3") )
+        (format != "w7") && (format != "w7.3") &&
+        (format != "w") )
    {
       MessageInterface::ShowMessage("MATLAB Writer .mat version %s invalid; "
             "defaulting to w6\n", format.c_str());
@@ -225,8 +226,12 @@ bool MatWriter::WriteData(const std::string &obj_name)
       throw UtilityException("Cannot write MATLAB data: MAT Structure array "
               "not created");
 
+   if (pmat == NULL)                                                                     // made changes by TUAN NGUYEN
+      throw UtilityException("Cannot write MATLAB data: MATFile was not openned yet");   // made changes by TUAN NGUYEN
+
    for (unsigned int i = 0; i < allData.size(); ++i)
-       ((MatData*)(allData[i]))->WriteData(pmat, obj_name, mat_struct);
+      for (unsigned int j = 0; j < allData[i].size(); ++j)
+          ((MatData*)(allData[i][j]))->WriteData(pmat, obj_name, mat_struct, i);
 
    return true;
 }
@@ -243,40 +248,45 @@ bool MatWriter::WriteData(const std::string &obj_name)
 bool MatWriter::CloseFile()
 {
    // close file
-   if (matClose(pmat) != 0)
-      throw UtilityException("MATLAB Writer: Error closing .mat file");
-
+   if (pmat)                               // made changes by TUAN NGUYEN
+   {                                       // made changes by TUAN NGUYEN
+      if (matClose(pmat) != 0)
+         throw UtilityException("MATLAB Writer: Error closing .mat file");
+      pmat = NULL;                         // made changes by TUAN NGUYEN
+   }                                       // made changes by TUAN NGUYEN
    return true;
 }
 
 //------------------------------------------------------------------------------
-// bool DescribeData (const StringArray &variableList)
+// bool DescribeData (const StringArray &variableList, UnsignedInt size)
 //------------------------------------------------------------------------------
 /**
  * Initialization routine used to decribe the incoming data
  *
  * @param variableList The names of the incoming data containers
+ * @param size Number of elements in the structure array
  *
  * @return true
  */
 //------------------------------------------------------------------------------
-bool MatWriter::DescribeData(const StringArray &variableList)
+bool MatWriter::DescribeData(const StringArray &variableList, UnsignedInt size)
 {
-   SetMxArray(variableList);
+   SetMxArray(variableList, size);
    return true;
 }
 
 //------------------------------------------------------------------------------
-// void SetMxArray(std::vector<std::string> variable_list)
+// void SetMxArray(std::vector<std::string> variable_list, mwSize size)
 //------------------------------------------------------------------------------
 /**
  * Initializes the structured array that all the data will get written to.
  * data format will be mat_struct.variable 
  *
  * @param variable_list list of variable names to write to the structured array
+ * @param size Number of elements in the structure array
  */
 //------------------------------------------------------------------------------
-void MatWriter::SetMxArray(const StringArray &variable_list)
+void MatWriter::SetMxArray(const StringArray &variable_list, mwSize size)
 {
    // get number of fields
    int number_of_fields = variable_list.size();
@@ -289,7 +299,37 @@ void MatWriter::SetMxArray(const StringArray &variable_list)
       fields[i] = variable_list[i].c_str();
 
    // create structured array handle
-   mat_struct = mxCreateStructMatrix(1, 1, number_of_fields, fields);
+   mat_struct = mxCreateStructMatrix(size, 1, number_of_fields, fields);
 
    delete [] fields;
+}
+
+//------------------------------------------------------------------------------
+// void UnsetMxArray()
+//------------------------------------------------------------------------------
+/**
+ * Cleans up the structured array that all data gets written to. This will cascade down
+ * to all sub-arrays.
+ *
+ */
+ //------------------------------------------------------------------------------
+void MatWriter::UnsetMxArray() {
+   if (mat_struct) {
+      mxDestroyArray(mat_struct);
+      mat_struct = NULL;
+   }
+}
+
+//-------------------------------------------------------------------------------------
+// bool ClearData()
+//-------------------------------------------------------------------------------------
+/**
+ * Clears the vector of WriterData objects
+ */
+ //-------------------------------------------------------------------------------------
+bool MatWriter::ClearData()
+{
+   bool retval = DataWriter::ClearData();
+   UnsetMxArray();
+   return retval;
 }

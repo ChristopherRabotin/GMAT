@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -661,7 +661,7 @@ bool StkEPropagator::Initialize()
 
             Rvector6 interpVal = ephem.InterpolatePoint(currentEpoch);
             std::memcpy(state, interpVal.GetDataVector(),
-                  dimension*sizeof(Real));
+                  6*sizeof(Real));
             lastEpoch = currentEpoch;
 
             timeFromEphemStart = (lastEpoch - ephemStart) *
@@ -799,8 +799,7 @@ bool StkEPropagator::Step()
    
    Rvector6 interpVal = ephem.InterpolatePoint(currentEpoch);
    lastEpoch = currentEpoch;
-   std::memcpy(state, interpVal.GetDataVector(),
-         dimension*sizeof(Real));
+   std::memcpy(state, interpVal.GetDataVector(), 6*sizeof(Real));
 
    #ifdef DEBUG_FINALSTEP
       if (currentEpoch == ephemEnd)
@@ -877,8 +876,7 @@ void StkEPropagator::UpdateState()
    #endif
 
    Rvector6 theState = ephem.InterpolatePoint(currentEpoch);
-   std::memcpy(state, theState.GetDataVector(), //theState.GetDataVector(),
-         dimension*sizeof(Real));
+   std::memcpy(state, theState.GetDataVector(), 6*sizeof(Real));
 }
 
 

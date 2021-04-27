@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2015 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -13,7 +13,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: Jan 13, 2016
 /**
- * 
+ * Model for thrusts applied by a thrust history file
  */
 //------------------------------------------------------------------------------
 
@@ -22,7 +22,8 @@
 #include "MessageInterface.hpp"
 #include "TimeTypes.hpp"
 #include "ODEModelException.hpp"
-#include <sstream>               // for stringstream
+#include "PropagationStateManager.hpp"
+#include <sstream>
 
 
 //#define DEBUG_INITIALIZATION
@@ -31,6 +32,7 @@
 //#define DEBUG_MASS_FLOW
 //#define DEBUG_SEGMENTS
 //#define DEBUG_REF_OBJECTS
+//#define DEBUG_TSF_SOLVEFOR
 
 //------------------------------------------------------------------------------
 // FileThrust(const std::string &name)
@@ -54,7 +56,12 @@ FileThrust::FileThrust(const std::string &name) :
    coordSystem             (NULL),
    liner                   (NULL),
    spliner                 (NULL),
-   warnTooFewPoints        (true)
+   warnTooFewPoints        (true),
+   estimatingTSF           (false),
+   tsfEpsilonID            (-1),
+   tsfEpsilonRow           (-1),
+   thrustSF                (1.0),
+   thrustSFinitial         (0.0)
 {
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
    objectTypeNames.push_back("FileThrust");
@@ -92,6 +99,7 @@ FileThrust::FileThrust(const FileThrust& ft) :
    fillCartesian           (ft.fillCartesian),
    dataIsThrust            (ft.dataIsThrust),
    massFlowWarningNeeded   (true),
+   segmentNames            (ft.segmentNames),
    segments                (ft.segments),
    mDotIndex               (ft.mDotIndex),
    depleteMass             (ft.depleteMass),
@@ -100,8 +108,14 @@ FileThrust::FileThrust(const FileThrust& ft) :
    coordSystem             (NULL),
    liner                   (NULL),
    spliner                 (NULL),
-   warnTooFewPoints        (true)
-{
+   warnTooFewPoints        (true),
+   estimatingTSF           (ft.estimatingTSF),
+   tsfEpsilonID            (ft.tsfEpsilonID),
+   tsfEpsilonRow           (ft.tsfEpsilonRow),
+   tsfInitial              (ft.tsfInitial),
+   thrustSF                (ft.thrustSF),
+   thrustSFinitial         (ft.thrustSFinitial)
+   {
 }
 
 //------------------------------------------------------------------------------
@@ -126,12 +140,21 @@ FileThrust& FileThrust::operator=(const FileThrust& ft)
       cartIndex     = ft.cartIndex;
       fillCartesian = ft.fillCartesian;
       dataIsThrust  = ft.dataIsThrust;
+      segmentNames  = ft.segmentNames;
       segments      = ft.segments;
       mDotIndex     = ft.mDotIndex;
       depleteMass   = ft.depleteMass;
       activeTankName = ft.activeTankName;
       csNames       = ft.csNames;
+      estimatingTSF = ft.estimatingTSF;
+      tsfEpsilonID  = ft.tsfEpsilonID;
+      tsfEpsilonRow = ft.tsfEpsilonRow;
+      tsfInitial    = ft.tsfInitial;
+      thrustSF      = ft.thrustSF;
+      thrustSFinitial = ft.thrustSFinitial;
       coordSystem   = NULL;
+
+      // Interpolator resets
       if (liner != NULL)
       {
          delete liner;
@@ -199,6 +222,155 @@ void FileThrust::Clear(const UnsignedInt type)
    }
 }
 
+
+//------------------------------------------------------------------------------
+// Integer         GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * Returns look-up ID for thrust segment data.
+ *
+ * This method overrides the GmatBase method used to look up scriptable
+ * parameters.  The use here is not standard, so should not be replicated
+ * elsewhere.
+ *
+ * @param str The string identifying the look up parameter
+ *
+ * @return An overloaded ID for the parameter
+ */
+//------------------------------------------------------------------------------
+Integer FileThrust::GetParameterID(const std::string &str) const
+{
+   Integer retval = -1, seg, id;
+
+   UnsignedInt loc = str.find(".");
+   if (loc != std::string::npos)
+   {
+      std::string segName, parmName;
+      segName = str.substr(0, loc);
+      parmName = str.substr(loc+1);
+
+      for (UnsignedInt i = 0; i < segments->size(); ++i)
+      {
+         if (segments->at(i).GetName() == segName)
+         {
+            seg = i;
+            id = segments->at(i).GetParameterID(parmName);
+            retval = 100 * (i+1) + segments->at(i).GetParameterID(parmName);
+            break;
+         }
+      }
+   }
+
+   #ifdef DEBUG_MAPPING
+      MessageInterface::ShowMessage("In FileThrust: Loaded ID for %s is %d "
+            "for segment %d, parameter %d\n", str.c_str(), retval, seg, id);
+   #endif
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Identifies parameters that are not written to script
+ *
+ * @param id The parameter checked here
+ *
+ * @return true for parameters that are hidden
+ *
+ * @note: Since this is an internal object (a force model element), this method
+ * isn't really used, but included for completeness
+ */
+//------------------------------------------------------------------------------
+bool FileThrust::IsParameterReadOnly(const Integer id) const
+{
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Identifies parameters that are not written to script
+ *
+ * @param label The parameter checked here
+ *
+ * @return true for parameters that are hidden
+ *
+ * @note: Since this is an internal object (a force model element), this method
+ * isn't really used, but included for completeness
+ */
+//------------------------------------------------------------------------------
+bool FileThrust::IsParameterReadOnly(const std::string &label) const
+{
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Accessor for floating point parameter data
+ *
+ * Note that the usage here is non-standard, and used for the solve-for
+ * implementation so that a common interface is used.
+ *
+ * @param id The ID of the parameter
+ *
+ * @return The parameter value
+ */
+//------------------------------------------------------------------------------
+Real FileThrust::GetRealParameter(const Integer id) const
+{
+   if (id > 99)
+   {
+      // Break ID apart into segment number and parm id
+      Integer segId, parmId;
+      segId = (Integer)(id / 100) - 1;
+      parmId = id - 100 * (segId + 1);
+
+      #ifdef DEBUG_MAPPING
+         MessageInterface::ShowMessage("Get %d: Segment %d, parm %d\n", id,
+               segId, parmId);
+      #endif
+
+      return segments->at(segId).GetRealParameter(parmId); 
+   }
+
+   return GmatBase::GetRealParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * Accessor for floating point parameter data
+ *
+ * Note that the usage here is non-standard, and used for the solve-for
+ * implementation so that a common interface is used.
+ *
+ * @param id The ID of the parameter
+ * @param value The new parameter value
+ *
+ * @return The parameter value
+ */
+//------------------------------------------------------------------------------
+Real FileThrust::SetRealParameter(const Integer id, const Real value)
+{
+   if (id > 99)
+   {
+      // Break ID apart into segment number and parm id
+      Integer segId, parmId;
+      segId = (Integer)(id / 100) - 1;
+      parmId = id - 100 * (segId + 1);
+
+      return segments->at(segId).SetRealParameter(parmId, value);
+   }
+
+   return PhysicalModel::SetRealParameter(id, value);
+}
+
 //------------------------------------------------------------------------------
 // const ObjectTypeArray& GetRefObjectTypeArray()
 //------------------------------------------------------------------------------
@@ -214,6 +386,7 @@ const ObjectTypeArray& FileThrust::GetRefObjectTypeArray()
    refObjectTypes.clear();
    refObjectTypes.push_back(Gmat::COORDINATE_SYSTEM);
    refObjectTypes.push_back(Gmat::SPACECRAFT);
+   refObjectTypes.push_back(Gmat::INTERFACE);
    return refObjectTypes;
 }
 
@@ -237,7 +410,8 @@ bool FileThrust::SetRefObjectName(const UnsignedInt type,
 {
    if (type == Gmat::SPACECRAFT)
    {
-      if (find(spacecraftNames.begin(), spacecraftNames.end(), name) == spacecraftNames.end())
+      if (find(spacecraftNames.begin(), spacecraftNames.end(), name) ==
+            spacecraftNames.end())
          spacecraftNames.push_back(name);
       return true;
    }
@@ -275,6 +449,10 @@ const StringArray& FileThrust::GetRefObjectNameArray(
    if ((type == Gmat::SPACECRAFT) || (type == Gmat::UNKNOWN_OBJECT))
       refObjectNames.insert(refObjectNames.begin(), spacecraftNames.begin(),
             spacecraftNames.end());
+
+   if ((type == Gmat::INTERFACE) || (type == Gmat::UNKNOWN_OBJECT))
+      refObjectNames.insert(refObjectNames.begin(), segmentNames.begin(),
+         segmentNames.end());
 
    if ((type == Gmat::COORDINATE_SYSTEM) || (type == Gmat::UNKNOWN_OBJECT))
       refObjectNames.insert(refObjectNames.begin(), csNames.begin(),
@@ -385,6 +563,16 @@ bool FileThrust::RenameRefObject(const UnsignedInt type,
       return true;
    }
 
+   if (type == Gmat::INTERFACE)
+   {
+      for (UnsignedInt i = 0; i < segmentNames.size(); ++i)
+      {
+         if (segmentNames[i] == oldName)
+            segmentNames[i] = newName;
+      }
+      return true;
+   }
+
    if (type == Gmat::COORDINATE_SYSTEM)
    {
       for (UnsignedInt i = 0; i < csNames.size(); ++i)
@@ -421,6 +609,16 @@ GmatBase* FileThrust::GetRefObject(const UnsignedInt type,
       for (UnsignedInt i = 0; i < spacecraft.size(); ++i)
          if (spacecraft[i]->GetName() == name)
             return spacecraft[i];
+      return NULL;
+   }
+   if (type == Gmat::INTERFACE)
+   {
+      if (name == "")
+         if (segments->size() > 0)
+            return &(segments->at(0));
+      for (UnsignedInt i = 0; i < segments->size(); ++i)
+         if (segments->at(i).GetName() == name)
+            return &(segments->at(i));
       return NULL;
    }
 
@@ -490,15 +688,36 @@ void FileThrust::SetSegmentList(std::vector<ThrustSegment> *segs)
    depleteMass = false;
 
    // Activate mass flow if any segment needs it and collect ref objects
+   segmentNames.clear();
    csNames.clear();
    for (UnsignedInt i = 0; i < segments->size(); ++i)
    {
       depleteMass |= segments->at(i).DepletesMass();
 
       // Collect the names of all of the coordinate systems needed
-      std::string name = segments->at(i).segData.csName;
-      if (find(csNames.begin(), csNames.end(), name) == csNames.end())
-         csNames.push_back(name);
+      std::string name = segments->at(i).GetName();
+      if (find(segmentNames.begin(), segmentNames.end(), name) == segmentNames.end())
+         segmentNames.push_back(name);
+
+      // Collect the names of all of the coordinate systems needed
+      std::string csname = segments->at(i).segData.csName;
+      if (find(csNames.begin(), csNames.end(), csname) == csNames.end())
+         csNames.push_back(csname);
+ 
+      // Set initial TSF
+      if (i < tsfInitial.size())
+      {
+          segments->at(i).SetRealParameter("TSF_Epsilon", 0.0);
+          thrustSF = segments->at(i).GetRealParameter("ThrustScaleFactor");
+          if (tsfInitial[i] == -99999999.9999)
+              tsfInitial[i] = segments->at(i).GetRealParameter("ThrustScaleFactor");
+      }
+      else
+      {
+          segments->at(i).SetRealParameter("TSF_Epsilon", 0.0);
+          thrustSF = segments->at(i).GetRealParameter("ThrustScaleFactor");
+          tsfInitial.push_back(segments->at(i).GetRealParameter("ThrustScaleFactor"));
+      }
    }
 
    #ifdef DEBUG_SEGMENTS
@@ -640,6 +859,11 @@ bool FileThrust::GetDerivatives(Real* state, Real dt, Integer order,
             (depleteMass ? "including mass flow" : "without mass flow"));
    #endif
 
+   #ifdef DEBUG_TSF_SOLVEFOR
+      MessageInterface::ShowMessage("===> %sEstimating TSF, Entries go in row %d\n",
+            (estimatingTSF ? "" : "NOT"), tsfEpsilonRow);
+   #endif
+
    if (fillCartesian)
    {
       Real accel[3], mDot, burnData[4];
@@ -653,13 +877,10 @@ bool FileThrust::GetDerivatives(Real* state, Real dt, Integer order,
       {
          i6 = cartIndex + i * 6;
 
-         if (1)  // <-- NEED A TEST HERE!
+         if (depleteMass)
          {
-            if (depleteMass)
-            {
-               mloc = mDotIndex + j;
-               ++j;
-            }
+            mloc = mDotIndex + j;
+            ++j;
          }
          else
             mloc = -1;
@@ -685,15 +906,27 @@ bool FileThrust::GetDerivatives(Real* state, Real dt, Integer order,
             #endif
 
             if (sat->GetType() != Gmat::SPACECRAFT)
-               throw ODEModelException("FiniteThrust::GetDerivatives Finite "
+               throw ODEModelException("FileThrust::GetDerivatives Finite "
                "burns cannot maneuver " + sat->GetTypeName() + " objects");
 
             // Start with zero thrust
             mDot = accel[0] = accel[1] = accel[2] = 0.0;
-            Real now = epoch + dt / GmatTimeConstants::SECS_PER_DAY;
-            ComputeAccelerationMassFlow(now, burnData);
+            if (HasPrecisionTime()) {
+               GmatTime segmentEpochGT = epochGT;
+               segmentEpochGT.AddSeconds(elapsedTime);
+               GmatTime nowGT = epochGT;
+               nowGT.AddSeconds(elapsedTime);
+               nowGT.AddSeconds(dt);
+               ComputeAccelerationMassFlow(segmentEpochGT, nowGT, burnData);
+            }
+            else {
+               Real segmentEpoch = epoch + elapsedTime / GmatTimeConstants::SECS_PER_DAY;
+               Real now = epoch + (elapsedTime + dt) / GmatTimeConstants::SECS_PER_DAY;
+               ComputeAccelerationMassFlow(segmentEpoch, now, burnData);
+            }
 
-             // Factor used to convert m/s^2 to km/s^2, and to divide out mass if modeling thrust
+            // Factor used to convert m/s^2 to km/s^2, and to divide out mass
+            // if modeling thrust
             Real factor = 0.001;
             if (dataIsThrust)
             {
@@ -789,6 +1022,141 @@ bool FileThrust::GetDerivatives(Real* state, Real dt, Integer order,
       MessageInterface::ShowMessage("FiniteThrust::GetDerivatives finished\n");
    #endif
 
+   Integer i, ix;
+   if (fillSTM || fillAMatrix)
+   {
+      Real now;
+      Real burnData[4];
+
+      #ifdef DEBUG_TSF_SOLVEFOR
+         MessageInterface::ShowMessage("FileThrust STM row count = %d\n",
+               stmRowCount);
+      #endif
+      
+      Integer iStart = stmStart;                    // made changes by TUAN NGUYEN
+      for (i = 0; i < satCount; ++i)
+      {
+         //Get Spacecraft object
+         Spacecraft* sc = (Spacecraft*)scObjs[i];
+
+         // Create aTilde matrix
+         Integer stmRowCount = sc->GetIntegerParameter("FullSTMRowCount");
+         Integer stmSize = stmRowCount * stmRowCount;
+         Real *aTilde = new Real[stmSize];
+         for (Integer j = 0; j < stmRowCount; ++j)
+         {
+            ix = j * stmRowCount;
+            for (Integer k = 0; k < stmRowCount; ++k)
+               aTilde[ix + k] = 0.0;
+         }
+
+         if (estimatingTSF)
+         {
+            // probably don't need this block
+            if (!fillCartesian) {
+                // in case ComputeAccelerationMassFlow() wasn't called
+                Real scaleFactors[2];
+                if (HasPrecisionTime())
+                {
+                   GmatTime segmentEpochGT = epochGT;
+                   segmentEpochGT.AddSeconds(elapsedTime);
+
+                   for (UnsignedInt i = 0; i < segments->size(); ++i)
+                   {
+                      if (InSegmentInterval((*segments)[i].segData.startEpochGT,
+                         (*segments)[i].segData.endEpochGT, segmentEpochGT))
+                      {
+                         (*segments)[i].GetScaleFactors(scaleFactors);
+                         scaleFactors[0] *= (1.0 + (*segments)[i].GetRealParameter("TSF_Epsilon"));
+                         thrustSF = scaleFactors[0];
+                         thrustSFinitial = tsfInitial[i];
+                         break;
+                      }
+                   }
+                }
+                else
+                {
+                   Real tt = epoch + elapsedTime / GmatTimeConstants::SECS_PER_DAY;
+
+                   for (UnsignedInt i = 0; i < segments->size(); ++i)
+                   {
+                      if (InSegmentInterval((*segments)[i].segData.startEpoch,
+                         (*segments)[i].segData.endEpoch, tt))
+                      {
+                         (*segments)[i].GetScaleFactors(scaleFactors);
+                         scaleFactors[0] *= (1.0 + (*segments)[i].GetRealParameter("TSF_Epsilon"));
+                         thrustSF = scaleFactors[0];
+                         thrustSFinitial = tsfInitial[i];
+                         break;
+                      }
+                   }
+                }
+            }
+
+            #ifdef DEBUG_TSF_SOLVEFOR
+               MessageInterface::ShowMessage("In FileThrust: ix = %d tsfEpsilonRow = %d, i = %d\n", ix, tsfEpsilonRow, i);
+            #endif
+            for (UnsignedInt jj = 0; jj < 3; ++jj)
+            {
+               ix = stmRowCount * (3 + jj);
+               aTilde[ix + tsfEpsilonRow] = deriv[i * 6 + 3 + jj] * thrustSFinitial / thrustSF;
+            }
+         }
+
+         // Integer iStart = stmStart + i * stmSize;           // made changes by TUAN NGUYEN
+         Integer element;
+         for (Integer j = 0; j < stmRowCount; ++j)
+         {
+            for (Integer k = 0; k < stmRowCount; ++k)
+            {
+               element = j * stmRowCount + k;
+               deriv[iStart + element] = aTilde[element];
+            }
+         }
+
+         #ifdef DUMP_DERIVATIVE
+            MessageInterface::ShowMessage("A-matrix:\n");
+            for (Integer m = 0; m < stmRowCount; ++m)
+            {
+               MessageInterface::ShowMessage("      ");
+               for (Integer n = 0; n < stmRowCount; ++n)
+               {
+                  if (n > 0)
+                     MessageInterface::ShowMessage(", ");
+                  MessageInterface::ShowMessage("%le", aTilde[m*stmRowCount + n]);
+               }
+               MessageInterface::ShowMessage("\n");
+            }
+            MessageInterface::ShowMessage("--------------------------------------"
+               "-----------------------------------------------------------\n");
+         #endif
+
+         #ifdef DEBUG_FINITEDIFF
+            MessageInterface::ShowMessage("Drag derivatives:\n   State: [");
+            Integer p, q;
+            for (p = 0; p < 6; ++p)
+              MessageInterface::ShowMessage(" %le ", deriv[p]);
+            MessageInterface::ShowMessage("]\n\n   A-Matrix: [");
+            for (p = 0; p < stmRowCount; ++p)
+            {
+               if (p > 0)
+                  MessageInterface::ShowMessage(";\n              ");
+               for (q = 0; q < stmRowCount; ++q)
+               {
+                  MessageInterface::ShowMessage(" %le ", deriv[6+p*stmRowCount+q]);
+               }
+            }
+            MessageInterface::ShowMessage("]\n\n");
+         #endif
+         
+         delete[] aTilde;                       // made changes by TUAN NGUYEN
+         //Handle varied size of STM            // made changes by TUAN NGUYEN
+         iStart = stmStart + stmSize;           // made changes by TUAN NGUYEN
+      }
+
+      //delete[] aTilde;                        // made changes by TUAN NGUYEN
+   }
+
    return retval;
 }
 
@@ -839,6 +1207,12 @@ bool FileThrust::SupportsDerivative(Gmat::StateElementId id)
       return true;
    }
 
+   if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
+      return true;
+
+   if (id == Gmat::ORBIT_A_MATRIX)
+      return true;
+
    return PhysicalModel::SupportsDerivative(id);
 }
 
@@ -853,13 +1227,21 @@ bool FileThrust::SupportsDerivative(Gmat::StateElementId id)
  * @param id State Element ID for the derivative type
  * @param index Starting index in the state vector for this type of derivative
  * @param quantity Number of objects that supply this type of data
+ * @param totalSize  Number of elements for a given state element ID. For case STM, 
+                     it is the number of elements in all STMs          // made changes by TUAN NGUYEN
  *
  * @return true if the type is supported, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool FileThrust::SetStart(Gmat::StateElementId id, Integer index,
-      Integer quantity, Integer sizeOfType)
+      Integer quantity, Integer totalSize)                             // made changes by TUAN NGUYEN
 {
+   #ifdef DEBUG_REGISTRATION
+      MessageInterface::ShowMessage("FileThrust setting start data for id = %d"
+            " to index %d; %d objects identified, size is %d\n", id, index,
+            quantity, sizeOfType);
+   #endif
+
    bool retval = false;
 
    switch (id)
@@ -879,6 +1261,24 @@ bool FileThrust::SetStart(Gmat::StateElementId id, Integer index,
          retval = true;
          break;
 
+	  case Gmat::ORBIT_STATE_TRANSITION_MATRIX:
+		  stmCount = quantity;
+		  stmStart = index;
+		  fillSTM = true;
+		  // stmRowCount = Integer(sqrt((Real)sizeOfType));            // made changes by TUAN NGUYEN
+		  totalSTMSize = totalSize;                                    // made changes by TUAN NGUYEN
+		  retval = true;
+		  break;
+
+	  case Gmat::ORBIT_A_MATRIX:
+		  aMatrixCount = quantity;
+		  aMatrixStart = index;
+		  fillAMatrix = true;
+		  // stmRowCount = Integer(sqrt((Real)sizeOfType));            // made changes by TUAN NGUYEN
+		  totalSTMSize = totalSize;                                    // made changes by TUAN NGUYEN
+		  retval = true;
+		  break;
+
       default:
          break;
    }
@@ -886,22 +1286,74 @@ bool FileThrust::SetStart(Gmat::StateElementId id, Integer index,
    return retval;
 }
 
+
 //------------------------------------------------------------------------------
-// void ComputeAccelerationMassFlow(const GmatEpoch atEpoch, Real burnData[4],
-//       SpaceObject *sat)
+// StringArray GetSolveForList()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves solve-for parameters supported for the FileThrust force
+ *
+ * @return The list of object/solve-for names
+ */
+//------------------------------------------------------------------------------
+StringArray FileThrust::GetSolveForList()
+{
+   solveForList.clear();
+
+   StringArray sfors;
+   std::string segName;
+
+   for (UnsignedInt i = 0; i < segments->size(); ++i)
+   {
+      segName = segments->at(i).GetName();
+      segName += ".";
+      sfors = segments->at(i).GetStringArrayParameter("SolveFors");
+      for (UnsignedInt j=0; j < sfors.size(); ++j)
+         solveForList.push_back(segName + sfors[j]);
+   }
+
+   return solveForList;
+}
+
+//------------------------------------------------------------------------------
+// void FileThrust::SetStmIndex(Integer id)
+//------------------------------------------------------------------------------
+/**
+ * Method invoked to set the STM index for this physical model
+ *
+ * @param id The index used to find the parameter in the STM
+ */
+ //------------------------------------------------------------------------------
+void FileThrust::SetStmIndex(Integer id, Integer paramID)
+{
+   if (paramID > 99)
+   {
+      // Get segment number from paramID
+      Integer segId;
+      segId = (Integer)(paramID / 100) - 1;
+
+      segments->at(segId).SetScaleFactorIndex(id);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void ComputeAccelerationMassFlow(const GmatEpoch segEpoch, const GmatEpoch atEpoch, Real burnData[4])
 //------------------------------------------------------------------------------
 /**
  * Retrieves dv data at a specified epoch from data in the thrust history file
  *
+ * @param segEpoch The epoch corresponding to dt=0 that is used to identify the segment
  * @param atEpoch The epoch of the data request
  * @param burnData The container receiving the acceleration and mass flow
  */
 //------------------------------------------------------------------------------
-void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
+void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch segEpoch, const GmatEpoch atEpoch,
       Real burnData[4])
 {
    // Start from nothin'
    burnData[0] = burnData[1] = burnData[2] = burnData[3] = 0.0;
+   dataBlock[0] = dataBlock[1] = dataBlock[2] = dataBlock[3] = dataBlock[4] = 0.0;
 
    Real scaleFactors[2];
 
@@ -910,14 +1362,39 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
    Integer index = -1;
    for (UnsignedInt i = 0; i < segments->size(); ++i)
    {
-      if (((*segments)[i].segData.startEpoch <= atEpoch) &&
-            ((*segments)[i].segData.endEpoch >= atEpoch))
+      if ((*segments)[i].segData.isActive &&
+            InSegmentInterval((*segments)[i].segData.startEpoch,
+            (*segments)[i].segData.endEpoch, segEpoch))
       {
          index = i;
-         // Factor used to convert m/s^2 to km/s^2, and to divide out mass if modeling thrust
+         // Factor used to convert m/s^2 to km/s^2, and to divide out mass if
+         // modeling thrust
          dataIsThrust = (*segments)[i].segData.modelThrust;
          (*segments)[i].GetScaleFactors(scaleFactors);
          coordSystem = (*segments)[i].segData.cs;
+
+         // Thrust Scale Factor Solve For
+         scaleFactors[0] *= (1.0 + (*segments)[i].GetRealParameter("TSF_Epsilon"));
+
+         thrustSF = scaleFactors[0];
+         thrustSFinitial = tsfInitial[i];
+
+         Integer tsfID = (*segments)[i].GetScaleFactorIndex();
+         Integer indexSTM = psm->GetSTMIndex(tsfID, NULL);                           // made changes by TUAN NGUYEN
+
+#ifdef DEBUG_TSF_SOLVEFOR
+         MessageInterface::ShowMessage("File TSF from psm %p (id %d) index in the STM "
+            "is %d, dim %d\n", psm, tsfID, index, dimension);
+#endif
+
+         // Thrust Scale Factor Solve For settings
+         if (indexSTM >= 0)
+         {
+            estimatingTSF = true;
+            tsfEpsilonRow = indexSTM;
+            fillSTM = true;
+         }
+
          break;
       }
    }
@@ -928,80 +1405,26 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
       dataBlock[6] = (*segments)[index].segData.massIntType;
 
       // Interpolate the thrust/acceleration
-      GetSegmentData(index, atEpoch);
-      switch ((Integer)dataBlock[5])
-      {
-      case ThfDataSegment::LINEAR:
-         LinearInterpolate(index, atEpoch);
-         #ifdef DEBUG_INTERPOLATION
-            MessageInterface::ShowMessage("Thrust/Acceleration: Linear Interpolation "
-                     "-> VXdot = %.12le\n", dataBlock[0] * scaleFactors[0]);
-         #endif
-         burnData[0] = dataBlock[0] * scaleFactors[0];
-         burnData[1] = dataBlock[1] * scaleFactors[0];
-         burnData[2] = dataBlock[2] * scaleFactors[0];
-         break;
 
-      case ThfDataSegment::SPLINE:
-         SplineInterpolate(index, atEpoch);
-         #ifdef DEBUG_INTERPOLATION
-            MessageInterface::ShowMessage("Thrust/Acceleration: Spline Interpolation "
-                     "-> VXdot = %.12le\n", dataBlock[0] * scaleFactors[0]);
-         #endif
-         burnData[0] = dataBlock[0] * scaleFactors[0];
-         burnData[1] = dataBlock[1] * scaleFactors[0];
-         burnData[2] = dataBlock[2] * scaleFactors[0];
-         break;
-
-      case ThfDataSegment::NONE:
-      default:
-         #ifdef DEBUG_INTERPOLATION
-            MessageInterface::ShowMessage("Thrust/Acceleration: No Interpolation "
-                     "-> VXdot = %.12le\n", dataBlock[0] * scaleFactors[0]);
-         #endif
-         burnData[0] = dataBlock[0] * scaleFactors[0];
-         burnData[1] = dataBlock[1] * scaleFactors[0];
-         burnData[2] = dataBlock[2] * scaleFactors[0];
-         break;
-      }
-
-      if (dataBlock[5] == dataBlock[6])
-      {
-         burnData[3] = dataBlock[3] * scaleFactors[1];
-      }
+      Integer profileIndex;
+      // First use segment epoch
+      Real offset = segEpoch - (*segments)[index].segData.startEpoch;
+      if ((*segments)[index].segData.endEpoch == segEpoch)
+         profileIndex = (*segments)[index].segData.profile.size() - 2;
       else
+         profileIndex = GetSegmentData(index, offset);
+
+      if (profileIndex >= 0)
       {
-         // Interpolate the mass flow, using data already collected
-         switch ((Integer)dataBlock[6])
-         {
-         case ThfDataSegment::LINEAR:
-            LinearInterpolate(index, atEpoch);
-            #ifdef DEBUG_INTERPOLATION
-               MessageInterface::ShowMessage("Mass Flow: Linear Interpolation "
-                     "-> Mdot = %.12le\n", dataBlock[3] * scaleFactors[1]);
-            #endif
-            burnData[3] = dataBlock[3] * scaleFactors[1];
-            break;
-
-         case ThfDataSegment::SPLINE:
-            SplineInterpolate(index, atEpoch);
-            #ifdef DEBUG_INTERPOLATION
-               MessageInterface::ShowMessage("Mass Flow: Spline Interpolation "
-                     "-> Mdot = %.12le\n", dataBlock[3] * scaleFactors[1]);
-            #endif
-            burnData[3] = dataBlock[3] * scaleFactors[1];
-            break;
-
-         case ThfDataSegment::NONE:
-         default:
-            #ifdef DEBUG_INTERPOLATION
-               MessageInterface::ShowMessage("Mass Flow: No Interpolation "
-                     "-> Mdot = %.12le\n", dataBlock[3] * scaleFactors[1]);
-            #endif
-            burnData[3] = dataBlock[3] * scaleFactors[1];
-            break;
-         }
+         // Now use actual epoch
+         offset = atEpoch - (*segments)[index].segData.startEpoch;
+         Interpolate(index, profileIndex, offset);
       }
+
+      burnData[0] = dataBlock[0] * scaleFactors[0];
+      burnData[1] = dataBlock[1] * scaleFactors[0];
+      burnData[2] = dataBlock[2] * scaleFactors[0];
+      burnData[3] = dataBlock[3] * scaleFactors[1];
 
       if (burnData[3] != 0.0)
       {
@@ -1014,7 +1437,7 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
          if (segments->size() > index)
          {
             if ((*segments)[index].massSource.size() > 0)
-               activeTankName = (*segments)[index].massSource[0];
+               activeTankName = (*segments)[index].massSource[0]->GetName();
             else
             {
                if (massFlowWarningNeeded)
@@ -1038,151 +1461,239 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
 
 
 //------------------------------------------------------------------------------
-// void GetSegmentData(Integer atIndex, GmatEpoch atEpoch)
+// void ComputeAccelerationMassFlow(const GmatTime &segEpoch, const GmatTime &atEpoch, Real burnData[4])
 //------------------------------------------------------------------------------
 /**
- * Retrieves the segment data for the segment containing the input epoch
+* Retrieves dv data at a specified epoch from data in the thrust history file
+*
+* @param segEpoch The epoch corresponding to dt=0 that is used to identify the segment
+* @param atEpoch The epoch of the data request
+* @param burnData The container receiving the acceleration and mass flow
+*/
+//------------------------------------------------------------------------------
+void FileThrust::ComputeAccelerationMassFlow(const GmatTime &segEpoch, const GmatTime &atEpoch,
+   Real burnData[4])
+{
+   // Start from nothin'
+   burnData[0] = burnData[1] = burnData[2] = burnData[3] = 0.0;
+   dataBlock[0] = dataBlock[1] = dataBlock[2] = dataBlock[3] = dataBlock[4] = 0.0;
+
+   Real scaleFactors[2];
+
+   // Find the segment with data covering the input epoch.  Note that if
+   // segments overlap, we use the data in the first segment covering the epoch
+   Integer index = -1;
+   for (UnsignedInt i = 0; i < segments->size(); ++i)
+   {
+      if ((*segments)[i].segData.isActive &&
+            InSegmentInterval((*segments)[i].segData.startEpochGT,
+            (*segments)[i].segData.endEpochGT, segEpoch))
+      {
+         index = i;
+         // Factor used to convert m/s^2 to km/s^2, and to divide out mass if
+         // modeling thrust
+         dataIsThrust = (*segments)[i].segData.modelThrust;
+         (*segments)[i].GetScaleFactors(scaleFactors);
+         coordSystem = (*segments)[i].segData.cs;
+
+         // Thrust Scale Factor Solve For
+         scaleFactors[0] *= (1.0 + (*segments)[i].GetRealParameter("TSF_Epsilon"));
+
+         thrustSF = scaleFactors[0];
+         thrustSFinitial = tsfInitial[i];
+
+         Integer tsfID = (*segments)[i].GetScaleFactorIndex();
+         Integer indexSTM = psm->GetSTMIndex(tsfID, NULL);                    // made changes by TUAN NGUYEN
+
+#ifdef DEBUG_TSF_SOLVEFOR
+         MessageInterface::ShowMessage("File TSF from psm %p (id %d) index in the STM "
+            "is %d, dim %d\n", psm, tsfID, index, dimension);
+#endif
+
+         // Thrust Scale Factor Solve For settings
+         if (indexSTM >= 0)
+         {
+            estimatingTSF = true;
+            tsfEpsilonRow = indexSTM;
+            fillSTM = true;
+         }
+
+         break;
+      }
+   }
+
+   if (index != -1)
+   {
+      dataBlock[5] = (*segments)[index].segData.accelIntType;
+      dataBlock[6] = (*segments)[index].segData.massIntType;
+
+      // Interpolate the thrust/acceleration
+
+      Integer profileIndex;
+      // First use segment epoch
+      GmatTime offsetGT = segEpoch - (*segments)[index].segData.startEpochGT;
+      Real offset = offsetGT.GetTimeInSec() / GmatTimeConstants::SECS_PER_DAY;
+      if ((*segments)[index].segData.endEpochGT == segEpoch)
+         profileIndex = (*segments)[index].segData.profile.size() - 2;
+      else
+         profileIndex = GetSegmentData(index, offset);
+
+
+      if (profileIndex >= 0)
+      {
+         // Now use actual epoch
+         offsetGT = atEpoch - (*segments)[index].segData.startEpochGT;
+         offset = offsetGT.GetTimeInSec() / GmatTimeConstants::SECS_PER_DAY;
+         Interpolate(index, profileIndex, offset);
+      }
+
+      burnData[0] = dataBlock[0] * scaleFactors[0];
+      burnData[1] = dataBlock[1] * scaleFactors[0];
+      burnData[2] = dataBlock[2] * scaleFactors[0];
+      burnData[3] = dataBlock[3] * scaleFactors[1];
+
+      if (burnData[3] != 0.0)
+      {
+#ifdef DEBUG_MASS_FLOW
+         MessageInterface::ShowMessage("Accessing segment %d at epoch "
+            "%s; [3] = %le\n", index, atEpoch.ToString(), burnData[3]);
+         MessageInterface::ShowMessage("   %d mass sources\n",
+            (*segments)[index].massSource.size());
+#endif
+         if (segments->size() > index)
+         {
+            if ((*segments)[index].massSource.size() > 0)
+               activeTankName = (*segments)[index].massSource[0]->GetName();
+            else
+            {
+               if (massFlowWarningNeeded)
+               {
+                  MessageInterface::ShowMessage("Warning: The Thrust History "
+                     "File force %s cannot deplete mass: no mass source "
+                     "is identified\n", instanceName.c_str());
+                  massFlowWarningNeeded = false;
+               }
+               burnData[3] = 0.0;
+               depleteMass = false;
+               massFlowWarningNeeded = false;
+            }
+         }
+      }
+
+      if (coordSystem != NULL)
+         ConvertDirectionToInertial(burnData, burnData, atEpoch);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetSegmentData(Integer atIndex, Real offset)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the index of the ThrustPoint vector element for the segment
+ * containing the input epoch
  *
  * @param atIndex Index of the segment containing the data
- * @param atEpoch The epoch of the requested data
+ * @param offset The offset from the start epoch of the requested segment
+ *
+ * @return Index of the ThrustPoint vector element containing the data
  */
 //------------------------------------------------------------------------------
-void FileThrust::GetSegmentData(Integer atIndex, GmatEpoch atEpoch)
+Integer FileThrust::GetSegmentData(Integer atIndex, Real offset)
 {
    #ifdef DEBUG_INTERPOLATION
       MessageInterface::ShowMessage("Entered GetSegmentData(%d, %.12lf)\n",
-            atIndex, atEpoch);
+            atIndex, offset);
    #endif
 
-   dataBlock[0] = dataBlock[1] = dataBlock[2] = dataBlock[3] = dataBlock[4] = 0.0;
-
-   // If at the end point; use its data
-   if ((*segments)[atIndex].segData.endEpoch == atEpoch)
+   Integer profileIndex = -1;
+   for (UnsignedInt i = 0; i < (*segments)[atIndex].segData.profile.size()-1; ++i)
    {
-      Integer i = (*segments)[atIndex].segData.profile.size()-1;
-      dataBlock[0] = (*segments)[atIndex].segData.profile[i].vector[0];
-      dataBlock[1] = (*segments)[atIndex].segData.profile[i].vector[1];
-      dataBlock[2] = (*segments)[atIndex].segData.profile[i].vector[2];
-      dataBlock[3] = (*segments)[atIndex].segData.profile[i].mdot;
-      dataBlock[4] = (*segments)[atIndex].segData.profile[i].time;
-   }
-   else
-   {
-      Real offset = atEpoch - (*segments)[atIndex].segData.startEpoch;
-
-      switch ((Integer)dataBlock[5])
+      if (InSegmentInterval((*segments)[atIndex].segData.profile[i].time,
+            (*segments)[atIndex].segData.profile[i + 1].time, offset))
       {
-      case ThfDataSegment::NONE:
-      case ThfDataSegment::LINEAR:
-         for (UnsignedInt i = 0; i < (*segments)[atIndex].segData.profile.size()-1; ++i)
-         {
-            if (((*segments)[atIndex].segData.profile[i].time <= offset) &&
-                ((*segments)[atIndex].segData.profile[i+1].time > offset))
-            {
-               dataBlock[0] = (*segments)[atIndex].segData.profile[i].vector[0];
-               dataBlock[1] = (*segments)[atIndex].segData.profile[i].vector[1];
-               dataBlock[2] = (*segments)[atIndex].segData.profile[i].vector[2];
-               if ((dataBlock[6] == ThfDataSegment::LINEAR) ||
-                   (dataBlock[6] == ThfDataSegment::NONE))
-                  dataBlock[3] = (*segments)[atIndex].segData.profile[i].mdot;
-               dataBlock[4] = (*segments)[atIndex].segData.profile[i].time;
-               break;
-            }
-         }
-         break;
-
-      case ThfDataSegment::SPLINE:
-         {
-            bool reload = false;
-            if (indexPair[0] != atIndex)
-               reload = true;
-            indexPair[0] = atIndex;
-            Integer proIndex = -1;
-
-            // Look up the profile index
-            for (UnsignedInt i = 0;
-                  i < (*segments)[atIndex].segData.profile.size()-1; ++i)
-            {
-               if (((*segments)[atIndex].segData.profile[i].time <= offset) &&
-                   ((*segments)[atIndex].segData.profile[i+1].time > offset))
-               {
-                  proIndex = i;
-                  break;
-               }
-            }
-
-            // Now set the indices for the buffer.  This code selects the region
-            // between the 2nd and 3rd points when possible.
-            if (proIndex == 0)
-               proIndex = 1;
-            else if (proIndex > (Integer)((*segments)[atIndex].segData.profile.size()) - 4)
-               proIndex = (*segments)[atIndex].segData.profile.size() - 4;
-
-            interpolatorData[0] = proIndex - 1;
-            interpolatorData[1] = proIndex;
-            interpolatorData[2] = proIndex + 1;
-            interpolatorData[3] = proIndex + 2;
-            interpolatorData[4] = proIndex + 3;
-         }
-         break;
-
-      default:
+         profileIndex = i;
          break;
       }
+   }
 
-      // Setup for mass flow
+   return profileIndex;
+}
+
+
+//------------------------------------------------------------------------------
+// void Interpolate(Integer atIndex, Integer profileIndex, Real offset)
+//------------------------------------------------------------------------------
+/**
+ * Performs desired interpolation and populates dataBlock array
+ *
+ * @param atIndex Index of the segment containing the data
+ * @param profileIndex Index of the ThrustPoint vector element containing the data
+ * @param offset The offset from the start epoch of the requested data
+ */
+ //------------------------------------------------------------------------------
+void FileThrust::Interpolate(Integer atIndex, Integer profileIndex, Real offset)
+{
+   switch ((Integer)dataBlock[5])
+   {
+   case ThfDataSegment::LINEAR:
+      LinearInterpolate(atIndex, profileIndex, offset);
+      #ifdef DEBUG_INTERPOLATION
+         MessageInterface::ShowMessage("Thrust/Acceleration: Linear Interpolation "
+                  "-> VXdot = %.12le\n", dataBlock[0] * scaleFactors[0]);
+      #endif
+      break;
+
+   case ThfDataSegment::SPLINE:
+      SplineInterpolate(atIndex, profileIndex, offset);
+      #ifdef DEBUG_INTERPOLATION
+         MessageInterface::ShowMessage("Thrust/Acceleration: Spline Interpolation "
+                  "-> VXdot = %.12le\n", dataBlock[0] * scaleFactors[0]);
+      #endif
+      break;
+
+   case ThfDataSegment::NONE:
+   default:
+      #ifdef DEBUG_INTERPOLATION
+         MessageInterface::ShowMessage("Thrust/Acceleration: No Interpolation "
+                  "-> VXdot = %.12le\n", dataBlock[0] * scaleFactors[0]);
+      #endif
+      dataBlock[0] = (*segments)[atIndex].segData.profile[profileIndex].vector[0];
+      dataBlock[1] = (*segments)[atIndex].segData.profile[profileIndex].vector[1];
+      dataBlock[2] = (*segments)[atIndex].segData.profile[profileIndex].vector[2];
+      dataBlock[3] = (*segments)[atIndex].segData.profile[profileIndex].mdot;
+      dataBlock[4] = (*segments)[atIndex].segData.profile[profileIndex].time;
+      break;
+   }
+
+   if (dataBlock[5] != dataBlock[6])
+   {
+      // Interpolate the mass flow, using data already collected
       switch ((Integer)dataBlock[6])
       {
-      case ThfDataSegment::NONE:
       case ThfDataSegment::LINEAR:
-         for (UnsignedInt i = 0; i < (*segments)[atIndex].segData.profile.size()-1; ++i)
-         {
-            if (((*segments)[atIndex].segData.profile[i].time <= offset) &&
-                ((*segments)[atIndex].segData.profile[i+1].time > offset))
-            {
-               dataBlock[3] = (*segments)[atIndex].segData.profile[i].mdot;
-               break;
-            }
-         }
+         LinearInterpolate(atIndex, profileIndex, offset);
+         #ifdef DEBUG_INTERPOLATION
+            MessageInterface::ShowMessage("Mass Flow: Linear Interpolation "
+                  "-> Mdot = %.12le\n", dataBlock[3] * scaleFactors[1]);
+         #endif
          break;
 
       case ThfDataSegment::SPLINE:
-         if ((*segments)[atIndex].segData.accelIntType != ThfDataSegment::SPLINE)
-         {
-            bool reload = false;
-            if (indexPair[0] != atIndex)
-               reload = true;
-            indexPair[0] = atIndex;
-            Integer proIndex = -1;
-
-            // Look up the profile index
-            for (UnsignedInt i = 0;
-                  i < (*segments)[atIndex].segData.profile.size()-1; ++i)
-            {
-               if (((*segments)[atIndex].segData.profile[i].time <= offset) &&
-                   ((*segments)[atIndex].segData.profile[i+1].time > offset))
-               {
-                  proIndex = i;
-                  break;
-               }
-            }
-
-            // Now set the indices for the buffer.  This code selects the region
-            // between the 2nd and 3rd points when possible.
-            if (proIndex == 0)
-               proIndex = 1;
-            else if (proIndex > (Integer)((*segments)[atIndex].segData.profile.size()) - 4)
-               proIndex = (*segments)[atIndex].segData.profile.size() - 4;
-
-            interpolatorData[0] = proIndex - 1;
-            interpolatorData[1] = proIndex;
-            interpolatorData[2] = proIndex + 1;
-            interpolatorData[3] = proIndex + 2;
-            interpolatorData[4] = proIndex + 3;
-         }
+         SplineInterpolate(atIndex, profileIndex, offset);
+         #ifdef DEBUG_INTERPOLATION
+            MessageInterface::ShowMessage("Mass Flow: Spline Interpolation "
+                  "-> Mdot = %.12le\n", dataBlock[3] * scaleFactors[1]);
+         #endif
          break;
 
+      case ThfDataSegment::NONE:
       default:
+         #ifdef DEBUG_INTERPOLATION
+            MessageInterface::ShowMessage("Mass Flow: No Interpolation "
+                  "-> Mdot = %.12le\n", dataBlock[3] * scaleFactors[1]);
+         #endif
+         dataBlock[3] = (*segments)[atIndex].segData.profile[profileIndex].mdot;
          break;
       }
    }
@@ -1190,45 +1701,32 @@ void FileThrust::GetSegmentData(Integer atIndex, GmatEpoch atEpoch)
 
 
 //------------------------------------------------------------------------------
-// void LinearInterpolate(Integer atIndex, GmatEpoch atEpoch)
+// void LinearInterpolate(Integer atIndex, Integer profileIndex, Real offset)
 //------------------------------------------------------------------------------
 /**
- * Retrieves linearly interpolated segment data for the input epoch
+ * Retrieves linearly interpolated segment data for the input epoch offset
+ * and populates the dataBlock array
  *
  * @param atIndex Index of the segment containing the data
- * @param atEpoch The epoch of the requested data
+ * @param profileIndex Index of the ThrustPoint vector element containing the data
+ * @param offset The offset from the start epoch of the requested data
  */
 //------------------------------------------------------------------------------
-void FileThrust::LinearInterpolate(Integer atIndex, GmatEpoch atEpoch)
+void FileThrust::LinearInterpolate(Integer atIndex, Integer profileIndex, Real offset)
 {
-   GetSegmentData(atIndex, atEpoch);
    bool includeMass = false;
 
-   if ((*segments)[atIndex].segData.endEpoch == atEpoch)
-   {
-      return;
-   }
+   dataSet[0][0] = (*segments)[atIndex].segData.profile[profileIndex].vector[0];
+   dataSet[0][1] = (*segments)[atIndex].segData.profile[profileIndex].vector[1];
+   dataSet[0][2] = (*segments)[atIndex].segData.profile[profileIndex].vector[2];
+   dataSet[0][3] = (*segments)[atIndex].segData.profile[profileIndex].mdot;
+   dataSet[0][4] = (*segments)[atIndex].segData.profile[profileIndex].time;
 
-   Real offset = atEpoch - (*segments)[atIndex].segData.startEpoch;
-   for (UnsignedInt i = 0; i < (*segments)[atIndex].segData.profile.size()-1; ++i)
-   {
-      if (((*segments)[atIndex].segData.profile[i].time <= offset) &&
-          ((*segments)[atIndex].segData.profile[i+1].time > offset))
-      {
-         dataSet[0][0] = dataBlock[0];
-         dataSet[0][1] = dataBlock[1];
-         dataSet[0][2] = dataBlock[2];
-         dataSet[0][3] = dataBlock[3];
-         dataSet[0][4] = (*segments)[atIndex].segData.profile[i].time;
-
-         dataSet[1][0] = (*segments)[atIndex].segData.profile[i+1].vector[0];
-         dataSet[1][1] = (*segments)[atIndex].segData.profile[i+1].vector[1];
-         dataSet[1][2] = (*segments)[atIndex].segData.profile[i+1].vector[2];
-         dataSet[1][3] = (*segments)[atIndex].segData.profile[i+1].mdot;
-         dataSet[1][4] = (*segments)[atIndex].segData.profile[i+1].time;
-         break;
-      }
-   }
+   dataSet[1][0] = (*segments)[atIndex].segData.profile[profileIndex+1].vector[0];
+   dataSet[1][1] = (*segments)[atIndex].segData.profile[profileIndex+1].vector[1];
+   dataSet[1][2] = (*segments)[atIndex].segData.profile[profileIndex+1].vector[2];
+   dataSet[1][3] = (*segments)[atIndex].segData.profile[profileIndex+1].mdot;
+   dataSet[1][4] = (*segments)[atIndex].segData.profile[profileIndex+1].time;
 
    Real pct = 0.0;
    if ((dataSet[1][4] != dataSet[0][4]))
@@ -1257,17 +1755,20 @@ void FileThrust::LinearInterpolate(Integer atIndex, GmatEpoch atEpoch)
    #endif
 }
 
+
 //------------------------------------------------------------------------------
-// void SplineInterpolate(Integer atIndex, GmatEpoch atEpoch)
+// void SplineInterpolate(Integer atIndex, Integer profileIndex, Real offset)
 //------------------------------------------------------------------------------
 /**
- * Retrieves spline interpolated segment data for the input epoch
+ * Retrieves spline interpolated segment data for the input epoch offset
+ * and populates the dataBlock array
  *
  * @param atIndex Index of the segment containing the data
- * @param atEpoch The epoch of the requested data
+ * @param profileIndex Index of the ThrustPoint vector element containing the data
+ * @param offset The offset from the start epoch of the requested data
  */
 //------------------------------------------------------------------------------
-void FileThrust::SplineInterpolate(Integer atIndex, GmatEpoch atEpoch)
+void FileThrust::SplineInterpolate(Integer atIndex, Integer profileIndex, Real offset)
 {
    // Handle case of too few points by falling back to linear interpolation
    if ((*segments)[atIndex].segData.profile.size() < 5)
@@ -1281,41 +1782,47 @@ void FileThrust::SplineInterpolate(Integer atIndex, GmatEpoch atEpoch)
                (*segments)[atIndex].segData.profile.size());
          warnTooFewPoints = false;
       }
-      LinearInterpolate(atIndex, atEpoch);
+      LinearInterpolate(atIndex, profileIndex, offset);
    }
 
    if (spliner == NULL)
+   {
       spliner = new NotAKnotInterpolator("SplineInterpolator", 4);
+      spliner->SetExtrapolation(true); // Allow extrapolation for RK89
+   }
 
    if (spliner == NULL)
       throw ODEModelException("The cubic spline interpolator failed to build");
 
    Real data[4];
-   if (interpolatorData[1] == -1)
-   {
-      // Ouside of the span; do nothing
-      data[0] =
-      data[1] =
-      data[2] =
-      data[3] = 0.0;
-   }
-   else
-   {
-      // Reload the interpolator.  For now, this is done at each call.
-      spliner->Clear();
-      for (UnsignedInt i = 0; i < 5; ++i)
-      {
-         data[0] = (*segments)[atIndex].segData.profile[interpolatorData[i]].vector[0];
-         data[1] = (*segments)[atIndex].segData.profile[interpolatorData[i]].vector[1];
-         data[2] = (*segments)[atIndex].segData.profile[interpolatorData[i]].vector[2];
-         data[3] = (*segments)[atIndex].segData.profile[interpolatorData[i]].mdot;
+   Integer profileSize = (*segments)[atIndex].segData.profile.size();
+   Integer interpIndex = profileIndex;
 
-         spliner->AddPoint((*segments)[atIndex].segData.profile[interpolatorData[i]].time, data);
-      }
+   // Want to make sure interpolatorData has valid indicies
+   if (interpIndex < 1)
+      interpIndex = 1;
+   else if (interpIndex > (profileSize - 4))
+      interpIndex = profileSize - 4;
 
-      Real offset = atEpoch - (*segments)[atIndex].segData.startEpoch;
-      spliner->Interpolate(offset, data);
+   interpolatorData[0] = interpIndex - 1;
+   interpolatorData[1] = interpIndex;
+   interpolatorData[2] = interpIndex + 1;
+   interpolatorData[3] = interpIndex + 2;
+   interpolatorData[4] = interpIndex + 3;
+
+   // Reload the interpolator.  For now, this is done at each call.
+   spliner->Clear();
+   for (UnsignedInt i = 0; i < 5; ++i)
+   {
+      data[0] = (*segments)[atIndex].segData.profile[interpolatorData[i]].vector[0];
+      data[1] = (*segments)[atIndex].segData.profile[interpolatorData[i]].vector[1];
+      data[2] = (*segments)[atIndex].segData.profile[interpolatorData[i]].vector[2];
+      data[3] = (*segments)[atIndex].segData.profile[interpolatorData[i]].mdot;
+
+      spliner->AddPoint((*segments)[atIndex].segData.profile[interpolatorData[i]].time, data);
    }
+
+   spliner->Interpolate(offset, data);
 
    if (dataBlock[5] == ThfDataSegment::SPLINE)
    {
@@ -1358,4 +1865,428 @@ void FileThrust::ConvertDirectionToInertial(Real *dir, Real *dirInertial, Real e
    dirInertial[0] = outDir[0];
    dirInertial[1] = outDir[1];
    dirInertial[2] = outDir[2];
+}
+
+
+//------------------------------------------------------------------------------
+// void ConvertDirectionToInertial(Real *dir, Real *dirInertial, GmatTime epoch)
+//------------------------------------------------------------------------------
+/*
+* Converts thrust direction to inertial frame
+*
+* @param dir  Thrust/accel direction in internal frame
+* @param dirInertial  Thrust direction in inertial frame
+* @param epoch  Epoch to be used for conversion
+*/
+//------------------------------------------------------------------------------
+void FileThrust::ConvertDirectionToInertial(Real *dir, Real *dirInertial,
+   const GmatTime &epoch)
+{
+#ifdef DEBUG_FILETHRUST_EXE
+   MessageInterface::ShowMessage("Rotating into a new frame\n");
+#endif
+
+   Real inDir[6], outDir[6];
+   for (Integer i = 0; i<3; i++)
+      inDir[i] = dir[i];
+   for (Integer i = 3; i<6; i++)
+      inDir[i] = 0.0;
+
+   // Now rotate to base system axes, we don't want to translate so
+   // set coincident to true
+   coordSystem->ToBaseSystem(epoch, inDir, outDir, true);
+
+   dirInertial[0] = outDir[0];
+   dirInertial[1] = outDir[1];
+   dirInertial[2] = outDir[2];
+}
+
+
+//------------------------------------------------------------------------------
+// const std::vector<ThrustSegment> GetAllThrustSegments()
+//------------------------------------------------------------------------------
+/**
+ * Accessor for the ThrustSegment array
+ *
+ * @return The ThrustSegment array
+ */
+//------------------------------------------------------------------------------
+const std::vector<ThrustSegment> FileThrust::GetAllThrustSegments()
+{
+	return *segments;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsEstimationParameterValid(const Integer item)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a parameter can be estimated
+ *
+ * @param item The ID for the parameter, as known in the estimation system
+ *
+ * @return true if estimation is available, false if not
+ */
+//------------------------------------------------------------------------------
+bool FileThrust::IsEstimationParameterValid(const Integer item)
+{
+   // convert Estimation ID to object parameter ID
+   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;
+
+   #ifdef DEBUG_TSF_SOLVEFOR
+      MessageInterface::ShowMessage("Testing estimation capability for "
+            "ID %d (%s)\n", id, GetParameterText(id).c_str());
+   #endif
+
+   for (UnsignedInt i = 0; i < segments->size(); ++i)
+   {
+      Integer tsfID = segments->at(i).GetScaleFactorIndex();
+      if (id == tsfID)
+         return true;
+   }
+
+   return GmatBase::IsEstimationParameterValid(id);
+}
+
+//-------------------------------------------------------------------------
+// Integer HasParameterCovariances(Integer parameterId)
+//-------------------------------------------------------------------------
+/**
+* This function is used to verify whether a parameter (with ID specified by
+* parameterId) having a covariance or not.
+*
+* @param parameterId      ID of a parameter
+* @return                 size of covariance matrix associated with the parameter
+*                         return -1 when the parameter has no covariance
+*/
+//-------------------------------------------------------------------------
+Integer FileThrust::HasParameterCovariances(Integer parameterId)
+{
+   if (parameterId > 99)
+   {
+      // Break ID apart into segment number and parm id
+      Integer segId, parmId;
+      segId = (Integer)(parameterId / 100) - 1;
+      parmId = parameterId - 100 * (segId + 1);
+
+#ifdef DEBUG_MAPPING
+      MessageInterface::ShowMessage("Get %d: Segment %d, parm %d\n", id,
+         segId, parmId);
+#endif
+
+      return segments->at(segId).HasParameterCovariances(parmId);
+   }
+
+   return GmatBase::HasParameterCovariances(parameterId);
+}
+
+
+//------------------------------------------------------------------------------
+// Rmatrix* GetParameterCovariances(Integer parameterId)
+//------------------------------------------------------------------------------
+/**
+* Get covariance of a given FileThrust's parameter
+*
+* @param paramId     The Id of a FileThrust's parameter
+*
+* @return            Covariance matrix of the parameter specified by the
+*                    parameter Id
+*/
+//------------------------------------------------------------------------------
+Rmatrix* FileThrust::GetParameterCovariances(Integer parameterId)
+{
+   if (isInitialized)
+      return covariance.GetCovariance(parameterId);
+   else
+      throw GmatBaseException("Error: cannot get " + GetName() + " FileThrust's covariance when it is not initialized.\n");
+   return NULL;
+}
+
+//------------------------------------------------------------------------------
+// Covariance* GetCovariance()
+//------------------------------------------------------------------------------
+Covariance* FileThrust::GetCovariance()
+{
+   std::vector<Rmatrix> covVector;
+   covarianceSizes.clear();
+
+   for (UnsignedInt ii = 0; ii < segments->size(); ii++)
+   {
+      for (UnsignedInt jj = 0; jj < (*segments)[ii].GetParameterCount(); jj++)
+      {
+         Integer covSize = (*segments)[ii].HasParameterCovariances(jj);
+
+         if (covSize > 0)
+         {
+            std::string paramName = (*segments)[ii].GetParameterText(jj);
+            std::string elementName = (*segments)[ii].GetName() + "." + paramName;
+            covariance.AddCovarianceElement(elementName, this);
+
+            covVector.push_back(*(*segments)[ii].GetCovariance()->GetCovariance(jj));
+            covarianceSizes.push_back(covSize);
+         }
+      }
+   }
+
+   UnsignedInt covIndex = 0;
+
+   for (UnsignedInt ii = 0; ii < covarianceSizes.size(); ii++)
+   {
+      covariance.ConstructRHS(covVector[ii], covIndex);
+      covIndex += covarianceSizes[ii];
+   }
+
+   return &covariance;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetPrecisionTimeFlag(bool onOff)
+//------------------------------------------------------------------------------
+/**
+* Set whether the thrust segment is using precision time or not
+*
+* @param onOff Flag indicating whether the thrust segment uses precision time
+*
+* @return Returns the value of the onOff flag passed in
+*/
+//------------------------------------------------------------------------------
+bool FileThrust::SetPrecisionTimeFlag(bool onOff)
+{
+   hasPrecisionTime = onOff;
+
+   if (segments != NULL)
+      for (ThrustSegment seg : *segments)
+         seg.SetPrecisionTimeFlag(onOff);
+
+   return hasPrecisionTime;
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetForceMaxStep(bool forward = true)
+//------------------------------------------------------------------------------
+/**
+ * Gets the max step size allowed by this PhysicalModel
+ *
+ * @param forward Flag to indicate which direction in time to travel
+ *
+ * @return The max step size in seconds, returns +/- REAL_MAX if the step size
+ *         is not limited
+ */
+//------------------------------------------------------------------------------
+Real FileThrust::GetForceMaxStep(bool forward)
+{
+   if (hasPrecisionTime)
+   {
+      //GmatTime theEpoch = theState->GetEpochGT();
+      GmatTime theEpoch = epochGT;
+      theEpoch.AddSeconds(elapsedTime);
+      return GetForceMaxStep(theEpoch, forward);
+   }
+   else
+   {
+      //Real theEpoch = theState->GetEpoch();
+      Real theEpoch = epoch;
+      theEpoch += elapsedTime / GmatTimeConstants::SECS_PER_DAY;
+      return GetForceMaxStep(theEpoch, forward);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetForceMaxStep(Real theEpoch, bool forward = true)
+//------------------------------------------------------------------------------
+/**
+ * Gets the max step size allowed by this ODEModel
+ *
+ * @param theEpoch The reference epoch to use for calculating the max step size
+ * @param forward Flag to indicate which direction in time to travel
+ *
+ * @return The max step size in seconds, returns +/- REAL_MAX if the step size
+ *         is not limited
+ */
+//------------------------------------------------------------------------------
+Real FileThrust::GetForceMaxStep(Real theEpoch, bool forward)
+{
+   // Get default values
+   Real dt = PhysicalModel::GetForceMaxStep(theEpoch, forward);
+
+   for (UnsignedInt ii = 0U; ii < segments->size(); ii++)
+   {
+      Real dtStart, dtEnd;
+
+      dtStart = ((*segments)[ii].segData.startEpoch - theEpoch) * GmatTimeConstants::SECS_PER_DAY;
+      dtEnd = ((*segments)[ii].segData.endEpoch - theEpoch) * GmatTimeConstants::SECS_PER_DAY;
+
+      if (forward)
+      {
+         if (dtStart > 0)
+            dt = GmatMathUtil::Min(dt, dtStart);
+         if (dtEnd > 0)
+            dt = GmatMathUtil::Min(dt, dtEnd);
+      }
+      else
+      {
+         if (dtStart < 0)
+            dt = GmatMathUtil::Max(dt, dtStart);
+         if (dtEnd < 0)
+            dt = GmatMathUtil::Max(dt, dtEnd);
+      }
+
+      // If inside the segment, check the profile epochs
+      if (dtStart <= 0.0 && dtEnd >= 0.0)
+      {
+         // Don't need to check last epoch as it always is aligned with endEpoch
+         for (UnsignedInt jj = 0U; jj < (*segments)[ii].segData.profile.size()-1; jj++)
+         {
+            Real offset = theEpoch - (*segments)[ii].segData.startEpoch;
+            Real dtProfile = ((*segments)[ii].segData.profile[jj].time - offset) * GmatTimeConstants::SECS_PER_DAY;
+
+            if (forward)
+            {
+               if (dtProfile > 0)
+                  dt = GmatMathUtil::Min(dt, dtProfile);
+            }
+            else
+            {
+               if (dtProfile < 0)
+                  dt = GmatMathUtil::Max(dt, dtProfile);
+            }
+         }
+      }
+   }
+
+   return dt;
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetForceMaxStep(const GmatTime& theEpochGT, bool forward = true)
+//------------------------------------------------------------------------------
+/**
+ * Gets the max step size allowed by this ODEModel
+ *
+ * @param theEpochGT The reference epoch to use for calculating the max step size
+ * @param forward Flag to indicate which direction in time to travel
+ *
+ * @return The max step size in seconds, returns +/- REAL_MAX if the step size
+ *         is not limited
+ */
+//------------------------------------------------------------------------------
+Real FileThrust::GetForceMaxStep(const GmatTime& theEpochGT, bool forward)
+{
+   // Get default values
+   Real dt = PhysicalModel::GetForceMaxStep(theEpochGT, forward);
+
+   for (UnsignedInt ii = 0U; ii < segments->size(); ii++)
+   {
+      Real dtStart, dtEnd;
+
+      dtStart = ((*segments)[ii].segData.startEpochGT - theEpochGT).GetTimeInSec();
+      dtEnd = ((*segments)[ii].segData.endEpochGT - theEpochGT).GetTimeInSec();
+
+      if (forward)
+      {
+         if (dtStart > 0)
+            dt = GmatMathUtil::Min(dt, dtStart);
+         if (dtEnd > 0)
+            dt = GmatMathUtil::Min(dt, dtEnd);
+      }
+      else
+      {
+         if (dtStart < 0)
+            dt = GmatMathUtil::Max(dt, dtStart);
+         if (dtEnd < 0)
+            dt = GmatMathUtil::Max(dt, dtEnd);
+      }
+
+      // If inside the segment, check the profile epochs
+      if (dtStart <= 0.0 && dtEnd >= 0.0)
+      {
+         // Don't need to check last epoch as it always is aligned with endEpoch
+         for (UnsignedInt jj = 0U; jj < (*segments)[ii].segData.profile.size()-1; jj++)
+         {
+            GmatTime offsetGT = theEpochGT - (*segments)[ii].segData.startEpochGT;
+            Real offset = offsetGT.GetTimeInSec() / GmatTimeConstants::SECS_PER_DAY;
+            Real dtProfile = ((*segments)[ii].segData.profile[jj].time - offset) * GmatTimeConstants::SECS_PER_DAY;
+
+
+            if (forward)
+            {
+               if (dtProfile > 0)
+                  dt = GmatMathUtil::Min(dt, dtProfile);
+            }
+            else
+            {
+               if (dtProfile < 0)
+                  dt = GmatMathUtil::Max(dt, dtProfile);
+            }
+         }
+      }
+   }
+
+   return dt;
+}
+
+
+//------------------------------------------------------------------------------
+// bool InSegmentInterval(GmatEpoch begin, GmatEpoch end, GmatEpoch epoch)
+//------------------------------------------------------------------------------
+/**
+ * Checks if the epoch is in the interval between the provided beginning and
+ * ending epoch, and is direction dependent on the boundaries. It is true at
+ * the beginning epoch only if the direction is forward, and it is true at
+ * the ending epoch only if the direction is backward.
+ *
+ * @param begin The beginning epoch of the interval
+ * @param end The ending epoch of the interval
+ * @param epoch The epoch to check if it is in the interval
+ *
+ * @return If the epoch is inside the interval
+ */
+ //------------------------------------------------------------------------------
+bool FileThrust::InSegmentInterval(GmatEpoch begin, GmatEpoch end, GmatEpoch epoch)
+{
+   if (begin < epoch && epoch < end)
+      return true;
+
+   if (direction == 1.0 && begin == epoch)
+      return true;
+
+   if (direction == -1.0 && end == epoch)
+      return true;
+
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool InSegmentInterval(const GmatTime& begin, const GmatTime& end, const GmatTime& epoch)
+//------------------------------------------------------------------------------
+/**
+ * Checks if the epoch is in the interval between the provided beginning and
+ * ending epoch, and is direction dependent on the boundaries. It is true at
+ * the beginning epoch only if the direction is forward, and it is true at
+ * the ending epoch only if the direction is backward.
+ *
+ * @param begin The beginning epoch of the interval
+ * @param end The ending epoch of the interval
+ * @param epoch The epoch to check if it is in the interval
+ *
+ * @return If the epoch is inside the interval
+ */
+ //------------------------------------------------------------------------------
+bool FileThrust::InSegmentInterval(const GmatTime& begin, const GmatTime& end, const GmatTime& epoch)
+{
+   if (begin < epoch && epoch < end)
+      return true;
+
+   if (direction == 1.0 && begin == epoch)
+      return true;
+
+   if (direction == -1.0 && end == epoch)
+      return true;
+
+   return false;
 }

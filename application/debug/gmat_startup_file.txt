@@ -55,12 +55,13 @@ PLUGIN                   = ./plugins/libStationd
 PLUGIN                   = ./plugins/libMatlabInterfaced
 PLUGIN                   = ./plugins/libFminconOptimizerd
 PLUGIN                   = ./plugins/libThrustFiled
+PLUGIN                   = ./plugins/libYukonOptimizerd
+PLUGIN                  = ../plugins/libThrustFiled
 
 # Alpha plugins (disabled by default)
-#PLUGIN                  = ./libCInterfaced
+PLUGIN                  = ./libCInterfaced
 PLUGIN                  = ./plugins/libGmatEstimationd
 PLUGIN                  = ./plugins/libExtraPropagatorsd
-PLUGIN                  = ./plugins/libGeometricMeasurementsd
 PLUGIN                  = ./plugins/libPolyhedronGravityd
 PLUGIN                  = ./plugins/libSaveCommandd
 PLUGIN                  = ./plugins/libScriptToolsd
@@ -68,12 +69,15 @@ PLUGIN                  = ./plugins/libEKFd
 
 # Internal-only plugins
 PLUGIN                   = ./plugins/proprietary/libCsaltInterfaced
+PLUGIN                   = ./plugins/proprietary/libEMTGModelsd
 PLUGIN                   = ./plugins/proprietary/libMarsGRAMd
 PLUGIN                   = ./plugins/proprietary/libMsise86d
 PLUGIN                   = ./plugins/proprietary/libNRLMsise00d
 PLUGIN                   = ./plugins/proprietary/libSNOptimizerd
 PLUGIN                   = ./plugins/proprietary/libVF13Optimizerd
-PLUGIN			 = ./plugins/libYukonOptimizerd
+
+# External plugins
+PLUGIN                  = ./plugins/libOpenFramesInterfaced
 
 #-----------------------------------------------------------
 # Directory/file paths

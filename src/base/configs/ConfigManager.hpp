@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -41,6 +41,7 @@
 #include "CelestialBody.hpp"
 #include "PropSetup.hpp"
 #include "Spacecraft.hpp"
+#include "Plate.hpp"                                     // made changes by TUAN NGUYEN
 #include "StopCondition.hpp"
 #include "PhysicalModel.hpp"
 #include "Propagator.hpp"
@@ -51,17 +52,18 @@
 #include "AtmosphereModel.hpp"
 #include "Function.hpp"
 #include "Hardware.hpp"
+#include "FieldOfView.hpp"
 #include "CoordinateSystem.hpp"
 #include "CalculatedPoint.hpp"
 
 class MeasurementModelBase;
-class CoreMeasurement;
+//class CoreMeasurement;
 class ErrorModel;
 class DataFilter;
 class DataFile;
 class ObType;
-class TrackingSystem;
-class TrackingData;
+//class TrackingSystem;
+//class TrackingData;
 class EventLocator;
 
 
@@ -84,7 +86,9 @@ public:
    void                AddPropSetup(PropSetup *propSetup);
    void                AddSpacecraft(SpaceObject *sc);
    void                AddSpacePoint(SpacePoint *sp);
+   void                AddPlate(Plate *pl);                                           // made changes by TUAN NGUYEN
    void                AddHardware(Hardware *hw);
+   void                AddFieldOfView(FieldOfView *fov);
    void                AddStopCondition(StopCondition* stopCond);
    void                AddParameter(Parameter* parameter);
    void                AddBurn(Burn* burn);
@@ -99,14 +103,14 @@ public:
    bool                SetSolarSystemInUse(const std::string &name);
 
    void                AddMeasurementModel(MeasurementModelBase *mModel);
-   void                AddMeasurement(CoreMeasurement *meas);
+//   void                AddMeasurement(CoreMeasurement *meas);
    void                AddErrorModel(ErrorModel *meas);
    void                AddDataFilter(DataFilter *filter);
    void                AddDataFile(DataFile *meas);
    void                AddObType(ObType *meas);
    void                AddEventLocator(EventLocator *el);
-   void                AddTrackingSystem(TrackingSystem *ts);
-   void                AddTrackingData(TrackingData *td);
+//   void                AddTrackingSystem(TrackingSystem *ts);
+//   void                AddTrackingData(TrackingData *td);
 
    const StringArray&  GetListOfAllItems();
    const StringArray&  GetListOfItems(UnsignedInt itemType);
@@ -141,7 +145,9 @@ public:
    ODEModel*           GetODEModel(const std::string &name);
    SpaceObject*        GetSpacecraft(const std::string &name);
    SpacePoint*         GetSpacePoint(const std::string &name);
+   Plate*              GetPlate(const std::string &name);                           // made changes by TUAN NGUYEN
    Hardware*           GetHardware(const std::string &name);
+   FieldOfView*        GetFieldOfView(const std::string &name);
    PropSetup*          GetPropSetup(const std::string &name);
    Subscriber*         GetSubscriber(const std::string &name);
    SolarSystem*        GetDefaultSolarSystem();
@@ -159,8 +165,8 @@ public:
    ErrorModel*         GetErrorModel(const std::string &name);
    DataFilter*         GetDataFilter(const std::string &name);
 
-   TrackingSystem*     GetTrackingSystem(const std::string &name);
-   TrackingData*       GetTrackingData(const std::string &name);
+//   TrackingSystem*     GetTrackingSystem(const std::string &name);
+//   TrackingData*       GetTrackingData(const std::string &name);
 
    DataFile *          GetDataStream(const std::string &name);
 

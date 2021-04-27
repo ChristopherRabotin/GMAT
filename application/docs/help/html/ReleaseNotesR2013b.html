@@ -3,7 +3,7 @@
   release for the project. This is an internal-only release, intended to
   support the ACE mission.</p><p>Below is a summary of key changes in this release. Please see the full
   <a class="link" href="http://li64-187.members.linode.com:8080/secure/ReleaseNote.jspa?projectId=10000&amp;version=10400" target="_top">R2013b
-  Release Notes</a> on JIRA for a complete list.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2AA1B"></a>New Features</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2AA1E"></a>Data File Interface</h4></div></div></div><p>GMAT now can load <span class="guilabel">Spacecraft</span> state and
+  Release Notes</a> on JIRA for a complete list.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2D456"></a>New Features</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2D459"></a>Data File Interface</h4></div></div></div><p>GMAT now can load <span class="guilabel">Spacecraft</span> state and
       physical properties data directly from a data file. A new resource,
       <span class="guilabel">FileInterface</span>, controls the interface to the data
       file, and the new <span class="guilabel">Set</span> command lets you apply the
@@ -15,7 +15,7 @@ tvhf.Format = 'TVHF_ASCII'
 BeginMissionSequence
 
 Set aSat tvhf</code></pre><p>See the <a class="link" href="FileInterface.html" title="FileInterface">FileInterface</a> and
-      <a class="link" href="Set.html" title="Set">Set</a> references for more information.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2AA44"></a>Code-500 Ephemeris Format</h4></div></div></div><p>GMAT's <span class="guilabel">EphemerisFile</span> resource can now write a
+      <a class="link" href="Set.html" title="Set">Set</a> references for more information.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2D47F"></a>Code-500 Ephemeris Format</h4></div></div></div><p>GMAT's <span class="guilabel">EphemerisFile</span> resource can now write a
       Code-500 format ephemeris file. The Code-500 format is a binary
       ephemeris format defined by the NASA Goddard Space Flight Center Flight
       Dynamics Facility.</p><div class="informalfigure"><div class="screenshot"><div class="mediaobject"><img src="../files/images/relnotes/r2013b/Code500.png" width="214"></div></div></div><pre class="programlisting"><code class="code">Create Spacecraft sc
@@ -30,7 +30,7 @@ ephem.OutputFormat = 'PC'
 BeginMissionSequence
 
 Propagate prop(sc) {sc.ElapsedDays = 1}</code></pre><p>See the <a class="link" href="EphemerisFile.html" title="EphemerisFile">EphemerisFile</a>
-      reference for more information on this format.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2AA5E"></a>New Local Aligned-Constrained Coordinate System</h4></div></div></div><p>A local aligned-constrainted coordinate system is one defined by
+      reference for more information on this format.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2D499"></a>New Local Aligned-Constrained Coordinate System</h4></div></div></div><p>A local aligned-constrainted coordinate system is one defined by
       an alignment vector (defined based on the position of a reference object
       with respect to the origin) and two constraint vectors. This is a highly
       flexible coordinate system that can be defined in many ways, depending
@@ -50,9 +50,9 @@ ACECoordSys.ConstraintCoordinateSystem = EarthMJ2000Ec
 ACECoordSys.ConstraintReferenceVectorX = 0
 ACECoordSys.ConstraintReferenceVectorY = 0
 ACECoordSys.ConstraintReferenceVectorZ = 1</code></pre><p>See the <a class="link" href="CoordinateSystem.html" title="CoordinateSystem">CoordinateSystem</a>
-      reference for more information.</p></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2AA7B"></a>Improvements</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2AA7E"></a>Force Model Parameters</h4></div></div></div><p>You can now access <span class="guilabel">ForceModel</span>-dependent
+      reference for more information.</p></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2D4B6"></a>Improvements</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2D4B9"></a>Force Model Parameters</h4></div></div></div><p>You can now access <span class="guilabel">ForceModel</span>-dependent
       parameters, such as <span class="guilabel">Spacecraft</span> acceleration and
-      atmospheric density. The new parameters are:</p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p><code class="literal"><em class="replaceable"><code>Spacecraft</code></em>.<em class="replaceable"><code>ForceModel</code></em>.Acceleration</code></p></li><li class="listitem"><p><code class="literal"><em class="replaceable"><code>Spacecraft</code></em>.<em class="replaceable"><code>ForceModel</code></em>.AccelerationX</code></p></li><li class="listitem"><p><code class="literal"><em class="replaceable"><code>Spacecraft</code></em>.<em class="replaceable"><code>ForceModel</code></em>.AccelerationY</code></p></li><li class="listitem"><p><code class="literal"><em class="replaceable"><code>Spacecraft</code></em>.<em class="replaceable"><code>ForceModel</code></em>.AccelerationZ</code></p></li><li class="listitem"><p><code class="literal"><em class="replaceable"><code>Spacecraft</code></em>.<em class="replaceable"><code>ForceModel</code></em>.AtmosDensity</code></p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2AAB8"></a>Space Point Parameters</h4></div></div></div><p>All Resources that have coordinates in space now have Cartesian
+      atmospheric density. The new parameters are:</p><div class="itemizedlist"><ul class="itemizedlist compact" style="list-style-type: disc; "><li class="listitem"><p><code class="literal"><em class="replaceable"><code>Spacecraft</code></em>.<em class="replaceable"><code>ForceModel</code></em>.Acceleration</code></p></li><li class="listitem"><p><code class="literal"><em class="replaceable"><code>Spacecraft</code></em>.<em class="replaceable"><code>ForceModel</code></em>.AccelerationX</code></p></li><li class="listitem"><p><code class="literal"><em class="replaceable"><code>Spacecraft</code></em>.<em class="replaceable"><code>ForceModel</code></em>.AccelerationY</code></p></li><li class="listitem"><p><code class="literal"><em class="replaceable"><code>Spacecraft</code></em>.<em class="replaceable"><code>ForceModel</code></em>.AccelerationZ</code></p></li><li class="listitem"><p><code class="literal"><em class="replaceable"><code>Spacecraft</code></em>.<em class="replaceable"><code>ForceModel</code></em>.AtmosDensity</code></p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2D4F3"></a>Space Point Parameters</h4></div></div></div><p>All Resources that have coordinates in space now have Cartesian
       position and velocity parameters, so you can access ephemeris
       information. This includes all built-in solar system bodies and other
       Resources such as
@@ -68,7 +68,7 @@ BeginMissionSequence
 
 Luna.Epoch.A1ModJulian = 21545
 Report rf Luna.EarthMJ2000Eq.X Luna.EarthMJ2000Eq.Y Luna.EarthMJ2000Eq.Z ...
-       Luna.EarthMJ2000Eq.VX Luna.EarthMJ2000Eq.VY Luna.EarthMJ2000Eq.VZ</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2AB12"></a>Compatibility Changes</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><code class="literal"><em class="replaceable"><code><em class="replaceable"><code>EphemerisFile</code></em></code></em>.InitialEpoch</code>
+       Luna.EarthMJ2000Eq.VX Luna.EarthMJ2000Eq.VY Luna.EarthMJ2000Eq.VZ</code></pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2D54D"></a>Compatibility Changes</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><code class="literal"><em class="replaceable"><code><em class="replaceable"><code>EphemerisFile</code></em></code></em>.InitialEpoch</code>
         now cannot be later than
         <code class="literal"><em class="replaceable"><code>EphemerisFile</code></em>.FinalEpoch</code>.
         See the <a class="link" href="EphemerisFile.html" title="EphemerisFile">EphemerisFile</a> reference
@@ -86,11 +86,11 @@ Report rf Luna.EarthMJ2000Eq.X Luna.EarthMJ2000Eq.Y Luna.EarthMJ2000Eq.Z ...
         instead. See the <a class="link" href="Thruster.html" title="ChemicalThruster">Thruster</a> reference
         for details.</p></li><li class="listitem"><p>Tab characters in strings are now treated literally, instead of
         being changed to spaces. See <a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-3336" target="_top">GMT-3336</a>
-        for details.</p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2AB56"></a>Known &amp; Fixed Issues</h3></div></div></div><p>Over 50 bugs were closed in this release. See the <a class="link" href="http://li64-187.members.linode.com:8080/issues/?filter=11911" target="_top">"Critical
+        for details.</p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="N2D591"></a>Known &amp; Fixed Issues</h3></div></div></div><p>Over 50 bugs were closed in this release. See the <a class="link" href="http://li64-187.members.linode.com:8080/issues/?filter=11911" target="_top">"Critical
     Issues Fixed in R2013b" report</a> for a list of critical bugs and
     resolutions in R2013b. See the <a class="link" href="http://li64-187.members.linode.com:8080/issues/?filter=11912" target="_top">"Minor
     Issues Fixed for R2013b" report</a> for minor issues addressed in
-    R2013b.</p><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2AB63"></a>Known Issues</h4></div></div></div><p>All known issues that affect this version of GMAT can be seen in
+    R2013b.</p><div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="N2D59E"></a>Known Issues</h4></div></div></div><p>All known issues that affect this version of GMAT can be seen in
       the <a class="link" href="http://li64-187.members.linode.com:8080/issues/?filter=11913" target="_top">"Known
       Issues in R2013b" report</a> in JIRA.</p><p>There are several known issues in this release that we consider to
       be significant:</p><div class="informaltable"><table border="1"><colgroup><col width="16%"><col width="84%"></colgroup><thead><tr><th align="left">ID</th><th align="left">Description</th></tr></thead><tbody><tr><td><a class="link" href="http://li64-187.members.linode.com:8080/browse/GMT-2561" target="_top">GMT-2561</a></td><td>UTC Epoch Entry and Reporting During Leap Second is

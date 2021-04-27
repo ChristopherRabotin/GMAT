@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -60,9 +60,6 @@ public:
    std::string      GetDate() const;
    bool             SetDate(const std::string &str);
    bool             SetDate(Date *newDate, Integer format = 1);
-   
-   std::string      GetType() const;
-   bool             SetType(const std::string &str);
    
    std::string      GetYMDHMS() const;
    

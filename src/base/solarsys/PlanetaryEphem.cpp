@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -55,6 +55,7 @@ PlanetaryEphem::PlanetaryEphem(std::string withFileName) :
    strcpy(g_pef_dcb.full_path,withFileName.c_str());
    g_pef_dcb.recl           = 0;
    g_pef_dcb.fptr           = NULL;
+   theTimeConverter = TimeSystemConverter::Instance();
 }
 
 //------------------------------------------------------------------------------
@@ -73,6 +74,7 @@ PlanetaryEphem::PlanetaryEphem(const PlanetaryEphem& pef) :
    itsName       (pef.itsName),
    g_pef_dcb     (pef.g_pef_dcb)
 {
+   theTimeConverter = TimeSystemConverter::Instance();
 }
 
 //------------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2015 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -26,6 +26,9 @@
 #include "LinearInterpolator.hpp"
 #include "NotAKnotInterpolator.hpp"
 
+/**
+ * Physical model used to apply derivative data from a thrust history file
+ */
 class FileThrust: public PhysicalModel
 {
 public:
@@ -39,6 +42,16 @@ public:
 
    virtual void            Clear(const UnsignedInt
                                  type = Gmat::UNKNOWN_OBJECT);
+
+   virtual Integer         GetParameterID(const std::string &str) const;
+   virtual bool            IsParameterReadOnly(const Integer id) const;
+   virtual bool            IsParameterReadOnly(const std::string &label) const;
+   virtual Real            GetRealParameter(const Integer id) const;
+   virtual Real            SetRealParameter(const Integer id,
+                                         const Real value);
+
+
+
    virtual const ObjectTypeArray&
                            GetRefObjectTypeArray();
    virtual bool            SetRefObjectName(const UnsignedInt type,
@@ -63,6 +76,9 @@ public:
    virtual bool            IsTransient();
    virtual bool            DepletesMass();
    virtual void            SetSegmentList(std::vector<ThrustSegment>* segs);
+
+   const std::vector<ThrustSegment> GetAllThrustSegments();                   // Thrust Scale Factor Solve For
+
    virtual void            SetPropList(ObjectArray *soList);
    virtual bool            Initialize();
 
@@ -72,18 +88,38 @@ public:
 
 
    // Methods used by the ODEModel to set the state indexes, etc
-   virtual bool SupportsDerivative(Gmat::StateElementId id);
-   virtual bool SetStart(Gmat::StateElementId id, Integer index,
-                         Integer quantity, Integer sizeOfType);
+   virtual bool            SupportsDerivative(Gmat::StateElementId id);
+   virtual bool            SetStart(Gmat::StateElementId id, Integer index,
+                                 Integer quantity, Integer sizeOfType);
+   virtual StringArray     GetSolveForList();
+   virtual void            SetStmIndex(Integer id, Integer paramID);
+
+   // Methods we may need in the future are commented out
+   // virtual Integer         GetEstimationParameterID(const std::string &param);
+   // virtual std::string     GetParameterNameForEstimationParameter(const std::string &parmName);
+   // virtual std::string     GetParameterNameFromEstimationParameter(const std::string &parmName);
+   // virtual Integer         SetEstimationParameter(const std::string &param);
+   virtual bool            IsEstimationParameterValid(const Integer id);
+   // virtual Integer         GetEstimationParameterSize(const Integer id);
+   // virtual Real*           GetEstimationParameterValue(const Integer id);
+
+   // Covariance handling code
+   virtual Integer         HasParameterCovariances(Integer parameterId);
+   virtual Rmatrix*        GetParameterCovariances(Integer parameterId = -1);
+   virtual Covariance*     GetCovariance();
+
+   virtual bool            SetPrecisionTimeFlag(bool onOff);
+
+   // Methods for getting stop epochs for force models
+   virtual Real                     GetForceMaxStep(bool forward = true);
+   virtual Real                     GetForceMaxStep(Real theEpoch, bool forward = true);
+   virtual Real                     GetForceMaxStep(const GmatTime& theEpochGT, bool forward = true);
 
    DEFAULT_TO_NO_CLONES
 
 protected:
+
    // Pieces needed for bookkeeping
-//   /// The finite burn objects this model uses
-//   std::vector <FiniteBurn *>    burns;
-//   /// Names for the FiniteBurn objects used for this force
-//   StringArray                   burnNames;
    /// Names of the spacecraft accessed by this force
    StringArray                   spacecraftNames;
    /// Propagated objects used in the ODEModel
@@ -101,6 +137,8 @@ protected:
    /// Flag used to warn once that  then go silent if mass flow is missing tank
    bool                          massFlowWarningNeeded;
 
+   /// Names of the segments accessed by this force
+   StringArray                   segmentNames;
    /// The segment data from the thrust history file
    std::vector<ThrustSegment>    *segments;
 
@@ -130,13 +168,39 @@ protected:
    Integer                       interpolatorData[5];
    /// Last used index pair
    Integer                       indexPair[2];
+  
+   // Thrust Scale Factor Solve For data
+   /// Spacecraft thrust scale factor
+   Real   thrustSF;
+   /// Starting value for the Spacecraft thrust scale factor
+   Real   thrustSFinitial;
+   /// Initial value of thrust scale factor
+   std::vector<Real> tsfInitial;
+   /// Flag indicating if ThrustSF is being estimated
+   bool estimatingTSF;
+   /// ID for the tsfEpsilon parameter
+   Integer tsfEpsilonID;
+   /// Row/Column for the TSF entries in the A-matrix and STM
+   Integer tsfEpsilonRow;
+   /// Current value(s) of tsf
+   //std::vector<Real> tsfEpsilon;
 
-   void ComputeAccelerationMassFlow(const GmatEpoch atEpoch, Real burnData[4]);
-   void GetSegmentData(Integer atIndex, GmatEpoch atEpoch);
-   void LinearInterpolate(Integer atIndex, GmatEpoch atEpoch);
-   void SplineInterpolate(Integer atIndex, GmatEpoch atEpoch);
+   Rvector3 Accelerate(GmatEpoch &theEpoch, Real mass);
+   Rvector3 Accelerate(GmatTime &theEpoch, Real mass);
+
+   void ComputeAccelerationMassFlow(const GmatEpoch segEpoch, const GmatEpoch atEpoch, Real burnData[4]);
+   void ComputeAccelerationMassFlow(const GmatTime &segEpoch, const GmatTime &atEpoch, Real burnData[4]);
+   Integer GetSegmentData(Integer atIndex, Real offset);
+   void Interpolate(Integer atIndex, Integer profileIndex, Real offset);
+   void LinearInterpolate(Integer atIndex, Integer profileIndex, Real offset);
+   void SplineInterpolate(Integer atIndex, Integer profileIndex, Real offset);
 
    void ConvertDirectionToInertial(Real *dir, Real *dirInertial, Real epoch);
+   void ConvertDirectionToInertial(Real *dir, Real *dirInertial, const GmatTime &epochGT);
+
+   // Methods for checking if an epoch is in an interval, when direction matters
+   virtual bool            InSegmentInterval(GmatEpoch begin, GmatEpoch end, GmatEpoch epoch);
+   virtual bool            InSegmentInterval(const GmatTime& begin, const GmatTime& end, const GmatTime& epoch);
 };
 
 #endif /* FileThrust_hpp */

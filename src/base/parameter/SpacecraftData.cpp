@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -122,6 +122,10 @@ Real SpacecraftData::GetReal(Integer item)
       return mSpacecraft->GetRealParameter("SRPArea");
    case TOTAL_MASS:
       return mSpacecraft->GetRealParameter("TotalMass");
+   case SPAD_DRAG_COEFF:                                                // made changes by TUAN NGUYEN
+      return mSpacecraft->GetRealParameter("SPADDragScaleFactor");      // made changes by TUAN NGUYEN
+   case SPAD_REFLECT_COEFF:                                             // made changes by TUAN NGUYEN
+      return mSpacecraft->GetRealParameter("SPADSRPScaleFactor");       // made changes by TUAN NGUYEN
       
    // for Spacecraft owned FuelTank
    case FUEL_MASS:
@@ -275,6 +279,10 @@ Real SpacecraftData::SetReal(Integer item, Real val)
       return mSpacecraft->SetRealParameter("DragArea", val);
    case SRP_AREA:      
       return mSpacecraft->SetRealParameter("SRPArea", val);
+   case SPAD_DRAG_COEFF:                                                    // made changes by TUAN NGUYEN
+      return mSpacecraft->SetRealParameter("SPADDragScaleFactor", val);     // made changes by TUAN NGUYEN
+   case SPAD_REFLECT_COEFF:                                                 // made changes by TUAN NGUYEN
+      return mSpacecraft->SetRealParameter("SPADSRPScaleFactor", val);      // made changes by TUAN NGUYEN
       
    // for Spacecraft owned FuelTank
    case FUEL_MASS:

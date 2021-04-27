@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -104,6 +104,7 @@ RealVar::RealVar(const std::string &name, const std::string &valStr,
       mIsNumber = false;
    }
    
+   parameterCount = RealVarParamCount;
    mReturnType = Gmat::REAL_TYPE;
 }
 
@@ -294,6 +295,53 @@ Integer RealVar::GetParameterID(const std::string &str) const
    
    return Parameter::GetParameterID(str);
 }
+
+
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+std::string RealVar::GetParameterTypeString(const Integer id) const
+{
+   if (id >= ParameterParamCount && id < RealVarParamCount)
+      return Parameter::PARAM_TYPE_STRING[GetParameterType(id)];
+   else
+      return Parameter::GetParameterTypeString(id);
+}
+
+
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+Gmat::ParameterType RealVar::GetParameterType(const Integer id) const
+{
+   if (id >= ParameterParamCount && id < RealVarParamCount)
+      return PARAMETER_TYPE[id - ParameterParamCount];
+   else
+      return Parameter::GetParameterType(id);
+}
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool RealVar::IsParameterReadOnly(const Integer id) const
+{
+   if (id == VALUE)
+      return true;
+
+   return Parameter::IsParameterReadOnly(id);
+}
+
+
 
 
 //-------------------------------------------------------------------------------

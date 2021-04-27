@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -167,6 +167,17 @@ Thruster::Thruster(const std::string &typeStr, const std::string &nomme) :
    localAxesLabels.push_back("MJ2000Eq");
    localAxesLabels.push_back("SpacecraftBody");
 
+   // REORDER parameter write order to put DirectionX/Y/Z later
+   IntegerArray newParameterOrder;
+   for (Integer ii = 0; ii < HardwareParamCount; ii++)
+   {
+      if ((ii != DIRECTION_X) && (ii != DIRECTION_Y) && (ii != DIRECTION_Z))
+         newParameterOrder.push_back(ii);
+   }
+   parameterWriteOrder.clear();
+   for (Integer jj= 0; jj < newParameterOrder.size(); jj++)
+      parameterWriteOrder.push_back(newParameterOrder.at(jj));
+
    // set parameter write order
    for (Integer i=HardwareParamCount; i <= AXES; i++)
       parameterWriteOrder.push_back(i);
@@ -278,6 +289,17 @@ Thruster::Thruster(const Thruster& th) :
    tanks = th.tanks;
    
    isInitialized = false;
+
+   // REORDER parameter write order to put DirectionX/Y/Z later
+   IntegerArray newParameterOrder;
+   for (Integer ii = 0; ii < HardwareParamCount; ii++)
+   {
+      if ((ii != DIRECTION_X) && (ii != DIRECTION_Y) && (ii != DIRECTION_Z))
+         newParameterOrder.push_back(ii);
+   }
+   parameterWriteOrder.clear();
+   for (Integer jj= 0; jj < newParameterOrder.size(); jj++)
+      parameterWriteOrder.push_back(newParameterOrder.at(jj));
 
    // set parameter write order
    for (Integer i=HardwareParamCount; i <= AXES; i++)
@@ -552,6 +574,12 @@ bool Thruster::IsParameterReadOnly(const Integer id) const
    if (tankNames.size() == 0)
       if (id == MIXRATIO)
          return true;
+
+   // we want this in the Show Script, but only for Thrusters
+   if ((id == DIRECTION_X)        ||
+       (id == DIRECTION_Y)        || (id == DIRECTION_Z))
+      return false;
+   
 
    return Hardware::IsParameterReadOnly(id);
 }

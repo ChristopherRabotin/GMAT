@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -173,8 +173,8 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       throw AtmosphereException(
          "Central body pointer not set in MSISE90 model.");
 
-   Real utcEpoch = TimeConverterUtil::Convert(epoch, TimeConverterUtil::A1MJD,
-		   TimeConverterUtil::UTCMJD, GmatTimeConstants::JD_JAN_5_1941);
+   Real utcEpoch = theTimeConverter->Convert(epoch, TimeSystemConverter::A1MJD,
+		   theTimeConverter->UTCMJD, GmatTimeConstants::JD_JAN_5_1941);
 
    GetInputs(utcEpoch);
 

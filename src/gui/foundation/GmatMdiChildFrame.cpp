@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -314,51 +314,6 @@ void GmatMdiChildFrame::SetEditor(ScriptEditor *editor)
 
 
 //------------------------------------------------------------------------------
-// void SetDirty(bool dirty)
-//------------------------------------------------------------------------------
-void GmatMdiChildFrame::SetDirty(bool dirty)
-{
-   mDirty = dirty;
-}
-
-
-//------------------------------------------------------------------------------
-// void SetCanBeDeleted(bool flag)
-//------------------------------------------------------------------------------
-void GmatMdiChildFrame::SetCanBeDeleted(bool flag)
-{
-   mCanBeDeleted = flag;
-}
-
-
-//------------------------------------------------------------------------------
-// void OverrideDirty(bool flag)
-//------------------------------------------------------------------------------
-void GmatMdiChildFrame::OverrideDirty(bool flag)
-{
-   mOverrideDirty = flag;
-}
-
-
-//------------------------------------------------------------------------------
-// bool IsDirty()
-//------------------------------------------------------------------------------
-bool GmatMdiChildFrame::IsDirty()
-{
-   return mDirty;
-}
-
-
-//------------------------------------------------------------------------------
-// bool CanClose()
-//------------------------------------------------------------------------------
-bool GmatMdiChildFrame::CanClose()
-{
-   return mCanClose;
-}
-
-
-//------------------------------------------------------------------------------
 // wxWindow* GetMdiParent()
 //------------------------------------------------------------------------------
 /**
@@ -663,6 +618,7 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
        (mItemType == GmatTree::OUTPUT_ORBIT_VIEW) ||
        (mItemType == GmatTree::OUTPUT_XY_PLOT) ||
        (mItemType == GmatTree::OUTPUT_GROUND_TRACK_PLOT) ||
+       (mItemType == GmatTree::OUTPUT_PERSISTENT) ||
        (mItemType == GmatTree::USER_DEFINED_OBJECT)
        // We'll want to add the event reports eventually, but they are not subscriber based
        //|| (mItemType == GmatTree::EVENT_REPORT)

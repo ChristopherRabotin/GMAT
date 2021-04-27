@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -146,6 +146,7 @@ protected:
    static const Integer UNDEFINED_NAIF_ID_REF_FRAME;
 
    virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime);
+   virtual void ComputeCosineMatrixAndAngularVelocity(GmatTime &atTime);           // made changes by TUAN NGUYEN
 
 private:
    // Default constructor - not implemented

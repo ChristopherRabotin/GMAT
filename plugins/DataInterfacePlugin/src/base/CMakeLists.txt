@@ -16,9 +16,6 @@ MESSAGE("GMAT DataInterface Plugin setup " ${VERSION})
 
 SET(TargetName DataInterface)
 
-# Add Preproccessor Definitions
-ADD_DEFINITIONS("-DDATAINTERFACE_EXPORTS")
-
 # ====================================================================
 # list of directories containing source/header files
 SET(PLUGIN_DIRS command datainterface datareader factory include plugin)
@@ -42,3 +39,6 @@ SET(PLUGIN_SRCS
 # ====================================================================
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
+
+# Rename DLL export preproccessor definition
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEFINE_SYMBOL "DATAINTERFACE_EXPORTS")

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -72,6 +72,7 @@
 //#include "Global.hpp"       // for Global command
 #include "Create.hpp"         // for Create command
 #include "Write.hpp"          // for Write command
+#include "UpdateDynamicData.hpp" // for UpdateDynamicData command
 
 //******************************************************************************
 // ElseIf does not work yet. (2008.08.29)
@@ -210,7 +211,9 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
     else if (ofType == "Create")
         return new Create;
     else if (ofType == "Write")
-        return new Write;
+       return new Write;
+    else if (ofType == "UpdateDynamicData")
+       return new UpdateDynamicData;
    // add more here .......
    else 
    {
@@ -280,6 +283,7 @@ CommandFactory::CommandFactory() :
       creatables.push_back("Toggle");
       creatables.push_back("Vary");
       creatables.push_back("While");
+      creatables.push_back("UpdateDynamicData");
    }
    
    // Now fill in unviewable commands

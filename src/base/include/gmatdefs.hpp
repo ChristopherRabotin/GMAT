@@ -13,7 +13,7 @@
 // Modification History      : 5/20/2003 - D. Conway, Thinking Systems, Inc.
 //                             Original delivery
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -89,38 +89,13 @@
 #endif
 
 
-typedef double          Real;              // 8 byte float
-typedef int             Integer;           // 4 byte signed integer
-typedef unsigned char   Byte;              // 1 byte
-typedef unsigned int    UnsignedInt;       // 4 byte unsigned integer
-
-typedef std::vector<Real>        RealArray;
-typedef std::vector<Integer>     IntegerArray;
-typedef std::vector<UnsignedInt> UnsignedIntArray;
-typedef std::vector<std::string> StringArray;
-typedef std::vector<bool>        BooleanArray;
-
-class GmatBase;        // Forward reference for ObjectArray
-class ElementWrapper;  // Forward reference for ElementWrapper
-class A1Mjd;           // Forward reference for A1Mjd (epoch)
-class Rvector6;        // Forward reference for Rvector6 (ephem state)
-typedef std::vector<GmatBase*>                 ObjectArray;
-typedef std::vector<ElementWrapper*>           WrapperArray;
-typedef std::vector<Rvector6*>                 StateArray;
-typedef std::vector<A1Mjd*>                    EpochArray;
-typedef std::map<std::string, Integer>         IntegerMap;
-typedef std::map<std::string, UnsignedInt>     ColorMap;
-typedef std::map<std::string, GmatBase*>       ObjectMap;
-typedef std::map<std::string, ElementWrapper*> WrapperMap;
-typedef std::stack<ObjectMap*>                 ObjectMapStack;
-
 /// Forward reference to the event handler class used to plug in GUI components
 class GmatEventHandler;
 
 typedef struct geoparms
 {
-   Real xtemp;  /// minimum global exospheric temperature (degrees K)
-   Real tkp;    /// geomagnetic index
+   Real xtemp;  ///< minimum global exospheric temperature (degrees K)
+   Real tkp;    ///< geomagnetic index
 
 } GEOPARMS;
 
@@ -152,6 +127,7 @@ namespace Gmat
       FORMATION,
       SPACEOBJECT,
       GROUND_STATION,
+      PLATE,                               // made changes by TUAN NGUYEN
       BURN,
       
       IMPULSIVE_BURN,
@@ -183,6 +159,7 @@ namespace Gmat
       REPORT_FILE,
       XY_PLOT,
       ORBIT_VIEW,
+      DYNAMIC_DATA_DISPLAY,
       
       EPHEMERIS_FILE,
       PROP_SETUP,
@@ -194,6 +171,11 @@ namespace Gmat
       ELECTRIC_THRUSTER,
       CHEMICAL_FUEL_TANK,
       ELECTRIC_FUEL_TANK,
+      
+      FIELD_OF_VIEW,
+      CONICAL_FOV,
+	  RECTANGULAR_FOV,
+	  CUSTOM_FOV,
 
       POWER_SYSTEM,        // for PowerSystems
       SOLAR_POWER_SYSTEM,
@@ -213,11 +195,11 @@ namespace Gmat
 
       // Estimation types
       MEASUREMENT_MODEL,   // May be replaced by TrackingSystem
-      CORE_MEASUREMENT,    // For the measurement primitives
+//      CORE_MEASUREMENT,    // For the measurement primitives
       ERROR_MODEL,         // Error model used in a measurement
       
-      TRACKING_DATA,
-      TRACKING_SYSTEM,
+//      TRACKING_DATA,
+//      TRACKING_SYSTEM,
       DATASTREAM,          // For DataFile container objects      
       DATA_FILE,           // For DataFile objects
       OBTYPE,              // For the specific observation types
@@ -298,183 +280,5 @@ namespace Gmat
    } PLUGIN_RESOURCE;
 
 }
-
-
-#ifdef EXPORT_TEMPLATES
-
-   /**
-    * The following code cleans up template import/export issues between GMAT and 
-    * Visual Studio 2010.  These blocks of code might result in multiply defined
-    * structures when using plugin libraries, or when refactoring the base code 
-    * into separate libraries.  If that happens, they need to be moved into a
-    * .cpp file that is only built in the base library.
-    */
-
-    // Instantiate STL template classes used in GMAT  
-    // This does not create an object. It only forces the generation of all
-    // of the members of the listed classes. It exports them from the DLL 
-    // and imports them into the .exe file.
-
-    // This fixes std::string:
-    // Only do this if the export is not already in a different module (wx, I'm looking at you!)
-    #ifdef IMPEXP_STDSTRING
-        EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<char>;
-        EXPIMP_TEMPLATE template class DECLSPECIFIER std::basic_string<char, std::char_traits<char>, std::allocator<char>>;
-    #endif
-
-//    const std::basic_string::size_type std::basic_string<char, std::char_traits<char>, std::allocator<char>>::npos = size_t(-1); 
-//    EXPIMP_TEMPLATE template const typename DECLSPECIFIER std::basic_string<char, std::char_traits<char>, std::allocator<char>>::npos;
-
-
- //   template<class _Elem,
-	//class _Traits,
-	//class _Alloc>
-	//_PGLOBAL const typename basic_string<_Elem, _Traits, _Alloc>::size_type
-	//	basic_string<_Elem, _Traits, _Alloc>::npos =
-	//		(typename basic_string<_Elem, _Traits, _Alloc>::size_type)(-1);
-
-    // Fix StringArray:
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<std::string>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<std::string>;
-
-    // Fix vector of StringArray
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<StringArray>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<StringArray>;
-
-    // Fix ObjectArray
-    class GmatBase;     // forward reference
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<GmatBase*>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<GmatBase*>;
-
-    // Fix IntegerArray
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<Integer>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<Integer>;
-
-    // Fix RealArray
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<Real>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<Real>;
-
-    // Fix UnsignedIntArray
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<UnsignedInt>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<UnsignedInt>;
-
-    // Fix vector of bools
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<bool>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<bool>;
-
-    // Fix ObjectType vector
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<UnsignedInt>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<UnsignedInt>;
-
-    // Fix WrapperDataType
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<Gmat::WrapperDataType>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<Gmat::WrapperDataType>;
-
-    // Fix vector of celestial body pointers
-    class CelestialBody;     // forward reference
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<CelestialBody*>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<CelestialBody*>;
-
-    // Fix vector of space point pointers
-    class SpacePoint;        // forward reference
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<SpacePoint*>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<SpacePoint*>;
-
-    // Fix vector of space object pointers
-    class SpaceObject;        // forward reference
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<SpaceObject*>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<SpaceObject*>;
-
-    // Fix vector of FuelTank pointers
-    class FuelTank;          // forward reference
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<FuelTank*>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<FuelTank*>;
-
-    // Fix vector of IntegerArrays
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<IntegerArray>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<IntegerArray>;
-
-    // Fix vector of space force pointers
-    class PhysicalModel;        // forward reference
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<PhysicalModel*>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<PhysicalModel*>;
-
-    // Fix vector of finite burn pointers
-    class FiniteBurn;        // forward reference
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<FiniteBurn*>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<FiniteBurn*>;
-
-    // Fix vector of coordinate system pointers
-    class CoordinateSystem;        // forward reference
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<CoordinateSystem*>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<CoordinateSystem*>;
-
-    // Fix vector of TriggerManager pointers
-    class TriggerManager;        // forward reference
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<TriggerManager*>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<TriggerManager*>;
-
-    // Fix vector of Sandbox pointers
-    class Sandbox;        // forward reference
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<Sandbox*>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<Sandbox*>;
-
-    // Fix vector of command pointers
-    class GmatCommand;        // forward reference
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<GmatCommand*>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<GmatCommand*>;
-
-    // Fix vector of PluginResource pointers
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<Gmat::PluginResource*>;
-    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<Gmat::PluginResource*>;
-
-    // Maps -- still need to be addressed
-    //EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<std::string>;
-    //EXPIMP_TEMPLATE template struct DECLSPECIFIER std::less< std::string >;
-    //EXPIMP_TEMPLATE template struct DECLSPECIFIER std::pair< std::string,std::string >;
-    //EXPIMP_TEMPLATE template class  DECLSPECIFIER std::allocator<std::pair<const std::string,std::string> >;
-    //EXPIMP_TEMPLATE template class  DECLSPECIFIER std::_Tmap_traits<std::string,std::string,std::less<std::string>, std::allocator<std::pair<const std::string,std::string> >,false>;
-    //EXPIMP_TEMPLATE template class  DECLSPECIFIER std::_Tree_nod<std::_Tmap_traits<std::string,std::string,std::less<std::string>, std::allocator<std::pair<const std::string,std::string> >,false> >;
-    //EXPIMP_TEMPLATE template class  DECLSPECIFIER std::allocator<std::_Tree_nod<std::_Tmap_traits<std::string,std::string,std::less<std::string>, std::allocator<std::pair<const std::string,std::string> >,false> > >;
-    //EXPIMP_TEMPLATE template class  DECLSPECIFIER std::_Tree_val<std::_Tmap_traits<std::string,std::string,std::less<std::string>, std::allocator<std::pair<const std::string,std::string> >,false> >;
-    //EXPIMP_TEMPLATE template class  DECLSPECIFIER std::map<std::string, std::string, std::less< std::string >, std::allocator<std::pair<const std::string,std::string> > >;
-
-/*
-   #define EXPORT_STL_MAP( mapkey, mapvalue ) \
-     template struct DECLSPECIFIER std::pair< mapkey,mapvalue >; \
-     template class DECLSPECIFIER std::allocator< \
-       std::pair<const mapkey,mapvalue> >; \
-     template struct DECLSPECIFIER std::less< mapkey >; \
-     template class DECLSPECIFIER std::allocator< \
-       std::_Tree_ptr<std::_Tmap_traits<mapkey,mapvalue,std::less<mapkey>, \
-       std::allocator<std::pair<const mapkey,mapvalue> >,false> > >; \
-     template class DECLSPECIFIER std::allocator< \
-       std::_Tree_nod<std::_Tmap_traits<mapkey,mapvalue,std::less<mapkey>, \
-       std::allocator<std::pair<const mapkey,mapvalue> >,false> > >; \
-     template class DECLSPECIFIER std::_Tree_nod< \
-       std::_Tmap_traits<mapkey,mapvalue,std::less<mapkey>, \
-       std::allocator<std::pair<const mapkey,mapvalue> >,false> >; \
-     template class DECLSPECIFIER std::_Tree_ptr< \
-       std::_Tmap_traits<mapkey,mapvalue,std::less<mapkey>, \
-       std::allocator<std::pair<const mapkey,mapvalue> >,false> >; \
-     template class DECLSPECIFIER std::_Tree_val< \
-       std::_Tmap_traits<mapkey,mapvalue,std::less<mapkey>, \
-   	std::allocator<std::pair<const mapkey,mapvalue> >,false> >; \
-     template class DECLSPECIFIER std::map< \
-       mapkey, mapvalue, std::less< mapkey >, \
-       std::allocator<std::pair<const mapkey,mapvalue> > >;
-
-   EXPORT_STL_MAP(std::string, std::string)
-*/
-
-    // Here are lists of strings:
-    //EXPIMP_TEMPLATE template class DECLSPECIFIER std::list<std::string>;
-
-
-    // other examples:
-//    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<int>;
-//    EXPIMP_TEMPLATE template class DECLSPECIFIER std::vector<char>;
-
-#endif
 
 #endif //GMATDEFS_HPP

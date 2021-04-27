@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -753,7 +753,7 @@ bool EclipseLocator::Initialize()
 
    if (solarSys)
    {
-      sun = (Star*) solarSys->GetBody(SolarSystem::SUN_NAME);
+      sun = (Star*) solarSys->GetBody(GmatSolarSystemDefaults::SUN_NAME);
    }
    if (eclipseTypes.size() < 1)
    {

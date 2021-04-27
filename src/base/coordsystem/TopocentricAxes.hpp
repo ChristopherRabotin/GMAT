@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -40,7 +40,10 @@
 #include "GmatBase.hpp"
 #include "AxisSystem.hpp"
 #include "DynamicAxes.hpp"
-#include "BodyFixedPoint.hpp"
+//#include "BodyFixedPoint.hpp"
+
+// forward reference for BodyFixedPoint
+class BodyFixedPoint;
 
 class GMAT_API TopocentricAxes : public DynamicAxes
 {

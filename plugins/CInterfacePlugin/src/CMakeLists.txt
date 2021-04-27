@@ -16,9 +16,6 @@ MESSAGE("GMAT CInterface Plugin setup " ${VERSION})
 
 SET(TargetName CInterface)
 
-# Add Preproccessor Definitions
-ADD_DEFINITIONS("-DCINTERFACE_EXPORTS")
-
 # ====================================================================
 # list of directories containing source/header files
 SET(PLUGIN_DIRS command factory include plugin)
@@ -36,6 +33,9 @@ SET(PLUGIN_SRCS
 
 # FORCE the plugin to install directly into bin
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" bin FORCE)
+
+# Rename DLL export preproccessor definition
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEFINE_SYMBOL "CINTERFACE_EXPORTS")
 
 # Set RPATH to find shared libraries in default locations on Mac/Linux
 if(UNIX)
@@ -92,7 +92,7 @@ if(Matlab_FOUND)
   # will gently exit if it couldn't build either one (won't error out).
 
   # Matlab command for multi-config or release builds
-  if( CMAKE_CONFIGURATION_TYPES OR (CMAKE_BUILD_TYPE STREQUAL Release) OR (CMAKE_BUILD_TYPE STREQUAL MinSizeRel))
+  if( CMAKE_CONFIGURATION_TYPES OR (CMAKE_BUILD_TYPE STREQUAL Release) OR (CMAKE_BUILD_TYPE STREQUAL MinSizeRel) OR (CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo) )
     # Matlab command for release configurations
     MESSAGE(STATUS "Will install CInterface (release) Matlab thunk files with command:\n${MATLAB_COMMAND}")
     INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab to build CInterface (release) thunk files...patience is a virtue...\")")
@@ -100,7 +100,7 @@ if(Matlab_FOUND)
   endif()
 
   # Matlab command for multi-config or debug builds
-  if( CMAKE_CONFIGURATION_TYPES OR (CMAKE_BUILD_TYPE STREQUAL Debug) OR (CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo))
+  if( CMAKE_CONFIGURATION_TYPES OR (CMAKE_BUILD_TYPE STREQUAL Debug) )
     # Matlab command for debug configurations
     MESSAGE(STATUS "Will install CInterface (debug) Matlab thunk files with command:\n${MATLAB_COMMAND_DEBUG}")
     INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab to build CInterface (debug) thunk files...patience is a virtue...\")")

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -17,7 +17,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
 // express or implied.   See the License for the specific language
 // governing permissions and limitations under the License.
-// $Copyright$
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc.
 //
@@ -202,9 +201,13 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    //use = use + " - Uses Perl Compatible Regular Expressions\n";
    use = use + " - JPL SPICE Library\n";
    use = use + " - IAU SOFA Library\n";
-   use = use + " - Apache Xerces 3.1\n";
+   use = use + " - Apache Xerces 3.2.2\n";
    use = use + " - Planetary images courtesy of JPL/Caltech/USGS, Celestia \n";
    use = use + "   Motherlode, Bjorn Jonsson, and NASA World Wind \n";
+   use = use + " - f2c \n";
+   use = use + " - MSISE 1990 Density Model \n";
+   use = use + " - IRI 2007 Ionosphere Model \n";
+   use = use + " - OpenFramesInterface \n";
    use = use + " - Boost";
    wxStaticText *useText = new wxStaticText(this, -1, use);
    

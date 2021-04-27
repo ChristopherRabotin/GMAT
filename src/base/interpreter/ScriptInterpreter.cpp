@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -62,6 +62,7 @@
 //#define DEBUG_COMMAND_MODE_TOGGLE
 //#define DEBUG_ENCODING_CHAR
 //#define DEBUG_INCLUDE
+//#define DEBUG_SCRIPTED_METHODS
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -175,6 +176,17 @@ bool ScriptInterpreter::Interpret()
    for (StringArray::iterator i = defaultCSNames.begin(); i != defaultCSNames.end(); ++i)
    {
       CoordinateSystem *cs = (CoordinateSystem*)FindObject(*i);
+      if (!cs)
+      {
+         // This message occurs when the user has corrected
+         // a Gmat Function via the GUI, then opened the
+         // script in the Script Editor and pressed 'Save, Sync, Run'.
+         // (GMT-7216)
+         std::string errmsg = "Error reloading the script ";
+         errmsg += mainScriptFilename + ".  Please ";
+         errmsg += "close GMAT and load the script again.\n";
+         throw InterpreterException(errmsg);
+      }
       cs->SetModifyFlag(false);
    }
 
@@ -1067,6 +1079,7 @@ bool ScriptInterpreter::InterpretIncludeFile(GmatCommand *inCmd)
       MessageInterface::ShowMessage("   Calling ReadScript()\n");
       #endif
       retval = ReadScript(inCmd, true, false);
+      parsingDelayedBlock = false;
    }
    else
    {
@@ -1218,6 +1231,133 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader,bool rein
          
          currentBlockType = theTextParser.EvaluateBlock(currentBlock);
          
+         // Object Method detection
+         if ((currentBlockType == Gmat::DEFINITION_BLOCK) ||
+               (currentBlockType == Gmat::COMMAND_BLOCK) ||
+               (currentBlockType == Gmat::ASSIGNMENT_BLOCK))
+         {
+            StringArray pieces = theTextParser.DecomposeBlock(currentBlock);
+
+            std::string lineToParse, preface, trailing;
+
+            for (UnsignedInt i = 0; i < pieces.size(); ++i)
+            {
+               lineToParse = pieces[i];
+               lineToParse = GmatStringUtil::Trim(lineToParse);
+
+               #ifdef DEBUG_SCRIPTED_METHODS
+                  MessageInterface::ShowMessage("Piece[%d]: '%s'\n", i,
+                     lineToParse.c_str());
+               #endif
+
+               // Skip comment lines
+               if (lineToParse[0] != '%')
+               {
+                  // Throw away inline comments to ignore their parens
+                  size_t commloc;
+                  if (theTextParser.GetInlineComment() != "")
+                  {
+                     commloc =
+                        lineToParse.find(theTextParser.GetInlineComment());
+                  }
+                  else
+                     commloc = std::string::npos;
+                  if (commloc != std::string::npos)
+                     trailing = " " + lineToParse.substr(commloc);
+                  lineToParse = lineToParse.substr(0, commloc);
+                  
+                  // Make sure line contains syntax for a function
+                  if (lineToParse.find(".") != std::string::npos)
+                     break;
+               }
+               else
+                  preface += pieces[i];
+            }
+
+            // object methods require parentheses
+            size_t oParenLoc = lineToParse.find("(");
+
+            if (oParenLoc != std::string::npos)
+            {
+               size_t cParenLoc = lineToParse.find_last_of(")"), len;
+
+               if (cParenLoc == std::string::npos)
+                  throw InterpreterException("Mismatched parentheses on the "
+                        "line " + currentBlock);
+
+               size_t loc = lineToParse.find(".");
+               size_t gmatloc = lineToParse.find("GMAT ");
+               if (gmatloc != std::string::npos)
+                  gmatloc += 5;
+               else
+                  gmatloc = 0;
+
+               // Object.Method must occur prior to open paren if a method
+               if (loc < oParenLoc)
+               {
+                  std::string objectName;
+                  std::string methodName;
+                  std::string args;
+
+                  #ifdef DEBUG_SCRIPTED_METHODS
+                     MessageInterface::ShowMessage("Method Check\n   Current "
+                           "block: '%s'\n   Line to parse:  '%s'\n   Current line:  '%s'\n",
+                           currentBlock.c_str(), lineToParse.c_str(), currentLine.c_str());
+                  #endif
+
+                  if (loc != std::string::npos)
+                  {
+                     len = (oParenLoc - (loc+1));
+                     objectName = lineToParse.substr(gmatloc,loc-gmatloc);
+                     methodName = lineToParse.substr(loc+1, len);
+                     // Make sure to remove blanks at front or back
+                     methodName = GmatStringUtil::Trim(methodName);
+
+                     len = (cParenLoc - (oParenLoc+1));
+                     args = lineToParse.substr(oParenLoc+1, len);
+
+                     #ifdef DEBUG_SCRIPTED_METHODS
+                        MessageInterface::ShowMessage("Method Check for %s:\n   "
+                              "Object: '%s'\n   Method: '%s'\n   Args:   '%s'\n",
+                              currentBlock.c_str(), objectName.c_str(),
+                              methodName.c_str(), args.c_str());
+                     #endif
+                  }
+
+                  if ((objectName != "") && (methodName != ""))
+                  {
+                     GmatBase *obj = CheckForMethod(objectName, methodName);
+                     if (obj)    // Object has a scriptable method
+                     {
+                        bool mRetVal = false;  // true when parsing succeeds
+
+                        #ifdef DEBUG_SCRIPTED_METHODS
+                           MessageInterface::ShowMessage("   Parsing arguments "
+                                 "'%s'\n", args.c_str());
+                        #endif
+
+                        // Split apart the parameters now
+                        StringArray parms = GmatStringUtil::SeparateByComma(args);
+
+                        #ifdef DEBUG_SCRIPTED_METHODS
+                           for (UnsignedInt i = 0; i < parms.size(); ++i)
+                              MessageInterface::ShowMessage("      %d: %s\n", i,
+                                    parms[i].c_str());
+                        #endif
+                        
+                        mRetVal = obj->SetMethodParameters(methodName, parms,
+                              preface, trailing);
+
+                        if (mRetVal)
+                           currentBlockType = Gmat::METHOD_BLOCK;
+
+                     }
+                  }
+               }
+            }
+         }
+
+
          #if DBGLVL_SCRIPT_READING > 1
          MessageInterface::ShowMessage
             ("===> after EvaluateBlock() currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
@@ -1892,15 +2032,36 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    if (objs.size() > 0)
       WriteSpacecrafts(objs, mode);
    
+   // made changes by TUAN NGUYEN
+   //---------------------------------------------
+   // Plate Objects
+   //---------------------------------------------
+   objs = theModerator->GetListOfObjects(Gmat::PLATE);
+   #ifdef DEBUG_SCRIPT_WRITING
+      MessageInterface::ShowMessage("   Found %d Plates\n", objs.size());
+   #endif
+   if (objs.size() > 0)
+      WriteObjects(objs, "Plates", mode);
+
    //-----------------------------------
    // Hardware
    //-----------------------------------
    objs = theModerator->GetListOfObjects(Gmat::HARDWARE);
-   #ifdef DEBUG_SCRIPT_WRITING 
+#ifdef DEBUG_SCRIPT_WRITING
    MessageInterface::ShowMessage("   Found %d Hardware Components\n", objs.size());
-   #endif
+#endif
    if (objs.size() > 0)
       WriteHardwares(objs, mode);
+   
+   //-----------------------------------
+   // FieldOfViews
+   //-----------------------------------
+   objs = theModerator->GetListOfObjects(Gmat::FIELD_OF_VIEW);
+   #ifdef DEBUG_SCRIPT_WRITING
+      MessageInterface::ShowMessage("   Found %d FieldOfView Components\n", objs.size());
+   #endif
+   if (objs.size() > 0)
+      WriteFieldOfViews(objs, mode);
    
    //-----------------------------------
    // Formation
@@ -2019,19 +2180,19 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    if (objs.size() > 0)
       WriteObjects(objs, "MeasurementModels", mode);
 
-   objs = theModerator->GetListOfObjects(Gmat::TRACKING_DATA);
-   #ifdef DEBUG_SCRIPT_WRITING
-   MessageInterface::ShowMessage("   Found %d TrackingData Objects\n", objs.size());
-   #endif
-   if (objs.size() > 0)
-      WriteObjects(objs, "TrackingData", mode);
+   //objs = theModerator->GetListOfObjects(Gmat::TRACKING_DATA);
+   //#ifdef DEBUG_SCRIPT_WRITING
+   //MessageInterface::ShowMessage("   Found %d TrackingData Objects\n", objs.size());
+   //#endif
+   //if (objs.size() > 0)
+   //   WriteObjects(objs, "TrackingData", mode);
 
-   objs = theModerator->GetListOfObjects(Gmat::TRACKING_SYSTEM);
-   #ifdef DEBUG_SCRIPT_WRITING
-   MessageInterface::ShowMessage("   Found %d Tracking Systems\n", objs.size());
-   #endif
-   if (objs.size() > 0)
-      WriteObjects(objs, "TrackingSystems", mode);
+   //objs = theModerator->GetListOfObjects(Gmat::TRACKING_SYSTEM);
+   //#ifdef DEBUG_SCRIPT_WRITING
+   //MessageInterface::ShowMessage("   Found %d Tracking Systems\n", objs.size());
+   //#endif
+   //if (objs.size() > 0)
+   //   WriteObjects(objs, "TrackingSystems", mode);
 
    //---------------------------------------------
    // Event Locators
@@ -2053,21 +2214,6 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    if (objs.size() > 0)
       WriteObjects(objs, "Solvers", mode);
       
-   //-----------------------------------
-   // Generic Objects
-   // MCR Emergent Space Technologies (9/22/17)
-   // For OpenFramesInterface Plugin
-   //
-   // In the future, this should use plugin registration instead, but plugin
-   // registration is not available on GMAT master at the time of this mod.
-   //-----------------------------------
-   objs = theModerator->GetListOfObjects(Gmat::GENERIC_OBJECT);
-   #ifdef DEBUG_SCRIPT_WRITING
-      MessageInterface::ShowMessage("   Found %d Subscribers\n", objs.size());
-   #endif
-   if (objs.size() > 0)
-      WriteObjects(objs, "Generic Objects", mode);
-
    //-----------------------------------
    // Subscriber
    //-----------------------------------
@@ -2766,6 +2912,8 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
       ("   Before checking for math, inCommandMode=%d\n", inCommandMode);
    #endif
 
+   //bool isRhsAMathEquation = false;               // made changes by TUAN NGUYEN
+
    if (!inCommandMode)
    {
       #ifdef DEBUG_PARSE_ASSIGNMENT
@@ -2783,7 +2931,8 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
             #ifdef DEBUG_PARSE
             MessageInterface::ShowMessage("   It is a math equation\n");
             #endif
-            
+            //isRhsAMathEquation = true;                     // made changes by TUAN NGUYEN
+
             // check if LHS is object.property
             if (FindPropertyID(obj, lhs, &owner, paramID, paramType))
             {
@@ -2941,6 +3090,13 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    // paramID will be assigned from call to Interpreter::FindPropertyID()
    if ( FindPropertyID(obj, lhs, &owner, paramID, paramType) )
    {
+      //if ((paramType == Gmat::STRING_TYPE) && isRhsAMathEquation)                                        // made changes by TUAN NGUYEN
+      //{                                                                                                  // made changes by TUAN NGUYEN
+      //   InterpreterException ex("Missing open and close signle quote on the right hand side of the assignment.\n");   // made changes by TUAN NGUYEN
+      //   HandleError(ex);                                                                                // made changes by TUAN NGUYEN
+      //   return false;                                                                                   // made changes by TUAN NGUYEN
+      //}                                                                                                  // made changes by TUAN NGUYEN
+
       attrStr = preStr;
       attrInLineStr = inStr;
       
@@ -3029,7 +3185,9 @@ bool ScriptInterpreter::ParseIncludeBlock(const StringArray &chunks)
    if (count != 2)
       retval = false;
    
-   std::string incFile = chunks[1];
+   // Check the file path, setting the path separator to forward slashes,
+   // so it will work on all platforms
+   std::string incFile = GmatStringUtil::Replace(chunks[1], "\\", "/");
    incFile = GmatStringUtil::RemoveEnclosingString(incFile, "'");
    #ifdef DEBUG_PARSE_INCLUDE
    MessageInterface::ShowMessage("   ==> incFile='%s'\n", incFile.c_str());
@@ -3502,11 +3660,11 @@ void ScriptInterpreter::WriteHardwares(StringArray &objs, Gmat::WriteMode mode)
 {
    StringArray::iterator current;
    GmatBase *object =  NULL;
-
+   
    WriteSectionDelimiter(objs[0], "Hardware Components");
    
    // Hardware Tanks
-   for (current = objs.begin(); current != objs.end(); ++current) 
+   for (current = objs.begin(); current != objs.end(); ++current)
    {
       object = FindObject(*current);
       if (object != NULL)
@@ -3519,7 +3677,7 @@ void ScriptInterpreter::WriteHardwares(StringArray &objs, Gmat::WriteMode mode)
    }
    
    // Hardware Thrusters
-   for (current = objs.begin(); current != objs.end(); ++current) 
+   for (current = objs.begin(); current != objs.end(); ++current)
    {
       object = FindObject(*current);
       if (object != NULL)
@@ -3530,24 +3688,51 @@ void ScriptInterpreter::WriteHardwares(StringArray &objs, Gmat::WriteMode mode)
             theReadWriter->WriteText(object->GetGeneratingString(mode));
          }
    }
-
+   
    // Other Hardware
    for (current = objs.begin(); current != objs.end(); ++current)
    {
       object = FindObject(*current);
       if (object != NULL)
          if ((object->GetTypeName() != "FuelTank") &&
-                  (object->GetTypeName() != "Thruster"))
+             (object->GetTypeName() != "Thruster"))
          {
             if (object->GetCommentLine() == "")
                theReadWriter->WriteText("\n");
             theReadWriter->WriteText(object->GetGeneratingString(mode));
          }
    }
-
+   
 }
 
+//------------------------------------------------------------------------------
+// void WriteFieldOfViews(StringArray &objs, Gmat::WriteMode mod)
+//------------------------------------------------------------------------------
+/*
+ * This method writes FieldOfView objects.
+ */
+//------------------------------------------------------------------------------
+void ScriptInterpreter::WriteFieldOfViews(StringArray &objs, Gmat::WriteMode mode)
+{
+	StringArray::iterator current;
+	GmatBase *object = NULL;
 
+	WriteSectionDelimiter(objs[0], "FieldOfView Components");
+
+	// Look for FieldOfView objects
+	for (current = objs.begin(); current != objs.end(); ++current)
+	{
+		object = FindObject(*current);
+		if (object != NULL)
+		{
+			if (object->GetCommentLine() == "")
+				theReadWriter->WriteText("\n");
+			theReadWriter->WriteText(object->GetGeneratingString(mode));
+		}
+
+	}
+
+}
 //------------------------------------------------------------------------------
 // void WriteSubscribers(StringArray &objs, Gmat::WriteMode mod)
 //------------------------------------------------------------------------------

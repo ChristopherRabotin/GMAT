@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -86,7 +86,7 @@ CCSDSAEMReader::~CCSDSAEMReader()
 }
 
 // -----------------------------------------------------------------------------
-// void CCSDSAEMReader* Clone()
+// CCSDSEMReader* Clone()
 // -----------------------------------------------------------------------------
 /**
  * This method returns a clone of the CCSDSAEMReader.
@@ -94,7 +94,7 @@ CCSDSAEMReader::~CCSDSAEMReader()
  * @return clone of the CCSDSAEMReader.
  */
 //------------------------------------------------------------------------------
-CCSDSAEMReader* CCSDSAEMReader::Clone() const
+CCSDSEMReader* CCSDSAEMReader::Clone() const
 {
    return (new CCSDSAEMReader(*this));
 }

@@ -19,22 +19,24 @@
 #
 
 # Require CMake minimum version
-cmake_minimum_required(VERSION 3.7.0)
-CMAKE_POLICY(VERSION 3.5)
+cmake_minimum_required(VERSION 3.14.0)
+CMAKE_POLICY(VERSION 3.14)
 
-# Support OSX 10.8+ -> go to 10.10 as minimum
+# Require OSX minimum version
 IF(APPLE)
-  SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.10 CACHE STRING
+  SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.14 CACHE STRING
     "Minimum OSX version to target for deployment (at runtime). Set to empty string to target current MacOS version.")
 ENDIF()
 
 # Set Cmake project
 PROJECT(GMAT C CXX)
-SET(GMAT_RELEASE_NAME "R2018a" CACHE STRING "GMAT version name")
+SET(GMAT_RELEASE_NAME "R2020a" CACHE STRING "GMAT version name")
 SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
+SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 
-# Enforce C++11
-SET(CMAKE_CXX_STANDARD 11)
+# Enforce C++ Standard. C++17 is preferred.
+SET(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ Standard used for the build. C++17 is preferred")
+SET_PROPERTY(CACHE CMAKE_CXX_STANDARD PROPERTY STRINGS 17 14 11)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -73,8 +75,7 @@ endif()
 # Set path to app bundle on Mac, relative to CMAKE_INSTALL_PREFIX
 # This may need to be a user-selectable cache variable in the future
 if(APPLE)
-  if((${CMAKE_BUILD_TYPE} STREQUAL "Debug") OR 
-    (${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo"))
+  if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMATd-${GMAT_RELEASE_NAME}_Beta.app/Contents")
   else()
     SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT-${GMAT_RELEASE_NAME}_Beta.app/Contents")
@@ -83,47 +84,92 @@ endif()
 
 # Additional Linux compile/link flags
 IF(UNIX AND NOT APPLE)
+  SET(GMAT_RUN_ADDRESS_SANITIZER OFF CACHE BOOL "Check Memory using Address Sanitizer")
+
   # Tell CMake Find* commands to search for lib64 paths on Linux
   SET_PROPERTY(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS ON)
 
   # Generate link errors for undefined symbols 
   # This is enabled by default on OSX but not Linux
   SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
+  IF (GMAT_RUN_ADDRESS_SANITIZER)
+    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+    SET(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -lasan -fno-omit-frame-pointer -fsanitize=address")
+    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -lasan -fno-omit-frame-pointer -fsanitize=address")
+  ENDIF()
 ENDIF()
+
+# ====================================================================
+# Allow user to enable GMAT components
+
+OPTION(GMAT_INCLUDE_GUI "Build the GMAT GUI" ON)
+OPTION(GMAT_INCLUDE_CSALT "Build CSALT with GMAT" OFF)
+OPTION(GMAT_INCLUDE_CSALT_TESTPROGRAM "Build CSALT test program" OFF)
+OPTION(GMAT_INCLUDE_API "Build the GMAT API" OFF)
+
+# ====================================================================
+# Enable boost::variant as needed
+
+# Use if on OSX before 10.14
+if(APPLE AND (CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.14))
+   SET(GMAT_USE_BOOST_VARIANT ON)
+else()
+   SET(GMAT_USE_BOOST_VARIANT OFF)
+endif()
+
+# Use if C++17 not available
+if(NOT ${CMAKE_CXX_STANDARD} MATCHES "17")
+   SET(GMAT_USE_BOOST_VARIANT ON)
+endif()
+
+# ====================================================================
+# Mark Boost as a dependency if needed
+
+if (GMAT_USE_BOOST_VARIANT OR GMAT_INCLUDE_CSALT)
+   SET(GMAT_USE_BOOST ON)
+else()
+   SET(GMAT_USE_BOOST OFF)
+endif()
+
+# ====================================================================
+# Setup CMake-managed dependencies
+ADD_SUBDIRECTORY(depends)
 
 # ====================================================================
 # Find wxWidgets
 
-# Set default wxWidgets directory based on OS
-SET(wxWidgets_PARTIAL_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets")
-if(WIN32)
-  # On Windows, FindwxWidgets searches the wxWidgets_ROOT_DIR path
-  SET(wxWidgets_ROOT_DIR "${wxWidgets_PARTIAL_DIR}/wxMSW-3.0.2" CACHE PATH "wxWidgets Root Directory")
+if(GMAT_INCLUDE_GUI)
+   # Set default wxWidgets directory based on OS
+   SET(wxWidgets_PARTIAL_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets")
+   if(WIN32)
+     # On Windows, FindwxWidgets searches the wxWidgets_ROOT_DIR path
+     SET(wxWidgets_ROOT_DIR "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.4" CACHE PATH "wxWidgets Root Directory")
 
-elseif(UNIX)
-  # On Mac/Linux, FindwxWidgets uses the wx-config utility which must be
-  # accessible from the system PATH environment variable. 
-  # So first save PATH (just the first time to avoid recursive setting)...
-  if(NOT wxWidgets_ROOT_DIR)
-    SET(SYS_PATH "$ENV{PATH}" CACHE INTERNAL "System PATH environment variable")
-  endif()
+   elseif(UNIX)
+     # On Mac/Linux, FindwxWidgets uses the wx-config utility which must be
+     # accessible from the system PATH environment variable. 
+     # So first save PATH (just the first time to avoid recursive setting)...
+     if(NOT wxWidgets_ROOT_DIR)
+       SET(SYS_PATH "$ENV{PATH}" CACHE INTERNAL "System PATH environment variable")
+     endif()
 
-  # ... then get the expected path to the wx-config utility ...
-  if(APPLE)
-    SET(wxWidgets_ROOT_DIR  "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.2/cocoa-install/bin" CACHE PATH "wxWidgets Root Directory")
-  else()
-    SET(wxWidgets_ROOT_DIR  "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.2/gtk-install/bin" CACHE PATH "wxWidgets Root Directory")
-  endif()
+     # ... then get the expected path to the wx-config utility ...
+     if(APPLE)
+       SET(wxWidgets_ROOT_DIR  "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.4/cocoa-install/bin" CACHE PATH "wxWidgets Root Directory")
+     else()
+       SET(wxWidgets_ROOT_DIR  "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.4/gtk-install/bin" CACHE PATH "wxWidgets Root Directory")
+     endif()
 
-  # ... then append that to the PATH environment variable
-  SET(ENV{PATH} "${SYS_PATH}:${wxWidgets_ROOT_DIR}")
+     # ... then prepend that to the PATH environment variable
+     SET(ENV{PATH} "${wxWidgets_ROOT_DIR}:${SYS_PATH}")
 
-  # Clear wxWidgets_CONFIG_EXECUTABLE in case user changed wxWidgets_ROOT_DIR
-  UNSET(wxWidgets_CONFIG_EXECUTABLE CACHE) 
+     # Clear wxWidgets_CONFIG_EXECUTABLE in case user changed wxWidgets_ROOT_DIR
+     UNSET(wxWidgets_CONFIG_EXECUTABLE CACHE) 
+   endif()
+
+   # Find wxWidgets
+   FIND_PACKAGE(wxWidgets COMPONENTS core base xml net richtext aui xrc qa html adv stc gl)
 endif()
-
-# Find wxWidgets
-FIND_PACKAGE(wxWidgets COMPONENTS core base xml net richtext aui xrc qa html adv stc gl)
 
 # ====================================================================
 # Find CSPICE
@@ -246,29 +292,8 @@ endif()
 
 # Initialize default GMAT dependency path for Xerces
 if(WIN32)
-  IF(GMAT_64_BIT)
-    SET(Xerces_ARCH Win64)
-  ELSE()
-    SET(Xerces_ARCH Win32)
-  ENDIF()
-  IF(MSVC80)
-    SET(Xerces_OUTDIR VC8)
-  ELSEIF(MSVC90)
-    SET(Xerces_OUTDIR VC9)
-  ELSEIF(MSVC10)
-    SET(Xerces_OUTDIR VC10)
-  ELSEIF(MSVC11)
-    SET(Xerces_OUTDIR VC11)
-  ELSEIF(MSVC12)
-    SET(Xerces_OUTDIR VC12)
-  ELSEIF(MSVC14)
-    SET(Xerces_OUTDIR VC14)
-  ELSE()
-    MESSAGE(WARNING "Unrecognized Visual Studio version ${MSVC_VERSION}. Xerces may not be found.")
-  ENDIF()
-  SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/src")
-  SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/Build/${Xerces_ARCH}/${Xerces_OUTDIR}/Static Release")
-  SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/Build/${Xerces_ARCH}/${Xerces_OUTDIR}/Static Debug")
+  SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/windows-install/include")
+  SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/windows-install/lib")
 elseif(APPLE)
   SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/cocoa-install")
 else()
@@ -286,8 +311,59 @@ if(UNIX)
     FIND_PACKAGE(Threads)
   endif()
 endif()
+
+# ====================================================================
+# Find SWIG
+
+# Handle SWIG policy warning
+cmake_policy(SET CMP0086 "NEW")
+
+# Initialize default GMAT dependency path for SWIG
+if(WIN32)
+  SET(SWIG_ROOT "${PROJECT_SOURCE_DIR}/depends/swig/swigwin")
+elseif(APPLE)
+  SET(SWIG_ROOT "${PROJECT_SOURCE_DIR}/depends/swig/swig/cocoa-install")
+else()
+  SET(SWIG_ROOT "${PROJECT_SOURCE_DIR}/depends/swig/swig/linux-install")
+  SET(SWIG_EXECUTABLE_ROOT "${SWIG_ROOT}/bin")
+
+  # Need to append SWIG to path to search for "swig" before "swig*.0" from package repositories
+  SET(ENV{PATH} "${SWIG_EXECUTABLE_ROOT}:${SYS_PATH}")
+  FIND_PROGRAM(SWIG_EXECUTABLE NAMES swig)
+endif()
+
+FIND_PACKAGE(SWIG)
 # ====================================================================
 
+# ====================================================================
+# ------------------------------------------------------------------ #
+# CSALT Dependencies: Only required if building the CSALT subsystem  #
+# ------------------------------------------------------------------ #
+if (GMAT_INCLUDE_CSALT)
+   SET(CSALT_DEPENDS_FAIL FALSE)
+
+   # Find SNOPT in depends folder
+   SET(SNOPT_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/snopt7" CACHE PATH "SNOPT Root Directory")
+   SET(SNOPT_LIB_DIR "${SNOPT_ROOT_DIR}/lib" CACHE PATH "SNOPT Library Directory")
+   SET(SNOPT_INCLUDE_DIR ${SNOPT_ROOT_DIR}/interfaces/include)
+   FIND_LIBRARY(SNOPT_CPPLIBRARY snopt7_cpp PATHS ${SNOPT_LIB_DIR} NO_DEFAULT_PATH)
+   FIND_LIBRARY(SNOPT_LIBRARY snopt7 PATHS ${SNOPT_LIB_DIR} NO_DEFAULT_PATH)
+   if(NOT SNOPT_CPPLIBRARY)
+      MESSAGE(WARNING "SNOPT CPP library not found. Check that SNOPT_ROOT_DIR contains a valid SNOPT installation.")
+      SET(CSALT_DEPENDS_FAIL TRUE)
+   endif()
+   if(NOT SNOPT_LIBRARY)
+      MESSAGE(WARNING "SNOPT library not found. Check that SNOPT_ROOT_DIR contains a valid SNOPT installation.")
+      SET(CSALT_DEPENDS_FAIL TRUE)
+   endif()
+
+   # Fail Configuration if any dependencies are missing
+   if(CSALT_DEPENDS_FAIL)
+      MESSAGE(FATAL_ERROR "Missing required CSALT dependencies: aborting build.")
+   else()
+      MESSAGE(STATUS "Found SNOPT: " ${SNOPT_ROOT_DIR})
+   endif()
+endif()
 
 # ====================================================================
 # Common build options
@@ -325,6 +401,10 @@ endif()
 ADD_DEFINITIONS(-DNO_GCC_PRAGMA)
 ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
 
+if(GMAT_USE_BOOST_VARIANT)
+   ADD_DEFINITIONS(-DGMAT_USE_BOOST_VARIANT)
+endif()
+
 # Mark debug libraries with a "d" suffix
 SET(CMAKE_DEBUG_POSTFIX "d")
 
@@ -350,6 +430,9 @@ if(UNIX)
     # For now, disable this compile error (-Wreserved-user-defined-literal)
     # [UPDATE] Removed since this no longer seems to create build errors.
     #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reserved-user-defined-literal")
+    
+    # Silence OpenGL deprecation warnings
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGL_SILENCE_DEPRECATION")
   endif()
 endif()
 
@@ -410,6 +493,12 @@ INCLUDE(build/install/CMake_INSTALL_Setup.cmake)
 # Go to src directory and look for CMake instructions there
 ADD_SUBDIRECTORY(src)
 
+if (GMAT_INCLUDE_API)
+  # ====================================================================
+  # Go to swig directory and look for CMake instructions there
+  ADD_SUBDIRECTORY(swig)
+endif()
+
 # ====================================================================
 # Go to plugins directory and look for CMake instructions there
 ADD_SUBDIRECTORY(plugins)
@@ -417,4 +506,3 @@ ADD_SUBDIRECTORY(plugins)
 # ====================================================================
 # Setup GMAT install process
 ADD_SUBDIRECTORY(build/install)
-

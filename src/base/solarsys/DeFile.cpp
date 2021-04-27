@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -74,25 +74,28 @@
 #define FALSE 0
 #endif
 
-const Integer DeFile::SUN_ID              = 10;
-const Integer DeFile::MERCURY_ID          = 0;
-const Integer DeFile::VENUS_ID            = 1;
-const Integer DeFile::EARTH_ID            = 2;     // Earth-Moon barycenter
-const Integer DeFile::MOON_ID             = 9;     // relative to geocenter
-const Integer DeFile::MARS_ID             = 3;
-const Integer DeFile::JUPITER_ID          = 4;
-const Integer DeFile::SATURN_ID           = 5;
-const Integer DeFile::URANUS_ID           = 6;
-const Integer DeFile::NEPTUNE_ID          = 7;
-const Integer DeFile::PLUTO_ID            = 8;
+// Initialized in the header to fix swig link error:
+//Error	849	error LNK2019: unresolved external symbol "public: static int const DeFile::VENUS_ID" (?VENUS_ID@DeFile@@2HB) referenced in function _CSharp_DeFile_VENUS_ID_get@0	C:\Projects\GmatAPI\gmat\build\windows-VS2013-CMake-32\swig\gmat_sharpCSHARP_wrap.obj
 
-const Integer DeFile::SS_BARY_ID          = 11;
-const Integer DeFile::EM_BARY_ID          = 12;
-const Integer DeFile::NUTATIONS_ID        = 13;
-const Integer DeFile::LIBRATIONS_ID       = 14;
+// const Integer DeFile::SUN_ID              = 10;
+// const Integer DeFile::MERCURY_ID          = 0;
+// const Integer DeFile::VENUS_ID            = 1;
+// const Integer DeFile::EARTH_ID            = 2;     // Earth-Moon barycenter
+// const Integer DeFile::MOON_ID             = 9;     // relative to geocenter
+// const Integer DeFile::MARS_ID             = 3;
+// const Integer DeFile::JUPITER_ID          = 4;
+// const Integer DeFile::SATURN_ID           = 5;
+// const Integer DeFile::URANUS_ID           = 6;
+// const Integer DeFile::NEPTUNE_ID          = 7;
+// const Integer DeFile::PLUTO_ID            = 8;
 
-const Real DeFile::JD_MJD_OFFSET          = GmatTimeConstants::JD_JAN_5_1941;
-const Real DeFile::TT_OFFSET              = GmatTimeConstants::TT_TAI_OFFSET;
+// const Integer DeFile::SS_BARY_ID          = 11;
+// const Integer DeFile::EM_BARY_ID          = 12;
+// const Integer DeFile::NUTATIONS_ID        = 13;
+// const Integer DeFile::LIBRATIONS_ID       = 14;
+
+const Real DeFile::JD_MJD_OFFSET  = GmatTimeConstants::JD_JAN_5_1941;
+const Real DeFile::TT_OFFSET      = GmatTimeConstants::TT_TAI_OFFSET;
 
 //------------------------------------------------------------------------------
 // public methods
@@ -268,19 +271,19 @@ void DeFile::Initialize()
 //------------------------------------------------------------------------------
 Integer  DeFile::GetBodyID(std::string bodyName)
 {
-   if (bodyName == SolarSystem::SOLAR_SYSTEM_BARYCENTER_NAME)     return DeFile::SS_BARY_ID;
+   if (bodyName == GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)     return DeFile::SS_BARY_ID;
 
-   if (bodyName == SolarSystem::SUN_NAME)     return DeFile::SUN_ID;
-   if (bodyName == SolarSystem::MERCURY_NAME) return DeFile::MERCURY_ID;
-   if (bodyName == SolarSystem::VENUS_NAME)   return DeFile::VENUS_ID;
-   if (bodyName == SolarSystem::EARTH_NAME)   return DeFile::EARTH_ID;
-   if (bodyName == SolarSystem::MOON_NAME)    return DeFile::MOON_ID;
-   if (bodyName == SolarSystem::MARS_NAME)    return DeFile::MARS_ID;
-   if (bodyName == SolarSystem::JUPITER_NAME) return DeFile::JUPITER_ID;
-   if (bodyName == SolarSystem::SATURN_NAME)  return DeFile::SATURN_ID;
-   if (bodyName == SolarSystem::URANUS_NAME)  return DeFile::URANUS_ID;
-   if (bodyName == SolarSystem::NEPTUNE_NAME) return DeFile::NEPTUNE_ID;
-   if (bodyName == SolarSystem::PLUTO_NAME)   return DeFile::PLUTO_ID;
+   if (bodyName == GmatSolarSystemDefaults::SUN_NAME)     return DeFile::SUN_ID;
+   if (bodyName == GmatSolarSystemDefaults::MERCURY_NAME) return DeFile::MERCURY_ID;
+   if (bodyName == GmatSolarSystemDefaults::VENUS_NAME)   return DeFile::VENUS_ID;
+   if (bodyName == GmatSolarSystemDefaults::EARTH_NAME)   return DeFile::EARTH_ID;
+   if (bodyName == GmatSolarSystemDefaults::MOON_NAME)    return DeFile::MOON_ID;
+   if (bodyName == GmatSolarSystemDefaults::MARS_NAME)    return DeFile::MARS_ID;
+   if (bodyName == GmatSolarSystemDefaults::JUPITER_NAME) return DeFile::JUPITER_ID;
+   if (bodyName == GmatSolarSystemDefaults::SATURN_NAME)  return DeFile::SATURN_ID;
+   if (bodyName == GmatSolarSystemDefaults::URANUS_NAME)  return DeFile::URANUS_ID;
+   if (bodyName == GmatSolarSystemDefaults::NEPTUNE_NAME) return DeFile::NEPTUNE_ID;
+   if (bodyName == GmatSolarSystemDefaults::PLUTO_NAME)   return DeFile::PLUTO_ID;
 
    return -1;
 }
@@ -345,8 +348,8 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
    double absJD = 0.0;
    if (overrideTimeSystem)
    {
-      double mjdTT = (double) TimeConverterUtil::Convert(atTime.Get(),
-                      TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
+      double mjdTT = (double) theTimeConverter->Convert(atTime.Get(),
+                      TimeSystemConverter::A1MJD, TimeSystemConverter::TTMJD,
                       GmatTimeConstants::JD_JAN_5_1941);
 
       absJD = mjdTT;
@@ -360,8 +363,8 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
    }
    else
    {
-      double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
-                      TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD, 
+      double mjdTDB = (double) theTimeConverter->Convert(atTime.Get(),
+                      TimeSystemConverter::A1MJD, TimeSystemConverter::TDBMJD,
                       GmatTimeConstants::JD_JAN_5_1941);
 
       absJD = mjdTDB;
@@ -477,8 +480,8 @@ Real* DeFile::GetPosVel(Integer forBody, GmatTime atTime, bool overrideTimeSyste
    GmatTime absJD = 0.0;
    if (overrideTimeSystem)
    {
-      GmatTime mjdTT = TimeConverterUtil::Convert(atTime,
-         TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
+      GmatTime mjdTT = theTimeConverter->Convert(atTime,
+         TimeSystemConverter::A1MJD, TimeSystemConverter::TTMJD,
          GmatTimeConstants::JD_JAN_5_1941);
 
       absJD = mjdTT;
@@ -492,8 +495,8 @@ Real* DeFile::GetPosVel(Integer forBody, GmatTime atTime, bool overrideTimeSyste
    }
    else
    {
-      GmatTime mjdTDB = TimeConverterUtil::Convert(atTime,
-         TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD,
+      GmatTime mjdTDB = theTimeConverter->Convert(atTime,
+         TimeSystemConverter::A1MJD, TimeSystemConverter::TDBMJD,
          GmatTimeConstants::JD_JAN_5_1941);
 
       absJD = mjdTDB;
@@ -628,11 +631,11 @@ Real* DeFile::GetPosDelta(Integer forBody,
    GmatTime absJD2 = 0.0;
    if (overrideTimeSystem)
    {
-      GmatTime mjdTT1 = TimeConverterUtil::Convert(atTime1,
-         TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
+      GmatTime mjdTT1 = theTimeConverter->Convert(atTime1,
+         TimeSystemConverter::A1MJD, TimeSystemConverter::TTMJD,
          GmatTimeConstants::JD_JAN_5_1941);
-      GmatTime mjdTT2 = TimeConverterUtil::Convert(atTime2,
-         TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
+      GmatTime mjdTT2 = theTimeConverter->Convert(atTime2,
+         TimeSystemConverter::A1MJD, TimeSystemConverter::TTMJD,
          GmatTimeConstants::JD_JAN_5_1941);
 
       absJD1 = mjdTT1;
@@ -647,11 +650,11 @@ Real* DeFile::GetPosDelta(Integer forBody,
    }
    else
    {
-      GmatTime mjdTDB1 = TimeConverterUtil::Convert(atTime1,
-         TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD,
+      GmatTime mjdTDB1 = theTimeConverter->Convert(atTime1,
+         TimeSystemConverter::A1MJD, TimeSystemConverter::TDBMJD,
          GmatTimeConstants::JD_JAN_5_1941);
-      GmatTime mjdTDB2 = TimeConverterUtil::Convert(atTime2,
-         TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD,
+      GmatTime mjdTDB2 = theTimeConverter->Convert(atTime2,
+         TimeSystemConverter::A1MJD, TimeSystemConverter::TDBMJD,
          GmatTimeConstants::JD_JAN_5_1941);
 
       absJD1 = mjdTDB1;
@@ -737,15 +740,15 @@ void  DeFile::GetAnglesAndRates(A1Mjd atTime, Real* angles, Real* rates,
    double absJD = 0.0;
    if (overrideTimeSystem)
    {
-       double mjdTT = (double) TimeConverterUtil::Convert(atTime.Get(),
-                       TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
+       double mjdTT = (double) theTimeConverter->Convert(atTime.Get(),
+                       TimeSystemConverter::A1MJD, TimeSystemConverter::TTMJD,
                        GmatTimeConstants::JD_JAN_5_1941);
        absJD        = mjdTT;
    }
    else
    {
-       double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
-                       TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD, 
+       double mjdTDB = (double) theTimeConverter->Convert(atTime.Get(),
+                       TimeSystemConverter::A1MJD, TimeSystemConverter::TDBMJD,
                        GmatTimeConstants::JD_JAN_5_1941);
        absJD         = mjdTDB;
    }
@@ -766,15 +769,15 @@ void  DeFile::GetAnglesAndRates(const GmatTime &atTime, Real* angles, Real* rate
    GmatTime absJD(0);
    if (overrideTimeSystem)
    {
-       GmatTime mjdTT = TimeConverterUtil::Convert(atTime,
-                        TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
+       GmatTime mjdTT = theTimeConverter->Convert(atTime,
+                        TimeSystemConverter::A1MJD, TimeSystemConverter::TTMJD,
                         GmatTimeConstants::JD_JAN_5_1941);
        absJD          = mjdTT;
    }
    else
    {
-       GmatTime mjdTDB = TimeConverterUtil::Convert(atTime,
-                         TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD, 
+       GmatTime mjdTDB = theTimeConverter->Convert(atTime,
+                         TimeSystemConverter::A1MJD, TimeSystemConverter::TDBMJD,
                          GmatTimeConstants::JD_JAN_5_1941);
        absJD           = mjdTDB;
    }
@@ -1984,11 +1987,11 @@ void DeFile::Interpolate_State(GmatTime Time, int Target, stateType *p)
 void DeFile::Interpolate_State_Delta(const GmatTime &Time, const GmatTime &Time2,
                                      int Target, stateType *p)
 {
-   register double    A[50], /*B[50] ,*/ Cp[50], P_Sum[3], Cp_Delta[50],
+   double    A[50], /*B[50] ,*/ Cp[50], P_Sum[3], Cp_Delta[50],
       T_break, T_seg = 0.0, T_sub, Tc = 0.0, Tc2 = 0.0, dt = 0.0;
-   register int       i, j;
-   register long int  C, G, N, offset = 0;
-   register stateType X;
+   int       i, j;
+   long int  C, G, N, offset = 0;
+   stateType X;
 
    /*--------------------------------------------------------------------------*/
    /* This function doesn't "do" nutations or librations.                      */

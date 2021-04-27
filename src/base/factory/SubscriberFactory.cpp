@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -40,6 +40,7 @@
 #include "EphemerisFile.hpp"
 #include "OrbitView.hpp"
 #include "GroundTrackPlot.hpp"
+#include "DynamicDataDisplay.hpp"
 
 #include "OwnedPlot.hpp"
 //#include "LocatorView.hpp"
@@ -98,6 +99,8 @@ Subscriber* SubscriberFactory::CreateSubscriber(const std::string &ofType,
       return new OrbitView(withName);
    else if (ofType == "GroundTrackPlot")
       return new GroundTrackPlot(withName);
+   else if (ofType == "DynamicDataDisplay")
+      return new DynamicDataDisplay(withName);
 
    // These are "owned" Subscribers
    else if (ofType == "OwnedPlot")
@@ -134,6 +137,7 @@ Factory(Gmat::SUBSCRIBER)
       creatables.push_back("OrbitView");
       creatables.push_back("GroundTrackPlot");
       creatables.push_back("OwnedPlot");
+      creatables.push_back("DynamicDataDisplay");
 //      creatables.push_back("LocatorView");
    }
    

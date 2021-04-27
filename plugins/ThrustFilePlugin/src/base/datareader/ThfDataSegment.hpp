@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -27,6 +27,12 @@
 #include "ThrustFileDefs.hpp"
 #include "CoordinateSystem.hpp"
 
+/**
+ * Structure used to contain thrust history file data segments
+ *
+ * Implemented as a class to pick up assignment operator and copy constructor
+ * methods.
+ */
 class ThfDataSegment
 {
 public:
@@ -35,12 +41,19 @@ public:
    ThfDataSegment(const ThfDataSegment &ds);
    ThfDataSegment& operator=(const ThfDataSegment &ds);
 
+   bool SetPrecisionTimeFlag(bool onOff = true);
+   bool HasPrecisionTime();
+
    /// Structure for the thrust profile data points
    struct ThrustPoint
    {
+      /// Time from epoch, stored in days and fraction of day
       Real time;
+      /// Magnitude of the thrust in the vector array (not currently used)
       Real magnitude;
+      /// Cartesian components of the instantaneous thrust (or acceleration)
       Real vector[3];
+      /// Mass flow for the point
       Real mdot;
 
       // constructor, destructor, copy constructor, assignment operator
@@ -50,6 +63,7 @@ public:
       ThrustPoint& operator=(const ThrustPoint& tp);
    };
 
+   /// Identifiers for the supported interpolators
    enum InterpolationType
    {
       NONE,
@@ -67,8 +81,14 @@ public:
    std::string startEpochString;
    /// a.1 start epoch
    GmatEpoch startEpoch;
+   /// a.1 start epoch precision time
+   GmatTime startEpochGT;
    /// a.1 epoch of the last node
    GmatEpoch endEpoch;
+   /// a.1 epoch of the last node precision time
+   GmatTime endEpochGT;
+   /// Is precision time used?
+   bool hasPrecisionTime;
    /// Name of the coordinate system for the thrust data
    std::string csName;
    /// The coordinate system
@@ -87,6 +107,10 @@ public:
    bool modelThrust;
    /// The thrust profile data, node by node
    std::vector<ThrustPoint> profile;
+   /// has data been loaded
+   bool isDataLoaded;
+   /// Is segment active in Thrust History File
+   bool isActive;
 
    //-------------------------------------------------
    // Data passed from the ThrustSegment Object
@@ -99,12 +123,6 @@ public:
    bool includeThrustFactorInMassFlow;
    /// List of tanks that are used for mass flow
    StringArray tanks;
-
-//   // Estimation settings
-//   /// Standard dev. for the thrust scale factor
-//   Real tsfSigma;
-//   /// List of solve-for parameters
-//   StringArray solveFors;
 };
 
 #endif /* ThfDataSegment_hpp */

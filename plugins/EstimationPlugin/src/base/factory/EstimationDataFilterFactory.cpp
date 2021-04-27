@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -21,8 +21,8 @@
 
 
 #include "EstimationDataFilterFactory.hpp"
-#include "StatisticAcceptFilter.hpp"
-#include "StatisticRejectFilter.hpp"
+//#include "StatisticAcceptFilter.hpp"
+//#include "StatisticRejectFilter.hpp"
 #include "AcceptFilter.hpp"
 #include "RejectFilter.hpp"
 #include "MessageInterface.hpp"
@@ -45,8 +45,10 @@ EstimationDataFilterFactory::EstimationDataFilterFactory() :
 
    if (creatables.empty())
    {
-      creatables.push_back("StatisticsAcceptFilter");
-      creatables.push_back("StatisticsRejectFilter");
+      /// StatisticsAcceptFilter and StatisticsRejectFilter are nolonger been used in GMAT
+      //creatables.push_back("StatisticsAcceptFilter");
+      //creatables.push_back("StatisticsRejectFilter");
+
       creatables.push_back("AcceptFilter");
       creatables.push_back("RejectFilter");
    }
@@ -84,8 +86,10 @@ EstimationDataFilterFactory::EstimationDataFilterFactory(StringArray createList)
 
    if (creatables.empty())
    {
-      creatables.push_back("StatisticsAcceptFilter");
-      creatables.push_back("StatisticsRejectFilter");
+      /// StatisticsAcceptFilter and StatisticsRejectFilter are nolonger been used in GMAT
+      //creatables.push_back("StatisticsAcceptFilter");
+      //creatables.push_back("StatisticsRejectFilter");
+
       creatables.push_back("AcceptFilter");
       creatables.push_back("RejectFilter");
    }
@@ -110,8 +114,10 @@ EstimationDataFilterFactory::EstimationDataFilterFactory(const EstimationDataFil
 
    if (creatables.empty())
    {
-      creatables.push_back("StatisticsAcceptFilter");
-      creatables.push_back("StatisticsRejectFilter");
+      /// StatisticsAcceptFilter and StatisticsRejectFilter are nolonger been used in GMAT
+      //creatables.push_back("StatisticsAcceptFilter");
+      //creatables.push_back("StatisticsRejectFilter");
+
       creatables.push_back("AcceptFilter");
       creatables.push_back("RejectFilter");
    }
@@ -141,8 +147,10 @@ EstimationDataFilterFactory& EstimationDataFilterFactory::operator= (const Estim
 
       if (creatables.empty())
       {
-         creatables.push_back("StatisticsAcceptFilter");
-         creatables.push_back("StatisticsRejectFilter");
+         /// StatisticsAcceptFilter and StatisticsRejectFilter are nolonger been used in GMAT
+         //creatables.push_back("StatisticsAcceptFilter");
+         //creatables.push_back("StatisticsRejectFilter");
+
          creatables.push_back("AcceptFilter");
          creatables.push_back("RejectFilter");
       }
@@ -174,17 +182,18 @@ DataFilter* EstimationDataFilterFactory::CreateDataFilter(const std::string &ofT
 
    DataFilter *retval = NULL;
 
-   if (ofType == "StatisticsAcceptFilter")
-   {
-      MessageInterface::ShowMessage("Warning: StatisticsAcceptFilter is deprecated and will be removed in a future GMAT build. Use AcceptFilter instead.\n");
-      retval = new StatisticAcceptFilter(ofType, withName);
-   }
-   
-   if (ofType == "StatisticsRejectFilter")
-   {
-      MessageInterface::ShowMessage("Warning: StatisticsRejectFilter is deprecated and will be removed in a future GMAT build. Use RejectFilter instead.\n");
-      retval = new StatisticRejectFilter(ofType, withName);
-   }
+   /// StatisticsAcceptFilter and StatisticsRejectFilter are nolonger been used in GMAT
+   //if (ofType == "StatisticsAcceptFilter")
+   //{
+   //   MessageInterface::ShowMessage("Warning: StatisticsAcceptFilter is deprecated and will be removed in a future GMAT build. Use AcceptFilter instead.\n");
+   //   retval = new StatisticAcceptFilter(ofType, withName);
+   //}
+   //
+   //if (ofType == "StatisticsRejectFilter")
+   //{
+   //   MessageInterface::ShowMessage("Warning: StatisticsRejectFilter is deprecated and will be removed in a future GMAT build. Use RejectFilter instead.\n");
+   //   retval = new StatisticRejectFilter(ofType, withName);
+   //}
 
    if (ofType == "AcceptFilter")
       retval = new AcceptFilter(ofType, withName);

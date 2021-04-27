@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2013 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -147,6 +147,8 @@ Code500EphemerisFile::Code500EphemerisFile(const std::string &fileName, double s
    a1StartEpoch = 0.0;
    a1EndEpoch   = 0.0;
 
+   theTimeConverter = TimeSystemConverter::Instance();
+
    Initialize();
    
    #ifdef DEBUG_INIT
@@ -286,7 +288,7 @@ void Code500EphemerisFile::Initialize()
    mSentinelsFound = false;
    mGregorianOfDUTRef = "18 Sep 1957 00:00:00.000";
    mRefTimeForDUT_YYMMDD = 570918.0;
-   mMjdOfDUTRef = TimeConverterUtil::ConvertGregorianToMjd(mGregorianOfDUTRef);
+   mMjdOfDUTRef = theTimeConverter->ConvertGregorianToMjd(mGregorianOfDUTRef);
    mTimeIntervalBetweenPointsSecs = 0.0;
    mLeapSecsStartOutput = 0.0;
    mLeapSecsEndOutput = 0.0;
@@ -707,10 +709,10 @@ bool Code500EphemerisFile::ReadHeader1(int logOption)
    }
    else if (mInputTimeSystem == 2.0) // UTC
    {
-      a1StartEpoch = TimeConverterUtil::Convert(epoch, TimeConverterUtil::UTCMJD,
-            TimeConverterUtil::A1MJD);
-      a1EndEpoch = TimeConverterUtil::Convert(epochend, TimeConverterUtil::UTCMJD,
-            TimeConverterUtil::A1MJD);
+      a1StartEpoch = theTimeConverter->Convert(epoch, TimeSystemConverter::UTCMJD,
+            TimeSystemConverter::A1MJD);
+      a1EndEpoch = theTimeConverter->Convert(epochend, TimeSystemConverter::UTCMJD,
+            TimeSystemConverter::A1MJD);
    }
    
    // Save central body of integration indicator
@@ -1375,7 +1377,7 @@ void Code500EphemerisFile::SetEphemerisStartTime(const A1Mjd &a1Mjd)
       mStartUtcMjd = startMjd;
    }
    
-   mLeapSecsStartOutput = TimeConverterUtil::NumberOfLeapSecondsFrom(startMjd);
+   mLeapSecsStartOutput = theTimeConverter->NumberOfLeapSecondsFrom(startMjd);
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage("mLeapSecsStartOutput = %f\n", mLeapSecsStartOutput);
    #endif
@@ -1442,7 +1444,7 @@ void Code500EphemerisFile::SetEphemerisEndTime(const A1Mjd &a1Mjd)
    }
    
    // Leap seconds info
-   mLeapSecsEndOutput = TimeConverterUtil::NumberOfLeapSecondsFrom(endMjd);
+   mLeapSecsEndOutput = theTimeConverter->NumberOfLeapSecondsFrom(endMjd);
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage("mLeapSecsEndOutput = %f\n", mLeapSecsEndOutput);
    #endif
@@ -1450,7 +1452,7 @@ void Code500EphemerisFile::SetEphemerisEndTime(const A1Mjd &a1Mjd)
    if ((mLeapSecsEndOutput - mLeapSecsStartOutput) > 0)
    {
       // Find out UTC date and time of the first leap second occurred between start and end time
-      double firstUtcMjd = TimeConverterUtil::GetFirstLeapSecondMJD(mStartUtcMjd, mEndUtcMjd);
+      double firstUtcMjd = theTimeConverter->GetFirstLeapSecondMJD(mStartUtcMjd, mEndUtcMjd);
       
       #ifdef DEBUG_SET
       MessageInterface::ShowMessage("firstUtcMjd       = %.12f\n", firstUtcMjd);
@@ -1461,7 +1463,7 @@ void Code500EphemerisFile::SetEphemerisEndTime(const A1Mjd &a1Mjd)
          ToYYYMMDDHHMMSS(firstUtcMjd, ymd, hms);
          // Add a couple of seconds to avoid noise at the leap second date boundary
          Real firstUtcMjd2 = firstUtcMjd + (2.0/86400);
-         Real firstA1Mjd = TimeConverterUtil::Convert(firstUtcMjd2, TimeConverterUtil::UTCMJD, TimeConverterUtil::A1MJD);
+         Real firstA1Mjd = theTimeConverter->Convert(firstUtcMjd2, TimeSystemConverter::UTCMJD, TimeSystemConverter::A1MJD);
          double a1UtcOffsetInSecs = (firstA1Mjd - firstUtcMjd2) * 86400.0;
          #ifdef DEBUG_SET
          MessageInterface::ShowMessage("firstUtcMjd+2sec  = %.12f\n", firstUtcMjd2);
@@ -2463,12 +2465,12 @@ double Code500EphemerisFile::ToUtcModJulian(const A1Mjd &a1Mjd)
    
    //std::string epochStr;
    //Integer format = 1;
-   // Need to apply leap seconds, so use TimeConverterUtil
+   // Need to apply leap seconds, so use TimeSystemConverter
    // Convert current epoch to specified format
-   //TimeConverterUtil::Convert("A1ModJulian", mjd, "", "UTCModJulian",
+   //theTimeConverter->Convert("A1ModJulian", mjd, "", "UTCModJulian",
    //                           utcMjd, epochStr, format);
    
-   Real utcMjd = TimeConverterUtil::Convert(a1MjdReal, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
+   Real utcMjd = theTimeConverter->Convert(a1MjdReal, TimeSystemConverter::A1MJD, TimeSystemConverter::UTCMJD);
    
    #ifdef DEBUG_TIME_CONVERSION
    MessageInterface::ShowMessage("ToUtcModJulian() returning utcMjd=%f\n", utcMjd);
@@ -2733,9 +2735,9 @@ std::string Code500EphemerisFile::ToUtcGregorian(const A1Mjd &a1Mjd, bool forOut
       Real utcMjd;
       Real epochInDays = a1Mjd.GetReal();
       
-      // Need to apply leap seconds, so use TimeConverterUtil
+      // Need to apply leap seconds, so use TimeSystemConverter
       // Convert current epoch to specified format
-      TimeConverterUtil::Convert("A1ModJulian", epochInDays, "", "UTCGregorian",
+      theTimeConverter->Convert("A1ModJulian", epochInDays, "", "UTCGregorian",
                                  utcMjd, epochStr, format);
       
       if (epochStr == "")

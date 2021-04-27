@@ -29,7 +29,6 @@ endif()
 SET(TargetName GmatEstimation)
 
 # Add Preproccessor Definitions
-ADD_DEFINITIONS("-DESTIMATION_EXPORTS")
 # ADD_DEFINITIONS("-DENABLE_UNFINISHED_FEATURES")
 
 # ====================================================================
@@ -55,61 +54,64 @@ SET(PLUGIN_DIRS
   signal
   tdmReader
   trackingfile
-  trackingsystem
   )
 
 # ====================================================================
 # source files
 SET(PLUGIN_SRCS
+    adapter/AngleAdapterDeg.cpp
+	adapter/AzimuthAdapter.cpp
+	adapter/DeclinationAdapter.cpp
     adapter/DopplerAdapter.cpp
     adapter/DSNRangeAdapter.cpp
+	adapter/ElevationAdapter.cpp
     adapter/GNDopplerAdapter.cpp
     adapter/GNRangeAdapter.cpp
     adapter/GPSAdapter.cpp
     adapter/PointRangeRateAdapterKps.cpp
     adapter/RangeAdapterKm.cpp
     adapter/RangeRateAdapterKps.cpp
+	adapter/RightAscAdapter.cpp
     adapter/TDRSDopplerAdapter.cpp
     adapter/TDRSRangeAdapter.cpp
     adapter/TrackingDataAdapter.cpp
+	adapter/XEastAdapter.cpp
+	adapter/XSouthAdapter.cpp
+	adapter/YEastAdapter.cpp
+	adapter/YNorthAdapter.cpp
+    adapter/RangeSkinAdapter.cpp
     command/RunEstimator.cpp
     command/RunSimulator.cpp
     datafilter/DataFilter.cpp
     datafilter/AcceptFilter.cpp
     datafilter/RejectFilter.cpp
-    datafilter/StatisticAcceptFilter.cpp
-    datafilter/StatisticRejectFilter.cpp
     errormodel/ErrorModel.cpp
+    estimator/BatchEstimatorBase.cpp
     estimator/BatchEstimator.cpp
-    estimator/BatchEstimatorInv.cpp
-    estimator/BatchEstimatorSVD.cpp
     estimator/EstimationStateManager.cpp
     estimator/Estimator.cpp
     estimator/EstimatorException.cpp
-    estimator/ExtendedKalmanInv.cpp
-    estimator/SequentialEstimator.cpp
     estimator/Simulator.cpp
     event/EstimationRootFinder.cpp
     event/Event.cpp
     event/EventData.cpp
     event/EventException.cpp
     event/EventManager.cpp
-    event/LightTimeCorrection.cpp
-    factory/AdapterFactory.cpp
+#    event/LightTimeCorrection.cpp
+#    factory/AdapterFactory.cpp
     factory/DataFileFactory.cpp
     factory/ErrorModelFactory.cpp
     factory/EstimationCommandFactory.cpp
     factory/EstimationDataFilterFactory.cpp
     factory/EstimatorFactory.cpp
     factory/EstimatorHardwareFactory.cpp
-    factory/EventFactory.cpp
-    factory/MeasurementFactory.cpp
+#    factory/EventFactory.cpp
+#    factory/MeasurementFactory.cpp
     factory/MeasurementModelFactory.cpp
     factory/NavPropagatorFactory.cpp
     factory/ObTypeFactory.cpp
     factory/SignalModelFactory.cpp
-    factory/TrackingDataFactory.cpp
-    factory/TrackingSystemFactory.cpp
+#    factory/TrackingDataFactory.cpp
     hardware/Antenna.cpp
     hardware/RFHardware.cpp
     hardware/Receiver.cpp
@@ -117,23 +119,23 @@ SET(PLUGIN_SRCS
     hardware/Signal.cpp
     hardware/Transmitter.cpp
     hardware/Transponder.cpp
-    measurement/AveragedDoppler.cpp
-    measurement/CoreMeasurement.cpp
-    measurement/DSNTwoWayDoppler.cpp
-    measurement/DSNTwoWayRange.cpp
+#    measurement/AveragedDoppler.cpp
+#    measurement/CoreMeasurement.cpp
+#    measurement/DSNTwoWayDoppler.cpp
+#    measurement/DSNTwoWayRange.cpp
     measurement/MeasurementData.cpp
     measurement/MeasurementManager.cpp
-    measurement/MeasurementModel.cpp
+#    measurement/MeasurementModel.cpp
     measurement/MeasurementModelBase.cpp
     measurement/MediaCorrection.cpp
-    measurement/OpticalAngles.cpp
-    measurement/OpticalAzEl.cpp
-    measurement/PhysicalMeasurement.cpp
-    measurement/SnTwoWayRange.cpp
-    measurement/TDRSSTwoWayRange.cpp
-    measurement/TrackingData.cpp
-    measurement/TwoWayRange.cpp
-    measurement/USNTwoWayRange.cpp
+#    measurement/OpticalAngles.cpp
+#    measurement/OpticalAzEl.cpp
+#    measurement/PhysicalMeasurement.cpp
+#    measurement/SnTwoWayRange.cpp
+#    measurement/TDRSSTwoWayRange.cpp
+#    measurement/TrackingData.cpp
+#    measurement/TwoWayRange.cpp
+#    measurement/USNTwoWayRange.cpp
     measurement/Troposphere/Troposphere.cpp
     measurementfile/B3_obtype.cpp
     measurementfile/DataFile.cpp
@@ -141,8 +143,8 @@ SET(PLUGIN_SRCS
     measurementfile/GmatObType.cpp
     measurementfile/GmatData.cpp
     measurementfile/GmatObType.cpp
-    measurementfile/GmatODDopplerType.cpp
-    measurementfile/GmatODType.cpp
+ #   measurementfile/GmatODDopplerType.cpp
+ #   measurementfile/GmatODType.cpp
     measurementfile/ObservationData.cpp
     measurementfile/ObType.cpp
     measurementfile/RampTableData.cpp
@@ -156,16 +158,13 @@ SET(PLUGIN_SRCS
     signal/SignalBase.cpp
     signal/SignalData.cpp
     signal/SinglePointSignal.cpp
+    signal/PassivePhysicalSignal.cpp
+    signal/SignalDataCache.cpp
     tdmReader/TdmErrorHandler.cpp
     tdmReader/TdmObType.cpp
     tdmReader/TdmReadWriter.cpp
     trackingfile/TFSMagicNumbers.cpp
     trackingfile/TrackingFileSet.cpp
-    trackingsystem/DSNTrackingSystem.cpp
-    trackingsystem/OpticalTrackingSystem.cpp
-    trackingsystem/TDRSSTrackingSystem.cpp
-    trackingsystem/TrackingSystem.cpp
-    trackingsystem/USNTrackingSystem.cpp
 )
 
 # Temporarily disable Ionosphere for Mac/Linux
@@ -179,6 +178,9 @@ SET(PLUGIN_SRCS
 # ====================================================================
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
+
+# Rename DLL export preproccessor definition
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEFINE_SYMBOL "ESTIMATION_EXPORTS")
 
 
 # ====================================================================

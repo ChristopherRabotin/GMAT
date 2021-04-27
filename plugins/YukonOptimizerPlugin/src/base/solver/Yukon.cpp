@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -60,6 +60,7 @@ Yukon::Yukon(YukonUserProblem *inputUserProblem,
                Integer maximumElasticWeight)
 {
    isModeElastic = false;
+   firstElasticStep = false;
    elasticWeight = 1.0;
 
    // Initialize various parameters
@@ -141,6 +142,7 @@ Yukon::Yukon(YukonUserProblem *inputUserProblem,
 Yukon::Yukon(const Yukon& obj)
 {
    isModeElastic = obj.isModeElastic;
+   firstElasticStep = obj.firstElasticStep;
    elasticWeight = obj.elasticWeight;
    totalNumCon = obj.totalNumCon;
    method = obj.method;
@@ -208,6 +210,7 @@ Yukon& Yukon::operator=(const Yukon& obj)
    if (&obj != this)
    {
       isModeElastic = obj.isModeElastic;
+      firstElasticStep = obj.firstElasticStep;
       elasticWeight = obj.elasticWeight;
       totalNumCon = obj.totalNumCon;
       method = obj.method;
@@ -362,7 +365,7 @@ void Yukon::PrepareToOptimize()
 */
 //------------------------------------------------------------------------------
 void Yukon::PrepareFailedRunOutput(Rvector &decVector, Real &costOut,
-   Integer &exitFlag, OutputData &output)
+                                   Integer &exitFlag, OutputData &output)
 {
    Integer unusedFlag;
    PrepareOutput(decVector, costOut, unusedFlag, output);
@@ -392,7 +395,8 @@ void Yukon::RespondToData()
       PrepareLineSearch();
       return;
    }
-   if (currentState == "ReadyForLineSearch" || currentState == "LineSearchIteration")
+   if (currentState == "ReadyForLineSearch" ||
+      currentState == "LineSearchIteration")
    {
       TakeStep();
       return;
@@ -446,9 +450,9 @@ void Yukon::RespondToData()
 * @param isOptimized Boolean representing whether current problem is optimized
 */
 //------------------------------------------------------------------------------
-void Yukon::CheckStatus(Integer &status, Integer &funTypes, Integer &optimizerIter,
-                         Rvector &decVector, bool &isNewX,
-                         YukonUserProblem *userFunPointer)
+void Yukon::CheckStatus(Integer &status, Integer &funTypes,
+                        Integer &optimizerIter, Rvector &decVector,
+                        bool &isNewX, YukonUserProblem *userFunPointer)
 {
    userFunPointer = userProblem;
    if (currentState == "Instantiated")
@@ -545,6 +549,16 @@ void Yukon::CheckStatus(Integer &status, Integer &funTypes, Integer &optimizerIt
    if (currentState == "FailedStepDirection")
    {
       status = 5;
+      funTypes = 0;
+      optimizerIter = numNLPIterations;
+      decVector.SetSize(decVec.GetSize());
+      decVector = decVec;
+      isNewX = false;
+      return;
+   }
+   if (currentState == "InfeasibleProblem")
+   {
+      status = 6;
       funTypes = 0;
       optimizerIter = numNLPIterations;
       decVector.SetSize(decVec.GetSize());
@@ -682,6 +696,11 @@ void Yukon::PrepareLineSearch()
    // 10 iterations to use normal line search convergence requirements
    if (skipsTaken >= 3)
    {
+      if (minConFuncs.GetSize() != totalNumCon)
+         RemoveLinearlyDependentCons("minConFunc");
+      if (minConJac.GetNumRows() != totalNumCon)
+         RemoveLinearlyDependentCons("minConJac");
+
       allowSkippedReduction = false;
       forceReductionSteps = 0;
       meritFalpha = minMeritFAlpha;
@@ -749,7 +768,7 @@ void Yukon::PrepareLineSearch()
                mu[i] = sigma*std::abs(plam[i]);
          }
 
-         if (numNLPIterations != 1)
+         if (numNLPIterations != 1 && !firstElasticStep)
          {
             minMeritFAlpha = minCost;
             for (Integer i = 0; i < totalNumCon; ++i)
@@ -781,9 +800,53 @@ void Yukon::PrepareLineSearch()
    srchCount = 0;
    xk.SetSize(numDecisionVars);
    xk = decVec;
-   if (numNLPIterations == 1)
+   if (numNLPIterations == 1 || firstElasticStep)
    {
       SetMinimumMeritValues(meritF, 0);
+      if (firstElasticStep)
+         firstElasticStep = false;
+   }
+
+   // Adjust variable step size to remain within max allowable step size and
+   // variable bounds
+   if (options.maxVarStepSize.GetSize() != numDecisionVars)
+   {
+      Integer oldNumDecisionVars = options.maxVarStepSize.GetSize();
+      options.maxVarStepSize.Resize(numDecisionVars);
+      for (Integer i = oldNumDecisionVars; i < numDecisionVars; ++i)
+         options.maxVarStepSize[i] = 1e300;
+   }
+
+   stepScalingFactor = 1.0;
+   Rvector stepSizeComparison(numDecisionVars);
+   Rvector testDecVecBounds(numDecisionVars);
+   for (Integer i = 0; i < px.GetSize(); ++i)
+   {
+      stepSizeComparison[i] = 1.0;
+      testDecVecBounds[i] = 1.0;
+      if (std::abs(options.maxVarStepSize[i]) < std::abs(px[i]))
+         stepSizeComparison[i] = std::abs(options.maxVarStepSize[i] /
+         px[i]);
+
+      if ((xk + px)[i] < varLowerBounds[i])
+         testDecVecBounds[i] = std::abs((varLowerBounds[i] - xk[i]) / px[i]);
+      else if ((xk + px)[i] > varUpperBounds[i])
+         testDecVecBounds[i] = std::abs((varUpperBounds[i] - xk[i]) / px[i]);
+   }
+
+   // Take the smallest scaling factor calculated to avoid all violations
+   // that would occur
+   if (GetMin(stepSizeComparison) < GetMin(testDecVecBounds))
+      stepScalingFactor = GetMin(stepSizeComparison);
+   else
+      stepScalingFactor = GetMin(testDecVecBounds);
+
+   // If a step size of zero is the only way to avoid breaking a bound,
+   // the problem is infeasable
+   if (stepScalingFactor == 0)
+   {
+      currentState = "InfeasibleProblem";
+      return;
    }
 
    currentState = "ReadyForLineSearch";
@@ -839,28 +902,6 @@ void Yukon::TakeStep()
    }
    stepTaken.SetSize(numDecisionVars);
    stepTaken = alpha*px;
-
-   if (options.maxVarStepSize.GetSize() != numDecisionVars)
-   {
-      Integer oldNumDecisionVars = options.maxVarStepSize.GetSize();
-      options.maxVarStepSize.Resize(numDecisionVars);
-      for (Integer i = oldNumDecisionVars; i < numDecisionVars; ++i)
-         options.maxVarStepSize[i] = 1e300;
-   }
-
-   // Adjust variable step size to remain below max allowable step size
-   stepScalingFactor = 1.0;
-   bool adjustStep = false;
-   Rvector stepSizeComparison(stepTaken.GetSize());
-   for (Integer i = 0; i < stepTaken.GetSize(); ++i)
-   {
-      stepSizeComparison[i] = 1.0;
-      if (std::abs(options.maxVarStepSize[i]) < std::abs(stepTaken[i]))
-         stepSizeComparison[i] = std::abs(options.maxVarStepSize[i] /
-         stepTaken[i]);
-   }
-   if (GetMin(stepSizeComparison) != 1.0)
-      stepScalingFactor = GetMin(stepSizeComparison);
 
    // Take step
    stepTaken = stepScalingFactor*alpha*px;
@@ -1121,11 +1162,17 @@ void Yukon::CheckIfFinished()
       isFinished = false;
       currentState = "LineSearchIteration";
    }
+   else if (isConverged < 0)
+   {
+      isFinished = true;
+      currentState = "InfeasibleProblem";
+   }
    else
    {
       isFinished = true;
       currentState = "Finished";
    }
+
 
    #ifdef DEBUG_PROGRESS
       MessageInterface::ShowMessage("Exiting CheckIfFinished(),"
@@ -1231,26 +1278,19 @@ void Yukon::ComputeSearchDirection(Rvector &px, Real &f, Rvector &plam,
    if (exitFlag != 1)
    {
       PrepareElasticMode();
+      firstElasticStep = true;
+      RemoveLinearlyDependentCons("All");
       qpOpt.~MinQP();
       W.SetSize(0);
       new (&qpOpt) MinQP(0 * decVec, hessLagrangian, costJac, conJac,
          conLowerBounds - conFunctions, conUpperBounds - conFunctions, W, 2,
-         checkForDuplicateCons);
+         true);
       qpOpt.Optimize(px, f, lambdaQP, exitFlag, qpIter, activeSet);
-      Rvector lagMultipliersCopy = lagMultipliers;
-      lagMultipliers.SetSize(lagMultipliersCopy.GetSize() +
-         userFuncManager->GetNumElasticVars());
-      for (Integer i = 0; i < lagMultipliers.GetSize(); ++i)
-      {
-         if (i < lagMultipliersCopy.GetSize())
-            lagMultipliers[i] = lagMultipliersCopy[i];
-         else
-            lagMultipliers[i] = 0;
-      }
    }
 
    // Update constraint values if MinQP removed any
-   modifiedConIdxs.SetSize(qpOpt.GetModifiedCons().GetNumRows(), qpOpt.GetModifiedCons().GetNumColumns());
+   modifiedConIdxs.SetSize(qpOpt.GetModifiedCons().GetNumRows(),
+      qpOpt.GetModifiedCons().GetNumColumns());
    modifiedConIdxs = qpOpt.GetModifiedCons();
    if (modifiedConIdxs.GetNumRows() != 0)
       RemoveLinearlyDependentCons("All");
@@ -1406,7 +1446,8 @@ std::string Yukon::UpdateHessian()
 
             hessLagrangian = gamma*hessLagrangian - gamma*hessLagrangian*
                MultiColToRowVector(stepTaken, stepTaken)*hessLagrangian * den1 +
-               MultiColToRowVector(deltaGradLagrangian, deltaGradLagrangian) * den2;
+               MultiColToRowVector(deltaGradLagrangian, deltaGradLagrangian) *
+               den2;
          }
          // If step size has become too small, optimization has failed
          catch (Rmatrix::DivideByZero &e)
@@ -1424,8 +1465,9 @@ std::string Yukon::UpdateHessian()
             gamma = deltaGradLagrangian*stepTaken / projHess;
             method = "   Self Scaled BFGS";
             hessLagrangian = gamma*hessLagrangian - gamma*hessLagrangian*
-               MultiColToRowVector(stepTaken, stepTaken)*hessLagrangian / projHess
-               + MultiColToRowVector(deltaGradLagrangian, deltaGradLagrangian) /
+               MultiColToRowVector(stepTaken, stepTaken)*
+               hessLagrangian / projHess +
+               MultiColToRowVector(deltaGradLagrangian, deltaGradLagrangian) /
                (stepTaken*deltaGradLagrangian);
          }
          // If step size has become too small, optimization has failed
@@ -1613,31 +1655,49 @@ Rvector Yukon::CalcConViolations()
 Integer Yukon::CheckConvergence(Rvector gradLag, Real f, Real fnew, Rvector x,
    Rvector xnew, Real alpha, Real maxConViolation)
 {
-   // If we are in elastic mode, check if slack variables are
-   // zero or we are at the max elastic weight.If not, we are not
-   // converged yet.
-   Integer converged;
 
+   Integer converged = 0;
+   Integer constraintsSatisfied = 0;
    bool isElasticModeActive = false;
+
+   // Check if constraints are satisfied for use in later convergence tests.
+   // If constraints are not satisfied, and elasticWeight < maxElasticWeight,
+   // then increase weight and continue to iterate
    if (isModeElastic)
    {
       Real maxElasticVar = userFuncManager->GetMaxElasticVar(decVec);
+      // maximum elastic var is not zero, and we have not reached the limit
+      // on maximum elastic weight so increase elastic weight and continue
+      // to iterate
       if (maxElasticVar > 1.0e-10 && elasticWeight < options.maxElasticWeight)
       {
          elasticWeight *= 10.0;
          userFuncManager->SetElasticWeight(elasticWeight);
          converged = 0;
+         constraintsSatisfied = 0;
          return converged;
       }
-   }
-
-   // Constraints are not satisfied, cannot be converged
-   if (!GmatMathUtil::IsNaN(maxConViolation))
-   {
-      if (maxConViolation > options.tolCon)
+      //  We have reached maximum elastic weight, but constraints are not
+      //  satisfied so set flag to indicate constraints are not satisfied
+      else if (maxElasticVar > 1.0e-10 &&
+         elasticWeight >= options.maxElasticWeight)
       {
-         converged = 0;
-         return converged;
+         constraintsSatisfied = 0;
+      }
+   }
+   // Not in elastic mode, check if constraints are satisfied
+   else
+   {
+      if (!GmatMathUtil::IsNaN(maxConViolation))
+      {
+         if (maxConViolation < options.tolCon)
+         {
+            constraintsSatisfied = 1;
+         }
+         else
+         {
+            constraintsSatisfied = 0;
+         }
       }
    }
 
@@ -1656,33 +1716,88 @@ Integer Yukon::CheckConvergence(Rvector gradLag, Real f, Real fnew, Rvector x,
       funChange = std::abs(fnew - f);
    }
 
+   // Check for convergence based on norm of the gradient of the Lagrangian
    if (InfNorm(gradLagrangian) < options.tolGrad)
    {
-      converged = 1;
-      messageHow = " Magnitude of gradient of Lagrangian is less than "
-         "tolerance \n";
+      if (!isModeElastic && constraintsSatisfied)
+      {
+         // Not in elastic mode, constraints satisfied, gradient of lagragian
+         // is smaller than tolerance.  Solution was found.
+         converged = 1;
+         messageHow = " Magnitude of gradient of Lagrangian is less than "
+            "tolerance \n";
+      }
+      else if (isModeElastic && !constraintsSatisfied)
+      {
+         // In elastic mode and elasticWeight = maxElasticWeight
+         // constraints are NOT satisfied, gradient of lagragian
+         // is smaller than tolerance. Solution was not found, but
+         // no more progress is possible.
+         converged = -1;
+         messageHow = " The problem appears to be infeasible.  "
+            "Constraint violations minimized. \n";
+      }
+      else
+      {
+         converged = 0;
+      }
    }
+   // Check for convergence based on change in objective function
    else if (funChange < options.tolF)
    {
-      converged = 2;
-      messageHow = " Absolute value of function improvement is less than "
+      if (!isModeElastic && constraintsSatisfied)
+      { 
+         // Not in elastic mode, constraints satisfied, step size
+         // is smaller than tolerance.  Solution was found.
+         converged = 2;
+         messageHow = " Absolute value of function improvement is less than "
          "tolerance\n";
+      }
+      else if (isModeElastic && !constraintsSatisfied)
+      {
+         // In elastic mode and elasticWeight is = maxElasticWeight
+         // constraints are NOT satisfied, step size
+         // is smaller than tolerance. Solution was not found, but
+         // no more progress is possible
+         converged = -1;
+         messageHow = " The problem appears to be infeasible.  "
+            "Constraint violations minimized. \n";
+      }
+      else
+      {
+         converged = 0;
+      }
    }
    else
-      converged = 0;
-
-   // If problem converged, and user requested output.Write
-   // convergence type to console
-   if (converged > 0 && options.display == "iter")
    {
-      if (isModeElastic && isElasticModeActive)
-         messageMode = "\n The problem appears to be infeasible... constraint "
-         "violations minimized \n";
-      else
-         messageMode = "\n Optimization Terminated Successfully \n";
-      MessageInterface::ShowMessage(messageMode + messageHow);
+      converged = 0;
+   }
+      
+   // If the step size has been set to zero, a variable bound has been reached
+   // and the search direction requires passing that bound, therefore making
+   // the current problem setup infeasible
+   if (stepScalingFactor == 0)
+   {
+      converged = -1;
+      messageHow = " The problem appears to be infeasible due to variable "
+         "bound restrictions. \n";
    }
 
+   // If problem converged, and user requested output.
+   // Write convergence type to console
+   if (converged > 0 && options.display == "iter")
+   {
+      messageMode = "\n Optimization Terminated Successfully \n";
+      MessageInterface::ShowMessage(messageMode + messageHow);
+   }
+   // The problem is infeasible and no more progress is possible.
+   // Write message indicating the problem is infeasible.
+   else if (converged < 0 && options.display == "iter")
+   { 
+      messageMode = "\n Optimal Solution Not Found \n";
+      MessageInterface::ShowMessage(messageMode + messageHow);
+   }
+   
    return converged;
 }
 
@@ -1734,17 +1849,17 @@ void Yukon::RemoveLinearlyDependentCons(std::string typeToRemove)
             }
             else if (i == modifiedConIdxs(j, 0))
             {
-               if (conLBCopy[i] > conLBCopy[modifiedConIdxs(j, 1)])
+               if (conLBCopy[i] > conLBCopy[(Integer)modifiedConIdxs(j, 1)])
                {
-                  conLowerBounds[modifiedConIdxs(j, 0) - numRemovedCons] = conLBCopy[i];
-                  conUpperBounds[modifiedConIdxs(j, 0) - numRemovedCons] =
-                     conUBCopy[modifiedConIdxs(j, 1)];
+                  conLowerBounds[(Integer)modifiedConIdxs(j, 0) - numRemovedCons] = conLBCopy[i];
+                  conUpperBounds[(Integer)modifiedConIdxs(j, 0) - numRemovedCons] =
+                     conUBCopy[(Integer)modifiedConIdxs(j, 1)];
                }
-               if (conUBCopy[i] < conUBCopy[modifiedConIdxs(j, 1)])
+               if (conUBCopy[i] < conUBCopy[(Integer)modifiedConIdxs(j, 1)])
                {
-                  conUpperBounds[modifiedConIdxs(j, 0) - numRemovedCons] = conUBCopy[i];
-                  conLowerBounds[modifiedConIdxs(j, 0) - numRemovedCons] =
-                     conLBCopy[modifiedConIdxs(j, 1)];
+                  conUpperBounds[(Integer)modifiedConIdxs(j, 0) - numRemovedCons] = conUBCopy[i];
+                  conLowerBounds[(Integer)modifiedConIdxs(j, 0) - numRemovedCons] =
+                     conLBCopy[(Integer)modifiedConIdxs(j, 1)];
                }
                skipBoundSetup = true;
             }
@@ -1759,7 +1874,10 @@ void Yukon::RemoveLinearlyDependentCons(std::string typeToRemove)
             }
             conFunctions[i - numRemovedCons] = conFuncCopy[i];
             mu[i - numRemovedCons] = muCopy[i];
-            lagMultipliers[i - numRemovedCons] = lagMultiplierCopy[i];
+            if (i < lagMultiplierCopy.GetSize())
+               lagMultipliers[i - numRemovedCons] = lagMultiplierCopy[i];
+            else
+               lagMultipliers[i - numRemovedCons] = 0;
             for (Integer conJacCol = 0; conJacCol < numDecisionVars;
                ++conJacCol)
             {
@@ -1823,6 +1941,28 @@ void Yukon::RemoveLinearlyDependentCons(std::string typeToRemove)
       }
    }
 
+   else if (typeToRemove == "minConFunc")
+   {
+      Rvector conFuncCopy = minConFuncs;
+      minConFuncs.SetSize(totalNumCon);
+      bool removeCurrentCon = false;
+      Integer numRemovedCons = 0;
+      for (Integer i = 0; i < totalNumCon + removeConIdx.GetSize(); ++i)
+      {
+         removeCurrentCon = false;
+         for (Integer j = 0; j < removeConIdx.GetSize(); ++j)
+         {
+            if (i == removeConIdx[j])
+            {
+               ++numRemovedCons;
+               removeCurrentCon = true;
+            }
+         }
+         if (!removeCurrentCon)
+            minConFuncs[i - numRemovedCons] = conFuncCopy[i];
+      }
+   }
+
    else if (typeToRemove == "minConJac")
    {
       Rmatrix conJacCopy = minConJac;
@@ -1883,6 +2023,8 @@ void Yukon::SetMinimumMeritValues(Real minMeritFun, Real decreaseCond)
    minConJac.SetSize(totalNumCon, numDecisionVars);
    userFuncManager->EvaluateNLPDerivsOnly(numDecisionVars, decVec, false,
       minCostJac, minConJac, unusedValue);
+   if (minConFuncs.GetSize() != totalNumCon)
+      RemoveLinearlyDependentCons("minConFunc");
    if (minConJac.GetNumRows() != totalNumCon)
       RemoveLinearlyDependentCons("minConJac");
 }

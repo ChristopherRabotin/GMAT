@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1218,7 +1218,7 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
       #endif
       
       // Validate fileName
-      if (!GmatFileUtil::IsValidFileName(value))
+      if (!GmatFileUtil::IsValidFileName(value, true))
       {
          std::string msg = GmatFileUtil::GetInvalidFileNameMessage(1);
          SubscriberException se;

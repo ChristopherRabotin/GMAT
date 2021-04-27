@@ -1,0 +1,180 @@
+%
+%   Ex_R2020a_Alpha_FilterSmoother
+%
+%   Run the Extended Kalman Filter and Fraser-Potter smoother.
+%
+%   WARNING: The filter and smoother are not operational resources.
+%   In gmat_startup_file.txt, comment-in libEKF to run this script.
+%
+
+%
+%   Spacecraft
+%
+
+Create Spacecraft SimSat;
+
+SimSat.DateFormat        = UTCGregorian;
+SimSat.Epoch             = '10 Jun 2010 00:00:00.000';
+SimSat.CoordinateSystem  = EarthMJ2000Eq;
+SimSat.DisplayStateType  = Cartesian;
+SimSat.X                 = 576.869556
+SimSat.Y                 = -5701.142761
+SimSat.Z                 = -4170.593691
+SimSat.VX                = -1.76450794
+SimSat.VY                = 4.18128798
+SimSat.VZ                = -5.96578986
+SimSat.DryMass           = 500;
+SimSat.Cd                = 2.2;
+SimSat.Cr                = 1.8;
+SimSat.DragArea          = 10;
+SimSat.SRPArea           = 10;
+SimSat.Id                = 'LEOSat';
+SimSat.AddHardware       = {GpsReceiver, GpsAntenna};
+
+Create Spacecraft EstSat;
+
+EstSat.DateFormat        = UTCGregorian;
+EstSat.Epoch             = '10 Jun 2010 00:00:00.000';
+EstSat.CoordinateSystem  = EarthMJ2000Eq;
+EstSat.DisplayStateType  = Cartesian;
+EstSat.X                 = 576.8
+EstSat.Y                 = -5701.1
+EstSat.Z                 = -4170.5
+EstSat.VX                = -1.7645
+EstSat.VY                = 4.1813
+EstSat.VZ                = -5.9658
+EstSat.DryMass           = 500;
+EstSat.Cd                = 2.2;
+EstSat.CdSigma           = 0.1;
+EstSat.Cr                = 1.8;
+EstSat.CrSigma           = 0.1;
+EstSat.DragArea          = 10;
+EstSat.SRPArea           = 10;
+EstSat.Id                = 'LEOSat';
+EstSat.AddHardware       = {GpsReceiver, GpsAntenna};
+EstSat.SolveFors         = {CartesianState};     
+EstSat.ProcessNoiseModel = SNC;
+
+Create ProcessNoiseModel SNC;
+
+SNC.Type             = 'StateNoiseCompensation';
+SNC.CoordinateSystem = EarthMJ2000Eq;
+SNC.AccelNoiseSigma  = [1.0e-9 1.0e-9 1.0e-9];
+
+%
+%   Spacecraft hardware
+%
+
+Create Antenna GpsAntenna;
+Create Receiver GpsReceiver;
+
+GpsReceiver.PrimaryAntenna = GpsAntenna;
+GpsReceiver.Id             = 800;
+GpsReceiver.ErrorModels    = {PosVecModel}
+
+Create ErrorModel PosVecModel;
+ 
+PosVecModel.Type       = 'GPS_PosVec'
+PosVecModel.NoiseSigma = 0.050;
+
+%
+%   Tracking file sets
+%
+
+Create TrackingFileSet SimData;
+
+SimData.AddTrackingConfig       = {{SimSat.GpsReceiver}, 'GPS_PosVec'};
+SimData.FileName                = {'Ex_R2020a_Alpha_FilterSmoother.gmd'};
+SimData.RampTable               = {};
+SimData.UseLightTime            = False;
+SimData.UseRelativityCorrection = False;
+SimData.UseETminusTAI           = False;
+SimData.DataFilters             = {};
+
+Create TrackingFileSet EstData;
+
+EstData.AddTrackingConfig       = {{EstSat.GpsReceiver}, 'GPS_PosVec'};
+EstData.FileName                = {'Ex_R2020a_Alpha_FilterSmoother.gmd'};
+EstData.RampTable               = {};
+EstData.UseLightTime            = False;
+EstData.UseRelativityCorrection = False;
+EstData.UseETminusTAI           = False;
+EstData.DataFilters             = {};
+
+%
+%   Propagators
+%
+
+Create ForceModel FM;
+
+FM.CentralBody                       = Earth;
+FM.PrimaryBodies                     = {Earth};
+FM.GravityField.Earth.Degree         = 8;
+FM.GravityField.Earth.Order          = 8;
+FM.GravityField.Earth.PotentialFile  = 'JGM2.cof';
+FM.GravityField.Earth.EarthTideModel = 'None';
+FM.SRP                               = On;
+FM.Drag.AtmosphereModel              = 'JacchiaRoberts';
+FM.Drag.HistoricWeatherSource        = 'CSSISpaceWeatherFile';
+FM.ErrorControl                      = None;
+
+Create Propagator ODProp;
+
+ODProp.FM              = FM;
+ODProp.Type            = 'RungeKutta89';
+ODProp.InitialStepSize = 60;
+ODProp.Accuracy        = 1e-13;
+ODProp.MinStep         = 0;
+ODProp.MaxStep         = 60;
+ODProp.MaxStepAttempts = 50;
+
+%
+%    Simulator
+%
+
+Create Simulator Sim;
+
+Sim.AddData              = {SimData};
+Sim.EpochFormat          = 'UTCGregorian';
+Sim.InitialEpoch         = '10 Jun 2010 00:00:00.000';
+Sim.FinalEpoch           = '11 Jun 2010 00:00:00.000'; 
+Sim.MeasurementTimeStep  = 600;
+Sim.Propagator           = ODProp;
+Sim.AddNoise             = On;
+
+%
+%   Estimator
+%
+
+Create ExtendedKalmanFilter EKF;
+
+EKF.ShowProgress         = True;
+EKF.ReportFile           = 'Ex_R2020a_Alpha_Filter.txt';
+EKF.Measurements         = {EstData};
+EKF.Propagator           = ODProp;
+EKF.ShowAllResiduals     = On;
+EKF.ProcessNoiseTimeStep = 120;
+EKF.DataFilters          = {}
+EKF.OutputWarmStartFile  = 'Ex_R2020a_Alpha_Filter_WarmStart.csv'
+
+Create Smoother FPS;
+
+FPS.Filter               = EKF;
+FPS.ShowProgress         = True;
+FPS.ShowAllResiduals     = Off;
+FPS.ReportFile           = 'Ex_R2020a_Alpha_Smoother.txt';
+
+%
+%   Run mission sequence
+%
+
+BeginMissionSequence
+
+EstSat.OrbitErrorCovariance = diag([1.0e-2 1.0e-2 1.0e-2 2.5e-7 2.5e-7 2.5e-7]);
+
+SetSeed(1);
+
+RunSimulator Sim;
+RunEstimator EKF;
+RunSmoother FPS;
+

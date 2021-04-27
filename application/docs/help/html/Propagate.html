@@ -1,4 +1,4 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Propagate</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Commands.html" title="Commands"><link rel="prev" href="PenUpPenDown.html" title="PenUpPenDown"><link rel="next" href="Report.html" title="Report"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Propagate</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="PenUpPenDown.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Report.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Propagate"></a><div class="titlepage"></div><a name="N24BA7" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Propagate</span></h2><p>Propagate &mdash; Propagates spacecraft to a requested stopping
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Propagate</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ch16s02.html" title="Commands"><link rel="prev" href="Maneuver.html" title="Maneuver"><link rel="next" href="ch17.html" title="Chapter&nbsp;17.&nbsp;Input/Output"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Propagate</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Maneuver.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="ch17.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="Propagate"></a><div class="titlepage"></div><a name="N1FBE8" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Propagate</span></h2><p>Propagate &mdash; Propagates spacecraft to a requested stopping
     condition</p></div><div class="refsynopsisdiv"><h2>Script Syntax</h2><p>The <span class="guilabel">Propagate</span> command is a complex command that
     supports multiple <span class="guilabel">Propagators</span>, multiple
     <span class="guilabel">Spacecraft</span>, and multiple stopping conditions. In the
@@ -31,7 +31,7 @@ or
 or
 
 <code class="literal">Propagate</code> <em class="replaceable"><code>PropagatorName</code></em>(<em class="replaceable"><code>SatName</code></em>),{<em class="replaceable"><code>StopCond, OrbitColor = [RGB triplet value]</code></em>};
-    </pre></div><div class="refsection"><a name="N24C39"></a><h2>Description</h2><p>The <span class="guilabel">Propagate</span> command controls the time
+    </pre></div><div class="refsection"><a name="N1FC7A"></a><h2>Description</h2><p>The <span class="guilabel">Propagate</span> command controls the time
     evolution of spacecraft. GMAT allows you to propagate single
     <span class="guilabel">Spacecraft</span>, multiple non-cooperative
     <span class="guilabel">Spacecraft</span>, and <span class="guilabel">Formations</span> in a
@@ -102,7 +102,7 @@ or
                     <span class="guilabel">Spacecraft.OrbitColor</span> field. Default
                     color on <span class="guilabel">Spacecraft.OrbitColor</span> is
                     Red. Therefore default color for
-                    <span class="guilabel">Propagate</span> command is Red.</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N24E5C"></a><h2>GUI</h2><div class="refsection"><a name="Propagate_GUI_Introduction"></a><h3>Introduction</h3><p>The <span class="guilabel">Propagate</span> command GUI provides an
+                    <span class="guilabel">Propagate</span> command is Red.</p></td></tr><tr><td><p><span class="term">Required</span></p></td><td><p>no</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1FE9D"></a><h2>GUI</h2><div class="refsection"><a name="Propagate_GUI_Introduction"></a><h3>Introduction</h3><p>The <span class="guilabel">Propagate</span> command GUI provides an
       interface to assign <span class="guilabel">Spacecraft</span> to
       <span class="guilabel">Propagators</span> used for propagation and to define a
       set of conditions to terminate propagation. The GUI also allows you to
@@ -114,7 +114,7 @@ or
       <span class="guilabel">sat3</span>) and two propagators (named
       <span class="guilabel">prop1</span> and <span class="guilabel">prop2</span>).</p><pre class="programlisting"><code class="code">Create Spacecraft sat1 sat2 sat3
 Create Propagator prop1 prop2
-BeginMissionSequence</code>r</pre></div><div class="refsection"><a name="N24E83"></a><h3>Defining Spacecraft and Propagators</h3><p>To demonstrate how to define a set of propagators and
+BeginMissionSequence</code>r</pre></div><div class="refsection"><a name="N1FEC4"></a><h3>Defining Spacecraft and Propagators</h3><p>To demonstrate how to define a set of propagators and
       <span class="guilabel">Spacecraft</span> for propagation, you will set up a
       <span class="guilabel">Propagate</span> command to propagate a
       <span class="guilabel">Spacecraft</span> named <span class="guilabel">sat1</span> using a
@@ -140,7 +140,7 @@ BeginMissionSequence</code>r</pre></div><div class="refsection"><a name="N24E83"
           List</span>, click the ellipsis button in the second row to open
           the <span class="guilabel">Space Object Select</span> dialog.</p></li><li class="listitem"><p>Click the right-arrow twice to add <span class="guilabel">sat2</span>
           and <span class="guilabel">sat3</span> to the list of selected spacecraft and
-          click <span class="guilabel">Ok</span>.</p></li></ol></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Propagate_GUI_3A.png" align="middle" height="482"></td></tr></table></div></div></div><div class="refsection"><a name="N24F14"></a><h3>Stopping conditions</h3><p>Continuing with the example above, now you will configure GMAT to
+          click <span class="guilabel">Ok</span>.</p></li></ol></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Command_Propagate_GUI_3A.png" align="middle" height="482"></td></tr></table></div></div></div><div class="refsection"><a name="N1FF55"></a><h3>Stopping conditions</h3><p>Continuing with the example above, now you will configure GMAT to
       propagate for one elapsed day or until <span class="guilabel">sat2</span> reaches
       periapsis.</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>In the <span class="guilabel">Parameter</span> list, click the ellipsis
           button in the first row to bring up the <span class="guilabel">Parameter Select
@@ -176,7 +176,7 @@ spkProp.StartEpoch = FromSpacecraft
 Create Propagator numProp
 numProp.Type = PrinceDormand78
 
-BeginMissionSequence</code></pre></div><div class="refsection"><a name="N24F93"></a><h3>How to Propagate a Single Spacecraft</h3><p><code class="literal">Note:</code> See the <a class="xref" href="Propagate.html#Propagate_Remarks_Introduction" title="Introduction">the section called &ldquo;Introduction&rdquo;</a> section for a script snippet
+BeginMissionSequence</code></pre></div><div class="refsection"><a name="N1FFD4"></a><h3>How to Propagate a Single Spacecraft</h3><p><code class="literal">Note:</code> See the <a class="xref" href="Propagate.html#Propagate_Remarks_Introduction" title="Introduction">the section called &ldquo;Introduction&rdquo;</a> section for a script snippet
       to configure GMAT to execute the examples in this section.</p><p>The <span class="guilabel">Propagate</span> command provides a simple
       interface to propagate a <span class="guilabel">Spacecraft</span> to a stopping
       condition or to take a single propagation step. To propagate a single
@@ -198,7 +198,7 @@ Propagate spkProp(spkSat,{spkSat.TA = 90})</code></pre><p>To take a single propa
       a step based on its step size control algorithm. See the <a class="xref" href="Propagator.html" title="Propagator"><span class="refentrytitle">Propagator</span></a> documentation for more information on step size
       control.</p><pre class="programlisting"><code class="code">Propagate numProp(numSat)
 % or
-Propagate spkProp(spkSat) </code></pre></div><div class="refsection"><a name="N24FD0"></a><h3>How to Propagate Multiple Spacecraft</h3><p>The <span class="guilabel">Propagate</span> command allows you to propagate
+Propagate spkProp(spkSat) </code></pre></div><div class="refsection"><a name="N20011"></a><h3>How to Propagate Multiple Spacecraft</h3><p>The <span class="guilabel">Propagate</span> command allows you to propagate
       multiple <span class="guilabel">Spacecraft</span> by including a list of
       <span class="guilabel">Spacecraft</span> in a single
       <span class="guilabel">Propagator</span>, by including a
@@ -240,7 +240,7 @@ Prop3(aFormation){Sat1.Earth.Periapsis}</code></pre><p>In the script line above 
         <span class="guilabel">Spacecraft</span> per
         <span class="guilabel">Propagator</span>.</p><p>This is supported: <code class="literal"></code></p><p><code class="literal">Propagate numProp(numSat) spkProp(spkSat1)
         spkProp(spkSat2)</code></p><p>This is NOT supported!</p><p><code class="literal">Propagate numProp(numSat)
-        spkProp(spkSat1,spkSat2)</code></p></div></div><div class="refsection"><a name="N25065"></a><h3>Behavior of Stopping Conditions</h3><p>GMAT allows you to define a set of stopping conditions when
+        spkProp(spkSat1,spkSat2)</code></p></div></div><div class="refsection"><a name="N200A6"></a><h3>Behavior of Stopping Conditions</h3><p>GMAT allows you to define a set of stopping conditions when
       propagating <span class="guilabel">Spacecraft</span> that define conditions that
       must be satisfied at the termination of the
       <span class="guilabel">Propagate</span> command. For example, it is often useful
@@ -308,7 +308,7 @@ Propagate prop1(Sat1) {Sat1.TA = 90, StopTolerance = 1e-4}</code></pre><p>The <s
         thrown. However, subsequent <span class="guilabel">Propagate</span> commands
         using the same stopping conditions may not behave as desired. For the
         FSA algorithm to work as designed, you must provide
-        <span class="guilabel">StopTolerance</span> values that are achievable.</p></div></div><div class="refsection"><a name="N250E9"></a><h3>How to Propagate Backwards</h3><p>To propagate backwards using the script interface, include the
+        <span class="guilabel">StopTolerance</span> values that are achievable.</p></div></div><div class="refsection"><a name="N2012A"></a><h3>How to Propagate Backwards</h3><p>To propagate backwards using the script interface, include the
       keyword <span class="guilabel">BackProp</span> between the
       <span class="guilabel">Propagate</span> command and the first
       <span class="guilabel">Propagator</span> in the command as shown below. All
@@ -316,7 +316,7 @@ Propagate prop1(Sat1) {Sat1.TA = 90, StopTolerance = 1e-4}</code></pre><p>The <s
       backwards.</p><pre class="programlisting"><code class="code">Propagate Synchronized BackProp Prop1(Sat1,Sat2) Prop2(Sat3,Sat4)...
            Prop3(aFormation){Sat1.Earth.Periapsis}
 
-Propagate Backprop numProp(numSat){numSat.Periapsis}</code></pre></div><div class="refsection"><a name="N250FD"></a><h3>How to Propagate the STM and Compute the Jacobian
+Propagate Backprop numProp(numSat){numSat.Periapsis}</code></pre></div><div class="refsection"><a name="N2013E"></a><h3>How to Propagate the STM and Compute the Jacobian
       (A-matrix)</h3><p>GMAT propagates the STM for all <span class="guilabel">Spacecraft</span>
       propagated using numerical integrators by including the
       <code class="literal">STM</code> keyword in a <span class="guilabel">Propagate</span>
@@ -324,11 +324,11 @@ Propagate Backprop numProp(numSat){numSat.Periapsis}</code></pre></div><div clas
       <span class="guilabel">Propagate</span> command, the STM is propagated for all
       spacecraft using numerical propagators.</p><pre class="programlisting"><code class="code">Propagate Backprop numProp(numSat,&rsquo;STM&rsquo;){numSat.Periapsis}</code></pre><p>GMAT does not currently support propagating the STM when
       propagating <span class="guilabel">Formation</span> resources or when using SPK
-      type propagators.</p></div><div class="refsection"><a name="N25116"></a><h3>Limitations of the Propagate Command</h3><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>When using an SPK-type <span class="guilabel">Propagator</span>, only a
+      type propagators.</p></div><div class="refsection"><a name="N20157"></a><h3>Limitations of the Propagate Command</h3><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>When using an SPK-type <span class="guilabel">Propagator</span>, only a
           single <span class="guilabel">Spacecraft</span> can be propagated by a given
           <span class="guilabel">Propagator</span>.</p></li><li class="listitem"><p>GMAT does not currently support propagating the STM when
           propagating <span class="guilabel">Formation</span> objects.</p></li><li class="listitem"><p>When computing the A-matrix during propagation, the A-matrix
-          values are only accessible via the C-Interface.</p></li></ul></div></div><div class="refsection"><a name="N2512F"></a><h3>Setting Colors on the Propagate Command</h3><p>GMAT allows you to assign unique colors to
+          values are only accessible via the C-Interface.</p></li></ul></div></div><div class="refsection"><a name="N20170"></a><h3>Setting Colors on the Propagate Command</h3><p>GMAT allows you to assign unique colors to
       <span class="guilabel">Spacecraft</span> trajectory segments by setting orbital
       colors on each <span class="guilabel">Propagate</span> command. If you do not set
       unique colors on each <span class="guilabel">Propagate</span> command, then by
@@ -338,7 +338,7 @@ Propagate Backprop numProp(numSat){numSat.Periapsis}</code></pre></div><div clas
       <span class="guilabel">OrbitColor</span> option that lets you set colors on the
       <span class="guilabel">Propagate</span> command. Also see <a class="xref" href="Color.html" title="Color"><span class="refentrytitle">Color</span></a> documentation for discussion and examples on
       how to set unique colors on orbital trajectory segments through GMAT's
-      <span class="guilabel">Propagate</span> command.</p></div></div><div class="refsection"><a name="N25150"></a><h2>Examples</h2><div class="informalexample"><p>Propagate a single <span class="guilabel">Spacecraft </span>to Earth
+      <span class="guilabel">Propagate</span> command.</p></div></div><div class="refsection"><a name="N20191"></a><h2>Examples</h2><div class="informalexample"><p>Propagate a single <span class="guilabel">Spacecraft </span>to Earth
       periapsis</p><pre class="programlisting"><code class="code">Create Spacecraft numSat
 numSat.Epoch.UTCGregorian = '02 Jun 2004 12:00:00.000'
 
@@ -383,4 +383,4 @@ BeginMissionSequence
 
 Propagate Synchronized aProp1(aSat1) aProp2(aSat2) ...
                       {aSat1.MA = 45,aSat2.MA = 45} 
-</pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="PenUpPenDown.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Commands.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Report.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">PenUpPenDown&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Report</td></tr></table></div></body></html>
+</pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Maneuver.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ch16s02.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="ch17.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Maneuver&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Chapter&nbsp;17.&nbsp;Input/Output</td></tr></table></div></body></html>

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -33,7 +33,10 @@ ThfDataSegment::ThfDataSegment() :
    segmentName                   (""),
    startEpochString              (""),
    startEpoch                    (0.0),      // 0.0 so relative timing is simple
+   startEpochGT                  (0.0),
    endEpoch                      (0.0),
+   endEpochGT                    (0.0),
+   hasPrecisionTime              (false),
    csName                        ("EarthMJ2000Eq"),
    cs                            (NULL),
    interpolationMethod           ("None"),   // Default stairsteps the data
@@ -42,6 +45,8 @@ ThfDataSegment::ThfDataSegment() :
    massIntType                   (NONE),
    modelFlag                     ("ModelThrustOnly"),
    modelThrust                   (true),
+   isDataLoaded                  (false),
+   isActive                      (false),
    thrustScaleFactor             (1.0),
    massFlowScaleFactor           (1.0),
    includeThrustFactorInMassFlow (false)
@@ -59,11 +64,23 @@ ThfDataSegment::~ThfDataSegment()
 {
 }
 
+//------------------------------------------------------------------------------
+// ThfDataSegment::ThfDataSegment(const ThfDataSegment& ds) :
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * @param ds The thrust data segment providing data for this one
+ */
+//------------------------------------------------------------------------------
 ThfDataSegment::ThfDataSegment(const ThfDataSegment& ds) :
    segmentName                   (ds.segmentName),
    startEpochString              (ds.startEpochString),
    startEpoch                    (ds.startEpoch),
+   startEpochGT                  (ds.startEpochGT),
    endEpoch                      (ds.endEpoch),
+   endEpochGT                    (ds.endEpochGT),
+   hasPrecisionTime              (ds.hasPrecisionTime),
    csName                        (ds.csName),
    cs                            (ds.cs),
    interpolationMethod           (ds.interpolationMethod),
@@ -72,6 +89,8 @@ ThfDataSegment::ThfDataSegment(const ThfDataSegment& ds) :
    massIntType                   (ds.massIntType),
    modelFlag                     (ds.modelFlag),
    modelThrust                   (ds.modelThrust),
+   isDataLoaded                  (ds.isDataLoaded),
+   isActive                      (ds.isActive),
    thrustScaleFactor             (ds.thrustScaleFactor),
    massFlowScaleFactor           (ds.massFlowScaleFactor),
    includeThrustFactorInMassFlow (ds.includeThrustFactorInMassFlow),
@@ -84,6 +103,17 @@ ThfDataSegment::ThfDataSegment(const ThfDataSegment& ds) :
    }
 }
 
+//------------------------------------------------------------------------------
+// ThfDataSegment& operator =(const ThfDataSegment& ds)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ *
+ * @param ds The thrust data segment copied to this one
+ *
+ * @return This data segment, set to match ds
+ */
+//------------------------------------------------------------------------------
 ThfDataSegment& ThfDataSegment::operator =(const ThfDataSegment& ds)
 {
    if (this != &ds)
@@ -91,7 +121,10 @@ ThfDataSegment& ThfDataSegment::operator =(const ThfDataSegment& ds)
       segmentName                 =  ds.segmentName;
       startEpochString            =  ds.startEpochString;
       startEpoch                  =  ds.startEpoch;
+      startEpochGT                =  ds.startEpochGT;
       endEpoch                    =  ds.endEpoch;
+      endEpochGT                  =  ds.endEpochGT;
+      hasPrecisionTime            =  ds.hasPrecisionTime;
       csName                      =  ds.csName;
       cs                          =  ds.cs;
       interpolationMethod         =  ds.interpolationMethod;
@@ -100,6 +133,8 @@ ThfDataSegment& ThfDataSegment::operator =(const ThfDataSegment& ds)
       massIntType                 =  ds.massIntType;
       modelFlag                   =  ds.modelFlag;
       modelThrust                 =  ds.modelThrust;
+      isDataLoaded                =  ds.isDataLoaded;
+      isActive                    =  ds.isActive;
       thrustScaleFactor           =  ds.thrustScaleFactor;
       massFlowScaleFactor         =  ds.massFlowScaleFactor;
       includeThrustFactorInMassFlow
@@ -117,6 +152,41 @@ ThfDataSegment& ThfDataSegment::operator =(const ThfDataSegment& ds)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// bool SetPrecisionTimeFlag(bool onOff)
+//------------------------------------------------------------------------------
+/**
+* Set whether the thf data segment is using precision time or not
+*
+* @param onOff Flag indicating whether the thf data segment uses precision time
+*
+* @return Returns the value of the onOff flag passed in
+*/
+//------------------------------------------------------------------------------
+bool ThfDataSegment::SetPrecisionTimeFlag(bool onOff)
+{
+   if ((hasPrecisionTime == false) && (onOff == true)) {
+      startEpochGT = startEpoch;
+      endEpochGT = endEpoch;
+   }
+
+   hasPrecisionTime = onOff;
+   return hasPrecisionTime;
+}
+
+//------------------------------------------------------------------------------
+// bool HasPrecisionTime()
+//------------------------------------------------------------------------------
+/**
+* Return whether the thf data segment is using precision time or not
+*
+* @return Flag indicating whether the thf data segment uses precision time
+*/
+//------------------------------------------------------------------------------
+bool ThfDataSegment::HasPrecisionTime()
+{
+   return hasPrecisionTime;
+}
 
 // Convenience methods for the thrust profile data structure
 
@@ -153,7 +223,7 @@ ThfDataSegment::ThrustPoint::~ThrustPoint()
 /**
  * Copy constructor
  *
- * @param tp The point copied to this make one
+ * @param tp The point copied to make this one
  */
 //------------------------------------------------------------------------------
 ThfDataSegment::ThrustPoint::ThrustPoint(const ThrustPoint& tp) :

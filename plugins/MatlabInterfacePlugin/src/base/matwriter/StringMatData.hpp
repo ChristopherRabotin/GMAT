@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2016 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -50,20 +50,18 @@ public:
    StringMatData(const StringMatData &sd);
    StringMatData& operator=(const StringMatData &sd);
 
-   virtual bool AddData(const StringMatrix &data);
+   virtual bool AddData(const StringMatrix &data, bool isJagged = false);
+   virtual bool AddData(const std::vector<StringMatrix> &data);
    virtual void WriteData(MATFile *matfile, const std::string &objectName,
-                          mxArray *mx_struct);
+                          mxArray *mx_struct, mwIndex index = 0U);
    virtual bool WriteData();
 
 protected:
    /// The data array to be written
    StringMatrix stringData;
-   /// entry count
-   mwSize m_string;
-   /// Row count for the data
-   int m_size;
-   /// Column count for the data
-   int n_size;
+   /// The 3D data array to be written
+   std::vector< StringMatrix> stringData3D;
+
    /// mxArray to string data
    mxArray *pa_string;
 };

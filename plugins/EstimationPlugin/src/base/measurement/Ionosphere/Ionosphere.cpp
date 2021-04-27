@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -228,7 +228,7 @@ bool Ionosphere::Initialize()
       // Get time range from ap.dat file
       GetTimeRange();
 
-      // Read all data files and store data to memmory
+      // Read all data files and store data to memory
       integer errNo;
       ftnlen len = 0;
       char errmsg[256]; 
@@ -345,7 +345,7 @@ bool Ionosphere::SetTime(GmatEpoch ep)
    epoch = ep;
    Real temp;
    std::string time;
-   TimeConverterUtil::Convert("A1ModJulian", epoch, "", "UTCGregorian", temp, time, 2);
+   TimeSystemConverter::Instance()->Convert("A1ModJulian", epoch, "", "UTCGregorian", temp, time, 2);
    yyyy = atoi(time.substr(0,4).c_str());
    mmdd = atoi(time.substr(5,2).c_str())*100 + atoi(time.substr(8,2).c_str());
    hours = atof(time.substr(11,2).c_str()) + atof(time.substr(14,2).c_str())/60 +
@@ -608,38 +608,92 @@ Real Ionosphere::TEC()
 //---------------------------------------------------------------------------
 Real Ionosphere::BendingAngle()
 {
-   Rvector3 rangeVec = spacecraftLoc - stationLoc;
-   Rvector3 dR = rangeVec / NUM_OF_INTERVALS;
-   Rvector3 p1 = stationLoc;
-   Rvector3 p2, delta;
-   Real n1, n2, dn_drho, de1, de2, integrant;
-   Real gammar = 0.0;
-   
-   Real beta0 = GmatMathConstants::PI_OVER_TWO - acos(rangeVec.GetUnitVector()*p1.GetUnitVector());
-   MessageInterface::ShowMessage("Elevation angle = %f\n", beta0*GmatMathConstants::DEG_PER_RAD);
-   Real beta = beta0;
-   Real freq = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / waveLength;
-   for(int i = 0; i < NUM_OF_INTERVALS; ++i)
+   // 1. Calculate end points which speccify path inside ionosphere
+   // Solution to where a line intersects a sphere is a quadratic equation
+   Real a, b, c, discriminant;
+   Rvector3 s = spacecraftLoc - stationLoc;
+   // Solve for intersection of signal with sphere of IONOSPHERE_MAX_ALTITUDE
+   a = s*s;
+   b = 2.0 * stationLoc * s;
+   c = stationLoc*stationLoc - GmatMathUtil::Pow(earthRadius + IONOSPHERE_MAX_ALTITUDE, 2);
+
+   discriminant = b*b - 4.0 * a*c;
+   if (discriminant <= 0)
    {
-      p2 = p1 + dR;
+      return 0; // Path does not travel through ionosphere
+   }
+
+   Real d1, d2; // Roots of quadratic equation
+
+   d1 = (-b - GmatMathUtil::Sqrt(b*b - 4.0*a*c)) / (2.0*a);
+   d2 = (-b + GmatMathUtil::Sqrt(b*b - 4.0*a*c)) / (2.0*a);
+
+   if ((d1 > 1 && d2 > 1) || (d1 < 0 && d2 < 0))
+   {
+      return 0; // Segment between start and end does not travel through ionosphere
+   }
+
+   d1 = GmatMathUtil::Max(d1, 0); // Truncate segment before start point of signal
+   d2 = GmatMathUtil::Min(d2, 1); // Truncate segment after end point of signal
+
+   Rvector3 start, end;
+   start = stationLoc + d1*s;
+   end = stationLoc + d2*s;
+
+   // 2. Calculate angle correction
+   //Rvector3 rangeVec = spacecraftLoc - stationLoc;    // made changes by TUAN NGUYEN
+   Rvector3 rangeVec = end - start;                     // made changes by TUAN NGUYEN
+   Rvector3 dR = rangeVec / NUM_OF_INTERVALS;
+   //Rvector3 r_i1 = spacecraftLoc;                     // made changes by TUAN NGUYEN
+   Rvector3 r_i1 = end;                                 // made changes by TUAN NGUYEN
+   Rvector3 r_i;
+   Real n_i, n_i1, density_i, density_i1;
+   
+   // Frequency of signal
+   Real freq = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / waveLength;
+
+   // Angle of incidence at position r_i1
+   Real theta_i1 = GmatMathUtil::ACos(rangeVec.GetUnitVector()*r_i1.GetUnitVector());             // unit: radian
+   
+   // Elevetion angle at position r_i1
+   Real beta_i1 = GmatMathConstants::PI_OVER_TWO - theta_i1;                                      // unit: radian
+   //MessageInterface::ShowMessage("Elevation angle = %.12lf degree\n", beta_i1*GmatMathConstants::DEG_PER_RAD);
+
+   // Electron density at position r_i1
+   density_i1 = ElectronDensity(r_i1);
+
+   // Index of refaction at position ri1
+   n_i1 = 1 - 40.3*density_i1 / (freq*freq);
+
+   // Refaction correction 
+   Real dtheta_i1 = 0.0;
+   for (int i = NUM_OF_INTERVALS; i > 0; --i)
+   {
+      // the previous position of r_i
+      r_i = r_i1 - dR;
       
-      delta = dR/100;
-      de1 = ElectronDensity(p1);
-      de2 = ElectronDensity(p1+delta);
-      n1 = 1 - 40.3*de1/(freq*freq);
-      n2 = 1 - 40.3*de2/(freq*freq);
-      dn_drho = -40.3*(de2 - de1)/ (freq*freq) / (((p1+delta).GetMagnitude() - p1.GetMagnitude())*GmatMathConstants::KM_TO_M);
-      integrant = dn_drho/(n1*tan(beta));
-      gammar += integrant*(p2.GetMagnitude() - p1.GetMagnitude())*GmatMathConstants::KM_TO_M;
-      //MessageInterface::ShowMessage("de1 = %.12lf,  de2 = %.12lf, rho1 = %f,   "
-      //"rho2 = %f, integrant = %.12lf, gammar =%.12lf\n",de1, de2, p1.GetMagnitude(),
-      //p2.GetMagnitude(), integrant, gammar*180/GmatConstants::PI);
+      // density at position r_i 
+      density_i = ElectronDensity(r_i);
       
-      p1 = p2;
-      beta = beta0 + gammar;
+      // index of refaction at position r_i 
+      n_i = 1 - 40.3*density_i/(freq*freq);
+
+      Real dtheta = ((n_i1 - n_i)/ n_i) * GmatMathUtil::Tan(theta_i1);
+      //MessageInterface::ShowMessage("dtheta = %.12lf rad\n", dtheta);
+      dtheta_i1 += dtheta;
+
+      // Reset position
+      r_i1 = r_i;
+      // Recalculate angle of incidence
+      theta_i1 = GmatMathUtil::ACos(rangeVec.GetUnitVector()*r_i1.GetUnitVector()) - dtheta_i1;             // unit: radian
+      // Reset desity, index of refaction for the new position
+      density_i1 = density_i;
+      n_i1 = n_i;
    }
    
-   return gammar;
+   Real dbeta = -dtheta_i1;             // elevation angle's correction equals negative of incidence angle's correction 
+   //MessageInterface::ShowMessage("Elevation angle correction = %.12lf x e-3 degree\n", dbeta*GmatMathConstants::DEG_PER_RAD*1000.0);
+   return dbeta;
 }
 
 
@@ -688,15 +742,16 @@ RealArray Ionosphere::Correction()
    Real freq = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / waveLength;
    Real tec = TEC();                  // Equation 6.70 of MONTENBRUCK and GILL      // unit: number of electrons/ m^2
    Real drho = 40.3*tec/(freq*freq);  // Equation 6.69 of MONTENBRUCK and GILL      // unit: meter
-   Real dphi = 0;                     //BendingAngle()*180/GmatConstants::PI;
-                                      // It has not been defined yet
-   Real dtime = drho/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;            // unit: s
+
+   // Unit of dphi has to be radian because in all caller functions use correction in radian unit.             // made changes by TUAN NGUYEN
+   Real dphi = BendingAngle();                                                      // unit: radian            // made changes by TUAN NGUYEN
+   Real dtime = drho/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;                  // unit: s
 
 #ifdef DEBUG_IONOSPHERE_CORRECTION
    MessageInterface::ShowMessage
       ("Ionosphere::Correction: freq = %.12lf MHz,  tec = %.12lfe16,  "
-       "drho = %.12lfm, dphi = %f, dtime = %.12lfs\n", freq/1.0e6,
-       tec/1.0e16, drho, dphi*3600, dtime);
+       "drho = %.12lf m, dphi = %.12lf degree, dtime = %.12lf s\n", freq/1.0e6,
+       tec/1.0e16, drho, dphi*GmatMathConstants::DEG_PER_RAD, dtime);
 #endif
 
    RealArray ra;

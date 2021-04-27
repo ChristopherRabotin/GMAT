@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -47,12 +47,30 @@ public:
    DataBucket(const DataBucket& db);
    DataBucket& operator=(const DataBucket& db);
 
-   Integer AddRealContainer(const std::string &name);
+   void SetFillToMatch(bool matchFill);
+   void SetInitialRealValue(Real val);
+   void SetInitialStringValue(std::string val);
+
+   Integer AddRealContainer(const std::string &name, UnsignedInt numElements = 1U);
    Integer FindRealContainer(const std::string &name);
-   Integer AddStringContainer(const std::string &name);
+   Integer GetRealContainerSize(UnsignedInt index);
+   Integer AddReal3DContainer(const std::string &name);
+   Integer FindReal3DContainer(const std::string &name);
+
+   Integer AddReal2DArray(const std::string &name);
+   Integer FindReal2DArray(const std::string &name);
+
+   Integer AddStringContainer(const std::string &name, UnsignedInt numElements = 1U);
    Integer FindStringContainer(const std::string &name);
+   Integer GetStringContainerSize(UnsignedInt index);
+   Integer AddString3DContainer(const std::string &name);
+   Integer FindString3DContainer(const std::string &name);
+
+   Integer AddString2DArray(const std::string &name);
+   Integer FindString2DArray(const std::string &name);
 
    Integer AddPoint();
+   Integer GetContainerSize();
    void Clear();
 
    /// Vector to track state for the data, so empty elements can be detected
@@ -60,13 +78,37 @@ public:
    /// Names of the real data collected
    StringArray realNames;
    /// The real data
-   std::vector<RealArray> realValues;
+   std::vector<std::vector<RealArray>> realValues;
+   /// The size of each real data
+   UnsignedIntArray realValueSize;
+   /// Names of the real data collected for the 3D container
+   StringArray real3DNames;
+   /// The real data for the 3D container
+   std::vector<std::vector<std::vector<RealArray>>> real3DValues;
+   /// Names of the real 2D array data collected
+   StringArray real2DArrayNames;
+   /// The real 2D array data
+   std::vector<std::vector<RealArray>> real2DArrayValues;
    /// Names of the string data collected
    StringArray stringNames;
    /// The string data
-   std::vector<StringArray> stringValues;
+   std::vector<std::vector<StringArray>> stringValues;
+   /// The size of each string data
+   UnsignedIntArray stringValueSize;
+   /// Names of the string data collected for the 3D container
+   StringArray string3DNames;
+   /// The string data for the 3D container
+   std::vector<std::vector<std::vector<StringArray>>> string3DValues;
+   /// Names of the string data 2D array collected
+   StringArray string2DArrayNames;
+   /// The string 2D array data
+   std::vector<std::vector<StringArray>> string2DArrayValues;
+
+protected:
 
    bool fillToMatch;
+   Real initialRealValue;
+   std::string initialStringValue;
 };
 
 #endif /* DataBucket_hpp */

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -23,8 +23,12 @@
 
 #include "GmatBase.hpp"
 #include "CoordinateSystem.hpp"
+#include "FuelTank.hpp"
 #include "ThfDataSegment.hpp"
 
+/**
+ * Container for thrust history file segment data
+ */
 class ThrustSegment : public GmatBase
 {
 public:
@@ -34,6 +38,21 @@ public:
    ThrustSegment& operator=(const ThrustSegment &ts);
 
    virtual GmatBase* Clone() const;
+
+   // Ref. object access methods - overridden from GmatBase
+   virtual bool         HasRefObjectTypeArray();
+   virtual const ObjectTypeArray&
+                        GetRefObjectTypeArray();
+   virtual const StringArray&
+                        GetRefObjectNameArray(const UnsignedInt type);
+   virtual bool         RenameRefObject(const UnsignedInt type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
+   virtual bool         SetRefObject(GmatBase *obj,
+                                     const UnsignedInt type,
+                                     const std::string &name = "");
+   virtual ObjectArray& GetRefObjectArray(const UnsignedInt type);
+   virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
    // Access methods derived classes can override
    virtual std::string  GetParameterText(const Integer id) const;
@@ -77,14 +96,9 @@ public:
    // Strings
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
-                                           const char *value);
-   virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value);
    virtual std::string  GetStringParameter(const Integer id,
                                            const Integer index) const;
-   virtual bool         SetStringParameter(const Integer id,
-                                           const char *value,
-                                           const Integer index);
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value,
                                            const Integer index);
@@ -94,8 +108,6 @@ public:
                         GetStringArrayParameter(const Integer id,
                                                 const Integer index) const;
    virtual std::string  GetStringParameter(const std::string &label) const;
-   virtual bool         SetStringParameter(const std::string &label,
-                                           const char *value);
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
    virtual std::string  GetStringParameter(const std::string &label,
@@ -131,20 +143,33 @@ public:
    bool                 DepletesMass();
 
    void                 GetScaleFactors(Real scaleFactors[2]);
+   Integer              GetScaleFactorIndex();
+   void                 SetScaleFactorIndex(Integer index);
+
+   // May need some of these:
+   virtual bool            IsEstimationParameterValid(const Integer id);
+
+   virtual Integer         HasParameterCovariances(Integer parameterId);
+   virtual Rmatrix*        GetParameterCovariances(Integer parameterId);
+
+   virtual bool            SetPrecisionTimeFlag(bool onOff);
 
    DEFAULT_TO_NO_CLONES
-   DEFAULT_TO_NO_REFOBJECTS
 
    /// The data from the file
    ThfDataSegment segData;
 
+   /// Sources of mass flow names
+   StringArray massSourceNames;
    /// Sources of mass flow
-   StringArray massSource;
+   std::vector<FuelTank *> massSource;
 
-private:
+protected:
    // Object fields
-   /// The trust scale factor
+   /// The thrust scale factor
    Real thrustScaleFactor;
+   /// The thrust scale factor epsilon
+   Real tsfEpsilon;
    /// Standard deviation for the TSF
    Real tsfSigma;
    /// Mass flow flag
@@ -153,8 +178,13 @@ private:
    bool useMassAndThrustFactor;
    /// Mass flow scale factor
    Real massFlowFactor;
+   /// STM index
+   Integer tsfIndex;
    /// Solve for parameters
    StringArray solveFors;
+
+   /// The object array used in GetRefObjectArray()
+   ObjectArray objectArray;
 
    /// Parameter IDs
    enum
@@ -165,6 +195,9 @@ private:
       MASSFLOWSCALEFACTOR,
       MASSSOURCE,
       SOLVEFORS,
+      TSF_EPSILON,
+      START_EPOCH,
+      END_EPOCH,
       ThrustSegmentParamCount,
    };
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -56,6 +56,7 @@
 class SolarSystem;
 class CoordinateSystem;
 class GmatWidget;
+class RHSEquation;
 
 
 // The allocation size used to construct estimation object parameter IDs
@@ -84,7 +85,35 @@ class GmatWidget;
 //------------------------------------------------------------------------------
 class GMAT_API GmatBase
 {
+// Class methods and data for the GMAT API
 public:
+   virtual std::string  Help(const std::string &forItem = "");
+   virtual void         SetField(const Integer id, const Integer value);
+   virtual void         SetField(const Integer id, const Real value);
+   virtual void         SetField(const Integer id, const std::string &value);
+   virtual void         SetField(const Integer id, const bool value);
+   virtual void         SetField(const std::string &label, const Integer value);
+   virtual void         SetField(const std::string &label, const Real value);
+   virtual void         SetField(const std::string &label, const std::string &value);
+   virtual void         SetField(const std::string &label, const bool value);
+   virtual bool         SetReference(GmatBase* obj, Integer index = -1);
+
+   virtual std::string  GetField(const Integer id);
+   virtual std::string  GetField(const std::string &label);
+
+   virtual void         SetNumber(const Integer id, const Real value);
+   virtual void         SetNumber(const std::string &label, const Real value);
+   virtual Real         GetNumber(const Integer id);
+   virtual Real         GetNumber(const std::string &label);
+
+   std::string          GetTypeAndValue(Integer i);
+
+protected:
+   virtual std::string  GetHelpString(const std::string &forItem = "");
+
+public:
+
+
    // The usual suspects
    GmatBase(UnsignedInt typeId, const std::string &typeStr,
             const std::string &nomme = "");
@@ -103,6 +132,8 @@ public:
 
    virtual const std::string  GetFullName();
    virtual bool         SetFullName(const std::string name);
+
+   virtual std::string  ToString() const;
 
    virtual Integer      GetParameterCount() const;
 
@@ -163,6 +194,11 @@ public:
    virtual ObjectArray& GetRefObjectArray(const UnsignedInt type);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
+   bool                 HasEquation();
+   virtual bool         SetupEquation(ObjectMap *configObjectMap);
+   virtual void         GetEquations(std::vector<RHSEquation*> &equations);
+   virtual bool         InitializeEquations(ObjectMap *lom, ObjectMap *gom);
+
    /// Returns the list of names used in the wrappers
    virtual const StringArray&
                         GetWrapperObjectNameArray(bool completeSet = false);
@@ -207,6 +243,7 @@ public:
 
    // Access methods derived classes can override
    virtual std::string  GetParameterText(const Integer id) const;
+   virtual std::string  GetParameterText(const Integer id, Integer width);
    virtual std::string  GetParameterUnit(const Integer id) const;
    virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
@@ -237,6 +274,9 @@ public:
 
    virtual UnsignedInt
                         GetPropertyObjectType(const Integer id) const;
+   virtual UnsignedInt
+                        GetPropertyObjectType(const Integer id,
+                              const Integer index) const;
    virtual const StringArray&
                         GetPropertyEnumStrings(const Integer id) const;
    virtual const StringArray&
@@ -330,6 +370,22 @@ public:
    virtual bool         SetBooleanParameter(const Integer id,
                                             const bool value,
                                             const Integer index);
+
+   virtual Integer      CheckGenericTypeSupport(const Integer id,
+                                                const Integer genType,
+                                                const std::string &setting = "");
+   virtual Generic      GetGenericParameter(const Integer id) const;
+   virtual Generic      SetGenericParameter(const Integer id,
+                                            const Generic value);
+
+   virtual Integer      CheckGenericTypeSupport(const std::string &label,
+                                                const Integer genType,
+                                                const std::string &setting = "");
+   virtual Generic      GetGenericParameter(const std::string &label) const;
+   virtual Generic      SetGenericParameter(const std::string &label,
+                                            const Generic value);
+
+   UnsignedInt          GetType(const Generic &forGeneric);
 
    virtual GmatTime     GetGmatTimeParameter(const std::string &label) const;
    virtual GmatTime     SetGmatTimeParameter(const std::string &label, 
@@ -475,7 +531,7 @@ public:
    /// Method to return the current number of instantiated objects
    static Integer          GetInstanceCount();
    /// Method for getting GMAT object type
-   static UnsignedInt GetObjectType(const std::string &typeString);
+   static UnsignedInt      GetObjectType(const std::string &typeString);
    /// Method for getting GMAT object type string
    static std::string      GetObjectTypeString(UnsignedInt type);
    /// Method for getting data precision
@@ -507,6 +563,7 @@ public:
    virtual bool            IsEstimationParameterValid(const Integer id);
    virtual Integer         GetEstimationParameterSize(const Integer id);
    virtual Real*           GetEstimationParameterValue(const Integer id);
+   virtual StringArray     GetSolveForList();
 
    virtual bool            HasDynamicParameterSTM(Integer parameterId);
    virtual Rmatrix*        GetParameterSTM(Integer parameterId);
@@ -551,13 +608,34 @@ public:
    bool                    HasPrecisionTime();
    virtual bool            SetPrecisionTimeFlag(bool onOff);
 
+   // Scripted Object Method Support
+   StringArray             GetScriptedMethodList();
+   Integer                 GetMethodParameterCount(const std::string &forMethod);
+   ObjectTypeArray         GetMethodParameterTypes(const std::string &forMethod);
+   virtual bool            SetMethodParameters(const std::string methodName,
+                                 const StringArray & args,
+                                 const std::string &precomment,
+                                 const std::string &postcomment);
+   // @todo Is this signature correct? Parameters are already set
+   virtual Generic         ExecuteMethod(const std::string &forMethod,
+                                 const StringArray &parameters);
+
 protected:
+
+   // Code to handle generics
+   UnsignedInt             GetGenericType(const std::string &fromString,
+                                          StringArray &contents);
+   UnsignedInt             GetGenericType(const Generic &g);
+   Generic                 GetGeneric(const std::string &fromString);
+
    /// Parameter IDs
    enum
    {
       COVARIANCE = 0,
       GmatBaseParamCount,
    };
+
+   static std::string helpStr;
 
    /// GmatBase parameter types
    static const Gmat::ParameterType PARAMETER_TYPE[GmatBaseParamCount];
@@ -595,6 +673,9 @@ protected:
    /// The list types that this class extends, by name
    StringArray         objectTypeNames;
 
+   /// The list of created objects                                // made changes by TUAN NGUYEN
+   ObjectArray         createdObjects;                            // made changes by TUAN NGUYEN
+
    /// Flag used to determine if associations have been made
    bool                isInitialized;
 
@@ -607,6 +688,9 @@ protected:
 
    /// flag indicating whether or not the object using GmatTime for epoch
    bool                hasPrecisionTime;
+
+   /// Flag indicating taht the object is an API generated object
+   bool                isAPIObject;
 
    /// flag indicating whether or not the object is Global
    bool                isGlobal;
@@ -629,7 +713,7 @@ protected:
 
    /// Integer array used to hold the parameter write order
    /// This array is automatically created if array is empty
-   IntegerArray         parameterWriteOrder;
+   IntegerArray        parameterWriteOrder;
    /// String used to hold the comment line
    std::string         commentLine;
    /// String used to hold inline comment
@@ -652,12 +736,14 @@ protected:
 
    // Ordered list of parameters that have covariances
    StringArray         covarianceList;
-   // Ordered list of parameter IDs that have covariances
+   /// Ordered list of parameter IDs that have covariances
    IntegerArray        covarianceIds;
    // Size of the covariance element
    IntegerArray        covarianceSizes;
-   // Covariance matrix for parameters identified in covarianceList
+   /// Covariance matrix for parameters identified in covarianceList
    Covariance          covariance;
+   /// Solve-for parameters that the object specifies
+   StringArray         solveForList;
    
    // Some string arrays need to be written even if they are empty
    bool                writeEmptyStringArray;
@@ -667,12 +753,38 @@ protected:
    virtual void        WriteParameters(Gmat::WriteMode mode,
                                        std::string &prefix,
                                        std::stringstream &stream);
-   void                WriteStringArrayValue(Gmat::WriteMode mode,
+   virtual void        WriteStringArrayValue(Gmat::WriteMode mode,
                                              std::string &prefix,
                                              Integer id, bool writeQuotes,
                                              std::stringstream &stream);
-   void                WriteParameterValue(Integer id,
+   virtual void        WriteParameterValue(Integer id,
                                            std::stringstream &stream);
+
+   RHSEquation*        ParseEquation(const std::string &equationString,
+                                     ObjectMap *configObjectMap);
+                                     
+   // Scripted Object Method Support
+   /// Methods that were scripted
+   StringArray                            objectMethods;
+   /// Comments for scripted methods
+   StringArray                            objectMethodPrefaces;
+   /// Input counts requires for a method
+   std::map<std::string, Integer>         methodRequiredInputCount;
+   /// Input counts allowed for a method
+   std::map<std::string, Integer>         methodTotalInputCount;
+   /// The inputs on a method
+   std::map<std::string, ObjectTypeArray> methodInputs;
+
+   /// The (object mode) scripted methods, for use when saving the script
+   StringArray                            scriptedMethods;
+
+   virtual bool            SetMethodParameter(const std::string methodName,
+                                 const std::string &arg, const Integer index,
+                                 bool &commandComplete);
+
+   /// Used to force equation evaluation, in case the eq'n isn't a field setting
+   bool                    hasEquation;
+
 
 private:
 

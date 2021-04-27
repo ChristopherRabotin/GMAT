@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -161,7 +161,7 @@ ChemicalThruster::ChemicalThruster(const std::string &nomme) :
    kCoefUnits.push_back("None");
    kCoefUnits.push_back("1/kPa");
 
-   for (Integer i=ThrusterParamCount; i < ChemicalThrusterParamCount; i++)  // is this right?
+   for (Integer i=ThrusterParamCount; i < ChemicalThrusterParamCount; ++i)
       parameterWriteOrder.push_back(i);
 }
 
@@ -202,7 +202,7 @@ ChemicalThruster::ChemicalThruster(const ChemicalThruster& th) :
    memcpy(cCoefficients, th.cCoefficients, COEFFICIENT_COUNT * sizeof(Real));
    memcpy(kCoefficients, th.kCoefficients, COEFFICIENT_COUNT * sizeof(Real));
 
-   for (Integer i=ThrusterParamCount; i < ChemicalThrusterParamCount; i++)  // is this right?
+   for (Integer i=ThrusterParamCount; i < ChemicalThrusterParamCount; ++i)
       parameterWriteOrder.push_back(i);
 
    #ifdef DEBUG_CHEMICAL_THRUSTER_CONSTRUCTOR

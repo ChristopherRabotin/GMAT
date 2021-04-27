@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -81,11 +81,11 @@ public:
    void SetEditor(ScriptEditor *editor);
 #endif
    
-   void SetDirty(bool dirty);
-   void OverrideDirty(bool flag);
-   void SetCanBeDeleted(bool flag);
-   bool IsDirty();
-   bool CanClose();
+   void SetDirty(bool dirty) { mDirty = dirty; }
+   bool IsDirty() const { return mDirty; }
+   void OverrideDirty(bool flag) { mOverrideDirty = flag; }
+   void SetCanBeDeleted(bool flag) { mCanBeDeleted = flag; }
+   bool CanClose() const { return mCanClose; }
    
    wxWindow* GetMdiParent();
    

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,6 +38,9 @@
 #include "Rendering.hpp"           // for DrawStringAt(), DrawSquare()
 #include "MdiChildGroundTrackFrame.hpp"
 #include "AttitudeConversionUtility.hpp"
+#include "BodyFixedPoint.hpp"
+
+#include "GuiPublisher.hpp"
 
 #ifdef __WXMAC__
 #  ifdef __DARWIN__
@@ -196,6 +199,9 @@ GroundTrackCanvas::GroundTrackCanvas(wxWindow *parent, wxWindowID id,
    
    mFootPrintOption = 0; // 0 = Draw NONE, 1 = Draw ALL
    mFootPrintDrawFrequency = 10; // every 100th plot data
+   
+   // write warning flags
+   mWriteCentralBodyWarning = true;
    
    // Zoom
    mMaxZoomIn = MAX_ZOOM_IN;
@@ -850,20 +856,16 @@ void GroundTrackCanvas::DrawFrame()
    mIsEndOfRun = false;
    mCurrIndex = 0;
    
+   Publisher *publisher = GuiPublisher::Instance();
+
    // refresh every 50 points (Allow user to set frame this increment?)
    for (int frame = 1; frame < numberOfData; frame+=mFrameInc)
    {
       mIsAnimationRunning = true;
-      
-      // wxYield() yields control to pending messages in the windowing system.
-      
-      // wxSafeYield() is similar to wxYield() except it disables the user
-      // input to all program windows before calling wxYield and re-enables
-      // it again afterwards.
-      
-      //wxSafeYield();
-      wxYield(); // To allow mouse event
-      
+
+      // Yield periodically
+      publisher->Ping();
+
       if (mHasUserInterrupted)
          break;
       
@@ -1835,6 +1837,29 @@ void GroundTrackCanvas::DrawGroundStation(const wxString &objName, int objId,
       ("GroundTrackCanvas::DrawGroundStation() entered, objName='%s', objId=%d, "
        "index=%d\n", objName.WX_TO_C_STRING, objId, index);
    #endif
+   
+   // Don't draw stations that are not on the central body for the plot
+   int gsID = GetObjectId(objName.c_str());
+   BodyFixedPoint *gs = (BodyFixedPoint*)mObjectArray[gsID];
+   if (gs)
+   {
+      std::string gsBodyName = gs->GetStringParameter("CentralBody");
+      if (gsBodyName != mCentralBodyName)
+      {
+         // Write wrong central body message only once
+         if (mWriteCentralBodyWarning)
+         {
+            MessageInterface::ShowMessage
+            ("*** WARNING ***: GroundStation %s has central body %s, "
+             "but central body for Ground Track plot is %s, so "
+             "GroundStation is not displayed.\n", gs->GetName().c_str(),
+             gsBodyName.c_str(), mCentralBodyName.c_str());
+            mWriteCentralBodyWarning = false;
+         }
+         return;
+      }
+   }
+   
    
    // Compute current position
    Real lon2, lat2;

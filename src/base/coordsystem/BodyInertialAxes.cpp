@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -75,8 +75,8 @@ InertialAxes("BodyInertial",itsName)
    objectTypeNames.push_back("BodyInertialAxes");
    parameterCount = BodyInertialAxesParamCount;
    Real TAIModJul   = 2451544.9996274998411 - GmatTimeConstants::JD_JAN_5_1941;
-   Real mjdA1       = TimeConverterUtil::Convert(TAIModJul,
-                      TimeConverterUtil::TAIMJD, TimeConverterUtil::A1MJD, 
+   Real mjdA1       = theTimeConverter->Convert(TAIModJul,
+                      TimeSystemConverter::TAIMJD, TimeSystemConverter::A1MJD,
                       GmatTimeConstants::JD_JAN_5_1941); 
    epoch.Set(mjdA1);
    needsCBOrigin = true;
@@ -164,13 +164,15 @@ bool BodyInertialAxes::Initialize()
    if (!(origin->IsOfType("CelestialBody")))
       throw CoordinateSystemException(
             "Improper origin set for BodyInertialAxes object.");
-   if (originName == SolarSystem::EARTH_NAME)
+   //if (originName == SolarSystem::EARTH_NAME)
+   if (originName == GmatSolarSystemDefaults::EARTH_NAME)
    {
       rotMatrix.Set(1.0,0.0,0.0,
                     0.0,1.0,0.0,
                     0.0,0.0,1.0);
    }
-   else if (originName == SolarSystem::MOON_NAME)
+   //else if (originName == SolarSystem::MOON_NAME)
+   else if (originName == GmatSolarSystemDefaults::MOON_NAME)
    {
       rotMatrix.Set( 0.998496505205088,  0.0499357293985327, -0.0226086714041825,
                     -0.0548154092680678, 0.909610125238044,  -0.411830900942613,

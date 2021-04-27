@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -205,7 +205,7 @@ GmatCoordinate::ParameterUsage BodyFixedAxes::UsesItrfFile() const
 //---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage BodyFixedAxes::UsesNutationUpdateInterval() const
 {
-   if (originName == SolarSystem::EARTH_NAME) 
+   if (originName == GmatSolarSystemDefaults::EARTH_NAME)
       return GmatCoordinate::REQUIRED;
    return DynamicAxes::UsesNutationUpdateInterval();
 }
@@ -229,7 +229,7 @@ bool BodyFixedAxes::Initialize()
             origin->GetName().c_str(), origin);
 #endif
    DynamicAxes::Initialize();
-   if (originName == SolarSystem::EARTH_NAME) InitializeFK5();
+   if (originName == GmatSolarSystemDefaults::EARTH_NAME) InitializeFK5();
    
    // Check for spacecraft origin whose attitude does not compute rates
    if (origin && origin->IsOfType("Spacecraft"))
@@ -481,7 +481,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const GmatTime &atEpoch,
       // 3. if the origin is Luna, the rotation data source has changed
 
       if ((!forceComputation)                    &&
-          (originName == SolarSystem::MOON_NAME) &&
+          (originName == GmatSolarSystemDefaults::MOON_NAME) &&
           (IsEqual(atEpoch,       prevEpoch))    &&
           (prevLunaSrc == ((CelestialBody*)origin)->GetRotationDataSource()))
          {
@@ -492,7 +492,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const GmatTime &atEpoch,
          }
 
       // compute rotMatrix and rotDotMatrix
-      if (originName == SolarSystem::EARTH_NAME)
+      if (originName == GmatSolarSystemDefaults::EARTH_NAME)
       {
          Real intervalFromOrigin = ((Planet*) origin)->GetNutationUpdateInterval();
          if ((!forceComputation)                                     &&
@@ -527,8 +527,8 @@ void BodyFixedAxes::CalculateRotationMatrix(const GmatTime &atEpoch,
 
          // Convert to MJD UTC to use for polar motion  and LOD
          // interpolations
-         GmatTime mjdUTC = TimeConverterUtil::Convert(atEpoch,
-                       TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
+         GmatTime mjdUTC = theTimeConverter->Convert(atEpoch,
+                       TimeSystemConverter::A1MJD, TimeSystemConverter::UTCMJD,
                        JD_JAN_5_1941);
          Real offset = JD_JAN_5_1941 - JD_NOV_17_1858;
          // convert to MJD referenced from time used in EOP file
@@ -536,13 +536,13 @@ void BodyFixedAxes::CalculateRotationMatrix(const GmatTime &atEpoch,
 
 
          // convert input time to UT1 for later use (for AST calculation)
-         GmatTime mjdUT1 = TimeConverterUtil::Convert(atEpoch,
-                       TimeConverterUtil::A1MJD, TimeConverterUtil::UT1,
+         GmatTime mjdUT1 = theTimeConverter->Convert(atEpoch,
+                       TimeSystemConverter::A1MJD, TimeSystemConverter::UT1,
                        JD_JAN_5_1941);
 
          // convert input A1 MJD to TT MJD (for most calculations)
-         GmatTime mjdTT = TimeConverterUtil::Convert(atEpoch,
-                      TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD,
+         GmatTime mjdTT = theTimeConverter->Convert(atEpoch,
+                      TimeSystemConverter::A1MJD, TimeSystemConverter::TTMJD,
                       JD_JAN_5_1941);
          GmatTime jdTT    = mjdTT + JD_JAN_5_1941; // right?
          // Compute Julian centuries of TDB from the base epoch (J2000)
@@ -744,7 +744,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const GmatTime &atEpoch,
          #endif
 
       }
-      else if ((originName == SolarSystem::MOON_NAME) &&
+      else if ((originName == GmatSolarSystemDefaults::MOON_NAME) &&
               (((CelestialBody*)origin)->GetRotationDataSource() == Gmat::DE_FILE))
       {
          #ifdef DEBUG_BF_RECOMPUTE
@@ -946,7 +946,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const GmatTime &atEpoch,
    #ifdef DEBUG_BF_RECOMPUTE
       MessageInterface::ShowMessage("at the end, just set prevEpoch to %12.10f\n", prevEpoch.GetMjd());
    #endif
-   if (originName == SolarSystem::MOON_NAME)
+   if (originName == GmatSolarSystemDefaults::MOON_NAME)
       prevLunaSrc = ((CelestialBody*)origin)->GetRotationDataSource();
 
    #ifdef DEBUG_FIRST_CALL

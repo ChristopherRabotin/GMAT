@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -110,6 +110,8 @@
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_PM_CONSTRUCT
 //#define DEBUG_STATE_ALLOCATION
+//#define DEBUG_MASS_JACOBIAN
+//#define DEBUG_TIME_JACOBIAN
 
 //#define DEBUG_MEMORY
 
@@ -167,6 +169,7 @@ PhysicalModel::PhysicalModel(UnsignedInt id, const std::string &typeStr,
    bodyName                    ("Earth"),
    dimension                   (1),
    stateChanged                (false),
+   allowODEDelete              (true),
    psm                         (NULL),
    theState                    (NULL),
    modelState                  (NULL),
@@ -175,7 +178,10 @@ PhysicalModel::PhysicalModel(UnsignedInt id, const std::string &typeStr,
    epochGT                     (21545.0),
    elapsedTime                 (0.0),
    prevElapsedTime             (0.0),
+   direction                   (1.0),
    deriv                       (NULL),
+   massJacobian                (NULL),
+   timeJacobian                (NULL),
    relativeErrorThreshold      (0.10),
    solarSystem                 (NULL),
    fillCartesian               (true),
@@ -184,10 +190,15 @@ PhysicalModel::PhysicalModel(UnsignedInt id, const std::string &typeStr,
    fillSTM                     (false),
    stmStart                    (-1),
    stmCount                    (0),
-   stmRowCount                 (6),
+   stmRowCount                 (6),                            // made changes by TUAN NGUYEN
    fillAMatrix                 (false),
    aMatrixStart                (-1),
-   aMatrixCount                (0)
+   aMatrixCount                (0),
+   isConservative              (true),
+   hasMassJacobian             (false),
+   fillMassJacobian            (false),
+   hasTimeJacobian             (false),
+   fillTimeJacobian            (false)
 {
    objectTypes.push_back(Gmat::PHYSICAL_MODEL);
    objectTypeNames.push_back("PhysicalModel");
@@ -195,6 +206,7 @@ PhysicalModel::PhysicalModel(UnsignedInt id, const std::string &typeStr,
 
    // Do not allow ODE model changes in command mode
    blockCommandModeAssignment = true;
+   theTimeConverter = TimeSystemConverter::Instance();
 }
              
 //------------------------------------------------------------------------------
@@ -270,6 +282,7 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    bodyName                    (pm.bodyName),
    dimension                   (pm.dimension),
    stateChanged                (pm.stateChanged),
+   allowODEDelete              (pm.allowODEDelete),
    psm                         (NULL),
    theState                    (NULL),
    modelState                  (NULL),
@@ -278,7 +291,10 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    epochGT                     (pm.epochGT),
    elapsedTime                 (pm.elapsedTime),
    prevElapsedTime             (pm.prevElapsedTime),
+   direction                   (pm.direction),
    deriv                       (NULL),
+   massJacobian                (NULL),
+   timeJacobian                (NULL),
    derivativeIds               (pm.derivativeIds),
    derivativeNames             (pm.derivativeNames),
    relativeErrorThreshold      (pm.relativeErrorThreshold),
@@ -289,10 +305,15 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    fillSTM                     (pm.fillSTM),
    stmStart                    (pm.stmStart),
    stmCount                    (pm.stmCount),
-   stmRowCount                 (pm.stmRowCount),
+   stmRowCount                 (pm.stmRowCount),                 // made changes by TUAN NGUYEN
    fillAMatrix                 (pm.fillAMatrix),
    aMatrixStart                (pm.aMatrixStart),
-   aMatrixCount                (pm.aMatrixCount)
+   aMatrixCount                (pm.aMatrixCount),
+   isConservative              (pm.isConservative),
+   hasMassJacobian             (pm.hasMassJacobian),   // Might remove after MJ work
+   fillMassJacobian            (pm.fillMassJacobian),
+   hasTimeJacobian             (pm.hasTimeJacobian),
+   fillTimeJacobian            (pm.fillTimeJacobian)
 {
    if (pm.modelState != NULL) 
    {
@@ -332,6 +353,7 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
       else
          isInitialized = false;
    }
+   theTimeConverter = TimeSystemConverter::Instance();
 }
 
 //------------------------------------------------------------------------------
@@ -367,10 +389,12 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
 
    bodyName        = pm.bodyName;
    dimension       = pm.dimension;
+   allowODEDelete  = pm.allowODEDelete;
    isInitialized   = false; //pm.initialized;
    epoch           = pm.epoch;
    epochGT         = pm.epochGT;
    elapsedTime     = pm.elapsedTime;
+   direction       = pm.direction;
    prevElapsedTime = pm.prevElapsedTime;
    relativeErrorThreshold = pm.relativeErrorThreshold;
    solarSystem     = pm.solarSystem;
@@ -381,12 +405,20 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
    fillSTM        = pm.fillSTM;
    stmStart       = pm.stmStart;
    stmCount       = pm.stmCount;
-   stmRowCount    = pm.stmRowCount;
+   stmRowCount    = pm.stmRowCount;                   // made changes by TUAN NGUYEN
    fillAMatrix    = pm.fillAMatrix;
    aMatrixStart   = pm.aMatrixStart;
    aMatrixCount   = pm.aMatrixCount;
+   theState       = pm.theState;
+
+   isConservative   = pm.isConservative;
+   hasMassJacobian  = pm.hasMassJacobian;   // Might remove after MJ work
+   fillMassJacobian = pm.fillMassJacobian;
+   hasTimeJacobian  = pm.hasTimeJacobian;
+   fillTimeJacobian = pm.fillTimeJacobian;
 
    theState = pm.theState;
+	scObjs         = pm.scObjs;                           // made changes by TUAN NGUYEN
 
    if (pm.modelState) 
    {
@@ -469,6 +501,72 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
       }
    }
    
+   if (pm.massJacobian)
+   {
+      if (massJacobian)
+      {
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (massJacobian, "massJacobian", "PhysicalModel::operator=()",
+             "deleting massJacobian", this);
+         #endif
+         delete [] massJacobian;
+      }
+
+      massJacobian = new Real[stmRowCount];
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Add
+         (massJacobian, "massJacobian", "PhysicalModel::operator=()",
+          "massJacobian = new Real[stmRowCount]", this);
+      #endif
+
+      if (massJacobian != NULL)
+         memcpy(massJacobian, pm.massJacobian, stmRowCount * sizeof(Real));
+      else
+         isInitialized = false;
+   }
+   else
+   {
+      if (massJacobian)
+      {
+         delete [] massJacobian;
+         massJacobian = NULL;
+      }
+   }
+
+   if (pm.timeJacobian)
+   {
+      if (timeJacobian)
+      {
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (timeJacobian, "timeJacobian", "PhysicalModel::operator=()",
+            "deleting timeJacobian", this);
+         #endif
+         delete[] timeJacobian;
+      }
+
+      timeJacobian = new Real[stmRowCount];
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Add
+         (timeJacobian, "timeJacobian", "PhysicalModel::operator=()",
+         "timeJacobian = new Real[stmRowCount]", this);
+      #endif
+
+      if (timeJacobian != NULL)
+         memcpy(timeJacobian, pm.timeJacobian, stmRowCount * sizeof(Real));
+      else
+         isInitialized = false;
+   }
+   else
+   {
+      if (timeJacobian)
+      {
+         delete[] timeJacobian;
+         timeJacobian = NULL;
+      }
+   }
+
    return *this;
 }
 
@@ -549,7 +647,7 @@ CelestialBody* PhysicalModel::GetForceOrigin()
  * perform other actions for the system setup.
  *
  * Note that deriv is allocated even if it is not used.  This feature may be 
- * PhysicalModelremoved in a later release.
+ * removed in a later release.
  */
 //------------------------------------------------------------------------------
 bool PhysicalModel::Initialize()
@@ -605,6 +703,28 @@ bool PhysicalModel::Initialize()
       deriv = NULL;
    }
 
+   if (massJacobian)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (massJacobian, "massJacobian", "PhysicalModel::Initialize()",
+          "deleting massJacobian", this);
+      #endif
+      delete [] massJacobian;
+      massJacobian = NULL;
+   }
+
+   if (timeJacobian)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (timeJacobian, "timeJacobian", "PhysicalModel::Initialize()",
+         "deleting timeJacobian", this);
+      #endif
+      delete[] timeJacobian;
+      timeJacobian = NULL;
+   }
+
    // MessageInterface::ShowMessage("PMInitialize setting dim = %d\n", dimension);   
    #ifdef DEBUG_STATE_ALLOCATION
       MessageInterface::ShowMessage("Allocating modelState (for %s) at ",
@@ -629,24 +749,51 @@ bool PhysicalModel::Initialize()
    {
       deriv = new Real[dimension];
 
-      for (Integer i = 0; i < dimension; ++i)
-         deriv[i] = 0.0;
-
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Add
          (deriv, "deriv", "PhysicalModel::Initialize()",
           "deriv = new Real[dimension]", this);
       #endif
       if (deriv)
+      {
+         for (Integer i = 0; i < dimension; ++i)
+            deriv[i] = 0.0;
          isInitialized = true;
+      }
       else
          isInitialized = false;
+
+      if (fillMassJacobian && hasMassJacobian)
+      {
+         #ifdef DEBUG_MASS_JACOBIAN
+            MessageInterface::ShowMessage("Building a mass Jacobian of size %d\n",
+                  stmRowCount);
+         #endif
+         massJacobian = new Real[stmRowCount];
+      }
+
+      if (fillTimeJacobian)
+      {
+         #ifdef DEBUG_TIME_JACOBIAN
+         MessageInterface::ShowMessage("Building a time Jacobian of size %d\n",
+            dimension);
+         #endif
+         timeJacobian = new Real[stmRowCount];
+      }
    }
    else
       isInitialized = false;
 
    rawState = modelState;
-   
+
+   #ifdef DEBUG_MASS_JACOBIAN
+      MessageInterface::ShowMessage("Mass Jacobian: %p\n", massJacobian);
+   #endif
+
+   #ifdef DEBUG_TIME_JACOBIAN
+      MessageInterface::ShowMessage("Time Jacobian: %p\n", timeJacobian);
+   #endif
+
    return isInitialized;
 }
 
@@ -888,6 +1035,54 @@ void PhysicalModel::SetTime(Real t)
    elapsedTime = t;
 }
 
+//------------------------------------------------------------------------------
+// void PhysicalModel::SetDirection(Real dir)
+//------------------------------------------------------------------------------
+/**
+ * Write accessor for the direction of the step
+ */
+ //------------------------------------------------------------------------------
+void PhysicalModel::SetDirection(Real dir)
+{
+   direction = dir;
+}
+
+
+//------------------------------------------------------------------------------
+// Real PhysicalModel::GetStepPrecision(Real stepSize)
+//------------------------------------------------------------------------------
+/**
+ * Gets the precision of the step based on the value of the step size and the
+ * value of elasedTime
+ *
+ * @param stepSize Size of the step to take
+ *
+ * @return The smallest precision that can be accurately represented for a step
+ */
+ //------------------------------------------------------------------------------
+Real PhysicalModel::GetStepPrecision(Real stepSize)
+{
+   // Get the precision of the stepSize
+   Real nextStep = std::nextafter(stepSize, 2.0 * stepSize);
+   Real stepPrecision = nextStep - stepSize;
+
+   // Get the precision of the elapsedTime
+   Real stepSign = 0.0;
+   if (stepSize > 0.0)
+      stepSign = 1.0;
+   else if (stepSize < 0.0)
+      stepSign = -1.0;
+
+   Real nextElapsedTime = std::nextafter(elapsedTime,
+                           elapsedTime + 0.5*stepSign*GmatMathUtil::Abs(elapsedTime));
+   Real timePrecision = nextElapsedTime - elapsedTime;
+
+   // Get the overall precision
+   if (GmatMathUtil::Abs(timePrecision) > GmatMathUtil::Abs(stepPrecision))
+      stepPrecision = timePrecision;
+   return stepPrecision;
+}
+
 
 //------------------------------------------------------------------------------
 // bool PhysicalModel::GetDerivatives(Real * state, Real dt, Integer order,
@@ -1087,6 +1282,21 @@ bool PhysicalModel::GetComponentMap(Integer * map, Integer order,
 }
 
 //------------------------------------------------------------------------------
+// void PhysicalModel::SetStmIndex(Integer id, Integer paramID)
+//------------------------------------------------------------------------------
+/**
+ * Method invoked to set the STM index for this physical model
+ *
+ * @param id The index used to find the parameter in the STM
+ */
+ //------------------------------------------------------------------------------
+void PhysicalModel::SetStmIndex(Integer index, Integer paramID)
+{
+   throw ODEModelException("SetStmIndex not implemented "
+      "for the " + typeName + " physical model.");
+}
+
+//------------------------------------------------------------------------------
 // void SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 /**
@@ -1128,6 +1338,7 @@ void PhysicalModel::SetSatelliteParameter(const Integer i,
 {
 }
 
+
 //------------------------------------------------------------------------------
 // void PhysicalModel::SetSatelliteParameter(const Integer i, 
 //                                           const std::string parmName, 
@@ -1163,6 +1374,13 @@ void PhysicalModel::SetSatelliteParameter(const Integer i,
 //------------------------------------------------------------------------------
 void PhysicalModel::SetSpaceObject(const Integer i, GmatBase *obj)
 {
+	unsigned parmNumber = (unsigned)(i);           // made changes by TUAN NGUYEN
+
+	if (parmNumber < scObjs.size())                // made changes by TUAN NGUYEN
+		scObjs[i] = obj;                            // made changes by TUAN NGUYEN
+	else                                           // made changes by TUAN NGUYEN
+		scObjs.push_back(obj);                      // made changes by TUAN NGUYEN
+
    return;
 }
 
@@ -1247,6 +1465,22 @@ bool PhysicalModel::DepletesMass()
 
 
 //------------------------------------------------------------------------------
+// bool PhysicalModel::AttitudeAffectsDynamics()
+//------------------------------------------------------------------------------
+/**
+ * Detects if a PhysicalModel is dependant on its attitude
+ *
+ * @return true if the model's dynamics are affected by its attitude,
+ *         false if it does not
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::AttitudeAffectsDynamics()
+{
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 // bool IsUserForce()
 //------------------------------------------------------------------------------
 /**
@@ -1279,6 +1513,40 @@ bool PhysicalModel::IsUserForce()
 bool PhysicalModel::IsUnique(const std::string &forBody)
 {
    return false;
+}
+
+//------------------------------------------------------------------------------
+//  bool SetAllowODEDelete(bool deleteFlag)
+//------------------------------------------------------------------------------
+/**
+ * Method to set the allowODEDelete flag for an object. This flag indicates if
+ * this object is to be deleted from memory when ODEModel::DeleteForce() is called.
+ *
+ * @param deleteFlag  flag indicating whether or not this object is to be
+ *                    deleted from memory when ODEModel::DeleteForce() is called
+ *
+ * @return value of allowODEDelete flag.
+ */
+ //------------------------------------------------------------------------------
+bool PhysicalModel::SetAllowODEDelete(bool deleteFlag)
+{
+   allowODEDelete = deleteFlag;
+   return allowODEDelete;
+}
+
+//------------------------------------------------------------------------------
+//  bool AllowODEDelete()
+//------------------------------------------------------------------------------
+/**
+ * Method to return the allowODEDelete flag for an object.
+ *
+ * @return value of allowODEDelete flag (i.e. whether or not this object is to
+ *         be deleted by the ODEModel when ODEModel::DeleteForce() is called)
+ */
+ //------------------------------------------------------------------------------
+bool PhysicalModel::AllowODEDelete() const
+{
+   return allowODEDelete;
 }
 
 
@@ -1360,55 +1628,55 @@ bool PhysicalModel::SupportsDerivative(Gmat::StateElementId id)
  * vector, so that the derivative information can be placed in the correct place
  * in the derivative vector.
  *
- * @param id State Element ID for the derivative type
- * @param index Starting index in the state vector for this type of derivative
- * @param quantity Number of objects that supply this type of data
- * @param sizeOfType For sizable types, the size to use.  For example, for STM,
- *                   this is the number of rows or columns in the STM
+ * @param id         State Element ID for the derivative type
+ * @param index      Starting index in the state vector for this type of derivative
+ * @param quantity   Number of objects that supply this type of data
+ * @param totalSize  For sizable types, the size to use.  For example, for STM,
+ *                   this is the number of STM' elements
  *
  * @return true if the type is supported, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool PhysicalModel::SetStart(Gmat::StateElementId id, Integer index,
-      Integer quantity, Integer sizeOfType)
+      Integer quantity, Integer totalSize)
 {
    return false;
 }
 
 
-//------------------------------------------------------------------------------
-// bool SetStmRowId(Integer rowNumber, Integer rowId)
-//------------------------------------------------------------------------------
-/**
- * Sets up the mapping the the STM rows/columns
- *
- * @param rowNumber The row number for the ID
- * @param rowId The parameter ID for that row
- *
- * @return true if the ID was saved/updated, false if it was discarded
- */
-//------------------------------------------------------------------------------
-bool PhysicalModel::SetStmRowId(Integer rowNumber, Integer rowId)
-{
-   bool retval = false;
-
-   if (stmRowId.size() > rowNumber)
-   {
-      stmRowId[rowNumber] = rowId;
-      retval = true;
-   }
-   else if (stmRowId.size() == rowNumber)
-   {
-      stmRowId.push_back(rowId);
-      retval = true;
-   }
-   else
-      throw ODEModelException("State Transition Matrix array index out of "
-            "bounds in PhysicalModel::SetStmRowId");
-
-   return retval;
-}
-
+//////------------------------------------------------------------------------------
+////// bool SetStmRowId(Integer rowNumber, Integer rowId)
+//////------------------------------------------------------------------------------
+/////**
+//// * Sets up the mapping the the STM rows/columns
+//// *
+//// * @param rowNumber The row number for the ID
+//// * @param rowId The parameter ID for that row
+//// *
+//// * @return true if the ID was saved/updated, false if it was discarded
+//// */
+//////------------------------------------------------------------------------------
+////bool PhysicalModel::SetStmRowId(Integer rowNumber, Integer rowId)
+////{
+////   bool retval = false;
+////
+////   if (stmRowId.size() > rowNumber)
+////   {
+////      stmRowId[rowNumber] = rowId;
+////      retval = true;
+////   }
+////   else if (stmRowId.size() == rowNumber)
+////   {
+////      stmRowId.push_back(rowId);
+////      retval = true;
+////   }
+////   else
+////      throw ODEModelException("State Transition Matrix array index out of "
+////            "bounds in PhysicalModel::SetStmRowId");
+////
+////   return retval;
+////}
+////
 
 //---------------------------------
 // inherited methods from GmatBase
@@ -1548,6 +1816,18 @@ GmatTime PhysicalModel::SetGmatTimeParameter(const Integer id, const GmatTime va
    return GmatBase::SetGmatTimeParameter(id, value);
 }
 
+
+GmatTime PhysicalModel::GetGmatTimeParameter(const std::string &label) const
+{
+   return GetGmatTimeParameter(GetParameterID(label));
+}
+
+
+GmatTime PhysicalModel::SetGmatTimeParameter(const std::string &label, const GmatTime value)
+{
+   return SetGmatTimeParameter(GetParameterID(label), value);
+}
+
 //------------------------------------------------------------------------------
 // Real PhysicalModel::GetRealParameter(const Integer id)
 //------------------------------------------------------------------------------
@@ -1587,6 +1867,46 @@ Real PhysicalModel::SetRealParameter(const Integer id, const Real value)
    }
    return GmatBase::SetRealParameter(id, value);
 }
+
+
+//---------------------------------------------------------------------------
+//  Real GetRealParameter(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve the value for a Real parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ *
+ * @return The parameter's value.
+ */
+ //------------------------------------------------------------------------------
+Real PhysicalModel::GetRealParameter(const std::string &label) const
+{
+   Integer id = GetParameterID(label);
+   return GetRealParameter(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  Real SetRealParameter(const std::string &label, const Real value)
+//---------------------------------------------------------------------------
+/**
+ * Set the value for a Real parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param <value> The new parameter value.
+ *
+ * @return the parameter value at the end of this call, or
+ *         REAL_PARAMETER_UNDEFINED if the parameter id is invalid or the
+ *         parameter type is not Real.
+ */
+ //------------------------------------------------------------------------------
+Real PhysicalModel::SetRealParameter(const std::string &label, const Real value)
+{
+   Integer id = GetParameterID(label);
+   return SetRealParameter(id, value);
+}
+
 
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
@@ -1952,3 +2272,171 @@ bool PhysicalModel::BuildModelStateGT(GmatTime now, Real* state, Real* j2kState,
    return retval;
 }
 
+
+//------------------------------------------------------------------------------
+// Real GetForceMaxStep(bool forward = true)
+//------------------------------------------------------------------------------
+/**
+ * Gets the max step size allowed by this PhysicalModel
+ *
+ * @param forward Flag to indicate which direction in time to travel
+ *
+ * @return The max step size in seconds, returns +/- REAL_MAX if the step size
+ *         is not limited
+ */
+//------------------------------------------------------------------------------
+Real PhysicalModel::GetForceMaxStep(bool forward)
+{
+   if (hasPrecisionTime)
+   {
+      //GmatTime theEpoch = theState->GetEpochGT();
+      GmatTime theEpoch = epochGT;
+      theEpoch.AddSeconds(elapsedTime);
+      return GetForceMaxStep(theEpoch, forward);
+   }
+   else
+   {
+      //Real theEpoch = theState->GetEpoch();
+      Real theEpoch = epoch;
+      theEpoch += elapsedTime / GmatTimeConstants::SECS_PER_DAY;
+      return GetForceMaxStep(theEpoch, forward);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetForceMaxStep(Real theEpoch, bool forward = true)
+//------------------------------------------------------------------------------
+/**
+ * Gets the max step size allowed by this PhysicalModel
+ *
+ * @param theEpoch The reference epoch to use for calculating the max step size
+ * @param forward Flag to indicate which direction in time to travel
+ *
+ * @return The max step size in seconds, returns +/- REAL_MAX if the step size
+ *         is not limited
+ */
+//------------------------------------------------------------------------------
+Real PhysicalModel::GetForceMaxStep(Real theEpoch, bool forward)
+{
+   if (forward)
+      return GmatRealConstants::REAL_MAX;
+   else
+      return -GmatRealConstants::REAL_MAX;
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetForceMaxStep(const GmatTime& theEpochGT, bool forward = true)
+//------------------------------------------------------------------------------
+/**
+ * Gets the max step size allowed by this PhysicalModel
+ *
+ * @param theEpochGT The reference epoch to use for calculating the max step size
+ * @param forward Flag to indicate which direction in time to travel
+ *
+ * @return The max step size in seconds, returns +/- REAL_MAX if the step size
+ *         is not limited
+ */
+//------------------------------------------------------------------------------
+Real PhysicalModel::GetForceMaxStep(const GmatTime& theEpochGT, bool forward)
+{
+   if (forward)
+      return GmatRealConstants::REAL_MAX;
+   else
+      return -GmatRealConstants::REAL_MAX;
+}
+
+//------------------------------------------------------------------------------
+// bool IsConservative()
+//------------------------------------------------------------------------------
+/**
+ * Tester to see if the force is conservative
+ *
+ * @return true for conservative forces, false for non-conservative forces
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::IsConservative()
+{
+   return isConservative;
+}
+
+//------------------------------------------------------------------------------
+// void ComputeMassJacobian(bool truefalse)
+//------------------------------------------------------------------------------
+/**
+ * Toggle function for mass Jacobian computation
+ */
+//------------------------------------------------------------------------------
+void PhysicalModel::ComputeMassJacobian(bool truefalse)
+{
+   fillMassJacobian = truefalse;
+}
+
+//------------------------------------------------------------------------------
+// void ComputeTimeJacobian(bool truefalse)
+//------------------------------------------------------------------------------
+/**
+* Toggle function for time Jacobian computation
+*/
+//------------------------------------------------------------------------------
+void PhysicalModel::ComputeTimeJacobian(bool truefalse)
+{
+   fillTimeJacobian = truefalse;
+}
+
+//------------------------------------------------------------------------------
+// bool HasMassJacobian()
+//------------------------------------------------------------------------------
+/**
+ * Tester to see if a mass Jacobian is available
+ *
+ * @return true if the mass Jacobian can be computed
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::HasMassJacobian()
+{
+   return hasMassJacobian;
+}
+
+//------------------------------------------------------------------------------
+// bool HasMassJacobian()
+//------------------------------------------------------------------------------
+/**
+* Tester to see if an analytic time Jacobian is available
+*
+* @return true if the time Jacobian can be computed
+*/
+//------------------------------------------------------------------------------
+bool PhysicalModel::HasTimeJacobian()
+{
+   return hasTimeJacobian;
+}
+
+//------------------------------------------------------------------------------
+// Real *GetMassJacobian()
+//------------------------------------------------------------------------------
+/**
+ * Access method for the mass Jacobian
+ *
+ * @return The mass Jacobian pointer
+ */
+//------------------------------------------------------------------------------
+const Real* PhysicalModel::GetMassJacobian()
+{
+   return massJacobian;
+}
+
+//------------------------------------------------------------------------------
+// Real *GetTimeJacobian()
+//------------------------------------------------------------------------------
+/**
+* Access method for the time Jacobian
+*
+* @return The time Jacobian pointer
+*/
+//------------------------------------------------------------------------------
+const Real* PhysicalModel::GetTimeJacobian()
+{
+   return timeJacobian;
+}

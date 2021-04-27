@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -25,6 +25,7 @@
 #include "GmatBase.hpp"
 #include "SolarSystem.hpp"
 #include "SignalData.hpp"
+#include "SignalDataCache.hpp"
 
 // Forward references
 class SignalBase;
@@ -34,6 +35,9 @@ class ObservationData;
 class RampTableData;
 class MeasurementData;
 class PropSetup;
+class PhysicalModel;
+class ODEModel;
+class PropagationStateManager;
 
 
 /**
@@ -47,8 +51,11 @@ class PropSetup;
 class ESTIMATION_API MeasureModel : public GmatBase
 {
 public:
-   MeasureModel(const std::string &name);
+   MeasureModel(const std::string &name, const bool usesPassiveSignal = false);
    virtual ~MeasureModel();
+
+   virtual void CleanUp();                // made changes by TUAN NGUYEN
+
    MeasureModel(const MeasureModel& mm);
    MeasureModel& operator=(const MeasureModel& mm);
 
@@ -110,7 +117,9 @@ public:
 
    DEFAULT_TO_NO_CLONES
 
-   virtual void         SetPropagator(PropSetup* ps);
+   virtual void         SetPropagators(std::vector<PropSetup*> *ps,
+         std::map<std::string, StringArray> *spMap);
+   virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
    virtual bool         Initialize();
 
    virtual bool CalculateMeasurement(bool withEvents = false,
@@ -149,6 +158,8 @@ public:
    Real                 GetUplinkFrequencyAtReceivedEpoch(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);
    Integer              GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);
 
+   void                 AddTransientForce(GmatBase *spacePoint, ODEModel *odeModel, PropagationStateManager *propMan);
+
    /// Measurement Model Settings
    virtual bool         SetProgressReporter(ProgressReporter* reporter);
 
@@ -159,13 +170,21 @@ public:
    virtual const std::vector<ObjectArray*>&
                         GetParticipantObjectLists();
 
+   /// Save and restore states of objects being propagated
+   virtual void         SaveState(std::vector<bool>& precTimeVec, std::vector<GmatEpoch>& epochVec,
+                                  std::vector<GmatTime>& epochGTVec, std::vector<Real>& valsVec);
+   virtual void         RestoreState(std::vector<bool>& precTimeVec, std::vector<GmatEpoch>& epochVec,
+                                     std::vector<GmatTime>& epochGTVec, std::vector<Real>& valsVec);
+
+   /// Uses ionosphere cache
+   virtual void         UseIonosphereCache(SignalDataCache::SimpleSignalDataCache* cache);
+
 protected:
    /// The ordered list of participants in the signal path
    std::vector<StringArray*> participantLists;
    /// Participant pointers.  This list is 1:1 with participantList
    std::vector<ObjectArray*> participants;
 
-   /// @todo: Extend this code to support multiple propagators
    /// Mapping of participants to (cloned) propagators
    std::map<SpacePoint*,PropSetup*> propMap;
 
@@ -177,6 +196,8 @@ protected:
    std::vector<SignalData*> theData;         // theData[i] points to theData of the head of signalPaths[i]
    /// Most recently calculated measurement derivatives gathered from Signals
    std::vector<RealArray> theDataDerivatives;
+   /// transient forces to pass to the ODEModel
+   std::vector<PhysicalModel *> *transientForces;
 
    /// Flag checking if the last measurement computed as feasible
    bool feasible;
@@ -202,6 +223,10 @@ protected:
 
    /// Flag used to indicate if the model is physical or single point
    bool isPhysical;
+
+   /// Flag used to indicate if the model uses passive signals that do not include hardware delays
+   bool isPassive;
+
    /// The solar system
    SolarSystem *solarsys;
 

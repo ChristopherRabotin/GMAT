@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1522,7 +1522,7 @@ void ViewCanvas::ComputeRingBufferIndex()
       {
          Real toMjd = -999;
          std::string utcGregorian;
-         TimeConverterUtil::Convert("A1ModJulian", mTime[mCurrIndex-1], "",
+         TimeSystemConverter::Instance()->Convert("A1ModJulian", mTime[mCurrIndex-1], "",
                                     "UTCGregorian", toMjd, utcGregorian, 1);
          MessageInterface::ShowMessage
             ("*** WARNING *** %s: '%s' exceed the maximum data points, now "
@@ -3091,11 +3091,11 @@ void ViewCanvas::CreateMJ2000EcCoordSystem()
       return;
    }
    
-   std::string originName = SolarSystem::EARTH_NAME;
+   std::string originName = GmatSolarSystemDefaults::EARTH_NAME;
    std::string axesType = "MJ2000Ec";
    std::string csName = originName + axesType;
    SpacePoint *origin = (SpacePoint*)pSolarSystem->GetBody(originName.c_str());
-   SpacePoint *j2000Body = (SpacePoint*)pSolarSystem->GetBody(SolarSystem::EARTH_NAME);
+   SpacePoint *j2000Body = (SpacePoint*)pSolarSystem->GetBody(GmatSolarSystemDefaults::EARTH_NAME);
    
    // Create coordinate system with Earth origin and MJ2000Ec axis
    pMJ2000EcCoordSystem = CoordinateSystem::CreateLocalCoordinateSystem
@@ -3272,7 +3272,7 @@ void ViewCanvas::DrawStatus(const wxString &label1, unsigned int textColor,
    {
       Real toMjd = -999;
       std::string utcGregorian;
-      TimeConverterUtil::Convert("A1ModJulian", time, "", "UTCGregorian",
+      TimeSystemConverter::Instance()->Convert("A1ModJulian", time, "", "UTCGregorian",
                                  toMjd, utcGregorian, 1);
       str = utcGregorian.c_str();
       #ifdef DEBUG_DRAW_STATUS

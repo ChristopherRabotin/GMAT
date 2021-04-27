@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -75,8 +75,8 @@ protected:
                                      bool saveEpochInfo,
                                      bool writeAfterData,
                                      bool ignoreBlankComments);
-   bool         IsTimeToWrite(Real epochInSecs, const Real state[6]);
-   void         WriteOrbitAt(Real reqEpochInSecs, const Real state[6]);
+   bool         IsTimeToWrite(Real epochInSecs, const Real state[6], const Real cov[21]);
+   void         WriteOrbitAt(Real reqEpochInSecs, const Real state[6], const Real cov[21]);
    
    void         ProcessFinalDataOnWaiting(bool canFinish = true);
    void         ProcessEpochsOnWaiting(bool checkFinalEpoch,
@@ -88,6 +88,9 @@ protected:
    void         RemoveEpochAlreadyWritten(Real epochInSecs, const std::string &msg);
    void         AddNextEpochToWrite(Real epochInSecs, const std::string &msg);
    
+   // Error message formatting
+   void         FormatErrorMessage(std::string &ephemMsg, std::string &errMsg);
+
    // Debug output
    void         DebugWriteEpochsOnWaiting(const std::string &msg = "");
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -36,14 +36,14 @@
 #include "OrbitReal.hpp"
 #include "OrbitRvec6.hpp"
 
-class GMAT_API Delal : public OrbitReal
+class GMAT_API Dela_l : public OrbitReal
 {
 public:
 
-   Delal(const std::string &name = "", GmatBase *obj = NULL);
-   Delal(const Delal &copy);
-   Delal& operator=(const Delal &right);
-   virtual ~Delal();
+   Dela_l(const std::string &name = "", GmatBase *obj = NULL);
+   Dela_l(const Dela_l &copy);
+   Dela_l& operator=(const Dela_l &right);
+   virtual ~Dela_l();
    
    // methods inherited from Parameter
    virtual bool Evaluate();
@@ -56,14 +56,14 @@ protected:
 };
 
 
-class GMAT_API Delag : public OrbitReal
+class GMAT_API Dela_g : public OrbitReal
 {
 public:
 
-   Delag(const std::string &name = "", GmatBase *obj = NULL);
-   Delag(const Delag &copy);
-   Delag& operator=(const Delag &right);
-   virtual ~Delag();
+   Dela_g(const std::string &name = "", GmatBase *obj = NULL);
+   Dela_g(const Dela_g &copy);
+   Dela_g& operator=(const Dela_g &right);
+   virtual ~Dela_g();
    
    // methods inherited from Parameter
    virtual bool Evaluate();
@@ -76,14 +76,14 @@ protected:
 };
 
 
-class GMAT_API Delah : public OrbitReal
+class GMAT_API Dela_h : public OrbitReal
 {
 public:
 
-   Delah(const std::string &name = "", GmatBase *obj = NULL);
-   Delah(const Delah &copy);
-   Delah& operator=(const Delah &right);
-   virtual ~Delah();
+   Dela_h(const std::string &name = "", GmatBase *obj = NULL);
+   Dela_h(const Dela_h &copy);
+   Dela_h& operator=(const Dela_h &right);
+   virtual ~Dela_h();
    
    // methods inherited from Parameter
    virtual bool Evaluate();

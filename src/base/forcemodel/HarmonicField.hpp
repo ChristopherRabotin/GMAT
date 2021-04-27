@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -77,7 +77,7 @@
  * Steven Queen
  * Goddard Space Flight Center
  * Flight Dynamics Analysis Branch
- * Steven.Z.Queen@nasa.gov
+ * Steven.Z.Queen at nasa.gov
  * Feburary 28, 2003
  *
  * Note that in GMAT, this code is derived from GravityBase rather than

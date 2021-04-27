@@ -1,0 +1,163 @@
+% Sample optimal control script using a 6th-order implicit Runge-Kutta (IRK) transcription.
+
+%
+% Create a spacecraft names aSat.  Guess is set later.
+%
+Create Spacecraft aSat
+GMAT aSat.DryMass = 1000
+GMAT aSat.Tanks = {ChemicalTank1};
+
+%
+% Create a chemical tank
+%
+
+Create ChemicalTank ChemicalTank1;
+GMAT ChemicalTank1.AllowNegativeFuelMass = false;
+GMAT ChemicalTank1.FuelMass = 3000;
+GMAT ChemicalTank1.Pressure = 1500;
+GMAT ChemicalTank1.Temperature = 20;
+GMAT ChemicalTank1.RefTemperature = 20;
+GMAT ChemicalTank1.Volume = 3;
+GMAT ChemicalTank1.FuelDensity = 1260;
+GMAT ChemicalTank1.PressureModel = PressureRegulated;
+
+%
+% Create an orbit dynamics model with Earth, Sun, Moon point mass
+%
+Create ForceModel DeepSpaceForceModel;
+GMAT DeepSpaceForceModel.CentralBody = Sun;
+GMAT DeepSpaceForceModel.PointMasses = {Sun};
+GMAT DeepSpaceForceModel.Drag = None;
+GMAT DeepSpaceForceModel.SRP = Off;
+
+%
+% Create an emtgThrustModel Resource
+%
+Create EMTGSpacecraft emtgThrustModel;
+emtgThrustModel.SpacecraftFile = FixedThrustAndIsp_Model2.emtg_spacecraftopt
+emtgThrustModel.DutyCycle = 1.0
+
+%
+% Create a DynamicsConfiguration object and add spacecraft
+% ForceModel and Thrust model
+%
+Create DynamicsConfiguration SunThrustDynConfig
+SunThrustDynConfig.ForceModels = {DeepSpaceForceModel};
+SunThrustDynConfig.Spacecraft = {aSat}
+SunThrustDynConfig.FiniteBurns = {emtgThrustModel}
+SunThrustDynConfig.EMTGTankConfig = {ChemicalTank1};
+
+%
+% Create a guess object that uses a file-based guess source
+%
+Create OptimalControlGuess trajectoryGuess
+trajectoryGuess.Type = CollocationGuessFile  
+trajectoryGuess.FileName = ../data/misc/GuessWithUnityControl.och
+
+%
+%  Create a phase and set transcription and parameter bounds
+%
+Create Phase thePhase
+thePhase.Type = ImplicitRKOrder6	
+thePhase.ThrustMode = Thrust
+thePhase.DynamicsConfiguration = SunThrustDynConfig
+thePhase.SubPhaseBoundaries = [0 1]
+thePhase.PointsPerSubPhase = [30]
+thePhase.GuessSource = trajectoryGuess
+thePhase.EpochFormat = A1ModJulian
+thePhase.EpochLowerBound = 30537.58129245887
+thePhase.EpochUpperBound = 32406.49962790855
+thePhase.StateLowerBound =  [ -1.49598e+09 -1.49598e+09 -1.49598e+09 ...
+                              -100 -100 -100 0.00001]
+thePhase.StateUpperBound = [ 1.49598e+09  1.49598e+09 1.49598e+09 ...
+                              100 100 100 4000]
+thePhase.ControlLowerBound = [ -1  -1  -1]
+thePhase.ControlUpperBound = [ 1  1  1]
+thePhase.InitialEpoch = 30542.0
+thePhase.FinalEpoch = 30692.0
+thePhase.MaxRelativeErrorTolerance = 1e-4
+thePhase.BuiltInCost = 'RMAGFinal'
+
+%
+% Create constraint that applies the initial conditions
+% 
+Create CustomLinkageConstraint initialConditions;
+GMAT initialConditions.ConstraintMode = Absolute;
+GMAT initialConditions.InitialPhase = thePhase;
+GMAT initialConditions.InitialPhaseBoundaryType = Start;
+GMAT initialConditions.SetModelParameter('TimeLowerBound', 'A1ModJulian', 30542)
+GMAT initialConditions.SetModelParameter('TimeUpperBound', 'A1ModJulian', 30542)
+GMAT initialConditions.SetModelParameter('PositionLowerBound', [125291184 -75613036 -32788527])
+GMAT initialConditions.SetModelParameter('PositionUpperBound', [125291184 -75613036 -32788527])
+GMAT initialConditions.SetModelParameter('VelocityLowerBound', [13.438 25.234 10.903])
+GMAT initialConditions.SetModelParameter('VelocityUpperBound', [13.438 25.234 10.903])
+GMAT initialConditions.SetModelParameter('MassLowerBound', 4000)
+GMAT initialConditions.SetModelParameter('MassUpperBound', 4000)
+
+%
+% Create a constraint on Phase duration. Duration must be 
+% 250 days = 21600000 seconds
+%
+
+Create CustomLinkageConstraint duration_Thrust;
+GMAT duration_Thrust.ConstraintMode = Difference;
+GMAT duration_Thrust.InitialPhase = thePhase;
+GMAT duration_Thrust.InitialPhaseBoundaryType = Start;
+GMAT duration_Thrust.FinalPhase = thePhase;
+GMAT duration_Thrust.FinalPhaseBoundaryType = End;
+GMAT duration_Thrust.SetModelParameter('TimeLowerBound', ElapsedDays, 250)
+GMAT duration_Thrust.SetModelParameter('TimeUpperBound', ElapsedDays, 250)
+
+%
+% Create the trajectory and add constraints
+%
+
+Create Trajectory traj
+traj.PhaseList = {thePhase}
+traj.GuessSource = trajectoryGuess;
+traj.SolutionFile = 'Phase_Type_ImplicitRKOrder6.och';
+traj.StateScaleMode = Canonical;
+traj.MassScaleFactor = 4000;
+traj.MaxMeshRefinementIterations = 5;
+traj.CustomLinkages = {initialConditions, duration_Thrust}
+traj.MajorIterationsLimits = [200 500];
+traj.TotalIterationsLimits = [20000];
+traj.FeasibilityTolerances = [1e-3,1e-3,1e-7];
+traj.MajorOptimalityTolerances = [1e-2,1e-2,1e-5];
+traj.OptimizationMode = {Maximize};
+traj.AllowFailedMeshOptimizations = True
+traj.PublishUpdateRate = 10
+
+Create CoordinateSystem SunMJ2000Ec;
+GMAT SunMJ2000Ec.Origin = Sun;
+GMAT SunMJ2000Ec.Axes = MJ2000Ec;
+
+Create CoordinateSystem SunMJ2000Eq;
+GMAT SunMJ2000Eq.Origin = Sun;
+GMAT SunMJ2000Eq.Axes = MJ2000Eq;
+
+Create ReportFile rf;
+GMAT rf.SolverIterations = Current;
+GMAT rf.UpperLeft = [ 0 0 ];
+GMAT rf.Size = [ 0 0 ];
+GMAT rf.RelativeZOrder = 0;
+GMAT rf.Maximized = false;
+GMAT rf.Filename = 'rf.txt';
+GMAT rf.Precision = 16;
+GMAT rf.Add = {aSat.A1ModJulian, aSat.SunMJ2000Eq.X, aSat.SunMJ2000Eq.Y, aSat.SunMJ2000Eq.Z, aSat.SunMJ2000Eq.VX, aSat.SunMJ2000Eq.VY, aSat.SunMJ2000Eq.VZ};
+GMAT rf.WriteHeaders = true;
+GMAT rf.LeftJustify = On;
+GMAT rf.ZeroFill = Off;
+GMAT rf.FixedWidth = true;
+GMAT rf.Delimiter = ' ';
+GMAT rf.ColumnWidth = 23;
+GMAT rf.WriteReport = true;
+
+
+%
+% Run the mission
+%
+   
+BeginMissionSequence
+
+Collocate traj

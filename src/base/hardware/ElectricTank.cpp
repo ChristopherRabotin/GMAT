@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -245,9 +245,6 @@ ElectricTank& ElectricTank::operator=(const ElectricTank& ft)
 ////---------------------------------------------------------------------------
 //bool ElectricTank::IsParameterReadOnly(const Integer id) const
 //{
-//   if ((id == DIRECTION_X) || (id == DIRECTION_Y) || (id == DIRECTION_Z))
-//      return true;
-//
 //   if (id == PRESSURE_REGULATED)
 //      return true;
 //

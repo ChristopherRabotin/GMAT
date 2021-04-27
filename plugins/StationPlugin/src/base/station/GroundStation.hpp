@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -45,7 +45,7 @@
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
 #include "Hardware.hpp"
-
+#include <set>
 //#include "MediaCorrectionInterface.hpp"
 
 class STATION_API GroundStation : public GroundstationInterface
@@ -129,7 +129,8 @@ public:
 
    virtual Real*        IsValidElevationAngle(const Rvector6 &state_sez);
 
-   virtual bool         CreateErrorModelForSignalPath(std::string spacecraftName);
+   virtual bool         CreateErrorModelForSignalPath(std::string spacecraftName,
+                                                      std::string spacecraftId);
    virtual std::map<std::string,ObjectArray>& 
                         GetErrorModelMap();
 
@@ -189,8 +190,15 @@ public:
    static const Gmat::ParameterType
       PARAMETER_TYPE[GroundStationParamCount - BodyFixedPointParamCount];
 
+ protected:
+   static const std::map<std::string, std::set<std::string>>
+      DISALLOWED_ANGLE_PAIRS;
+
+
 private:
-   bool               VerifyAddHardware();
+   bool             VerifyAddHardware();
+   bool             VerifyErrorModels(const GmatBase &errorModelToadd,
+                                      std::string &message) const;
 };
 
 #endif /*GroundStation_hpp*/

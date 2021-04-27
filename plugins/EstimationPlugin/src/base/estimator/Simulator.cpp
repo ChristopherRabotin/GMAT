@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -71,7 +71,7 @@ const Gmat::ParameterType
 Simulator::PARAMETER_TYPE[SimulatorParamCount - SolverParamCount] =
 {
    Gmat::OBJECTARRAY_TYPE,
-   Gmat::OBJECT_TYPE,
+   Gmat::OBJECTARRAY_TYPE,
    Gmat::ENUMERATION_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
@@ -93,8 +93,8 @@ Simulator::PARAMETER_TYPE[SimulatorParamCount - SolverParamCount] =
 //------------------------------------------------------------------------------
 Simulator::Simulator(const std::string& name) :
    Solver              ("Simulator", name),
-   propagator          (NULL),
-   propagatorName      (""),
+   currentPropagator   (""),
+   needsSatPropMap     (false),
    simState            (NULL),
 //   simulationStart     (GmatTimeConstants::MJD_OF_J2000),
 //   simulationEnd       (GmatTimeConstants::MJD_OF_J2000 + 1.0),
@@ -113,10 +113,11 @@ Simulator::Simulator(const std::string& name) :
    objectTypeNames.push_back("Simulator");
    parameterCount = SimulatorParamCount;
 
+   theTimeConverter = TimeSystemConverter::Instance();
    hasPrecisionTime = true;
 
-   simulationStartGT = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::A1MJD, atof(initialEpoch.c_str()));
-   simulationEndGT = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::A1MJD, atof(finalEpoch.c_str()));
+   simulationStartGT = theTimeConverter->ConvertFromTaiMjd(TimeSystemConverter::A1MJD, atof(initialEpoch.c_str()));
+   simulationEndGT = theTimeConverter->ConvertFromTaiMjd(TimeSystemConverter::A1MJD, atof(finalEpoch.c_str()));
    currentEpochGT = nextSimulationEpochGT = simulationStartGT;
 
    // Turn off writting progress report for simulation    // fix bug GMT-5713 RunSimulator command creates an empty file
@@ -136,13 +137,15 @@ Simulator::Simulator(const std::string& name) :
 //------------------------------------------------------------------------------
 Simulator::Simulator(const Simulator& sim) :
    Solver              (sim),
-   propagatorName      (sim.propagatorName),
+   propagatorNames     (sim.propagatorNames),
+   propagatorSatMap    (sim.propagatorSatMap),
+   currentPropagator   (""),
    simState            (NULL),   // should this be cloned?
-   simulationStartGT     (sim.simulationStartGT),
-   simulationEndGT       (sim.simulationEndGT),
+   simulationStartGT   (sim.simulationStartGT),
+   simulationEndGT     (sim.simulationEndGT),
    nextSimulationEpochGT (sim.nextSimulationEpochGT),
    simEpochCounter     (0),
-   currentEpochGT        (sim.currentEpochGT),
+   currentEpochGT      (sim.currentEpochGT),
    epochFormat         (sim.epochFormat),
    initialEpoch        (sim.initialEpoch),
    finalEpoch          (sim.finalEpoch),
@@ -154,8 +157,14 @@ Simulator::Simulator(const Simulator& sim) :
    addNoise            (sim.addNoise),
    isEpochFormatSet    (sim.isEpochFormatSet)
 {
-   propagator = NULL;
-   if (sim.propagator) propagator = ((PropSetup*) (sim.propagator)->Clone());
+   theTimeConverter = TimeSystemConverter::Instance();
+
+   // SatPropMap needs built if there is a propagator to satellite mapping
+   needsSatPropMap = (propagatorSatMap.size() > 0);
+
+   if (sim.propagators.size() > 0)
+      for (UnsignedInt i = 0; i < sim.propagators.size(); ++i)
+         propagators.push_back((PropSetup*)(sim.propagators[i]->Clone()));
 }
 
 
@@ -171,39 +180,31 @@ Simulator::Simulator(const Simulator& sim) :
  * @return "this" Simulator with data of input Simulator sim.
  */
 //------------------------------------------------------------------------------
-Simulator& Simulator::operator =(const Simulator& sim)
+Simulator& Simulator::operator=(const Simulator& sim)
 {
    if (&sim != this)
    {
       Solver::operator=(sim);
 
-      //if (propagator != NULL)
-      //   delete propagator;
+      // Remove current PropSetups
+      for (UnsignedInt i = 0; i < propagators.size(); ++i)
+         delete propagators[i];
+      propagators.clear();
 
-      if (sim.propagator)
-      {
-         if (propagator == NULL)
-            propagator = ((PropSetup*)(sim.propagator)->Clone());
-         else if (propagator->GetName() != sim.propagator->GetName())
-         {
-            delete propagator;
-            propagator = ((PropSetup*)(sim.propagator)->Clone());
-         }
-      }
-      else
-      {
-         if (propagator)
-            delete propagator;
-         propagator = NULL;
-      }
+      // Clone the ones from sim
+      if (sim.propagators.size() > 0)
+         for (UnsignedInt i = 0; i < sim.propagators.size(); ++i)
+            propagators.push_back((PropSetup*)(sim.propagators[i]->Clone()));
 
-      propagatorName      = sim.propagatorName;
+      propagatorNames     = sim.propagatorNames;
+      propagatorSatMap    = sim.propagatorSatMap;
+      needsSatPropMap     = (propagatorSatMap.size() > 0);
       simState            = NULL;   // or clone it here??
-      simulationStartGT     = sim.simulationStartGT;
-      simulationEndGT       = sim.simulationEndGT;
+      simulationStartGT   = sim.simulationStartGT;
+      simulationEndGT     = sim.simulationEndGT;
       nextSimulationEpochGT = sim.nextSimulationEpochGT;
       simEpochCounter     = sim.simEpochCounter;
-      currentEpochGT        = sim.currentEpochGT;
+      currentEpochGT      = sim.currentEpochGT;
       epochFormat         = sim.epochFormat;
       initialEpoch        = sim.initialEpoch;
       finalEpoch          = sim.finalEpoch;
@@ -229,19 +230,29 @@ Simulator& Simulator::operator =(const Simulator& sim)
 //------------------------------------------------------------------------------
 Simulator::~Simulator()
 {
-   if (propagator)
-      delete propagator;
+   // clean up PropSetups
+   for (UnsignedInt i = 0; i < propagators.size(); ++i)
+      if (propagators[i])
+         delete propagators[i];
 
    if (simState)
       delete simState;
 
-   activeEvents.clear();
-   measList.clear();
-   measModelList.clear();
-   refObjectList.clear();
+   // clean up ObjectArray activeEvents;
+   for (Integer i = 0; i < activeEvents.size(); ++i)
+   {
+      if (activeEvents[i])
+         delete activeEvents[i];
+   }
+   
+   // clean up MeasurementManager  measManager;
+   measManager.CleanUp();
 
-   ionoWarningList.clear();
-   tropoWarningList.clear();
+   for (Integer i = 0; i < measModelList.size(); ++i)
+   {
+      if (measModelList[i])
+         delete measModelList[i];
+   }
 }
 
 
@@ -392,9 +403,53 @@ Real Simulator::GetTimeStep(GmatTime fromEpoch)
  * Returns a pointer to the PropSetup object.
  */
 //------------------------------------------------------------------------------
-PropSetup* Simulator::GetPropagator()
+PropSetup* Simulator::GetPropagator(const std::string &forSpacecraft)
 {
-   return propagator;
+   PropSetup *retval = nullptr;
+
+   if (needsSatPropMap)
+   {
+      BuildSatPropMap();
+      needsSatPropMap = false;
+   }
+
+   if (forSpacecraft == "")
+   {
+      if (propagators.size() > 0)
+         retval = propagators[0];
+   }
+   else
+   {
+      if (satPropMap.find(forSpacecraft) != satPropMap.end())
+         retval = satPropMap[forSpacecraft];
+      else
+      {
+         if (propagators.size() > 0)
+            retval = propagators[0];
+      }
+   }
+   
+   #ifdef DEBUG_PROPAGATION
+      MessageInterface::ShowMessage("Returning propagator %s <%p> for "
+            "spacecraft %s\n", (retval ? retval->GetName().c_str() : "nullptr"),
+            retval, forSpacecraft.c_str());
+   #endif
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// std::vector<PropSetup*> GetPropagators()
+//------------------------------------------------------------------------------
+/**
+ * Accessor for the PropSetup vector
+ *
+ * @return THe vector
+ */
+//------------------------------------------------------------------------------
+std::vector<PropSetup*> *Simulator::GetPropagators()
+{
+   return &propagators;
 }
 
 
@@ -575,7 +630,9 @@ Real Simulator::SetRealParameter(const Integer id, const Real value)
       if (value <= 0.0)
       {
          std::stringstream ss;
-         ss << "Error: a nonpositive number (" << value << ") was set to " << GetName() << ".MeasurementTimeStep parameter. It should be a positive number.\n";
+         ss << "Error: a nonpositive number (" << value << ") was set to "
+            << GetName()
+            << ".MeasurementTimeStep parameter. It should be a positive number.\n";
          throw SolverException(ss.str());
       }
 
@@ -601,7 +658,12 @@ Real Simulator::SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 std::string Simulator::GetStringParameter(const Integer id) const
 {
-   if (id == PROPAGATOR)             return propagatorName;
+   if (id == PROPAGATOR)
+   {
+      if (propagatorNames.size() > 0)
+         return propagatorNames[0];
+      return "";
+   }
    if (id == EPOCH_FORMAT)           return epochFormat;
    if (id == INITIAL_EPOCH)          return initialEpoch;
    if (id == FINAL_EPOCH)            return finalEpoch;
@@ -680,14 +742,27 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value)
    if (id == PROPAGATOR)
    {
       if (!GmatStringUtil::IsValidIdentity(value))
-         throw SolverException("Error: '" + value + "' set to " + GetName() + ".Propagator parameter is an invalid object name.\n");
+         throw SolverException("Error: '" + value + "' set to " +
+               instanceName + ".Propagator is an invalid GMAT object name.\n");
 
-      propagatorName = value;  // get propSetup here???   Answer: GMAT cannot get propSetup object here due to at this point, the script to define propSetup object may be not read yet. Getting propSetup should be in SetRefObject()
+      if (propagatorNames.size() > 0)
+      {
+//         if (propagatorNames[0] != value)
+//            // Warn if resetting default propagator
+//            MessageInterface::ShowMessage("Resetting default propagator from "
+//                  "%s to %s\n", propagatorNames[0].c_str(), value.c_str());
+         propagatorNames[0] = value;
+      }
+      else
+         propagatorNames.push_back(value);
+
+      currentPropagator = value;
       return true;
    }
+
    if (id == EPOCH_FORMAT)
    {
-      if (!TimeConverterUtil::IsValidTimeSystem(value))
+      if (!theTimeConverter->IsValidTimeSystem(value))
          throw SolverException("Error: Time system '" + value + "' set to " + GetName() + ".EpochFormat parameter is invalid.\n");
 
       epochFormat = value;
@@ -738,7 +813,7 @@ GmatTime Simulator::ConvertToGmatTimeEpoch(const std::string &theEpoch,
    GmatTime retval(-999.999);
    std::string outStr;
 
-   TimeConverterUtil::Convert(theFormat, fromMjd, theEpoch, "A1ModJulian",
+   theTimeConverter->Convert(theFormat, fromMjd, theEpoch, "A1ModJulian",
          retval, outStr);
 
    if (retval == -999.999)
@@ -772,6 +847,57 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value,
                "Simulator::SetStringParameter(%d, %s, %d)\n",
             id, value.c_str(), index);
    #endif
+
+   if (id == PROPAGATOR)
+   {
+      bool retval = false;
+
+      #ifdef DEBUG_PROPAGATORS
+         MessageInterface::ShowMessage("Propagator setting on %s for index %d to %s\n",
+               instanceName.c_str(), index, value.c_str());
+      #endif
+
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw SolverException("Error: '" + value + "' set to " +
+               instanceName + ".Propagator is an invalid GMAT object name.\n");
+
+      // Start the name mapping
+      if (index == 0)
+      {
+         currentPropagator = value;
+
+         if (find(propagatorNames.begin(), propagatorNames.end(), value) ==
+               propagatorNames.end())
+            propagatorNames.push_back(value);
+
+         if (propagatorSatMap.find(value) == propagatorSatMap.end())
+         {
+            StringArray satList;
+            propagatorSatMap[currentPropagator] = satList;
+         }
+         retval = true;
+      }
+      else
+      {
+         StringArray theSats = propagatorSatMap[currentPropagator];
+         if (find(theSats.begin(), theSats.end(), value) == theSats.end())
+         {
+            propagatorSatMap[currentPropagator].push_back(value);
+            retval = true;
+         }
+         else
+         {
+            MessageInterface::ShowMessage("%s is already in the sat list for "
+                  "%s\n", value.c_str(), currentPropagator.c_str());
+         }
+      }
+
+      if (retval)
+         needsSatPropMap = true;
+
+      return retval;
+   }
+
    if (id == MEASUREMENTS)
    {
       // No measurement is added when an empty list is set to Add Measurement parameter 
@@ -904,7 +1030,7 @@ const StringArray& Simulator::GetPropertyEnumStrings(const Integer id) const
 
    if (id == EPOCH_FORMAT)
    {
-      typeList = TimeConverterUtil::GetValidTimeRepresentations();
+      typeList = theTimeConverter->GetValidTimeRepresentations();
       return typeList;
    }
 
@@ -942,6 +1068,33 @@ UnsignedInt Simulator::GetPropertyObjectType(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+// UnsignedInt GetPropertyObjectType(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves object type of parameter of given id and index.
+ *
+ * @param id ID for the parameter.
+ * @param id Array index for the parameter.
+ *
+ * @return parameter ObjectType
+ */
+//------------------------------------------------------------------------------
+UnsignedInt Simulator::GetPropertyObjectType(const Integer id,
+      const Integer index) const
+{
+   if (id == PROPAGATOR)
+   {
+      if (index == 0)
+         return Gmat::PROP_SETUP;
+      else
+         return Gmat::SPACECRAFT;
+   }
+
+   return GetPropertyObjectType(id);
+}
+
+
+//------------------------------------------------------------------------------
 // bool RenameRefObject(const UnsignedInt type,
 //       const std::string & oldName, const std::string & newName)
 //------------------------------------------------------------------------------
@@ -961,11 +1114,16 @@ bool Simulator::RenameRefObject(const UnsignedInt type,
    /// @todo Simulator rename code needs to be implemented
    if (type == Gmat::PROP_SETUP)
    {
-      if (propagator->GetName() == oldName)
+      bool renamed = false;
+      for (UnsignedInt i = 0; i < propagators.size(); ++i)
       {
-         propagator->SetName(newName);
-         return true;
+         if (propagators[i]->GetName() == oldName)
+         {
+            propagators[i]->SetName(newName);
+            renamed = true;
+         }
       }
+      return renamed;
    }
 
    if (type == Gmat::MEASUREMENT_MODEL)
@@ -999,11 +1157,12 @@ bool Simulator::RenameRefObject(const UnsignedInt type,
 bool Simulator::SetRefObjectName(const UnsignedInt type,
       const std::string & name)
 {
-   if (type == Gmat::PROP_SETUP)
-   {
-      propagator->SetName(name);
-      return true;
-   }
+   // Removed: Set the name for which propagator?
+//   if (type == Gmat::PROP_SETUP)
+//   {
+//      propagator->SetName(name);
+//      return true;
+//   }
    // Note: this function is not applied for measurement List
 
    return Solver::SetRefObjectName(type, name);
@@ -1057,13 +1216,22 @@ const StringArray& Simulator::GetRefObjectNameArray(const UnsignedInt type)
    {
       if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::PROP_SETUP))
       {
-         #ifdef DEBUG_SIMULATOR_INITIALIZATION
-            MessageInterface::ShowMessage(
-                  "   Adding propagator: %s\n", propagatorName.c_str());
-         #endif
-         if (find(refObjectList.begin(), refObjectList.end(),
-               propagatorName) == refObjectList.end())
-            refObjectList.push_back(propagatorName);
+         //#ifdef DEBUG_SIMULATOR_INITIALIZATION
+         //   MessageInterface::ShowMessage(
+         //         "   Adding propagator: %s\n", propagatorName.c_str());
+         //#endif
+
+         for (UnsignedInt i = 0; i < propagatorNames.size(); ++i)
+         {
+            #ifdef DEBUG_SIMULATOR_INITIALIZATION
+               MessageInterface::ShowMessage(
+                  "   Adding propagator: %s\n", propagatorNames[i].c_str());
+            #endif
+
+            if (find(refObjectList.begin(), refObjectList.end(),
+                  propagatorNames[i]) == refObjectList.end())
+               refObjectList.push_back(propagatorNames[i]);
+         }
       }
 
       if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::MEASUREMENT_MODEL))
@@ -1100,10 +1268,10 @@ const StringArray& Simulator::GetRefObjectNameArray(const UnsignedInt type)
 //-----------------------------------------------------------------------------
 std::string Simulator::GetRefObjectName(const UnsignedInt type) const
 {
-   if (type == Gmat::PROP_SETUP)
-      return propagator->GetName();
-
-   // Note: this function is not applied for measurement List
+//   if (type == Gmat::PROP_SETUP)
+//      return propagator->GetName();
+//
+//   // Note: this function is not applied for measurement List
 
    return Solver::GetRefObjectName(type);
 }
@@ -1126,10 +1294,10 @@ GmatBase* Simulator::GetRefObject(const UnsignedInt type,
 {
    if (type == Gmat::PROP_SETUP)
    {
-      if (propagator != NULL)
+      for (UnsignedInt i = 0; i < propagators.size(); ++i)
       {
-         if (propagator->GetName() == name)
-            return propagator;
+         if (propagators[i]->GetName() == name)
+            return propagators[i];
       }
    }
 
@@ -1188,18 +1356,33 @@ bool Simulator::SetRefObject(GmatBase *obj, const UnsignedInt type,
             name.c_str(), obj->GetTypeName().c_str());
    #endif
 
-   if (name == propagatorName)
+   for (UnsignedInt i = 0; i < propagatorNames.size(); ++i)
    {
-      if (type == Gmat::PROP_SETUP)
+      if (name == propagatorNames[i])
       {
-         //if (propagator != NULL)
-         //   delete propagator;
-         //propagator = (PropSetup*)obj->Clone();
+         if (type == Gmat::PROP_SETUP)
+         {
+            PropSetup *propagator = (PropSetup*)obj->Clone();
+            if (propagators.size() <= i)
+               propagators.push_back(propagator);
+            else
+            {
+               PropSetup *oldProp = propagators[i];
+               propagators[i] = propagator;
+               delete oldProp;
+            }
 
-         if (propagator == NULL)
-            propagator = (PropSetup*)obj->Clone();
-         measManager.SetPropagator(propagator);
-         return true;
+            // Set the spacecraft - propagator map
+            if (propagatorSatMap.find(name) != propagatorSatMap.end())
+            {
+               StringArray propSats = propagatorSatMap[name];
+               for (UnsignedInt i = 0; i < propSats.size(); ++i)
+                  satPropMap[propSats[i]] = propagator;
+            }
+
+            measManager.SetPropagators(&propagators, &propagatorSatMap);
+            return true;
+         }
       }
    }
 
@@ -1207,47 +1390,13 @@ bool Simulator::SetRefObject(GmatBase *obj, const UnsignedInt type,
 
    if (find(measList.begin(), measList.end(), name) != measList.end())
    {
-      if (obj->IsOfType(Gmat::MEASUREMENT_MODEL) &&
-          !(obj->IsOfType(Gmat::TRACKING_SYSTEM)))
+      if (obj->IsOfType(Gmat::MEASUREMENT_MODEL))
       {
          #ifdef DEBUG_SIMULATOR_INITIALIZATION
             MessageInterface::ShowMessage("SetRefObject for object type Gmat::MEASUREMENT_MODEL.\n");
          #endif
 
-         measManager.AddMeasurement((MeasurementModel *)obj);
-         return true;
-      }
-      if (obj->IsOfType(Gmat::TRACKING_SYSTEM))
-      {
-         #ifdef DEBUG_SIMULATOR_INITIALIZATION
-            MessageInterface::ShowMessage("SetRefObject <%s> for object type Gmat::TRACKING_SYSTEM.\n", obj->GetName().c_str());
-         #endif
-
-         // Add to tracking systems list
-         measManager.AddMeasurement((TrackingSystem*)obj);
-
-         MeasurementModel *meas;
-         // Retrieve each measurement model from the tracking system ...
-         for (UnsignedInt i = 0;
-                  i < ((TrackingSystem*)obj)->GetMeasurementCount(); ++i)
-         {
-            #ifdef DEBUG_SIMULATOR_INITIALIZATION
-               MessageInterface::ShowMessage("   Measurement %d\n", i);
-            #endif
-
-            // ...and pass them to the measurement manager
-            meas = ((TrackingSystem*)obj)->GetMeasurement(i);
-            if (meas == NULL)
-            {
-               MessageInterface::ShowMessage("Simulator cannot initialize "
-                        "because an expected MeasurementModel is NULL\n");
-               throw SolverException("In Simulator::SetRefObject, a "
-                        "measurement in the tracking system " + obj->GetName() +
-                        " is NULL\n");
-            }
-
-            measManager.AddMeasurement(meas);
-         }
+         measManager.AddMeasurement((TrackingFileSet*)obj);
          return true;
       }
    }
@@ -1378,78 +1527,66 @@ bool Simulator::Initialize()
    if (simulationEndGT < simulationStartGT)
       throw SolverException(
             "Simulator error - simulation end time is before simulation start time.\n");
-
+   
    // Check to make sure required objects have been set
-   if (propagatorName == "")
+   if (propagatorNames.size() == 0)
       throw SolverException(
             "Simulator error - " + GetName() + ".Propagator was not defined in your script.\n");
-
-   if (!propagator)
+   
+   if (propagators.size() != propagatorNames.size())
       throw SolverException(
-            "Simulator error - Propagator '" + propagatorName + "' was not defined in your script.\n");
-
+            "Simulator error - the list of propagators and set of propagator names do not match.\n");
+   
    if (measList.empty())
        throw SolverException(
             "Simulator error - " + GetName() + ".AddData was not defined in your script.\n");
-
-   ODEModel *ode = propagator->GetODEModel();
-   if (ode->GetStringParameter("ErrorControl") != "None")
-      throw EstimatorException("GMAT navigation requires use of fixed "
-            "stepped propagation. The ErrorControl parameter specified for "
-            "the ForceModel resource associated with the propagator, " +
-            propagatorName + ", used with the " + typeName + " named " +
-            instanceName + " must be 'None.' Of course, when using fixed step "
-            "control, the user must choose a step size, as given by the "
-            "Propagator InitialStepSize field, for the chosen orbit regime "
-            "and force profile, that yields the desired accuracy.");
-
+   
+   // comment this out for now for testing with RSSStep
+   std::string propSettingError;
+   for (UnsignedInt i = 0; i < propagators.size(); ++i)
+   {
+      ODEModel *ode = propagators[i]->GetODEModel();
+      if (ode)
+      {
+         if (ode->GetStringParameter("ErrorControl") != "None")
+         {
+            propSettingError += "GMAT navigation requires use of fixed "
+               "stepped propagation. The ErrorControl parameter specified for "
+               "the ForceModel resource associated with the propagator, ";
+            propSettingError += propagatorNames[i];
+            propSettingError += ", used  with the ";
+            propSettingError += typeName;
+            propSettingError += " named ";
+            propSettingError += instanceName;
+            propSettingError += " must be 'None.' Of course, when using fixed step "
+                  "control, the user must choose a step size, as given by the "
+                  "Propagator InitialStepSize field, for the chosen orbit regime "
+                  "and force profile, that yields the desired accuracy.\n";
+         }
+      }
+   }
+   if (propSettingError != "")
+      throw EstimatorException(propSettingError);
+   
    // Check the names of measurement models shown in sim.AddData have to be the names of created objects
-   std::vector<MeasurementModel*> measModels = measManager.GetAllMeasurementModels();
-   std::vector<TrackingSystem*> tkSystems = measManager.GetAllTrackingSystems();
    std::vector<TrackingFileSet*> tfs = measManager.GetAllTrackingFileSets();
    StringArray measNames = measManager.GetMeasurementNames();
-   
    for(UnsignedInt i = 0; i < measNames.size(); ++i)
    {
       std::string name = measNames[i];
       bool found = false;
-      for(UnsignedInt j = 0; j < measModels.size(); ++j)
+      for(UnsignedInt j = 0; j < tfs.size(); ++j)
       {
-         if (measModels[j]->GetName() == name)
+         if (tfs[j]->GetName() == name)
          {
             found = true;
             break;
          }
       }
-
-      if (!found)
-      {
-         for(UnsignedInt j = 0; j < tkSystems.size(); ++j)
-         {
-            if (tkSystems[j]->GetName() == name)
-            {
-               found = true;
-               break;
-            }
-         }
-      }
-      
-      if (!found)
-      {
-         for(UnsignedInt j = 0; j < tfs.size(); ++j)
-         {
-            if (tfs[j]->GetName() == name)
-            {
-               found = true;
-               break;
-            }
-         }
-      }
-
       if (!found)
          throw SolverException("Cannot initialize simulator; '" + name + "' object is not defined in script.\n");
    }
-
+   
 
    // Check for TrackingConfig to be defined in TrackingFileSet
    for(UnsignedInt i = 0; i < tfs.size(); ++i)
@@ -1460,9 +1597,7 @@ bool Simulator::Initialize()
                  tfs[i]->GetName() + "' object which is defined in simulator '" + 
                  GetName() + "' has no tracking configuration.\n");
    }
-
-   measModels.clear();
-   tkSystems.clear();
+   
    tfs.clear();
    measNames.clear();
 
@@ -1663,6 +1798,10 @@ void Simulator::CompleteInitialization()
 
    // Get time range of EOP file
    EopFile* eop = GmatGlobal::Instance()->GetEopFile();
+
+   // Initializes the EOP file in case it has not yet been by other objects
+   eop->Initialize();
+
    if (eop != NULL)
    {
       Real timeMin, timeMax;
@@ -1810,6 +1949,8 @@ void Simulator::CalculateData()
       else
          currentState = SIMULATING;
    }
+
+   measManager.ClearIonosphereCache();
 }
 
 
@@ -1873,8 +2014,12 @@ void Simulator::SimulateData()
       const MeasurementData* measData = NULL;
       for (Integer i = 0; (measData = measManager.GetMeasurement(i)) != NULL; ++i)
       {
+         //MessageInterface::ShowMessage("measData->unfeasibleReason = %s", measData->unfeasibleReason.c_str());
          // Validate media correction for the measurement 
-         ValidateMediaCorrection(measData);
+         if (measData->isFeasible)
+         { 
+            ValidateMediaCorrection(measData);
+         }
       }
 
       // Write measurements to data file
@@ -2051,6 +2196,136 @@ std::string Simulator::GetProgressString()
 }
 
 
+//------------------------------------------------------------------------------
+// void BuildSatPropMap()
+//------------------------------------------------------------------------------
+/**
+ * Sets up the mapping between spacecraft and their propagators
+ */
+//------------------------------------------------------------------------------
+void Simulator::BuildSatPropMap()
+{
+   satPropMap.clear();
+   for (std::map<std::string, StringArray>::iterator i = propagatorSatMap.begin();
+         i != propagatorSatMap.end(); ++i)
+   {
+      // Find the propagator
+      PropSetup *theProp = nullptr;
+      std::string propName = i->first;
+      for (UnsignedInt j = 0; j < propagators.size(); ++j)
+      {
+         if (propagators[j]->GetName() == propName)
+         {
+            theProp = propagators[j];
+            break;
+         }
+      }
+      if (!theProp)
+         throw EstimatorException("The propagator " + propName
+               + " set on the Simulator " + instanceName + " was not found.");
+
+      StringArray scs = i->second;
+      for (UnsignedInt j = 0; j < scs.size(); ++j)
+      {
+         if (satPropMap.find(scs[j]) != satPropMap.end())
+            throw EstimatorException("The spacecraft " + scs[j]
+                  + " is set to propagate with more than one propagator in "
+                    "the Simulator" + instanceName);
+         satPropMap[scs[j]] = theProp;
+      }
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteStringArrayValue(Gmat::WriteMode mode, std::string &prefix,
+//       Integer id, bool writeQuotes, std::stringstream &stream)
+//------------------------------------------------------------------------------
+/**
+ * Writes out parameters of StringArrayType or ObjectArrayType in the GMAT script syntax.
+ *
+ * Overridden here to manage multiple propagators on Simulators.
+ *
+ * @param mode Output mode for the parameter.
+ * @param prefix Prefix for the parameter (e.g. "GMAT ")
+ * @param id   ID for the parameter that gets written.
+ * @param writeQuotes Toggle indicating if quote marks should be written.
+ * @param stream Output stream for the data.
+ */
+//------------------------------------------------------------------------------
+void Simulator::WriteStringArrayValue(Gmat::WriteMode mode, std::string &prefix,
+      Integer id, bool writeQuotes, std::stringstream &stream)
+{
+   if (id == PROPAGATOR)
+   {
+      std::stringstream propstr;
+
+      if (mode != Gmat::OBJECT_EXPORT)
+         propstr << GetAttributeCommentLine(id);
+
+      if (propagatorNames.size() > 0)
+      {
+         std::string thePrefix = prefix + GetParameterText(id);
+
+         // Set the default propagator
+         if (writeQuotes)
+            propstr << thePrefix << " = '" << propagatorNames[0] << "'\n";
+         else
+            propstr << thePrefix << " = " << propagatorNames[0] << "\n";
+
+         for (UnsignedInt i = 0; i < propagatorNames.size(); ++i)
+         {
+            if (propagatorSatMap.find(propagatorNames[i]) != propagatorSatMap.end())
+            {
+               std::string mapping;
+               StringArray sats = propagatorSatMap[propagatorNames[i]];
+               if (sats.size() > 0)
+               {
+                  mapping = thePrefix + " = {";
+
+                  if (writeQuotes)
+                     mapping += "'" + propagatorNames[i] + "', ";
+                  else
+                     mapping += propagatorNames[i] + ", ";
+
+                  for (UnsignedInt j = 0; j < sats.size(); ++j)
+                  {
+                     if (j > 0)
+                        mapping += ", ";
+
+                     if (writeQuotes)
+                        mapping += "'";
+                     mapping += sats[j];
+                     if (writeQuotes)
+                        mapping += "'";
+                  }
+                  propstr << mapping << "};\n";
+               }
+            }
+         }
+
+         stream << propstr.str();
+
+         if ((propstr.str() != "") && ((mode == Gmat::SCRIPTING) ||
+                                 (mode == Gmat::OWNED_OBJECT) ||
+                                 (mode == Gmat::SHOW_SCRIPT)))
+         {
+            stream << GetInlineAttributeComment(id);
+         }
+
+         #ifdef DEBUG_SCRIPTOUTPUT
+            MessageInterface::ShowMessage("Overriding setting for ID %d (%s):\n",
+                  id, GetParameterText(id).c_str());
+            MessageInterface::ShowMessage("%s\n", propstr.str().c_str());
+         #endif
+      }
+      return;
+   }
+
+   Solver::WriteStringArrayValue(mode, prefix, id, writeQuotes, stream);
+}
+
+
 //-----------------------------------------------------------------------------
 // void UpdateCurrentEpoch(GmatTime newEpoch)
 //-----------------------------------------------------------------------------
@@ -2129,9 +2404,17 @@ void Simulator::ValidateMediaCorrection(const MeasurementData* measData)
       // if the pass is not in warning list, then display warning message
       if (find(ionoWarningList.begin(), ionoWarningList.end(), ss1.str()) == ionoWarningList.end())
       {
-         // generate warning message
-         MessageInterface::ShowMessage("Warning: When running simulator '%s', ionosphere correction is %lf m for measurement %s at measurement time tag %.12lf A1Mjd. Media corrections to the computed measurement may be inaccurate.\n", GetName().c_str(), measData->ionoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
+         // specify unit of this measurement data
+         std::string unit = GetUnit(measData->typeName);
 
+         // generate warning message
+         //MessageInterface::ShowMessage("Warning: When running simulator '%s', ionosphere correction is %lf m for measurement %s at measurement time tag %.12lf A1Mjd. Media corrections to the computed measurement may be inaccurate.\n", GetName().c_str(), measData->ionoCorrectRawValue * 1000.0, ss1.str().c_str(), measData->epoch);
+         MessageInterface::ShowMessage("Warning: When running simulator '%s', "
+            "ionosphere correction is %lf %s "
+            "for measurement %s at measurement time tag %.12lf A1Mjd. "
+            "Media corrections to the computed measurement may be inaccurate.\n", 
+            GetName().c_str(), measData->ionoCorrectValue, unit.c_str(),
+            ss1.str().c_str(), measData->epoch);
          // add pass to the list
          ionoWarningList.push_back(ss1.str());
       }
@@ -2151,12 +2434,73 @@ void Simulator::ValidateMediaCorrection(const MeasurementData* measData)
       // if the pass is not in warning list, then display warning message
       if (find(tropoWarningList.begin(), tropoWarningList.end(), ss1.str()) == tropoWarningList.end())
       {
+         // specify unit of this measurement data
+         std::string unit = GetUnit(measData->typeName);
+
          // generate warning message
-         MessageInterface::ShowMessage("Warning: When running simulator '%s', troposphere correction is %lf m for measurement %s at measurement time tag %.12lf A1Mjd. Media corrections to the computed measurement may be inaccurate.\n", GetName().c_str(), measData->tropoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
+         //MessageInterface::ShowMessage("Warning: When running simulator '%s', troposphere correction is %lf m for measurement %s at measurement time tag %.12lf A1Mjd. Media corrections to the computed measurement may be inaccurate.\n", GetName().c_str(), measData->tropoCorrectRawValue * 1000.0, ss1.str().c_str(), measData->epoch);
+         MessageInterface::ShowMessage("Warning: When running simulator '%s', "
+            "troposphere correction is %lf %s "
+            "for measurement %s at measurement time tag %.12lf A1Mjd. "
+            "Media corrections to the computed measurement may be inaccurate.\n",
+            GetName().c_str(),
+            measData->tropoCorrectValue, unit.c_str(),
+            ss1.str().c_str(), measData->epoch);
 
          // add pass to the list
          tropoWarningList.push_back(ss1.str());
       }
    }
+
+   //MessageInterface::ShowMessage("%.12lf A1Mjd     %lf %s     type = %s\n", measData->epochGT.GetMjd(), measData->tropoCorrectValue, GetUnit(measData->typeName).c_str(), measData->typeName.c_str());
 }
+
+
+
+//----------------------------------------------------------------------
+// std::string GetUnit(std::string type)
+//----------------------------------------------------------------------
+/**
+* Get unit for a given observation data type
+*/
+//----------------------------------------------------------------------
+std::string Simulator::GetUnit(const std::string type) const
+{
+   std::string unit = "";
+   if (type == "GPS_PosVec")
+      unit = "km";
+   else if (type == "DSN_SeqRange")
+      unit = "RU";
+   else if (type == "DSN_TCP")
+      unit = "Hz";
+   else if (type == "Range")
+      unit = "km";
+   else if (type == "SN_Range")
+      unit = "km";
+   else if (type == "RangeRate")
+      unit = "km/s";
+   else if (type == "SN_Doppler")
+      unit = "Hz";
+   else if (type == "Azimuth")
+      unit = "deg";
+   else if (type == "Elevation")
+      unit = "deg";
+   else if (type == "XEast")
+      unit = "deg";
+   else if (type == "YNorth")
+      unit = "deg";
+   else if (type == "XSouth")
+      unit = "deg";
+   else if (type == "YEast")
+      unit = "deg";
+   else if (type == "RightAscension")
+      unit = "deg";
+   else if (type == "Declination")
+      unit = "deg";
+   else if (type == "Range_Skin")
+      unit = "km";
+
+   return unit;
+}
+
 

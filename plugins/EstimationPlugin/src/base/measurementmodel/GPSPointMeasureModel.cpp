@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -34,6 +34,7 @@
 #include "TextParser.hpp"
 #include "GroundstationInterface.hpp"
 #include "Transmitter.hpp"
+#include "StringUtil.hpp"                       // made changes by TUAN NGUYEN
 
 #include <sstream>
 
@@ -434,27 +435,37 @@ bool GPSPointMeasureModel::InitializePointModel()
          {
             // clone all ErrorModel objects belonging to groundstation firstPart
             std::string spacecraftName = "";
-            if (participants[i]->at(1)->IsOfType(Gmat::SPACECRAFT))
-               spacecraftName = participants[i]->at(1)->GetName();
+            std::string spacecraftId = "";
+            GmatBase* obj = participants[i]->at(1);
+            if (obj->IsOfType(Gmat::SPACECRAFT))
+            {
+               spacecraftName = obj->GetName();
+               spacecraftId = obj->GetStringParameter("Id");
+            }
             else
                throw MeasurementException("Error: It has 2 ground stations (" +
-               firstPart->GetName() + ", " + participants[i]->at(1)->GetName() +
+               firstPart->GetName() + ", " + obj->GetName() +
                ") next to each other in signal path.\n");
             
-            ((GroundstationInterface*)firstPart)->CreateErrorModelForSignalPath(spacecraftName);
+            ((GroundstationInterface*)firstPart)->CreateErrorModelForSignalPath(spacecraftName, spacecraftId);
          }
          else
          {
             // clone all ErrorModel objects belonging to groundstation firstPart
             std::string spacecraftName = "";
-            if (participants[i]->at(participants[i]->size() - 2)->IsOfType(Gmat::SPACECRAFT))
-               spacecraftName = participants[i]->at(participants[i]->size() - 2)->GetName();
+            std::string spacecraftId = "";
+            GmatBase* obj = participants[i]->at(participants[i]->size() - 2);
+            if (obj->IsOfType(Gmat::SPACECRAFT))
+            {
+               spacecraftName = obj->GetName();
+               spacecraftId = obj->GetStringParameter("Id");
+            }
             else
                throw MeasurementException("Error: It has 2 ground stations (" +
-               participants[i]->at(participants[i]->size() - 2)->GetName() + ", " +
+               obj->GetName() + ", " +
                lastPart->GetName() + ") next to each other in signal path.\n");
             
-            ((GroundstationInterface*)lastPart)->CreateErrorModelForSignalPath(spacecraftName);
+            ((GroundstationInterface*)lastPart)->CreateErrorModelForSignalPath(spacecraftName, spacecraftId);
          }
       }
    }
@@ -615,12 +626,19 @@ bool GPSPointMeasureModel::CalculateMeasurement(bool withEvents, bool withMediaC
       if (sdObj->rNode->IsOfType(Gmat::SPACECRAFT))
       {
          // this spacecraft's state presents in MJ2000Eq with origin at ForceModel.CentralBody
+
+         if (propMap[sdObj->rNode] == NULL)
+            throw MeasurementException("GPSPointMeasureModel::CalculateMeasurement(): "
+               "The propagator for " + sdObj->rNode->GetName() + " is not defined");
+
          const Real* propState =
             propMap[sdObj->rNode]->GetPropagator()->AccessOutState();
          Rvector6 state(propState);
 
          // This step is used to convert spacecraft's state to Spacecraft.CoordinateSystem                                                                          // fix bug GMT-5364
          SpacePoint* spacecraftOrigin = ((Spacecraft*)(sdObj->rNode))->GetOrigin();                 // the origin of the receive spacecraft's cooridinate system    // fix bug GMT-5364
+
+         /// @note: If this model is used with an ephem propagator, this code need updating
          SpacePoint* forcemodelOrigin = propMap[sdObj->rNode]->GetODEModel()->GetForceOrigin();     // the origin of the coordinate system used in forcemodel       // fix bug GMT-5364
          state = state + (forcemodelOrigin->GetMJ2000PrecState(sdObj->rPrecTime) - spacecraftOrigin->GetMJ2000PrecState(sdObj->rPrecTime));                         // fix bug GMT-5364
          sdObj->rLoc = state.GetR();
@@ -1198,6 +1216,7 @@ void GPSPointMeasureModel::GetDerivativeWRTState(GmatBase *forObj, bool wrtR, bo
    
    if (forObj->IsOfType(Gmat::SPACECRAFT))
    {
+      /// @note: If this model is used with an ephem propagator, this code need updating
       SpacePoint* forcemodelOrigin = propMap[(SpacePoint*)forObj]->GetODEModel()->GetForceOrigin();
       forceModelCs = CoordinateSystem::CreateLocalCoordinateSystem("forceModelCs",
          "MJ2000Eq", forcemodelOrigin, NULL, NULL, earthBody, solarsys);
@@ -1268,12 +1287,20 @@ void GPSPointMeasureModel::GetDerivativeWRTState(GmatBase *forObj, bool wrtR, bo
    }
    
    if (ecf)
+   {
       delete ecf;
+      ecf = NULL;                               // made changes by TUAN NGUYEN
+   }
    if (forceModelCs)
+   {
       delete forceModelCs;
+      forceModelCs = NULL;                      // made changes by TUAN NGUYEN
+   }
    if (cv)
+   {
       delete cv;
-
+      cv = NULL;                                // made changes by TUAN NGUYEN
+   }
    #ifdef DEBUG_DERIVATIVE
       MessageInterface::ShowMessage("derivative = [\n");
       for (UnsignedInt row = 0; row < derivative.size(); ++row)
@@ -1343,7 +1370,9 @@ void GPSPointMeasureModel::ModelPointSignalDerivative(GmatBase* obj, Integer for
    // Check to see if obj is a participant
    SignalData* data = sb->GetSignalDataObject();
    GmatBase *objPtr = NULL;
-   if (data->rNode == obj)
+   if (data->tNode == obj)                      // made changes by TUAN NGUYEN
+      objPtr = data->tNode;                     // made changes by TUAN NGUYEN
+   else if (data->rNode == obj)                 // made changes by TUAN NGUYEN
       objPtr = data->rNode;
    
    //Integer parameterID = -1;
@@ -1434,11 +1463,145 @@ void GPSPointMeasureModel::ModelPointSignalDerivative(GmatBase* obj, Integer for
       // Set 0 to all elements (number of elements is specified by size)
       for (Integer row = 0; row < 3; ++row)                   // for GPS X, Y, and Z
          for (UnsignedInt col = 0; col < size; ++col)         // derivative w.r.t. a given parameter 
-            derivative[row][col] += 0.0;
+            derivative[row][col] = 0.0;
    }
 
 #ifdef DEBUG_DERIVATIVES
    MessageInterface::ShowMessage("Exit GPSPointMeasureModel::ModelPointSignalDerivative()\n");
 #endif
 }
+
+
+Real GPSPointMeasureModel::GetParamDerivative(GmatBase *forObj, std::string paramName, GmatBase *associateObj, SignalData *theData)
+{
+   //MessageInterface::ShowMessage("SignalBase::GetParamDerivative(forObj = <%s>, paramName = <%s>, associateObj = <%s>) start\n", forObj->GetName().c_str(), paramName.c_str(), (associateObj == NULL?"":associateObj->GetName().c_str()));
+   // Get index for paramName
+   StringArray stmElemNames;
+   std::string paramFullName;
+   if (associateObj)
+   {
+      // associateObj is a Spacecraft object (example: estSat.Plate1.DiffuseFraction, associateObj is estSat, forObj is Plate1, and paramName is DiffuseFraction)
+      stmElemNames = associateObj->GetStringArrayParameter("StmElementNames");
+      paramFullName = forObj->GetName() + "." + paramName;
+   }
+   else
+   {
+      // forObj is a Spacecraft object (example: estSat.Cr, forObj is estSat, paramName is Cr)
+      stmElemNames = forObj->GetStringArrayParameter("StmElementNames");
+      paramFullName = paramName;
+   }
+
+   UnsignedInt paramIndex = 0;
+   bool found = false;
+   //for (int i = 0; i < stmElemNames.size(); i++)
+   //   MessageInterface::ShowMessage("for i = %d: stmElemNames[%d] = <%s>\n", i, i, stmElemNames[i].c_str());
+
+   for (int i = 0; i < stmElemNames.size(); i++)
+   {
+      if (stmElemNames.at(i) == "CartesianState" || stmElemNames.at(i) == "KeplerianState")
+         paramIndex += 0;  // vector that GetCDerivativeVector() returns does not include cartesian state
+      else if (stmElemNames.at(i) == paramFullName)
+      {
+         found = true;
+         break;
+      }
+      else
+      {
+         std::string name = stmElemNames.at(i);
+         size_t pos = name.find_last_of('.');
+         if (pos != name.npos)
+            name = name.substr(pos + 1);
+         paramIndex += forObj->GetEstimationParameterSize(forObj->GetParameterID(name));
+      }
+   }
+
+   if (!found)
+   {
+      //MessageInterface::ShowMessage("Not found paramFullName <%s> in StmElementNames: deriv = 0.0\n", paramFullName.c_str());
+      //MessageInterface::ShowMessage("SignalBase::GetParamDerivative(forObj = <%s>) end\n", forObj->GetName().c_str());
+      return 0.0;
+   }
+
+   // Get C derivative vector
+   Rvector dVector;
+   if (associateObj)
+      GetCDerivativeVector(associateObj, dVector, paramFullName, theData);
+   else
+      GetCDerivativeVector(forObj, dVector, paramFullName, theData);
+
+   // Get paramName partial derivative
+   Real deriv = dVector[paramIndex];
+
+   //MessageInterface::ShowMessage("Found parameter with name <%s> in StmElementNames: deriv = %.12le    Index = %d\n", paramFullName.c_str(), deriv, paramIndex);
+   //MessageInterface::ShowMessage("SignalBase::GetParamDerivative(forObj = <%s>) end\n", forObj->GetName().c_str());
+   return deriv;
+}
+
+
+// Note that: forObj is always a Spacecraft object (it is never a Groundstation object due to ground station does not has its own STM)
+void GPSPointMeasureModel::GetCDerivativeVector(GmatBase *forObj, Rvector &deriv, const std::string &solveForType, SignalData *theData)
+{
+   // 1. Calculate phi matrix
+   //MessageInterface::ShowMessage("forObj = <%p,%s>      theData.tNode = <%p,%s>    theData.rNode = <%p,%s>\n",
+   //   forObj, forObj->GetName().c_str(),
+   //   theData.tNode, theData.tNode->GetName().c_str(),
+   //   theData.rNode, theData.rNode->GetName().c_str());
+
+
+   bool forTransmitter = true;
+   if (theData->rNode == forObj)
+      forTransmitter = false;
+   else
+   {
+      if (theData->tNode != forObj)
+         throw MeasurementException(solveForType + " derivative requested, but "
+            "neither participant is the \"for\" object");
+   }
+   Rmatrix phi = (forTransmitter ? (theData->tSTM*theData->tSTMtm.Inverse()) : (theData->rSTM*theData->rSTMtm.Inverse()));
+
+   // 2. Calculate E matrix
+   Integer m = phi.GetNumColumns() - 6;
+   Rmatrix E(3, m);
+   for (Integer i = 0; i < 3; ++i)
+   {
+      for (Integer j = 0; j < m; ++j)
+      {
+         E(i, j) = phi(i, j + 6);
+      }
+   }
+
+   // 3. Calculate: sign * R * phi
+   Real sign = (forTransmitter ? -1.0 : 1.0);
+
+   Rmatrix33 body2FK5_matrix = (forTransmitter ? theData->tJ2kRotation :
+      theData->rJ2kRotation);
+   Rmatrix tempMatrix(3, m);
+   // tempMatrix = body2FK5_matrix * E;
+   for (Integer i = 0; i < 3; ++i)
+   {
+      for (Integer j = 0; j < m; ++j)
+      {
+         tempMatrix(i, j) = 0.0;
+         for (Integer k = 0; k < 3; ++k)
+            tempMatrix(i, j) += sign * body2FK5_matrix(i, k) * E(k, j);
+      }
+   }
+
+
+   // 4. Calculate range unit vector
+   Rvector3 rangeVec = theData->rangeVecInertial;
+   Rvector3 unitRange = rangeVec / rangeVec.GetMagnitude();
+
+
+   // 5. Calculate C vector derivative
+   deriv.SetSize(m);
+   for (Integer j = 0; j < m; ++j)
+   {
+      deriv[j] = 0.0;
+      for (Integer i = 0; i < 3; ++i)
+         deriv[j] += unitRange[i] * tempMatrix(i, j);
+   }
+}
+
+
 

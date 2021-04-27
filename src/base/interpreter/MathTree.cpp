@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -404,8 +404,10 @@ bool MathTree::Initialize(ObjectMap *objectMap, ObjectMap *globalObjectMap)
       return true;
    }
    
-   theObjectMap       = objectMap;
-   theGlobalObjectMap = globalObjectMap;
+   if (objectMap)
+      theObjectMap       = objectMap;
+   if (globalObjectMap)
+      theGlobalObjectMap = globalObjectMap;
    
    #ifdef DEBUG_MATH_TREE_INIT
    MessageInterface::ShowMessage
@@ -475,6 +477,7 @@ void MathTree::SetObjectMap(ObjectMap *map)
    #endif
    
    SetObjectMapToRunner(theTopNode, map);
+   theObjectMap = map;
    
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage("MathTree::SetObjectMap() returning\n");
@@ -507,6 +510,7 @@ void MathTree::SetGlobalObjectMap(ObjectMap *map)
    #endif
    
    SetGlobalObjectMapToRunner(theTopNode, map);
+   theGlobalObjectMap = map;
    
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage("MathTree::SetGlobalObjectMap() returning\n");
@@ -675,7 +679,7 @@ const StringArray& MathTree::GetWrapperObjectNameArray(bool completeSet)
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the MathTree.
@@ -684,7 +688,7 @@ const StringArray& MathTree::GetWrapperObjectNameArray(bool completeSet)
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* MathTree::Clone(void) const
+GmatBase* MathTree::Clone() const
 {
    return (new MathTree(*this));
 }
@@ -765,8 +769,11 @@ bool MathTree::InitializeParameter(MathNode *node)
                ("MathTree::InitializeParameter() Unable to find " + newName +
                 " from theObjectMap or theGlobalObjectMap\n");
             #endif
-            
-            undefNames = undefNames + ", " + newName;
+
+            if (undefNames == "")
+               undefNames = newName;
+            else
+               undefNames = undefNames + ", " + newName;
          }
       }
       

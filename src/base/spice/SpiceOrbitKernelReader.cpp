@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -224,7 +224,8 @@ void  SpiceOrbitKernelReader::GetCoverageStartAndEnd(StringArray       &kernels,
                forNaifId, (kernels.at(ii)).c_str());
       #endif
       // SPICE expects forward slashes for directory separators
-      std::string kName = GmatStringUtil::Replace(kernels.at(ii), "\\", "/");
+//      std::string kName = GmatStringUtil::Replace(kernels.at(ii), "\\", "/");
+      std::string kName = GetFullKernelPath(kernels.at(ii));
       #ifdef DEBUG_SPK_COVERAGE
          MessageInterface::ShowMessage("--- Setting kernel name to %s\n", kName.c_str());
       #endif

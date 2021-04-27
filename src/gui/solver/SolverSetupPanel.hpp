@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -42,7 +42,7 @@
  * writable parameters using text controls and comboboxes.
  * 
  * The code has been tested using two Optimizers: the VF13ad optimizer and the
- * (incomplete) SteepestDescent optimizer.  The panel functions correctly for
+ * (removed) SteepestDescent optimizer.  The panel functions correctly for
  * both of these optimizers running either as part of a base GMAT build or 
  * through the plug-in interfaces.
  */

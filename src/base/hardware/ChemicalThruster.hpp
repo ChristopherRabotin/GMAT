@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -42,7 +42,8 @@
 class GMAT_API ChemicalThruster : public Thruster
 {
 public:
-
+   
+   //./burn/ImpulsiveBurn.hpp:#define COEFFICIENT_COUNT 16
    static const Integer COEFFICIENT_COUNT = 16;
 
    ChemicalThruster(const std::string &nomme);
@@ -74,6 +75,7 @@ public:
    virtual Real         CalculateMassFlow();
 
 protected:
+   
    /// Array of thrust coefficients
    Real                       cCoefficients[COEFFICIENT_COUNT];
    /// Array of specific impulse coefficients

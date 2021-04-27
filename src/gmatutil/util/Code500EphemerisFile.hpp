@@ -8,6 +8,7 @@
 #include "utildefs.hpp"       // For type Byte
 #include "A1Mjd.hpp"
 #include "Rvector6.hpp"
+#include "TimeSystemConverter.hpp"   // for the TimeSystemConverter singleton
 #include <iostream>
 #include <fstream>
 
@@ -235,6 +236,9 @@ protected:
    };
    
 #pragma pack(pop)
+
+   /// Time converter singleton
+   TimeSystemConverter *theTimeConverter;
 
    // Header_1 information
    double         mSatId;

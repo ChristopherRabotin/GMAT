@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -180,8 +180,8 @@ void TODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Real cosEpsbar        = 0.0;
    
    // convert epoch (A1 MJD) to TT MJD (for calculations)
-   Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
-                TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
+   Real mjdTT = theTimeConverter->Convert(atEpoch.Get(),
+                TimeSystemConverter::A1MJD, TimeSystemConverter::TTMJD,
                 GmatTimeConstants::JD_JAN_5_1941);      
    Real offset = GmatTimeConstants::JD_JAN_5_1941 - GmatTimeConstants::JD_OF_J2000;
    Real tTDB  = (mjdTT + offset) / GmatTimeConstants::DAYS_PER_JULIAN_CENTURY;

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,6 +39,7 @@
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_EXECUTION
+//#define DEBUG_EXTENDED_STATES
 
 //------------------------------------------------------------------------------
 // Static Data
@@ -109,6 +110,8 @@ EphemerisPropagator::EphemerisPropagator(const std::string & typeStr,
    startEpoch = epochString.str();
    startOptions.push_back("FromSpacecraft");
 //   startOptions.push_back("EphemStart");
+
+   theTimeConverter = TimeSystemConverter::Instance();
 }
 
 
@@ -159,6 +162,7 @@ EphemerisPropagator::EphemerisPropagator(const EphemerisPropagator & ep) :
    stepDirection           (ep.stepDirection),
    solarSystem             (NULL)
 {
+   theTimeConverter = TimeSystemConverter::Instance();
 }
 
 
@@ -363,7 +367,8 @@ bool EphemerisPropagator::IsParameterReadOnly(const std::string &label) const
 bool EphemerisPropagator::IsParameterCommandModeSettable(const Integer id) const
 {
    // Override this one from the parent class
-   if (id == EPHEM_STEP_SIZE)
+   if ((id == EPHEM_STEP_SIZE) || (id ==EPHEM_EPOCH_FORMAT) ||
+       (id == EPHEM_START_EPOCH))
       return true;
    
    // And let the parent class handle its own
@@ -694,7 +699,7 @@ bool EphemerisPropagator::SetStringParameter(const Integer id,
          return true;
 
       case EPHEM_EPOCH_FORMAT:
-         if (TimeConverterUtil::IsValidTimeSystem(value))
+         if (theTimeConverter->IsValidTimeSystem(value))
          {
             epochFormat = value;   
          }
@@ -702,7 +707,7 @@ bool EphemerisPropagator::SetStringParameter(const Integer id,
          {
             char msg[512];
             std::string timeRepList;
-            StringArray validReps = TimeConverterUtil::GetValidTimeRepresentations();
+            StringArray validReps = theTimeConverter->GetValidTimeRepresentations();
             for (UnsignedInt i = 0; i < validReps.size(); ++i)
             {
                if (i != 0)
@@ -710,7 +715,7 @@ bool EphemerisPropagator::SetStringParameter(const Integer id,
                timeRepList += validReps[i];
             }
 
-            // The valid format list here should be retrieved from TimeconverterUtil,
+            // The valid format list here should be retrieved from TimeSystemConverter,
             // once that code is refactored
             std::sprintf(msg, errorMessageFormat.c_str(), value.c_str(),
                   PARAMETER_TEXT[EPHEM_EPOCH_FORMAT - PropagatorParamCount].c_str(),
@@ -1212,26 +1217,38 @@ bool EphemerisPropagator::Initialize()
 {
    bool retval = false;
 
-   if (Propagator::Initialize())
+   Integer perSatDim = 6;
+
+   if (psm)
+      perSatDim = psm->GetState()->GetSize();
+
+   #ifdef DEBUG_EXTENDED_STATES
+      MessageInterface::ShowMessage("perSatDim = %d\n", perSatDim);
+   #endif
+
+   Integer oldDim = dimension;
+   dimension = perSatDim * propObjects.size();
+   if (dimension > 0)
    {
-      Real oldDim = dimension;
-      dimension = 6 * propObjects.size();
-      if (dimension > 0)
+      if (state != NULL)
+         delete [] state;
+      state = new Real[dimension];
+
+      if ((j2kState != NULL) && (oldDim != dimension))
       {
-         if (state != NULL)
-            delete [] state;
-         state = new Real[dimension];
-
-         if ((j2kState != NULL) && (oldDim != dimension))
-         {
-            delete [] j2kState;
-            j2kState = NULL;
-         }
-
-         if (j2kState == NULL)
-            j2kState = new Real[dimension];
+         delete [] j2kState;
+         j2kState = NULL;
       }
 
+      if (j2kState == NULL)
+         j2kState = new Real[dimension];
+   }
+
+   //for (UnsignedInt i = 0; i < dimension; ++i)
+   //   state[i] = j2kState[i] = 0.0;
+
+   if (Propagator::Initialize())
+   {
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("Ephemeris has %spropagated\n",
                (((SpaceObject*)(propObjects[0]))->HasEphemPropagated()) ? "" : "not ");
@@ -1368,7 +1385,10 @@ bool EphemerisPropagator::Step(Real dt)
 Integer EphemerisPropagator::GetDimension()
 {
    if (dimension == 0)
-      dimension = 6 * propObjects.size();
+   {
+      Integer perSatDim = (psm ? psm->GetState()->GetSize() : 6);
+      dimension = perSatDim * propObjects.size();
+   }
    return dimension;
 }
 
@@ -1650,13 +1670,28 @@ GmatEpoch EphemerisPropagator::ConvertToRealEpoch(const std::string &theEpoch,
    Real retval = -999.999;
    std::string outStr;
 
-   TimeConverterUtil::Convert(theFormat, fromMjd, theEpoch, "A1ModJulian",
+   theTimeConverter->Convert(theFormat, fromMjd, theEpoch, "A1ModJulian",
          retval, outStr);
 
    if (retval == -999.999)
       throw PropagatorException("Error converting the time string \"" +
             theEpoch + "\"; please check the format for the input string.");
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// Real* GetAnalyticState()
+//------------------------------------------------------------------------------
+/**
+ * State access method for ephemeric propagators
+ *
+ * @return The state pointer
+ */
+//------------------------------------------------------------------------------
+Real* EphemerisPropagator::GetAnalyticState()
+{
+   return j2kState;
 }
 
 
@@ -1751,7 +1786,8 @@ void EphemerisPropagator::MoveToOrigin(Real newEpoch)
       MessageInterface::ShowMessage("]\n\n");
    #endif
 
-   memcpy(state, j2kState, dimension*sizeof(Real));
+   if (state != j2kState)
+      memcpy(state, j2kState, dimension*sizeof(Real));
 
    if (centralBody != j2kBodyName)
    {
@@ -1834,7 +1870,8 @@ void EphemerisPropagator::MoveToOriginGT(GmatTime newEpoch)
    MessageInterface::ShowMessage("]\n\n");
 #endif
 
-   memcpy(state, j2kState, dimension*sizeof(Real));
+   if (state != j2kState)
+      memcpy(state, j2kState, dimension*sizeof(Real));
 
    if (centralBody != j2kBodyName)
    {
@@ -1916,7 +1953,8 @@ void EphemerisPropagator::ReturnFromOrigin(Real newEpoch)
       MessageInterface::ShowMessage("ODEModel::ReturnFromOrigin entered\n");
    #endif
 
-   memcpy(j2kState, state, dimension*sizeof(Real));
+   if (state != j2kState)
+      memcpy(j2kState, state, dimension*sizeof(Real));
    if (centralBody != j2kBodyName)
    {
       Rvector6 cbState, jkState, delta;
@@ -1972,7 +2010,8 @@ void EphemerisPropagator::ReturnFromOriginGT(GmatTime newEpoch)
    MessageInterface::ShowMessage("ODEModel::ReturnFromOriginGT entered\n");
 #endif
 
-   memcpy(j2kState, state, dimension*sizeof(Real));
+   if (state != j2kState)
+      memcpy(j2kState, state, dimension*sizeof(Real));
    if (centralBody != j2kBodyName)
    {
       Rvector6 cbState, jkState, delta;

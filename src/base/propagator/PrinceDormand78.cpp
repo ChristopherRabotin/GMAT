@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -108,13 +108,13 @@ PrinceDormand78 & PrinceDormand78::operator=(const PrinceDormand78& rk)
 
 
 //------------------------------------------------------------------------------
-// Propagator* PrinceDormand78::Clone() const
+// GmatBase* PrinceDormand78::Clone() const
 //------------------------------------------------------------------------------
 /**
  * Method used to create a copy of the object
  */
 //------------------------------------------------------------------------------
-Propagator* PrinceDormand78::Clone() const
+GmatBase* PrinceDormand78::Clone() const
 {
     return new PrinceDormand78(*this);
 }

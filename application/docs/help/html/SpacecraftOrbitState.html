@@ -1,4 +1,4 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Spacecraft Orbit State</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="Resources.html" title="Resources"><link rel="prev" href="SpacecraftNavigation.html" title="Spacecraft Navigation"><link rel="next" href="SpacecraftVisualizationProperties.html" title="Spacecraft Visualization Properties"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Spacecraft Orbit State</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="SpacecraftNavigation.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="SpacecraftVisualizationProperties.html">Next</a></td></tr></table><hr></div><div lang="en_US" class="refentry"><a name="SpacecraftOrbitState"></a><div class="titlepage"></div><a name="N1FA08" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Spacecraft Orbit State</span></h2><p>Spacecraft Orbit State &mdash; The orbital initial conditions</p></div><div class="refsection"><a name="N1FA19"></a><h2>Description</h2><p>GMAT supports a suite of state types for defining the orbital state,
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Spacecraft Orbit State</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ch16.html#N1516B" title="Resources"><link rel="prev" href="SpacecraftHardware.html" title="Spacecraft Hardware"><link rel="next" href="SpacecraftVisualizationProperties.html" title="Spacecraft Visualization Properties"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Spacecraft Orbit State</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="SpacecraftHardware.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="SpacecraftVisualizationProperties.html">Next</a></td></tr></table><hr></div><div lang="en_US" class="refentry"><a name="SpacecraftOrbitState"></a><div class="titlepage"></div><a name="N1D16C" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Spacecraft Orbit State</span></h2><p>Spacecraft Orbit State &mdash; The orbital initial conditions</p></div><div class="refsection"><a name="N1D17D"></a><h2>Description</h2><p>GMAT supports a suite of state types for defining the orbital state,
     including <span class="guilabel">Cartesian</span> and
     <span class="guilabel">Keplerian</span>, among others. In addtion, you can define
     the orbital state in different coordinate systems, for example
@@ -17,7 +17,7 @@
     fields. There are some limitations when setting the orbital state during
     initialization, which are discussed in <a class="xref" href="SpacecraftOrbitState.html#Resources_SpacecraftOrbitState_Remarks" title="Remarks">the section called &ldquo;Remarks&rdquo;</a>. We also include
     examples for setting each state type in commonly used coordinate
-    systems.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a>, <a class="xref" href="Propagator.html" title="Propagator"><span class="refentrytitle">Propagator</span></a>, and <a class="xref" href="SpacecraftEpoch.html" title="Spacecraft Epoch"><span class="refentrytitle">Spacecraft Epoch</span></a></p></div><div class="refsection"><a name="N1FA57"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AltEquinoctialP</span></td><td><p> A measure of the orientation of the orbit.
+    systems.</p><p><span class="ref_seealso">See Also</span>: <a class="xref" href="Spacecraft.html" title="Spacecraft"><span class="refentrytitle">Spacecraft</span></a>, <a class="xref" href="Propagator.html" title="Propagator"><span class="refentrytitle">Propagator</span></a>, and <a class="xref" href="SpacecraftEpoch.html" title="Spacecraft Epoch"><span class="refentrytitle">Spacecraft Epoch</span></a></p></div><div class="refsection"><a name="N1D1BB"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AltEquinoctialP</span></td><td><p> A measure of the orientation of the orbit.
             AltEquinoctialP and AltEquinoctialQ together govern how an orbit
             is oriented. <span class="guilabel">AltEquinotialP</span> =
             sin(<span class="guilabel">INC</span>/2)*sin(<span class="guilabel">RAAN</span>).</p>
@@ -274,7 +274,7 @@
             <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">Y</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Z</span></td><td><p> The z-component of the
             <span class="guilabel">Spacecraft</span> position with respect to the
             coordinate system chosen in the spacecraft's
-            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">Z</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1300</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N20846"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftOrbitEpoch_GUI.png" align="middle" height="531"></td></tr></table></div></div><p>The <span class="guilabel">Spacecraft</span> orbit state dialog box allows
+            <span class="guilabel">CoordinateSystem</span> field. </p> <div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Real</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>-&infin; &lt; <span class="guilabel">Z</span> &lt; &infin;</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set, get</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p>1300</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>GUI, script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N1DFAA"></a><h2>GUI</h2><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftOrbitEpoch_GUI.png" align="middle" height="531"></td></tr></table></div></div><p>The <span class="guilabel">Spacecraft</span> orbit state dialog box allows
     you to set the epoch, coordinate system, and state type values for the
     <span class="guilabel">Spacecraft</span> orbital state. When you specify an orbital
     state, you define the state in the representation selected in the
@@ -300,9 +300,9 @@
     appear as options in the <span class="guibutton">StateType</span> menu. The
     <span class="guilabel">Planetodetic</span> state type cannot be selected untill the
     <span class="guilabel">CoordinateSystem</span> has <span class="guilabel">BodyFixed</span>
-    axes.</p></div><div class="refsection"><a name="Resources_SpacecraftOrbitState_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N2089B"></a><h3>Cartesian State</h3><p>The<span class="guilabel"> Cartesian</span> state is composed of the
+    axes.</p></div><div class="refsection"><a name="Resources_SpacecraftOrbitState_Remarks"></a><h2>Remarks</h2><div class="refsection"><a name="N1DFFF"></a><h3>Cartesian State</h3><p>The<span class="guilabel"> Cartesian</span> state is composed of the
       position and velocity components expressed with respect to the selected
-      <span class="guilabel">CoordinateSystem</span>.</p></div><div class="refsection"><a name="N208A6"></a><h3>Keplerian and Modified Keplerian State Types</h3><p>The <span class="guilabel">Keplerian</span> and
+      <span class="guilabel">CoordinateSystem</span>.</p></div><div class="refsection"><a name="N1E00A"></a><h3>Keplerian and Modified Keplerian State Types</h3><p>The <span class="guilabel">Keplerian</span> and
       <span class="guilabel">ModifiedKeplerian</span> state types use the osculating
       Keplerian orbital elements with respect to the selected
       <span class="guilabel">CoordinateSystem</span>. To use either the
@@ -319,7 +319,7 @@
       <span class="guilabel">INC</span>, <span class="guilabel">RAAN</span>,
       <span class="guilabel">AOP</span>, and <span class="guilabel">TA</span>. The tables and
       figures below describe each <span class="guilabel">Keplerian</span> state element
-      in detail including singularities.</p></div><div class="refsection"><a name="N208EA"></a><h3>Geometry of the Keplerian Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">SMA</span></td><td><p><span class="guilabel">SMA</span> contains information on
+      in detail including singularities.</p></div><div class="refsection"><a name="N1E04E"></a><h3>Geometry of the Keplerian Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">SMA</span></td><td><p><span class="guilabel">SMA</span> contains information on
               the type and size of an orbit. If <span class="guilabel">SMA</span> &gt;
               0 the orbit is elliptic. If <span class="guilabel">SMA</span> &lt;0 the
               orbit is hyperbolic. <span class="guilabel">SMA</span> is infinite for
@@ -386,7 +386,7 @@
               <span class="guilabel">RadPer</span> &gt; 1 meter in state conversions.
               </p></td></tr><tr><td><span class="guilabel">RadApo = 0</span></td><td><p>Singular conic section. GMAT requires
               abs(<span class="guilabel">RadApo</span>) &gt; 1 meter in state
-              conversions. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20A18"></a><h3>Delaunay State Type</h3><p>The conversion between <span class="guilabel">Delaunay</span> and
+              conversions. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1E17C"></a><h3>Delaunay State Type</h3><p>The conversion between <span class="guilabel">Delaunay</span> and
       <span class="guilabel">Cartesian</span> is performed passing through classical
       <span class="guilabel">Keplerian</span> state. Therefore,
       <span class="guilabel">Delaunay</span> state cannot represent parabolic orbits.
@@ -405,13 +405,13 @@
               <span class="guilabel">DelaunayL</span>*sqrt(1-<span class="guilabel">ECC</span>^2)
               </p></td></tr><tr><td><span class="guilabel">DelaunayH</span></td><td><p> The K component of the orbital angular momentum.
               <span class="guilabel">DelaunayH</span> = <span class="guilabel">DelaunayG</span>
-              * cos(<span class="guilabel">INC</span>)</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20A91"></a><h3>Singularities in the Delaunay Elements</h3><p>Singularities in the <span class="guilabel">Delaunay</span> elements is the
+              * cos(<span class="guilabel">INC</span>)</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1E1F5"></a><h3>Singularities in the Delaunay Elements</h3><p>Singularities in the <span class="guilabel">Delaunay</span> elements is the
       same as the <span class="guilabel">Keplerian</span> elements, because it uses the
       <span class="guilabel">Keplerian</span> elements during conversion. See
       &ldquo;Keplerian State&rdquo; section. The table below shows the additional
       singularities regarding the <span class="guilabel">Delaunay</span> state
       type.</p><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">ECC &gt; 1</span></td><td><p><span class="guilabel">DelaunayL</span> is not real for
-              hyperbolic orbits by its definition.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20ABD"></a><h3>Brouwer-Lyddane Mean State Type</h3><p>The <span class="guilabel">BrouwerMeanShort</span> state represents
+              hyperbolic orbits by its definition.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1E221"></a><h3>Brouwer-Lyddane Mean State Type</h3><p>The <span class="guilabel">BrouwerMeanShort</span> state represents
       short-term averaged mean motion under low-order zonal harmonics (i.e.
       J2-J5). Likewise, <span class="guilabel">BrouwerMeanLong</span> state represents
       long-term averaged mean motion under low-order zonal harmonics (i.e.
@@ -430,7 +430,7 @@
               averaged) mean inclination.</p></td></tr><tr><td><p><span class="guilabel">BrouwerLongRAAN</span></p><p><span class="guilabel">BrouwerShortRAAN</span></p></td><td><p>Brouwer-Lyddane long-term averaged (short-term
               averaged) mean RAAN (right ascension of the ascending
               node).</p></td></tr><tr><td><p><span class="guilabel">BrouwerLongSMA</span></p><p><span class="guilabel">BrouwerShortSMA</span></p></td><td><p>Long-term averaged (short-term averaged) mean
-              semi-major axis.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20B2E"></a><h3>Singularities in the Brouwer-Lyddane Mean Elements</h3><p>The table below shows the characteristics of singularities
+              semi-major axis.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1E292"></a><h3>Singularities in the Brouwer-Lyddane Mean Elements</h3><p>The table below shows the characteristics of singularities
       regarding
       <span class="guilabel">BrouwerMeanShort</span>/<span class="guilabel">BrouwerMeanLong</span>
       state and the implemented method to handle the singularities in GMAT
@@ -453,7 +453,7 @@
               has been reported that Cartesian to
               <span class="guilabel">BrouwerMeanLong</span> state does not converge
               statistically. For these cases, GMAT gives a warning message
-              with the current conversion error.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20B75"></a><h3>Spherical State Types</h3><p>The <span class="guilabel">SphericalAZFPA </span>and
+              with the current conversion error.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1E2D9"></a><h3>Spherical State Types</h3><p>The <span class="guilabel">SphericalAZFPA </span>and
       <span class="guilabel">SphericalRADEC</span> state types are composed of the
       polar coordinates of the spacecraft state expressed with respect to the
       selected <span class="guilabel">CoordinateSystem</span>. The two spherical
@@ -467,7 +467,7 @@
       <span class="guilabel">DEC</span>, <span class="guilabel">VMAG</span>,
       <span class="guilabel">AZ</span>I and <span class="guilabel">FPA</span>. The tables and
       figures below describe each spherical state element in detail including
-      singularities.</p></div><div class="refsection"><a name="N20BAD"></a><h3>Geometry of the Spherical Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">RMAG</span></td><td><p>The magnitude of the position
+      singularities.</p></div><div class="refsection"><a name="N1E311"></a><h3>Geometry of the Spherical Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="14%"><col width="86%"></colgroup><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">RMAG</span></td><td><p>The magnitude of the position
               vector.</p></td></tr><tr><td><span class="guilabel">RA</span></td><td><p>The right ascension which is the angle between the
               projection of the position vector into the xy-plane and the
               x-axis measured counterclockwise. </p></td></tr><tr><td><span class="guilabel">DEC</span></td><td><p>The declination which is the angle between tjhe
@@ -481,7 +481,7 @@
               normal to the position vector.</p></td></tr><tr><td><span class="guilabel">RAV</span></td><td><p>The right ascension of velocity. The angle between
               the projection of the velocity vector into the xy-plane and the
               x-axis measured counterclockwise.</p></td></tr><tr><td><span class="guilabel">DECV</span></td><td><p>The flight path azimuth. The angle between the
-              velocity vector and the xy-plane.</p></td></tr></tbody></table></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftOrbitState_Remark_4.png" align="middle" height="476"></td></tr></table></div></div></div><div class="refsection"><a name="N20C03"></a><h3>Singularities in the Spherical Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Singularity</th><th>Comments and Behavior</th></tr></thead><tbody><tr><td><span class="guilabel">RMAG = 0</span></td><td><p>Results in a singular conic section: declination
+              velocity vector and the xy-plane.</p></td></tr></tbody></table></div><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_SpacecraftOrbitState_Remark_4.png" align="middle" height="476"></td></tr></table></div></div></div><div class="refsection"><a name="N1E367"></a><h3>Singularities in the Spherical Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Singularity</th><th>Comments and Behavior</th></tr></thead><tbody><tr><td><span class="guilabel">RMAG = 0</span></td><td><p>Results in a singular conic section: declination
               and flight path angle are undefined. GMAT will not allow
               transformations if <span class="guilabel">RMAG</span> &lt; 1e-10. For
               <span class="guilabel">RMAG</span> values greater than, but near 1e-10,
@@ -490,7 +490,7 @@
               allow transformations if <span class="guilabel">VMAG</span> &lt;
               1e-10.For <span class="guilabel">VMAG</span> values greater than, but
               near 1e-10, loss of precision may occur in transformations.
-              </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20C32"></a><h3>Planetodetic State Type</h3><p>The <span class="guilabel">Planetodetic</span> state type is useful for
+              </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1E396"></a><h3>Planetodetic State Type</h3><p>The <span class="guilabel">Planetodetic</span> state type is useful for
       specifying states relative to the surface of a central body. It is very
       similar to the spherical state types, but uses the central body's
       flattening in its definition. To use the
@@ -503,7 +503,7 @@
               fixed frame.</p></td></tr><tr><td><span class="guilabel">PlanetodeticAZI</span></td><td><p>Orbital velocity azimuth in the fixed
               frame.</p></td></tr><tr><td><span class="guilabel">PlanetodeticHFPA</span></td><td><p>Horizontal flight path angle.
               <span class="guilabel">HFPA</span> = 90 -
-              <span class="guilabel">VFPA</span></p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20C84"></a><h3>Singularities in the Planetodetic Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Singularity</th><th>Comments and Behavior</th></tr></thead><tbody><tr><td><span class="guilabel">PlanetodeticRMAG = 0</span></td><td><p>Results in a singular conic section: declination
+              <span class="guilabel">VFPA</span></p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1E3E8"></a><h3>Singularities in the Planetodetic Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Singularity</th><th>Comments and Behavior</th></tr></thead><tbody><tr><td><span class="guilabel">PlanetodeticRMAG = 0</span></td><td><p>Results in a singular conic section: declination
               and flight path angle are undefined. GMAT will not allow
               transformations if <span class="guilabel">PlanetodeticRMAG</span> &lt;
               1e-10. For <span class="guilabel">PlanetodeticRMAG</span> values greater
@@ -513,7 +513,7 @@
               allow transformations if <span class="guilabel">PlanetodeticVMAG</span>
               &lt; 1e-10. For <span class="guilabel">PlanetodeticVMAG</span> values
               greater than, but near 1e-10, loss of precision may occur in
-              transformations. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20CB3"></a><h3>Equinoctial State Type</h3><p>GMAT supports the <span class="guilabel">Equinoctial</span> state
+              transformations. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1E417"></a><h3>Equinoctial State Type</h3><p>GMAT supports the <span class="guilabel">Equinoctial</span> state
       representation which is non-singular for elliptic orbits with
       inclinations less than 180 degrees. To use the
       <span class="guilabel">Equinoctial</span> state type, the spacecraft&rsquo;s coordinate
@@ -540,12 +540,12 @@
               </p></td></tr><tr><td><span class="guilabel">MLONG</span></td><td><p> A measure of the mean location of the spacecraft
               in its orbit. <span class="guilabel">MLONG</span> =
               <span class="guilabel">AOP</span> +<span class="guilabel"> RAAN</span> +
-              <span class="guilabel">MA</span>. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20D42"></a><h3>Singularities in the Equinoctial Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">INC = 180</span></td><td><p><span class="guilabel">RAAN</span> is undefined. If
+              <span class="guilabel">MA</span>. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1E4A6"></a><h3>Singularities in the Equinoctial Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">INC = 180</span></td><td><p><span class="guilabel">RAAN</span> is undefined. If
               <span class="guilabel">INC</span> &gt; 180 - 1.0e-11, GMAT sets
               <span class="guilabel">RAAN</span> to 0 degrees. GMAT does not support
               <span class="guilabel">Equinoctial</span> elements for true retrograde
               orbits. </p></td></tr><tr><td><span class="guilabel">ECC &gt; 0.9999999</span></td><td><p><span class="guilabel">Equinoctial</span> elements are not
-              defined for parabolic or hyperbolic orbits. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20D72"></a><h3>Alternate Equinoctial State Type</h3><p>The <span class="guilabel">AlternateEquinoctial</span> state type is a
+              defined for parabolic or hyperbolic orbits. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1E4D6"></a><h3>Alternate Equinoctial State Type</h3><p>The <span class="guilabel">AlternateEquinoctial</span> state type is a
       slight variation on the <span class="guilabel">Equinoctial</span> elements that
       uses sin(<span class="guilabel">INC</span>/2) instead of
       tan(<span class="guilabel">INC</span>/2) in the "P" and "Q" elements. Both
@@ -558,7 +558,7 @@
               <span class="guilabel">AltEquinoctialQ</span> together govern how an
               orbit is oriented. <span class="guilabel">AltEquinotialP</span> =
               sin(<span class="guilabel">INC</span>/2)*cos(<span class="guilabel">RAAN</span>).
-              </p></td></tr><tr><td><span class="guilabel">MLONG</span></td><td><p> See Equinoctial section.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20DDD"></a><h3>Modified Equinoctial State Type</h3><p>The <span class="guilabel">ModifiedEquinoctial</span> state representation
+              </p></td></tr><tr><td><span class="guilabel">MLONG</span></td><td><p> See Equinoctial section.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1E541"></a><h3>Modified Equinoctial State Type</h3><p>The <span class="guilabel">ModifiedEquinoctial</span> state representation
       is non-singular for circular, elliptic, parabolic, and hyperbolic
       orbits. The only singularity is for retrograde equatorial orbits,
       because, like <span class="guilabel">Equinoctial</span> and
@@ -580,11 +580,11 @@
               <span class="guilabel">EquinoctialP</span>.</p></td></tr><tr><td><span class="guilabel">TLONG</span></td><td><p> A measure of the true location of the spacecraft
               in its orbit. <span class="guilabel">TLONG</span> =
               <span class="guilabel">AOP</span> + <span class="guilabel">RAAN</span> +
-              <span class="guilabel">TA</span>. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20E60"></a><h3>Singularities in the Modified Equinoctial Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">INC = 180</span></td><td><p>Similar to <span class="guilabel">Equinoctial</span>
+              <span class="guilabel">TA</span>. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1E5C4"></a><h3>Singularities in the Modified Equinoctial Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">INC = 180</span></td><td><p>Similar to <span class="guilabel">Equinoctial</span>
               elements, there is singularity at <span class="guilabel">INC</span> = 180
               deg. GMAT does not support
               <span class="guilabel">ModifiedEquinoctial</span> elements for retrograde
-              equatorial orbits. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20E85"></a><h3>Hyperbolic Asymptote State Type</h3><p>GMAT supports two related hyperbolic asymptote state types:
+              equatorial orbits. </p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1E5E9"></a><h3>Hyperbolic Asymptote State Type</h3><p>GMAT supports two related hyperbolic asymptote state types:
       <span class="guilabel">IncomingAsymptote</span> for defining the incoming
       hyperbolic asymptote, and <span class="guilabel">OutgoingAsymptote</span>, for
       defining the outgoing hyperbolic asymptote. Both representations are
@@ -613,7 +613,7 @@
               is the B-vector azimuth at infinity of the incoming/outgoing
               asymptote measured counter-clockwise from south. If
               <span class="guilabel">C3Energy</span> &lt; 0 the apsides vector is
-              substituted for the outgoing/incoming asymptote.</p></td></tr><tr><td><span class="guilabel">TA</span></td><td><p> See <span class="guilabel">Keplerian</span>.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20F1D"></a><h3>Singularities in the Hyperbolic Asymptote Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">IncomingC3Energy/OutgoingC3Energy =
+              substituted for the outgoing/incoming asymptote.</p></td></tr><tr><td><span class="guilabel">TA</span></td><td><p> See <span class="guilabel">Keplerian</span>.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1E681"></a><h3>Singularities in the Hyperbolic Asymptote Elements</h3><div class="informaltable"><table border="1"><colgroup><col width="33%"><col width="67%"></colgroup><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">IncomingC3Energy/OutgoingC3Energy =
               0</span></td><td><p>If
               <span class="guilabel">IncomingC3Energy</span>/<span class="guilabel">OutgoingC3Energy</span>
               = 0 the spacecraft has a parabolic orbit. Hyperbolic asymptote
@@ -627,7 +627,7 @@
               z-axis</span></td><td><p> If the asymptote vector is parallel or
               antiparallel to coordinate system&rsquo;s z-direction, then the
               B-plane is undefined. It must be avoided by choosing either a
-              proper coordinate system or set of elements.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N20F56"></a><h3>State Component Interactions with the Spacecraft Coordinate
+              proper coordinate system or set of elements.</p></td></tr></tbody></table></div></div><div class="refsection"><a name="N1E6BA"></a><h3>State Component Interactions with the Spacecraft Coordinate
       System Field</h3><p>When you define <span class="guilabel">Spacecraf</span>t state elements
       such as <span class="guilabel">SMA</span>, <span class="guilabel">X</span>, or
       <span class="guilabel">DEC</span> for example, these values are set in
@@ -647,7 +647,7 @@ aSpacecraft.X = 1000  </code>      </pre><p>When the script lines above are exec
       mode; see later remarks for more information).</p><pre class="programlisting"><code class="code">aSpacecraft.CoordinateSystem = EarthMJ2000Eq
 aSpacecraft.SMA = 8000
 aSpacecraft.CoordinateSystem = EarthFixed
-aSpacecraft.X = 6000</code></pre></div><div class="refsection"><a name="N20F9C"></a><h3>State Component Interactions with the Spacecraft Epoch
+aSpacecraft.X = 6000</code></pre></div><div class="refsection"><a name="N1E700"></a><h3>State Component Interactions with the Spacecraft Epoch
       Field</h3><p>When you specify the <span class="guilabel">Spacecraft</span>&rsquo;s epoch, you
       define the initial epoch of the spacecraft in the specified coordinate
       system. If your choice for the <span class="guilabel">Spacecraft</span>'s
@@ -688,7 +688,7 @@ Y  = -6643.18687
 Z  =  1300.02073
 VX =  7.45981
 VY = -2.47767
-VZ =  0.99953       </code>      </pre></div><div class="refsection"><a name="N20FE2"></a><h3>Scripting Limitations during Initialization</h3><p>When setting the <span class="guilabel">Spacecraft</span> orbit state in a
+VZ =  0.99953       </code>      </pre></div><div class="refsection"><a name="N1E746"></a><h3>Scripting Limitations during Initialization</h3><p>When setting the <span class="guilabel">Spacecraft</span> orbit state in a
       script, there are a few limitations to be aware of. In the
       initialization portion of the script (before the
       <span class="guilabel">BeginMissionSequence</span> command), you should set the
@@ -705,7 +705,7 @@ VZ =  0.99953       </code>      </pre></div><div class="refsection"><a name="N2
       two. If you need to mix state types, coordinate systems, or epochs to
       define the state of a spacecraft, you must set the state using scripting
       in the mission sequence (after the
-      <span class="guilabel">BeginMissionSequence</span> command).</p></div><div class="refsection"><a name="N21010"></a><h3>Shared State Components</h3><p>Some state components, such as <span class="guilabel">SMA</span>, are
+      <span class="guilabel">BeginMissionSequence</span> command).</p></div><div class="refsection"><a name="N1E774"></a><h3>Shared State Components</h3><p>Some state components, such as <span class="guilabel">SMA</span>, are
       shared among multiple state representations. In the mission sequence,
       GMAT does not require you to specify the state representation that you
       are setting; rather, you may specify a combination of elements from
@@ -726,7 +726,7 @@ aSpacecraft.OutgoingDHA = 90 % conversion goes through OutgoingAsymptote
 aSpacecraft.TA = 45          % conversion goes through Keplerian</pre><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>When setting state parameters (especially in Keplerian-based
         representations) using non-default dependencies, be careful of the
         loss of precision caused by large translations in the intermediate
-        orbit.</p></div></div></div><div class="refsection"><a name="N2107F"></a><h2>Examples</h2><div class="informalexample"><p>Define a <span class="guilabel">Spacecraft</span>&rsquo;s Earth MJ2000Eq
+        orbit.</p></div></div></div><div class="refsection"><a name="N1E7E3"></a><h2>Examples</h2><div class="informalexample"><p>Define a <span class="guilabel">Spacecraft</span>&rsquo;s Earth MJ2000Eq
       coordinates in the <span class="guilabel">Keplerian</span> representation:</p><pre class="programlisting"><code class="code">Create Spacecraft aSpacecraft
 aSpacecraft.CoordinateSystem = EarthMJ2000Eq
 aSpacecraft.SMA  = 7100
@@ -796,4 +796,4 @@ aSpacecraft.EquinoctialH = 0.00905
 aSpacecraft.EquinoctialK = 0.00424
 aSpacecraft.EquinoctialP = -0.1059
 aSpacecraft.EquinoctialQ = 0.14949
-aSpacecraft.MLONG = 247.4528</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="SpacecraftNavigation.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="Resources.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="SpacecraftVisualizationProperties.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Spacecraft Navigation&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Spacecraft Visualization Properties</td></tr></table></div></body></html>
+aSpacecraft.MLONG = 247.4528</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="SpacecraftHardware.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ch16.html#N1516B">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="SpacecraftVisualizationProperties.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Spacecraft Hardware&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Spacecraft Visualization Properties</td></tr></table></div></body></html>

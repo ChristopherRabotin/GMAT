@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -190,14 +190,16 @@ Integer TFSMagicNumbers::FillMagicNumber(ObservationData* theObs)
    if ((theObs->typeName == "RANGE") && (theObs->unit == "RU") &&
        (theObs->strands.size() == 1) && (theObs->strands[0].size() == 3))
    {
-      theObs->typeName = "DSNTwoWayRange";
+      //theObs->typeName = "DSNTwoWayRange";
+      theObs->typeName = "DSN_SeqRange";
       remapData = true;
    }
 
    if ((theObs->typeName == "RECEIVE_FREQ") && // (theObs->units == "RU") &&
        (theObs->strands.size() == 1) && (theObs->strands[0].size() == 3))
    {
-      theObs->typeName = "DSNTwoWayDoppler";
+      //theObs->typeName = "DSNTwoWayDoppler";
+      theObs->typeName = "DSN_TCP";
       remapData = true;
    }
 
@@ -250,23 +252,36 @@ StringArray TFSMagicNumbers::GetAvailableTypes()
    availableTypes.push_back("DSN_TCP");
    availableTypes.push_back("GPS_PosVec");
    availableTypes.push_back("Range");
+   availableTypes.push_back("Range_Skin");
    availableTypes.push_back("RangeRate");
+   //availableTypes.push_back("SN_Range");                     // made changes by TUAN NGUYEN
+   //availableTypes.push_back("SN_Doppler");                   // made changes by TUAN NGUYEN
+   availableTypes.push_back("Azimuth");
+   availableTypes.push_back("Elevation");
+   availableTypes.push_back("XEast");
+   availableTypes.push_back("YNorth");
+   availableTypes.push_back("XSouth");
+   availableTypes.push_back("YEast");
+   //availableTypes.push_back("RightAscension");               // made changes by TUAN NGUYEN
+   //availableTypes.push_back("Declination");                  // made changes by TUAN NGUYEN
 
-   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();        // fix bug: GMT-5955
-   if (runmode == GmatGlobal::TESTING)                                   // fix bug: GMT-5955
-   {
-      availableTypes.push_back("SN_Range");
-      availableTypes.push_back("SN_Doppler");
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();        // fix bug: GMT-5955   // made changes by TUAN NGUYEN
+   if (runmode == GmatGlobal::TESTING)                                   // fix bug: GMT-5955   // made changes by TUAN NGUYEN
+   {                                                                                            // made changes by TUAN NGUYEN
+      availableTypes.push_back("SN_Range");                                                     // made changes by TUAN NGUYEN
+      availableTypes.push_back("SN_Doppler");                                                   // made changes by TUAN NGUYEN
+      availableTypes.push_back("RightAscension");                                               // made changes by TUAN NGUYEN
+      availableTypes.push_back("Declination");                                                  // made changes by TUAN NGUYEN
    }
 
    return availableTypes;
 }
 
 
-std::map<std::string, std::string> TFSMagicNumbers::GetDeprecatedTypeMap()
-{
-   return depTypeMap;
-}
+//std::map<std::string, std::string> TFSMagicNumbers::GetDeprecatedTypeMap()
+//{
+//   return depTypeMap;
+//}
 
 
 //------------------------------------------------------------------------------
@@ -442,6 +457,7 @@ void TFSMagicNumbers::SetType(ObservationData* forData)
 #define   DSN_SEQRANGE_TYPE_INDEX         MAGIC_NUMBER_BASE+4
 #define   GN_DOPPLER_TYPE_INDEX           MAGIC_NUMBER_BASE+12
 #define   DSN_TCP_TYPE_INDEX              MAGIC_NUMBER_BASE+6
+#define   RANGE_SKIN_TYPE_INDEX           MAGIC_NUMBER_BASE+24
 
 #define   RANGERATEKPS_TYPE_INDEX         MAGIC_NUMBER_BASE+8
 #define   POINT_RANGERATE_TYPE_INDEX      MAGIC_NUMBER_BASE+9
@@ -450,6 +466,16 @@ void TFSMagicNumbers::SetType(ObservationData* forData)
 #define   SN_DOPPLER_TYPE_INDEX           MAGIC_NUMBER_BASE+13
 
 #define   GPS_POSVEC_TYPE_INDEX           MAGIC_NUMBER_BASE+14
+
+#define   AZIMUTH_TYPE_INDEX              MAGIC_NUMBER_BASE+16
+#define   ELEVATION_TYPE_INDEX            MAGIC_NUMBER_BASE+17
+#define   X_EAST_TYPE_INDEX               MAGIC_NUMBER_BASE+18
+#define   Y_NORTH_TYPE_INDEX              MAGIC_NUMBER_BASE+19
+#define   X_SOUTH_TYPE_INDEX              MAGIC_NUMBER_BASE+20
+#define   Y_EAST_TYPE_INDEX               MAGIC_NUMBER_BASE+21
+#define   RIGHT_ASC_TYPE_INDEX            MAGIC_NUMBER_BASE+22
+#define   DECLINATION_TYPE_INDEX          MAGIC_NUMBER_BASE+23
+
 
 TFSMagicNumbers::TFSMagicNumbers() :
    lastNumber        (MAGIC_NUMBER_BASE)
@@ -625,6 +651,26 @@ TFSMagicNumbers::TFSMagicNumbers() :
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
    //++lastNumber;
+   
+   // Range Skin two way range
+   lastNumber = RANGE_SKIN_TYPE_INDEX;
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 2;
+   nodes.clear();
+   nodes.push_back("T1");
+   nodes.push_back("S1");
+   nodes.push_back("T1");
+   lue->nodes.push_back(nodes);
+   lue->type = "Range_Skin";
+   lue->multFactor = 1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
 
    // DSN two way range as used in the TDM file
    lastNumber = MAGIC_NUMBER_BASE + 7;
@@ -826,14 +872,177 @@ TFSMagicNumbers::TFSMagicNumbers() :
    magicNumbers.push_back(lastNumber);
    //++lastNumber;
 
+
+
+   // Azimuth angle, 2 participants
+   lastNumber = AZIMUTH_TYPE_INDEX;
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 2;
+   nodes.clear();
+   nodes.push_back("T1");
+   nodes.push_back("S1");
+   nodes.push_back("T1");
+   lue->nodes.push_back(nodes);
+   lue->type = "Azimuth";
+   lue->multFactor = 1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+
+   // Elevation angle, 2 participants
+   lastNumber = ELEVATION_TYPE_INDEX;
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 2;
+   nodes.clear();
+   nodes.push_back("T1");
+   nodes.push_back("S1");
+   nodes.push_back("T1");
+   lue->nodes.push_back(nodes);
+   lue->type = "Elevation";
+   lue->multFactor = 1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+
+   // X East angle, 2 participants
+   lastNumber = X_EAST_TYPE_INDEX;
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 2;
+   nodes.clear();
+   nodes.push_back("T1");
+   nodes.push_back("S1");
+   nodes.push_back("T1");
+   lue->nodes.push_back(nodes);
+   lue->type = "XEast";
+   lue->multFactor = 1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+
+   // Y North angle, 2 participants
+   lastNumber = Y_NORTH_TYPE_INDEX;
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 2;
+   nodes.clear();
+   nodes.push_back("T1");
+   nodes.push_back("S1");
+   nodes.push_back("T1");
+   lue->nodes.push_back(nodes);
+   lue->type = "YNorth";
+   lue->multFactor = 1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+
+   // X South angle, 2 participants
+   lastNumber = X_SOUTH_TYPE_INDEX;
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 2;
+   nodes.clear();
+   nodes.push_back("T1");
+   nodes.push_back("S1");
+   nodes.push_back("T1");
+   lue->nodes.push_back(nodes);
+   lue->type = "XSouth";
+   lue->multFactor = 1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+
+   // Y East angle, 2 participants
+   lastNumber = Y_EAST_TYPE_INDEX;
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 2;
+   nodes.clear();
+   nodes.push_back("T1");
+   nodes.push_back("S1");
+   nodes.push_back("T1");
+   lue->nodes.push_back(nodes);
+   lue->type = "YEast";
+   lue->multFactor = 1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+
+   // Right Ascension angle, 2 participants
+   lastNumber = RIGHT_ASC_TYPE_INDEX;
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 2;
+   nodes.clear();
+   nodes.push_back("T1");
+   nodes.push_back("S1");
+   nodes.push_back("T1");
+   lue->nodes.push_back(nodes);
+   lue->type = "RightAscension";
+   lue->multFactor = 1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+
+   // Declination angle, 2 participants
+   lastNumber = DECLINATION_TYPE_INDEX;
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 2;
+   nodes.clear();
+   nodes.push_back("T1");
+   nodes.push_back("S1");
+   nodes.push_back("T1");
+   lue->nodes.push_back(nodes);
+   lue->type = "Declination";
+   lue->multFactor = 1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+
+
    // Build the factor map
    factorMap.clear();
    for (UnsignedInt i = 0; i < lookupTable.size(); ++i)
       factorMap[lookupTable[i]->magicNumber] = lookupTable[i]->multFactor;
 
-   // Define deprecated type map
-   depTypeMap["DSNRange"] = "DSN_SeqRange";
-   depTypeMap["Doppler"]  = "DSN_TCP";
+   //// Define deprecated type map
+   //depTypeMap["DSNRange"] = "DSN_SeqRange";
+   //depTypeMap["Doppler"]  = "DSN_TCP";
 }
 
 
@@ -849,4 +1058,5 @@ TFSMagicNumbers::~TFSMagicNumbers()
    // Clean up memory
    for (UnsignedInt i = 0; i < lookupTable.size(); ++i)
       delete lookupTable[i];
+   lookupTable.clear();                              // made changes by TUAN NGUYEN
 }

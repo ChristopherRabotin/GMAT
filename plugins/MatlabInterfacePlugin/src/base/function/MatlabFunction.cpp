@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -36,6 +36,11 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_MATLAB_FUNCTION
+//#define DEBUG_FUNCTION_SET
+
+//------------------------------------------------------------------------------
+// public methods
+//------------------------------------------------------------------------------
 
 
 //------------------------------------------------------------------------------
@@ -197,42 +202,9 @@ bool MatlabFunction::SetStringParameter(const Integer id, const std::string &val
    {
    case FUNCTION_PATH:
       {
-         // Compose full path if it has relative path.
-         // Assuming if first char has '.', it has relative path.
-         std::string temp = GmatStringUtil::Trim(value);
-         if (temp[0] == '.')
-         {
-            FileManager *fm = FileManager::Instance();
-            std::string currPath = fm->GetCurrentWorkingDirectory();
-            
-            #ifdef DEBUG_FUNCTION_SET
-            MessageInterface::ShowMessage("   currPath=%s\n", currPath.c_str());
-            #endif
-            
-            if (temp[1] != '.')
-               functionPath = currPath + temp.substr(1);
-            else
-            {
-               functionPath = currPath + '/';
-               functionPath = functionPath + temp;
-            }
-         }
-         else
-         {
-            functionPath = value;
-         }
+         bool retval = SetMatlabFunctionPath(value);
          
-         // Remove path
-         functionName = GmatFileUtil::ParseFileName(functionPath);
-         
-         #ifdef DEBUG_FUNCTION_SET
-         MessageInterface::ShowMessage
-            ("   functionPath=<%s>\n", functionPath.c_str());
-         MessageInterface::ShowMessage
-            ("   functionName=<%s>\n", functionName.c_str());
-         #endif
-         
-         return true;
+         return retval;
       }
    case FUNCTION_NAME:
       {
@@ -253,5 +225,96 @@ bool MatlabFunction::SetStringParameter(const std::string &label,
                                         const std::string &value)
 {
    return SetStringParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
+// protected methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// bool SetMatlabFunctionPath(const std::string &path)
+//------------------------------------------------------------------------------
+bool MatlabFunction::SetMatlabFunctionPath(const std::string &path)
+{
+   #ifdef DEBUG_FUNCTION_SET
+      MessageInterface::ShowMessage
+      ("MatlabFunction::SetMatlabFunctionPath() <%p> entered,"
+       "path='%s'\n", this, path.c_str());
+   #endif
+   
+   FileManager *fm = FileManager::Instance();
+
+   // Compose full path if it has relative path.
+   // Assuming if first char has '.', it has relative path.
+   std::string temp = GmatStringUtil::Trim(path);
+   #ifdef DEBUG_FUNCTION_SET
+      MessageInterface::ShowMessage("   temp=%s\n", temp.c_str());
+   #endif
+   if (temp[0] == '.')
+   {
+      //            std::string currPath = fm->GetCurrentWorkingDirectory();
+      // Look relative to the directory that contains the current
+      // script first
+      std::string currPath = fm->GetGmatWorkingDirectory();
+      
+      #ifdef DEBUG_FUNCTION_SET
+         MessageInterface::ShowMessage("   currPath=%s\n", currPath.c_str());
+      #endif
+      
+      if (temp[1] != '.')
+         functionPath = currPath + temp.substr(1); // WCS - why no slash here too?
+      else
+      {
+         functionPath = currPath + '/';
+         functionPath += temp;
+      }
+      #ifdef DEBUG_FUNCTION_SET
+         MessageInterface::ShowMessage("   functionPath set to %s\n",
+                                       functionPath.c_str());
+      #endif
+      
+      // Check to see if this path exists; if not, try relative to the
+      // bin folder
+      if (!fm->DoesDirectoryExist(functionPath))
+      {
+         std::string binPath = fm->GetCurrentWorkingDirectory();
+         if (temp[1] != '.')
+            functionPath = binPath + temp.substr(1); // WCS - why no slash here too?
+         else
+         {
+            functionPath = binPath + '/';
+            functionPath += temp;
+         }
+      }
+   }
+   else
+   {
+      functionPath = path;
+   }
+   
+   #ifdef DEBUG_FUNCTION_SET
+      MessageInterface::ShowMessage
+                        ("   functionPath=<%s>\n", functionPath.c_str());
+      MessageInterface::ShowMessage
+                        ("   functionName=<%s>\n", functionName.c_str());
+   #endif
+   
+   
+   // Add to MatlabFunction path so that nested function can be found
+   // Do we need to add to FileManager function path? exclude it (LOJ: 2015.03.17)
+   std::string funcPathOnly = GmatFileUtil::ParsePathName(functionPath);
+   #ifdef DEBUG_FUNCTION_SET
+      MessageInterface::ShowMessage
+                        ("   ===> Adding MatlabFunction path '%s' to "
+                         "FileManager for function '%s'\n",
+                        funcPathOnly.c_str(), GetName().c_str());
+   #endif
+   fm->AddMatlabFunctionPath(funcPathOnly);
+   
+   // Remove path for function name
+   functionName = GmatFileUtil::ParseFileName(functionPath);
+   
+   return true;
 }
 

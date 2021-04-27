@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -140,6 +140,7 @@ Propagator::Propagator(const std::string &typeStr,
       dimension           (0),
       physicalModel       (NULL),
       finalStep           (false),
+      followUpStep        (false),
       j2kBodyName         ("Earth"),
       j2kBody             (NULL),
       centralBody         ("Earth"),
@@ -186,6 +187,7 @@ Propagator::Propagator(const Propagator& p)
       dimension           (p.dimension),
       physicalModel       (NULL),
       finalStep           (false),
+      followUpStep        (false),
       j2kBodyName         (p.j2kBodyName),
       j2kBody             (NULL),
       centralBody         (p.centralBody),
@@ -224,6 +226,7 @@ Propagator& Propagator::operator=(const Propagator& p)
     resetInitialData = true;
     alwaysUpdateStepsize = p.alwaysUpdateStepsize;
     finalStep = false;    
+    followUpStep = false;
 
     j2kBodyName = p.j2kBodyName;
     j2kBody     = NULL;
@@ -703,8 +706,10 @@ bool Propagator::Initialize()
                "not defined");
    }
    else
+   {
+      inState = outState = GetAnalyticState();
       isInitialized = true;
-
+   }
     
     if (!isInitialized)
        throw PropagatorException("Propagator failed to initialize");
@@ -769,6 +774,30 @@ void Propagator::ResetInitialData()
 }
 
 //------------------------------------------------------------------------------
+// void UpdateInitialData(bool dynamicOnly, bool updateEpoch)
+//------------------------------------------------------------------------------
+/**
+ * Refreshes initial data
+ *
+ * Propagators that use ODE Models call into them for the refresh.  Others
+ * manage the data update here.
+ *
+ * @param dynamicOnly Flag indicating only dynamic properties should be updated
+ *                    (false by default)
+ * @param updateEpoch Flag indicating epoch data should be updated
+ *                    (true by default)
+ *
+ * @note For propagators that don't have ODEModels, this method does nothing.
+ *       Derived classes override it as needed.
+ */
+//------------------------------------------------------------------------------
+void Propagator::UpdateInitialData(bool dynamicOnly, bool updateEpoch)
+{
+   if (physicalModel->IsOfType("ODEModel"))
+      ((ODEModel*)physicalModel)->UpdateInitialData(dynamicOnly, updateEpoch);
+}
+
+//------------------------------------------------------------------------------
 // const Real * Propagator::AccessOutState()
 //------------------------------------------------------------------------------
 /**
@@ -805,6 +834,39 @@ Integer Propagator::GetPropagatorOrder() const
 bool Propagator::UsesODEModel()
 {
    return true;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetPropOriginName()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of the propagator origin
+ *
+ * @return The name
+ */
+//------------------------------------------------------------------------------
+std::string Propagator::GetPropOriginName()
+{
+   return centralBody;
+}
+
+//------------------------------------------------------------------------------
+// SpacePoint* GetPropOrigin()
+//------------------------------------------------------------------------------
+/**
+ * Access method for the propagator origin.
+ *
+ * This access is made through the ODE model for propagators that use one.
+ * Analytic propagators supply it using this method.
+ *
+ * @param
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
+SpacePoint* Propagator::GetPropOrigin()
+{
+   return propOrigin;
 }
 
 
@@ -1137,6 +1199,22 @@ bool Propagator::RawStep(Real dt)
 //------------------------------------------------------------------------------
 // Protected methods
 //------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+// Real* GetAnalyticState()
+//------------------------------------------------------------------------------
+/**
+ * AState access method used for propagators that do not use an ODEModel
+ *
+ * @return A state pointer (nullptr by default)
+ */
+//------------------------------------------------------------------------------
+Real* Propagator::GetAnalyticState()
+{
+   return nullptr;
+}
+
 
 //------------------------------------------------------------------------------
 // void MoveToOrigin(Real newEpoch)

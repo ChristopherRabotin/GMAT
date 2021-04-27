@@ -1,0 +1,83 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>ProcessNoiseModel</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL Stylesheets V1.78.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="ch19.html#N24EB6" title="Resources"><link rel="prev" href="ExtendedKalmanFilter.html" title="ExtendedKalmanFilter"><link rel="next" href="Receiver.html" title="Receiver"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">ProcessNoiseModel</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="ExtendedKalmanFilter.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Receiver.html">Next</a></td></tr></table><hr></div><div class="refentry"><a name="ProcessNoiseModel"></a><div class="titlepage"></div><a name="N26322" class="indexterm"></a><a name="N26325" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">ProcessNoiseModel</span></h2><p>ProcessNoiseModel &mdash; Used to specify process noise for estimation when using the
+    ExtendedKalmanFilter estimator.</p></div><div class="refsection"><a name="N26336"></a><h2>Description</h2><p>A <span class="guilabel">ProcessNoiseModel</span> is assigned on the
+    <span class="guilabel">ProcessNoiseModel</span> field of an instance of
+    <span class="guilabel">Spacecraft</span> to allow an
+    <span class="guilabel">ExtendedKalmanFilter</span> to account for general errors in
+    force modeling.</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p><span class="guilabel">ProcessNoiseModel</span> is an alpha-level resource
+      and should not be used for operational support. Access to this resource
+      is disabled by default. To enable access to the ProcessNoiseModel
+      resource, comment-in the <span class="guilabel">libEKF</span> plug-in in the GMAT
+      <code class="literal">gmat_startup_file.txt</code> file.</p></div><p>See also <a class="xref" href="ExtendedKalmanFilter.html" title="ExtendedKalmanFilter"><span class="refentrytitle">ExtendedKalmanFilter</span></a>, <a class="xref" href="SpacecraftNavigation.html" title="Spacecraft Navigation"><span class="refentrytitle">Spacecraft Navigation</span></a></p></div><div class="refsection"><a name="N26359"></a><h2>Fields</h2><div class="informaltable"><table border="1"><colgroup><col width="25%"><col width="75%"></colgroup><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody><tr><td><span class="guilabel">AccelNoiseSigma</span></td><td><p>Three-axis process noise sigma. The root variance
+            along each axis of an assumed Gaussian white noise
+            process.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Array</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Real &gt;= 0</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">[0, 0, 0]</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Depends on process noise model type; see remarks
+                    below</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">CoordinateSystem</span></td><td><p>Reference coordinate system for the process noise
+            acceleration sigma vector. </p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>String</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p>Name of any built-in or user defined
+                    <span class="guilabel">CoordinateSystem</span> resource</p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">EarthMJ2000Eq</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr><tr><td><span class="guilabel">Type</span></td><td><p>Process noise modeling type. See remarks below for
+            additional details.</p><div class="variablelist"><table border="0" class="variablelist"><colgroup><col valign="top" align="left"><col></colgroup><tbody><tr><td><p><span class="term">Data Type</span></p></td><td><p>Enumeration</p></td></tr><tr><td><p><span class="term">Allowed Values</span></p></td><td><p><span class="guilabel">StateNoiseCompensation</span></p></td></tr><tr><td><p><span class="term">Access</span></p></td><td><p>set</p></td></tr><tr><td><p><span class="term">Default Value</span></p></td><td><p><span class="guilabel">StateNoiseCompensation</span></p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr><tr><td><p><span class="term">Interfaces</span></p></td><td><p>script</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection"><a name="N263F9"></a><h2>Remarks</h2><div class="refsection"><a name="N263FC"></a><h3>State Noise Compensation</h3><p>The <span class="guilabel">StateNoiseCompensation</span> process noise type
+      implements the process noise algorithm described in Tapley, Schutz, and
+      Born, <span class="emphasis"><em>Statistical Orbit Determination</em></span>, Section 4.9
+      and Appendix F. The process noise is assumed to be an additive Gaussian
+      white noise process applied to the total deterministic acceleration. For
+      this scheme, the user provides the diagonal elements of the following
+      matrix in a chosen reference frame.</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ProcessNoiseModel_SNC_PNSD.png" align="middle" height="93"></td></tr></table></div></div><p>where <span class="emphasis"><em>q<sub>1</sub></em></span>,
+      <span class="emphasis"><em>q<sub>2</sub></em></span>, and
+      <span class="emphasis"><em>q<sub>3</sub></em></span> are the squares of the
+      elements of the specified <span class="guilabel">AccelNoiseSigma</span> in the
+      selected <span class="guilabel">CoordinateSystem</span>. The process noise
+      <span class="bold"><strong>S</strong></span> is then given by the matrix</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ProcessNoiseModel_SNC_PN.png" align="middle" height="141"></td></tr></table></div></div><p>Where <span class="bold"><strong><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+            <m:mi>&#916;</m:mi>
+
+            <m:mi>t</m:mi>
+          </m:math></strong></span> is obtained from a time grid formed by
+      the union of the input measurement times and the chosen
+      <span class="guilabel">ExtendedKalmanFilter</span>
+      <span class="guilabel">ProcessNoiseTimeStep</span>. <span class="bold"><strong><m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+            <m:mi>Q&#771;</m:mi>
+          </m:math> </strong></span>is the <span class="bold"><strong>Q</strong></span>
+      matrix transformed into the coordinate system of integration. Process
+      noise is added according to this formulation at each time update and
+      measurement update during filtering and prediction.</p><p>Determination of appropriate values of
+      <span class="emphasis"><em>q<sub>1</sub></em></span>,
+      <span class="emphasis"><em>q<sub>2</sub></em></span>, and
+      <span class="emphasis"><em>q<sub>3</sub></em></span> often involves
+      experimentation via trial and error or a parametric analysis. References
+      1 and 2 indicate that an appropriate starting point for such tuning, in
+      the case of near-circular orbits dominated by along-track error, can be
+      derived from the following equation</p><div class="screenshot"><div class="mediaobject" align="center"><table border="0" summary="manufactured viewport for HTML img" style="cellpadding: 0; cellspacing: 0;" width="100%"><tr><td align="center"><img src="../files/images/Resource_ProcessNoiseModel_SNC_QTuning.png" align="middle" height="70"></td></tr></table></div></div><p>Where <m:math xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:db="http://docbook.org/ns/docbook" display="inline">
+            <m:msub>
+              <m:mi>&#963;</m:mi>
+
+              <m:mn>AT</m:mn>
+            </m:msub>
+          </m:math> is the along-track error per orbit period (perhaps
+      determined empirically), and <span class="emphasis"><em>T</em></span> is the orbit period
+      in seconds. Note that the square root of
+      <span class="emphasis"><em>q<sub>AT</sub></em></span> is specified when
+      inputting the components of the <span class="guilabel">AccelNoiseSigma</span>.
+      For State Noise Compensation, the units of
+      <span class="guilabel">AccelNoiseSigma</span> are
+      km/second<sup>3/2</sup>.</p></div></div><div class="refsection"><a name="N26493"></a><h2>Examples</h2><div class="informalexample"><p>This example shows how to create and assign a
+      <span class="guilabel">ProcessNoiseModel</span>.</p><pre class="programlisting">%   Create a ProcessNoiseModel
+ 
+Create ProcessNoiseModel SNC;
+
+SNC.Type             = StateNoiseCompensation;
+SNC.CoordinateSystem = EarthMJ2000Eq;
+SNC.AccelNoiseSigma  = [1e-8 1e-8 1e-8];
+ 
+%   Assign it to a Spacecraft
+ 
+Create Spacecraft EstSat;
+ 
+EstSat.ProcessNoiseModel = SNC;
+
+%    Specify a process noise time step
+
+Create ExtendedKalmanFilter EKF
+
+EKF.ProcessNoiseTimeStep = 240.;
+</pre></div></div><div class="refsection"><a name="N2649E"></a><h2>References</h2><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Carpenter, Russell and Chris D'Souza. <span class="emphasis"><em>Navigation
+        Filter Best Practices</em></span>. Technical Report TP-2018-219822,
+        NASA, April 2018.</p></li><li class="listitem"><p>Geller, David. <span class="emphasis"><em>Orbital Rendezvous: When is Autonomy
+        Required?</em></span>. Journal of Guidance, Control, and Dynamics, Vol.
+        30, No.4. July-August 2007.</p></li></ol></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="ExtendedKalmanFilter.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="ch19.html#N24EB6">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Receiver.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">ExtendedKalmanFilter&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Receiver</td></tr></table></div></body></html>

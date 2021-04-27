@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -110,6 +110,9 @@ ChemicalTank::ChemicalTank(const std::string &nomme) :
    pressureModelList.clear();
    pressureModelList.push_back("PressureRegulated");
    pressureModelList.push_back("BlowDown");
+
+   for (Integer i = FuelTankParamCount; i < ChemicalTankParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 
@@ -151,6 +154,9 @@ ChemicalTank::ChemicalTank(const ChemicalTank& ft) :
 {
    parameterCount = ft.parameterCount;
    isInitialized  = Initialize();
+
+   for (Integer i = FuelTankParamCount; i < ChemicalTankParamCount; ++i)
+      parameterWriteOrder.push_back(i);
 }
 
 
@@ -318,9 +324,6 @@ std::string ChemicalTank::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool ChemicalTank::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == DIRECTION_X) || (id == DIRECTION_Y) || (id == DIRECTION_Z))
-      return true;
-
    if (id == PRESSURE_REGULATED)
       return true;
 

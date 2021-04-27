@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2015 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,15 +39,15 @@
 const std::string ThrustHistoryFile::
 PARAMETER_LABEL[ThrustHistoryFileParamCount - GmatBaseParamCount] =
 {
-      "FileName",                         // FILENAME
-      "AddThrustSegment",                 // SEGMENTS,
+   "FileName",                         // FILENAME
+   "AddThrustSegment",                 // SEGMENTS,
 };
 
 const Gmat::ParameterType ThrustHistoryFile::
 PARAMETER_TYPE[ThrustHistoryFileParamCount - GmatBaseParamCount] =
 {
-      Gmat::FILENAME_TYPE,
-      Gmat::STRINGARRAY_TYPE,
+   Gmat::FILENAME_TYPE,
+   Gmat::STRINGARRAY_TYPE,
 };
 
 
@@ -113,6 +113,7 @@ ThrustHistoryFile::ThrustHistoryFile(const ThrustHistoryFile& thf) :
    FileReader           (thf),
    thrustFileName       (thf.thrustFileName),
    segments             (thf.segments),
+   scriptSegments       (thf.scriptSegments),
    segmentNames         (thf.segmentNames),
    massSources          (thf.massSources),
    keywords             (thf.keywords),
@@ -141,6 +142,7 @@ ThrustHistoryFile& ThrustHistoryFile::operator =(const ThrustHistoryFile& thf)
 
       thrustFileName = thf.thrustFileName;
       segments = thf.segments;
+      scriptSegments = thf.scriptSegments;
       segmentNames = thf.segmentNames;
       massSources = thf.massSources;
       keywords = thf.keywords;
@@ -320,46 +322,6 @@ std::string ThrustHistoryFile::GetStringParameter(const Integer id) const
    return FileReader::GetStringParameter(id);
 }
 
-
-//------------------------------------------------------------------------------
-//  bool SetStringParameter(const Integer id, const char *value)
-//------------------------------------------------------------------------------
-/**
- * Change the value of a string parameter.
- *
- * @param id The integer ID for the parameter.
- * @param value The new string for this parameter.
- *
- * @return true if the string is stored, throw if the parameter is not stored.
- */
-//------------------------------------------------------------------------------
-bool ThrustHistoryFile::SetStringParameter(const Integer id, const char* value)
-{
-   if (id == FILENAME)
-   {
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("Setting ThrustHistoryFile %s\n", value);
-      #endif
-      thrustFileName = value;
-      return true;
-   }
-
-   if (id == SEGMENTS)
-   {
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("Adding ThrustHistoryFile segment %s\n",
-               value);
-      #endif
-
-      if (find(segmentNames.begin(), segmentNames.end(), value) ==
-            segmentNames.end())
-         segmentNames.push_back(value);
-      return true;
-   }
-
-   return FileReader::SetStringParameter(id, value);
-}
-
 //------------------------------------------------------------------------------
 //  bool SetStringParameter(const Integer id, const std::string& value)
 //------------------------------------------------------------------------------
@@ -377,6 +339,11 @@ bool ThrustHistoryFile::SetStringParameter(const Integer id,
 {
    if (id == FILENAME)
    {
+      // verify a valid file name
+      Integer error;
+      if (!GmatStringUtil::IsValidFullFileName(value, error))
+         throw InterfaceException("Error: '" + value + "' set to " + GetName() + ".FileName is an invalid file name.\n");
+
       thrustFileName = value;
       return true;
    }
@@ -387,7 +354,26 @@ bool ThrustHistoryFile::SetStringParameter(const Integer id,
          MessageInterface::ShowMessage("Block string %s\n", value.c_str());
       #endif
 
-      if (find(segmentNames.begin(), segmentNames.end(), value) == segmentNames.end())
+      // trim off braces:
+      if (GmatStringUtil::IsEnclosedWithBraces(value))
+      {
+         std::string value1 = GmatStringUtil::RemoveEnclosingString(value, "{}");
+         if (GmatStringUtil::Trim(value1) == "")
+         {
+            segmentNames.clear();               // empty list of solvefors.
+            return true;
+         }
+      }
+
+      // verify input value:
+      if (GmatStringUtil::IsValidIdentity(value) == false)
+      {
+         throw InterfaceException("Error: The value \"" + value + "\" cannot be accepted for " + GetName() + ".AddThrustSegment ");
+         return false;
+      }
+
+      if (find(segmentNames.begin(), segmentNames.end(), value) ==
+            segmentNames.end())
          segmentNames.push_back(value);
       return true;
    }
@@ -413,27 +399,6 @@ std::string ThrustHistoryFile::GetStringParameter(const Integer id,
       const Integer index) const
 {
    return FileReader::GetStringParameter(id, index);
-}
-
-//------------------------------------------------------------------------------
-//  bool SetStringParameter(const Integer id, const char *value,
-//                          const Integer index)
-//------------------------------------------------------------------------------
-/**
- * Change the value of a string parameter.
- *
- * @param id The integer ID for the parameter.
- * @param value The new string for this parameter.
- * @param index Index for parameters in arrays.  Use -1 or the index free
- *              version to add the value to the end of the array.
- *
- * @return true if the string is stored, false if not.
- */
-//------------------------------------------------------------------------------
-bool ThrustHistoryFile::SetStringParameter(const Integer id, const char* value,
-      const Integer index)
-{
-   return FileReader::SetStringParameter(id, value, index);
 }
 
 //------------------------------------------------------------------------------
@@ -514,24 +479,6 @@ std::string ThrustHistoryFile::GetStringParameter(
       const std::string& label) const
 {
    return GetStringParameter(GetParameterID(label));
-}
-
-//------------------------------------------------------------------------------
-//  bool SetStringParameter(const std::string &label, const char *value)
-//------------------------------------------------------------------------------
-/**
- * Change the value of a string parameter.
- *
- * @param label The (string) label for the parameter.
- * @param value The new string for this parameter.
- *
- * @return true if the string is stored, false if not.
- */
-//------------------------------------------------------------------------------
-bool ThrustHistoryFile::SetStringParameter(const std::string& label,
-      const char* value)
-{
-   return SetStringParameter(GetParameterID(label), value);
 }
 
 //------------------------------------------------------------------------------
@@ -723,22 +670,18 @@ bool ThrustHistoryFile::SetRefObject(GmatBase *obj, const UnsignedInt type,
 
          // Look through the Segments for the passed in object
          Integer index = -1;
-         for (UnsignedInt i = 0; i < segments.size(); ++i)
+         for (UnsignedInt i = 0; i < scriptSegments.size(); ++i)
          {
-            if (segments[i].GetName() == name)
+            if (scriptSegments[i]->GetName() == name)
                index = i;
          }
          if (index == -1)
          {
-            ThrustSegment newSeg(*((ThrustSegment*)obj));
-            segments.push_back(newSeg);
+            scriptSegments.push_back((ThrustSegment*)obj);
          }
          else
          {
-            // Pass in the segment data, but don't mess with the file data
-            ThfDataSegment theData = segments[index].segData;
-            segments[index] = *((ThrustSegment*)obj);
-            segments[index].segData = theData;
+            scriptSegments[index] = (ThrustSegment*) obj;
          }
          return true;
       }
@@ -786,6 +729,9 @@ bool ThrustHistoryFile::ReadData()
          MessageInterface::ShowMessage("File opened successfully\n");
       #endif
 
+      // Keep track of segment names
+      StringArray currSegmentNames;
+
       std::string theLine;
       char filedata[2048];
 
@@ -816,6 +762,7 @@ bool ThrustHistoryFile::ReadData()
          if (theLine.find("BeginThrust") != std::string::npos)
          {
             ThfDataSegment theSegment;
+            theSegment.SetPrecisionTimeFlag(HasPrecisionTime());
             #ifdef DEBUG_FILE_DATA
                MessageInterface::ShowMessage("Reading Thrust History File "
                      "header information\n");
@@ -865,6 +812,16 @@ bool ThrustHistoryFile::ReadData()
                #endif
                bool dataEndFound = ReadThrustProfile(theSegment);
             }
+
+            // Check if segment name is repeated
+            for (UnsignedInt ii = 0; ii < currSegmentNames.size(); ii++)
+               if (theSegment.segmentName == currSegmentNames[ii])
+                  throw InterfaceException("In ThrustHistoryFile \"" + instanceName + "\", "
+                     "the ThrustSegment name \"" + theSegment.segmentName + "\" "
+                     "is used more than once");
+
+            currSegmentNames.push_back(theSegment.segmentName);
+
             ValidateSegment(theSegment);
             SetSegmentData(theSegment);
          }
@@ -877,6 +834,75 @@ bool ThrustHistoryFile::ReadData()
             thrustFileName + "; is the file in the search path?");
 
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool AllDataSegmentsLoaded()
+//------------------------------------------------------------------------------
+/**
+ * Check that all ThrustSegments for the thrust history file have their data loaded
+ *
+ * @param segsNotLoaded list of thrust segments whose data hasn't been loaded
+ *
+ * @return true if all thrust segments have their data loaded
+ */
+//------------------------------------------------------------------------------
+bool ThrustHistoryFile::AllDataSegmentsLoaded(StringArray &segsNotLoaded)
+{
+   bool allLoaded = true;
+   segsNotLoaded.clear();
+
+   for (std::vector<ThrustSegment>::iterator it = segments.begin(); it != segments.end(); it++)
+      if (!it->segData.isDataLoaded) {
+         segsNotLoaded.push_back(it->GetName());
+         allLoaded = false;
+      }
+
+   return allLoaded;
+}
+
+
+//------------------------------------------------------------------------------
+// void ActivateSegments()
+//------------------------------------------------------------------------------
+/**
+ * Marks the segments that have been set in AddThrustSegment as active
+ */
+ //------------------------------------------------------------------------------
+void ThrustHistoryFile::ActivateSegments()
+{
+   static bool inactiveSegmentFirstWarning = true;
+
+   for (UnsignedInt ii = 0; ii < segments.size(); ii++)
+   {
+      std::string segName = segments[ii].segData.segmentName;
+
+      segments[ii].segData.isActive =
+         std::find(segmentNames.begin(), segmentNames.end(), segName) != segmentNames.end();
+
+      // Warn if not all segments are active
+      if (inactiveSegmentFirstWarning && !segments[ii].segData.isActive)
+      {
+         MessageInterface::ShowMessage ("*** WARNING *** Not all thrust segments in "
+            "ThrustHistoryFile \"" + GetName() + "\" are active\n");
+         inactiveSegmentFirstWarning = false;
+      }
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void DeactivateSegments()
+//------------------------------------------------------------------------------
+/**
+ * Marks all the segments as inactive
+ */
+ //------------------------------------------------------------------------------
+void ThrustHistoryFile::DeactivateSegments()
+{
+   for (UnsignedInt ii = 0; ii < segments.size(); ii++)
+      segments[ii].segData.isActive = false;
 }
 
 
@@ -894,8 +920,14 @@ bool ThrustHistoryFile::Initialize()
    bool retval = false;
 
    retval = ReadData();
-   if (retval)
+   if (retval) {
+      for (std::vector<ThrustSegment>::iterator it = segments.begin(); it != segments.end(); it++)
+         if (!it->segData.isDataLoaded)
+            MessageInterface::ShowMessage("Warning - data not loaded for ThrustHistoryFile '" + this->GetName() +
+               "' ThrustSegment '" + it->GetName() + "'\n");
+
       theForce.SetSegmentList(&segments);
+   }
 
    return retval;
 }
@@ -921,8 +953,8 @@ bool ThrustHistoryFile::CheckDataStart(std::string theLine,
       if (theLine.find(dataStartKeys[i]) != std::string::npos)
       {
          #ifdef DEBUG_FILE_READ
-            MessageInterface::ShowMessage("   Data Start Keyword %s in line \"%s\"\n",
-                  dataStartKeys[i].c_str(), theLine.c_str());
+            MessageInterface::ShowMessage("   Data Start Keyword %s in line "
+                  "\"%s\"\n", dataStartKeys[i].c_str(), theLine.c_str());
          #endif
          // @todo  Sanity check theLine to be sure it's not gorp
          theSegment.modelFlag = dataStartKeys[i];
@@ -960,8 +992,8 @@ bool ThrustHistoryFile::SetHeaderField(std::string theLine,
          if (temp == keywords[i])
          {
             #ifdef DEBUG_FILE_READ
-               MessageInterface::ShowMessage("      Header Keyword %s in line \"%s\" "
-                     "is setting the field to \"%s\"\n",
+               MessageInterface::ShowMessage("      Header Keyword %s in "
+                     "line \"%s\" is setting the field to \"%s\"\n",
                      keywords[i].c_str(), theLine.c_str(),
                      GmatStringUtil::Trim(chunks[1]).c_str());
             #endif
@@ -1050,6 +1082,19 @@ void ThrustHistoryFile::SetSegmentData(ThfDataSegment seg)
    for (UnsignedInt i = 0; i < segments.size(); ++i)
       if (segments[i].GetName() == seg.segmentName)
       {
+         for (UnsignedInt j = 0; j < scriptSegments.size(); ++j)
+         {
+            if (scriptSegments[j]->GetName() == seg.segmentName)
+            {
+               // Update segment with any changes in scriptSegment
+               ThrustSegment newSegment(*(scriptSegments[i]));
+               newSegment.SetPrecisionTimeFlag(this->HasPrecisionTime());
+               segments[i] = newSegment;
+               break;
+            }
+         }
+
+
          segments[i].SetDataSegment(seg);
          segmentFound = true;
       }
@@ -1057,9 +1102,29 @@ void ThrustHistoryFile::SetSegmentData(ThfDataSegment seg)
    // Segment was not found, so add it
    if (!segmentFound)
    {
-      ThrustSegment newSegment(seg.segmentName);
-      newSegment.SetDataSegment(seg);
-      segments.push_back(newSegment);
+      bool scriptSegmentFound = false;
+
+      // First try finding a ThrustSegment from the script
+      for (UnsignedInt i = 0; i < scriptSegments.size(); ++i)
+      {
+         if (scriptSegments[i]->GetName() == seg.segmentName)
+         {
+            ThrustSegment newSegment(*(scriptSegments[i]));
+            newSegment.SetPrecisionTimeFlag(this->HasPrecisionTime());
+            newSegment.SetDataSegment(seg);
+            segments.push_back(newSegment);
+            scriptSegmentFound = true;
+         }
+      }
+
+      // If none in the script, create a new one
+      if (!scriptSegmentFound)
+      {
+         ThrustSegment newSegment(seg.segmentName);
+         newSegment.SetPrecisionTimeFlag(this->HasPrecisionTime());
+         newSegment.SetDataSegment(seg);
+         segments.push_back(newSegment);
+      }
    }
 }
 
@@ -1080,7 +1145,9 @@ bool ThrustHistoryFile::ReadThrustProfile(ThfDataSegment& theSegment)
    bool retval = true; //false;
 
    // If mass flow is modeled, the modelFlag will contain the string "MassRate"
-   bool includeMass = !(theSegment.modelFlag.find("MassRate") == std::string::npos);
+   bool includeMass =
+         !(theSegment.modelFlag.find("MassRate") == std::string::npos);
+
    Integer dataCount = (includeMass ? 5 : 4);
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("ModelFlag %s, Include Mass = %s, "
@@ -1113,8 +1180,9 @@ bool ThrustHistoryFile::ReadThrustProfile(ThfDataSegment& theSegment)
                      chunks[1].substr(start+1, (end - start - 1)));
 
             if (endName != theSegment.segmentName)
-               throw InterfaceException("The EndSegment identifies a different segment (" +
-                     endName + ") than the name name of the current segment, \"" +
+               throw InterfaceException("The EndSegment identifies a different "
+                     "segment (" + endName +
+                     ") than the name name of the current segment, \"" +
                      theSegment.segmentName + "\"");
 
             #ifdef DEBUG_FILE_READ
@@ -1167,6 +1235,8 @@ void ThrustHistoryFile::ValidateSegment(ThfDataSegment& theSegment)
             theSegment.startEpochString.c_str());
       MessageInterface::ShowMessage("   >>>        :   %.12lf\n",
             theSegment.startEpoch);
+      MessageInterface::ShowMessage("   >>>        :   %s\n",
+         theSegment.startEpochGT.ToString());
       MessageInterface::ShowMessage("   Coord System:  %s\n",
             theSegment.csName.c_str());
       MessageInterface::ShowMessage("   Interpolator:  %s\n",
@@ -1189,13 +1259,19 @@ void ThrustHistoryFile::ValidateSegment(ThfDataSegment& theSegment)
    // Perform conversions: epochs and vectors
    if (theSegment.startEpochString != "")
    {
+      TimeSystemConverter *theTimeConverter = TimeSystemConverter::Instance();
+
       Real utcEpoch =
-            TimeConverterUtil::ConvertGregorianToMjd(theSegment.startEpochString);
-      theSegment.startEpoch = TimeConverterUtil::Convert(utcEpoch,
-            TimeConverterUtil::UTCMJD, TimeConverterUtil::A1MJD);
+            theTimeConverter->ConvertGregorianToMjd(theSegment.startEpochString);
+      theSegment.startEpoch = theTimeConverter->Convert(utcEpoch,
+            TimeSystemConverter::UTCMJD, TimeSystemConverter::A1MJD);
+
+      GmatTime utcEpochGT =
+         theTimeConverter->ConvertGregorianToMjdGT(theSegment.startEpochString);
+      theSegment.startEpochGT = theTimeConverter->Convert(utcEpochGT,
+         TimeSystemConverter::UTCMJD, TimeSystemConverter::A1MJD);
    }
 
-   GmatEpoch start = theSegment.startEpoch;
    for (UnsignedInt i = 0; i < theSegment.profile.size(); ++i)
    {
       // Convert time in sec to epoch offsets in days
@@ -1216,7 +1292,9 @@ void ThrustHistoryFile::ValidateSegment(ThfDataSegment& theSegment)
    }
 
    theSegment.endEpoch = theSegment.startEpoch +
-         theSegment.profile[theSegment.profile.size()-1].time;
+      theSegment.profile[theSegment.profile.size() - 1].time;
+   theSegment.endEpochGT = theSegment.startEpochGT +
+      theSegment.profile[theSegment.profile.size() - 1].time;
 
    // Set the interpolation method types
    if (theSegment.interpolationMethod == "None")
@@ -1252,6 +1330,62 @@ void ThrustHistoryFile::ValidateSegment(ThfDataSegment& theSegment)
                   "interpolation in the Thrust History File segment named " +
                   theSegment.segmentName);
 
+   // Error if epochs overlap with another segment
+   bool checkOverlap = true;
+   for (UnsignedInt ii = 0; ii < segments.size(); ii++)
+   {
+      if (theSegment.segmentName == segments[ii].segData.segmentName)
+      {
+         // Don't write warning message more than once
+         // (if segment is already loaded, the warning has already been written
+         checkOverlap = false;
+         break;
+      }
+   }
+
+   if (checkOverlap)
+   {
+      for (UnsignedInt ii = 0; ii < segments.size(); ii++)
+      {
+         bool overlap = false;
+
+         if (hasPrecisionTime)
+         {
+            // Start epoch is inside another segment
+            overlap = overlap || (theSegment.startEpochGT >= segments[ii].segData.startEpochGT &&
+               theSegment.startEpochGT < segments[ii].segData.endEpochGT);
+            // End epoch is inside another segment
+            overlap = overlap || (theSegment.endEpochGT > segments[ii].segData.startEpochGT &&
+               theSegment.endEpochGT <= segments[ii].segData.endEpochGT);
+            // This segment envelops another segment
+            overlap = overlap || (theSegment.startEpochGT <= segments[ii].segData.startEpochGT &&
+               theSegment.endEpochGT >= segments[ii].segData.endEpochGT);
+         }
+         else
+         {
+            // Start epoch is inside another segment
+            overlap = overlap || (theSegment.startEpoch >= segments[ii].segData.startEpoch &&
+               theSegment.startEpoch < segments[ii].segData.endEpoch);
+            // End epoch is inside another segment
+            overlap = overlap || (theSegment.endEpoch > segments[ii].segData.startEpoch &&
+               theSegment.endEpoch <= segments[ii].segData.endEpoch);
+            // This segment envelops another segment
+            overlap = overlap || (theSegment.startEpoch <= segments[ii].segData.startEpoch &&
+               theSegment.endEpoch >= segments[ii].segData.endEpoch);
+         }
+
+         if (overlap)
+         {
+            throw InterfaceException("In ThrustHistoryFile \"" + instanceName + "\", "
+               "ThrustSegments \"" + segments[ii].segData.segmentName + "\" "
+               "and \"" + theSegment.segmentName + "\" have epochs that overlap. "
+               "Currently, GMAT can only apply one ThrustSegment at a given epoch.");
+         }
+      }
+   }
+
+   theSegment.isDataLoaded = true;
+
    #ifdef DEBUG_FILE_READ
       MessageInterface::ShowMessage("Segment data after processing\n");
       MessageInterface::ShowMessage("   Segment Name:      %s\n",
@@ -1260,6 +1394,8 @@ void ThrustHistoryFile::ValidateSegment(ThfDataSegment& theSegment)
             theSegment.startEpochString.c_str());
       MessageInterface::ShowMessage("   >>>        :       %.12lf\n",
             theSegment.startEpoch);
+      MessageInterface::ShowMessage("   >>>        :       %s\n",
+            theSegment.startEpochGT.ToString());
       MessageInterface::ShowMessage("   Coord System:      %s\n",
             theSegment.csName.c_str());
       MessageInterface::ShowMessage("   Interpolator:      %s\n",
@@ -1278,4 +1414,28 @@ void ThrustHistoryFile::ValidateSegment(ThfDataSegment& theSegment)
                point.mdot);
       }
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetPrecisionTimeFlag(bool onOff)
+//------------------------------------------------------------------------------
+/**
+* Set whether the thrust segment is using precision time or not
+*
+* @param onOff Flag indicating whether the thrust segment uses precision time
+*
+* @return Returns the value of the onOff flag passed in
+*/
+//------------------------------------------------------------------------------
+bool ThrustHistoryFile::SetPrecisionTimeFlag(bool onOff)
+{
+   hasPrecisionTime = onOff;
+
+   for (ThrustSegment seg : segments)
+      seg.SetPrecisionTimeFlag(onOff);
+
+   theForce.SetPrecisionTimeFlag(onOff);
+
+   return hasPrecisionTime;
 }

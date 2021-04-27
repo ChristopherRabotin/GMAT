@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -36,6 +36,13 @@ public:
    GNRangeAdapter&      operator=(const GNRangeAdapter& rak);
 
    virtual GmatBase*    Clone() const;
+
+   virtual void ComputeBiasAndNoise(const std::string& useMeasType,
+      const Integer numTrip);
+
+   virtual void ApplyBiasAndNoise(const std::string& useMeasType,
+      const RealArray& corrections, 
+      const RealArray& values);
 
    virtual const MeasurementData&
       CalculateMeasurement(bool withEvents = false,

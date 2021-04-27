@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>DRAFT GMAT API Design and User’s Guide &#8212; GMAT Tools and Extensions R2020a documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Introduction" href="intro/Overview.html" />
+    <link rel="prev" title="GMAT Tools and Extensions" href="../../index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="intro/Overview.html" title="Introduction"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../../index.html" title="GMAT Tools and Extensions"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">GMAT Tools and Extensions R2020a documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="draft-gmat-api-design-and-user-s-guide">
+<h1>DRAFT GMAT API Design and User’s Guide<a class="headerlink" href="#draft-gmat-api-design-and-user-s-guide" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro/Overview.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design/Design.html">System Design</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="design/Architecture.html">GMAT Architectural Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/LessonsLearned.html">GMAT API Prototypes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/Examples.html">API Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/APIDesign.html">The API Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/APIDesign.html#gmat-code-updates">GMAT Code Updates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design/APIDesign.html#api-support-functions">API Support Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/UsersGuide.html">GMAT API User’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/StyleGuide.html">Conventions in the API Examples and Use Cases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/Setup.html">Setting up the GMAT API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/GettingStarted.html">Object Usage with the GMAT API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/GettingStarted.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/APIFunctions.html">Functions Used in the GMAT API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/ScriptUsage.html">Script Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/ScriptUsage.html#api-functions-for-script-users">API Functions for Script Users</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/ScriptUsage.html#examples">Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/usage/UseCase1.html">Tutorial: Accessing GMAT Propagation and Navigation Features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/usage/UseCase1.html#verifying-setup">Verifying Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/usage/UseCase1.html#getting-started-with-the-api">Getting Started with the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/usage/UseCase1.html#spacecraft-configuration">Spacecraft Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/usage/UseCase1.html#force-model-setup">Force Model Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/usage/UseCase1.html#propagator-setup">Propagator Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/usage/UseCase1.html#the-gmat-api-and-plug-in-modules">The GMAT API and Plug-in Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/usage/UseCase1.html#measurement-modeling">Measurement Modeling</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/usage/UseCase2.html">Example: MONTE-GMAT Interoperability for OSIRIS_REx</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/usage/UseCase2.html#ephemeris-sharing">Ephemeris Sharing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/usage/UseCase2.html#maneuver-planning">Maneuver Planning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/usage/UseCase2.html#navigation-data-sharing">Navigation Data Sharing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/BestPractices.html">API Best Practices</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/BestPractices.html#general-practices">General Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/BestPractices.html#java-and-matlab-best-practices">Java and MATLAB Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/BestPractices.html#python-best-practices">Python Best Practices</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Appendices:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="appendix/ReviewInfo.html">Review and Prototype Information</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="appendix/OpenIssues.html">Open issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/ReviewActions.html">Review Responses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/PrototypeProductionComparison.html">Comparison of the SWIG Prototype with the Production API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/JavaExamples.html">API Examples in Java</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/usage/CheatSheet.html">GMAT API Cheat Sheet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/usage/CheatSheet.html#loading-the-api">Loading the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/usage/CheatSheet.html#asking-for-help">Asking for Help</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/usage/CheatSheet.html#gmat-objects">GMAT Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/usage/CheatSheet.html#gmat-script-access">GMAT Script Access</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="userguide/notebooks/notebooks.html">API Notebook Walkthroughs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="userguide/notebooks/GMAT_States.html">State Management with the GMAT API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="userguide/notebooks/GMAT_Propagation.html">Propagation with the GMAT API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ChangeHistory.html">Change History</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../../index.html"
+                        title="previous chapter">GMAT Tools and Extensions</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="intro/Overview.html"
+                        title="next chapter">Introduction</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/API/source/apiIndex.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="intro/Overview.html" title="Introduction"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../../index.html" title="GMAT Tools and Extensions"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">GMAT Tools and Extensions R2020a documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018-2020, United States Government as represented by the Administrator of the National Aeronautics and Space Administration..
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>

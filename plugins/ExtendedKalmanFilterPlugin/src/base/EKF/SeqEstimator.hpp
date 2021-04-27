@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -35,24 +35,7 @@
 
 #include "kalman_defs.hpp"
 #include "Estimator.hpp"
-
-struct MeasNoiseType   // EKF Mod 12/16
-{
-public:
-   static const std::string Hardware;
-   static const std::string Filter;
-};
-
-struct ProcessNoiseType  // EKF Mod 12/16
-{
-public:
-   static const std::string None;
-   static const std::string Constant;
-   static const std::string BasicTime;
-   static const std::string SingerModel;
-   static const std::string SNC;
-   //static const std::string DMC; // not supported yet...
-};
+#include "ProcessNoiseModel.hpp"
 
 /**
  * Provides core functionality used in sequential estimation.
@@ -72,109 +55,154 @@ public:
 
    virtual bool         Initialize();
    virtual SolverState  AdvanceState();
+   virtual void         StateCleanUp();
    virtual bool         Finalize();
+
+   virtual bool         IsFinalPass();
 
    // methods overridden from GmatBase
 // EKF mod 12/16
    virtual std::string  GetParameterText(const Integer id) const;
    virtual std::string  GetParameterUnit(const Integer id) const;
    virtual Integer      GetParameterID(const std::string &str) const;
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const std::string &label) const;
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
-   virtual Integer      GetIntegerParameter(const Integer id) const;
-   virtual Integer      SetIntegerParameter(const Integer id,
-                                            const Integer value);
-
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
                                          const Real value);
-
    virtual Real         GetRealParameter(const std::string &label) const;
    virtual Real         SetRealParameter(const std::string &label,
-                                         const Real value);
-
-   virtual Real         GetRealParameter(const Integer id,
-                                         const Integer index) const;
-   virtual Real         SetRealParameter(const Integer id,
-                                         const Real value,
-                                         const Integer index);
-
-   virtual Real         GetRealParameter(const std::string &label,
-                                         const Integer index) const;
-   virtual Real         SetRealParameter(const std::string &label,
-                                         const Real value,
-                                         const Integer index);
-
-   virtual const Rvector&
-                        GetRvectorParameter(const Integer id) const;
-   virtual const Rvector&
-                        SetRvectorParameter(const Integer id,
-                                            const Rvector &value);
-
-   virtual const Rvector&
-                        GetRvectorParameter(const std::string &label) const;
-   virtual const Rvector&
-                        SetRvectorParameter(const std::string &label,
-                                            const Rvector &value);
+                                        const Real value);
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value);
-   virtual std::string  GetStringParameter(const Integer id,
-                                           const Integer index) const;
-   virtual bool         SetStringParameter(const Integer id,
-                                           const std::string &value,
-                                           const Integer index);
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
-   virtual std::string  GetStringParameter(const std::string &label,
-                                           const Integer index) const;
-   virtual bool         SetStringParameter(const std::string &label,
-                                           const std::string &value,
-                                           const Integer index);
-
-   virtual std::string  GetOnOffParameter(const Integer id) const;
-   virtual bool         SetOnOffParameter(const Integer id,
-                                         const std::string &value);
-
-   virtual const StringArray& GetPropertyEnumStrings(const Integer id) const;
 // End EKF mod
 
    virtual bool         TakeAction(const std::string &action,
                                    const std::string &actionData = "");
 
+   // Statistics information for Filter measurements
+   struct FilterMeasurementInfoType : MeasurementInfoType
+   {
+      RealArray state;
+      Rmatrix   cov;
+      Rmatrix33 sigmaVNB;
+      RealArray scaledResid;
+      Rmatrix   kalmanGain;
+
+      // Need to size Rmatrix
+      FilterMeasurementInfoType()
+      {
+         cov.SetSize(0, 0);
+         kalmanGain.SetSize(0, 0);
+      };
+
+      // Need copy assignment defined to set size of Rmatrix
+      FilterMeasurementInfoType& operator=(const FilterMeasurementInfoType& info)
+      {
+         MeasurementInfoType::operator=(info);
+
+         cov.SetSize(info.cov.GetNumRows(), info.cov.GetNumColumns());
+         kalmanGain.SetSize(info.kalmanGain.GetNumRows(), info.kalmanGain.GetNumColumns());
+
+         state       = info.state;
+         cov         = info.cov;
+         sigmaVNB    = info.sigmaVNB;
+         scaledResid = info.scaledResid;
+         kalmanGain  = info.kalmanGain;
+
+         return *this;
+      }
+   };
+
+   // Covariance information for measurements and time-updates
+   struct UpdateInfoType
+   {
+      GmatTime    epoch;
+      bool        isObs;
+      FilterMeasurementInfoType measStat;
+      RealArray   state;
+      Rmatrix     cov;
+      Rmatrix33   sigmaVNB;
+      Rmatrix     processNoise;
+      Rmatrix     stm;
+
+      // Need to size Rmatrix
+      UpdateInfoType()
+      {
+         cov.SetSize(0, 0);
+         processNoise.SetSize(0, 0);
+         stm.SetSize(0, 0);
+      };
+
+      // If there is a need for copy assignment, it will need to be
+      // added explicitly here to size the Rmatrix struct members.
+      // See FilterMeasurementInfoType above for an example.
+   };
+
+   // Functions added for smoothing
+   virtual std::vector<UpdateInfoType> GetUpdateStats();
+   virtual void         SetAnchorEpoch(const GmatTime& epoch, bool noiseBetween);
+   virtual bool         UpdateInitialConditions();
+
 protected:
+   /// Smoother instances access SeqEstimator data directly
+   friend class SmootherBase;
+
+   /// particicpants column length for Filter Covariance section of the report file.
+   Integer                 pcolumnCovLen;
+
 // EKF mod 12/16
    static const UnsignedInt truthStateSize;
    static const UnsignedInt stdColLen;
    static const UnsignedInt minPartSize;
    static const UnsignedInt strSizeMin;
-   static const double      defaultMeasSigma;
 
-   UnsignedInt pcolumnLen;
+   /// The step size used for updating the process noise
+   Real        processNoiseStep;
+   /// The next epoch desired for updating the process noise
+   GmatTime    nextNoiseUpdateGT;
+   /// The time duration to delay rectifying the reference trajectory
+   Real        delayRectifySpan;
+   /// If an anchor epoch has been set
+   bool        hasAnchorEpoch;
+   /// If the estimator is to overwrite the edit flags with the calculated flags
+   bool        overwriteEditFlags;
 
-   Rvector     defaultMeasCovarianceDiag;
-   Rmatrix     defaultMeasCovariance;
-
-   /// Time system used to specify the estimation epoch
-   std::string             estEpochFormat;
-   /// The estimation epoch.  "FromParticipants" means use the spacecraft epoch.
-   std::string             estEpoch;
+   Real constMult;
 // End EKF mod
+
+   /// The file to read data from to initialize the SeqEstimator
+   std::string inputDataFile;
+   /// The epoch to initialize the SeqEstimator from based on the inputDataFile
+   std::string restartEpochFormat;
+   /// The epoch to initialize the SeqEstimator from based on the inputDataFile
+   std::string restartEpoch;
+   /// The file to write SeqEstimator data to
+   std::string outputDataFile;
+   /// The output data file
+   std::ofstream dataFile;
 
    /// Changes in the state vector
    Rvector                 dx;
    /// Array used to track the one-sigma deviation for each measurement point
    RealArray               sigma;
 
+   /// The time updates covariance matrix
+   Rmatrix                 pBar;
+   /// The process noise
+   Rmatrix                 Q;
+
    Rmatrix                 H; // measurement matrix, EKF mod 12/16
    Rmatrix                 I; // identity matrix of size stateSize, EKF mod 12/16
-
-   /// The measurement error covariance
-   Covariance              *measCovariance;
 
 // EKF mod 12/16   
 /// Size of the measurement
@@ -182,32 +210,39 @@ protected:
    /// meas count
    UnsignedInt             measCount;
 
-   /// Meas noise
-   std::string              measNoiseType;
-   Rvector                  measNoiseSigma;
+   /// Process noise
+   std::vector<ProcessNoiseModel*>
+                           processNoiseModels;
 
-   // Process noise
-   std::string              processNoiseType;
-   Rvector                  processNoiseConstantVector;
-   Real                     processPosNoiseTimeRate;
-   Real                     processVelNoiseTimeRate;
-   Real                     processSingerTimeConst;
-   Real                     processSingerSigma;
+   /// Data container for filter data
+   DataBucket              matFilterData;
 
-   /// previous measurement epoch
-   GmatTime                 prevObsEpochGT;
+   /// Indexing for the .mat filter elements
+   std::map<std::string, Integer> matFilterIndex;
+
+   /// previous update epoch
+   GmatTime                 prevUpdateEpochGT;
+
+   /// Previous Cartesian to Solve-for state conversion derivative matrix [dX/dS]
+   Rmatrix                 cart2SolvMatrixPrev;
+   /// Previous Solve-for state to Keplerian conversion derivative matrix [dS/dK]
+   Rmatrix                 solv2KeplMatrixPrev;
+
+   CoordinateSystem*        vnbFrame; // VNB frame for report output
+
+   Rmatrix33                GetCovarianceVNB(const Rmatrix& inCov);
 
    /// Parameter IDs for the BatchEstimators
    enum
    {
-      MEAS_NOISE_TYPE = EstimatorParamCount,
-      MEAS_NOISE_SIGMA,
-      PROCESS_NOISE_TYPE,
-      PROCESS_NOISE_CONSTANT_VECTOR,
-      PROCESS_POS_NOISE_TIME_RATE,
-      PROCESS_VEL_NOISE_TIME_RATE,
-      PROCESS_SINGER_TIME_CONST,
-      PROCESS_SINGER_SIGMA,
+      PROCESS_NOISE_TIME_STEP = EstimatorParamCount,
+      CONSTANT_MULTIPLIER,
+      DELAY_RECTIFY_TIME,
+      INPUT_DATA_FILE,
+      RESTART_EPOCH_FORMAT,
+      RESTART_EPOCH,
+      OUTPUT_DATA_FILE,
+
       SeqEstimatorParamCount
    };
 
@@ -229,45 +264,58 @@ protected:
    virtual void            CheckCompletion();
    virtual void            RunComplete();
 
-   /**
-    *  Abstract method that is overridden in derived classes to perform
-    *  sequential estimation.
-    */
-   virtual void            Estimate() = 0;
-
    virtual void            PrepareForStep();
-
-//   virtual bool            TestForConvergence(std::string &reason);
-   virtual void            WriteToTextFile(Solver::SolverState state =
-                                                Solver::UNDEFINED_STATE);
-   virtual void            UpdateReportText() = 0;
-   virtual void            UpdateStateReportText(std::stringstream& sLine) = 0;
+   virtual void            FilterUpdate();
 
    // Additional methods used by the EKF
+   virtual void            UpdateProcessNoise();
+   virtual void            TimeUpdate();
+
+   virtual bool            OverwriteEditFlag(const std::string &editFlag);
+   virtual bool            WriteEditFlag();
+   virtual void            EstimationPartials(std::vector<RealArray> &hMeas);
+   virtual bool            DataFilter();
+
    virtual void            GetEstimationState(GmatState& outputState);
 
    bool                    ConvertToPartCoordSys(ListItem* infor, GmatTime epoch,
                                  Real inputStateElement,
                                  Real* outputStateElement);
 
-   std::string             GetElementFullName(ListItem* infor, bool isInternalCS) const;
    Rmatrix                 CovarianceConvertionMatrix(std::map<GmatBase*, Rvector6> stateMap);
 
-   std::map<GmatBase*, Rvector6>
-                           CalculateCartesianStateMap(const std::vector<ListItem*> *map, GmatState state);
-   std::map<GmatBase*, Rvector6>
-                           CalculateKeplerianStateMap(const std::vector<ListItem*> *map, GmatState state);
    Rmatrix66               CartesianToKeplerianCoverianceConvertionMatrix(GmatBase* obj, const Rvector6 state);
 
    virtual std::string     GetProgressString();
 
-// EKF mod 12/16
-private:
-   void                   WriteScript();
-   void                   WriteHeader();
-   void                   WriteSummary(Solver::SolverState sState);
-   void                   WriteConclusion();
-// End EKF mod
+   virtual void           WriteReportFileHeaderPart6();
+
+   virtual void           WriteNotationHeader();
+
+   virtual void           WriteReportFileSummaryPart1(Solver::SolverState sState);
+   virtual void           WriteReportFileSummaryPart5(Solver::SolverState sState);
+
+   virtual void           WriteCovariancePageHeader();
+
+   std::vector<UpdateInfoType> updateStats;
+
+   virtual void           BuildCovarianceLine(const UpdateInfoType &updateStat);
+
+   virtual bool           IsIterative();
+
+   virtual std::string    GetHeaderName();
+
+   void                   OpenDataFile();
+   virtual void           WriteDataFile();
+   virtual bool           RestartFromDataFile(const GmatTime &epoch, bool onlyPriorEpochs);
+
+   virtual bool           WriteMatData();
+   virtual void           AddMatlabData(const FilterMeasurementInfoType &measStat);
+   virtual void           AddMatlabData(const FilterMeasurementInfoType &measStat,
+                                        DataBucket &matData, IntegerMap &matIndex);
+   virtual void           AddMatlabFilterData(const UpdateInfoType &updateStat);
+   virtual void           AddMatlabFilterData(const UpdateInfoType &updateStat,
+                                              DataBucket &matFilterData, IntegerMap &matFilterIndex);
 };
 
 #endif /* SeqEstimator_hpp */

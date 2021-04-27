@@ -1,0 +1,266 @@
+% Sample optimal control script incorporating a patched-conic launch boundary condition.
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+%%%%%%%%%%%%%%%%%%%%%
+% create a spacecraft
+%%%%%%%%%%%%%%%%%%%%%
+
+Create Spacecraft testSat;
+GMAT testSat.DateFormat = TAIModJulian;
+GMAT testSat.Epoch = '21545';
+GMAT testSat.CoordinateSystem = EarthMJ2000Eq;
+GMAT testSat.DisplayStateType = Cartesian;
+GMAT testSat.X = 7100;
+GMAT testSat.Y = 0;
+GMAT testSat.Z = 1300;
+GMAT testSat.VX = 0;
+GMAT testSat.VY = 7.35;
+GMAT testSat.VZ = 1;
+GMAT testSat.DryMass = 850;
+GMAT testSat.Cd = 2.2;
+GMAT testSat.Cr = 1.8;
+GMAT testSat.DragArea = 15;
+GMAT testSat.SRPArea = 10;
+GMAT testSat.SPADDragScaleFactor = 1;
+GMAT testSat.SPADSRPScaleFactor = 1;
+GMAT testSat.Tanks = {ChemicalTank1};
+GMAT testSat.NAIFId = -10001001;
+GMAT testSat.NAIFIdReferenceFrame = -9001001;
+GMAT testSat.OrbitColor = Red;
+GMAT testSat.TargetColor = Teal;
+GMAT testSat.OrbitErrorCovariance = [ 1e+70 0 0 0 0 0 ; 0 1e+70 0 0 0 0 ; 0 0 1e+70 0 0 0 ; 0 0 0 1e+70 0 0 ; 0 0 0 0 1e+70 0 ; 0 0 0 0 0 1e+70 ];
+GMAT testSat.CdSigma = 1e+70;
+GMAT testSat.CrSigma = 1e+70;
+GMAT testSat.Id = 'SatId';
+GMAT testSat.Attitude = CoordinateSystemFixed;
+GMAT testSat.SPADSRPInterpolationMethod = Bilinear;
+GMAT testSat.SPADSRPScaleFactorSigma = 1e+70;
+GMAT testSat.SPADDragInterpolationMethod = Bilinear;
+GMAT testSat.SPADDragScaleFactorSigma = 1e+70;
+GMAT testSat.ModelFile = 'aura.3ds';
+GMAT testSat.ModelOffsetX = 0;
+GMAT testSat.ModelOffsetY = 0;
+GMAT testSat.ModelOffsetZ = 0;
+GMAT testSat.ModelRotationX = 0;
+GMAT testSat.ModelRotationY = 0;
+GMAT testSat.ModelRotationZ = 0;
+GMAT testSat.ModelScale = 1;
+GMAT testSat.AttitudeDisplayStateType = 'Quaternion';
+GMAT testSat.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT testSat.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT testSat.EulerAngleSequence = '321';
+
+%----------------------------------------
+%---------- Hardware Components
+%----------------------------------------
+
+Create ChemicalTank ChemicalTank1;
+GMAT ChemicalTank1.AllowNegativeFuelMass = false;
+GMAT ChemicalTank1.FuelMass = 50000;
+GMAT ChemicalTank1.Pressure = 1500;
+GMAT ChemicalTank1.Temperature = 20;
+GMAT ChemicalTank1.RefTemperature = 20;
+GMAT ChemicalTank1.Volume = 40;
+GMAT ChemicalTank1.FuelDensity = 1260;
+GMAT ChemicalTank1.PressureModel = PressureRegulated;
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+%%%%%%%%%%%%%%%%%%%%%%%
+% create force model(s)
+%%%%%%%%%%%%%%%%%%%%%%%
+
+Create ForceModel PatchedConicForceModel;
+GMAT PatchedConicForceModel.CentralBody = Earth;
+GMAT PatchedConicForceModel.PointMasses = {Sun};
+GMAT PatchedConicForceModel.Drag = None;
+GMAT PatchedConicForceModel.SRP = Off;
+GMAT PatchedConicForceModel.RelativisticCorrection = Off;
+GMAT PatchedConicForceModel.ErrorControl = RSSStep;
+
+%----------------------------------------
+%---------- Coordinate Systems
+%----------------------------------------
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% create coordinate system(s)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Create CoordinateSystem SunMJ2000Eq;
+GMAT SunMJ2000Eq.Origin = Sun;
+GMAT SunMJ2000Eq.Axes = MJ2000Eq;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create OrbitView OrbitView1;
+GMAT OrbitView1.SolverIterations = Current;
+GMAT OrbitView1.UpperLeft = [ 0.002435460301997077 0 ];
+GMAT OrbitView1.Size = [ 0.7998051631758403 0.8493788819875776 ];
+GMAT OrbitView1.RelativeZOrder = 24;
+GMAT OrbitView1.Maximized = false;
+GMAT OrbitView1.Add = {testSat, Earth, Sun, Venus};
+GMAT OrbitView1.CoordinateSystem = EarthMJ2000Eq;
+GMAT OrbitView1.DrawObject = [ true true true ];
+GMAT OrbitView1.DataCollectFrequency = 1;
+GMAT OrbitView1.UpdatePlotFrequency = 50;
+GMAT OrbitView1.NumPointsToRedraw = 0;
+GMAT OrbitView1.ShowPlot = true;
+GMAT OrbitView1.MaxPlotPoints = 20000;
+GMAT OrbitView1.ShowLabels = true;
+GMAT OrbitView1.ViewPointReference = Earth;
+GMAT OrbitView1.ViewPointVector = [ 0 0 200000 ];
+GMAT OrbitView1.ViewDirection = Earth;
+GMAT OrbitView1.ViewScaleFactor = 1;
+GMAT OrbitView1.ViewUpCoordinateSystem = EarthMJ2000Eq;
+GMAT OrbitView1.ViewUpAxis = Z;
+GMAT OrbitView1.EclipticPlane = Off;
+GMAT OrbitView1.XYPlane = On;
+GMAT OrbitView1.WireFrame = Off;
+GMAT OrbitView1.Axes = On;
+GMAT OrbitView1.Grid = Off;
+GMAT OrbitView1.SunLine = Off;
+GMAT OrbitView1.UseInitialView = On;
+GMAT OrbitView1.StarCount = 7000;
+GMAT OrbitView1.EnableStars = On;
+GMAT OrbitView1.EnableConstellations = On;
+
+%----------------------------------------
+%---------- User Objects
+%----------------------------------------
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% create emtg thruster model
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Create EMTGSpacecraft emtg;
+GMAT emtg.SpacecraftFile = 'FixedThrustAndIsp_Model1.emtg_spacecraftopt';
+GMAT emtg.DutyCycle = 1;
+GMAT emtg.SpacecraftStage = [ 1 ];
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% create dynamics configuration(s)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Create DynamicsConfiguration PatchedConicDynConfig;
+GMAT PatchedConicDynConfig.ForceModels = {PatchedConicForceModel};
+GMAT PatchedConicDynConfig.Spacecraft = {testSat};
+GMAT PatchedConicDynConfig.FiniteBurns = {emtg};
+GMAT PatchedConicDynConfig.EMTGTankConfig = {ChemicalTank1};
+
+%%%%%%%%%%%%%%%%%%%
+% initial guess(es)
+%%%%%%%%%%%%%%%%%%%
+
+Create OptimalControlGuess PatchedConicLaunchGuess;
+GMAT PatchedConicLaunchGuess.Type = 'CollocationGuessFile';
+GMAT PatchedConicLaunchGuess.TimeSystem = 'A1ModJulian';
+GMAT PatchedConicLaunchGuess.CoordinateSystem = EarthMJ2000Eq;
+GMAT PatchedConicLaunchGuess.FileName = '../data/misc/GuessWithUnityControl.och';
+
+%%%%%%%%%%%%%%%%%
+% create phase(s)
+%%%%%%%%%%%%%%%%%
+
+Create Phase Phase_PatchedConicLaunch;
+GMAT Phase_PatchedConicLaunch.Type = 'RadauPseudospectral';
+GMAT Phase_PatchedConicLaunch.ThrustMode = 'Coast';
+GMAT Phase_PatchedConicLaunch.SubPhaseBoundaries = [ -1 -0.75 -0.5 -0.25 0 0.25 0.5 0.75 1 ];
+GMAT Phase_PatchedConicLaunch.PointsPerSubPhase = [ 3 3 3 3 3 3 3 3 ];
+GMAT Phase_PatchedConicLaunch.GuessSource = PatchedConicLaunchGuess;
+GMAT Phase_PatchedConicLaunch.EpochFormat = 'A1ModJulian';
+GMAT Phase_PatchedConicLaunch.StateLowerBound = [ -1495980000 -1495980000 -1495980000 -100 -100 -100 1 ];
+GMAT Phase_PatchedConicLaunch.StateUpperBound = [ 1495980000 1495980000 1495980000 100 100 100 50000 ];
+GMAT Phase_PatchedConicLaunch.ControlLowerBound = [ -1 -1 -1 ];
+GMAT Phase_PatchedConicLaunch.ControlUpperBound = [ 1 1 1 ];
+GMAT Phase_PatchedConicLaunch.EpochLowerBound = '30540';
+GMAT Phase_PatchedConicLaunch.EpochUpperBound = '30600';
+
+% guess for epochs
+GMAT Phase_PatchedConicLaunch.InitialEpoch = '30545';
+GMAT Phase_PatchedConicLaunch.FinalEpoch = '30555';
+GMAT Phase_PatchedConicLaunch.DynamicsConfiguration = PatchedConicDynConfig;
+
+% cost function
+GMAT Phase_PatchedConicLaunch.BuiltInCost = 'TotalMassFinal';
+GMAT Phase_PatchedConicLaunch.MinControlMagnitude = 0;
+GMAT Phase_PatchedConicLaunch.MaxControlMagnitude = 1;
+GMAT Phase_PatchedConicLaunch.MaxRelativeErrorTolerance = 1e-05;
+GMAT Phase_PatchedConicLaunch.OverrideColorInGraphics = false;
+GMAT Phase_PatchedConicLaunch.OrbitColor = Red;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% custom linkage constraints
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% duration of launch phase
+Create CustomLinkageConstraint LaunchPhaseDuration;
+GMAT LaunchPhaseDuration.ConstraintMode = 'Difference';
+GMAT LaunchPhaseDuration.InitialPhase = Phase_PatchedConicLaunch;
+GMAT LaunchPhaseDuration.InitialPhaseBoundaryType = 'Start';
+GMAT LaunchPhaseDuration.FinalPhase = Phase_PatchedConicLaunch;
+GMAT LaunchPhaseDuration.FinalPhaseBoundaryType = 'End';
+GMAT LaunchPhaseDuration.SetModelParameter('TimeLowerBound', 'ElapsedDays', 8);
+GMAT LaunchPhaseDuration.SetModelParameter('TimeUpperBound', 'ElapsedDays', 8);
+
+% launch epoch
+Create CustomLinkageConstraint LaunchEpoch;
+GMAT LaunchEpoch.ConstraintMode = 'Absolute';
+GMAT LaunchEpoch.InitialPhase = Phase_PatchedConicLaunch;
+GMAT LaunchEpoch.InitialPhaseBoundaryType = 'Start';
+GMAT LaunchEpoch.SetModelParameter('TimeLowerBound', A1ModJulian, 30540);
+GMAT LaunchEpoch.SetModelParameter('TimeUpperBound', A1ModJulian, 30560);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% create optimal control functions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% patched conic launch constraint
+Create OptimalControlFunction PatchedConicLaunchConstraint;
+GMAT PatchedConicLaunchConstraint.Function = 'PatchedConicLaunch';
+GMAT PatchedConicLaunchConstraint.Type = 'AlgebraicConstraint';
+GMAT PatchedConicLaunchConstraint.PhaseList = {'Phase_PatchedConicLaunch.Initial'};
+GMAT PatchedConicLaunchConstraint.SetModelParameter('VehicleName', 'TestConfig1');
+GMAT PatchedConicLaunchConstraint.SetModelParameter('CentralBody', 'Earth');
+GMAT PatchedConicLaunchConstraint.SetModelParameter('EMTGLaunchVehicleOptionsFile', ../data/emtg/NLSII_August2018_Augmented.emtg_launchvehicleopt);
+
+%%%%%%%%%%%%%%%%%%%
+% create trajectory
+%%%%%%%%%%%%%%%%%%%
+Create Trajectory traj;
+GMAT traj.GuessSource = PatchedConicLaunchGuess;
+GMAT traj.MaxMeshRefinementIterations = 5;
+GMAT traj.PhaseList = {Phase_PatchedConicLaunch};
+GMAT traj.AddBoundaryFunction = {PatchedConicLaunchConstraint};
+GMAT traj.SNOPTOutputFile = 'SNOPTOutputFile.txt';
+GMAT traj.CustomLinkages = {LaunchPhaseDuration, LaunchEpoch};
+GMAT traj.SolutionFile = 'PCLaunch_ConstrainedC3AndDLA_EarthLaunch_EarthOrigin.och';
+GMAT traj.StateScaleMode = 'Canonical';
+GMAT traj.MassScaleFactor = 1000;
+GMAT traj.OutputCoordinateSystem = UsePhaseCoordinateSystems;
+GMAT traj.FeasibilityTolerances = [ 1e-08 ];
+GMAT traj.MajorOptimalityTolerances = [ 0.0001 ];
+GMAT traj.MajorIterationsLimits = [ 1000 ];
+GMAT traj.TotalIterationsLimits = [ 200000 ];
+GMAT traj.OptimizationMode = {'Minimize'};
+GMAT traj.AllowFailedMeshOptimizations = true;
+GMAT traj.MeshRefinementGuessMode = 'CurrentSolution';
+GMAT traj.PublishUpdateRate = 30;
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+
+
+% execute
+BeginMissionSequence;
+
+Collocate traj

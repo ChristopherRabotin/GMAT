@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -43,9 +43,15 @@ public:
    ~SchurFactorization();
    SchurFactorization& operator=(const SchurFactorization &schurfactorization);
 
-   virtual void Factor(const Rmatrix inputMatrix, Rmatrix &sdUnitary,
+   virtual void Factor(const Rmatrix &inputMatrix, Rmatrix &sdUnitary,
                        Rmatrix &sdUpper);
    virtual void Invert(Rmatrix &inputMatrix);
+   virtual void Invert(Real *sum1, Integer array_size);
+
+   virtual void RemoveRowCol(Real *sum1, Integer num_rows,
+      Integer row_to_remove, IntegerArray& removed_rows);
+   virtual void RestoreAllRowCols(Real *sum1, Integer num_rows,
+      IntegerArray& removed_rows);
 };
 
 

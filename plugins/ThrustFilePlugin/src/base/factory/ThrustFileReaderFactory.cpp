@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -117,6 +117,8 @@ GmatBase* ThrustFileReaderFactory::CreateObject(const std::string& ofType,
       retval = new ThrustHistoryFile(withName);
    if (ofType == "ThrustSegment")
       retval = new ThrustSegment(withName);
+   // TBD - where should this call go?
+   retval->SetPrecisionTimeFlag(true);
 
    return retval;
 }
