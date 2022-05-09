@@ -1,4 +1,13 @@
-﻿Welcome to the wonderful world of GMAT!
+
+https://gmat.atlassian.net/wiki/spaces/GW/pages/380273355/Compiling+GMAT+CMake+Build+System
+
+GMAT User Guide Organization
+
+The GMAT User Guide is the primary source of user information and is complimented by sample scripts distributed with the system (100s!), training classes, and videos.  The user guide is broken down into four main sections to guide you to information quickly.  New users should start by reading the Using GMAT section, which contains information on installation and configuration instructions, data overview, interface tours, and system philosophy.   The Tutorials section contains end-to-end procedures for performing different types of modelling and analysis from propagating an orbit, to modelling multi-segment trajectories and performing orbit determination.  The Reference Guide section contains low-level information on all interfaces including supported fields and functions and an explanations of all inputs and outputs along with defaults and allowed ranges.  The Release Notes sections, one for each release, describe new features, compatibility issues, and known significant issues in each software release. 
+
+Note that documentation for the GMAT API and the Collocation Stand Alone ToolKit (CSALT) is written in a different documentation system and is distributed in separate files than the rest of the system’s documentation.  GMAT’s heritage documentation is written using DocBook.  When new subsystems are implemented, the user documentation is written in Restructured Text (RST).  The GMAT API and CSALT are two of the newest components and the user documentation for those components is located in executable\application packages in the file docs/GMAT_API_OC_HTML/index.html .
+
+Welcome to the wonderful world of GMAT!
 
 GMAT is a software system for space mission design, navigation, and optimization 
 applicable to missions anywhere in the solar system ranging from low Earth orbit 
