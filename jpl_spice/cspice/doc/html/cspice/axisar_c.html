@@ -1,0 +1,418 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>axisar_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>axisar_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   axisar_c ( Axis and angle to rotation ) 
+
+   void axisar_c ( ConstSpiceDouble  axis   [3],
+                   SpiceDouble       angle,
+                   SpiceDouble       r      [3][3]  )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Construct a rotation matrix that rotates vectors by a specified
+   angle about a specified axis.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/rotation.html">ROTATION</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   MATRIX
+   ROTATION
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   axis       I   Rotation axis.
+   angle      I   Rotation angle, in radians.
+   r          O   Rotation matrix corresponding to `axis' and `angle'.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   axis,
+   angle       are, respectively, a rotation axis and a rotation
+               angle.  `axis' and `angle' determine a coordinate
+               transformation whose effect on any vector `v' is to
+               rotate `v' by `angle' radians about the vector `axis'.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   r           is a rotation matrix representing the coordinate
+               transformation determined by `axis' and `angle': for
+               each vector `v', r*v is the vector resulting from
+               rotating `v' by `angle' radians about `axis'.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   Error free.
+
+   1)  If `axis' is the zero vector, the rotation generated is the
+       identity. This is consistent with the specification of <a href="vrotv_c.html">vrotv_c</a>.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   <b>axisar_c</b> can be thought of as a partial inverse of <a href="raxisa_c.html">raxisa_c</a>. <b>axisar_c</b>
+   really is a `left inverse': the code fragment
+
+      <a href="raxisa_c.html">raxisa_c</a> ( r,    axis,  &amp;angle );
+      <b>axisar_c</b> ( axis, angle,  r     );
+
+   preserves `r', except for round-off error, as long as `r' is a
+   rotation matrix.
+
+   On the other hand, the code fragment
+
+      <b>axisar_c</b> ( axis, angle,  r     );
+      <a href="raxisa_c.html">raxisa_c</a> ( r,    axis,  &amp;angle );
+
+   preserves `axis' and `angle', except for round-off error, only if
+   `angle' is in the range (0, pi). So <b>axisar_c</b> is a right inverse
+   of <a href="raxisa_c.html">raxisa_c</a> only over a limited domain.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for these examples may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Compute a matrix that rotates vectors by pi/2 radians about
+      the Z-axis, and compute the rotation axis and angle based on
+      that matrix.
+
+
+      Example code begins here.
+
+
+      /.
+         Program axisar_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local variables
+         ./
+         SpiceDouble          angle;
+         SpiceDouble          angout;
+         SpiceDouble          axis   [3];
+         SpiceDouble          axout  [3];
+         SpiceDouble          rotmat [3][3];
+
+         SpiceInt             i;
+
+         /.
+         Define an axis and an angle for rotation.
+         ./
+         axis[0] = 0.0;
+         axis[1] = 0.0;
+         axis[2] = 1.0;
+         angle   = <a href="halfpi_c.html">halfpi_c</a>();
+
+         /.
+         Determine the rotation matrix.
+         ./
+         <b>axisar_c</b> ( axis, angle, rotmat );
+
+         /.
+         Now calculate the rotation axis and angle based on
+         `rotmat' as input.
+         ./
+         <a href="raxisa_c.html">raxisa_c</a> ( rotmat, axout, &amp;angout );
+
+         /.
+         Display the results.
+         ./
+         printf( &quot;Rotation matrix:\n&quot; );
+         printf( &quot;\n&quot; );
+         for ( i = 0; i &lt; 3; i++ )
+         {
+            printf( &quot;%10.5f %9.5f %9.5f\n&quot;,
+                    rotmat[i][0], rotmat[i][1], rotmat[i][2] );
+         }
+         printf( &quot;\n&quot; );
+         printf( &quot;Rotation axis       : %9.5f %9.5f %9.5f\n&quot;,
+                                 axout[0], axout[1], axout[2] );
+         printf( &quot;Rotation angle (deg): %9.5f\n&quot;, angout * <a href="dpr_c.html">dpr_c</a>() );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Rotation matrix:
+
+         0.00000  -1.00000   0.00000
+         1.00000   0.00000   0.00000
+         0.00000   0.00000   1.00000
+
+      Rotation axis       :   0.00000   0.00000   1.00000
+      Rotation angle (deg):  90.00000
+
+
+   2) Linear interpolation between two rotation matrices.
+
+      Let r(t) be a time-varying rotation matrix; `r' could be
+      a C-matrix describing the orientation of a spacecraft
+      structure. Given two points in time `t1' and `t2' at which
+      r(t) is known, and given a third time `t3', where
+
+         t1  &lt;  t3  &lt;  t2,
+
+      we can estimate r[t3 - 1] by linear interpolation. In other
+      words, we approximate the motion of `r' by pretending that
+      `r' rotates about a fixed axis at a uniform angular rate
+      during the time interval [t1, t2]. More specifically, we
+      assume that each column vector of `r' rotates in this
+      fashion. This procedure will not work if `r' rotates through
+      an angle of pi radians or more during the time interval
+      [t1, t2]; an aliasing effect would occur in that case.
+
+
+      Example code begins here.
+
+
+      /.
+         Program axisar_ex2
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local variables
+         ./
+         SpiceDouble          angle;
+         SpiceDouble          axis   [3];
+         SpiceDouble          delta  [3][3];
+         SpiceDouble          frac;
+         SpiceDouble          q      [3][3];
+         SpiceDouble          r1     [3][3];
+         SpiceDouble          r2     [3][3];
+         SpiceDouble          r3     [3][3];
+         SpiceDouble          t1;
+         SpiceDouble          t2;
+         SpiceDouble          t3;
+
+         SpiceInt             i;
+
+         /.
+         Lets assume that r(t) is the matrix that rotates
+         vectors by pi/2 radians about the Z-axis every
+         minute.
+
+         Let
+
+            r1 = r[t1 - 1], for t1 =  0&quot;, and
+            r2 = r[t2 - 1], for t1 = 60&quot;.
+
+         Define both matrices and times.
+         ./
+         axis[0] = 0.0;
+         axis[1] = 0.0;
+         axis[2] = 1.0;
+
+         t1 =  0.0;
+         t2 = 60.0;
+         t3 = 30.0;
+
+         <a href="ident_c.html">ident_c</a> ( r1 );
+         <b>axisar_c</b> ( axis, <a href="halfpi_c.html">halfpi_c</a>(), r2 );
+
+         <a href="mxmt_c.html">mxmt_c</a> ( r2, r1, q );
+         <a href="raxisa_c.html">raxisa_c</a> ( q, axis, &amp;angle );
+
+         /.
+         Find the fraction of the total rotation angle that `r'
+         rotates through in the time interval [t1, t3].
+         ./
+         frac = ( t3 - t1 )  /  ( t2 - t1 );
+
+         /.
+         Finally, find the rotation `delta' that r(t) undergoes
+         during the time interval [t1, t3], and apply that
+         rotation to `r1', yielding r[t3 - 1], which we'll call `r3'.
+         ./
+         <b>axisar_c</b> ( axis, frac * angle, delta );
+         <a href="mxm_c.html">mxm_c</a> ( delta, r1, r3 );
+
+         /.
+         Display the results.
+         ./
+         printf( &quot;Time (s)            : %9.5f\n&quot;, t3 );
+         printf( &quot;Rotation axis       : %9.5f %9.5f %9.5f\n&quot;,
+                                    axis[0], axis[1], axis[2] );
+         printf( &quot;Rotation angle (deg): %9.5f\n&quot;, frac * angle * <a href="dpr_c.html">dpr_c</a>() );
+         printf( &quot;Rotation matrix     :\n&quot; );
+         printf( &quot;\n&quot; );
+         for ( i = 0; i &lt; 3; i++ )
+         {
+            printf( &quot;%10.5f %9.5f %9.5f\n&quot;, r3[i][0], r3[i][1], r3[i][2] );
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Time (s)            :  30.00000
+      Rotation axis       :   0.00000   0.00000   1.00000
+      Rotation angle (deg):  45.00000
+      Rotation matrix     :
+
+         0.70711  -0.70711   0.00000
+         0.70711   0.70711   0.00000
+         0.00000   0.00000   1.00000
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.1, 06-JUL-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Added complete
+       code examples based on existing code fragments.
+
+   -CSPICE Version 1.0.0, 18-JUN-1999 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   axis and angle to rotation
+</PRE>
+<h4>Link to routine axisar_c source file <a href='../../../src/cspice/axisar_c.c'>axisar_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:01 2021</pre>
+
+</body>
+</html>
+

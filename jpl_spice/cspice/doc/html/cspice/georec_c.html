@@ -1,0 +1,471 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>georec_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>georec_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   georec_c ( Geodetic to rectangular coordinates ) 
+
+   void georec_c ( SpiceDouble lon,
+                   SpiceDouble lat,
+                   SpiceDouble alt,
+                   SpiceDouble re,
+                   SpiceDouble f,
+                   SpiceDouble rectan[3] )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Convert geodetic coordinates to rectangular coordinates.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   CONVERSION
+   COORDINATES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   lon        I   Geodetic longitude of point (radians).
+   lat        I   Geodetic latitude  of point (radians).
+   alt        I   Altitude of point above the reference spheroid.
+   re         I   Equatorial radius of the reference spheroid.
+   f          I   Flattening coefficient.
+   rectan     O   Rectangular coordinates of point.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   lon         is the geodetic longitude of the input point. This is
+               the angle between the prime meridian and the meridian
+               containing `rectan'. The direction of increasing
+               longitude is from the +X axis towards the +Y axis.
+
+               Longitude is measured in radians. On input, the
+               range of longitude is unrestricted.
+
+   lat         is the geodetic latitude of the input point. For a
+               point P on the reference spheroid, this is the angle
+               between the XY plane and the outward normal vector at
+               P. For a point P not on the reference spheroid, the
+               geodetic latitude is that of the closest point to P on
+               the spheroid.
+
+               Latitude is measured in radians. On input, the
+               range of latitude is unrestricted.
+
+   alt         is the altitude of point above the reference spheroid.
+               `alt' must be in the same units as `re'.
+
+   re          is the equatorial radius of a reference spheroid. This
+               spheroid is a volume of revolution: its horizontal
+               cross sections are circular. The shape of the
+               spheroid is defined by an equatorial radius `re' and
+               a polar radius `rp'. `re' must be in the same units
+               as `alt'.
+
+   f           is the flattening coefficient = (re-rp) / re,  where
+               `rp' is the polar radius of the spheroid.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   rectan      are the rectangular coordinates of the input point.
+
+               The units associated with `rectan' are those associated
+               with the inputs `alt' and `re'.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the flattening coefficient is greater than or equal to one,
+       the error SPICE(VALUEOUTOFRANGE) is signaled by a routine in
+       the call tree of this routine.
+
+   2)  If the equatorial radius is less than or equal to zero, the
+       error SPICE(VALUEOUTOFRANGE) is signaled by a routine in the
+       call tree of this routine.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   Given the geodetic coordinates of a point, and the constants
+   describing the reference spheroid,  this routine returns the
+   bodyfixed rectangular coordinates of the point. The bodyfixed
+   rectangular frame is that having the X-axis pass through the
+   0 degree latitude 0 degree longitude point. The Y-axis passes
+   through the 0 degree latitude 90 degree longitude. The Z-axis
+   passes through the 90 degree latitude point. For some bodies
+   this coordinate system may not be a right-handed coordinate
+   system.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   This routine can be used to convert body fixed geodetic
+   coordinates (such as the used for United States Geological
+   Survey topographic maps) to bodyfixed rectangular coordinates
+   such as the Satellite Tracking and Data Network of 1973.
+
+   1) Find the rectangular coordinates of the point having Earth
+      geodetic coordinates:
+
+         lon (deg) =  118.0
+         lat (deg) =   32.0
+         alt (km)  =    0.0
+
+      Use the PCK kernel below to load the required triaxial
+      ellipsoidal shape model and orientation data for the Earth.
+
+         pck00010.tpc
+
+
+      Example code begins here.
+
+
+      /.
+         Program georec_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local variables
+         ./
+         SpiceDouble          alt;
+         SpiceDouble          f;
+         SpiceDouble          lat;
+         SpiceDouble          lon;
+         SpiceDouble          radii  [3];
+         SpiceDouble          re;
+         SpiceDouble          rectan [3];
+         SpiceDouble          rp;
+
+         SpiceInt             n;
+
+         /.
+         Load a PCK file containing a triaxial
+         ellipsoidal shape model and orientation
+         data for the Earth.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( &quot;pck00010.tpc&quot; );
+
+         /.
+         Retrieve the triaxial radii of the Earth
+         ./
+         <a href="bodvrd_c.html">bodvrd_c</a> ( &quot;EARTH&quot;, &quot;RADII&quot;, 3, &amp;n, radii );
+
+         /.
+         Compute flattening coefficient.
+         ./
+         re  =  radii[0];
+         rp  =  radii[2];
+         f   =  ( re - rp ) / re;
+
+         /.
+         Set a geodetic position.
+         ./
+         lon = 118.0 * <a href="rpd_c.html">rpd_c</a> ( );
+         lat =  30.0 * <a href="rpd_c.html">rpd_c</a> ( );
+         alt =   0.0;
+
+         /.
+         Do the conversion.
+         ./
+         <b>georec_c</b> ( lon, lat, alt, radii[0], f, rectan );
+
+         printf( &quot;Geodetic coordinates in deg and km (lon, lat, alt)\n&quot; );
+         printf( &quot; %13.6f %13.6f %13.6f\n&quot;,
+                 lon * <a href="dpr_c.html">dpr_c</a> ( ), lat * <a href="dpr_c.html">dpr_c</a> ( ), alt );
+         printf( &quot;Rectangular coordinates in km (x, y, z)\n&quot; );
+         printf( &quot; %13.6f %13.6f %13.6f\n&quot;, rectan[0], rectan[1], rectan[2] );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Geodetic coordinates in deg and km (lon, lat, alt)
+          118.000000     30.000000      0.000000
+      Rectangular coordinates in km (x, y, z)
+        -2595.359123   4881.160589   3170.373523
+
+
+   2) Create a table showing a variety of rectangular coordinates
+      and the corresponding Earth geodetic coordinates. The
+      values are computed using the equatorial radius of the Clark
+      66 spheroid and the Clark 66 flattening factor:
+
+         radius: 6378.2064
+         flattening factor: 1./294.9787
+
+      Note: the values shown above may not be current or suitable
+            for your application.
+
+
+      Corresponding rectangular and geodetic coordinates are
+      listed to three decimal places. Input angles are in degrees.
+
+
+      Example code begins here.
+
+
+      /.
+         Program georec_ex2
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define NREC         11
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble          clarkr;
+         SpiceDouble          clarkf;
+         SpiceDouble          rectan [3];
+         SpiceDouble          rlat;
+         SpiceDouble          rlon;
+
+         SpiceInt             i;
+
+         /.
+         Define the input geodetic coordinates. Angles in
+         degrees.
+         ./
+         SpiceDouble          lon    [NREC] = { 0.0,    0.0,  90.0,
+                                                0.0,  180.0, -90.0,
+                                                0.0,   45.0,   0.0,
+                                               90.0,    45.0       };
+
+         SpiceDouble          lat    [NREC] = {  90.0,    0.0,    0.0,
+                                                 90.0,    0.0,    0.0,
+                                                -90.0,    0.0,   88.707,
+                                                 88.707, 88.1713        };
+
+         SpiceDouble          alt    [NREC] = { -6356.5838,     0.0,
+                                        0.0,        0.0,        0.0,
+                                        0.0,        0.0,        0.0,
+                                    -6355.5725, -6355.5725, -6355.5612 };
+
+         /.
+         Using the equatorial radius of the Clark66 spheroid
+         (clarkr = 6378.2064 km) and the Clark 66 flattening
+         factor (clarkf = 1.0 / 294.9787 ) convert from
+         body fixed rectangular coordinates.
+         ./
+         clarkr = 6378.2064;
+         clarkf = 1.0 / 294.9787;
+
+         /.
+         Print the banner.
+         ./
+         printf( &quot;   lon      lat       alt     rectan[0]  rectan[1] &quot;
+                 &quot; rectan[2]\n&quot; );
+         printf( &quot; -------  -------  ---------  ---------  --------- &quot;
+                 &quot; ---------\n&quot; );
+
+         /.
+         Do the conversion.
+         ./
+         for ( i = 0; i &lt; NREC; i++ )
+         {
+
+            rlon = lon[i] * <a href="rpd_c.html">rpd_c</a> ( );
+            rlat = lat[i] * <a href="rpd_c.html">rpd_c</a> ( );
+
+            <b>georec_c</b> ( rlon, rlat, alt[i], clarkr, clarkf, rectan );
+
+            printf( &quot;%8.3f %8.3f %10.3f&quot;, lon[i], lat[i], alt[i] );
+            printf( &quot;%11.3f %10.3f %10.3f\n&quot;,
+                    rectan[0], rectan[1], rectan[2] );
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+         lon      lat       alt     rectan[0]  rectan[1]  rectan[2]
+       -------  -------  ---------  ---------  ---------  ---------
+         0.000   90.000  -6356.584      0.000      0.000      0.000
+         0.000    0.000      0.000   6378.206      0.000      0.000
+        90.000    0.000      0.000      0.000   6378.206      0.000
+         0.000   90.000      0.000      0.000      0.000   6356.584
+       180.000    0.000      0.000  -6378.206      0.000      0.000
+       -90.000    0.000      0.000      0.000  -6378.206      0.000
+         0.000  -90.000      0.000      0.000      0.000  -6356.584
+        45.000    0.000      0.000   4510.073   4510.073      0.000
+         0.000   88.707  -6355.573      1.000      0.000      1.000
+        90.000   88.707  -6355.573      0.000      1.000      1.000
+        45.000   88.171  -6355.561      1.000      1.000      1.000
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   [1]  R. Bate, D. Mueller, and J. White, &quot;Fundamentals of
+        Astrodynamics,&quot; Dover Publications Inc., 1971.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   C.H. Acton          (JPL)
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   H.A. Neilan         (JPL)
+   B.V. Semenov        (JPL)
+   W.L. Taber          (JPL)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.4, 01-NOV-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Added two complete code
+       examples.
+
+   -CSPICE Version 1.0.3, 26-JUL-2016 (BVS)
+
+       Minor headers edits.
+
+   -CSPICE Version 1.0.2, 30-JUL-2003 (NJB)
+
+       Various header corrections were made.
+
+   -CSPICE Version 1.0.1, 11-JAN-2003 (EDW)
+
+       Removed a spurious non-printing character.
+
+   -CSPICE Version 1.0.0, 08-FEB-1998 (EDW) (CHA) (HAN) (WLT)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   geodetic to rectangular coordinates
+</PRE>
+<h4>Link to routine georec_c source file <a href='../../../src/cspice/georec_c.c'>georec_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:07 2021</pre>
+
+</body>
+</html>
+

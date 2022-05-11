@@ -1,0 +1,368 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>ckfxfm_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>ckfxfm_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   ckfxfm_c ( CK frame, find state transformation ) 
+
+   void ckfxfm_c ( SpiceInt            inst,
+                   SpiceDouble         et,
+                   SpiceDouble         xform  [6][6],
+                   SpiceInt          * ref,
+                   SpiceBoolean      * found         )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Find the state transformation matrix from a C-kernel (CK) frame
+   with the specified frame class ID (CK ID) to the base frame of
+   the highest priority CK segment containing orientation and
+   angular velocity data for this CK frame at the time requested.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/ck.html">CK</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   POINTING
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   inst       I   Frame class ID (CK ID) of a CK frame.
+   et         I   Epoch measured in seconds past J2000 TDB.
+   xform      O   Transformation from CK frame to frame `ref'.
+   ref        O   Frame ID of the base reference.
+   found      O   SPICETRUE when requested pointing is available.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   inst        is the unique frame class ID (CK ID) of the CK frame for
+               which data is being requested.
+
+   et          is the epoch for which the state transformation is
+               desired. `et' should be given in seconds past the epoch of
+               J2000 TDB.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   xform       is a state transformation matrix that converts states
+               relative to the CK frame given by its frame class ID,
+               `inst', to states relative to the base frame given by its
+               frame ID, `ref'.
+
+               Thus, if a state S has components x, y, z, dx, dy, dz in
+               the CK frame, then S has components x', y', z', dx',
+               dy', dz' in the base frame `ref'.
+
+                  .-   -.     .-         -. .-  -.
+                  |  x' |     |           | |  x |
+                  |  y' |     |           | |  y |
+                  |  z' |     |           | |  z |
+                  | dx' |  =  |   xform   | | dx |
+                  | dy' |     |           | | dy |
+                  | dz' |     |           | | dz |
+                  `-   -'     `-         -' `-  -'
+
+
+   ref         is the ID code of the base reference frame to which
+               `xform' will transform states.
+
+   found       is SPICETRUE if a record was found to satisfy the pointing
+               request. `found' will be SPICEFALSE otherwise.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If no CK files were loaded prior to calling this routine, an
+       error is signaled by a routine in the call tree of this
+       routine.
+
+   2)  If no SCLK correlation data needed to read CK files were
+       loaded prior to calling this routine, an error is signaled by
+       a routine in the call tree of this routine.
+
+   3)  If the input time `et' cannot be converted to an encoded SCLK
+       time, using SCLK data associated with `inst', an error is
+       signaled by a routine in the call tree of this routine.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   <b>ckfxfm_c</b> searches through loaded CK files to locate a segment that
+   can satisfy the request for state transformation data for the CK
+   frame with the specified frame class ID at time `et'. You must load
+   a CK file containing such data before calling this routine. You
+   must also load SCLK and possibly LSK files needed to convert the
+   input `et' time to the encoded SCLK time with which the orientation
+   data stored inside that CK is tagged.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   <b>ckfxfm_c</b> searches through loaded CK files to satisfy a pointing
+   request. Last-loaded files are searched first, and individual
+   files are searched in backwards order, giving priority to
+   segments that were added to a file later than the others.
+
+   The search ends when a segment is found that can give pointing
+   for the specified CK frame at the request time.
+
+   Only segments with angular velocities are considered by this
+   routine.
+
+   This routine uses the <a href="ckmeta_c.html">ckmeta_c</a> routine to determine the SCLK ID
+   used to convert the input `et' time to the encoded SCLK time used
+   to look up pointing data in loaded CK files.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Use <b>ckfxfm_c</b> to compute the angular rate of rotation for the Mars
+      Global Surveyor (MGS) spacecraft frame, &quot;MGS_SPACECRAFT&quot;,
+      relative to the inertial frame used as the base frame in CK
+      files containing MGS spacecraft orientation at 2003-JUL-25
+      13:00:00. The frame class ID (CK ID) for the &quot;MGS_SPACECRAFT&quot;
+      frame is -94000.
+
+      Use the meta-kernel shown below to load the required SPICE
+      kernels.
+
+
+         KPL/MK
+
+         File name: ckfxfm_ex1.tm
+
+         This meta-kernel is intended to support operation of SPICE
+         example programs. The kernels shown here should not be
+         assumed to contain adequate or correct versions of data
+         required by SPICE-based user applications.
+
+         In order for an application to use this meta-kernel, the
+         kernels referenced here must be present in the user's
+         current working directory.
+
+         The names and contents of the kernels referenced
+         by this meta-kernel are as follows:
+
+            File name                     Contents
+            ---------                     --------
+            naif0012.tls                  Leapseconds
+            mgs_sclkscet_00061.tsc        MGS SCLK coefficients
+            mgs_sc_ext12.bc               MGS s/c bus attitude
+
+         \begindata
+
+         KERNELS_TO_LOAD = ( 'naif0012.tls',
+                             'mgs_sclkscet_00061.tsc',
+                             'mgs_sc_ext12.bc' )
+
+         \begintext
+
+         End of meta-kernel
+
+
+      Example code begins here.
+
+
+      /.
+         Program ckfxfm_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define EPOCH        &quot;2003-JUL-25 13:00:00&quot;
+         #define INST         -94000
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble          av     [3];
+         SpiceDouble          et;
+         SpiceDouble          rot    [3][3];
+         SpiceDouble          xform  [6][6];
+
+         SpiceInt             ref;
+
+         SpiceBoolean         found;
+
+         /.
+         Load the required LSK, SCLK and CK. Use a
+         meta-kernel for convenience.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( &quot;ckfxfm_ex1.tm&quot; );
+
+         /.
+         First convert the time to seconds past J2000.
+         ./
+         <a href="str2et_c.html">str2et_c</a> ( EPOCH, &amp;et );
+
+         /.
+         Now, look up the state transformation from the MGS
+         spacecraft frame specified by its frame class ID
+         (CK ID) to a base reference frame (returned by
+         <b>ckfxfm_c</b>), at `et'.
+         ./
+         <b>ckfxfm_c</b> ( INST, et, xform, &amp;ref, &amp;found );
+
+         /.
+         Next determine the angular velocity of the
+         transformation.
+         ./
+         <a href="xf2rav_c.html">xf2rav_c</a> ( xform, rot, av );
+
+         /.
+         The angular rate of change (in radians/second) is just
+         the magnitude of `av'.
+         ./
+         printf( &quot;Angular rate of change (rad/s): %19.16f\n&quot;,
+                                               <a href="vnorm_c.html">vnorm_c</a> ( av ) );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Angular rate of change (rad/s):  0.0008907319999591
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  A CK file must be loaded prior to calling this routine.
+
+   2)  LSK and SCLK files needed for time conversions must be loaded
+       prior to calling this routine.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.0, 13-DEC-2021 (JDR)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   get instrument frame transformation and reference frame
+</PRE>
+<h4>Link to routine ckfxfm_c source file <a href='../../../src/cspice/ckfxfm_c.c'>ckfxfm_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:02 2021</pre>
+
+</body>
+</html>
+

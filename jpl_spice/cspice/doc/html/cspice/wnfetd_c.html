@@ -1,0 +1,310 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>wnfetd_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>wnfetd_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   wnfetd_c ( Fetch an interval from a DP window ) 
+
+   void wnfetd_c ( SpiceCell    * window,
+                   SpiceInt       n,
+                   SpiceDouble  * left,
+                   SpiceDouble  * right   )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Fetch a particular interval from a double precision window.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/windows.html">WINDOWS</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   WINDOWS
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   window     I   Input window.
+   n          I   Index of interval to be fetched.
+   left,
+   right      O   Left, right endpoints of the nth interval.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   window      is a window containing zero or more intervals.
+
+               `window' must be declared as a double precision SpiceCell.
+
+               CSPICE provides the following macro, which declares and
+               initializes the cell
+
+                  SPICEDOUBLE_CELL        ( window, WINDOWSZ );
+
+               where WINDOWSZ is the maximum capacity of `window'.
+
+   n           is the index of a particular interval within the window.
+               Indices range from 0 to NINT-1, where NINT is the number of
+               intervals in the window (<a href="card_c.html">card_c</a>(&amp;window)/2).
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   left,
+   right       are the left and right endpoints of the N'th interval in
+               the input window. If the interval is not found, `left' and
+               `right' are not defined.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If `n' is less than one, the error SPICE(NOINTERVAL) is
+       signaled by a routine in the call tree of this routine.
+
+   2)  If the interval does not exist, i.e. n &gt; <a href="card_c.html">card_c</a>(window)/2, the
+       error SPICE(NOINTERVAL) is signaled by a routine in the call
+       tree of this routine.
+
+   3)  The cardinality of the input `window' must be even. Left
+       endpoints of stored intervals must be strictly greater than
+       preceding right endpoints. Right endpoints must be greater
+       than or equal to corresponding left endpoints. Invalid window
+       data are not diagnosed by this routine and may lead to
+       unpredictable results.
+
+   4)  If the `window' cell argument has a type other than
+       SpiceDouble, the error SPICE(TYPEMISMATCH) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as input,
+   the compiler and supporting libraries, and the machine specific
+   arithmetic implementation.
+
+   1) The following code example demonstrates how to insert an
+      interval into an existing double precision SPICE window, and
+      how to loop over all its intervals to extract their left and
+      right points.
+
+
+      Example code begins here.
+
+
+      /.
+         Program wnfetd_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main()
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define WNSIZE          10
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble              left;
+         SpiceDouble              right;
+
+         SPICEDOUBLE_CELL ( window,  WNSIZE );
+
+         SpiceInt                 i;
+
+         /.
+         Validate the window with size WNSIZE and zero elements.
+         ./
+         <a href="wnvald_c.html">wnvald_c</a> ( WNSIZE, 0, &amp;window );
+
+         /.
+         Insert the intervals
+
+            [ 1, 3 ]  [ 7, 11 ]  [ 23, 27 ]
+
+         into `window'.
+         ./
+         <a href="wninsd_c.html">wninsd_c</a> (  1.0,   3.0, &amp;window );
+         <a href="wninsd_c.html">wninsd_c</a> (  7.0,  11.0, &amp;window );
+         <a href="wninsd_c.html">wninsd_c</a> ( 23.0,  27.0, &amp;window );
+
+         /.
+         Loop over the number of intervals in `window', output
+         the `left' and `right' endpoints for each interval.
+         ./
+         for ( i=0; i&lt;<a href="wncard_c.html">wncard_c</a>(&amp;window); i++)
+         {
+            <b>wnfetd_c</b>( &amp;window, i, &amp;left, &amp;right );
+            printf(&quot;Interval %d [%8.3f, %8.3f]\n&quot;, i, left, right );
+         }
+
+         return ( 0 );
+
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Interval 0 [   1.000,    3.000]
+      Interval 1 [   7.000,   11.000]
+      Interval 2 [  23.000,   27.000]
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   W.L. Taber          (JPL)
+   I.M. Underwood      (JPL)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.2, 10-AUG-2021 (JDR)
+
+       Edited the header to comply to NAIF standard. Added complete code
+       example, problem statement and solution.
+
+       Extended description of argument &quot;window&quot; in -Detailed_Input to include
+       type and preferred declaration method.
+
+       Added entry #3 in -Exceptions section.
+
+   -CSPICE Version 1.0.1, 30-JUL-2007 (EDW)
+
+      Removed erroneous description in the -Examples section
+      indicating &quot;Undefined&quot; as a return state after an error
+      event caused by an invalid value of n.
+
+   -CSPICE Version 1.0.0, 22-AUG-2002 (NJB) (WLT) (IMU)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   fetch an interval from a d.p. window
+</PRE>
+<h4>Link to routine wnfetd_c source file <a href='../../../src/cspice/wnfetd_c.c'>wnfetd_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:15 2021</pre>
+
+</body>
+</html>
+

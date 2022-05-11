@@ -1,0 +1,533 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>dafopw_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>dafopw_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   dafopw_c ( DAF, open for write ) 
+
+   void dafopw_c ( ConstSpiceChar  * fname,
+                   SpiceInt        * handle )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Open a DAF for subsequent write requests.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/daf.html">DAF</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   DAF
+   FILES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   fname      I   Name of DAF to be opened.
+   handle     O   Handle assigned to DAF.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   fname       is the name of a DAF to be opened with write access.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   handle      is the file handle associated with the file. This handle
+               is used to identify the file in subsequent calls to other
+               DAF routines.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the specified file has already been opened, either by the
+       DAF routines or by other code, an error is signaled by a
+       routine in the call tree of this routine. Note that this
+       response is not paralleled by <a href="dafopr_c.html">dafopr_c</a>, which allows you to open
+       a DAF for reading even if it is already open for reading.
+
+   2)  If the specified file cannot be opened without exceeding the
+       maximum number of files, the error SPICE(DAFFTFULL) is
+       signaled by a routine in the call tree of this routine.
+
+   3)  If the attempt to read the file's file record fails, the error
+       SPICE(FILEREADFAILED) is signaled by a routine in the call
+       tree of this routine.
+
+   4)  If the specified file is not a DAF file, an error is signaled
+       by a routine in the call tree of this routine.
+
+   5)  If no logical units are available, an error is signaled by a
+       routine in the call tree of this routine.
+
+   6)  If the file does not exist, an error is signaled by a routine
+       in the call tree of this routine.
+
+   7)  If an I/O error occurs in the process of opening the file, the
+       error is signaled by a routine in the call tree of this
+       routine.
+
+   8)  If the file name is blank or otherwise inappropriate, an error
+       is signaled by a routine in the call tree of this routine.
+
+   9)  If the file was transferred improperly via FTP, an error is
+       signaled by a routine in the call tree of this routine.
+
+   10) If the file utilizes a non-native binary file format, an error
+       is signaled by a routine in the call tree of this routine.
+
+   11) If the `fname' input string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   12) If the `fname' input string has zero length, the error
+       SPICE(EMPTYSTRING) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See argument `fname'.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   Most DAFs require only read access. If you do not need to
+   change the contents of a file, you should open it with <a href="dafopr_c.html">dafopr_c</a>.
+   Use <b>dafopw_c</b> when you need to
+
+      -- change (update) one or more summaries, names, or
+         arrays within a file; or
+
+      -- add new arrays to a file.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for these examples may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Delete the entire comment area of a DAF file. Note that this
+      action should only be performed if fresh new comments are to
+      be placed within the DAF file.
+
+      Use the SPK kernel below as input DAF file for the program.
+
+         earthstns_itrf93_201023.bsp
+
+
+      Example code begins here.
+
+
+      /.
+         Program dafopw_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+         /.
+         Local parameters
+         ./
+         #define KERNEL       &quot;earthstns_itrf93_201023.bsp&quot;
+         #define BUFFSZ       10
+         #define LINLEN       1000
+
+         /.
+         Local variables.
+         ./
+         SpiceChar            buffer [BUFFSZ][LINLEN];
+
+         SpiceInt             handle;
+         SpiceInt             i;
+         SpiceInt             n;
+
+         SpiceBoolean         done;
+
+         /.
+         Open a DAF for write. Return a `handle' referring to the
+         file.
+         ./
+         <b>dafopw_c</b> ( KERNEL, &amp;handle );
+
+         /.
+         Print the first 10 lines of comments from the DAF file.
+         ./
+         printf( &quot;Comment area of input DAF file (max. 10 lines): \n&quot; );
+         printf( &quot;--------------------------------&quot;
+                 &quot;------------------------------\n&quot; );
+
+         <a href="dafec_c.html">dafec_c</a> ( handle, BUFFSZ, LINLEN, &amp;n, buffer, &amp;done );
+
+         for ( i = 0; i &lt; n; i++ )
+         {
+            printf( &quot;%s\n&quot;, buffer[i] );
+         }
+
+         printf( &quot;--------------------------------&quot;
+                 &quot;------------------------------\n&quot; );
+         printf( &quot; \n&quot; );
+         printf( &quot;Deleting entire comment area...\n&quot; );
+
+         /.
+         Delete all the comments from the DAF file.
+         ./
+         <a href="dafdc_c.html">dafdc_c</a> ( handle );
+
+         /.
+         Close the DAF file and re-open it for read
+         access to work around the <a href="dafec_c.html">dafec_c</a> restriction
+         on comments not to be modified while they are
+         being extracted.
+         ./
+         <a href="dafcls_c.html">dafcls_c</a> ( handle );
+
+         <a href="dafopr_c.html">dafopr_c</a> ( KERNEL, &amp;handle );
+
+         /.
+         Check if the comments have indeed been deleted.
+         ./
+         <a href="dafec_c.html">dafec_c</a> ( handle, BUFFSZ, LINLEN, &amp;n, buffer, &amp;done );
+
+         if ( done  &amp;&amp;  ( n == 0 ) )
+         {
+            printf( &quot; \n&quot; );
+            printf( &quot;   Successful operation.\n&quot; );
+         }
+         else
+         {
+            printf( &quot; \n&quot; );
+            printf( &quot;   Operation failed.\n&quot; );
+         }
+
+         /.
+         Safely close the DAF.
+         ./
+         <a href="dafcls_c.html">dafcls_c</a> ( handle );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Comment area of input DAF file (max. 10 lines):
+      --------------------------------------------------------------
+
+         SPK for DSN Station Locations
+         =====================================================================
+
+         Original file name:                   earthstns_itrf93_201023.bsp
+         Creation date:                        2020 October 28 12:30
+         Created by:                           Nat Bachman  (NAIF/JPL)
+
+
+         Introduction
+      --------------------------------------------------------------
+
+      Deleting entire comment area...
+
+         Successful operation.
+
+
+   2) In the following code example, <b>dafopw_c</b> is used to open a
+      file, which is then searched for arrays containing data for
+      a particular object. The code for the object is then changed
+      (perhaps to reflect some new convention).
+
+
+      Example code begins here.
+
+
+      /.
+         Program dafopw_ex2
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main()
+      {
+         /.
+         Local parameters.
+         ./
+         #define  ARCHLN         4
+         #define  DSCSIZ         5
+         #define  FILSIZ         256
+         #define  KTYPLN         5
+         #define  LINSIZ         81
+         #define  MAXOBJ         1000
+         #define  ND             2
+         #define  NI             6
+
+         /.
+         Local variables.
+         ./
+         SPICEINT_CELL         ( ids,   MAXOBJ );
+
+         SpiceBoolean            found;
+
+         SpiceChar               arch       [ ARCHLN ];
+         SpiceChar               fname      [ FILSIZ ];
+         SpiceChar               ktype      [ KTYPLN ];
+         SpiceChar               line       [ LINSIZ ];
+
+         SpiceDouble             dc         [ ND ];
+         SpiceDouble             sum        [ DSCSIZ ];
+
+         SpiceInt                handle;
+         SpiceInt                i;
+         SpiceInt                ic         [ NI ];
+         SpiceInt                new_code;
+         SpiceInt                obj;
+         SpiceInt                old_code;
+
+
+         /.
+         Get the input data.
+         ./
+         <a href="prompt_c.html">prompt_c</a> ( &quot;Enter name of existing DAF &gt; &quot;, FILSIZ, fname );
+
+         <a href="prompt_c.html">prompt_c</a> ( &quot;Enter ID code to change    &gt; &quot;, LINSIZ, line  );
+         <a href="prsint_c.html">prsint_c</a> ( line, &amp;old_code );
+
+         <a href="prompt_c.html">prompt_c</a> ( &quot;Enter replacement code     &gt; &quot;, LINSIZ, line  );
+         <a href="prsint_c.html">prsint_c</a> ( line, &amp;new_code );
+
+         /.
+         Open the existing DAF file for write access.
+         ./
+         <b>dafopw_c</b> ( fname, &amp;handle );
+
+         /.
+         Start a forward search through the file.
+         ./
+         <a href="dafbfs_c.html">dafbfs_c</a> ( handle );
+
+         /.
+         Find the first array (segment).
+         ./
+         <a href="daffna_c.html">daffna_c</a> ( &amp;found );
+
+         while ( found )
+         {
+            /.
+            Read and unpack the current DAF array summary
+            (aka segment descriptor) sum:
+            ./
+            <a href="dafgs_c.html">dafgs_c</a> ( sum );
+            <a href="dafus_c.html">dafus_c</a> ( sum, ND, NI, dc, ic );
+
+
+            if ( ic[0] == old_code )
+            {
+               ic[0] = new_code;
+
+               /.
+               Re-pack the descriptor; replace the descriptor
+               in the file.
+               ./
+               <a href="dafps_c.html">dafps_c</a> ( ND, NI, dc, ic, sum );
+               <a href="dafrs_c.html">dafrs_c</a> ( sum );
+
+            }
+
+            /.
+            Find the next segment.
+            ./
+            <a href="daffna_c.html">daffna_c</a> ( &amp;found );
+         }
+
+         /.
+         Close the DAF.
+         ./
+         <a href="dafcls_c.html">dafcls_c</a> ( handle );
+
+         /.
+         Find the set of objects in the DAF file.
+         ./
+         <a href="getfat_c.html">getfat_c</a> ( fname, ARCHLN, KTYPLN, arch, ktype );
+
+         if ( <a href="eqstr_c.html">eqstr_c</a> ( ktype, &quot;spk&quot; ) )
+         {
+            <a href="spkobj_c.html">spkobj_c</a> ( fname, &amp;ids );
+         }
+         else if ( <a href="eqstr_c.html">eqstr_c</a> ( ktype, &quot;ck&quot; ) )
+         {
+            <a href="ckobj_c.html">ckobj_c</a>  ( fname, &amp;ids );
+         }
+         else if ( <a href="eqstr_c.html">eqstr_c</a> ( ktype, &quot;pck&quot; ) )
+         {
+            <a href="pckfrm_c.html">pckfrm_c</a> ( fname, &amp;ids );
+         }
+
+         printf( &quot;Objects in the DAF file:\n\n&quot; );
+         for ( i = 0;  i &lt; <a href="card_c.html">card_c</a>( &amp;ids );  i++  )
+         {
+            obj  =  SPICE_CELL_ELEM_I( &amp;ids, i );
+
+            printf( &quot;  %d&quot;, (int)obj );
+         }
+         printf( &quot;\n&quot; );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, using the SPK file named de430.bsp as input
+      DAF file and requesting to change the Moon ID code &quot;301&quot;
+      to another (fake) ID, &quot;-999&quot;, the output was:
+
+
+      Enter name of existing DAF &gt; de430.bsp
+      Enter ID code to change    &gt; 301
+      Enter replacement code     &gt; -999
+      Objects in the DAF file:
+
+        -999  1  2  3  4  5  6  7  8  9  10  199  299  399
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  Only files of the native binary file format may be opened
+       with this routine.
+
+   2)  Files opened using this routine must be closed with <a href="dafcls_c.html">dafcls_c</a>.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   K.R. Gehringer      (JPL)
+   J.M. Lynch          (JPL)
+   J.E. McLean         (JPL)
+   W.L. Taber          (JPL)
+   F.S. Turner         (JPL)
+   I.M. Underwood      (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.1, 25-NOV-2021 (JDR)
+
+       Edited the header to comply with NAIF standard.
+
+       Extended code example to generate outputs, provide example's solution
+       and replaced f2c'ed functions by CSPICE wrappers. Moved DAF required
+       reading from -Literature_References to -Required_Reading section.
+
+   -CSPICE Version 1.0.0, 13-OCT-2004 (NJB) (KRG) (JML) (JEM) (WLT) (FST) (IMU)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   open existing DAF for write
+</PRE>
+<h4>Link to routine dafopw_c source file <a href='../../../src/cspice/dafopw_c.c'>dafopw_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:03 2021</pre>
+
+</body>
+</html>
+

@@ -1,0 +1,416 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>rav2xf_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>rav2xf_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   rav2xf_c ( Rotation and angular velocity to transform ) 
+
+   void rav2xf_c ( ConstSpiceDouble    rot   [3][3],
+                   ConstSpiceDouble    av    [3],
+                   SpiceDouble         xform [6][6]  )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Determine a state transformation matrix from a rotation matrix
+   and the angular velocity of the rotation.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/rotation.html">ROTATION</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   FRAMES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   rot        I   Rotation matrix.
+   av         I   Angular velocity vector.
+   xform      O   State transformation associated with `rot' and `av'.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   rot         is a rotation matrix that gives the transformation from
+               some frame FRAME1 to another frame FRAME2.
+
+   av          is the angular velocity of the transformation.
+               In other words, if `p' is the position of a fixed
+               point in FRAME2, then from the point of view of
+               FRAME1, `p' rotates (in a right handed sense) about
+               an axis parallel to `av'. Moreover the rate of rotation
+               in radians per unit time is given by the length of
+               `av'.
+
+               More formally, the velocity `v' of `p' in FRAME1 is
+               given by
+                                  T
+                  v  =  av x ( rot  * p )
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   xform       is a state transformation matrix associated
+               with `rot' and `av'. If `s1' is the state of an object
+               with respect to FRAME1, then the state `s2' of the
+               object with respect to FRAME2 is given by
+
+                  s2  =  xform * s1
+
+               where &quot;*&quot; denotes Matrix-Vector multiplication.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   Error free.
+
+   1)  No checks are performed on `rot' to ensure that it is indeed
+       a rotation matrix.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine is essentially a macro routine for converting
+   a rotation and angular velocity of the rotation to the
+   equivalent state transformation matrix.
+
+   This routine is an inverse of <a href="xf2rav_c.html">xf2rav_c</a>.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) The following example program uses <a href="ckgpav_c.html">ckgpav_c</a> to get C-matrix
+      and associated angular velocity vector for an image whose
+      SCLK count (un-encoded character string version) is known.
+
+      From that matrix and angular velocity vector, the associated
+      state transformation matrix is obtained.
+
+      Note that we need to load a SCLK kernel to convert from clock
+      string to &quot;ticks.&quot; Although not required for older spacecraft
+      clocks, most modern spacecraft ones require a leapseconds
+      kernel to be loaded in addition to a SCLK kernel.
+
+
+      Use the meta-kernel shown below to load the required SPICE
+      kernels.
+
+
+         KPL/MK
+
+         File name: rav2xf_ex1.tm
+
+         This meta-kernel is intended to support operation of SPICE
+         example programs. The kernels shown here should not be
+         assumed to contain adequate or correct versions of data
+         required by SPICE-based user applications.
+
+         In order for an application to use this meta-kernel, the
+         kernels referenced here must be present in the user's
+         current working directory.
+
+         The names and contents of the kernels referenced
+         by this meta-kernel are as follows:
+
+            File name              Contents
+            --------------------   -----------------------
+            cas00071.tsc           CASSINI SCLK
+            04161_04164ra.bc       CASSINI spacecraft
+                                   reconstructed CK
+
+         \begindata
+
+           KERNELS_TO_LOAD = ( 'cas00071.tsc'
+                               '04161_04164ra.bc' )
+
+         \begintext
+
+         End of meta-kernel
+
+
+      Example code begins here.
+
+
+      /.
+         Program rav2xf_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Constants for this program.
+
+         -- The code for the CASSINI spacecraft clock is -82.
+
+         -- The code for CASSINI spacecraft reference frame is
+            -82000.
+
+         --  Spacecraft clock tolerance is 1.0 seconds. This may
+            not be an acceptable tolerance for some applications.
+            It must be converted to &quot;ticks&quot; (units of encoded
+            SCLK) for input to <a href="ckgpav_c.html">ckgpav_c</a>.
+
+         -- The reference frame we want is J2000.
+         ./
+         #define META         &quot;rav2xf_ex1.tm&quot;
+         #define REFFRM       &quot;J2000&quot;
+         #define SCLKCH       &quot;1/1465476046.160&quot;
+         #define SCLTOL       &quot;1.0&quot;
+         #define SCID         -82
+         #define INSTID       -82000
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble          av     [3];
+         SpiceDouble          clkout;
+         SpiceDouble          cmat   [3][3];
+         SpiceDouble          fxmat  [6][6];
+         SpiceDouble          sclkdp;
+         SpiceDouble          toltik;
+
+         SpiceInt             i;
+
+         SpiceBoolean         found;
+
+         /.
+         Load kernels.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( META );
+
+         /.
+         Convert tolerance from CASSINI formatted character
+         string SCLK to ticks which are units of encoded SCLK.
+         ./
+         <a href="sctiks_c.html">sctiks_c</a> ( SCID, SCLTOL, &amp;toltik );
+
+         /.
+         <a href="ckgpav_c.html">ckgpav_c</a> requires encoded spacecraft clock.
+         ./
+         <a href="scencd_c.html">scencd_c</a> ( SCID, SCLKCH, &amp;sclkdp );
+
+         <a href="ckgpav_c.html">ckgpav_c</a> ( INSTID, sclkdp, toltik,  REFFRM,
+                    cmat,   av,     &amp;clkout, &amp;found );
+
+         /.
+         Recall that `cmat' and `av' are the rotation and angular
+         velocity of the transformation from J2000 to the
+         spacecraft frame.
+         ./
+         if ( found )
+         {
+
+            /.
+            Display `cmat' and `av'.
+            ./
+            printf( &quot;Rotation matrix:\n&quot; );
+            for ( i = 0; i &lt; 3; i++ )
+            {
+
+               printf( &quot;%10.6f %9.6f %9.6f\n&quot;,
+                       cmat[i][0], cmat[i][1], cmat[i][2] );
+
+            }
+
+            printf( &quot;Angular velocity:\n&quot; );
+            printf( &quot;%20.16f %19.16f %19.16f\n&quot;, av[0], av[1], av[2] );
+
+            /.
+            Get state transformation from J2000 to the spacecraft
+            frame.
+            ./
+            <b>rav2xf_c</b> ( cmat, av, fxmat );
+
+            /.
+            Display the results.
+            ./
+            printf( &quot;\n&quot; );
+            printf( &quot;State transformation matrix:\n&quot; );
+            for ( i = 0; i &lt; 6; i++ )
+            {
+
+               printf( &quot;%10.6f %9.6f %9.6f %9.6f %9.6f %9.6f\n&quot;,
+                       fxmat[i][0], fxmat[i][1], fxmat[i][2],
+                       fxmat[i][3], fxmat[i][4], fxmat[i][5] );
+
+            }
+         }
+         else
+         {
+            printf( &quot;No rotation matrix/angular velocity found for %s\n&quot;,
+                                                                   SCLKCH );
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Rotation matrix:
+       -0.604984  0.796222 -0.005028
+       -0.784160 -0.596891 -0.169748
+       -0.138158 -0.098752  0.985475
+      Angular velocity:
+        0.0000032866819065 -0.0000099372638338  0.0000197597699770
+
+      State transformation matrix:
+       -0.604984  0.796222 -0.005028  0.000000  0.000000  0.000000
+       -0.784160 -0.596891 -0.169748  0.000000  0.000000  0.000000
+       -0.138158 -0.098752  0.985475  0.000000  0.000000  0.000000
+       -0.000016 -0.000012 -0.000003 -0.604984  0.796222 -0.005028
+        0.000013 -0.000015 -0.000010 -0.784160 -0.596891 -0.169748
+       -0.000008 -0.000006 -0.000002 -0.138158 -0.098752  0.985475
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   W.L. Taber          (JPL)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.2, 16-JUL-2020 (JDR)
+
+       Edited the header to comply with NAIF standard. Added complete
+       code example based on existing example.
+
+       Added ROTATION to the required readings.
+
+   -CSPICE Version 1.0.1, 12-APR-2007 (EDW)
+
+       Edit to abstract.
+
+   -CSPICE Version 1.0.0, 18-JUN-1999 (WLT) (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   State transformation to rotation and angular velocity
+</PRE>
+<h4>Link to routine rav2xf_c source file <a href='../../../src/cspice/rav2xf_c.c'>rav2xf_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:11 2021</pre>
+
+</body>
+</html>
+

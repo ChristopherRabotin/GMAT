@@ -1,0 +1,414 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>cknr03_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>cknr03_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   cknr03_c ( C-kernel, number of records, type 03 ) 
+
+   void cknr03_c ( SpiceInt            handle,
+                   ConstSpiceDouble    descr  [],
+                   SpiceInt          * nrec      )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Return the number of pointing instances in a CK type 03 segment.
+   The segment is identified by a CK file handle and segment
+   descriptor.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/ck.html">CK</a>
+   <a href="../req/daf.html">DAF</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   POINTING
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   handle     I   The handle of the CK file containing the segment.
+   descr      I   The descriptor of the type 3 segment.
+   nrec       O   The number of pointing instances in the segment.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   handle      is the handle of the binary CK file containing the
+               segment. The file should have been opened for read
+               or write access, by <a href="cklpf_c.html">cklpf_c</a>, <a href="dafopr_c.html">dafopr_c</a> or <a href="dafopw_c.html">dafopw_c</a>.
+
+   descr       is the packed descriptor of a data type 3 CK segment.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   nrec        is the number of pointing instances in the type 3
+               segment.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the segment indicated by `descr' is not a type 3 segment, the
+       error SPICE(CKWRONGDATATYPE) is signaled by a routine in the call
+       tree of this routine.
+
+   2)  If the specified handle does not belong to any DAF file that
+       is currently known to be open, an error is signaled by a
+       routine in the call tree of this routine.
+
+   3)  If `descr' is not a valid descriptor of a segment in the CK
+       file specified by `handle', the results of this routine are
+       unpredictable.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   The CK file specified by `handle' should be open for read or
+   write access.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   For a complete description of the internal structure of a type 3
+   segment, see the CK required reading.
+
+   This routine returns the number of discrete pointing instances
+   contained in the specified segment. It is normally used in
+   conjunction with <a href="ckgr03_c.html">ckgr03_c</a> which returns the Ith pointing instance
+   in the segment.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) The following code example extracts the SCLK time, boresight
+      vector, and angular velocity vector for each pointing instance
+      in the first segment in a CK file that contains segments of
+      data type 3.
+
+      Use the CK kernel below, available in the Venus Express PDS
+      archives, as input for the code example.
+
+         VEX_BOOM_V01.BC
+
+      Example code begins here.
+
+
+      /.
+         Program cknr03_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble          quat   [4];
+         SpiceDouble          av     [3];
+         SpiceDouble          bore   [3];
+         SpiceDouble          cmat   [3][3];
+         SpiceDouble          dcd    [2];
+         SpiceDouble          descr  [5];
+         SpiceDouble          record [8];
+         SpiceDouble          sclkdp;
+
+         SpiceInt             i;
+         SpiceInt             icd    [6];
+         SpiceInt             handle;
+         SpiceInt             nrec;
+
+         SpiceBoolean         avseg;
+         SpiceBoolean         found;
+
+         /.
+         First load the file (it may also be opened by
+         using <a href="cklpf_c.html">cklpf_c</a>).
+         ./
+         <a href="dafopr_c.html">dafopr_c</a> ( &quot;VEX_BOOM_V01.BC&quot;, &amp;handle );
+
+         /.
+         Begin forward search.  Find the first array.
+         ./
+         <a href="dafbfs_c.html">dafbfs_c</a> ( handle );
+         <a href="daffna_c.html">daffna_c</a> ( &amp;found );
+
+         /.
+         Get segment descriptor.
+         ./
+         <a href="dafgs_c.html">dafgs_c</a> ( descr );
+
+         /.
+         Unpack the segment descriptor into its double precision
+         and integer components.
+         ./
+         <a href="dafus_c.html">dafus_c</a> ( descr, 2, 6, dcd, icd );
+
+         /.
+         The data type for a segment is located in the third
+         integer component of the descriptor.
+         ./
+         if ( icd[2] == 3 )
+         {
+
+            /.
+            Does the segment contain `av' data?
+            ./
+            avseg =  ( icd[3] == 1 );
+
+            /.
+            How many records does this segment contain?
+            ./
+            <b>cknr03_c</b> ( handle, descr, &amp;nrec );
+
+            for ( i = 1; i &lt;= nrec; i++ )
+            {
+
+               /.
+               Get the ith pointing instance in the segment.
+               ./
+               <a href="ckgr03_c.html">ckgr03_c</a> ( handle, descr, i, record );
+
+               /.
+               Unpack `record' into the time, quaternion, and av.
+               ./
+               sclkdp = record[0];
+
+               <a href="moved_c.html">moved_c</a> ( record+1, 4, quat );
+
+               if ( avseg )
+               {
+                  <a href="moved_c.html">moved_c</a> ( record+5, 3, av );
+               }
+
+               /.
+               The boresight vector is the third row of the
+               C-matrix.
+               ./
+               <a href="q2m_c.html">q2m_c</a> ( quat, cmat );
+
+               bore[0] = cmat[2][0];
+               bore[1] = cmat[2][1];
+               bore[2] = cmat[2][2];
+
+               /.
+               Write out the results.
+               ./
+               printf( &quot;Record: %2d\n&quot;, (int)i );
+               printf( &quot;   SCLK time       : %24.6f\n&quot;, sclkdp );
+               printf( &quot;   Boresight       : %13.9f %13.9f %13.9f\n&quot;,
+                                            bore[0], bore[1], bore[2] );
+
+               if ( avseg )
+               {
+                  printf( &quot;   Angular velocity: %13.9f %13.9f %13.9f\n&quot;,
+                                                     av[0], av[1], av[2] );
+               }
+               printf( &quot;\n&quot; );
+            }
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Record:  1
+         SCLK time       :           2162686.710986
+         Boresight       :  -0.999122830   0.000000000   0.041875654
+         Angular velocity:   0.000000000   0.000000000   0.000000000
+
+      Record:  2
+         SCLK time       :       54160369751.715164
+         Boresight       :  -0.999122830   0.000000000   0.041875654
+         Angular velocity:   0.000000000   1.176083393   0.000000000
+
+      Record:  3
+         SCLK time       :       54160454948.487686
+         Boresight       :   0.000000000   0.000000000   1.000000000
+         Angular velocity:   0.000000000   0.000000000   0.000000000
+
+      Record:  4
+         SCLK time       :      299264885854.937805
+         Boresight       :   0.000000000   0.000000000   1.000000000
+         Angular velocity:   0.000000000   0.000000000   0.000000000
+
+      Record:  5
+         SCLK time       :     2366007685832.532227
+         Boresight       :   0.000000000   0.000000000   1.000000000
+         Angular velocity:   0.000000000   0.000000000   0.000000000
+
+      Record:  6
+         SCLK time       :     4432750485810.126953
+         Boresight       :   0.000000000   0.000000000   1.000000000
+         Angular velocity:   0.000000000   0.000000000   0.000000000
+
+      Record:  7
+         SCLK time       :     6505155594828.757812
+         Boresight       :   0.000000000   0.000000000   1.000000000
+         Angular velocity:   0.000000000   0.000000000   0.000000000
+
+      Record:  8
+         SCLK time       :     8571898394806.352539
+         Boresight       :   0.000000000   0.000000000   1.000000000
+         Angular velocity:   0.000000000   0.000000000   0.000000000
+
+      Record:  9
+         SCLK time       :    10638641194783.947266
+         Boresight       :   0.000000000   0.000000000   1.000000000
+         Angular velocity:   0.000000000   0.000000000   0.000000000
+
+      Record: 10
+         SCLK time       :    12705383994761.541016
+         Boresight       :   0.000000000   0.000000000   1.000000000
+         Angular velocity:   0.000000000   0.000000000   0.000000000
+
+      Record: 11
+         SCLK time       :    14777789103780.169922
+         Boresight       :   0.000000000   0.000000000   1.000000000
+         Angular velocity:   0.000000000   0.000000000   0.000000000
+
+      Record: 12
+         SCLK time       :    16844531903757.763672
+         Boresight       :   0.000000000   0.000000000   1.000000000
+         Angular velocity:   0.000000000   0.000000000   0.000000000
+
+      Record: 13
+         SCLK time       :    18911274703735.359375
+         Boresight       :   0.000000000   0.000000000   1.000000000
+         Angular velocity:   0.000000000   0.000000000   0.000000000
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  The binary CK file containing the segment whose descriptor was
+       passed to this routine must be opened for read or write access
+       by <a href="cklpf_c.html">cklpf_c</a>, <a href="dafopr_c.html">dafopr_c</a> or <a href="dafopw_c.html">dafopw_c</a>.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.0, 01-NOV-2021 (JDR)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   number of CK type_3 records
+</PRE>
+<h4>Link to routine cknr03_c source file <a href='../../../src/cspice/cknr03_c.c'>cknr03_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:02 2021</pre>
+
+</body>
+</html>
+

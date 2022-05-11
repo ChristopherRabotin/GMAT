@@ -1,0 +1,434 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>pckw02_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>pckw02_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   pckw02_c ( PCK, write type 2 segment ) 
+
+   void pckw02_c ( SpiceInt           handle,
+                   SpiceInt           clssid,
+                   ConstSpiceChar   * frame,
+                   SpiceDouble        first,
+                   SpiceDouble        last,
+                   ConstSpiceChar   * segid,
+                   SpiceDouble        intlen,
+                   SpiceInt           n,
+                   SpiceInt           polydg,
+                   SpiceDouble        cdata  [],
+                   SpiceDouble        btime      )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Write a type 2 segment to a PCK binary file given the file handle,
+   frame class ID, base frame, time range covered by the segment, and
+   the Chebyshev polynomial coefficients.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/daf.html">DAF</a>
+   <a href="../req/frames.html">FRAMES</a>
+   <a href="../req/naif_ids.html">NAIF_IDS</a>
+   <a href="../req/pck.html">PCK</a>
+   <a href="../req/spc.html">SPC</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   PCK
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   handle     I   Handle of binary PCK file open for writing.
+   clssid     I   Frame class ID of body-fixed frame.
+   frame      I   Name of base reference frame.
+   first      I   Start time of interval covered by segment.
+   last       I   End time of interval covered by segment.
+   segid      I   Segment identifier.
+   intlen     I   Length of time covered by logical record.
+   n          I   Number of logical records in segment.
+   polydg     I   Chebyshev polynomial degree.
+   cdata      I   Array of Chebyshev coefficients.
+   btime      I   Begin time of first logical record.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   handle      is the DAF handle of an PCK file to which a type 2
+               segment is to be added. The PCK file must be open
+               for writing.
+
+   clssid      is the frame class ID of a body-fixed reference frame
+               whose orientation is described by the segment to be
+               created.
+
+   frame       is the NAIF name for a reference frame relative to
+               which the orientation information for the frame
+               designated by `clssid' is specified. The frame
+               designated by `frame' is called the &quot;base frame.&quot;
+
+   first,
+   last        are, respectively, the start and stop times of
+               the time interval over which the segment defines
+               the orientation of clssid.
+
+   segid       is the segment identifier. A PCK segment
+               identifier may contain up to 40 characters.
+
+   intlen      Length of time, in seconds, covered by each set of
+               Chebyshev polynomial coefficients (each logical
+               record). Each set of Chebyshev coefficients must
+               cover this fixed time interval, `intlen'.
+
+   n           is the number of sets of Chebyshev polynomial
+               coefficients (number of logical records)
+               to be stored in the segment. There is one set
+               of Chebyshev coefficients for each time interval.
+
+   polydg      Degree of each set of Chebyshev polynomials.
+
+   cdata       Array containing all the sets of Chebyshev
+               polynomial coefficients to be contained in the
+               segment of the PCK file. The coefficients are
+               stored in cdata in order as follows:
+
+                  the (degree + 1) coefficients for the first
+                  Euler angle of the first logical record
+
+                  the coefficients for the second Euler angle
+
+                  the coefficients for the third Euler angle
+
+                  the coefficients for the first Euler angle for
+                  the second logical record, ...
+
+                  and so on.
+
+   btime       Begin time (seconds past J2000 TDB) of first set
+               of Chebyshev polynomial coefficients (first
+               logical record).
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the number of sets of coefficients is not positive, the
+       error SPICE(NUMCOEFFSNOTPOS) is signaled by a routine in the
+       call tree of this routine.
+
+   2)  If the interval length is not positive, the error
+       SPICE(INTLENNOTPOS) is signaled by a routine in the call tree
+       of this routine.
+
+   3)  If the integer code for the reference frame is not recognized,
+       the error SPICE(INVALIDREFFRAME) is signaled by a routine in
+       the call tree of this routine.
+
+   4)  If segment stop time is not greater then the begin time, the
+       error SPICE(BADDESCRTIMES) is signaled by a routine in the
+       call tree of this routine.
+
+   5)  If the time of the first record is not greater than or equal
+       to the descriptor begin time, the error SPICE(BADDESCRTIMES)
+       is signaled by a routine in the call tree of this routine.
+
+   6)  If the end time of the last record is not greater than or
+       equal to the descriptor end time, the error
+       SPICE(BADDESCRTIMES) is signaled by a routine in the call tree
+       of this routine.
+
+   7)  If any of the `frame' or `segid' input string pointers is
+       null, the error SPICE(NULLPOINTER) is signaled.
+
+   8)  If any of the `frame' or `segid' input strings has zero
+       length, the error SPICE(EMPTYSTRING) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   A new type 2 PCK segment is written to the PCK file attached
+   to HANDLE.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine writes an PCK type 2 data segment to the designated
+   PCK file, according to the format described in the PCK Required
+   Reading.
+
+   Each segment can contain data for only one body-fixed frame and base
+   reference frame. The Chebyshev polynomial degree and length of time
+   covered by each logical record are also fixed. However, an
+   arbitrary number of logical records of Chebyshev polynomial
+   coefficients can be written in each segment. Minimizing the number
+   of segments in a PCK file will help optimize how the SPICE system
+   accesses the file.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Suppose that you have sets of Chebyshev polynomial
+      coefficients in an array pertaining to the orientation of
+      the Moon body-fixed frame with the frame class ID 301
+      relative to the J2000 reference frame, and want
+      to put these into a type 2 segment PCK file. The following
+      example could be used to add one new type 2 segment. To add
+      multiple segments, put the call to <b>pckw02_c</b> in a loop.
+
+
+      Example code begins here.
+
+
+      /.
+         Program pckw02_ex1
+      ./
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters
+         ./
+         #define FNAME        &quot;pckw02_ex1.bpc&quot;
+         #define BODY         301
+         #define POLYDG       9
+         #define SZCDAT       60
+
+         /.
+         Local variables
+         ./
+         SpiceChar          * ifname;
+         SpiceChar          * segid;
+
+         SpiceDouble          btime;
+         SpiceDouble          first;
+         SpiceDouble          intlen;
+         SpiceDouble          last;
+
+         SpiceInt             handle;
+         SpiceInt             n;
+         SpiceInt             nresvc;
+
+         /.
+         Set the input data: RA/DEC/W coefficients,
+         begin time for the first record, start/end times
+         for the segment, length of the time covered by
+         each record, and number of logical records.
+
+         `cdata' contains the ra/dec/w coefficients: first the
+         the polydeg + 1 for the RA first record, then the
+         polydeg + 1 for the DEC first record, then the
+         polydeg +1 for W first record, then the polydeg + 1
+         for the RA second record, and so on.
+         ./
+         SpiceDouble          cdata  [SZCDAT] = {
+                       -5.4242086033301107e-002, -5.2241405162792561e-005,
+                        8.9751456289930307e-005, -1.5288696963234620e-005,
+                        1.3218870864581395e-006,  5.9822156790328180e-007,
+                       -6.5967702052551211e-008, -9.9084309118396298e-009,
+                        4.9276055963541578e-010,  1.1612267413829385e-010,
+                        0.42498898565916610,      1.3999219324235620e-004,
+                       -1.8855140511098865e-005, -2.1964684808526649e-006,
+                        1.4229817868138752e-006, -1.6991716166847001e-007,
+                       -3.4824688140649506e-008,  2.9208428745895990e-009,
+                        4.4217757657060300e-010, -3.9211207055305402e-012,
+                        2565.0633504619473,       0.92003769451305328,
+                       -8.0503797901914501e-005,  1.1960860244433900e-005,
+                       -1.2237900518372542e-006, -5.3651349407824562e-007,
+                        6.0843372260403005e-008,  9.0211287487688797e-009,
+                       -4.6460429330339309e-010, -1.0446918704281774e-010,
+                       -5.3839796353225056e-002,  4.3378021974424991e-004,
+                        4.8130091384819459e-005, -1.2283066272873327e-005,
+                       -5.4099296265403208e-006, -4.4237368347319652e-007,
+                        1.3004982445546169e-007,  1.9017128275284284e-008,
+                       -7.0368223839477803e-011, -1.7119414526133175e-010,
+                        0.42507987850614548,     -7.1844899448557937e-005,
+                       -5.1052122872412865e-005, -8.9810401387721321e-006,
+                       -1.4611718567948972e-007,  4.0883847771062547e-007,
+                        4.6812854485029333e-008, -4.5698075960784951e-009,
+                       -9.8679875320349531e-010, -7.9392503778178240e-011,
+                        2566.9029069934054,       0.91952244801740568,
+                       -6.0426151041179828e-005,  1.0850559330577959e-005,
+                        5.1756033678137497e-006,  4.2127585555214782e-007,
+                       -1.1774737441872970e-007, -1.7397191490163833e-008,
+                        5.8908810244396165e-012,  1.4594279337955166e-010 };
+
+         first  =   -43200.0;
+         last   =  1339200.0;
+         btime  =  first;
+         intlen =   691200.0;
+         n      =  2;
+
+         /.
+         Open a new PCK file.  For simplicity, we will not
+         reserve any space for the comment area, so the
+         number of reserved comment characters is zero.
+         The variable `ifname' is the internal file name.
+         ./
+         nresvc  =  0;
+         ifname  =  &quot;Test PCK/Created 04-SEP-2019&quot;;
+
+         <a href="pckopn_c.html">pckopn_c</a> ( FNAME, ifname, nresvc, &amp;handle );
+
+         /.
+         Create a segment identifier.
+         ./
+         segid = &quot;MY_SAMPLE_PCK_TYPE_2_SEGMENT&quot;;
+
+         /.
+         Write the segment.
+         ./
+         <b>pckw02_c</b> ( handle, BODY, &quot;J2000&quot;, first, last, segid,
+                    intlen, n,    POLYDG,  cdata, btime       );
+
+         /.
+         Close the file.
+         ./
+         <a href="pckcls_c.html">pckcls_c</a> ( handle );
+
+         return ( 0 );
+      }
+
+
+      When this program is executed, no output is presented on
+      screen. After run completion, a new PCK type 2 exists in
+      the output directory.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   K.S. Zukor          (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.1, 04-AUG-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Added
+       complete code examples based on existing fragment.
+
+   -CSPICE Version 1.0.0, 16-DEC-2016 (NJB) (KSZ)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   write PCK type_2 data segment
+</PRE>
+<h4>Link to routine pckw02_c source file <a href='../../../src/cspice/pckw02_c.c'>pckw02_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:10 2021</pre>
+
+</body>
+</html>
+

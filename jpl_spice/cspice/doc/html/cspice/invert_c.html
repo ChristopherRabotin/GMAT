@@ -1,0 +1,309 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>invert_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>invert_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   invert_c ( Invert a 3x3 matrix ) 
+
+   void invert_c ( ConstSpiceDouble  m   [3][3],
+                   SpiceDouble       mout[3][3] )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Generate the inverse of a 3x3 matrix.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   MATH
+   MATRIX
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   m          I   Matrix to be inverted.
+   mout       O   Inverted matrix (m)^-1.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   m           is an arbitrary 3x3 matrix. The limits on the size of
+               elements of `m' are determined by the process of calculating
+               the cofactors of each element of the matrix. For a 3x3
+               matrix this amounts to the differencing of two terms, each
+               of which consists of the multiplication of two matrix
+               elements. This multiplication must not exceed the range
+               of double precision numbers or else an overflow error will
+               occur.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   mout        is the inverse of `m' and is calculated explicitly using
+               the matrix of cofactors. `mout' is set to be the zero matrix
+               if `m' is singular.
+
+               `mout' can overwrite `m'.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  No internal checking on the input matrix `m' is performed except
+       on the size of its determinant. Thus it is possible to generate a
+       floating point overflow or underflow in the process of
+       calculating the matrix of cofactors.
+
+   2)  If the determinant is less than 10**-16, the matrix is deemed to
+       be singular and the output matrix is filled with zeros.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   A temporary matrix is used to compute the result, so the output
+   matrix may overwrite the input matrix.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Given a double precision 3x3 matrix, compute its inverse. Check
+      that the original matrix times the computed inverse produces
+      the identity matrix.
+
+
+      Example code begins here.
+
+
+      /.
+         Program invert_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble          imat   [3][3];
+         SpiceDouble          mout   [3][3];
+
+         SpiceInt             i;
+
+         /.
+         Define a matrix to invert.
+         ./
+         SpiceDouble          m      [3][3] = { {0.0, -1.0, 0.0},
+                                                {0.5,  0.0, 0.0},
+                                                {0.0,  0.0, 1.0} };
+
+         printf( &quot;Original Matrix:\n&quot; );
+         for ( i = 0; i &lt; 3; i++ )
+         {
+
+            printf( &quot;%16.7f %15.7f %15.7f\n&quot;, m[i][0], m[i][1], m[i][2] );
+
+         }
+
+         /.
+         Invert the matrix, then output.
+         ./
+         <b>invert_c</b> ( m, mout );
+
+         printf( &quot; \n&quot; );
+         printf( &quot;Inverse Matrix:\n&quot; );
+         for ( i = 0; i &lt; 3; i++ )
+         {
+
+            printf( &quot;%16.7f %15.7f %15.7f\n&quot;,
+                    mout[i][0], mout[i][1], mout[i][2] );
+
+         }
+
+         /.
+         Check the `m' times `mout' produces the identity matrix.
+         ./
+         <a href="mxm_c.html">mxm_c</a> ( m, mout, imat );
+
+         printf( &quot; \n&quot; );
+         printf( &quot;Original times inverse:\n&quot; );
+         for ( i = 0; i &lt; 3; i++ )
+         {
+
+            printf( &quot;%16.7f %15.7f %15.7f\n&quot;,
+                    imat[i][0], imat[i][1], imat[i][2] );
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Original Matrix:
+             0.0000000      -1.0000000       0.0000000
+             0.5000000       0.0000000       0.0000000
+             0.0000000       0.0000000       1.0000000
+
+      Inverse Matrix:
+             0.0000000       2.0000000      -0.0000000
+            -1.0000000       0.0000000      -0.0000000
+             0.0000000      -0.0000000       1.0000000
+
+      Original times inverse:
+             1.0000000       0.0000000       0.0000000
+             0.0000000       1.0000000       0.0000000
+             0.0000000       0.0000000       1.0000000
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  The input matrix must be such that generating the cofactors will
+       not cause a floating point overflow or underflow. The
+       strictness of this condition depends, of course, on the computer
+       installation and the resultant maximum and minimum values of
+       double precision numbers.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   W.M. Owen           (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.0, 06-JUL-2021 (JDR)
+
+       Changed input argument name &quot;m1&quot; to &quot;m&quot; for consistency with
+       other routines.
+
+       Updated the header to comply with NAIF standard. Added
+       complete code example.
+
+   -CSPICE Version 1.0.0, 13-SEP-1999 (NJB) (WMO)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   invert a 3x3_matrix
+</PRE>
+<h4>Link to routine invert_c source file <a href='../../../src/cspice/invert_c.c'>invert_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:08 2021</pre>
+
+</body>
+</html>
+

@@ -1,0 +1,431 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>pl2nvc_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>pl2nvc_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   pl2nvc_c ( Plane to normal vector and constant ) 
+
+   void pl2nvc_c ( ConstSpicePlane   * plane,
+                   SpiceDouble         normal[3],
+                   SpiceDouble       * konst     )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Return a unit normal vector and constant that define a specified
+   plane.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/planes.html">PLANES</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   GEOMETRY
+   MATH
+   PLANE
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   plane      I   A SPICE plane.
+   normal,
+   konst      O   A normal vector and constant defining the
+                  geometric plane represented by `plane'.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   plane       is a SPICE plane.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   normal,
+   konst       are, respectively, a unit normal vector and
+               constant that define the geometric plane
+               represented by `plane'. Let the symbol &lt; a, b &gt;
+               indicate the inner product of vectors `a' and `b';
+               then the geometric plane is the set of vectors `x'
+               in three-dimensional space that satisfy
+
+                  &lt; x,  normal &gt;  =  konst.
+
+               `normal' is a unit vector. `konst' is the distance of
+               the plane from the origin;
+
+                  konst * normal
+
+               is the closest point in the plane to the origin.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   Error free.
+
+   1)  The input plane MUST have been created by one of the CSPICE
+       routines
+
+          <a href="nvc2pl_c.html">nvc2pl_c</a> ( Normal vector and constant to plane )
+          <a href="nvp2pl_c.html">nvp2pl_c</a> ( Normal vector and point to plane    )
+          <a href="psv2pl_c.html">psv2pl_c</a> ( Point and spanning vectors to plane )
+
+       Otherwise, the results of this routine are unpredictable.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   CSPICE geometry routines that deal with planes use the `plane'
+   data type to represent input and output planes. This data type
+   makes the routine interfaces simpler and more uniform.
+
+   The CSPICE routines that produce SPICE planes from data that
+   define a plane are:
+
+      <a href="nvc2pl_c.html">nvc2pl_c</a> ( Normal vector and constant to plane )
+      <a href="nvp2pl_c.html">nvp2pl_c</a> ( Normal vector and point to plane    )
+      <a href="psv2pl_c.html">psv2pl_c</a> ( Point and spanning vectors to plane )
+
+   The CSPICE routines that convert SPICE planes to data that
+   define a plane are:
+
+      <b>pl2nvc_c</b> ( Plane to normal vector and constant )
+      <a href="pl2nvp_c.html">pl2nvp_c</a> ( Plane to normal vector and point    )
+      <a href="pl2psv_c.html">pl2psv_c</a> ( Plane to point and spanning vectors )
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for these examples may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Determine the distance of a plane from the origin, and
+      confirm the result by calculating the dot product (inner
+      product) of a vector from the origin to the plane and a
+      vector in that plane.
+
+      The dot product between these two vectors should be zero,
+      to double precision round-off, so orthogonal to that
+      precision.
+
+
+      Example code begins here.
+
+
+      /.
+         Program pl2nvc_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+
+         SpiceDouble          konst;
+         SpicePlane           plane;
+         SpiceDouble          plnvec [3];
+         SpiceDouble          vec    [3];
+
+         /.
+         Define the plane with a vector normal to the plan
+         and a point in the plane.
+         ./
+         SpiceDouble          normal [3] = { -1.0,  5.0,   -3.5 };
+         SpiceDouble          point  [3] = { 9.0, -0.65, -12.0 };
+
+         /.
+         Create the SPICE plane from the normal and point.
+         ./
+         <a href="nvp2pl_c.html">nvp2pl_c</a> ( normal, point, &amp;plane );
+
+         /.
+         Calculate the normal vector and constant defining
+         the plane. The constant value is the distance from
+         the origin to the plane.
+         ./
+         <b>pl2nvc_c</b> ( &amp;plane, normal, &amp;konst );
+         printf( &quot;Distance to the plane: %11.7f\n&quot;, konst );
+
+         /.
+         Confirm the results. Calculate a vector
+         from the origin to the plane.
+         ./
+         <a href="vscl_c.html">vscl_c</a> ( konst, normal, vec );
+         printf( &quot;Vector from origin   : %11.7f %11.7f %11.7f\n&quot;,
+                                           vec[0], vec[1], vec[2] );
+         printf( &quot; \n&quot; );
+
+         /.
+         Now calculate a vector in the plane from the
+         location in the plane defined by `vec'.
+         ./
+         <a href="vsub_c.html">vsub_c</a> ( vec, point, plnvec );
+
+         /.
+         These vectors should be orthogonal.
+         ./
+         printf( &quot;dot product          : %11.7f\n&quot;, <a href="vdot_c.html">vdot_c</a> ( plnvec, vec ) );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Distance to the plane:   4.8102899
+      Vector from origin   :  -0.7777778   3.8888889  -2.7222222
+
+      dot product          :  -0.0000000
+
+
+   2) Apply a linear transformation represented by a matrix to
+      a plane represented by a normal vector and a constant.
+
+      Find a normal vector and constant for the transformed plane.
+
+
+      Example code begins here.
+
+
+      /.
+         Program pl2nvc_ex2
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local variables.
+         ./
+         SpicePlane           plane;
+         SpiceDouble          m      [3][3];
+         SpiceDouble          point  [3];
+         SpiceDouble          span1  [3];
+         SpiceDouble          span2  [3];
+         SpiceDouble          tkonst;
+         SpiceDouble          tnorml [3];
+         SpicePlane           tplane;
+         SpiceDouble          tpoint [3];
+         SpiceDouble          tspan1 [3];
+         SpiceDouble          tspan2 [3];
+
+         /.
+         Set the normal vector and the constant defining the
+         initial plane.
+         ./
+         SpiceDouble          normal [3] = {
+                                         -0.1616904, 0.8084521, -0.5659165 };
+         SpiceDouble          konst      = 4.8102899;
+
+         /.
+         Define a transformation matrix to the right-handed
+         reference frame having the +i unit vector as primary
+         axis, aligned to the original frame's +X axis, and
+         the -j unit vector as second axis, aligned to the +Y
+         axis.
+         ./
+         SpiceDouble          axdef  [3] = { 1.0,  0.0,  0.0 };
+         SpiceDouble          plndef [3] = { 0.0, -1.0,  0.0 };
+
+         <a href="twovec_c.html">twovec_c</a> ( axdef, 1, plndef, 2, m );
+
+         /.
+         Make a SPICE plane from `normal' and `konst', and then
+         find a point in the plane and spanning vectors for the
+         plane.  `normal' need not be a unit vector.
+         ./
+         <a href="nvc2pl_c.html">nvc2pl_c</a> ( normal, konst, &amp;plane );
+         <a href="pl2psv_c.html">pl2psv_c</a> ( &amp;plane, point, span1, span2 );
+
+         /.
+         Apply the linear transformation to the point and
+         spanning vectors.  All we need to do is multiply
+         these vectors by `m', since for any linear
+         transformation T,
+
+               T ( point  +  t1 * span1     +  t2 * span2 )
+
+            =  T (point)  +  t1 * T(span1)  +  t2 * T(span2),
+
+         which means that T(point), T(span1), and T(span2)
+         are a point and spanning vectors for the transformed
+         plane.
+         ./
+         <a href="mxv_c.html">mxv_c</a> ( m, point, tpoint );
+         <a href="mxv_c.html">mxv_c</a> ( m, span1, tspan1 );
+         <a href="mxv_c.html">mxv_c</a> ( m, span2, tspan2 );
+
+         /.
+         Make a new SPICE plane `tplane' from the
+         transformed point and spanning vectors, and find a
+         unit normal and constant for this new plane.
+         ./
+         <a href="psv2pl_c.html">psv2pl_c</a> (  tpoint, tspan1, tspan2, &amp;tplane );
+         <b>pl2nvc_c</b> ( &amp;tplane, tnorml, &amp;tkonst );
+
+         /.
+         Print the results.
+         ./
+         printf( &quot;Unit normal vector: %11.7f %11.7f %11.7f\n&quot;,
+                               tnorml[0], tnorml[1], tnorml[2] );
+         printf( &quot;Constant          : %11.7f\n&quot;, tkonst );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Unit normal vector:  -0.1616904  -0.8084521   0.5659165
+      Constant          :   4.8102897
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   [1]  G. Thomas and R. Finney, &quot;Calculus and Analytic Geometry,&quot;
+        7th Edition, Addison Wesley, 1988.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.0, 24-AUG-2021 (JDR)
+
+       Changed the output argument name &quot;constant&quot; to &quot;konst&quot; for
+       consistency with other routines.
+
+       Edited the header to comply with NAIF standard. Added complete code
+       examples.
+
+   -CSPICE Version 1.0.1, 06-FEB-2003 (EDW)
+
+       Trivial correction to header docs.
+
+   -CSPICE Version 1.0.0, 05-MAR-1999 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   plane to normal vector and constant
+</PRE>
+<h4>Link to routine pl2nvc_c source file <a href='../../../src/cspice/pl2nvc_c.c'>pl2nvc_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:10 2021</pre>
+
+</body>
+</html>
+

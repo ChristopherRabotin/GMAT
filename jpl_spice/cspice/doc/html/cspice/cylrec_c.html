@@ -1,0 +1,439 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>cylrec_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>cylrec_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   cylrec_c ( Cylindrical to rectangular ) 
+
+   void cylrec_c ( SpiceDouble r,
+                   SpiceDouble clon,
+                   SpiceDouble z,
+                   SpiceDouble rectan[3] )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Convert from cylindrical to rectangular coordinates.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   CONVERSION
+   COORDINATES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  -------------------------------------------------
+   r          I   Distance of a point from Z axis.
+   clon       I   Angle (radians) of a point from XZ plane
+   z          I   Height of a point above XY plane.
+   rectan     O   Rectangular coordinates of the point.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   r           is the distance of the point of interest from Z axis.
+
+   clon        is the cylindrical angle (in radians) of the point of
+               interest from XZ plane.
+
+   z           is the height of the point above XY plane.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   rectan      are the rectangular coordinates of the point of interest.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   Error free.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine transforms the coordinates of a point from
+   cylindrical to rectangular coordinates.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for these examples may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Compute the cylindrical coordinates of the position of the Moon
+      as seen from the Earth, and convert them to rectangular
+      coordinates.
+
+      Use the meta-kernel shown below to load the required SPICE
+      kernels.
+
+
+         KPL/MK
+
+         File name: cylrec_ex1.tm
+
+         This meta-kernel is intended to support operation of SPICE
+         example programs. The kernels shown here should not be
+         assumed to contain adequate or correct versions of data
+         required by SPICE-based user applications.
+
+         In order for an application to use this meta-kernel, the
+         kernels referenced here must be present in the user's
+         current working directory.
+
+         The names and contents of the kernels referenced
+         by this meta-kernel are as follows:
+
+            File name                     Contents
+            ---------                     --------
+            de421.bsp                     Planetary ephemeris
+            naif0012.tls                  Leapseconds
+
+
+         \begindata
+
+            KERNELS_TO_LOAD = ( 'de421.bsp',
+                                'naif0012.tls'  )
+
+         \begintext
+
+         End of meta-kernel
+
+
+      Example code begins here.
+
+
+      /.
+         Program cylrec_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local variables
+         ./
+         SpiceDouble          clon;
+         SpiceDouble          et;
+         SpiceDouble          lt;
+         SpiceDouble          pos    [3];
+         SpiceDouble          rectan [3];
+         SpiceDouble          r;
+         SpiceDouble          z;
+
+         /.
+         Load SPK and LSK kernels, use a meta kernel for
+         convenience.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( &quot;cylrec_ex1.tm&quot; );
+
+         /.
+         Look up the geometric state of the Moon as seen from
+         the Earth at 2017 Mar 20, relative to the J2000
+         reference frame.
+         ./
+         <a href="str2et_c.html">str2et_c</a> ( &quot;2017 Mar 20&quot;, &amp;et );
+
+         <a href="spkpos_c.html">spkpos_c</a> ( &quot;Moon&quot;, et, &quot;J2000&quot;, &quot;NONE&quot;, &quot;Earth&quot;, pos, &amp;lt );
+
+         /.
+         Convert the position vector `pos' to cylindrical
+         coordinates.
+         ./
+         <a href="reccyl_c.html">reccyl_c</a> ( pos, &amp;r, &amp;clon, &amp;z );
+
+         /.
+         Convert the cylindrical to rectangular coordinates.
+         ./
+
+         <b>cylrec_c</b> ( r, clon, z, rectan );
+
+         printf( &quot; \n&quot; );
+         printf( &quot;Original rectangular coordinates:\n&quot; );
+         printf( &quot; \n&quot; );
+         printf( &quot; X          (km):  %19.8f\n&quot;, pos[0] );
+         printf( &quot; Y          (km):  %19.8f\n&quot;, pos[1] );
+         printf( &quot; Z          (km):  %19.8f\n&quot;, pos[2] );
+         printf( &quot; \n&quot; );
+         printf( &quot;Cylindrical coordinates:\n&quot; );
+         printf( &quot; \n&quot; );
+         printf( &quot; Radius     (km):  %19.8f\n&quot;, r );
+         printf( &quot; Longitude (deg):  %19.8f\n&quot;, clon*<a href="dpr_c.html">dpr_c</a> ( ) );
+         printf( &quot; Z          (km):  %19.8f\n&quot;, z );
+         printf( &quot; \n&quot; );
+         printf( &quot;Rectangular coordinates from <b>cylrec_c</b>:\n&quot; );
+         printf( &quot; \n&quot; );
+         printf( &quot; X          (km):  %19.8f\n&quot;, rectan[0] );
+         printf( &quot; Y          (km):  %19.8f\n&quot;, rectan[1] );
+         printf( &quot; Z          (km):  %19.8f\n&quot;, rectan[2] );
+         printf( &quot; \n&quot; );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Original rectangular coordinates:
+
+       X          (km):      -55658.44323296
+       Y          (km):     -379226.32931475
+       Z          (km):     -126505.93063865
+
+      Cylindrical coordinates:
+
+       Radius     (km):      383289.01777726
+       Longitude (deg):         261.65040211
+       Z          (km):     -126505.93063865
+
+      Rectangular coordinates from <b>cylrec_c</b>:
+
+       X          (km):      -55658.44323296
+       Y          (km):     -379226.32931475
+       Z          (km):     -126505.93063865
+
+
+   2) Create a table showing a variety of cylindrical coordinates
+      and the corresponding rectangular coordinates.
+
+      Corresponding rectangular and cylindrical coordinates are
+      listed to three decimal places. Input angles are in degrees.
+
+
+      Example code begins here.
+
+
+      /.
+         Program cylrec_ex2
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define NREC         11
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble          rclon;
+         SpiceDouble          rectan [3];
+
+         SpiceInt             i;
+
+         /.
+         Define the input cylindrical coordinates. Angles
+         in degrees.
+         ./
+         SpiceDouble          r      [NREC] = { 0.0,  1.0,    1.0,
+                                                0.0,  1.0,    1.0,
+                                                0.0,  1.4142, 1.0,
+                                                1.0,  1.4142      };
+
+         SpiceDouble          clon   [NREC] = {  0.0,   0.0,  90.0,
+                                                 0.0, 180.0, 270.0,
+                                                 0.0,  45.0,   0.0,
+                                                90.0,  45.0        };
+
+         SpiceDouble          z      [NREC] = {  0.0,  0.0,  0.0,
+                                                 1.0,  0.0,  0.0,
+                                                -1.0,  0.0,  1.0,
+                                                 1.0,  1.0       };
+
+         /.
+         Print the banner.
+         ./
+         printf( &quot;    r       clon      z     rect[0]  rect[1]  rect[2] \n&quot; );
+         printf( &quot; -------  -------  -------  -------  -------  ------- \n&quot; );
+
+         /.
+         Do the conversion.
+         ./
+         for ( i = 0; i &lt; NREC; i++ )
+         {
+
+            rclon = clon[i] * <a href="rpd_c.html">rpd_c</a> ( );
+
+            <b>cylrec_c</b> ( r[i], rclon, z[i], rectan );
+
+            printf( &quot;%8.3f %8.3f %8.3f &quot;, r[i], clon[i], z[i] );
+            printf( &quot;%8.3f %8.3f %8.3f\n&quot;, rectan[0], rectan[1], rectan[2] );
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+          r       clon      z     rect[0]  rect[1]  rect[2]
+       -------  -------  -------  -------  -------  -------
+         0.000    0.000    0.000    0.000    0.000    0.000
+         1.000    0.000    0.000    1.000    0.000    0.000
+         1.000   90.000    0.000    0.000    1.000    0.000
+         0.000    0.000    1.000    0.000    0.000    1.000
+         1.000  180.000    0.000   -1.000    0.000    0.000
+         1.000  270.000    0.000   -0.000   -1.000    0.000
+         0.000    0.000   -1.000    0.000    0.000   -1.000
+         1.414   45.000    0.000    1.000    1.000    0.000
+         1.000    0.000    1.000    1.000    0.000    1.000
+         1.000   90.000    1.000    0.000    1.000    1.000
+         1.414   45.000    1.000    1.000    1.000    1.000
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   J. Diaz del Rio     (ODC Space)
+   W.L. Taber          (JPL)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.0, 02-JUL-2021 (JDR)
+
+       Changed the input argument name &quot;lon&quot; to &quot;clon&quot; for consistency
+       with other routines.
+
+       Edited the header to comply with NAIF standard.
+       Added complete code examples.
+
+   -CSPICE Version 1.0.1, 08-FEB-1998 (EDW)
+
+       Corrected and clarified header entries. Removed return call.
+
+   -CSPICE Version 1.0.0, 25-OCT-1997 (EDW) (WLT)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   cylindrical to rectangular
+</PRE>
+<h4>Link to routine cylrec_c source file <a href='../../../src/cspice/cylrec_c.c'>cylrec_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:03 2021</pre>
+
+</body>
+</html>
+

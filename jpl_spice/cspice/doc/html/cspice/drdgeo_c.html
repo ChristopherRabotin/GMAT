@@ -1,0 +1,498 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>drdgeo_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>drdgeo_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   drdgeo_c ( Derivative of rectangular w.r.t. geodetic ) 
+
+   void drdgeo_c ( SpiceDouble    lon,
+                   SpiceDouble    lat,
+                   SpiceDouble    alt,
+                   SpiceDouble    re,
+                   SpiceDouble    f,
+                   SpiceDouble    jacobi[3][3] )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Compute the Jacobian matrix of the transformation from geodetic
+   to rectangular coordinates.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   COORDINATES
+   DERIVATIVES
+   MATRIX
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   lon        I   Geodetic longitude of point (radians).
+   lat        I   Geodetic latitude of point (radians).
+   alt        I   Altitude of point above the reference spheroid.
+   re         I   Equatorial radius of the reference spheroid.
+   f          I   Flattening coefficient.
+   jacobi     O   Matrix of partial derivatives.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   lon         is the geodetic longitude of point (radians).
+
+   lat         is the geodetic latitude  of point (radians).
+
+   alt         is the altitude of point above the reference spheroid.
+
+   re          is the equatorial radius of the reference spheroid.
+
+   f           is the flattening coefficient = (re-rp) / re,  where `rp' is
+               the polar radius of the spheroid. (More importantly
+               rp = re*(1-f).)
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   jacobi      is the matrix of partial derivatives of the conversion
+               between geodetic and rectangular coordinates. It
+               has the form
+
+                  .-                             -.
+                  |  dx/dlon   dx/dlat  dx/dalt   |
+                  |  dy/dlon   dy/dlat  dy/dalt   |
+                  |  dz/dlon   dz/dlat  dz/dalt   |
+                  `-                             -'
+
+               evaluated at the input values of `lon', `lat' and `alt'.
+
+               The formulae for computing `x', `y', and `z' from
+               geodetic coordinates are given below.
+
+                  x = [alt +        re/g(lat,f)]*cos(lon)*cos(lat)
+
+
+                  y = [alt +        re/g(lat,f)]*sin(lon)*cos(lat)
+
+                                     2
+                  z = [alt + re*(1-f) /g(lat,f)]*         sin(lat)
+
+               where
+
+                  re    is the polar radius of the reference spheroid.
+
+                  f     is the flattening factor (the polar radius is
+                        obtained by multiplying the equatorial radius by 1-f).
+
+                  g( lat, f ) is given by
+
+                         2             2     2
+                     sqrt ( cos (lat) + (1-f) * sin (lat) )
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the flattening coefficient is greater than or equal to one,
+       the error SPICE(VALUEOUTOFRANGE) is signaled by a routine in
+       the call tree of this routine.
+
+   2)  If the equatorial radius is non-positive, the error
+       SPICE(BADRADIUS) is signaled by a routine in the call tree of
+       this routine.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   It is often convenient to describe the motion of an object in
+   the geodetic coordinate system. However, when performing
+   vector computations its hard to beat rectangular coordinates.
+
+   To transform states given with respect to geodetic coordinates
+   to states with respect to rectangular coordinates, one makes use
+   of the Jacobian of the transformation between the two systems.
+
+   Given a state in geodetic coordinates
+
+        ( lon, lat, alt, dlon, dlat, dalt )
+
+   the velocity in rectangular coordinates is given by the matrix
+   equation:
+
+                  t          |                                 t
+      (dx, dy, dz)   = jacobi|             * (dlon, dlat, dalt)
+                             |(lon,lat,alt)
+
+
+   This routine computes the matrix
+
+            |
+      jacobi|
+            |(lon,lat,alt)
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Find the geodetic state of the earth as seen from
+      Mars in the IAU_MARS reference frame at January 1, 2005 TDB.
+      Map this state back to rectangular coordinates as a check.
+
+      Use the meta-kernel shown below to load the required SPICE
+      kernels.
+
+
+         KPL/MK
+
+         File name: drdgeo_ex1.tm
+
+         This meta-kernel is intended to support operation of SPICE
+         example programs. The kernels shown here should not be
+         assumed to contain adequate or correct versions of data
+         required by SPICE-based user applications.
+
+         In order for an application to use this meta-kernel, the
+         kernels referenced here must be present in the user's
+         current working directory.
+
+         The names and contents of the kernels referenced
+         by this meta-kernel are as follows:
+
+            File name                     Contents
+            ---------                     --------
+            de421.bsp                     Planetary ephemeris
+            pck00010.tpc                  Planet orientation and
+                                          radii
+            naif0009.tls                  Leapseconds
+
+
+         \begindata
+
+            KERNELS_TO_LOAD = ( 'de421.bsp',
+                                'pck00010.tpc',
+                                'naif0009.tls'  )
+
+         \begintext
+
+         End of meta-kernel
+
+
+      Example code begins here.
+
+
+      /.
+         Program drdgeo_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local variables
+         ./
+         SpiceDouble          alt;
+         SpiceDouble          drectn [3];
+         SpiceDouble          et;
+         SpiceDouble          f;
+         SpiceDouble          jacobi [3][3];
+         SpiceDouble          lat;
+         SpiceDouble          lon;
+         SpiceDouble          lt;
+         SpiceDouble          geovel [3];
+         SpiceDouble          radii  [3];
+         SpiceDouble          re;
+         SpiceDouble          rectan [3];
+         SpiceDouble          rp;
+         SpiceDouble          state  [6];
+
+         SpiceInt             n;
+
+         /.
+         Load SPK, PCK, and LSK kernels, use a meta kernel for
+         convenience.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( &quot;drdgeo_ex1.tm&quot; );
+
+         /.
+         Look up the radii for Mars.  Although we
+         omit it here, we could first call <a href="badkpv_c.html">badkpv_c</a>
+         to make sure the variable BODY499_RADII
+         has three elements and numeric data type.
+         If the variable is not present in the kernel
+         pool, <a href="bodvrd_c.html">bodvrd_c</a> will signal an error.
+         ./
+         <a href="bodvrd_c.html">bodvrd_c</a> ( &quot;MARS&quot;, &quot;RADII&quot;, 3, &amp;n, radii );
+
+         /.
+         Compute flattening coefficient.
+         ./
+         re  =  radii[0];
+         rp  =  radii[2];
+         f   =  ( re - rp ) / re;
+
+         /.
+         Look up the apparent state of earth as seen from Mars at
+         January 1, 2005 TDB, relative to the IAU_MARS reference
+         frame.
+         ./
+         <a href="str2et_c.html">str2et_c</a> ( &quot;January 1, 2005 TDB&quot;, &amp;et );
+
+         <a href="spkezr_c.html">spkezr_c</a> ( &quot;Earth&quot;, et, &quot;IAU_MARS&quot;, &quot;LT+S&quot;, &quot;Mars&quot;, state, &amp;lt );
+
+         /.
+         Convert position to geodetic coordinates.
+         ./
+         <a href="recgeo_c.html">recgeo_c</a> ( state, re, f, &amp;lon, &amp;lat, &amp;alt );
+
+         /.
+         Convert velocity to geodetic coordinates.
+         ./
+
+         <a href="dgeodr_c.html">dgeodr_c</a> ( state[0], state[1], state[2], re, f, jacobi );
+
+         <a href="mxv_c.html">mxv_c</a> ( jacobi, state+3, geovel );
+
+         /.
+         As a check, convert the geodetic state back to
+         rectangular coordinates.
+         ./
+         <a href="georec_c.html">georec_c</a> ( lon, lat, alt, re, f, rectan );
+
+         <b>drdgeo_c</b> ( lon, lat, alt, re, f, jacobi );
+
+         <a href="mxv_c.html">mxv_c</a> ( jacobi, geovel, drectn );
+
+         printf( &quot; \n&quot; );
+         printf( &quot;Rectangular coordinates:\n&quot; );
+         printf( &quot; \n&quot; );
+         printf( &quot; X (km)                 =  %17.8e\n&quot;, state[0] );
+         printf( &quot; Y (km)                 =  %17.8e\n&quot;, state[1] );
+         printf( &quot; Z (km)                 =  %17.8e\n&quot;, state[2] );
+         printf( &quot; \n&quot; );
+         printf( &quot;Rectangular velocity:\n&quot; );
+         printf( &quot; \n&quot; );
+         printf( &quot; dX/dt (km/s)           =  %17.8e\n&quot;, state[3] );
+         printf( &quot; dY/dt (km/s)           =  %17.8e\n&quot;, state[4] );
+         printf( &quot; dZ/dt (km/s)           =  %17.8e\n&quot;, state[5] );
+         printf( &quot; \n&quot; );
+         printf( &quot;Ellipsoid shape parameters: \n&quot; );
+         printf( &quot; \n&quot; );
+         printf( &quot; Equatorial radius (km) =  %17.8e\n&quot;, re );
+         printf( &quot; Polar radius      (km) =  %17.8e\n&quot;, rp );
+         printf( &quot; Flattening coefficient =  %17.8e\n&quot;, f );
+         printf( &quot; \n&quot; );
+         printf( &quot;Geodetic coordinates:\n&quot; );
+         printf( &quot; \n&quot; );
+         printf( &quot; Longitude (deg)        =  %17.8e\n&quot;, lon / <a href="rpd_c.html">rpd_c</a>() );
+         printf( &quot; Latitude  (deg)        =  %17.8e\n&quot;, lat / <a href="rpd_c.html">rpd_c</a>() );
+         printf( &quot; Altitude  (km)         =  %17.8e\n&quot;, alt );
+         printf( &quot; \n&quot; );
+         printf( &quot;Geodetic velocity:\n&quot; );
+         printf( &quot; \n&quot; );
+         printf( &quot; d Longitude/dt (deg/s) =  %17.8e\n&quot;, geovel[0]/<a href="rpd_c.html">rpd_c</a>() );
+         printf( &quot; d Latitude/dt  (deg/s) =  %17.8e\n&quot;, geovel[1]/<a href="rpd_c.html">rpd_c</a>() );
+         printf( &quot; d Altitude/dt  (km/s)  =  %17.8e\n&quot;, geovel[2] );
+         printf( &quot; \n&quot; );
+         printf( &quot;Rectangular coordinates from inverse mapping:\n&quot; );
+         printf( &quot; \n&quot; );
+         printf( &quot; X (km)                 =  %17.8e\n&quot;, rectan[0] );
+         printf( &quot; Y (km)                 =  %17.8e\n&quot;, rectan[1] );
+         printf( &quot; Z (km)                 =  %17.8e\n&quot;, rectan[2] );
+         printf( &quot; \n&quot; );
+         printf( &quot;Rectangular velocity from inverse mapping:\n&quot; );
+         printf( &quot; \n&quot; );
+         printf( &quot; dX/dt (km/s)           =  %17.8e\n&quot;, drectn[0] );
+         printf( &quot; dY/dt (km/s)           =  %17.8e\n&quot;, drectn[1] );
+         printf( &quot; dZ/dt (km/s)           =  %17.8e\n&quot;, drectn[2] );
+         printf( &quot; \n&quot; );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Rectangular coordinates:
+
+       X (km)                 =    -7.60961826e+07
+       Y (km)                 =     3.24363805e+08
+       Z (km)                 =     4.74704840e+07
+
+      Rectangular velocity:
+
+       dX/dt (km/s)           =     2.29520749e+04
+       dY/dt (km/s)           =     5.37601112e+03
+       dZ/dt (km/s)           =    -2.08811490e+01
+
+      Ellipsoid shape parameters:
+
+       Equatorial radius (km) =     3.39619000e+03
+       Polar radius      (km) =     3.37620000e+03
+       Flattening coefficient =     5.88600756e-03
+
+      Geodetic coordinates:
+
+       Longitude (deg)        =     1.03202903e+02
+       Latitude  (deg)        =     8.10898757e+00
+       Altitude  (km)         =     3.36531823e+08
+
+      Geodetic velocity:
+
+       d Longitude/dt (deg/s) =    -4.05392876e-03
+       d Latitude/dt  (deg/s) =    -3.31899337e-06
+       d Altitude/dt  (km/s)  =    -1.12116015e+01
+
+      Rectangular coordinates from inverse mapping:
+
+       X (km)                 =    -7.60961826e+07
+       Y (km)                 =     3.24363805e+08
+       Z (km)                 =     4.74704840e+07
+
+      Rectangular velocity from inverse mapping:
+
+       dX/dt (km/s)           =     2.29520749e+04
+       dY/dt (km/s)           =     5.37601112e+03
+       dZ/dt (km/s)           =    -2.08811490e+01
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   W.L. Taber          (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.1, 01-NOV-2021 (JDR)
+
+       Edited the -Examples section to comply with NAIF standard.
+       Added complete code example.
+
+   -CSPICE Version 1.0.0, 20-JUL-2001 (WLT) (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   Jacobian of rectangular w.r.t. geodetic coordinates
+</PRE>
+<h4>Link to routine drdgeo_c source file <a href='../../../src/cspice/drdgeo_c.c'>drdgeo_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:04 2021</pre>
+
+</body>
+</html>
+

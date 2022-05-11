@@ -1,0 +1,269 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>vnormg_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>vnormg_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   vnormg_c ( Vector norm, general dimension ) 
+
+   SpiceDouble vnormg_c ( ConstSpiceDouble   * v1,
+                          SpiceInt             ndim )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Compute the magnitude of a double precision vector of arbitrary
+   dimension.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   VECTOR
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   v1         I   Vector whose magnitude is to be found.
+   ndim       I   Dimension of `v1'.
+
+   The function returns the magnitude of `v1'.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   v1          is any double precision vector of arbitrary dimension.
+
+   ndim        is the dimension of the input vector `v1'.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   The function returns the magnitude of `v1' calculated in a
+   numerically stable way.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   Error free.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   <b>vnormg_c</b> finds the component of v1 whose magnitude is the largest.
+   If the absolute magnitude of that component indicates that a
+   numeric overflow would occur when it is squared, or if it
+   indicates that an underflow would occur when squared (falsely
+   giving a magnitude of zero) then the following expression is
+   used:
+
+      <b>vnormg_c</b> = v1max * MAGNITUDE OF [ (1/v1max)*v1 ]
+
+   Otherwise a simpler expression is used:
+
+      <b>vnormg_c</b> = MAGNITUDE OF [ v1 ]
+
+   Beyond the logic described above, no further checking of the
+   validity of the input is performed.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for these examples may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Define a four-dimensional vector and calculate its magnitude.
+
+      Example code begins here.
+
+
+      /.
+         Program vnormg_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define NDIM         4
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble          v1    [NDIM] = { 12.3, -4.32, 76.0, 1.87 };
+
+         /.
+         Compute the magnitude of `v1'
+         ./
+         printf(&quot; Magnitude of v1: %f\n&quot;, <b>vnormg_c</b>( v1, NDIM ) );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+       Magnitude of v1: 77.132673
+
+
+   2) The following table show the correlation between various input
+      vectors `v1' and <b>vnormg_c</b>:
+
+         ndim     v1[ndim]                          <b>vnormg_c</b>
+         ---------------------------------------------------
+          1      (-7.0e20)                            7.e20
+          3      (1., 2., 2.)                         3.
+          4      (3., 3., 3., 3.)                     6.
+          5      (5., 12., 0., 0., 0.)               13.
+          3      (-5.e-17, 0.0, 12.e-17)             13.e-17
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   W.M. Owen           (JPL)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.2.0, 13-AUG-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Added
+       complete code example.
+
+       Removed check for &quot;ndim&quot; being positive in order to replicate
+       behavior of SPICELIB equivalent routine.
+
+   -CSPICE Version 1.1.0, 22-OCT-1998 (NJB)
+
+       Made input vector const.
+
+   -CSPICE Version 1.0.0, 01-APR-1998 (EDW) (WMO)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   norm of n-dimensional vector
+</PRE>
+<h4>Link to routine vnormg_c source file <a href='../../../src/cspice/vnormg_c.c'>vnormg_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:15 2021</pre>
+
+</body>
+</html>
+

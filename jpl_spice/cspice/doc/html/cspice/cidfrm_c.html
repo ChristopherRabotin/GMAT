@@ -1,0 +1,323 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>cidfrm_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>cidfrm_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   cidfrm_c ( center SPK ID frame ) 
+
+   void cidfrm_c ( SpiceInt        cent,
+                   SpiceInt        namlen,
+                   SpiceInt      * frcode,
+                   SpiceChar     * frname,
+                   SpiceBoolean  * found  )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Retrieve frame ID code and name to associate with a frame center.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   FRAMES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   cent       I   An object to associate a frame with.
+   namlen     I   Available space in output string `frname'.
+   frcode     O   The ID code of the frame associated with `cent'.
+   frname     O   The name of the frame with ID `frcode'.
+   found      O   SPICETRUE if the requested information is available.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   cent        is the ID code for object for which there is a
+               preferred reference frame.
+
+   namlen      is the available space in the output string frname,
+               including room for the terminating null character.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   frcode      is the frame ID code to associate with the object
+               specified by `cent'.
+
+   frname      is the name of the frame that should be associated
+               with the object specified by `cent'. `frname' should be
+               declared as SpiceChar[33] to ensure that it can
+               contain the full name of the frame. If `frname' does
+               not have enough room to hold the full name of the
+               frame, the name will be truncated on the right.
+
+   found       is SPICETRUE if the appropriate frame ID code and frame
+               name can be determined. Otherwise `found' is returned
+               with the value SPICEFALSE.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If `frname' does not have enough room to contain the frame name,
+       the name will be truncated on the right. (Declaring `frname' to
+       be SpiceChar[33] will ensure that the name will not be truncated).
+
+   2)  If the `frname' output string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   3)  If the `frname' output string has length less than two
+       characters, the error SPICE(STRINGTOOSHORT) is signaled, since
+       the output string is too short to contain one character of
+       output data plus a null terminator.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine allows the user to determine the frame that should
+   be associated with a particular object. For example, if you
+   need the frame to associate with the Io, you can call <b>cidfrm_c</b>
+   to determine the frame name and ID code for the bodyfixed frame
+   of Io.
+
+   The preferred frame to use with an object is specified via one
+   of the kernel pool variables:
+
+       OBJECT_&lt;cent&gt;_FRAME
+
+   where &lt;cent&gt; is the decimal representation of the integer `cent'.
+
+   For those PCK objects that have &quot;built-in&quot; frame names this
+   routine returns the corresponding &quot;IAU&quot; frame and frame ID code.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Determine the &quot;preferred&quot; frame to use with Jupiter's moon Io,
+      the Earth and the Moon. Use their corresponding NAIF ID codes.
+
+      Note that for any objects that has a &quot;built-in&quot; frame name, the
+      preferred frame is its corresponding &quot;IAU&quot; frame, which may not
+      be suitable for high-precision computations.
+
+      Example code begins here.
+
+
+      /.
+         Program cidfrm_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+         /.
+         Local constants.
+         ./
+         #define FRNMLN          33
+
+         /.
+         Local variables.
+         ./
+         SpiceBoolean            found;
+
+         SpiceChar               frname [ FRNMLN ];
+         SpiceInt                frcode;
+
+         SpiceInt                i;
+
+         /.
+         Assign an array of body IDs. Not all the listed NAIF IDs
+         have a frame associated to them.
+         ./
+         SpiceInt                bodyid[] = { 501, 399, 301, -999 };
+
+
+         /.
+         Loop over the `body' array, call <b>cidfrm_c</b> for each
+         element of `body'.
+         ./
+         printf( &quot;Body ID  Frame ID  Frame name\n&quot; );
+         printf( &quot;-------  --------  ----------\n&quot; );
+
+         for (i = 0; i &lt; 4; i++ )
+         {
+            <b>cidfrm_c</b> ( bodyid[i], FRNMLN, &amp;frcode, frname, &amp;found );
+
+            if ( found )
+            {
+               printf( &quot;%7d %9d  %s\n&quot;, (int)bodyid[i],
+                                        (int)frcode, frname );
+            }
+            else
+            {
+               printf( &quot;%7d  No frame associated with body ID\n&quot;,
+                       (int)bodyid[i]                          );
+            }
+
+         }
+
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Body ID  Frame ID  Frame name
+      -------  --------  ----------
+          501     10023  IAU_IO
+          399     10013  IAU_EARTH
+          301     10020  IAU_MOON
+         -999  No frame associated with body ID
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   W.L. Taber          (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.0, 13-AUG-2021 (JDR)
+
+       Changed the argument name &quot;lenout&quot; to &quot;namlen&quot; for consistency with
+       other routines.
+
+       Edited the header to comply with NAIF standard.
+       Added complete code example.
+
+       Updated -Detailed_Output to indicate the required minimum length for
+       the output frame character string to not be truncated.
+       Added -Exceptions section.
+
+   -CSPICE Version 1.0.0, 22-JUL-1999 (NJB) (WLT)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   Fetch reference frame attributes
+</PRE>
+<h4>Link to routine cidfrm_c source file <a href='../../../src/cspice/cidfrm_c.c'>cidfrm_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:02 2021</pre>
+
+</body>
+</html>
+

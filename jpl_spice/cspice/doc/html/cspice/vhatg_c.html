@@ -1,0 +1,275 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>vhatg_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>vhatg_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   vhatg_c ( "V-Hat", unit vector along V, general dimension ) 
+
+   void vhatg_c ( ConstSpiceDouble   * v1,
+                  SpiceInt             ndim,
+                  SpiceDouble        * vout )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Find the unit vector along a double precision vector of
+   arbitrary dimension.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   VECTOR
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   v1         I   Vector to be normalized.
+   ndim       I   Dimension of `v1' (and also `vout').
+   vout       O   Unit vector along `v1'.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   v1          is any double precision vector of arbitrary dimension.
+
+   ndim        is the dimension of `v1' (and also `vout').
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   vout        is the unit vector in the direction of `v1':
+
+                            v1
+                  vout = --------
+                          ||v1||
+
+               If `v1' represents the zero vector, then `vout' will also be
+               the zero vector. `vout' may overwrite `v1'.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   Error free.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   <b>vhatg_c</b> determines the magnitude of `v1' and then divides each
+   component of `v1' by the magnitude. This process is highly stable
+   over the whole range of multi-dimensional vectors.
+
+   This routine will detect if `v1' the zero vector, and will not
+   attempt to divide by zero.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Define a set of n-dimensional vectors and find the unit vector
+      along each of them.
+
+
+      Example code begins here.
+
+
+      /.
+         Program vhatg_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define NDIM         4
+         #define SETSIZ       2
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble          vout   [NDIM];
+
+         SpiceInt             i;
+
+         /.
+         Define the vector set.
+         ./
+         SpiceDouble          v1     [SETSIZ][NDIM] = {
+                                   { 5.0,    12.0,  0.0,   0.0 },
+                                   { 1.e-7,  2.e-7, 2.e-7, 0.0 } };
+
+         /.
+         Calculate the unit vectors.
+         ./
+         for ( i = 0; i &lt; SETSIZ; i++ )
+         {
+
+            <b>vhatg_c</b> ( v1[i], NDIM, vout );
+
+            printf( &quot;Input vector:  %11.7f %11.7f %11.7f %11.7f\n&quot;,
+                             v1[i][0], v1[i][1], v1[i][2], v1[i][3] );
+            printf( &quot;Unit vector :  %11.7f %11.7f %11.7f %11.7f\n&quot;,
+                                 vout[0], vout[1], vout[2], vout[3] );
+            printf( &quot;\n&quot; );
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Input vector:    5.0000000  12.0000000   0.0000000   0.0000000
+      Unit vector :    0.3846154   0.9230769   0.0000000   0.0000000
+
+      Input vector:    0.0000001   0.0000002   0.0000002   0.0000000
+      Unit vector :    0.3333333   0.6666667   0.6666667   0.0000000
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  The relative number of cases whereby floating point overflow
+       may occur is negligible. Thus, no error recovery or reporting
+       scheme is incorporated into this function.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   W.M. Owen           (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.1, 05-JUL-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Added complete
+       code example based on existing example.
+
+   -CSPICE Version 1.0.0, 13-JUL-1999 (NJB) (WMO)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   unitize a n-dimensional vector
+</PRE>
+<h4>Link to routine vhatg_c source file <a href='../../../src/cspice/vhatg_c.c'>vhatg_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:14 2021</pre>
+
+</body>
+</html>
+

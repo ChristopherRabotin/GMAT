@@ -1,0 +1,368 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>dasadi_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>dasadi_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   dasadi_c ( DAS, add data, integer ) 
+
+   void dasadi_c ( SpiceInt            handle,
+                   SpiceInt            n,
+                   ConstSpiceInt       data   [] )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Add an array of integers to a DAS file.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/das.html">DAS</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   ARRAY
+   ASSIGNMENT
+   DAS
+   FILES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   handle     I   DAS file handle.
+   n          I   Number of integers to add to DAS file.
+   data       I   Array of integers to add.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   handle      is a file handle of a DAS file opened for writing.
+
+   n           is the number of integer &quot;words&quot; to add to the DAS file
+               specified by `handle'.
+
+   data        is an array of integers to be added to the specified DAS
+               file. Elements 0 through n-1 are appended to the integer
+               data in the file.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   None.
+
+   See -Particulars for a description of the effect of this routine.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the input file handle is invalid, an error is signaled by a
+       routine in the call tree of this routine.
+
+   2)  If an I/O error occurs during the data addition attempted by
+       this routine, the error is signaled by a routine in the call
+       tree of this routine.
+
+   3)  If the input count `n' is less than 1, no data will be added to
+       the specified DAS file. No error will be signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See the description of the argument `handle' in -Detailed_Input.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine adds integer data to a DAS file by &quot;appending&quot; them
+   after any integer data already in the file. The sense in which
+   the data are &quot;appended&quot; is that the data will occupy a range of
+   logical addresses for integer data that immediately follow the
+   last logical address of an integer that is occupied at the time
+   this routine is called. The diagram below illustrates this
+   addition:
+
+      +-------------------------+
+      |    (already in use)     |  Integer logical address 1
+      +-------------------------+
+                  .
+                  .
+                  .
+      +-------------------------+
+      |    (already in use)     |  last integer logical address
+      +-------------------------+  in use before call to <b>dasadi_c</b>
+      |        data[0]          |
+      +-------------------------+
+                  .
+                  .
+                  .
+      +-------------------------+
+      |        data[n-1]        |
+      +-------------------------+
+
+
+   The logical organization of the integers in the DAS file is
+   independent of the location in the file of any data of double
+   precision or character type.
+
+   The actual physical write operations that add the input array
+   `data' to the indicated DAS file might not take place before this
+   routine returns, since the DAS system buffers data that are
+   written as well as data that are read. In any case, the data
+   will be flushed to the file at the time the file is closed, if
+   not earlier. A physical write of all buffered records can be
+   forced by calling the CSPICE routine <a href="daswbr_c.html">daswbr_c</a> (DAS, write
+   buffered records).
+
+   In order to update integer logical addresses that already contain
+   data, the CSPICE routine <a href="dasudi_c.html">dasudi_c</a> (DAS update data, integer)
+   should be used.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Create a new DAS file and add 200 integers to it. Close the
+      file, then re-open it and read the data back out.
+
+
+      Example code begins here.
+
+
+      /.
+         Program dasadi_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define FNAME        &quot;dasadi_ex1.das&quot;
+         #define TYPE         &quot;TEST&quot;
+
+         /.
+         Local variables.
+         ./
+         SpiceInt             data   [200];
+
+         SpiceInt             handle;
+         SpiceInt             i;
+         SpiceInt             j;
+
+         /.
+         Open a new DAS file. Use the file name as the internal
+         file name, and reserve no records for comments.
+         ./
+         <a href="dasonw_c.html">dasonw_c</a> ( FNAME, TYPE, FNAME, 0, &amp;handle );
+
+         /.
+         Fill the array `data' with the integers 1 through
+         100, and add this array to the file.
+         ./
+         for ( i = 1; i &lt;= 100; i++ )
+         {
+            data[i-1] = i;
+         }
+
+         <b>dasadi_c</b> ( handle, 100, data );
+
+         /.
+         Now append the array `data' to the file again.
+         ./
+         <b>dasadi_c</b> ( handle, 100, data );
+
+         /.
+         Close the file.
+         ./
+         <a href="dascls_c.html">dascls_c</a> ( handle );
+
+         /.
+         Now verify the addition of data by opening the
+         file for read access and retrieving the data.
+         ./
+         <a href="dasopr_c.html">dasopr_c</a> ( FNAME, &amp;handle );
+         <a href="dasrdi_c.html">dasrdi_c</a> ( handle, 1, 200, data );
+
+         /.
+         Dump the data to the screen.  We should see the
+         sequence  1, 2, ..., 100, 1, 2, ... , 100.
+         ./
+         printf( &quot;\n&quot; );
+         printf( &quot;Data from \&quot;%s\&quot;:\n&quot;, FNAME );
+         printf( &quot;\n&quot; );
+         for ( i = 0; i &lt; 20; i++ )
+         {
+            for ( j = 0; j &lt; 10; j++ )
+            {
+               printf( &quot;%5d&quot;, data[i*10+j] );
+            }
+            printf( &quot;\n&quot; );
+         }
+
+         /.
+         Close the file.
+         ./
+         <a href="dascls_c.html">dascls_c</a> ( handle );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Data from &quot;dasadi_ex1.das&quot;:
+
+          1    2    3    4    5    6    7    8    9   10
+         11   12   13   14   15   16   17   18   19   20
+         21   22   23   24   25   26   27   28   29   30
+         31   32   33   34   35   36   37   38   39   40
+         41   42   43   44   45   46   47   48   49   50
+         51   52   53   54   55   56   57   58   59   60
+         61   62   63   64   65   66   67   68   69   70
+         71   72   73   74   75   76   77   78   79   80
+         81   82   83   84   85   86   87   88   89   90
+         91   92   93   94   95   96   97   98   99  100
+          1    2    3    4    5    6    7    8    9   10
+         11   12   13   14   15   16   17   18   19   20
+         21   22   23   24   25   26   27   28   29   30
+         31   32   33   34   35   36   37   38   39   40
+         41   42   43   44   45   46   47   48   49   50
+         51   52   53   54   55   56   57   58   59   60
+         61   62   63   64   65   66   67   68   69   70
+         71   72   73   74   75   76   77   78   79   80
+         81   82   83   84   85   86   87   88   89   90
+         91   92   93   94   95   96   97   98   99  100
+
+
+      Note that after run completion, a new DAS file exists in the
+      output directory.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.0, 09-MAR-2021 (JDR)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   add integer data to a DAS file
+</PRE>
+<h4>Link to routine dasadi_c source file <a href='../../../src/cspice/dasadi_c.c'>dasadi_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:03 2021</pre>
+
+</body>
+</html>
+

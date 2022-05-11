@@ -1,0 +1,311 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>mxmg_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>mxmg_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   mxmg_c ( Matrix times matrix, general dimension ) 
+
+   void mxmg_c ( const void    * m1,
+                 const void    * m2,
+                 SpiceInt        nr1,
+                 SpiceInt        nc1r2,
+                 SpiceInt        nc2,
+                 void          * mout   )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Multiply two double precision matrices of arbitrary size.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   MATRIX
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   m1         I   nr1   x nc1r2 double precision matrix.
+   m2         I   nc1r2 x nc2   double precision matrix.
+   nr1        I   Row dimension of `m1' (and also `mout').
+   nc1r2      I   Column dimension of `m1' and row dimension of `m2'.
+   nc2        I   Column dimension of `m2' (and also `mout').
+   mout       O   nr1 x nc2 double precision matrix.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   m1          is any double precision matrix of arbitrary size.
+
+   m2          is any double precision matrix of arbitrary size.
+               The number of rows in m2 must match the number of
+               columns in m1.
+
+   nr1         is the number of rows in both `m1' and `mout'.
+
+   nc1r2       is the number of columns in `m1' and (by necessity)
+               the number of rows of `m2'.
+
+   nc2         is the number of columns in both `m2' and `mout'.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   mout        is the product matrix defined by
+
+                  mout = (m1) x (m2)
+
+               `mout' is a double precision matrix of dimension
+               nr1 x nc2.
+
+               `mout' may overwrite `m1' or `m2'.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If nc1r2 &lt; 0, the elements of the matrix `mout' are set equal to
+       zero.
+
+   2)  If memory cannot be allocated to create the temporary matrix
+       required for the execution of the routine, the error
+       SPICE(MALLOCFAILED) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   The code reflects precisely the following mathematical expression
+
+   For each value of the subscript `i' from 1 to `nr1', and `j' from 1
+   to `nc2':
+
+      mout(i,j) = Summation from k=1 to nc1r2 of  m1(i,k) * m2(k,j)
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Given a 3x2 and a 2x3 matrices, multiply the first matrix by
+      the second one.
+
+
+      Example code begins here.
+
+
+      /.
+         Program mxmg_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble          mout   [3][3];
+
+         SpiceInt             i;
+
+         /.
+         Define `m1' and `m2'.
+         ./
+         SpiceDouble          m1     [3][2] = { { 1.0, 4.0 },
+                                                { 2.0, 5.0 },
+                                                { 3.0, 6.0 }  };
+
+         SpiceDouble          m2     [2][3] = { { 1.0, 3.0, 5.0 },
+                                                { 2.0, 4.0, 6.0 } };
+
+         /.
+         Multiply `m1' by `m2'.
+         ./
+         <b>mxmg_c</b> ( m1, m2, 3, 2, 3, mout );
+
+         printf( &quot;M1 times M2:\n&quot; );
+         for ( i = 0; i &lt; 3; i++ )
+         {
+            printf( &quot;%10.3f %9.3f %9.3f\n&quot;,
+                    mout[i][0], mout[i][1], mout[i][2] );
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      M1 times M2:
+           9.000    19.000    29.000
+          12.000    26.000    40.000
+          15.000    33.000    51.000
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  No error checking is performed to prevent numeric overflow or
+       underflow.
+
+   2)  No error checking performed to determine if the input and
+       output matrices have, in fact, been correctly dimensioned.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.2.0, 10-AUG-2021 (JDR)
+
+       Changed the input argument names &quot;nrow1&quot;, &quot;ncol1&quot; and &quot;ncol2&quot; to
+       &quot;nr1&quot;, &quot;nc1r2&quot; and &quot;nc2&quot; for consistency with other routines.
+
+       Updated short error message for consistency within CSPICE wrapper
+       interface: MEMALLOCFAILED -&gt; MALLOCFAILED.
+
+       Edited the header to comply with NAIF standard.
+       Added complete code example based on the existing example.
+
+       Added entry #1 to -Exceptions section.
+
+   -CSPICE Version 1.1.2, 16-JAN-2008 (EDW)
+
+       Corrected typos in header titles:
+
+       Detailed Input to -Detailed_Input
+       Detailed Output to -Detailed_Output
+
+   -CSPICE Version 1.1.1, 10-NOV-2006 (EDW)
+
+       Added -Parameters section header.
+
+   -CSPICE Version 1.1.0, 28-AUG-2001 (NJB)
+
+       Const-qualified input arrays.
+
+   -CSPICE Version 1.0.0, 16-APR-1999 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   matrix times matrix n-dimensional_case
+</PRE>
+<h4>Link to routine mxmg_c source file <a href='../../../src/cspice/mxmg_c.c'>mxmg_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:09 2021</pre>
+
+</body>
+</html>
+

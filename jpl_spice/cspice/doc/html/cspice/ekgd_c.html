@@ -1,0 +1,1234 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>ekgd_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>ekgd_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   ekgd_c ( EK, get event data, double precision ) 
+
+   void ekgd_c ( SpiceInt          selidx,
+                 SpiceInt          row,
+                 SpiceInt          elment,
+                 SpiceDouble     * ddata,
+                 SpiceBoolean    * null,
+                 SpiceBoolean    * found  )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Return an element of an entry in a column of double precision
+   type in a specified row.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/ek.html">EK</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   ASSIGNMENT
+   EK
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   selidx     I   Index of parent column in SELECT clause.
+   row        I   Row to fetch from.
+   elment     I   Index of element, within column entry, to fetch.
+   ddata      O   Double precision element of column entry.
+   null       O   Flag indicating whether column entry was null.
+   found      O   Flag indicating whether column was present in row.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   selidx      is the SELECT clause index of the column to fetch
+               from. The range of selidx is from 0 to one less than
+               the number of columns in the SELECT clause.
+
+   row         is the output row containing the entry to fetch
+               from. The range of row is from 0 to one less than
+               the number of rows satisfying the previous query.
+
+   elment      is the index of the element of the column entry
+               to fetch. The normal range of elment is from 0 to
+               one less than the size of the column's entry, but
+               elment is allowed to exceed the number of elements in
+               the column entry; if it does, found is returned
+               as SPICEFALSE. This allows the caller to read data
+               from the column entry in a loop without checking the
+               number of available elements first.
+
+               Null values in variable-sized columns are
+               considered to have size 1.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   ddata       is the requested element of the specified column
+               entry. If the entry is null, ddata is undefined.
+
+   null        is a logical flag indicating whether the entry
+               belonging to the specified column in the specified
+               row is null.
+
+   found       is a logical flag indicating whether the specified
+               element was found. If the element does not exist,
+               found is returned as SPICEFALSE.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the input argument `elment' is less than 0, the error
+       SPICE(INVALIDINDEX) is signaled by a routine in the call tree of this
+       routine and `found' is returned SPICEFALSE. However, `elment' is allowed
+       to be greater than or equal to the number of elements in the specified
+       column entry; this allows the caller to read data from the column entry
+       in a loop without checking the number of available elements first. If
+       `elment' is greater than or equal to the number of available elements,
+       `found' is returned SPICEFALSE.
+
+   2)  If `selidx' is outside of the range established by the last query
+       passed to the EK search engine, the error SPICE(INVALIDINDEX) is
+       signaled by a routine in the call tree of this routine and `found' is
+       returned SPICEFALSE.
+
+   3)  If the input argument `row' is less than 0 or greater than or
+       equal to the number of rows matching the query, the error
+       SPICE(INVALIDINDEX) is signaled by a routine in the call tree
+       of this routine and `found' is returned SPICEFALSE.
+
+   4)  If the specified column does not have DP or TIME type, the
+       error SPICE(INVALIDTYPE) is signaled by a routine in the call
+       tree of this routine.
+
+   5)  If this routine is called when no E-kernels have been loaded,
+       the error SPICE(NOLOADEDFILES) is signaled by a routine in the
+       call tree of this routine.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   The EK &quot;query and fetch&quot; suite of functions reads binary `sequence
+   component' EK files. In order for a binary EK file to be
+   accessible to this routine, the file must be `loaded' via a call
+   to the function <a href="eklef_c.html">eklef_c</a>.
+
+   Text format EK files cannot be used by this routine; they must
+   first be converted by binary format by the NAIF Toolkit utility
+   SPACIT.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine allows retrieval of data from double precision columns.
+
+   This routine returns one element at a time in order to save the
+   caller from imposing a limit on the size of the column entries
+   that can be handled.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for these examples may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Perform a query on an EK file that contains a database with
+      the Supplementary Engineering Data Records of the Viking
+      Project in order to retrieve the PLATFORM_CLOCK values (double
+      precision) that correspond to the images with IMAGE_NUMBER
+      smaller than a given value, ordered by IMAGE_NUMBER.
+
+
+      Use the EK kernel below to load the information from the
+      original Supplementary Engineering Data Record (SEDR) data
+      set generated by the Viking Project.
+
+         vo_sedr.bdb
+
+
+      Example code begins here.
+
+
+      /.
+         Program ekgd_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters
+         ./
+         #define EKNAME       &quot;vo_sedr.bdb&quot;
+         #define ERRLEN       1840
+
+         /.
+         Local variables
+         ./
+         SpiceChar            errmsg [ERRLEN];
+         SpiceChar          * query;
+
+         SpiceDouble          ddata;
+
+         SpiceInt             eltidx;
+         SpiceInt             nmrows;
+         SpiceInt             rowno;
+         SpiceInt             selidx;
+
+         SpiceBoolean         error;
+         SpiceBoolean         found;
+         SpiceBoolean         isnull;
+
+         /.
+         Open an EK file.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( EKNAME );
+
+         /.
+         The table &quot;VIKING_SEDR_DATA&quot; has a column
+         &quot;PLATFORM_CLOCK&quot; of double precision values.
+
+         Define a set of constraints to perform a query on
+         all loaded EK files (the SELECT clause). In this
+         case select the column &quot;PLATFORM_CLOCK&quot; from table
+         &quot;VIKING_SEDR_DATA&quot; sorted by &quot;IMAGE_NUMBER&quot;.
+         ./
+         query = &quot;Select PLATFORM_CLOCK from VIKING_SEDR_DATA &quot;
+                 &quot;where IMAGE_NUMBER &lt; 25860000 &quot;
+                 &quot;order by IMAGE_NUMBER&quot;;
+
+         /.
+         Query the EK system for data rows matching the
+         SELECT constraints.
+         ./
+         <a href="ekfind_c.html">ekfind_c</a> ( query, ERRLEN, &amp;nmrows, &amp;error, errmsg );
+
+         /.
+         Check whether an error occurred while processing the
+         SELECT clause. If so, output the error message.
+         ./
+         if ( error )
+         {
+            printf( &quot;SELECT clause error:  %s\n&quot;, errmsg );
+         }
+         else
+         {
+
+            /.
+            Fetch the character data. We know the query returned
+            one column and the column contains only scalar data,
+            so the index of all elements is 0.
+            ./
+            selidx = 0;
+            eltidx = 0;
+
+            /.
+            Loop over each row found matching the query.
+            ./
+            for ( rowno = 0; rowno &lt; nmrows; rowno++ )
+            {
+
+               printf( &quot;Row  %2d: Double precision data: &quot;, rowno );
+
+               /.
+               Use <b>ekgd_c</b> to retrieve the string from
+               ./
+               <b>ekgd_c</b> ( selidx, rowno, eltidx, &amp;ddata, &amp;isnull, &amp;found );
+
+               if ( isnull )
+               {
+                  printf( &quot;&lt;Null&gt;\n&quot; );
+               }
+               else
+               {
+                  printf( &quot;%10.6f\n&quot;, ddata );
+               }
+
+            }
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Row   0: Double precision data: 119.880000
+      Row   1: Double precision data: 119.270000
+      Row   2: Double precision data: 119.880000
+      Row   3: Double precision data: 119.270000
+      Row   4: Double precision data: 119.880000
+      Row   5: Double precision data: 119.270000
+      Row   6: Double precision data: 120.140000
+      Row   7: Double precision data: 119.520000
+      Row   8: Double precision data: 120.140000
+      Row   9: Double precision data: 120.140000
+      Row  10: Double precision data: 120.140000
+      Row  11: Double precision data: 221.920000
+      Row  12: Double precision data: 221.920000
+      Row  13: Double precision data: 221.920000
+      Row  14: Double precision data: 120.140000
+      Row  15: Double precision data: 120.140000
+      Row  16: Double precision data: 120.140000
+      Row  17: Double precision data: 120.220000
+      Row  18: Double precision data: 120.220000
+      Row  19: Double precision data: 120.220000
+      Row  20: Double precision data: 120.370000
+      Row  21: Double precision data: 120.370000
+      Row  22: Double precision data: 120.370000
+      Row  23: Double precision data: 120.290000
+      Row  24: Double precision data: 120.290000
+      Row  25: Double precision data: 120.290000
+
+
+   2) Perform a query on an EK file that contains a database with
+      the Supplementary Engineering Data Records of the Viking
+      Project in order to retrieve the IMAGE_TIME values (double
+      precision time) that correspond to the images with
+      IMAGE_NUMBER smaller than a given value, ordered by
+      IMAGE_NUMBER.
+
+
+      Use the EK kernel below to load the information from the
+      original Supplementary Engineering Data Record (SEDR) data
+      set generated by the Viking Project.
+
+         vo_sedr.bdb
+
+      Use the LSK kernel below to load the leap seconds and time
+      constants required for the conversions.
+
+         naif0012.tls
+
+
+      Example code begins here.
+
+
+      /.
+         Program ekgd_ex2
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters
+         ./
+         #define EKNAME       &quot;vo_sedr.bdb&quot;
+         #define LSKNAM       &quot;naif0012.tls&quot;
+         #define ERRLEN       1840
+         #define TIMLEN       24
+
+         /.
+         Local variables
+         ./
+         SpiceChar            errmsg [ERRLEN];
+         SpiceChar          * query;
+         SpiceChar            utcstr [TIMLEN];
+
+         SpiceDouble          ddata;
+
+         SpiceInt             eltidx;
+         SpiceInt             nmrows;
+         SpiceInt             rowno;
+         SpiceInt             selidx;
+
+         SpiceBoolean         error;
+         SpiceBoolean         found;
+         SpiceBoolean         isnull;
+
+         /.
+         Load leapseconds file for time conversion.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( LSKNAM );
+
+         /.
+         Open an EK file.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( EKNAME );
+
+         /.
+         The table &quot;VIKING_SEDR_DATA&quot; has a column
+         &quot;IMAGE_TIME&quot; of time values (stored as double
+         precision items).
+
+         Define a set of constraints to perform a query on
+         all loaded EK files (the SELECT clause). In this
+         case select the column &quot;IMAGE_TIME&quot; from table
+         &quot;VIKING_SEDR_DATA&quot; sorted by &quot;IMAGE_NUMBER&quot;.
+         ./
+         query = &quot;Select IMAGE_TIME from VIKING_SEDR_DATA &quot;
+                 &quot;where IMAGE_NUMBER &lt; 25860000 &quot;
+                 &quot;order by IMAGE_NUMBER&quot;;
+
+         /.
+         Query the EK system for data rows matching the
+         SELECT constraints.
+         ./
+         <a href="ekfind_c.html">ekfind_c</a> ( query, ERRLEN, &amp;nmrows, &amp;error, errmsg );
+
+         /.
+         Check whether an error occurred while processing the
+         SELECT clause. If so, output the error message.
+         ./
+         if ( error )
+         {
+            printf( &quot;SELECT clause error:  %s\n&quot;, errmsg );
+         }
+         else
+         {
+
+            /.
+            Fetch the character data. We know the query returned
+            one column and the column contains only scalar data,
+            so the index of all elements is 0.
+            ./
+            selidx = 0;
+            eltidx = 0;
+
+            /.
+            Loop over each row found matching the query.
+            ./
+            for ( rowno = 0; rowno &lt; nmrows; rowno++ )
+            {
+
+               printf( &quot;Row  %2d: Time data: &quot;, rowno );
+
+               /.
+               Use <b>ekgd_c</b> to retrieve the string from
+               ./
+               <b>ekgd_c</b> ( selidx, rowno, eltidx, &amp;ddata, &amp;isnull, &amp;found );
+
+               if ( isnull )
+               {
+                  printf( &quot;&lt;Null&gt;\n&quot; );
+               }
+               else
+               {
+                  <a href="et2utc_c.html">et2utc_c</a> ( ddata, &quot;C&quot;, 3, TIMLEN, utcstr );
+                  printf( &quot; %s\n&quot;, utcstr );
+               }
+
+            }
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Row   0: Time data:  1976 JUN 16 16:50:55.92
+      Row   1: Time data:  1976 JUN 16 16:51:00.26
+      Row   2: Time data:  1976 JUN 16 20:56:53.05
+      Row   3: Time data:  1976 JUN 16 20:56:57.39
+      Row   4: Time data:  1976 JUN 17 01:02:50.17
+      Row   5: Time data:  1976 JUN 17 01:02:54.52
+      Row   6: Time data:  1976 JUN 17 05:08:56.26
+      Row   7: Time data:  1976 JUN 17 05:09:00.60
+      Row   8: Time data:  1976 JUN 17 06:30:28.42
+      Row   9: Time data:  1976 JUN 17 06:30:46.17
+      Row  10: Time data:  1976 JUN 17 06:30:55.16
+      Row  11: Time data:  1976 JUN 17 11:17:47.47
+      Row  12: Time data:  1976 JUN 17 11:18:05.22
+      Row  13: Time data:  1976 JUN 17 11:18:14.21
+      Row  14: Time data:  1976 JUN 17 13:20:23.63
+      Row  15: Time data:  1976 JUN 17 13:20:41.38
+      Row  16: Time data:  1976 JUN 17 13:20:50.37
+      Row  17: Time data:  1976 JUN 17 15:23:17.71
+      Row  18: Time data:  1976 JUN 17 15:23:35.46
+      Row  19: Time data:  1976 JUN 17 15:23:44.46
+      Row  20: Time data:  1976 JUN 17 17:26:20.76
+      Row  21: Time data:  1976 JUN 17 17:26:38.51
+      Row  22: Time data:  1976 JUN 17 17:26:47.50
+      Row  23: Time data:  1976 JUN 17 19:29:23.80
+      Row  24: Time data:  1976 JUN 17 19:29:41.55
+      Row  25: Time data:  1976 JUN 17 19:29:50.54
+
+
+   3) This example demonstrates how to fetch double precision values
+      from a column in three different cases: single values,
+      variable-size arrays and static-size arrays.
+
+      Create an EK that contains a table TAB that has the following
+      columns:
+
+         Column name   Data Type   Size
+         -----------   ---------   ----
+         DP_COL_1      DP          1
+         DP_COL_2      DP          VARIABLE
+         DP_COL_3      DP          3
+
+      Issue the following query
+
+          query = &quot;SELECT DP_COL_1, DP_COL_2, DP_COL_3 FROM TAB&quot;
+
+      to fetch and dump column values from the rows that satisfy the
+      query.
+
+
+      Example code begins here.
+
+
+      /.
+         Program ekgd_ex3
+      ./
+      #include &lt;stdio.h&gt;
+      #include &lt;string.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters
+         ./
+         #define EKNAME       &quot;ekgd_ex3.bdb&quot;
+         #define TABLE        &quot;TAB&quot;
+         #define COL3SZ       3
+         #define DECLEN       200
+         #define ERRLEN       1840
+         #define MXC2SZ       4
+         #define NCOLS        3
+         #define NROWS        4
+
+         /.
+         Local variables
+         ./
+         SpiceChar            cdecls [NCOLS][DECLEN];
+         SpiceChar            cnames [NCOLS][SPICE_EK_CSTRLN];
+         SpiceChar            errmsg [ERRLEN];
+         SpiceChar          * ifname;
+         SpiceChar          * query;
+
+         SpiceDouble          col1;
+         SpiceDouble          col2   [MXC2SZ];
+         SpiceDouble          col3   [COL3SZ];
+         SpiceDouble          dvals  [MXC2SZ];
+
+         SpiceInt             eltidx;
+         SpiceInt             handle;
+         SpiceInt             i;
+         SpiceInt             j;
+         SpiceInt             nelt;
+         SpiceInt             nmrows;
+         SpiceInt             nresvc;
+         SpiceInt             recno;
+         SpiceInt             row;
+         SpiceInt             segno;
+         SpiceInt             selidx;
+
+         SpiceBoolean         error;
+         SpiceBoolean         found;
+         SpiceBoolean         isnull;
+
+         /.
+         Open a new EK file.  For simplicity, we will not
+         reserve any space for the comment area, so the
+         number of reserved comment characters is zero.
+         The variable `ifname' is the internal file name.
+         ./
+         nresvc  =  0;
+         ifname  =  &quot;Test EK/Created 13-JUN-2019&quot;;
+
+         <a href="ekopn_c.html">ekopn_c</a> ( EKNAME, ifname, nresvc, &amp;handle );
+
+         /.
+         Set up the column names and declarations
+         for the TAB segment.  We'll index all of
+         the columns.
+         ./
+         strcpy( cnames[0], &quot;DP_COL_1&quot; );
+         strcpy( cdecls[0], &quot;DATATYPE = DOUBLE PRECISION, INDEXED  = TRUE&quot; );
+
+         strcpy( cnames[1], &quot;DP_COL_2&quot; );
+         strcpy( cdecls[1], &quot;DATATYPE = DOUBLE PRECISION, SIZE = VARIABLE&quot; );
+
+         strcpy( cnames[2], &quot;DP_COL_3&quot; );
+         strcpy( cdecls[2], &quot;DATATYPE = DOUBLE PRECISION, SIZE = 3&quot; );
+
+         /.
+         Start the segment.
+         ./
+         <a href="ekbseg_c.html">ekbseg_c</a> ( handle, TABLE,  NCOLS,   SPICE_EK_CSTRLN,
+                    cnames, DECLEN, cdecls, &amp;segno           );
+
+         /.
+         At the records to the table.
+         ./
+         for ( i = 1; i &lt;= NROWS; i++ )
+         {
+
+            /.
+            Append a new record to the EK.
+            ./
+            <a href="ekappr_c.html">ekappr_c</a> ( handle, segno, &amp;recno );
+
+            /.
+            Add DP_COL_1
+            ./
+            col1 = i * 100.0;
+
+            <a href="ekaced_c.html">ekaced_c</a> ( handle,  segno, recno, cnames[0],
+                       1,      &amp;col1,  SPICEFALSE );
+
+            /.
+            Add `i' items to DP_COL_2
+            ./
+            for ( j = 0; j &lt; i; j++ )
+            {
+               col2[j] = j + 1 + i*200.0;
+            }
+
+            <a href="ekaced_c.html">ekaced_c</a> ( handle, segno, recno, cnames[1], i, col2, SPICEFALSE );
+
+            /.
+            Add 3 items to DP_COL_3
+            ./
+            for ( j = 0; j &lt; 3; j++ )
+            {
+               col3[j] =  i + (j+1)*100.0;
+            }
+
+            <a href="ekaced_c.html">ekaced_c</a> ( handle, segno, recno, cnames[2], 3, col3, SPICEFALSE );
+
+         }
+
+         /.
+         Close the file.
+         ./
+         <a href="ekcls_c.html">ekcls_c</a> ( handle );
+
+         /.
+         Open the created file. Perform the query and show the
+         results.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( EKNAME );
+
+         query = &quot;SELECT DP_COL_1, DP_COL_2, DP_COL_3 FROM TAB&quot;;
+
+         /.
+         Query the EK system for data rows matching the
+         SELECT constraints.
+         ./
+         <a href="ekfind_c.html">ekfind_c</a> ( query, ERRLEN, &amp;nmrows, &amp;error, errmsg );
+
+         /.
+         Check whether an error occurred while processing the
+         SELECT clause. If so, output the error message.
+         ./
+         if ( error )
+         {
+
+            printf( &quot;SELECT clause error:  %s\n&quot;, errmsg );
+
+         }
+         else
+         {
+
+            for ( row = 0; row &lt; nmrows; row++ )
+            {
+
+               printf( &quot; \n&quot; );
+               printf( &quot;ROW  =  %2d\n&quot;, row );
+
+               /.
+               Fetch values from column DP_COL_1.  Since
+               DP_COL_1 was the first column selected, the
+               selection index `selidx' is set to 0.
+               ./
+               selidx = 0;
+               eltidx = 0;
+               <b>ekgd_c</b> ( selidx, row, eltidx, dvals, &amp;isnull, &amp;found );
+
+               printf( &quot;  COLUMN = DP_COL_1: &quot; );
+
+               if ( isnull )
+               {
+                  printf( &quot;&lt;Null&gt;\n&quot; );
+               }
+               else
+               {
+                  printf( &quot; %f\n&quot;, dvals[0] );
+               }
+
+               /.
+               Fetch values from column DP_COL_2 in the current
+               row.  Since DP_COL_2 contains variable-size array
+               elements, we call <a href="eknelt_c.html">eknelt_c</a> to determine how many
+               elements to fetch.
+               ./
+               selidx = 1;
+               nelt = <a href="eknelt_c.html">eknelt_c</a> ( selidx, row );
+
+               eltidx = 0;
+               isnull = SPICEFALSE;
+
+               while ( ( eltidx &lt; nelt ) &amp;&amp; ( !isnull ) )
+               {
+
+                  <b>ekgd_c</b> ( selidx,        row,     eltidx,
+                           dvals+eltidx, &amp;isnull, &amp;found  );
+
+                  eltidx = eltidx + 1;
+
+                  /.
+                  If the column entry is null, we'll be kicked
+                  out of this loop after the first iteration.
+                  ./
+               }
+
+               printf( &quot;  COLUMN = DP_COL_2:&quot; );
+
+               if ( isnull )
+               {
+                  printf( &quot;&lt;Null&gt;\n&quot; );
+               }
+               else
+               {
+
+                  for ( i = 0; i &lt; nelt; i++ )
+                  {
+                     printf( &quot; %6.1f&quot;, dvals[i] );
+                  }
+
+                  printf( &quot; \n&quot; );
+
+               }
+
+               /.
+               Fetch values from column DP_COL_3 in the current
+               row.  We need not call <a href="eknelt_c.html">eknelt_c</a> since we know how
+               many elements are in each column entry.
+               ./
+               selidx = 2;
+               eltidx = 0;
+               isnull = SPICEFALSE;
+
+               while ( ( eltidx &lt; COL3SZ ) &amp;&amp; ( !isnull ) )
+               {
+
+                  <b>ekgd_c</b> ( selidx,        row,     eltidx,
+                           dvals+eltidx, &amp;isnull, &amp;found  );
+
+                  eltidx = eltidx + 1;
+
+               }
+
+               printf( &quot;  COLUMN = DP_COL_3:&quot; );
+
+               if ( isnull )
+               {
+                  printf( &quot;&lt;Null&gt;\n&quot; );
+               }
+               else
+               {
+
+                  for ( i = 0; i &lt; COL3SZ; i++ )
+                  {
+                     printf( &quot; %6.1f&quot;, dvals[i] );
+                  }
+
+                  printf( &quot; \n&quot; );
+
+               }
+
+            }
+
+            /.
+            We either parsed the SELECT clause or had an error.
+            ./
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      ROW  =   0
+        COLUMN = DP_COL_1:  100.000000
+        COLUMN = DP_COL_2:  201.0
+        COLUMN = DP_COL_3:  101.0  201.0  301.0
+
+      ROW  =   1
+        COLUMN = DP_COL_1:  200.000000
+        COLUMN = DP_COL_2:  401.0  402.0
+        COLUMN = DP_COL_3:  102.0  202.0  302.0
+
+      ROW  =   2
+        COLUMN = DP_COL_1:  300.000000
+        COLUMN = DP_COL_2:  601.0  602.0  603.0
+        COLUMN = DP_COL_3:  103.0  203.0  303.0
+
+      ROW  =   3
+        COLUMN = DP_COL_1:  400.000000
+        COLUMN = DP_COL_2:  801.0  802.0  803.0  804.0
+        COLUMN = DP_COL_3:  104.0  204.0  304.0
+
+
+      Note that after run completion, a new EK file exists in the
+      output directory.
+
+
+   4) Query the EK system and fetch data matching that query.
+
+      The program shown here does not rely on advance
+      knowledge of the input query or the contents of any loaded EK
+      files.
+
+      To simplify the example, we assume that all data are scalar.
+      This assumption relieves us of the need to test the size of
+      column entries before fetching them. In the event that a
+      column contains variable-size array entries, the entry point
+      <a href="eknelt_c.html">eknelt_c</a> may be called to obtain the size of column entries to
+      be fetched. See <a href="eknelt_c.html">eknelt_c</a> for an example.
+
+
+      Use the EK kernel below to load the information from the
+      original Supplementary Engineering Data Record (SEDR) data
+      set generated by the Viking Project.
+
+         vo_sedr.bdb
+
+      Use the LSK kernel below to load the leap seconds and time
+      constants required for the conversions.
+
+         naif0012.tls
+
+
+      Example code begins here.
+
+
+      /.
+         Program ekgd_ex4
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters
+         ./
+         #define EKNAME       &quot;vo_sedr.bdb&quot;
+         #define LSKNAM       &quot;naif0012.tls&quot;
+         #define ERRLEN       1840
+         #define TIMLEN       27
+         #define TYPLEN       4
+         #define XCLSLN       4
+
+         /.
+         Local variables
+         ./
+         SpiceChar            cdata  [SPICE_EK_MAXQSTR];
+         SpiceChar            cols   [SPICE_EK_MAXQSEL][SPICE_EK_MAXQRY];
+         SpiceChar            errmsg [ERRLEN];
+         SpiceChar          * query;
+         SpiceChar            utcstr [TIMLEN];
+         SpiceChar            tabs   [SPICE_EK_MAXQTAB][SPICE_EK_MAXQRY];
+         SpiceEKExprClass     xclass [SPICE_EK_MAXQSEL];
+         SpiceEKDataType      xtypes [SPICE_EK_MAXQSEL];
+
+         SpiceDouble          ddata;
+         SpiceDouble          tdata;
+
+         SpiceInt             b;
+         SpiceInt             colno;
+         SpiceInt             e;
+         SpiceInt             handle;
+         SpiceInt             idata;
+         SpiceInt             n;
+         SpiceInt             nmrows;
+         SpiceInt             row;
+         SpiceInt             xbegs  [SPICE_EK_MAXQSEL];
+         SpiceInt             xends  [SPICE_EK_MAXQSEL];
+
+         SpiceBoolean         error;
+         SpiceBoolean         found;
+         SpiceBoolean         null;
+
+         /.
+         Load leapseconds file for time conversion.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( LSKNAM );
+
+         /.
+         Load EK.
+         ./
+         <a href="eklef_c.html">eklef_c</a> ( EKNAME, &amp;handle );
+
+         /.
+         Setup the query.  Parse the SELECT clause using
+         <a href="ekpsel_c.html">ekpsel_c</a>.
+         ./
+         query = &quot;Select IMAGE_NUMBER, IMAGE_ID, PLATFORM_CLOCK, IMAGE_TIME &quot;
+                 &quot;from VIKING_SEDR_DATA where IMAGE_NUMBER &lt; 25850000 &quot;
+                 &quot;order by IMAGE_NUMBER&quot;;
+
+         <a href="ekpsel_c.html">ekpsel_c</a> ( query,  ERRLEN, SPICE_EK_MAXQRY, SPICE_EK_MAXQRY,
+                    &amp;n,     xbegs,  xends,           xtypes,
+                    xclass, tabs,   cols,           &amp;error,          errmsg );
+
+         if ( error )
+         {
+            printf( &quot;%s\n&quot;, errmsg );
+         }
+         else
+         {
+
+            /.
+            Submit query to the EK query system.
+            ./
+            <a href="ekfind_c.html">ekfind_c</a> ( query, ERRLEN, &amp;nmrows, &amp;error, errmsg );
+
+            if ( error )
+            {
+
+               printf( &quot;%s\n&quot;, errmsg );
+
+            }
+            else
+            {
+
+               /.
+               Fetch the rows that matched the query.
+               ./
+               for ( row = 0; row &lt; nmrows; row++ )
+               {
+
+                  /.
+                  Fetch data from the ith row.
+                  ./
+                  printf( &quot; \n&quot; );
+                  printf( &quot;ROW =  %d\n&quot;, row );
+
+                  for ( colno = 0; colno &lt; n; colno++ )
+                  {
+
+                     /.
+                     Fetch the data from the jth selected
+                     column.
+                     ./
+                     if ( xclass[colno] == SPICE_EK_EXP_COL )
+                     {
+                        printf( &quot;  %s.%-14s: &quot;, tabs[colno], cols[colno] );
+                     }
+                     else
+                     {
+                        b  =  xbegs[colno];
+                        e  =  xends[colno];
+                        printf( &quot;ITEM =  (%.*s)&quot;, e-b, query+b );
+                     }
+
+                     if ( xtypes[colno] == SPICE_CHR )
+                     {
+                        <a href="ekgc_c.html">ekgc_c</a> ( colno,  row,   1, SPICE_EK_MAXQSTR,
+                                 cdata, &amp;null, &amp;found               );
+
+                        if ( null )
+                        {
+                           printf( &quot;&lt;Null&gt;\n&quot; );
+                        }
+                        else
+                        {
+                           printf( &quot;%s\n&quot;, cdata );
+                        }
+
+                     }
+                     else if ( xtypes[colno] == SPICE_DP )
+                     {
+                        <b>ekgd_c</b> ( colno, row, 1, &amp;ddata, &amp;null, &amp;found );
+
+                        if ( null )
+                        {
+                           printf( &quot;&lt;Null&gt;\n&quot; );
+                        }
+                        else
+                        {
+                           printf( &quot;%f\n&quot;, ddata );
+                        }
+
+                     }
+                     else if ( xtypes[colno] == SPICE_INT )
+                     {
+                        <a href="ekgi_c.html">ekgi_c</a> ( colno, row, 1, &amp;idata, &amp;null, &amp;found );
+
+                        if ( null )
+                        {
+                           printf( &quot;&lt;Null&gt;\n&quot; );
+                        }
+                        else
+                        {
+                           printf( &quot;%d\n&quot;, idata );
+                        }
+
+                     }
+                     else
+                     {
+
+                        /.
+                        The item is a time value.  Convert it
+                        to UTC for output.
+                        ./
+                        <b>ekgd_c</b> ( colno, row, 1, &amp;tdata, &amp;null, &amp;found );
+
+                        if ( null )
+                        {
+                           printf( &quot;&lt;Null&gt;\n&quot; );
+                        }
+                        else
+                        {
+                           <a href="et2utc_c.html">et2utc_c</a> ( tdata, &quot;C&quot;, 3, TIMLEN, utcstr );
+                           printf( &quot;%s\n&quot;, utcstr );
+                        }
+
+                     }
+
+                     /.
+                     We're done with the column having index `colno'.
+                     ./
+                  }
+
+                  /.
+                  We're done with the row having index `row'.
+                  ./
+               }
+
+               /.
+               We either processed the query or had an error.
+               ./
+            }
+
+            /.
+            We either parsed the SELECT clause or had an error.
+            ./
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      ROW =  0
+        VIKING_SEDR_DATA.IMAGE_NUMBER  : 25837050
+        VIKING_SEDR_DATA.IMAGE_ID      : 168C09
+        VIKING_SEDR_DATA.PLATFORM_CLOCK: 119.880000
+        VIKING_SEDR_DATA.IMAGE_TIME    : 1976 JUN 16 16:50:55.925
+
+      ROW =  1
+        VIKING_SEDR_DATA.IMAGE_NUMBER  : 25837051
+        VIKING_SEDR_DATA.IMAGE_ID      : 168C10
+        VIKING_SEDR_DATA.PLATFORM_CLOCK: 119.270000
+        VIKING_SEDR_DATA.IMAGE_TIME    : 1976 JUN 16 16:51:00.269
+
+      ROW =  2
+        VIKING_SEDR_DATA.IMAGE_NUMBER  : 25840344
+        VIKING_SEDR_DATA.IMAGE_ID      : 168C11
+        VIKING_SEDR_DATA.PLATFORM_CLOCK: 119.880000
+        VIKING_SEDR_DATA.IMAGE_TIME    : 1976 JUN 16 20:56:53.051
+
+      ROW =  3
+        VIKING_SEDR_DATA.IMAGE_NUMBER  : 25840345
+        VIKING_SEDR_DATA.IMAGE_ID      : 168C12
+        VIKING_SEDR_DATA.PLATFORM_CLOCK: 119.270000
+        VIKING_SEDR_DATA.IMAGE_TIME    : 1976 JUN 16 20:56:57.395
+
+      ROW =  4
+        VIKING_SEDR_DATA.IMAGE_NUMBER  : 25843638
+        VIKING_SEDR_DATA.IMAGE_ID      : 169C01
+        VIKING_SEDR_DATA.PLATFORM_CLOCK: 119.880000
+        VIKING_SEDR_DATA.IMAGE_TIME    : 1976 JUN 17 01:02:50.177
+
+      ROW =  5
+        VIKING_SEDR_DATA.IMAGE_NUMBER  : 25843639
+        VIKING_SEDR_DATA.IMAGE_ID      : 169C02
+        VIKING_SEDR_DATA.PLATFORM_CLOCK: 119.270000
+        VIKING_SEDR_DATA.IMAGE_TIME    : 1976 JUN 17 01:02:54.521
+
+      ROW =  6
+        VIKING_SEDR_DATA.IMAGE_NUMBER  : 25846934
+        VIKING_SEDR_DATA.IMAGE_ID      : 169C03
+        VIKING_SEDR_DATA.PLATFORM_CLOCK: 120.140000
+        VIKING_SEDR_DATA.IMAGE_TIME    : 1976 JUN 17 05:08:56.263
+
+      ROW =  7
+        VIKING_SEDR_DATA.IMAGE_NUMBER  : 25846935
+        VIKING_SEDR_DATA.IMAGE_ID      : 169C04
+        VIKING_SEDR_DATA.PLATFORM_CLOCK: 119.520000
+        VIKING_SEDR_DATA.IMAGE_TIME    : 1976 JUN 17 05:09:00.607
+
+      ROW =  8
+        VIKING_SEDR_DATA.IMAGE_NUMBER  : 25848026
+        VIKING_SEDR_DATA.IMAGE_ID      : 169C05
+        VIKING_SEDR_DATA.PLATFORM_CLOCK: 120.140000
+        VIKING_SEDR_DATA.IMAGE_TIME    : 1976 JUN 17 06:30:28.424
+
+      ROW =  9
+        VIKING_SEDR_DATA.IMAGE_NUMBER  : 25848030
+        VIKING_SEDR_DATA.IMAGE_ID      : 169C09
+        VIKING_SEDR_DATA.PLATFORM_CLOCK: 120.140000
+        VIKING_SEDR_DATA.IMAGE_TIME    : 1976 JUN 17 06:30:46.174
+
+      ROW =  10
+        VIKING_SEDR_DATA.IMAGE_NUMBER  : 25848032
+        VIKING_SEDR_DATA.IMAGE_ID      : 169C11
+        VIKING_SEDR_DATA.PLATFORM_CLOCK: 120.140000
+        VIKING_SEDR_DATA.IMAGE_TIME    : 1976 JUN 17 06:30:55.168
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.2.0, 02-AUG-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Added
+       complete code examples.
+
+   -CSPICE Version 1.1.1, 09-FEB-2003 (EDW)
+
+       Minor edit to correct typo in header.
+
+   -CSPICE Version 1.1.0, 09-JUL-1998 (NJB)
+
+       Bug fix: now uses local logical variable to capture the
+       error flag value returned by the underlying f2c'd routine.
+
+   -CSPICE Version 1.0.0, 27-MAR-1998 (NJB)
+
+       Based on SPICELIB Version 1.1.0, 07-JUL-1996 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   fetch element from double precision column entry
+</PRE>
+<h4>Link to routine ekgd_c source file <a href='../../../src/cspice/ekgd_c.c'>ekgd_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:05 2021</pre>
+
+</body>
+</html>
+

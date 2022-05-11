@@ -1,0 +1,456 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>dskn02_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>dskn02_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   dskn02_c ( DSK, type 2, compute normal vector for plate ) 
+
+   void dskn02_c ( SpiceInt               handle,
+                   ConstSpiceDLADescr   * dladsc,
+                   SpiceInt               plid,
+                   SpiceDouble            normal[3] )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Compute the unit normal vector for a specified plate from a type
+   2 DSK segment.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/das.html">DAS</a>
+   <a href="../req/dsk.html">DSK</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   DAS
+   DSK
+   FILES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   handle     I   DSK file handle.
+   dladsc     I   DLA descriptor.
+   plid       I   Plate ID.
+   normal     O   Plate's unit normal vector.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   handle      is the handle of a DSK file containing a type 2
+               segment from which data are to be fetched.
+
+   dladsc      is the DLA descriptor associated with the segment
+               from which data are to be fetched.
+
+   plid        is the plate ID. Plate IDs range from 1 to NP
+               (the number of plates).
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   normal      is the normal vector associated with the plate
+               designated by `plid'. The direction of `normal' is
+               determined by the order of the plate's vertices;
+               the vertices are presumed to be ordered in the
+               right-handed (counterclockwise) sense about the
+               normal direction. If the plate's vertices are
+               `v1', `v2', `v3', then `normal' points in the direction
+
+                  (v2 - v1) x ( v3 - v2 )
+
+               where &quot;x&quot; represents the cross product operator.
+
+               The vector `normal' is expressed in the body-fixed
+               reference frame of the segment designated by `dladsc'.
+               The center of this frame is the origin of the cartesian
+               coordinate system in which the vertices are expressed.
+               Note that the frame center need not coincide with the
+               central body of the segment. Units are km.
+
+               The vector has magnitude 1.
+
+               If an error occurs on the call, `normal' is undefined.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   See the header file
+
+      SpiceDLA.h
+
+   for declarations of DLA descriptor sizes and documentation of the
+   contents of DLA descriptors.
+
+   See the header file
+
+      SpiceDSK.h
+
+   for declarations of DSK descriptor sizes and documentation of the
+   contents of DSK descriptors.
+
+   See the header file
+
+      SpiceDSK.h
+
+   for declarations of DSK data type 2 (plate model) parameters.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the input handle is invalid, an error is signaled by a
+       routine in the call tree of this routine.
+
+   2)  If a file read error occurs, the error is signaled by a
+       routine in the call tree of this routine.
+
+   3)  If the input DLA descriptor is invalid, the effect of this
+       routine is undefined. The error *may* be diagnosed by
+       routines in the call tree of this routine, but there are no
+       guarantees.
+
+   4)  If `plid' is less than 1 or greater than the number of plates in
+       the segment, the error SPICE(INDEXOUTOFRANGE) is signaled by a
+       routine in the call tree of this routine.
+
+   5)  This routine does not check for linear independence of the
+       plate's edges. The plate model is assumed to be geometrically
+       valid.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See input argument `handle'.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Look up all the vertices associated with each plate
+      of the model contained in a specified type 2 segment. For each
+      of the first 5 plates, display the plate's vertices and normal
+      vector.
+
+      For this example, we'll show the context of this look-up:
+      opening the DSK file for read access, traversing a trivial,
+      one-segment list to obtain the segment of interest.
+
+
+      Example code begins here.
+
+
+      /.
+         Program dskn02_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main()
+      {
+         /.
+         Constants
+         ./
+         #define PBUFSIZ         10000
+         #define FILSIZ          256
+
+         /.
+         Local variables
+         ./
+         SpiceBoolean            found;
+
+         SpiceChar               dsk  [ FILSIZ ];
+
+         SpiceDLADescr           dladsc;
+
+         SpiceDouble             normal [3];
+         SpiceDouble             verts  [3][3];
+
+         SpiceInt                handle;
+         SpiceInt                i;
+         SpiceInt                j;
+         SpiceInt                n;
+         SpiceInt                np;
+         SpiceInt                nread;
+         SpiceInt                nv;
+         SpiceInt                nvtx;
+         SpiceInt                plates[PBUFSIZ][3];
+         SpiceInt                plix;
+         SpiceInt                remain;
+         SpiceInt                start;
+
+         /.
+         Prompt for name of DSK and open file for reading.
+         ./
+         <a href="prompt_c.html">prompt_c</a> ( &quot;Enter DSK name &gt; &quot;, FILSIZ, dsk );
+
+         <a href="dasopr_c.html">dasopr_c</a> ( dsk,    &amp;handle );
+
+         <a href="dlabfs_c.html">dlabfs_c</a> ( handle, &amp;dladsc, &amp;found );
+
+         if ( !found )
+         {
+            <a href="setmsg_c.html">setmsg_c</a> ( &quot;No segment found in file #.&quot; );
+            <a href="errch_c.html">errch_c</a>  ( &quot;#&quot;,  dsk                     );
+            <a href="sigerr_c.html">sigerr_c</a> ( &quot;SPICE(NOSEGMENT)&quot;            );
+         }
+
+         /.
+         Get segment vertex and plate counts.
+         ./
+         <a href="dskz02_c.html">dskz02_c</a> ( handle, &amp;dladsc, &amp;nv, &amp;np );
+
+         printf ( &quot;\n&quot;
+                  &quot;Number of vertices:  %d\n&quot;
+                  &quot;Number of plates:    %d\n&quot;,
+                  (int)nv,
+                  (int)np                           );
+
+         /.
+         Display the vertices of each of the first 5 plates.
+         ./
+         remain = <a href="mini_c.html">mini_c</a> ( 2, 5, np );
+         start  = 1;
+
+         while ( remain &gt; 0 )
+         {
+            /.
+            `nread' is the number of plates we&quot;ll read on this
+            loop pass.
+            ./
+            nread  = <a href="mini_c.html">mini_c</a> ( 2, PBUFSIZ, remain );
+
+            <a href="dskp02_c.html">dskp02_c</a> ( handle, &amp;dladsc, start, nread, &amp;n, plates );
+
+            for ( i = 0; i &lt; nread; i++ )
+            {
+               plix = start + i;
+
+               /.
+               Read the vertices of the current plate.
+               ./
+               for ( j = 0;  j &lt; 3;  j++ )
+               {
+                  <a href="dskv02_c.html">dskv02_c</a> ( handle, &amp;dladsc, plates[i][j],
+                             1,      &amp;nvtx,
+                             ( SpiceDouble(*)[3] )(verts[j])  );
+               }
+
+               /.
+               Display the vertices of the current plate:
+               ./
+               printf ( &quot;\n&quot;
+                        &quot; Plate number: %d\n&quot;
+                        &quot;    Vertex 1: ( %16.8e %16.8e %16.8e )\n&quot;
+                        &quot;    Vertex 2: ( %16.8e %16.8e %16.8e )\n&quot;
+                        &quot;    Vertex 3: ( %16.8e %16.8e %16.8e )\n&quot;,
+                        (int)plix,
+                        verts[0][0],  verts[0][1],  verts[0][2],
+                        verts[1][0],  verts[1][1],  verts[1][2],
+                        verts[2][0],  verts[2][1],  verts[2][2]   );
+
+               /.
+               Display the normal vector of the current plate:
+               ./
+               <b>dskn02_c</b> ( handle, &amp;dladsc, plix, normal );
+
+               printf( &quot;    Normal:   ( %16.8e %16.8e %16.8e )\n&quot;,
+                       normal[0], normal[1], normal[2]           );
+            }
+
+            start  = start  + nread;
+            remain = remain - nread;
+         }
+
+         /.
+         Close the kernel.  This isn't necessary in a stand-
+         alone program, but it's good practice in subroutines
+         because it frees program and system resources.
+         ./
+         <a href="dascls_c.html">dascls_c</a> ( handle );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, using the DSK file named phobos512.bds, the output
+      was:
+
+
+      Enter DSK name &gt; phobos512.bds
+
+      Number of vertices:  1579014
+      Number of plates:    3145728
+
+       Plate number: 1
+          Vertex 1: (  -6.77444000e+00   6.26815000e+00   6.01149000e+00 )
+          Vertex 2: (  -6.76238000e+00   6.25728000e+00   6.02556000e+00 )
+          Vertex 3: (  -6.75710000e+00   6.27754000e+00   6.02096000e+00 )
+          Normal:   (  -5.81973770e-01   3.21285613e-01   7.47048918e-01 )
+
+       Plate number: 2
+          Vertex 1: (  -6.77444000e+00   6.26815000e+00   6.01149000e+00 )
+          Vertex 2: (  -6.77973000e+00   6.24790000e+00   6.01610000e+00 )
+          Vertex 3: (  -6.76238000e+00   6.25728000e+00   6.02556000e+00 )
+          Normal:   (  -5.81456950e-01   3.21988310e-01   7.47148809e-01 )
+
+       Plate number: 3
+          Vertex 1: (  -6.77973000e+00   6.24790000e+00   6.01610000e+00 )
+          Vertex 2: (  -6.76768000e+00   6.23701000e+00   6.03019000e+00 )
+          Vertex 3: (  -6.76238000e+00   6.25728000e+00   6.02556000e+00 )
+          Normal:   (  -5.81597068e-01   3.22641957e-01   7.46757671e-01 )
+
+       Plate number: 4
+          Vertex 1: (  -6.77973000e+00   6.24790000e+00   6.01610000e+00 )
+          Vertex 2: (  -6.78499000e+00   6.22762000e+00   6.02070000e+00 )
+          Vertex 3: (  -6.76768000e+00   6.23701000e+00   6.03019000e+00 )
+          Normal:   (  -5.83129010e-01   3.20560704e-01   7.46459237e-01 )
+
+       Plate number: 5
+          Vertex 1: (  -6.78499000e+00   6.22762000e+00   6.02070000e+00 )
+          Vertex 2: (  -6.77299000e+00   6.21674000e+00   6.03482000e+00 )
+          Vertex 3: (  -6.76768000e+00   6.23701000e+00   6.03019000e+00 )
+          Normal:   (  -5.83664048e-01   3.23060196e-01   7.44962005e-01 )
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   See -Exceptions section.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.2, 10-AUG-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Updated
+       code example to reduce the number of plates whose vertices are
+       shown on output and to remove unnecessary include files.
+
+   -CSPICE Version 1.0.1, 27-JAN-2016 (NJB)
+
+       Edit to example program to use &quot;%d&quot; with explicit casts
+       to int for printing SpiceInts with printf.
+
+       Updated header -Detailed_Output and -Index_Entries
+       sections.
+
+   -CSPICE Version 1.0.0, 03-JUN-2010 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   compute normal vector for a type 2 DSK plate
+   compute normal vector from DSK type 2 plate id
+</PRE>
+<h4>Link to routine dskn02_c source file <a href='../../../src/cspice/dskn02_c.c'>dskn02_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:04 2021</pre>
+
+</body>
+</html>
+

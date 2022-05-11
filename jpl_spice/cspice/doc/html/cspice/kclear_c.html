@@ -1,0 +1,323 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>kclear_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>kclear_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   kclear_c ( Keeper clear ) 
+
+   void kclear_c ( void )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Clear the KEEPER subsystem: unload all kernels, clear the kernel
+   pool, and re-initialize the subsystem. Existing watches on kernel
+   variables are retained.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   KERNEL
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   None.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   None. This routine operates by side effects. See -Particulars
+   below.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If an error occurs when setting a kernel pool watch or
+       checking watched variables, the error is signaled by a routine
+       in the call tree of this routine.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See -Particulars.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This entry point allows you re-initialize the KEEPER system with
+   a single call. The KEEPER system is the kernel management system
+   underlying the set of CSPICE APIs
+
+      <a href="furnsh_c.html">furnsh_c</a>
+      <a href="ktotal_c.html">ktotal_c</a>
+      <a href="kdata_c.html">kdata_c</a>
+      <a href="kinfo_c.html">kinfo_c</a>
+      <b>kclear_c</b>
+      <a href="unload_c.html">unload_c</a>
+
+   This routine unloads all kernels from their kernel-type-specific
+   kernel management subsystems (SPKBSR, CKBSR, etc.), clears the
+   kernel pool, clears KEEPER's internal file database, and re-sets
+   the watch status for the kernel variables used to load kernels
+   via meta-kernels. As a side effect of clearing the kernel pool,
+   all watched variables are marked as updated. Note that clearing
+   the kernel pool does not delete watchers.
+
+   This capability, though implemented in Fortran, is particularly
+   relevant to SPICE implementations such as Icy, for which the
+   state of the KEEPER system persists after any Icy-based IDL
+   script is run. Successive runs of Icy-based scripts may perform
+   in unexpected ways when scripts access data loaded during runs of
+   previous scripts.
+
+   Cleaning up after such programs using explicit <a href="unload_c.html">unload_c</a> commands is
+   tedious and error-prone. One call to this routine sets the
+   KEEPER system to its initial state, preventing unintentional
+   interaction between scripts via KEEPER's state.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Load a meta-kernel containing three kernels, and count the
+      number of files in the kernel pool before and after calling
+      cspice_kclear.
+
+      Use the meta-kernel shown below to load the required SPICE
+      kernels.
+
+
+         KPL/MK
+
+         File name: kclear_ex1.tm
+
+         This meta-kernel is intended to support operation of SPICE
+         example programs. The kernels shown here should not be
+         assumed to contain adequate or correct versions of data
+         required by SPICE-based user applications.
+
+         In order for an application to use this meta-kernel, the
+         kernels referenced here must be present in the user's
+         current working directory.
+
+         The names and contents of the kernels referenced
+         by this meta-kernel are as follows:
+
+            File name                     Contents
+            ---------                     --------
+            de421.bsp                     Planetary ephemeris
+            pck00008.tpc                  Planet orientation and
+                                          radii
+            naif0009.tls                  Leapseconds
+
+
+         \begindata
+
+            KERNELS_TO_LOAD = ( 'de421.bsp',
+                                'pck00008.tpc',
+                                'naif0009.tls'  )
+
+         \begintext
+
+         End of meta-kernel
+
+
+      Example code begins here.
+
+
+      /.
+         Program kclear_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      SpiceInt        count;
+
+      int main()
+      {
+         /.
+         Load the meta kernel.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a>( &quot;kclear_ex1.tm&quot; );
+
+         /.
+         Count the number of loaded kernel files.
+         ./
+         <a href="ktotal_c.html">ktotal_c</a> ( &quot;ALL&quot;, &amp;count );
+
+         printf ( &quot;Count of loaded kernels before &quot;
+                  &quot;<b>kclear_c</b> call: %d\n&quot;, count );
+
+         /.
+         Clear the KEEPER system, retrieve the number of loaded
+         after the clear.
+         ./
+         <b>kclear_c</b> ( );
+
+         <a href="ktotal_c.html">ktotal_c</a> ( &quot;ALL&quot;, &amp;count );
+
+         printf ( &quot;Count of loaded kernels after &quot;
+                  &quot;<b>kclear_c</b> call : %d\n&quot;, count );
+
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Count of loaded kernels before <b>kclear_c</b> call: 4
+      Count of loaded kernels after <b>kclear_c</b> call : 0
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  Calling this routine will wipe out any kernel pool data
+       inserted via the CSPICE API routines to put data into the
+       kernel pool (<a href="pcpool_c.html">pcpool_c</a>, <a href="pdpool_c.html">pdpool_c</a> and <a href="pipool_c.html">pipool_c</a>).
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.2, 10-AUG-2021 (JDR)
+
+       Edited -Examples section to comply with NAIF standard. Added
+       complete example.
+
+       Improved -Restrictions section.
+
+   -CSPICE Version 1.0.1, 01-JUL-2014 (NJB)
+
+       The header -Particulars section was updated to more
+       completely describe the effect of this routine on
+       kernel pool watchers. Header section order was corrected.
+
+   -CSPICE Version 1.0.0, 15-NOV-2006 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   Re-initialize the keeper system
+   Clear the keeper system
+   Unload all kernels
+</PRE>
+<h4>Link to routine kclear_c source file <a href='../../../src/cspice/kclear_c.c'>kclear_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:08 2021</pre>
+
+</body>
+</html>
+

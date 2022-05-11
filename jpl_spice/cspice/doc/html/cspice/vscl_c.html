@@ -1,0 +1,285 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>vscl_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>vscl_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   vscl_c ( Vector scaling, 3 dimensions ) 
+
+   void vscl_c ( SpiceDouble        s,
+                 ConstSpiceDouble   v1[3],
+                 SpiceDouble        vout[3] )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Multiply a scalar and a double precision 3-dimensional vector.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   VECTOR
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   s          I   Scalar to multiply a vector.
+   v1         I   Vector to be multiplied.
+   vout       O   Product vector, s * v1.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   s           is a double precision scalar used to multiply the vector
+               `v1'.
+
+   v1          is a double precision 3-dimensional vector, which is to
+               be scaled by `s'.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   vout        is a double precision 3-dimensional vector containing
+               the product of the scalar with the vector `v1'. `vout' may
+               overwrite `v1'.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   Error free.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   For each value of the index `i' from 0 to 2, this function
+   performs the following multiplication
+
+      vout[i] = s * v1[i];
+
+   No error checking is performed to guard against numeric overflow
+   or underflow.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Define a sets of scalar double precision values and use them
+      to scale a given 3-dimensional vector.
+
+
+      Example code begins here.
+
+
+      /.
+         Program vscl_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define SETSIZ       3
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble          vout   [3];
+
+         SpiceInt             i;
+
+         /.
+         Define the set of scalars and the input vector.
+         ./
+         SpiceDouble          s      [SETSIZ] = { 3.0, 0.0, -1.0 };
+
+         SpiceDouble          v1     [3]      = { 1.0, 2.0, -3.0 };
+
+         printf( &quot;Input vector :  %5.1f %5.1f %5.1f\n&quot;,
+                                   v1[0], v1[1], v1[2] );
+         printf( &quot;\n&quot; );
+
+         /.
+         Calculate product of each scalar and `v1'.
+         ./
+         for ( i = 0; i &lt; SETSIZ; i++ )
+         {
+
+            <b>vscl_c</b> ( s[i], v1, vout );
+
+            printf( &quot;Scale factor :  %5.1f\n&quot;, s[i] );
+            printf( &quot;Output vector:  %5.1f %5.1f %5.1f\n&quot;,
+                              vout[0], vout[1], vout[2] );
+            printf( &quot;\n&quot; );
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Input vector :    1.0   2.0  -3.0
+
+      Scale factor :    3.0
+      Output vector:    3.0   6.0  -9.0
+
+      Scale factor :    0.0
+      Output vector:    0.0   0.0  -0.0
+
+      Scale factor :   -1.0
+      Output vector:   -1.0  -2.0   3.0
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  The user is responsible for insuring that no floating point
+       overflow occurs from multiplying `s' by any component of `v1'. No
+       error recovery or reporting scheme is incorporated in this
+       function.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   W.M. Owen           (JPL)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.1, 23-JUL-2020 (JDR)
+
+       Edited the header to comply with NAIF standard. Added complete
+       code example based on existing example.
+
+   -CSPICE Version 1.1.0, 22-OCT-1998 (NJB)
+
+       Made input vector const.
+
+   -CSPICE Version 1.0.0, 08-FEB-1998 (EDW) (WMO)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   3-dimensional vector scaling
+</PRE>
+<h4>Link to routine vscl_c source file <a href='../../../src/cspice/vscl_c.c'>vscl_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:15 2021</pre>
+
+</body>
+</html>
+

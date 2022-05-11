@@ -1,0 +1,454 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>raxisa_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>raxisa_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   raxisa_c ( Rotation axis of a matrix ) 
+
+   void raxisa_c ( ConstSpiceDouble     matrix[3][3],
+                   SpiceDouble          axis  [3],
+                   SpiceDouble        * angle       )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Compute the axis of the rotation given by an input matrix
+   and the angle of the rotation about that axis.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/rotation.html">ROTATION</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   ANGLE
+   MATRIX
+   ROTATION
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   matrix     I   3x3 rotation matrix in double precision.
+   axis       O   Axis of the rotation.
+   angle      O   Angle through which the rotation is performed.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   matrix      is a 3x3 rotation matrix in double precision.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   axis        is a unit vector pointing along the axis of the rotation.
+               In other words, `axis' is a unit eigenvector of the input
+               matrix, corresponding to the eigenvalue 1. If the input
+               matrix is the identity matrix, `axis' will be the vector
+               (0, 0, 1). If the input rotation is a rotation by pi
+               radians, both `axis' and -axis may be regarded as the
+               axis of the rotation.
+
+   angle       is the angle between `v' and matrix*v for any non-zero
+               vector `v' orthogonal to `axis'.  `angle' is given in
+               radians. The angle returned will be in the range from 0
+               to pi radians.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the input matrix is not a rotation matrix (where a fairly
+       loose tolerance is used to check this), an error is signaled
+       by a routine in the call tree of this routine.
+
+   2)  If the input matrix is the identity matrix, this routine
+       returns an angle of 0.0, and an axis of ( 0.0, 0.0, 1.0 ).
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   Every rotation matrix has an axis `a' such any vector `v'
+   parallel to that axis satisfies the equation
+
+      v = matrix * v
+
+   This routine returns a unit vector `axis' parallel to the axis of
+   the input rotation matrix. Moreover for any vector `w' orthogonal
+   to the axis of the rotation, the two vectors
+
+       axis,
+       w x (matrix*w)
+
+      (where &quot;x&quot; denotes the cross product operation)
+
+   will be positive scalar multiples of one another (at least
+   to within the ability to make such computations with double
+   precision arithmetic, and under the assumption that `matrix'
+   does not represent a rotation by zero or pi radians).
+
+   The angle returned will be the angle between `w' and matrix*w
+   for any vector orthogonal to `axis'.
+
+   If the input matrix is a rotation by 0 or pi radians some
+   choice must be made for the axis returned. In the case of
+   a rotation by 0 radians, `axis' is along the positive z-axis.
+   In the case of a rotation by 180 degrees, two choices are
+   possible. The choice made this routine is unspecified.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for these examples may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Given an axis and an angle of rotation about that axis,
+      determine the rotation matrix. Using this matrix as input,
+      compute the axis and angle of rotation, and verify that
+      the later are equivalent by subtracting the original matrix
+      and the one resulting from using the computed axis and angle
+      of rotation on the <a href="axisar_c.html">axisar_c</a> call.
+
+
+      Example code begins here.
+
+
+      /.
+         Program raxisa_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local variables
+         ./
+         SpiceDouble          angle;
+         SpiceDouble          angout;
+         SpiceDouble          axout  [3];
+         SpiceDouble          r      [3][3];
+         SpiceDouble          rout   [3][3];
+
+         SpiceInt             i;
+
+         /.
+         Define an axis and an angle for rotation.
+         ./
+         SpiceDouble          axis   [3] = { 1.0, 2.0, 3.0 };
+
+         angle = 0.1 * <a href="twopi_c.html">twopi_c</a> ( );
+
+         /.
+         Determine the rotation matrix.
+         ./
+         <a href="axisar_c.html">axisar_c</a> ( axis, angle, r );
+
+         /.
+         Now calculate the rotation axis and angle based on the
+         matrix as input.
+         ./
+         <b>raxisa_c</b> ( r, axout, &amp;angout );
+
+         printf( &quot;Axis : %11.8f %11.8f %11.8f\n&quot;,
+                                     axout[0], axout[1], axout[2] );
+         printf( &quot;Angle: %11.8f\n&quot;, angout );
+         printf( &quot; \n&quot; );
+
+         /.
+         Now input the `axout' and `angout' to <a href="axisar_c.html">axisar_c</a> to
+         compare against the original rotation matrix `r'.
+         ./
+         printf( &quot;Difference between input and output matrices:\n&quot; );
+
+         <a href="axisar_c.html">axisar_c</a> ( axout, angout, rout );
+
+         for ( i = 0; i &lt; 3; i++ )
+         {
+
+            printf( &quot;%20.16f %19.16f %19.16f\n&quot;,
+                    rout[i][0] - r[i][0],
+                    rout[i][1] - r[i][1],
+                    rout[i][2] - r[i][2] );
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Axis :  0.26726124  0.53452248  0.80178373
+      Angle:  0.62831853
+
+      Difference between input and output matrices:
+       -0.0000000000000001  0.0000000000000000  0.0000000000000000
+        0.0000000000000001 -0.0000000000000001  0.0000000000000000
+        0.0000000000000000  0.0000000000000001  0.0000000000000000
+
+
+      Note, the zero matrix is accurate to round-off error. A
+      numerical demonstration of equality.
+
+
+   2) This routine can be used to numerically approximate the
+      instantaneous angular velocity vector of a rotating object.
+
+      Suppose that R(t) is the rotation matrix whose columns
+      represent the inertial pointing vectors of the body-fixed axes
+      of an object at time t.
+
+      Then the angular velocity vector points along the vector given
+      by:
+
+                              T
+          limit  axis( R(t+h)R )
+          h--&gt;0
+
+      And the magnitude of the angular velocity at time t is given
+      by:
+
+                             T
+         d angle ( R(t+h)R(t) )
+         ----------------------   at   h = 0
+                   dh
+
+      This code example computes the instantaneous angular velocity
+      vector of the Earth at 2000 Jan 01 12:00:00 TDB.
+
+      Use the PCK kernel below to load the required triaxial
+      ellipsoidal shape model and orientation data for the Earth.
+
+         pck00010.tpc
+
+
+      Example code begins here.
+
+
+      /.
+         Program raxisa_ex2
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local variables
+         ./
+         SpiceDouble          angle;
+         SpiceDouble          angvel [3];
+         SpiceDouble          axis   [3];
+         SpiceDouble          infrot [3][3];
+         SpiceDouble          h;
+         SpiceDouble          rt     [3][3];
+         SpiceDouble          rth    [3][3];
+         SpiceDouble          t;
+
+         /.
+         Load a PCK file containing a triaxial
+         ellipsoidal shape model and orientation
+         data for the Earth.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( &quot;pck00010.tpc&quot; );
+
+         /.
+         Load time into the double precision variable `t'
+         and the delta time (1 ms) into the double precision
+         variable `h'
+         ./
+         t = 0.0;
+         h = 1e-3;
+
+         /.
+         Get the rotation matrices from IAU_EARTH to J2000
+         at `t' and t+h.
+         ./
+         <a href="pxform_c.html">pxform_c</a> ( &quot;IAU_EARTH&quot;, &quot;J2000&quot;, t,   rt  );
+         <a href="pxform_c.html">pxform_c</a> ( &quot;IAU_EARTH&quot;, &quot;J2000&quot;, t+h, rth );
+
+         /.
+         Compute the infinitesimal rotation R(t+h)R(t)**T
+         ./
+         <a href="mxmt_c.html">mxmt_c</a> ( rth, rt, infrot );
+
+         /.
+         Compute the `axis' and `angle' of the infinitesimal rotation
+         ./
+         <b>raxisa_c</b> ( infrot, axis, &amp;angle );
+
+         /.
+         Scale `axis' to get the angular velocity vector
+         ./
+         <a href="vscl_c.html">vscl_c</a> ( angle/h, axis, angvel );
+
+         /.
+         Output the results.
+         ./
+         printf( &quot;Instantaneous angular velocity vector:\n&quot; );
+         printf( &quot;%14.10f %14.10f %14.10f\n&quot;,
+                 angvel[0], angvel[1], angvel[2] );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Instantaneous angular velocity vector:
+        0.0000000000   0.0000000000   0.0000729212
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  If the input matrix is not a rotation matrix but is close enough
+       to pass the tests this routine performs on it, no error will be
+       signaled, but the results may have poor accuracy.
+
+   2)  The input matrix is taken to be an object that acts on (rotates)
+       vectors---it is not regarded as a coordinate transformation. To
+       find the axis and angle of a coordinate transformation, input
+       the transpose of that matrix to this routine.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   W.L. Taber          (JPL)
+   F.S. Turner         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.2, 05-JUL-2021 (JDR)
+
+       Edited the header to comply with NAIF standard.
+       Added complete code examples.
+
+   -CSPICE Version 1.0.1, 05-JAN-2005 (NJB) (WLT) (FST)
+
+       Various header updates were made to reflect changes
+       made to the underlying SPICELIB Fortran code.
+       Miscellaneous header corrections were made as well.
+
+   -CSPICE Version 1.0.0, 31-MAY-1999 (WLT) (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   rotation axis of a matrix
+</PRE>
+<h4>Link to routine raxisa_c source file <a href='../../../src/cspice/raxisa_c.c'>raxisa_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:11 2021</pre>
+
+</body>
+</html>
+

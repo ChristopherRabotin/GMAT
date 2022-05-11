@@ -1,0 +1,288 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>vprjp_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>vprjp_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   vprjp_c ( Vector projection onto plane ) 
+
+   void vprjp_c ( ConstSpiceDouble    vin   [3],
+                  ConstSpicePlane   * plane,
+                  SpiceDouble         vout  [3] )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Project a vector onto a specified plane, orthogonally.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/planes.html">PLANES</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   GEOMETRY
+   MATH
+   PLANE
+   VECTOR
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   vin        I   Vector to be projected.
+   plane      I   A SPICE plane onto which `vin' is projected.
+   vout       O   Vector resulting from projection.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   vin         is a 3-vector that is to be orthogonally projected
+               onto a specified plane.
+
+   plane       is a SPICE plane that represents the geometric
+               plane onto which `vin' is to be projected.
+
+               The normal vector component of a SPICE plane has
+               unit length.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   vout        is the vector resulting from the orthogonal
+               projection of `vin' onto `plane'. `vout' is the closest
+               point in the specified plane to `vin'.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the normal vector of the input plane does not have unit
+       length (allowing for round-off error), the error
+       SPICE(NONUNITNORMAL) is signaled by a routine in the call tree
+       of this routine.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   Projecting a vector `vin' orthogonally onto a plane can be thought
+   of as finding the closest vector in the plane to `vin'. This
+   &quot;closest vector&quot; always exists; it may be coincident with the
+   original vector.
+
+   Two related routines are <a href="vprjpi_c.html">vprjpi_c</a>, which inverts an orthogonal
+   projection of a vector onto a plane, and <a href="vproj_c.html">vproj_c</a>, which projects
+   a vector orthogonally onto another vector.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Find the closest point in the ring plane of a planet to a
+      spacecraft located at a point (in body-fixed coordinates).
+
+
+      Example code begins here.
+
+
+      /.
+         Program vprjp_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+         /.
+         Local variables.
+         ./
+         SpiceDouble          proj   [3];
+         SpicePlane           ringpl;
+
+         /.
+         Set the spacecraft location and define the normal
+         vector as the normal to the equatorial plane, and
+         the origin at the body/ring center.
+         ./
+         SpiceDouble          scpos  [3] = { -29703.16955,
+                                             879765.72163,
+                                             -137280.21757 };
+
+         SpiceDouble          norm   [3] = { 0.0, 0.0, 1.0 };
+
+         SpiceDouble          orig   [3] = { 0.0, 0.0, 0.0 };
+
+         /.
+         Create the plane structure.
+         ./
+         <a href="nvp2pl_c.html">nvp2pl_c</a> ( norm, orig, &amp;ringpl );
+
+         /.
+         Project the position vector onto the ring plane.
+         ./
+         <b>vprjp_c</b> ( scpos, &amp;ringpl, proj );
+
+         printf( &quot;Projection of S/C position onto ring plane:\n&quot; );
+         printf( &quot;%17.5f %16.5f %16.5f\n&quot;, proj[0], proj[1], proj[2] );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Projection of S/C position onto ring plane:
+           -29703.16955     879765.72163          0.00000
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  It is recommended that the input plane be created by one of
+       the CSPICE routines
+
+          <a href="nvc2pl_c.html">nvc2pl_c</a> ( Normal vector and constant to plane )
+          <a href="nvp2pl_c.html">nvp2pl_c</a> ( Normal vector and point to plane    )
+          <a href="psv2pl_c.html">psv2pl_c</a> ( Point and spanning vectors to plane )
+
+       In any case the input plane must have a unit length normal
+       vector and a plane constant consistent with the normal
+       vector.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   [1]  G. Thomas and R. Finney, &quot;Calculus and Analytic Geometry,&quot;
+        7th Edition, Addison Wesley, 1988.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   B.V. Semenov        (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.2, 24-AUG-2021 (JDR) (NJB)
+
+       Edited the header to comply with NAIF standard. Added complete
+       code example.
+
+       Added entry #1 to -Exceptions section, and entry #1 to -Restrictions.
+
+   -CSPICE Version 1.0.1, 01-FEB-2017 (BVS)
+
+       Typo fix: pnv2pl_c -&gt; <a href="nvp2pl_c.html">nvp2pl_c</a>.
+
+   -CSPICE Version 1.0.0, 05-MAR-1999 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   vector projection onto plane
+</PRE>
+<h4>Link to routine vprjp_c source file <a href='../../../src/cspice/vprjp_c.c'>vprjp_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:15 2021</pre>
+
+</body>
+</html>
+

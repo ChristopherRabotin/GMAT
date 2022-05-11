@@ -1,0 +1,604 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>dskopn_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>dskopn_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   dskopn_c ( DSK, open new file ) 
+
+   void dskopn_c ( ConstSpiceChar  * fname,
+                   ConstSpiceChar  * ifname,
+                   SpiceInt          ncomch,
+                   SpiceInt       *  handle )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Open a new DSK file for subsequent write operations.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/das.html">DAS</a>
+   <a href="../req/dsk.html">DSK</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   DAS
+   DSK
+   FILES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   fname      I   Name of a DSK file to be opened.
+   ifname     I   Internal file name.
+   ncomch     I   Number of comment characters to allocate.
+   handle     O   Handle assigned to the opened DSK file.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   fname       is the name of a new DSK file to be created. The
+               file will be left opened for write access.
+
+   ifname      is the internal file name for the new file. The name
+               may contain as many as 60 characters. All characters
+               of `ifname' should be printing characters (ASCII codes
+               32-126 decimal). This name should uniquely identify
+               the file.
+
+   ncomch      is the number of comment characters to allocate.
+               Allocating comment characters at file creation time
+               may reduce the likelihood of having to expand the
+               comment area later.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   handle      is the file handle associated with the file. This
+               handle is used to identify the file in subsequent
+               calls to other DSK routines.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the input filename is blank, an error is signaled by a
+       routine in the call tree of this routine. No file will be
+       created.
+
+   2)  If the specified file cannot be opened without exceeding the
+       maximum allowed number of open DAS files, an error is signaled
+       by a routine in the call tree of this routine. No file will be
+       created.
+
+   3)  If the file cannot be opened properly, an error is signaled by
+       a routine in the call tree of this routine. No file will be
+       created.
+
+   4)  If the initial records in the file cannot be written, an error
+       is signaled by a routine in the call tree of this routine. No
+       file will be created.
+
+   5)  If no logical units are available, an error is signaled by a
+       routine in the call tree of this routine. No file will be
+       created.
+
+   6)  If the internal file name contains nonprinting characters
+       (ASCII codes decimal 0-31 and 127-255), an error is signaled
+       by a routine in the call tree of this routine. No file will be
+       created.
+
+   7)  If the number of comment characters allocated `ncomch' is
+       negative, an error is signaled by a routine in the call
+       tree of this routine. No file will be created.
+
+   8)  If any of the `fname' or `ifname' input string pointers is
+       null, the error SPICE(NULLPOINTER) is signaled.
+
+   9)  If any of the `fname' or `ifname' input strings has zero
+       length, the error SPICE(EMPTYSTRING) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See argument FNAME.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   DSK files are built using the DLA low-level format and
+   the DAS architecture; DLA files are a specialized type of DAS
+   file in which data are organized as a doubly linked list of
+   segments. Each segment's data belong to contiguous components of
+   character, double precision, and integer type.
+
+   This routine creates a new DSK file and sets the type of the
+   file to the mnemonic code passed to it.
+
+   DSK files created by this routine have initialized file records.
+   The ID word in a DSK file record has the form
+
+      DAS/DSK
+
+   where the characters following the slash are supplied by the
+   caller of this routine.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Create a three-segment DSK file using plate model data for
+      Phobos. Use latitudinal, rectangular, and planetodetic
+      coordinates in the respective segments. This is not a
+      realistic example, but it serves to demonstrate use of
+      the supported coordinate systems.
+
+      Use the DSK kernel below to provide, for simplicity, the
+      input plate and vertex data. The selected input file has one
+      segment.
+
+         phobos_3_3.bds
+
+
+      Example code begins here.
+
+
+      /.
+         Program dskopn_ex1
+
+         Example program for <a href="dskw02_c.html">dskw02_c</a>, <a href="dskmi2_c.html">dskmi2_c</a>, and <a href="dskrb2_c.html">dskrb2_c</a>
+
+         Create a three-segment DSK file using plate model data for
+         Phobos. Use latitudinal, rectangular, and planetodetic
+         coordinates in the respective segments.
+
+         For simplicity, use an existing DSK file to provide the
+         input plate and vertex data. The selected input file has one
+         segment.
+
+            Version 1.0.0 22-JAN-2016 (NJB)
+
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main()
+      {
+
+         /.
+         Local constants
+         ./
+         #define FILSIZ          256
+         #define LNSIZE           81
+         #define NCOR              4
+         #define NSEG              3
+         #define NAMLEN           21
+
+         /.
+         Local variables
+         ./
+
+         /.
+         Below, we declare large arrays static to avoid stack
+         overflow problems.
+         ./
+
+         SpiceBoolean            found;
+
+         SpiceChar               cornam [ NCOR ][ NAMLEN ] =
+                                 { &quot;radius&quot;,
+                                   &quot;Z-coordinate&quot;,
+                                   &quot;Z-coordinate&quot;,
+                                   &quot;altitude&quot; };
+
+         SpiceChar             * dsk;
+         SpiceChar             * frame;
+         SpiceChar             * indsk;
+
+         SpiceDLADescr           dladsc;
+
+         SpiceDouble             corpar [ SPICE_DSK_NSYPAR ];
+         SpiceDouble             f;
+         SpiceDouble             finscl;
+         SpiceDouble             first;
+         SpiceDouble             last;
+         SpiceDouble             mncor1;
+         SpiceDouble             mncor2;
+         SpiceDouble             mncor3;
+         SpiceDouble             mxcor1;
+         SpiceDouble             mxcor2;
+         SpiceDouble             mxcor3;
+         SpiceDouble             re;
+         SpiceDouble             rp;
+
+         /.
+         Note: the values of SPICE_DSK02_MAXVRT and
+         SPICE_DSK02_MAXPLT declared in SpiceDSK.h,
+         integer spatial index dimension SPICE_DSK02_SPAISZ,
+         and the workspace dimension SPICE_DSK02_MAXCEL
+         are very large. Smaller buffers can be used for most
+         applications.
+         ./
+         static SpiceDouble      spaixd [ SPICE_DSK02_SPADSZ ];
+         static SpiceDouble      vrtces [ SPICE_DSK02_MAXVRT ][3];
+
+         SpiceInt                center;
+         SpiceInt                corscl;
+         SpiceInt                corsys;
+         SpiceInt                dclass;
+         SpiceInt                handle;
+         SpiceInt                i;
+         SpiceInt                inhan;
+         SpiceInt                np;
+         SpiceInt                nv;
+         static SpiceInt         plates [ SPICE_DSK02_MAXPLT ][3];
+         SpiceInt                segno;
+         static SpiceInt         spaixi [ SPICE_DSK02_SPAISZ ];
+         SpiceInt                spaisz;
+         SpiceInt                surfid;
+         SpiceInt                voxpsz;
+         SpiceInt                voxlsz;
+         static SpiceInt         work   [ SPICE_DSK02_MAXCEL ][2];
+         SpiceInt                worksz;
+
+
+         /.
+         Assign names of input and output DSK files.
+         ./
+         indsk = &quot;phobos_3_3.bds&quot;;
+         dsk   = &quot;phobos_3_3_3seg.bds&quot;;
+
+         /.
+         Open input DSK for read access; find first segment.
+         ./
+         <a href="dasopr_c.html">dasopr_c</a> ( indsk, &amp;inhan );
+         <a href="dlabfs_c.html">dlabfs_c</a> ( inhan, &amp;dladsc, &amp;found );
+
+         /.
+         Fetch vertices and plates from input DSK file.
+
+         Note that vertex and plate indices are 1-based.
+         ./
+         printf ( &quot;Reading input data...\n&quot; );
+
+         <a href="dskv02_c.html">dskv02_c</a> ( inhan, &amp;dladsc, 1, SPICE_DSK02_MAXVRT,
+                    &amp;nv,   vrtces                           );
+         <a href="dskp02_c.html">dskp02_c</a> ( inhan, &amp;dladsc, 1, SPICE_DSK02_MAXPLT,
+                    &amp;np,   plates                           );
+
+         printf ( &quot;Done.\n&quot; );
+
+
+         /.
+         Set input array sizes required by <a href="dskmi2_c.html">dskmi2_c</a>.
+         ./
+         voxpsz = SPICE_DSK02_MAXVXP;
+         voxlsz = SPICE_DSK02_MXNVLS;
+         worksz = SPICE_DSK02_MAXCEL;
+         spaisz = SPICE_DSK02_SPAISZ;
+
+         /.
+         Set fine and coarse voxel scales. (These usually
+         need to determined by experimentation.)
+         ./
+         finscl = 5.0;
+         corscl = 4;
+
+         /.
+         Open a new DSK file.
+         ./
+         <b>dskopn_c</b> ( dsk, dsk, 0, &amp;handle );
+
+         /.
+         Create three segments and add them to the file.
+         ./
+         for ( segno = 1;  segno &lt;= NSEG;  segno++ )
+         {
+            /.
+            Create spatial index. We won't generate a
+            vertex-plate mapping, so we set the flag
+            for creating this map to &quot;false.&quot;
+            ./
+            printf ( &quot;Creating segment %d\n&quot;, (int)segno );
+            printf ( &quot;Creating spatial index...\n&quot; );
+
+            <a href="dskmi2_c.html">dskmi2_c</a> ( nv,     vrtces,     np,     plates,
+                       finscl, corscl,     worksz, voxpsz,
+                       voxlsz, SPICEFALSE, spaisz, work,
+                       spaixd, spaixi                    );
+
+            printf ( &quot;Done.\n&quot; );
+
+            /.
+            Set up inputs describing segment attributes:
+
+            - Central body: Phobos
+            - Surface ID code: user's choice.
+              We use the segment number here.
+            - Data class: general (arbitrary) shape
+            - Body-fixed reference frame
+            - Time coverage bounds (TBD)
+            ./
+            center = 401;
+            surfid = segno;
+            dclass = SPICE_DSK_GENCLS;
+            frame  = &quot;IAU_PHOBOS&quot;;
+
+            first = -50 * <a href="jyear_c.html">jyear_c</a>();
+            last  =  50 * <a href="jyear_c.html">jyear_c</a>();
+
+            /.
+            Set the coordinate system and coordinate system
+            bounds based on the segment index.
+
+            Zero out the coordinate parameters to start.
+            ./
+            for ( i = 0;  i &lt; SPICE_DSK_NSYPAR;  i++ )
+            {
+               corpar[i] = 0.0;
+            }
+
+            if ( segno == 1 )
+            {
+               /.
+               Use planetocentric latitudinal coordinates. Set
+               the longitude and latitude bounds.
+               ./
+               corsys = SPICE_DSK_LATSYS;
+
+               mncor1 = -<a href="pi_c.html">pi_c</a>();
+               mxcor1 =  <a href="pi_c.html">pi_c</a>();
+               mncor2 = -<a href="pi_c.html">pi_c</a>()/2;
+               mxcor2 =  <a href="pi_c.html">pi_c</a>()/2;
+            }
+            else if ( segno == 2 )
+            {
+
+               /.
+               Use rectangular coordinates. Set the
+               X and Y bounds.
+
+               The bounds shown here were derived from
+               the plate data. They lie slightly outside
+               of the range spanned by the plates.
+               ./
+               corsys = SPICE_DSK_RECSYS;
+
+               mncor1 = -1.3;
+               mxcor1 =  1.31;
+               mncor2 = -1.21;
+               mxcor2 =  1.2;
+            }
+            else
+            {
+               /.
+               Set the coordinate system to planetodetic.
+               ./
+               corsys    = SPICE_DSK_PDTSYS;
+
+               mncor1    = -<a href="pi_c.html">pi_c</a>();
+               mxcor1    =  <a href="pi_c.html">pi_c</a>();
+               mncor2    = -<a href="pi_c.html">pi_c</a>()/2;
+               mxcor2    =  <a href="pi_c.html">pi_c</a>()/2;
+
+               /.
+               We'll use equatorial and polar radii from
+               pck00010.tpc. These normally would be fetched
+               at run time, but for simplicity, we'll use
+               hard-coded values.
+               ./
+               re        = 13.0;
+               rp        =  9.1;
+               f         = ( re - rp ) / re;
+
+               corpar[0] = re;
+               corpar[1] = f;
+            }
+            /.
+            Compute plate model radius bounds.
+            ./
+            printf ( &quot;Computing %s bounds of plate set...\n&quot;,
+                     cornam[corsys-1]                        );
+
+            <a href="dskrb2_c.html">dskrb2_c</a> ( nv,     vrtces, np,      plates,
+                       corsys, corpar, &amp;mncor3, &amp;mxcor3 );
+
+            printf ( &quot;Done.\n&quot; );
+
+            /.
+            Write the segment to the file.
+            ./
+            printf ( &quot;Writing segment...\n&quot; );
+
+            <a href="dskw02_c.html">dskw02_c</a> ( handle,
+                       center, surfid, dclass, frame,  corsys,
+                       corpar, mncor1, mxcor1, mncor2, mxcor2,
+                       mncor3, mxcor3, first,  last,   nv,
+                       vrtces, np,     plates, spaixd, spaixi );
+
+            printf ( &quot;Done.\n&quot; );
+         }
+
+         /.
+         Segregate the data records in the DSK file and
+         close the file.
+         ./
+         printf ( &quot;Segregating and closing DSK file...\n&quot; );
+
+         <a href="dskcls_c.html">dskcls_c</a> ( handle, SPICETRUE );
+
+         printf ( &quot;Done.\n&quot; );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Reading input data...
+      Done.
+      Creating segment 1
+      Creating spatial index...
+      Done.
+      Computing radius bounds of plate set...
+      Done.
+      Writing segment...
+      Done.
+      Creating segment 2
+      Creating spatial index...
+      Done.
+      Computing Z-coordinate bounds of plate set...
+      Done.
+      Writing segment...
+      Done.
+      Creating segment 3
+      Creating spatial index...
+      Done.
+      Computing altitude bounds of plate set...
+      Done.
+      Writing segment...
+      Done.
+      Segregating and closing DSK file...
+      Done.
+
+
+      Note that after run completion, a new DSK exists in the output
+      directory.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.1, 09-JUL-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Added
+       complete code example based on example in <a href="dskmi2_c.html">dskmi2_c</a>.
+
+   -CSPICE Version 1.0.0, 23-JAN-2016 (NJB)
+
+       Corrected spelling errors in comments.
+
+       DSKLIB_C Version 1.0.0, 12-FEB-2010 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   open a new DSK file
+   open a new DSK file with write access
+</PRE>
+<h4>Link to routine dskopn_c source file <a href='../../../src/cspice/dskopn_c.c'>dskopn_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:05 2021</pre>
+
+</body>
+</html>
+

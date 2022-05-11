@@ -1,0 +1,300 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>nthwd_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>nthwd_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   nthwd_c ( n'th word in a character string ) 
+
+   void nthwd_c  ( ConstSpiceChar    * string,
+                   SpiceInt            nth,
+                   SpiceInt            worlen,
+                   SpiceChar         * word,
+                   SpiceInt          * loc    )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Return the nth word in a character string, and its location
+   in the string.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   CHARACTER
+   PARSING
+   SEARCH
+   WORD
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   string     I   Input character string.
+   nth        I   Index of the word to be returned.
+   worlen     I   Maximum length of output string `word'.
+   word       O   The `nth' word in `string'.
+   loc        O   Location of `word' in `string'.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   string      is a null-terminated string to be parsed. Each word of this
+               string is a maximal sequence of consecutive non-blank, non-null
+               characters.
+
+   nth         is the index of the word to be returned. (Zero for the first
+               word, one for the second, and so on.)
+
+   worlen      is the maximum allowed length of the output string `word'.
+               This length must be large enough to hold the output string
+               plus the null-terminator character. If the output string
+               is expected to have N characters, `worlen' should be at
+               least N+1.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   word        is the n'th word in `string'. If `string' is blank or empty,
+               or `nth' is non-positive or too large, `word' is empty.
+
+               If the n'th word is longer than worlen-1 characters, it will be
+               truncated on the right.
+
+               `word' may overwrite `string'.
+
+   loc         is the location of `word' in `string'. (That is, `word'
+               begins at string[loc]). If `string' is blank or empty, or
+               `nth' is nonpositive or too large, `loc' is -1.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the declared length of `word' is not large enough to contain
+       the `nth' word in `string', the word will be truncated on the
+       right.
+
+   2)  If the `string' input string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   3)  If the `word' output string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   4)  If the `word' output string has length less than two
+       characters, the error SPICE(STRINGTOOSHORT) is signaled, since
+       the output string is too short to contain one character of
+       output data plus a null terminator.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   <b>nthwd_c</b>, like <a href="nextwd_c.html">nextwd_c</a>, is useful primarily for parsing input commands
+   consisting of one or more words, where a word is defined to be a
+   maximal sequence of consecutive non-blank, non-null characters. Each word is
+   bounded on both sides by a blank character, or by the start or end
+   of the input string. Successive calls to <a href="nextwd_c.html">nextwd_c</a> allow the calling
+   routine to neatly parse and process one word at a time.
+
+   The chief difference between the two routines is that
+   <b>nthwd_c</b> allows the calling routine to access the words making
+   up the input string in random order. (<a href="nextwd_c.html">nextwd_c</a> allows only
+   sequential access.)
+
+   <b>nthwd_c</b> may be more efficient than <a href="nextwd_c.html">nextwd_c</a>, since <b>nthwd_c</b> doesn't
+   update an output string consisting of the remaining, unparsed
+   string.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Given a character string, get the n'th word within, and the
+      word's location.
+
+
+      Example code begins here.
+
+
+      /.
+         Program nthwd_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define STRING       &quot; Now is the time,   for all good men     to &quot; \
+                              &quot;come.&quot;
+         #define WRDSZ        6
+
+         /.
+         Local variables.
+         ./
+         SpiceChar            word   [WRDSZ];
+         SpiceInt             loc;
+         SpiceInt             nth;
+
+         for ( nth = -1; nth &lt;= 11; nth++ )
+         {
+            <b>nthwd_c</b> ( STRING, nth-1, WRDSZ, word, &amp;loc );
+            printf( &quot;Word # %2d  is &lt;%s&gt;, starting at position %2d\n&quot;,
+                                             (int)nth, word, (int)loc );
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Word # -1  is &lt;&gt;, starting at position -1
+      Word #  0  is &lt;&gt;, starting at position -1
+      Word #  1  is &lt;Now&gt;, starting at position  1
+      Word #  2  is &lt;is&gt;, starting at position  5
+      Word #  3  is &lt;the&gt;, starting at position  8
+      Word #  4  is &lt;time,&gt;, starting at position 12
+      Word #  5  is &lt;for&gt;, starting at position 20
+      Word #  6  is &lt;all&gt;, starting at position 24
+      Word #  7  is &lt;good&gt;, starting at position 28
+      Word #  8  is &lt;men&gt;, starting at position 33
+      Word #  9  is &lt;to&gt;, starting at position 41
+      Word # 10  is &lt;come.&gt;, starting at position 44
+      Word # 11  is &lt;&gt;, starting at position -1
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.0, 01-NOV-2021 (JDR)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   n'th word in a character_string
+</PRE>
+<h4>Link to routine nthwd_c source file <a href='../../../src/cspice/nthwd_c.c'>nthwd_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:10 2021</pre>
+
+</body>
+</html>
+

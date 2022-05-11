@@ -1,0 +1,424 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>dascls_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>dascls_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   dascls_c ( DAS, close file ) 
+
+   void dascls_c ( SpiceInt handle )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Close a DAS file.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/das.html">DAS</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   DAS
+   FILES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   handle     I   Handle of an open DAS file.
+   FTSIZE     P   Maximum number of simultaneously open DAS files.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   handle      is the file handle of an open DAS file.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   None.
+
+   See -Particulars for a description of the effect of this routine.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   All parameters described here are declared in the CSPICE
+   header file SpiceDAS.h. See that file for parameter values.
+
+   SPICE_DAS_FTSIZE
+
+            is the maximum number of DAS files that can be
+            open at any one time.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   Error free.
+
+   1)  If `handle' is not the handle of an open DAS file, no error
+       is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See the description of input argument `handle' in -Detailed_Input.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine provides the primary recommended method of closing an
+   open DAS file. It is also possible to close a DAS file without
+   segregating it by calling daswbr_ and dasllc_. Closing a DAS file by
+   any other means may cause the DAS mechanism for keeping track of
+   which files are open to fail. Closing a DAS file that has been
+   opened for writing by any other means may result in the production
+   of something other than a DAS file.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for these examples may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Open a new DAS file, add 100 double precision numbers
+      to it, and then close the file.
+
+      Example code begins here.
+
+
+      /.
+         Program dascls_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main()
+      {
+         #define  NMAX           100
+
+         SpiceChar             * fname;
+         SpiceChar             * ftype;
+         SpiceChar             * ifname;
+
+         SpiceDouble             ddata  [ NMAX ];
+
+         SpiceInt                handle;
+         SpiceInt                i;
+         SpiceInt                n;
+         SpiceInt                ncomch;
+
+
+         /.
+         We'll give the file the same internal file name
+         as the file's actual name.  We don't require any
+         comment records.
+         ./
+         fname  = &quot;dascls_ex1.das&quot;;
+         ftype  = &quot;TEST&quot;;
+         ifname = fname;
+         ncomch = 0;
+
+         printf ( &quot;Opening the DAS file for writing...\n&quot; );
+         <a href="dasonw_c.html">dasonw_c</a> ( fname, ftype, fname, ncomch, &amp;handle );
+
+
+         for ( i = 0;  i &lt; NMAX;  i++ )
+         {
+             ddata[i] = (SpiceDouble)i;
+         }
+
+         n = NMAX;
+
+         printf ( &quot;Adding the double precision numbers...\n&quot; );
+         <a href="dasadd_c.html">dasadd_c</a> ( handle, n, ddata );
+
+         printf ( &quot;Closing the DAS file...\n&quot; );
+         <b>dascls_c</b> ( handle );
+
+         printf( &quot;All ok.\n&quot; );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Opening the DAS file for writing...
+      Adding the double precision numbers...
+      Closing the DAS file...
+      All ok.
+
+
+      Note that after run completion, a new DAS file exists in
+      the output directory.
+
+   2) Dump several parameters from the first DLA segment of a DSK
+      file. Note that DSK files are based on DAS. The segment is
+      assumed to be of type 2.
+
+
+      Example code begins here.
+
+
+      /.
+         Program dascls_ex2
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main()
+      {
+         /.
+         Constants
+         ./
+         #define FILSIZ          256
+
+         /.
+         Local variables
+         ./
+         SpiceBoolean            found;
+
+         SpiceChar               dsk  [ FILSIZ ];
+
+         SpiceDLADescr           dladsc;
+
+         SpiceDouble             voxori [3];
+         SpiceDouble             voxsiz;
+         SpiceDouble             vtxbds [3][2];
+
+         SpiceInt                cgscal;
+         SpiceInt                handle;
+         SpiceInt                np;
+         SpiceInt                nv;
+         SpiceInt                nvxtot;
+         SpiceInt                vgrext [3];
+         SpiceInt                voxnpl;
+         SpiceInt                voxnpt;
+         SpiceInt                vtxnpl;
+
+         /.
+         Prompt for the name of DSK to read.
+         ./
+         <a href="prompt_c.html">prompt_c</a> ( &quot;Enter DSK name &gt; &quot;, FILSIZ, dsk );
+
+         /.
+         Open the DSK file for read access. We use the
+         DAS-level interface for this function.
+         ./
+         <a href="dasopr_c.html">dasopr_c</a> ( dsk, &amp;handle );
+
+         /.
+         Begin a forward search through the kernel. In
+         this example, it's a very short search.
+         ./
+         <a href="dlabfs_c.html">dlabfs_c</a> ( handle, &amp;dladsc, &amp;found );
+
+         if ( !found )
+         {
+            <a href="setmsg_c.html">setmsg_c</a> ( &quot;No segment found in file #.&quot; );
+            <a href="errch_c.html">errch_c</a>  ( &quot;#&quot;,  dsk                     );
+            <a href="sigerr_c.html">sigerr_c</a> ( &quot;SPICE(NOSEGMENT)&quot;            );
+         }
+
+         /.
+         If we made it this far, DLADSC is the
+         DLA descriptor of the first segment.
+         Read and display type 2 bookkeeping data.
+         ./
+         <a href="dskb02_c.html">dskb02_c</a> ( handle,  &amp;dladsc, &amp;nv,    &amp;np,    &amp;nvxtot,
+                    vtxbds,  &amp;voxsiz, voxori, vgrext, &amp;cgscal,
+                    &amp;vtxnpl, &amp;voxnpt, &amp;voxnpl                 );
+
+         printf ( &quot;\n&quot;
+                  &quot;Number of vertices:                 %d\n&quot;
+                  &quot;Number of plates:                   %d\n&quot;
+                  &quot;Number of voxels:                   %d\n&quot;,
+                  (int)nv,
+                  (int)np,
+                  (int)nvxtot                                       );
+
+         printf ( &quot;Vertex bounds in X direction (km):  %f : %f\n&quot;
+                  &quot;Vertex bounds in Y direction (km):  %f : %f\n&quot;
+                  &quot;Vertex bounds in Z direction (km):  %f : %f\n&quot;,
+                  vtxbds[0][0], vtxbds[0][1],
+                  vtxbds[1][0], vtxbds[1][1],
+                  vtxbds[2][0], vtxbds[2][1]                        );
+
+         printf ( &quot;Voxel edge length (km):             %f\n&quot;
+                  &quot;Voxel grid origin (km):           ( %f %f %f )\n&quot;
+                  &quot;Voxel grid extents:                 %d %d %d\n&quot;
+                  &quot;Coarse voxel grid scale:            %d\n&quot;
+                  &quot;Size of vertex-plate list:          %d\n&quot;
+                  &quot;Size of voxel-plate pointer array:  %d\n&quot;
+                  &quot;Size of voxel-plate list:           %d\n&quot;,
+                  voxsiz,
+                  voxori[0], voxori[1], voxori[2],
+                  (int)vgrext[0], (int)vgrext[1], (int)vgrext[2],
+                  (int)cgscal,
+                  (int)vtxnpl,
+                  (int)voxnpt,
+                  (int)voxnpl                                       );
+
+         /.
+         Close the kernel. This isn't necessary in a stand-
+         alone program, but it's good practice in subroutines
+         because it frees program and system resources.
+         ./
+         <b>dascls_c</b> ( handle );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, using the DSK file named phobos512.bds,
+      the output was:
+
+
+      Enter DSK name &gt; phobos512.bds
+
+      Number of vertices:                 1579014
+      Number of plates:                   3145728
+      Number of voxels:                   11914500
+      Vertex bounds in X direction (km):  -13.440030 : 12.762800
+      Vertex bounds in Y direction (km):  -11.520650 : 12.061140
+      Vertex bounds in Z direction (km):  -9.570780 : 10.055000
+      Voxel edge length (km):             0.104248
+      Voxel grid origin (km):           ( -14.073520 -11.988554 -9.903588 )
+      Voxel grid extents:                 260 235 195
+      Coarse voxel grid scale:            5
+      Size of vertex-plate list:          11010050
+      Size of voxel-plate pointer array:  1151500
+      Size of voxel-plate list:           6419540
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   K.R. Gehringer      (JPL)
+   W.L. Taber          (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.1, 10-AUG-2021 (JDR)
+
+       Edited the header to comply with NAIF standard.
+
+       Updated code example #1 to produce logging information and replace
+       f2c'ed by CSPICE APIs. Added code example #2 using example from
+       <a href="dskb02_c.html">dskb02_c</a>.
+
+   -CSPICE Version 1.0.0, 05-OCT-2006 (NJB) (KRG) (WLT)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   close an open DAS file
+</PRE>
+<h4>Link to routine dascls_c source file <a href='../../../src/cspice/dascls_c.c'>dascls_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:03 2021</pre>
+
+</body>
+</html>
+

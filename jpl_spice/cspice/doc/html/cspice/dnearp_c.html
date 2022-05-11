@@ -1,0 +1,516 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>dnearp_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>dnearp_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   dnearp_c ( Derivative of near point ) 
+
+   void dnearp_c ( ConstSpiceDouble    state  [6],
+                   SpiceDouble         a,
+                   SpiceDouble         b,
+                   SpiceDouble         c,
+                   SpiceDouble         dnear  [6],
+                   SpiceDouble         dalt   [2],
+                   SpiceBoolean      * found      )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Compute the state (position and velocity) of an ellipsoid surface
+   point nearest to the position component of a specified state.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   DERIVATIVE
+   ELLIPSOID
+   GEOMETRY
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   state      I   State of an object in body-fixed coordinates.
+   a          I   Length of semi-axis parallel to X-axis.
+   b          I   Length of semi-axis parallel to Y-axis.
+   c          I   Length on semi-axis parallel to Z-axis.
+   dnear      O   State of the nearest point on the ellipsoid.
+   dalt       O   Altitude and derivative of altitude.
+   found      O   Flag that indicates whether `dnear' is degenerate.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   state       is a 6-vector giving the position and velocity of some
+               object in the body-fixed coordinates of the ellipsoid.
+
+               In body-fixed coordinates, the semi-axes of the ellipsoid
+               are aligned with the x, y, and z-axes of the coordinate
+               system.
+
+   a           is the length of the semi-axis of the ellipsoid that is
+               parallel to the X-axis of the body-fixed coordinate
+               system.
+
+   b           is the length of the semi-axis of the ellipsoid that is
+               parallel to the Y-axis of the body-fixed coordinate
+               system.
+
+   c           is the length of the semi-axis of the ellipsoid that is
+               parallel to the Z-axis of the body-fixed coordinate
+               system.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   dnear       is the 6-vector giving the position and velocity in
+               body-fixed coordinates of the point on the ellipsoid,
+               closest to the object whose position and velocity are
+               represented by `state'.
+
+               While the position component of `dnear' is always
+               meaningful, the velocity component of `dnear' will be
+               meaningless if `found' if SPICEFALSE (See the discussion of
+               the meaning of `found' below.)
+
+
+   dalt        is an array of two double precision numbers. The first
+               gives the altitude of `state' with respect to the
+               ellipsoid. The second gives the rate of change of the
+               altitude.
+
+               Note that the rate of change of altitude is meaningful if
+               and only if `found' is SPICETRUE (See the discussion of the
+               meaning of `found' below.)
+
+   found       is a logical flag indicating whether or not the velocity
+               portion of `dnear' is meaningful. If the velocity portion
+               of `dnear' is meaningful `found' will be returned with a
+               value of SPICETRUE. Under very rare circumstance the velocity
+               of the near point is undefined. Under these circumstances
+               `found' will be returned with the value SPICEFALSE.
+
+               `found' can be SPICEFALSE only for states whose position
+               components are inside the ellipsoid and then only at
+               points on a special surface contained inside the
+               ellipsoid called the focal set of the ellipsoid.
+
+               `a' point in the interior is on this special surface only
+               if there are two or more points on the ellipsoid that are
+               closest to it. The origin is such a point and the only
+               such point if the ellipsoid is a sphere. For
+               non-spheroidal ellipsoids the focal set contains small
+               portions of the planes of symmetry of the ellipsoid.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the axes are non-positive, an error is signaled by a
+       routine in the call tree of this routine.
+
+   2)  If an object is passing through the interior of an ellipsoid
+       there are points at which there is more than 1 point on the
+       ellipsoid that is closest to the object. At these points the
+       velocity of the near point is undefined. (See the description
+       of the output variable `found').
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   If an object is moving relative to some triaxial body along a
+   trajectory c(t) then there is a companion trajectory n(t) that
+   gives the point on the ellipsoid that is closest to c(t) as a
+   function of `t'. The instantaneous position and velocity of c(t),
+   `state', are sufficient to compute the instantaneous position and
+   velocity of n(t), `dnear'.
+
+   This routine computes `dnear' from `state'. In addition it returns the
+   altitude and rate of change of altitude.
+
+   Note that this routine can compute `dnear' for `state' outside, on,
+   or inside the ellipsoid. However, the velocity of `dnear' and
+   derivative of altitude do not exist for a &quot;small&quot; set of `state'
+   in the interior of the ellipsoid. See the discussion of `found'
+   above for a description of this set of points.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for these examples may differ across
+   platforms. The results depend on the SPICE kernels used as input,
+   the compiler and supporting libraries, and the machine specific
+   arithmetic implementation.
+
+   1) Suppose you wish to compute the velocity of the ground track
+      of a satellite as it passes over a location on Mars and that
+      the moment of passage has been previously determined. (We
+      assume that the spacecraft is close enough to the surface that
+      light time corrections do not matter.)
+
+      Use the meta-kernel shown below to load the required SPICE
+      kernels.
+
+
+         KPL/MK
+
+         File: dnearp_ex1.tm
+
+         This meta-kernel is intended to support operation of SPICE
+         example programs. The kernels shown here should not be
+         assumed to contain adequate or correct versions of data
+         required by SPICE-based user applications.
+
+         In order for an application to use this meta-kernel, the
+         kernels referenced here must be present in the user's
+         current working directory.
+
+         The names and contents of the kernels referenced
+         by this meta-kernel are as follows:
+
+            File name                        Contents
+            ---------                        --------
+            pck00010.tpc                     Planet orientation and
+                                             radii
+            naif0012.tls                     Leapseconds
+            de430.bsp                        Planetary ephemeris
+            mar097.bsp                       Mars satellite ephemeris
+            mro_psp4_ssd_mro95a.bsp          MRO ephemeris
+
+         \begindata
+
+            KERNELS_TO_LOAD = ( 'pck00010.tpc',
+                                'naif0012.tls',
+                                'de430.bsp',
+                                'mar097.bsp',
+                                'mro_psp4_ssd_mro95a.bsp' )
+
+         \begintext
+
+         End of meta-kernel
+
+
+      Example code begins here.
+
+
+      /.
+         Program dnearp_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters
+         ./
+         #define BODYNM       &quot;MARS&quot;
+         #define META         &quot;dnearp_ex1.tm&quot;
+
+         /.
+         Local variables
+         ./
+         SpiceDouble          a;
+         SpiceDouble          b;
+         SpiceDouble          c;
+         SpiceDouble          dalt   [2];
+         SpiceDouble          dnear  [6];
+         SpiceDouble          et;
+         SpiceDouble          lt;
+         SpiceDouble          radii  [3];
+         SpiceDouble          state  [6];
+         SpiceDouble          gtvel  [3];
+
+         SpiceInt             dim;
+
+         SpiceBoolean         found;
+
+         /.
+         Load kernel files via the meta-kernel.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( META );
+
+         /.
+         Convert the TDB input time string to seconds past
+         J2000, TDB.
+         ./
+         <a href="str2et_c.html">str2et_c</a> ( &quot;2007 SEP 30 00:00:00 TDB&quot;, &amp;et );
+
+         /.
+         First get the axes of the body.
+         ./
+         <a href="bodvrd_c.html">bodvrd_c</a> ( BODYNM, &quot;RADII&quot;, 3, &amp;dim, radii );
+         <a href="vupack_c.html">vupack_c</a> ( radii, &amp;a, &amp;b, &amp;c );
+
+         /.
+         Get the geometric state of the spacecraft with
+         respect to BODYNM in the body-fixed reference frame
+         at `et' and compute the state of the sub-spacecraft point.
+         ./
+         <a href="spkezr_c.html">spkezr_c</a> ( &quot;MRO&quot;, et, &quot;IAU_MARS&quot;, &quot;NONE&quot;, BODYNM, state, &amp;lt );
+         <b>dnearp_c</b> ( state, a, b, c, dnear, dalt, &amp;found );
+
+         if ( found )
+         {
+
+            /.
+            `dnear' contains the state of the subspacecraft point.
+            ./
+            <a href="vequ_c.html">vequ_c</a> ( dnear+3, gtvel );
+
+            printf( &quot;Ground-track velocity (km/s): %9.6f %9.6f %9.6f\n&quot;,
+                                            gtvel[0], gtvel[1], gtvel[2] );
+            printf( &quot;Ground-track speed    (km/s): %9.6f\n&quot;,
+                                           <a href="vnorm_c.html">vnorm_c</a> ( gtvel ) );
+         }
+         else
+         {
+            printf( &quot;DNEAR is degenerate.\n&quot; );
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Ground-track velocity (km/s):  0.505252  1.986553 -2.475506
+      Ground-track speed    (km/s):  3.214001
+
+
+   2) Suppose you wish to compute the one-way doppler shift of a
+      radar mounted on board a spacecraft as it passes over some
+      region. Moreover, assume that for your purposes it is
+      sufficient to neglect effects of atmosphere, topography and
+      antenna pattern for the sake of this computation.
+
+      Use the meta-kernel from Example 1 above.
+
+
+      Example code begins here.
+
+
+      /.
+         Program dnearp_ex2
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters
+         ./
+         #define BODYNM       &quot;MARS&quot;
+         #define META         &quot;dnearp_ex1.tm&quot;
+
+         /.
+         Define the central frequency of the radar,
+         in megahertz.
+         ./
+         #define RCFRQ        20.0
+
+         /.
+         Local variables
+         ./
+         SpiceDouble          a;
+         SpiceDouble          b;
+         SpiceDouble          c;
+         SpiceDouble          dalt   [2];
+         SpiceDouble          dnear  [6];
+         SpiceDouble          et;
+         SpiceDouble          lt;
+         SpiceDouble          radii  [3];
+         SpiceDouble          shift;
+         SpiceDouble          state  [6];
+
+         SpiceInt             dim;
+
+         SpiceBoolean         found;
+
+         /.
+         Load kernel files via the meta-kernel.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( META );
+
+         /.
+         Convert the TDB input time string to seconds past
+         J2000, TDB.
+         ./
+         <a href="str2et_c.html">str2et_c</a> ( &quot;2007 SEP 30 00:00:00 TDB&quot;, &amp;et );
+
+         /.
+         First get the axes of the body.
+         ./
+         <a href="bodvrd_c.html">bodvrd_c</a> ( BODYNM, &quot;RADII&quot;, 3, &amp;dim, radii );
+         <a href="vupack_c.html">vupack_c</a> ( radii, &amp;a, &amp;b, &amp;c );
+
+         /.
+         Get the geometric state of the spacecraft with
+         respect to BODYNM in the body-fixed reference frame
+         at `et' and compute the state of the sub-spacecraft point.
+         ./
+         <a href="spkezr_c.html">spkezr_c</a> ( &quot;MRO&quot;, et, &quot;IAU_MARS&quot;, &quot;NONE&quot;, BODYNM, state, &amp;lt );
+         <b>dnearp_c</b> ( state, a, b, c, dnear, dalt, &amp;found );
+
+         if ( found )
+         {
+
+            /.
+            The change in frequency is given by multiplying `shift'
+            times the carrier frequency
+            ./
+            shift = ( dalt[1] / <a href="clight_c.html">clight_c</a>() );
+            printf( &quot;Central frequency (MHz): %19.16f\n&quot;, RCFRQ );
+            printf( &quot;Doppler shift     (MHz): %19.16f\n&quot;, RCFRQ * shift );
+         }
+         else
+         {
+            printf( &quot;DNEAR is degenerate.\n&quot; );
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Central frequency (MHz): 20.0000000000000000
+      Doppler shift     (MHz): -0.0000005500991159
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.0, 01-NOV-2021 (JDR)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   Velocity of the nearest point on an ellipsoid
+   Rate of change of the altitude over an ellipsoid
+   Derivative of altitude over an ellipsoid
+   Velocity of a ground track
+</PRE>
+<h4>Link to routine dnearp_c source file <a href='../../../src/cspice/dnearp_c.c'>dnearp_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:04 2021</pre>
+
+</body>
+</html>
+

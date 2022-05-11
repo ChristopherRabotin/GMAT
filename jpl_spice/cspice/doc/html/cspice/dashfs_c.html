@@ -1,0 +1,537 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>dashfs_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>dashfs_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   dashfs_c ( DAS, handle to file summary ) 
+
+   void dashfs_c ( SpiceInt            handle,
+                   SpiceInt          * nresvr,
+                   SpiceInt          * nresvc,
+                   SpiceInt          * ncomr,
+                   SpiceInt          * ncomc,
+                   SpiceInt          * free,
+                   SpiceInt            lastla [3],
+                   SpiceInt            lastrc [3],
+                   SpiceInt            lastwd [3] )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Return a file summary for a specified DAS file.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/das.html">DAS</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   DAS
+   FILES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   handle     I   Handle of a DAS file.
+   nresvr     O   Number of reserved records in file.
+   nresvc     O   Number of characters in use in reserved rec. area.
+   ncomr      O   Number of comment records in file.
+   ncomc      O   Number of characters in use in comment area.
+   free       O   Number of first free record.
+   lastla     O   Array of last logical addresses for each data type.
+   lastrc     O   Record number of last descriptor of each data type.
+   lastwd     O   Word number of last descriptor of each data type.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   handle      is the handle of a previously opened DAS file. The file
+               may be open for read or write access.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   nresvr      is the number of reserved records in a specified DAS
+               file.
+
+   nresvc      is the number of characters in use in the reserved record
+               area of a specified DAS file.
+
+   ncomr       is the number of comment records in a specified DAS file.
+
+   ncomc       is the number of characters in use in the comment area of
+               a specified DAS file.
+
+   free        is the 1-based record number of the first free record in
+               a specified DAS file.
+
+   lastla      is an array containing the highest current 1-based logical
+               addresses, in the specified DAS file, of data of
+               character, double precision, and integer types, in that
+               order.
+
+   lastrc      is an array containing the 1-based record numbers, in the
+               specified DAS file, of the directory records containing
+               the current last descriptors of clusters of character,
+               double precision, and integer data records, in that
+               order.
+
+   lastwd      is an array containing the 1-based word indices, within
+               the respective descriptor records identified by the
+               elements of `lastrc', of the current last descriptors of
+               clusters of character, double precision, and integer data
+               records, in that order.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   See header file SpiceDAS.h for declarations and descriptions of
+   parameters used throughout the DAS system.
+
+   SPICE_DAS_CHARDT,
+   SPICE_DAS_DPDT,
+   SPICE_DAS_INTDT
+
+               are data type specifiers which indicate SpiceChar,
+               SpiceDouble, and SpiceInt respectively. These
+               parameters are used in all DAS routines that require a
+               data type specifier.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the specified handle does not belong to any file that is
+       currently known to be open, the error SPICE(DASNOSUCHHANDLE)
+       is signaled by a routine in the call tree of this routine.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   The quantities
+
+      nresvr
+      nresvc
+      ncomr
+      ncomc
+      free
+      lastla
+      lastrc
+      lastwd
+
+   define the &quot;state&quot; of a DAS file, and in particular the state of
+   the directory structure of the file. This information is needed by
+   other DAS routines, but application programs will usually have no
+   need for it. The one exception is the array of &quot;last&quot; logical
+   addresses `lastla': these addresses indicate how many words of data
+   of each type are contained in the specified DAS file. The elements
+   of `lastla' can be conveniently retrieved by calling <a href="daslla_c.html">daslla_c</a>.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Create a DAS file containing 10 integers, 5 double precision
+      numbers, and 4 characters. Print the summary of the file and
+      dump its contents.
+
+
+      Example code begins here.
+
+
+      /.
+         Program dashfs_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &lt;string.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define FNAME        &quot;dashfs_ex1.das&quot;
+         #define LINLEN       2
+
+         /.
+         Local variables.
+         ./
+         ConstSpiceChar     * ifname;
+         ConstSpiceChar     * type;
+         SpiceChar            line   [LINLEN];
+         SpiceChar            linstr [LINLEN+1];
+
+         SpiceDouble          dbli;
+         SpiceDouble          x;
+
+         SpiceInt             first;
+         SpiceInt             free;
+         SpiceInt             handle;
+         SpiceInt             i;
+         SpiceInt             last;
+         SpiceInt             lastla [3];
+         SpiceInt             lastrc [3];
+         SpiceInt             lastwd [3];
+         SpiceInt             n;
+         SpiceInt             ncomc;
+         SpiceInt             ncomr;
+         SpiceInt             nread;
+         SpiceInt             nresvc;
+         SpiceInt             nresvr;
+         SpiceInt             remain;
+
+         /.
+         Open a new DAS file. Reserve no records for comments.
+         ./
+         type   = &quot;TEST&quot;;
+         ifname = &quot;TEST.DAS/NAIF/NJB/11-NOV-1992-20:12:20&quot;;
+
+         <a href="dasonw_c.html">dasonw_c</a> ( FNAME, type, ifname, 0, &amp;handle );
+
+         /.
+         Obtain the file summary.
+         ./
+         <b>dashfs_c</b> ( handle, &amp;nresvr, &amp;nresvc,
+                    &amp;ncomr, &amp;ncomc,  &amp;free,
+                    lastla, lastrc,  lastwd );
+
+         /.
+         Print the summary of the new file.
+         ./
+         printf( &quot;Summary before adding data:\n&quot; );
+         printf( &quot;   Number of reserved records     : %d\n&quot;, (int)nresvr );
+         printf( &quot;   Characters in reserved records : %d\n&quot;, (int)nresvc );
+         printf( &quot;   Number of comment records      : %d\n&quot;, (int)ncomr );
+         printf( &quot;   Characters in comment area     : %d\n&quot;, (int)ncomc );
+         printf( &quot;   Number of first free record    : %d\n&quot;, (int)free );
+         printf( &quot;   Last logical character address : %d\n&quot;,
+                               (int)lastla[SPICE_DAS_CHARDT] );
+         printf( &quot;   Last logical d.p. address      : %d\n&quot;,
+                                 (int)lastla[SPICE_DAS_DPDT] );
+         printf( &quot;   Last logical integer address   : %d\n&quot;,
+                                (int)lastla[SPICE_DAS_INTDT] );
+         printf( &quot;   Last character descriptor      : %d\n&quot;,
+                               (int)lastrc[SPICE_DAS_CHARDT] );
+         printf( &quot;   Last d.p descriptor            : %d\n&quot;,
+                                 (int)lastrc[SPICE_DAS_DPDT] );
+         printf( &quot;   Last integer descriptor        : %d\n&quot;,
+                                (int)lastrc[SPICE_DAS_INTDT] );
+         printf( &quot;   Character word position in desc: %d\n&quot;,
+                               (int)lastwd[SPICE_DAS_CHARDT] );
+         printf( &quot;   d.p. word position in desc     : %d\n&quot;,
+                                 (int)lastwd[SPICE_DAS_DPDT] );
+         printf( &quot;   Integer word position in desc  : %d\n&quot;,
+                                (int)lastwd[SPICE_DAS_INTDT] );
+         printf( &quot;\n&quot; );
+
+         /.
+         Add the data.
+         ./
+         for ( i = 1; i &lt; 11; i++ )
+         {
+            <a href="dasadi_c.html">dasadi_c</a> ( handle, 1, &amp;i );
+         }
+
+         for ( i = 1; i &lt; 6; i++ )
+         {
+            dbli = (double)i;
+            <a href="dasadd_c.html">dasadd_c</a> ( handle, 1, &amp;dbli );
+         }
+
+         /.
+         Add character data to the file. DAS character data are
+         treated as a character array, not as a null-terminated
+         string. The following call adds only the first 4 characters
+         to the DAS file.
+         ./
+         <a href="dasadc_c.html">dasadc_c</a> ( handle, 4, 0, 3, 4, &quot;SPUDWXY&quot; );
+
+         /.
+         Close the file and open it for reading.
+         ./
+         <a href="dascls_c.html">dascls_c</a> ( handle );
+         <a href="dasopr_c.html">dasopr_c</a> ( FNAME, &amp;handle );
+
+         /.
+         Obtain again the file summary.
+         ./
+         <b>dashfs_c</b> ( handle, &amp;nresvr, &amp;nresvc,
+                    &amp;ncomr, &amp;ncomc,  &amp;free,
+                    lastla, lastrc,  lastwd );
+
+         printf( &quot;Summary after adding data:\n&quot; );
+         printf( &quot;   Number of reserved records     : %d\n&quot;, (int)nresvr );
+         printf( &quot;   Characters in reserved records : %d\n&quot;, (int)nresvc );
+         printf( &quot;   Number of comment records      : %d\n&quot;, (int)ncomr );
+         printf( &quot;   Characters in comment area     : %d\n&quot;, (int)ncomc );
+         printf( &quot;   Number of first free record    : %d\n&quot;, (int)free );
+         printf( &quot;   Last logical character address : %d\n&quot;,
+                               (int)lastla[SPICE_DAS_CHARDT] );
+         printf( &quot;   Last logical d.p. address      : %d\n&quot;,
+                                 (int)lastla[SPICE_DAS_DPDT] );
+         printf( &quot;   Last logical integer address   : %d\n&quot;,
+                                (int)lastla[SPICE_DAS_INTDT] );
+         printf( &quot;   Last character descriptor      : %d\n&quot;,
+                               (int)lastrc[SPICE_DAS_CHARDT] );
+         printf( &quot;   Last d.p descriptor            : %d\n&quot;,
+                                 (int)lastrc[SPICE_DAS_DPDT] );
+         printf( &quot;   Last integer descriptor        : %d\n&quot;,
+                                (int)lastrc[SPICE_DAS_INTDT] );
+         printf( &quot;   Character word position in desc: %d\n&quot;,
+                               (int)lastwd[SPICE_DAS_CHARDT] );
+         printf( &quot;   d.p. word position in desc     : %d\n&quot;,
+                                 (int)lastwd[SPICE_DAS_DPDT] );
+         printf( &quot;   Integer word position in desc  : %d\n&quot;,
+                                (int)lastwd[SPICE_DAS_INTDT] );
+         printf( &quot;\n&quot; );
+
+         /.
+         Read the integers and dump them.
+         ./
+         printf( &quot;Integer data in the DAS file:\n&quot; );
+         for ( i = 1; i &lt;= lastla[SPICE_DAS_INTDT]; i++ )
+         {
+            <a href="dasrdi_c.html">dasrdi_c</a> ( handle, i, i, &amp;n );
+            printf( &quot;   %d\n&quot;, (int)n );
+         }
+
+         /.
+         Now the d.p. numbers:
+         ./
+         printf( &quot;\n&quot; );
+         printf( &quot;Double precision data in the DAS file:\n&quot; );
+         for ( i = 1; i &lt;= lastla[SPICE_DAS_DPDT]; i++ )
+         {
+            <a href="dasrdd_c.html">dasrdd_c</a> ( handle, i, i, &amp;x );
+            printf( &quot;   %f\n&quot;, x );
+         }
+
+         /.
+         Now the characters. In this case, we read the
+         data one line at a time.
+         ./
+         first   =  0;
+         last    =  0;
+         remain  =  lastla[SPICE_DAS_CHARDT];
+
+         printf( &quot;\n&quot; );
+         printf( &quot;Character data in the DAS file:\n&quot; );
+         while ( remain &gt; 0 )
+         {
+            nread = <a href="mini_c.html">mini_c</a>( 2, LINLEN, remain );
+            first = last + 1;
+            last  = last + nread;
+
+            <a href="dasrdc_c.html">dasrdc_c</a> ( handle, first, last, 0, nread-1, LINLEN, line );
+
+            /.
+            Add null-terminating character to `line' in order to
+            print it to the screen.
+            ./
+            strncpy( linstr, line, LINLEN );
+            linstr[LINLEN] = '\0';
+
+            printf( &quot;   %s\n&quot;, linstr );
+
+            remain = remain - nread;
+         }
+
+         /.
+         Close the file.
+         ./
+         <a href="dascls_c.html">dascls_c</a> ( handle );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Summary before adding data:
+         Number of reserved records     : 0
+         Characters in reserved records : 0
+         Number of comment records      : 0
+         Characters in comment area     : 0
+         Number of first free record    : 3
+         Last logical character address : 0
+         Last logical d.p. address      : 0
+         Last logical integer address   : 0
+         Last character descriptor      : 0
+         Last d.p descriptor            : 0
+         Last integer descriptor        : 0
+         Character word position in desc: 0
+         d.p. word position in desc     : 0
+         Integer word position in desc  : 0
+
+      Summary after adding data:
+         Number of reserved records     : 0
+         Characters in reserved records : 0
+         Number of comment records      : 0
+         Characters in comment area     : 0
+         Number of first free record    : 6
+         Last logical character address : 4
+         Last logical d.p. address      : 5
+         Last logical integer address   : 10
+         Last character descriptor      : 2
+         Last d.p descriptor            : 2
+         Last integer descriptor        : 2
+         Character word position in desc: 10
+         d.p. word position in desc     : 11
+         Integer word position in desc  : 12
+
+      Integer data in the DAS file:
+         1
+         2
+         3
+         4
+         5
+         6
+         7
+         8
+         9
+         10
+
+      Double precision data in the DAS file:
+         1.000000
+         2.000000
+         3.000000
+         4.000000
+         5.000000
+
+      Character data in the DAS file:
+         SP
+         UD
+
+
+      Note that after run completion, a new DAS file exists in the
+      output directory.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.0, 16-JUL-2021 (JDR)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   return the file summary of a DAS file
+   find the amount of data in a DAS file
+</PRE>
+<h4>Link to routine dashfs_c source file <a href='../../../src/cspice/dashfs_c.c'>dashfs_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:03 2021</pre>
+
+</body>
+</html>
+

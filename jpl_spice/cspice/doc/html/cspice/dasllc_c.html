@@ -1,0 +1,486 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>dasllc_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>dasllc_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   dasllc_c ( DAS, low-level close ) 
+
+   void dasllc_c ( SpiceInt            handle )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Close the DAS file associated with a given handle, without
+   flushing buffered data or segregating the file.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/das.html">DAS</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   DAS
+   FILES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   handle     I   Handle of a DAS file to be closed.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   handle      is the handle of a previously opened DAS file.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   None.
+
+   See -Particulars for a description of the effect of this routine.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the specified handle does not belong to a DAS file that is
+       currently open, this routine returns without signaling an
+       error.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See the description of the argument `handle' in -Detailed_Input.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   Normally, routines outside of CSPICE will not need to call this
+   routine. Application programs should close DAS files by calling
+   the CSPICE routine <a href="dascls_c.html">dascls_c</a>. This routine is a lower-level
+   routine that is called by <a href="dascls_c.html">dascls_c</a>, but (obviously) does not have
+   the full functionality of <a href="dascls_c.html">dascls_c</a>.
+
+   This routine closes a DAS file and updates the DAS file manager's
+   bookkeeping information on open DAS files. Because the DAS file
+   manager must keep track of which files are open at any given time,
+   it is important that DAS files be closed only with <a href="dascls_c.html">dascls_c</a> or
+   <b>dasllc_c</b>, to prevent the remaining DAS routines from failing,
+   sometimes mysteriously.
+
+   Note that when a file is opened more than once for read or write
+   access, <a href="dasopr_c.html">dasopr_c</a> returns the same handle each time it is re-opened.
+   Each time the file is closed, <b>dasllc_c</b> checks to see if any other
+   claims on the file are still active before physically closing
+   the file.
+
+   Unlike <a href="dascls_c.html">dascls_c</a>, this routine does not force a write of updated,
+   buffered records to the indicated file, nor does it segregate the
+   data records in the file.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Write a DAS file by adding data to it over multiple passes.
+      Avoid spending time on file segregation between writes.
+
+      Each pass opens the file, adds character, double precision,
+      and integer data to the file, writes out buffered data by
+      calling <a href="daswbr_c.html">daswbr_c</a>, and closes the file without segregating the
+      data by calling <b>dasllc_c</b>.
+
+      The program also checks the file: after the final write,
+      the program reads the data and compares it to expected values.
+
+      Note that most user-oriented applications should segregate a
+      DAS file after writing it, since this greatly enhances file
+      reading efficiency. The technique demonstrated here may be
+      useful for cases in which a file will be written via many
+      small data additions, and in which the file is read between
+      write operations.
+
+
+      Example code begins here.
+
+
+      /.
+         Program dasllc_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &lt;stdlib.h&gt;
+      #include &lt;string.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters
+         ./
+         #define CHRLEN       50
+         #define IBUFSZ       20
+         #define DBUFSZ       30
+
+         /.
+         Local variables
+         ./
+         SpiceChar            chrbuf [CHRLEN];
+         SpiceChar            chrstr [CHRLEN+1];
+         SpiceChar            xchrbf [CHRLEN+1];
+
+         SpiceDouble          dpbuf  [DBUFSZ];
+         SpiceDouble          xdpbuf [DBUFSZ];
+
+         SpiceInt             firstc;
+         SpiceInt             firstd;
+         SpiceInt             firsti;
+         SpiceInt             handle;
+         SpiceInt             i;
+         SpiceInt             intbuf [IBUFSZ];
+         SpiceInt             j;
+         SpiceInt             lastc;
+         SpiceInt             lastd;
+         SpiceInt             lasti;
+         SpiceInt             passno;
+         SpiceInt             xintbf [IBUFSZ];
+
+         /.
+         Initial values
+         ./
+         ConstSpiceChar     * fname = &quot;dasllc_ex1.das&quot;;
+         ConstSpiceChar     * ftype = &quot;ANG&quot;;
+         SpiceInt             ncall = 1000;
+         SpiceInt             ncomr = 10;
+         SpiceInt             npass = 3;
+
+         /.
+         Open a new DAS file. We'll allocate `ncomr' records
+         for comments. The file type is not one of the standard
+         types recognized by SPICE; however it can be used to
+         ensure the database file is of the correct type.
+
+         We'll use the file name as the internal file name.
+         ./
+         <a href="dasonw_c.html">dasonw_c</a> ( fname, ftype, fname, ncomr, &amp;handle );
+
+         /.
+         Add data of character, integer, and double precision
+         types to the file in interleaved fashion. We'll add to
+         the file over `npass' &quot;passes,&quot; in each of which we close
+         the file after writing.
+         ./
+         for ( passno = 1; passno &lt;= npass; passno++ )
+         {
+            if ( passno &gt; 1 )
+            {
+               printf( &quot;Opening file for write access...\n&quot; );
+
+               <a href="dasopw_c.html">dasopw_c</a> ( fname, &amp;handle );
+            }
+
+            for ( i = 1; i &lt;= ncall; i++ )
+            {
+
+               /.
+               Add string data to the file.
+               ./
+               strncpy( chrbuf, &quot;Character value #&quot;, 18 );
+               <a href="repmi_c.html">repmi_c</a> ( chrbuf, &quot;#&quot;, i, CHRLEN, chrbuf );
+
+               <a href="dasadc_c.html">dasadc_c</a> ( handle, CHRLEN, 0, CHRLEN-1, CHRLEN, chrbuf );
+
+               /.
+               Add double precision data to the file.
+               ./
+               for ( j = 1; j &lt;= DBUFSZ; j++ )
+               {
+                  dpbuf[j-1] = (SpiceDouble)( 100000000*passno + 100*i + j );
+               }
+
+               <a href="dasadd_c.html">dasadd_c</a> ( handle, DBUFSZ, dpbuf );
+
+               /.
+               Add integer data to the file.
+               ./
+               for ( j = 1; j &lt;= IBUFSZ; j++ )
+               {
+                  intbuf[j-1] = 100000000*passno  +  100 * i  +  j;
+               }
+
+               <a href="dasadi_c.html">dasadi_c</a> ( handle, IBUFSZ, intbuf );
+            }
+
+            /.
+            Write buffered data to the file.
+            ./
+            printf( &quot;Writing buffered data...\n&quot; );
+            <a href="daswbr_c.html">daswbr_c</a> ( handle );
+
+            /.
+            Close the file without segregating it.
+            ./
+            printf( &quot;Closing DAS file...\n&quot; );
+            <b>dasllc_c</b> ( handle );
+         }
+
+         printf( &quot;File write is done.\n&quot; );
+
+         /.
+         Check file contents.
+         ./
+         <a href="dasopr_c.html">dasopr_c</a> ( fname, &amp;handle );
+
+         /.
+         Read data from the file; compare to expected values.
+
+         Initialize end addresses.
+         ./
+         lastc = 0;
+         lastd = 0;
+         lasti = 0;
+
+         for ( passno = 1; passno &lt;= npass; passno++ )
+         {
+            for ( i = 1; i &lt;= ncall; i++ )
+            {
+
+               /.
+               Check string data.
+               ./
+               strncpy( xchrbf, &quot;Character value #&quot;, 18 );
+               <a href="repmi_c.html">repmi_c</a> ( xchrbf, &quot;#&quot;, i, CHRLEN+1, xchrbf );
+
+               firstc = lastc + 1;
+               lastc  = lastc + CHRLEN;
+
+               <a href="dasrdc_c.html">dasrdc_c</a> ( handle,   firstc, lastc, 0,
+                          CHRLEN-1, CHRLEN, chrbuf   );
+
+               if ( strncmp( chrbuf, xchrbf, CHRLEN ) )
+               {
+                  /.
+                  Add null-terminating character to `chrbuf' in order to
+                  print it to the screen.
+                  ./
+                  strncpy( chrstr, chrbuf, CHRLEN );
+                  chrstr[CHRLEN] = '\0';
+
+                  printf( &quot;Character data mismatch:\n&quot; );
+                  printf( &quot;PASS     = %d\n&quot;, (int)passno );
+                  printf( &quot;I        = %d\n&quot;, (int)i );
+                  printf( &quot;Expected = %s\n&quot;, xchrbf );
+                  printf( &quot;Actual   = %s\n&quot;, chrstr );
+                  exit( EXIT_FAILURE );
+               }
+
+               /.
+               Check double precision data.
+               ./
+               for ( j = 1; j &lt;= DBUFSZ; j++ )
+               {
+                  xdpbuf[j-1] = (SpiceDouble)( 100000000*passno + 100*i + j );
+               }
+
+               firstd = lastd + 1;
+               lastd  = lastd + DBUFSZ;
+
+               <a href="dasrdd_c.html">dasrdd_c</a> ( handle, firstd, lastd, dpbuf );
+
+               for ( j = 0; j &lt; DBUFSZ; j++ )
+               {
+                  if ( dpbuf[j] != xdpbuf[j] )
+                  {
+                     printf( &quot;Double precision data mismatch:\n&quot; );
+                     printf( &quot;PASS     = %d\n&quot;, (int)passno );
+                     printf( &quot;I        = %d\n&quot;, (int)i );
+                     printf( &quot;J        = %d\n&quot;, (int)j );
+                     printf( &quot;Expected = %f\n&quot;, xdpbuf[j] );
+                     printf( &quot;Actual   = %f\n&quot;, dpbuf[j] );
+                     exit( EXIT_FAILURE );
+                  }
+               }
+
+               /.
+               Check integer data.
+               ./
+               for ( j = 1; j &lt;= IBUFSZ; j++ )
+               {
+                  xintbf[j-1] = 100000000*passno  +  100 * i  +  j;
+               }
+
+               firsti = lasti + 1;
+               lasti  = lasti + IBUFSZ;
+
+               <a href="dasrdi_c.html">dasrdi_c</a> ( handle, firsti, lasti, intbuf );
+
+               for ( j = 0; j &lt; IBUFSZ; j++ )
+               {
+                  if ( intbuf[j] != xintbf[j] )
+                  {
+                     printf( &quot;Integer data mismatch:\n&quot; );
+                     printf( &quot;PASS     = %d\n&quot;, (int)passno );
+                     printf( &quot;I        = %d\n&quot;, (int)i );
+                     printf( &quot;J        = %d\n&quot;, (int)j );
+                     printf( &quot;Expected = %d\n&quot;, xintbf[j] );
+                     printf( &quot;Actual   = %d\n&quot;, intbuf[j] );
+                     exit( EXIT_FAILURE );
+                  }
+               }
+            }
+         }
+
+         printf( &quot;File check is done.\n&quot; );
+
+         /.
+         Close the file.
+         ./
+         <a href="dascls_c.html">dascls_c</a> ( handle );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Writing buffered data...
+      Closing DAS file...
+      Opening file for write access...
+      Writing buffered data...
+      Closing DAS file...
+      Opening file for write access...
+      Writing buffered data...
+      Closing DAS file...
+      File write is done.
+      File check is done.
+
+
+      Note that after run completion, a new DAS file exists in the
+      output directory.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.0, 23-FEB-2021 (JDR)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   close a DAS file
+</PRE>
+<h4>Link to routine dasllc_c source file <a href='../../../src/cspice/dasllc_c.c'>dasllc_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:03 2021</pre>
+
+</body>
+</html>
+

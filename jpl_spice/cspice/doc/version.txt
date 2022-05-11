@@ -1,0 +1,7 @@
+This file describes your current toolkit package.
+ 
+Creation Date: Sat Jan  1 19:04:32 PST 2022 
+ 
+Version Information
+ 
+               CSPICE.............V.N0067

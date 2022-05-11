@@ -1,0 +1,400 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>dasec_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>dasec_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   dasec_c ( DAS extract comments ) 
+
+   void dasec_c ( SpiceInt         handle,
+                  SpiceInt         bufsiz,
+                  SpiceInt         buffln,
+                  SpiceInt       * n,
+                  void           * buffer,
+                  SpiceBoolean   * done   )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Extract comments from the comment area of a binary DAS file.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/das.html">DAS</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   FILES
+   UTILITY
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   handle     I   Handle of binary DAS file open with read access.
+   bufsiz     I   Maximum size, in lines, of `buffer'.
+   buffln     I   Line length associated with `buffer'.
+   n          O   Number of comments extracted from the DAS file.
+   buffer     O   Buffer in which extracted comments are placed.
+   done       O   Indicates whether all comments have been extracted.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   handle      is the file handle of a binary DAS file which has been
+               opened with read access.
+
+   bufsiz      is the maximum number of comments that may be placed into
+               `buffer'. This would typically be the declared array size
+               for the C character string array passed into this
+               routine.
+
+   buffln      is the common length of the strings in `buffer', including the
+               terminating nulls.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   n           is the number of comment lines extracted from the comment area
+               of the binary DAS file attached to handle. This number will
+               be &lt;= bufsiz on output. If n == bufsiz and done !=
+               SPICETRUE then there are more comments left to extract. If
+               n == 0, then done == SPICETRUE, i.e., there were no
+               comments in the comment area. If there are comments in the
+               comment area, or comments remaining after the extraction
+               process has begun, n &gt; 0, always.
+
+   buffer      is a list of at most `bufsiz' comments which have been
+               extracted from the comment area of the binary DAS
+               file attached to handle. `buffer' should be declared as
+               follows:
+
+                  ConstSpiceChar   buffer [bufsiz][buffln]
+
+               Each string in buffer is null-terminated.
+
+   done        is a boolean flag indicating whether or not all of the
+               comment lines from the comment area of the DAS file have
+               been read. This variable has the value SPICETRUE after the
+               last comment line has been read. It will have the value
+               SPICEFALSE otherwise.
+
+               If there are no comments in the comment area, this
+               variable will have the value SPICETRUE, and n == 0.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the size of the output line buffer is is not positive, the
+       error SPICE(INVALIDARGUMENT) is signaled by a routine in the
+       call tree of this routine.
+
+   2)  If a comment line in a DAS file is longer than the length of a
+       character string array element of `buffer', the error
+       SPICE(COMMENTTOOLONG) is signaled by a routine in the call
+       tree of this routine.
+
+   3)  If there is a mismatch between the number of comment
+       characters found and the number of comment characters
+       expected, the error SPICE(BADDASCOMMENTAREA) is signaled by a
+       routine in the call tree of this routine.
+
+   4)  If the binary DAS file attached to `handle' is not open for
+       reading, an error is signaled by a routine in the call tree of
+       this routine.
+
+   5)  If the `buffer' output string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   6)  If the `buffer' output string has length less than two
+       characters, the error SPICE(STRINGTOOSHORT) is signaled, since
+       the output string is too short to contain one character of
+       output data plus a null terminator.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See argument handle in -Detailed_Input.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   Binary DAS files contain an area which is reserved for storing
+   annotations or descriptive textual information describing the data
+   contained in a file. This area is referred to as the &quot;comment
+   area&quot; of the file. The comment area of a DAS file is a line
+   oriented medium for storing textual information. The comment
+   area preserves any leading or embedded white space in the line(s)
+   of text which are stored, so that the appearance of the of
+   information will be unchanged when it is retrieved (extracted) at
+   some other time. Trailing blanks, however, are NOT preserved,
+   due to the way that character strings are represented in
+   standard Fortran 77.
+
+   This routine will read the comments from the comment area of
+   a binary DAS file, placing them into a line buffer. If the line
+   buffer is not large enough to hold the entire comment area,
+   the portion read will be returned to the caller, and the done
+   flag will be set to SPICEFALSE. This allows the comment area to be
+   read in &quot;chunks,&quot; a buffer at a time. After all of the comment
+   lines have been read, the done flag will be set to SPICETRUE.
+
+   After all of the comments in DAS file have been read, the next
+   call to this routine will start reading comments at the start
+   of the comment area.
+
+   This routine can be used to &quot;simultaneously&quot; extract comments
+   from the comment areas of multiple binary DAS files.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) The following example will extract the entire comment area of a
+      binary DAS file attached to `handle', displaying the comments on
+      the terminal screen.
+
+
+      Use the DSK kernel below as input DAS file for the example.
+
+         phobos512.bds
+
+
+      Example code begins here.
+
+
+      /.
+         Program dasec_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         #define LNSIZE          81
+         #define MAXBUF          25
+
+         SpiceBoolean            done;
+
+         SpiceChar               buffer [MAXBUF][LNSIZE];
+         SpiceChar             * filename;
+
+         SpiceInt                handle;
+         SpiceInt                i;
+         SpiceInt                n;
+
+
+         filename = &quot;phobos512.bds&quot;;
+
+         <a href="dasopr_c.html">dasopr_c</a> ( filename, &amp;handle );
+
+         done = SPICEFALSE;
+
+         while ( !done )
+         {
+            <b>dasec_c</b>( handle, MAXBUF, LNSIZE, &amp;n, buffer, &amp;done );
+
+            for ( i = 0;  i &lt; n;  i++ )
+            {
+               printf ( &quot;%s\n&quot;, buffer[i] );
+            }
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      *************************************************************************
+      MKDSK RUN DATE/TIME: 2010-06-30T16:52:12
+      MKDSK SETUP FILE:    phobos512.cmd
+      MKDSK INPUT FILE:    phobos_q512.txt
+      MKDSK OUTPUT FILE:   phobos512.bds
+      OUTPUT FILE STATUS:    NEW FILE
+      *************************************************************************
+
+                 \begindata
+
+                 INPUT_SHAPE_FILE    = 'phobos_q512.txt'
+                 OUTPUT_DSK_FILE     = 'phobos512.bds'
+                 COMMENT_FILE        = ' '
+                 LEAPSECONDS_FILE    = 'naif0009.tls'
+                 SURFACE_NAME        = 'phobos'
+                 CENTER_NAME         = 'phobos'
+                 REF_FRAME_NAME      = 'IAU_PHOBOS'
+                 START_TIME          = '1950-JAN-1/00:00:00'
+                 STOP_TIME           = '2050-JAN-1/00:00:00'
+                 DATA_CLASS          = 1
+                 INPUT_DATA_UNITS    = ( 'ANGLES    = DEGREES'
+                                         'DISTANCES = KILOMETERS' )
+                 COORDINATE_SYSTEM   = 'LATITUDINAL'
+                 MINIMUM_LATITUDE    = -90
+                 MAXIMUM_LATITUDE    =  90
+                 MINIMUM_LONGITUDE   = -180
+                 MAXIMUM_LONGITUDE   =  180
+                 DATA_TYPE           = 2
+                 PLATE_TYPE          = 2
+                 FINE_VOXEL_SCALE    = 4.0
+                 COARSE_VOXEL_SCALE  = 5
+
+                 \begintext
+
+      *************************************************************************
+
+
+      Warning: incomplete output. 3 lines extended past the right
+      margin of the header and have been truncated. These lines are
+      marked by &quot;***&quot; at the end of each line.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  The comment area may consist only of printing ASCII characters,
+       decimal values 32 - 126.
+
+   2)  There is NO maximum length imposed on the significant portion
+       of a text line that may be placed into the comment area of a
+       DAS file. The maximum length of a line stored in the comment
+       area should be kept reasonable, so that they may be easily
+       extracted. A good value for this would be 255 characters, as
+       this can easily accommodate &quot;screen width&quot; lines as well as
+       long lines which may contain some other form of information.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   K.R. Gehringer      (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.1, 02-AUG-2021 (JDR)
+
+       Edited the header to comply with NAIF standard.
+       Updated the example to use CSPICE <a href="dasopr_c.html">dasopr_c</a> routine and
+       a hardcoded value for the DAS file name.
+
+   -CSPICE Version 1.1.0, 29-JUL-2015 (NJB)
+
+       Bug fix: removed semi-colon at end of the &quot;if&quot;
+       statement controlling execution of the call
+       to F2C_ConvertStrTrArr. This semi-colon turned
+       out to have no effect on the behavior of the
+       routine.
+
+   -CSPICE Version 1.0.0, 24-FEB-2003 (NJB) (KRG)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   extract comments from a DAS file
+</PRE>
+<h4>Link to routine dasec_c source file <a href='../../../src/cspice/dasec_c.c'>dasec_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:03 2021</pre>
+
+</body>
+</html>
+

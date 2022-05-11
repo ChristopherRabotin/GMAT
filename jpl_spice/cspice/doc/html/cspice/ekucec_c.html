@@ -1,0 +1,547 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>ekucec_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>ekucec_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   ekucec_c ( EK, update character column entry ) 
+
+   void ekucec_c  ( SpiceInt          handle,
+                    SpiceInt          segno,
+                    SpiceInt          recno,
+                    ConstSpiceChar  * column,
+                    SpiceInt          nvals,
+                    SpiceInt          cvalen,
+                    const void      * cvals,
+                    SpiceBoolean      isnull )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Update a character column entry in a specified EK record.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/ek.html">EK</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   EK
+   FILES
+   UTILITY
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   handle     I   EK file handle.
+   segno      I   Index of segment containing record.
+   recno      I   Record to which data is to be updated.
+   column     I   Column name.
+   nvals      I   Number of values in new column entry.
+   cvalen     I   Declared length of character values.
+   cvals      I   Character values comprising new column entry.
+   isnull     I   Flag indicating whether column entry is null.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   handle      is the handle of an EK file open for write access.
+
+   segno       is the index of the segment containing the column entry
+               to be updated. EK segment numbers range from
+               0 to N-1, where N is the number of segments
+               in the kernel.
+
+   recno       is the index of the record containing the column entry
+               to be updated. This record number is relative to the start
+               of the segment indicated by segno; the first
+               record in the segment has index 0.
+
+   column      is the name of the column containing the entry to
+               be updated.
+
+   nvals       is the number of elements in the new value to be inserted
+               into the specified column.
+
+   cvalen      is the length of the strings in the `cvals' array, where
+               the length includes space for null terminators.
+
+               If the  column has fixed-size entries, then `nvals'
+               must equal the entry size for the specified column.
+
+
+   cvals       is the set of replacement values themselves. The values
+               are written into the specified column and record.
+
+               The array `cvals' should be declared with dimensions
+
+                  [nelts][cvalen]
+
+               where `nelts' is greater than or equal to `nvals'.
+
+   isnull      is a logical flag indicating whether the entry is
+               null. If `isnull' is SPICEFALSE, the column entry
+               defined by `nvals' and `cvals' is added to the
+               specified kernel file.
+
+               If `isnull' is SPICETRUE, `nvals' and `cvals' are
+               ignored: no data are written into the specified column
+               entry. The column entry is marked as a null value.
+
+               If the column has fixed-length, variable-size
+               entries, the number of entries is considered to
+               be 1.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   None.
+
+   See -Particulars for a description of the effect of this routine.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If `handle' is invalid, an error is signaled by a routine in the
+       call tree of this routine.
+
+   2)  If `segno' is out of range, an error is signaled by a routine in
+       the call tree of this routine.
+
+   3)  If `column' is not the name of a declared column, an error
+       is signaled by a routine in the call tree of this routine.
+
+   4)  If `column' specifies a column of whose data type is not
+       CHARACTER, the error SPICE(WRONGDATATYPE) is signaled by a
+       routine in the call tree of this routine.
+
+   5)  If `recno' is out of range, an error is signaled by a routine in
+       the call tree of this routine.
+
+   6)  If the specified column has fixed-size entries and `nvals' does
+       not match this size, an error is signaled by a routine in the
+       call tree of this routine.
+
+   7)  If the specified column has variable-size entries and `nvals' is
+       non-positive, an error is signaled by a routine in the call
+       tree of this routine.
+
+   8)  If an attempt is made to add a null value to a column that
+       doesn't take null values, an error is signaled by a routine in
+       the call tree of this routine.
+
+   9)  If `column' specifies a column of whose class is not a character
+       class known to this routine, the error SPICE(NOCLASS) is
+       signaled by a routine in the call tree of this routine.
+
+   10) If an I/O error occurs while reading or writing the indicated
+       file, the error is signaled by a routine in the call tree of
+       this routine.
+
+   11) If the `column' input string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   12) If the `column' input string has zero length, the error
+       SPICE(EMPTYSTRING) is signaled.
+
+   13) If the `cvals' input array pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   14) If the `cvals' input array strings have length less than two
+       characters, the error SPICE(STRINGTOOSHORT) is signaled.
+
+   15) If memory cannot be allocated to create the temporary variable
+       required for the execution of the underlying Fortran routine,
+       the error SPICE(MALLOCFAILED) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See the EK Required Reading for a discussion of the EK file
+   format.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine operates by side effects: it modifies the named
+   EK file by replacing a specified character column entry.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) The following program demonstrates how to create a new EK and
+      add data to a character column in a given record within the
+      file, how to update the data in this record, and how to read
+      the data from it.
+
+
+      Example code begins here.
+
+
+      /.
+         Program ekucec_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &lt;string.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local constants.
+         ./
+         #define EKNAME       &quot;ekucec_ex1.bdb&quot;
+         #define IFNAME       &quot;Test EK&quot;
+         #define TABLE        &quot;CHR_DATA&quot;
+         #define CVLEN        10
+         #define DECLEN       201
+         #define MAXVAL       4
+         #define NCOLS        2
+         #define NROWS        6
+         #define NRESVC       0
+
+         /.
+         Local variables
+         ./
+         SpiceChar            cdecls [NCOLS] [DECLEN];
+         SpiceChar            cnames [NCOLS] [SPICE_EK_CSTRLN];
+         SpiceChar            cvals  [MAXVAL][CVLEN];
+
+         SpiceInt             handle;
+         SpiceInt             i;
+         SpiceInt             nvals;
+         SpiceInt             recno;
+         SpiceInt             segno;
+
+         SpiceBoolean         isnull;
+
+         /.
+         Open a new EK file.  For simplicity, we won't
+         reserve space for the comment area, so the
+         number of reserved comment characters is zero.
+         The constant IFNAME is the internal file name.
+         ./
+         <a href="ekopn_c.html">ekopn_c</a> ( EKNAME, IFNAME, NRESVC, &amp;handle );
+
+         /.
+         Set up the table and column names and declarations
+         for the CHR_DATA segment.  We'll index all of
+         the columns.
+         ./
+         strcpy( cnames[0], &quot;CHR_COL_1&quot; );
+         strcpy( cdecls[0], &quot;DATATYPE = CHARACTER*(*), &quot;
+                            &quot;INDEXED = TRUE, NULLS_OK = TRUE&quot; );
+
+         strcpy( cnames[1], &quot;CHR_COL_2&quot; );
+         strcpy( cdecls[1], &quot;DATATYPE = CHARACTER*(9), &quot;
+                            &quot;SIZE = VARIABLE, NULLS_OK = TRUE&quot; );
+
+         /.
+         Start the segment.
+         ./
+         <a href="ekbseg_c.html">ekbseg_c</a> ( handle, TABLE,  NCOLS,   SPICE_EK_CSTRLN,
+                    cnames, DECLEN, cdecls, &amp;segno           );
+
+         for ( i = 0; i &lt; NROWS; i++ )
+         {
+
+            <a href="ekappr_c.html">ekappr_c</a> ( handle, segno, &amp;recno );
+
+            isnull = ( i == 1 );
+
+            sprintf  ( cvals[0], &quot;%d&quot;, i );
+            <a href="ekacec_c.html">ekacec_c</a> ( handle, segno, recno, cnames[0],
+                       1,      CVLEN, cvals, isnull    );
+
+            /.
+            Array-valued columns follow.
+            ./
+            sprintf  ( cvals[0], &quot;%d&quot;, 10*i     );
+            sprintf  ( cvals[1], &quot;%d&quot;, 10*i + 1 );
+            sprintf  ( cvals[2], &quot;%d&quot;, 10*i + 2 );
+            sprintf  ( cvals[3], &quot;%d&quot;, 10*i + 3 );
+            <a href="ekacec_c.html">ekacec_c</a> ( handle, segno, recno, cnames[1],
+                       4,      CVLEN, cvals, isnull    );
+
+         }
+
+         /.
+         End the file.
+         ./
+         <a href="ekcls_c.html">ekcls_c</a> ( handle );
+
+         /.
+         Open the EK for write access.
+         ./
+         <a href="ekopw_c.html">ekopw_c</a> ( EKNAME, &amp;handle );
+
+         /.
+         Negate the values in the odd-numbered records
+         using the update routines.
+         ./
+         for ( i = 1; i &lt; NROWS; i = i+2 )
+         {
+            recno = i;
+
+            isnull = ( i == 1 );
+
+            sprintf  ( cvals[0], &quot;%d&quot;, -i );
+            <b>ekucec_c</b> ( handle, segno, recno, cnames[0],
+                       1,      CVLEN, cvals, isnull    );
+
+            /.
+            Array-valued columns follow.
+            ./
+            sprintf  ( cvals[0], &quot;%d&quot;, -10*i       );
+            sprintf  ( cvals[1], &quot;%d&quot;, -(10*i + 1) );
+            sprintf  ( cvals[2], &quot;%d&quot;, -(10*i + 2) );
+            sprintf  ( cvals[3], &quot;%d&quot;, -(10*i + 3) );
+            <b>ekucec_c</b> ( handle, segno, recno, cnames[1],
+                       4,      CVLEN, cvals, isnull    );
+
+         }
+
+         /.
+         Close the file.
+         ./
+         <a href="ekcls_c.html">ekcls_c</a> ( handle );
+
+         /.
+         Open the created file. Show the values added.
+         ./
+         <a href="ekopr_c.html">ekopr_c</a> ( EKNAME, &amp;handle );
+
+         for ( i = 0; i &lt; NROWS; i++ )
+         {
+
+            <a href="ekrcec_c.html">ekrcec_c</a> ( handle, segno, i,      cnames[0],
+                       CVLEN, &amp;nvals, cvals, &amp;isnull    );
+
+            if ( ! isnull )
+            {
+
+               printf( &quot;Data from column:  %s\n&quot;, cnames[0] );
+               printf( &quot;   record number:  %d\n&quot;, i );
+               printf( &quot;   values       :  %s\n&quot;, cvals[0] );
+               printf( &quot; \n&quot; );
+
+            }
+            else
+            {
+
+               printf( &quot;Record  %d flag is NULL.\n&quot;, i );
+               printf( &quot; \n&quot; );
+
+            }
+
+            /.
+            Array-valued columns follow.
+            ./
+            <a href="ekrcec_c.html">ekrcec_c</a> ( handle, segno, i,      cnames[1],
+                       CVLEN, &amp;nvals, cvals, &amp;isnull    );
+
+            if ( ! isnull )
+            {
+
+               printf( &quot;Data from column:  %s\n&quot;, cnames[1] );
+               printf( &quot;   record number:  %d\n&quot;, i );
+               printf( &quot;   values       :  %s  %s  %s  %s\n&quot;,
+                                     cvals[0], cvals[1], cvals[2], cvals[3] );
+               printf( &quot; \n&quot; );
+
+            }
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Data from column:  CHR_COL_1
+         record number:  0
+         values       :  0
+
+      Data from column:  CHR_COL_2
+         record number:  0
+         values       :  0          1          2          3
+
+      Record  1 flag is NULL.
+
+      Data from column:  CHR_COL_1
+         record number:  2
+         values       :  2
+
+      Data from column:  CHR_COL_2
+         record number:  2
+         values       :  20         21         22         23
+
+      Data from column:  CHR_COL_1
+         record number:  3
+         values       :  -3
+
+      Data from column:  CHR_COL_2
+         record number:  3
+         values       :  -30        -31        -32        -33
+
+      Data from column:  CHR_COL_1
+         record number:  4
+         values       :  4
+
+      Data from column:  CHR_COL_2
+         record number:  4
+         values       :  40         41         42         43
+
+      Data from column:  CHR_COL_1
+         record number:  5
+         values       :  -5
+
+      Data from column:  CHR_COL_2
+         record number:  5
+         values       :  -50        -51        -52        -53
+
+
+      Note that the second record does not appear due to setting the
+      `isnull' flag to true for that record. The odd value record
+      numbers have negative values as a result of the update calls.
+
+      After run completion, a new EK exists in the output directory.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.0, 10-AUG-2021 (JDR)
+
+       Changed input argument name &quot;vallen&quot; to &quot;cvalen&quot; for consistency
+       with other routines.
+
+       Edited the header to comply with NAIF standard. Added complete
+       code example.
+
+   -CSPICE Version 1.0.0, 28-AUG-2001 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   replace character entry in an EK column
+</PRE>
+<h4>Link to routine ekucec_c source file <a href='../../../src/cspice/ekucec_c.c'>ekucec_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:06 2021</pre>
+
+</body>
+</html>
+

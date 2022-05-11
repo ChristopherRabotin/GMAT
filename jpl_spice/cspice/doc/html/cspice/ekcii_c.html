@@ -1,0 +1,475 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>ekcii_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>ekcii_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   ekcii_c ( EK, column info by index ) 
+
+   void ekcii_c ( ConstSpiceChar   * table,
+                  SpiceInt           cindex,
+                  SpiceInt           collen,
+                  SpiceChar        * column,
+                  SpiceEKAttDsc    * attdsc  )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Return attribute information about a column belonging to a loaded
+   EK table, specifying the column by table and index.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/ek.html">EK</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   EK
+   FILES
+   UTILITY
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   table      I   Name of table containing column.
+   cindex     I   Index of column whose attributes are to be found.
+   collen     I   Maximum allowed length of column name.
+   column     O   Name of column.
+   attdsc     O   Column attribute descriptor.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   table       is the name of a loaded EK table. Case is not
+               significant.
+
+   cindex      is the index, within TABLE's column attribute
+               table, of the column whose attributes are to be
+               found. The indices of the column table entries
+               range from 0 to ccount-1, where ccount is the value
+               returned by the entry point <a href="ekccnt_c.html">ekccnt_c</a>.
+
+   collen      is the maximum allowed length of the output column
+               name, including the terminating null. Column names
+               can be accommodated by a character array of length
+               SPICE_EK_CSTRLN. This constant is declared in the
+               header file SpiceEK.h.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   column      is the name of the specified column.
+
+   attdsc      is an EK column attribute descriptor. See the header
+               file SpiceEK.h for details.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the specified table is not loaded, the error
+       SPICE(TABLENOTLOADED) is signaled by a routine in the call
+       tree of this routine.
+
+   2)  If the input argument `cindex' is out of range, the error
+       SPICE(INVALIDINDEX) is signaled by a routine in the call tree
+       of this routine.
+
+   3)  If the `column' output string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   4)  If the `column' output string has length less than two
+       characters, the error SPICE(STRINGTOOSHORT) is signaled, since
+       the output string is too short to contain one character of
+       output data plus a null terminator.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   The returned column name and descriptor are based on the currently
+   loaded EK files.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine is a utility that allows a calling routine to
+   determine the attributes of the currently loaded columns.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Dump the names and attributes of the columns in each loaded
+      table.
+
+      Example code begins here.
+
+
+      /.
+         Program ekcii_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+
+      int main( )
+      {
+         /.
+         Local constants.
+         ./
+         #define FILEN           256
+
+         /.
+         Local variables.
+         ./
+         SpiceChar               colnam  [ SPICE_EK_CSTRLN ];
+         SpiceChar               ek      [ FILEN ];
+         SpiceChar               tabnam  [ SPICE_EK_TSTRLN ];
+
+         SpiceChar             * typstrs [ 4 ] =
+                                 {
+                                    &quot;CHR&quot;, &quot;DP&quot;, &quot;INT&quot;, &quot;TIME&quot;
+                                 };
+
+         SpiceEKAttDsc           attdsc;
+
+         SpiceInt                i;
+         SpiceInt                ncols;
+         SpiceInt                ntab;
+         SpiceInt                tab;
+
+
+         <a href="prompt_c.html">prompt_c</a> ( &quot;Enter name of EK to examine &gt; &quot;, FILEN, ek );
+
+         <a href="furnsh_c.html">furnsh_c</a> ( ek );
+
+         /.
+         Get the number of loaded tables.
+         ./
+         <a href="ekntab_c.html">ekntab_c</a> ( &amp;ntab );
+
+         printf ( &quot;Number of tables in EK: %2i\n&quot;, ntab );
+
+         for ( tab = 0;  tab &lt; ntab;  tab++ )
+         {
+            /.
+            Get the name of the current table, and look up
+            the column count for this table.
+            ./
+            <a href="ektnam_c.html">ektnam_c</a> ( tab, SPICE_EK_TSTRLN, tabnam );
+
+            <a href="ekccnt_c.html">ekccnt_c</a> ( tabnam, &amp;ncols );
+
+            printf ( &quot;------------------------------&quot;
+                     &quot;------------------------------\n&quot;);
+            printf ( &quot;Table = %s\n\n&quot;, tabnam );
+
+
+            /.
+            For each column in the current table, look up the
+            column's attributes.  The attribute block
+            index parameters are defined in the include file
+            ekattdsc.inc.
+            ./
+
+            for ( i = 0;  i &lt; ncols;  i++ )
+            {
+               <b>ekcii_c</b> ( tabnam, i, SPICE_EK_CSTRLN, colnam, &amp;attdsc );
+
+               printf ( &quot;Column = %s\n&quot;, colnam );
+
+
+               /.
+               Write out the current column's data type.
+               ./
+
+               printf ( &quot;   Type = %s\n&quot;, typstrs[(int)attdsc.dtype] );
+
+               if ( attdsc.dtype == SPICE_CHR )
+               {
+                  if ( attdsc.strlen == SPICE_EK_VARSIZ )
+                  {
+                     printf ( &quot;   String length = VARIABLE\n&quot; );
+                  }
+                  else
+                  {
+                      printf ( &quot;   String length = %d\n&quot;,
+                              (int) attdsc.strlen );
+                  }
+               }
+
+               /.
+               Write out the current column's entry size.
+               ./
+               printf ( &quot;   Size = %d\n&quot;, (int)attdsc.size );
+
+
+               /.
+               Indicate whether the current column is indexed.
+               ./
+               if ( attdsc.indexd == SPICETRUE )
+               {
+                  printf ( &quot;   Indexed.\n&quot; );
+               }
+               else
+               {
+                  printf ( &quot;   Not indexed.\n&quot; );
+               }
+
+               /.
+               Indicate whether the current column allows
+               null values.
+               ./
+               if ( attdsc.nullok == SPICETRUE )
+               {
+                  printf ( &quot;   Null values allowed.\n&quot; );
+               }
+               else
+               {
+                  printf ( &quot;   Null values not allowed.\n&quot; );
+               }
+            }
+            /.
+            We're done with the current column.
+            ./
+         }
+         /.
+         We're done with the current table.
+         ./
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, using the EK file named vo_sedr.bdb to load the
+      Viking Orbiter Image SEDR Data, the output was:
+
+
+      Enter name of EK to examine &gt; vo_sedr.bdb
+      Number of tables in EK:  1
+      ------------------------------------------------------------
+      Table = VIKING_SEDR_DATA
+
+      Column = IMAGE_ID
+         Type = CHR
+         String length = 6
+         Size = 1
+         Indexed.
+         Null values allowed.
+      Column = IMAGE_NUMBER
+         Type = INT
+         Size = 1
+         Indexed.
+         Null values allowed.
+      Column = SPACECRAFT_ID
+         Type = CHR
+         String length = 3
+         Size = 1
+         Indexed.
+         Null values allowed.
+      Column = IMAGE_TIME
+         Type = TIME
+         Size = 1
+         Indexed.
+         Null values allowed.
+      Column = INSTRUMENT_ID
+         Type = CHR
+         String length = 4
+         Size = 1
+         Indexed.
+         Null values allowed.
+      Column = GAIN_MODE_ID
+         Type = CHR
+         String length = 4
+         Size = 1
+         Not indexed.
+         Null values allowed.
+      Column = FLOOD_MODE_ID
+         Type = CHR
+         String length = 3
+         Size = 1
+         Not indexed.
+         Null values allowed.
+      Column = OFFSET_MODE_ID
+         Type = CHR
+         String length = 3
+         Size = 1
+         Not indexed.
+         Null values allowed.
+      Column = FILTER_ID
+         Type = INT
+         Size = 1
+         Indexed.
+         Null values allowed.
+      Column = EXPOSURE_DURATION
+         Type = DP
+         Size = 1
+         Indexed.
+         Null values allowed.
+      Column = PLATFORM_IN_MOTION
+         Type = CHR
+         String length = 3
+         Size = 1
+         Not indexed.
+         Null values allowed.
+      Column = PLATFORM_CONE
+         Type = DP
+         Size = 1
+         Not indexed.
+         Null values allowed.
+      Column = PLATFORM_CLOCK
+         Type = DP
+         Size = 1
+         Not indexed.
+         Null values allowed.
+      Column = PLATFORM_TWIST
+         Type = DP
+         Size = 1
+         Not indexed.
+         Null values allowed.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.0, 02-AUG-2021 (JDR)
+
+       Changed the input argument name &quot;lenout&quot; to &quot;collen&quot; for
+       consistency with other routines.
+
+       Edited the header to comply with NAIF standard.
+       Created complete code example from existing code fragments.
+
+   -CSPICE Version 1.0.2, 12-JUL-2016 (EDW)
+
+       Edit to example program to use &quot;%d&quot; with explicit casts
+       to int for printing SpiceInts with printf.
+
+   -CSPICE Version 1.0.1, 26-MAR-2003 (NJB)
+
+       Fixed description of exception (5):  replaced &quot;lenout-1&quot;
+       with &quot;lenout.&quot; Removed spurious word &quot;clock&quot; from string
+       description.
+
+   -CSPICE Version 1.0.0, 10-JAN-2002 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   return information on loaded EK column specified by index
+</PRE>
+<h4>Link to routine ekcii_c source file <a href='../../../src/cspice/ekcii_c.c'>ekcii_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:05 2021</pre>
+
+</body>
+</html>
+

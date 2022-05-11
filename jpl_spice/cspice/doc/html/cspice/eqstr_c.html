@@ -1,0 +1,366 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>eqstr_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>eqstr_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   eqstr_c ( Equivalent strings ) 
+
+   SpiceBoolean eqstr_c ( ConstSpiceChar    * a,
+                          ConstSpiceChar    * b )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Determine whether two strings are equivalent.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   ALPHANUMERIC
+   ASCII
+   CHARACTER
+   COMPARE
+   PARSING
+   SEARCH
+   STRING
+   TEXT
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   a,
+   b          I   Arbitrary character strings.
+
+   The function returns SPICETRUE if `a' and `b' are equivalent.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   a,
+   b           are arbitrary character strings.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   The function returns SPICETRUE if `a' and `b' are equivalent: that is,
+   if `a' and `b' contain  the same characters in the same order,
+   when white space characters are ignored and uppercase and
+   lowercase characters are considered equal.
+
+   White space characters are those in the set
+
+      { ' ', '\f', '\n', '\r', '\t', '\v' }
+
+   Note that this specification differs from that of the Fortran version
+   of this routine, which considers the blank ( ' ' ) to be the only
+   white space character.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If any of the `a' or `b' input string pointers is null, the
+       error SPICE(NULLPOINTER) is signaled. The function returns the
+       value SPICEFALSE.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine is provided for those cases in which two strings
+   must be compared, and in which allowances are to be made for
+   extra (leading, trailing, and embedded) blanks and differences
+   in case. For the most part,
+
+      <b>eqstr_c</b> ( a, b )
+
+   is SPICETRUE whenever
+
+      <a href="cmprss_c.html">cmprss_c</a> ( &quot; &quot;, 0, a,        MAXLEN, tempa );
+      <a href="ucase_c.html">ucase_c</a>  (            tempa, MAXLEN, tempa );
+
+      <a href="cmprss_c.html">cmprss_c</a> ( &quot; &quot;, 0, b,        MAXLEN, tempb );
+      <a href="ucase_c.html">ucase_c</a>  (            tempb, MAXLEN, tempb );
+
+      eqvlnt = !strncmp ( tempa, tempb, MAXLEN )
+
+   is SPICETRUE. There are two important differences, however.
+
+      1) The single reference to <b>eqstr_c</b> is much simpler to
+         write, and simpler to understand.
+
+      2) The reference to <b>eqstr_c</b> does not require any temporary
+         storage, nor does it require that the strings `a' and `b'
+         be changed. This feature is especially useful when
+         comparing strings received as subprogram arguments
+         against strings stored internally within the subprogram.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) This code provides examples of equivalent and non-equivalent
+      strings according to the algorithm implemented in <b>eqstr_c</b>.
+
+      Example code begins here.
+
+
+      /.
+         Program eqstr_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define SETSIZ       9
+         #define STRLEN       23
+
+         /.
+         Local variables.
+         ./
+         SpiceInt             i;
+
+         /.
+         Initialize the two arrays of strings.
+         ./
+         SpiceChar            str1   [SETSIZ][STRLEN] = {
+                                &quot;A short string   &quot;, &quot;Embedded        blanks&quot;,
+                                &quot;Embedded        blanks&quot;, &quot; &quot;,
+                                &quot;One word left out&quot;, &quot;Extra [] delimiters&quot;,
+                                &quot;Testing 1, 2, 3&quot;, &quot;Case insensitive&quot;,
+                                &quot;Steve&quot; };
+
+         SpiceChar            str2   [SETSIZ][STRLEN] = {
+                                &quot;ashortstring&quot;,      &quot;Em be dd ed bl an ks&quot;,
+                                &quot;   Embeddedblanks&quot;, &quot;          &quot;,
+                                &quot;WORD LEFT OUT&quot;,     &quot;extradelimiters&quot;,
+                                &quot;TESTING123&quot;,        &quot;Case Insensitive&quot;,
+                                &quot;  S t E v E  &quot; };
+
+         /.
+         Compare the two arrays.
+         ./
+         for ( i = 0; i &lt; SETSIZ; i++ )
+         {
+
+            printf( &quot;\n&quot; );
+            printf( &quot;STR1 : %s\n&quot;, str1[i] );
+            printf( &quot;STR2 : %s\n&quot;, str2[i] );
+
+            if ( <b>eqstr_c</b> ( str1[i], str2[i] ) )
+            {
+               printf( &quot;<b>eqstr_c</b>: equivalent.\n&quot; );
+            }
+            else
+            {
+               printf( &quot;<b>eqstr_c</b>: NOT equivalent.\n&quot; );
+            }
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      STR1 : A short string
+      STR2 : ashortstring
+      <b>eqstr_c</b>: equivalent.
+
+      STR1 : Embedded        blanks
+      STR2 : Em be dd ed bl an ks
+      <b>eqstr_c</b>: equivalent.
+
+      STR1 : Embedded        blanks
+      STR2 :    Embeddedblanks
+      <b>eqstr_c</b>: equivalent.
+
+      STR1 :
+      STR2 :
+      <b>eqstr_c</b>: equivalent.
+
+      STR1 : One word left out
+      STR2 : WORD LEFT OUT
+      <b>eqstr_c</b>: NOT equivalent.
+
+      STR1 : Extra [] delimiters
+      STR2 : extradelimiters
+      <b>eqstr_c</b>: NOT equivalent.
+
+      STR1 : Testing 1, 2, 3
+      STR2 : TESTING123
+      <b>eqstr_c</b>: NOT equivalent.
+
+      STR1 : Case insensitive
+      STR2 : Case Insensitive
+      <b>eqstr_c</b>: equivalent.
+
+      STR1 : Steve
+      STR2 :   S t E v E
+      <b>eqstr_c</b>: equivalent.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   [1]  &quot;American National Standard for Programming Languages -- C,&quot;
+        Section 7.3.1.9, p.104, American National Standards Institute,
+        1990.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.3.1, 02-AUG-2021 (JDR)
+
+       Edited the header to comply with NAIF standard.
+
+       Added complete code example based on existing example fragments.
+
+   -CSPICE Version 1.3.0, 27-AUG-1999 (NJB)
+
+       Added check for null input strings. Added logic to handle the
+       case where at least one input string is empty.
+
+   -CSPICE Version 1.2.0, 24-FEB-1999 (NJB)
+
+       Arguments passed to isspace are now cast to unsigned char to
+       suppress compilation warnings on some systems.
+
+   -CSPICE Version 1.1.0, 08-FEB-1998 (NJB)
+
+       Initial assignment of return value added to suppress compilation
+       warnings on some systems.
+
+   -CSPICE Version 1.0.0, 25-OCT-1997 (NJB)
+
+       Based on SPICELIB Version 1.2.0, 03-AUG-1994 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   equivalent strings
+</PRE>
+<h4>Link to routine eqstr_c source file <a href='../../../src/cspice/eqstr_c.c'>eqstr_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:06 2021</pre>
+
+</body>
+</html>
+

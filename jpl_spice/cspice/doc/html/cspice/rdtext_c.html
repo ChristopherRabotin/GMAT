@@ -1,0 +1,371 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>rdtext_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>rdtext_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   rdtext_c ( Read a line from a text file ) 
+
+   void rdtext_c ( ConstSpiceChar * file,
+                   SpiceInt         lineln,
+                   SpiceChar      * line,
+                   SpiceBoolean   * eof    )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Read the next line of text from a text file.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   FILES
+   TEXT
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   file       I   Name of text file.
+   lineln     I   Available room in output line.
+   line       O   Next line from the text file.
+   eof        O   End-of-file indicator.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   file        is the name of the text file from which the next
+               line is to be read. If the file is not currently
+               open, it is opened with a logical unit determined
+               at run time, and the first line of the file is
+               returned. Otherwise, the next line not yet read
+               from the file is read and returned.
+
+   lineln      is the available room in the output line, including
+               the terminating null. If the maximum expected length
+               of an output line is N, `lineln' should be at least N+1.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   line        is next line of text in the specified file.
+               If the end of the file is reached, `line' is blank.
+
+   eof         is SPICETRUE when the end of the file is reached, and is
+               otherwise SPICEFALSE.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If too many files are open already, the error
+       SPICE(TOOMANYFILESOPEN) is signaled by a routine in the call
+       tree of this routine.
+
+   2)  If the attempt to open the file fails, the error
+       SPICE(FILEOPENFAILED) is signaled by a routine in the call
+       tree of this routine.
+
+   3)  If the attempt to read from the file fails, the error
+       SPICE(FILEREADFAILED) is signaled by a routine in the call
+       tree of this routine.
+
+   4)  If the attempt to &quot;inquire&quot; the status of the file fails, the
+       error SPICE(INQUIREFAILED) is signaled by a routine in the
+       call tree of this routine.
+
+   5)  If the `file' input string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   6)  If the `file' input string has zero length, the error
+       SPICE(EMPTYSTRING) is signaled.
+
+   7)  If the `line' output string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   8)  If the `line' output string has length less than two
+       characters, the error SPICE(STRINGTOOSHORT) is signaled, since
+       the output string is too short to contain one character of
+       output data plus a null terminator.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See input `file'.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   <b>rdtext_c</b> reads the next line from a text file. If the file is
+   not currently open, it is opened with a logical unit determined
+   at run time, and the first line of the file is returned.
+   Otherwise, the next line not yet read from the file is returned.
+
+   If the end of the file is reached, an empty line is returned,
+   the end-of-file indicator is SPICETRUE, and the file is closed.
+
+   Several files may be opened and read simultaneously. Thus,
+   you may begin reading from one file before the end of another
+   file has been reached. <b>rdtext_c</b> maintains a separate file pointer
+   for each file.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) The following code example demonstrates how to read single
+      lines from a text file and print them to the screen.
+
+      Use the PCK kernel below as an example of source text file
+      whose contents are read into the program.
+
+         de-403-masses.tpc
+
+
+      Example code begins here.
+
+
+      /.
+         Program rdtext_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+
+      int main()
+      {
+         #define LENOUT 80
+
+         SpiceBoolean eof;
+         SpiceChar    line[LENOUT];
+
+         eof = SPICEFALSE;
+
+         while ( !eof )
+         {
+            <b>rdtext_c</b> ( &quot;de-403-masses.tpc&quot;, LENOUT, line, &amp;eof );
+            printf ( &quot;%s \n&quot;, line );
+
+         }
+
+         return ( 0 );
+
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      KPL/PCK
+
+      This file was produced by Kevin Gehringer on June 15, 1995.
+      The file was updated by Bill Taber on March 26, 1996 to add
+      the value of the AU to the list of items input to the kernel pool.
+
+      Use this at your own risk, for now.
+
+      The masses for the sun and barycenter given in this file are
+      derived from the masses used for the integration of the planetary
+      ephemerides DE-403. The value of the AU given in this ephemeris is.
+
+         AU = 149597870.693 km
+
+      In the ephemeris the values of the masses are given as ratios to
+      of Solar GM to barycenter GM.  These values are given here.
+
+         BODY1_GMSUN/GM  =   6023600.0
+         BODY2_GMSUN/GM  =    408523.71
+         BODY3_GMSUN/GM  =    332946.048134
+         BODY4_GMSUN/GM  =   3098708.0
+         BODY5_GMSUN/GM  =      1047.3486
+         BODY6_GMSUN/GM  =      3497.898
+         BODY7_GMSUN/GM  =     22902.94
+         BODY8_GMSUN/GM  =     19412.24
+         BODY9_GMSUN/GM  = 135000000.0
+
+      These values are the ones that are used in the integration
+      of DE-403 and are used by other products that use DE-403 to
+      provide gravitational force models for integration of
+      trajectories.
+
+
+      \begindata
+
+      AU         =      149597870.693
+
+      BODY1_GM   =          22032.080
+      BODY2_GM   =         324858.599
+      BODY3_GM   =         403503.235
+      BODY4_GM   =          42828.314
+      BODY5_GM   =      126712767.863
+      BODY6_GM   =       37940626.063
+      BODY7_GM   =        5794559.128
+      BODY8_GM   =        6836534.064
+      BODY9_GM   =            983.055
+      BODY10_GM  =   132712440023.310
+
+      \begintext
+
+      The masses of bodies other than the earth and moon are
+      simply taken to be the masses of the barycenters given above.
+      The masses of the earth and moon are taken from DE-403.
+
+      \begindata
+
+      BODY199_GM   =         22032.080
+      BODY299_GM   =         324858.599
+      BODY301_GM   =           4902.799
+      BODY399_GM   =         398600.436
+      BODY499_GM   =          42828.314
+      BODY599_GM   =      126712767.881
+      BODY699_GM   =       37940626.068
+      BODY799_GM   =        5794559.128
+      BODY899_GM   =        6836534.065
+      BODY999_GM   =            983.055
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 2.1.0, 04-AUG-2021 (JDR)
+
+       Changed the input argument name &quot;lenout&quot; to &quot;lineln&quot; for consistency
+       with other routines.
+
+       Edited the header to comply with NAIF standard. Converted the existing
+       code fragments into a complete example and added reference to a text
+       kernel as input.
+
+   -CSPICE Version 2.0.0, 07-OCT-1999 (NJB)
+
+       Changed argument list to conform to SPICE convention: LENOUT
+       now precedes the output string.
+
+       Added description of lineln to the header.
+
+       Added local logical variable for EOF flag.
+
+   -CSPICE Version 1.0.0, 25-MAY-1999 (EDW)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   read a line from a text file
+</PRE>
+<h4>Link to routine rdtext_c source file <a href='../../../src/cspice/rdtext_c.c'>rdtext_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:11 2021</pre>
+
+</body>
+</html>
+

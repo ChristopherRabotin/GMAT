@@ -1,0 +1,784 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>timout_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>timout_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   timout_c ( Time Output ) 
+
+   void timout_c ( SpiceDouble       et,
+                   ConstSpiceChar  * pictur,
+                   SpiceInt          outlen,
+                   SpiceChar       * output )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Convert an input epoch represented in TDB seconds past the TDB
+   epoch of J2000 to a character string formatted to the
+   specifications of a user's format picture.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/time.html">TIME</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   TIME
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   et         I   Epoch in seconds past the ephemeris epoch J2000.
+   pictur     I   A format specification for the output string.
+   outlen     I   Maximum length of output string `output'.
+   output     O   A string representation of the input epoch.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   et          is a double precision representation of time in seconds
+               past the ephemeris epoch J2000.
+
+   pictur      is a string that specifies how the output should be
+               presented. The string is made up of various markers
+               that stand for various components associated with
+               a time.
+
+               There are five types of markers that may appear in a
+               format picture. These are String Markers, Numeric
+               Markers, Meta markers, Modifier Markers and Literal
+               Markers.
+
+               The `pictur' string is examined and the various markers
+               are identified. The output time string is constructed
+               by replacing each of the identified markers with
+               an appropriate time component.
+
+               The various markers and their meanings are discussed
+               in the -Particulars section below.
+
+               Note that leading and trailing blanks in `pictur' are
+               ignored.
+
+   outlen      is the maximum allowed length of the output string
+               `output'. This length must be large enough to hold the
+               output string plus the null-terminator character. If the
+               output string is expected to have N characters, `outlen'
+               should be at least N+1.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   output      is a time string equivalent to the input epoch `et',
+               matching the format specified by `pictur'.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  A leapseconds kernel must be loaded via the routine <a href="furnsh_c.html">furnsh_c</a>
+       before calling this routine. If a leapsecond kernel has not
+       been loaded, an error is signaled by a routine in the call
+       tree of this routine.
+
+   2)  If `pictur' contains the numeric marker &quot;YYYY&quot; and the magnitude
+       of year is too large to be displayed as a four-digit integer,
+       <b>timout_c</b> will replace it by &quot;****&quot;.
+
+   3)  If the requested precision is higher than 12 decimal places,
+       <b>timout_c</b> will truncate the decimal part down to 12, and `output'
+       will have all the remaining digits in the decimal part set to
+       zero.
+
+   4)  Double colon (::), when is not part of one of the supported
+       markers, has no effect and will be presented as is on the
+       output string.
+
+   5)  If the `pictur' input string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   6)  If the `pictur' input string has zero length, the error
+       SPICE(EMPTYSTRING) is signaled.
+
+   7)  If the `output' output string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   8)  If the `output' output string has length less than two
+       characters, the error SPICE(STRINGTOOSHORT) is signaled, since
+       the output string is too short to contain one character of
+       output data plus a null terminator.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   A leapseconds kernel must be &quot;loaded&quot; via the routine <a href="furnsh_c.html">furnsh_c</a>
+   prior to calling <b>timout_c</b>.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   A format picture is simply a string of letters that lets
+   <b>timout_c</b> know where various components of a time representation
+   should be placed during creation of the time string.
+   Here's an example of such a picture:
+
+      MON DD,YYYY  HR:MN:SC.#### (TDB) ::TDB
+
+   Here is a sample of times that would be created by using this
+   format.
+
+      JAN 12,1992  12:28:18.2772 (TDB)
+      FEB 13,1994  23:18:25.2882 (TDB)
+      AUG 21,1995  00:02:00.1881 (TDB)
+
+   As you can see from the samples above, the format picture
+   specifies that every time string created should begin with a
+   three-letter abbreviation for the month, followed by a space and
+   the day of the month. The day of month is followed immediately by
+   a comma and the year. The year component is followed by two
+   spaces. The next outputs are hours represented as a two digit
+   integer, a colon, minutes represented as a two digit integer,
+   another colon, and seconds truncated to 4 decimal places and
+   having a two digit integer part (rounding can be commanded; see
+   the discussion of truncation and rounding below). This is
+   followed by a space and the string &quot;(TDB)&quot;. The special marker
+   &quot;::TDB&quot; in the time picture is a ``invisible'' marker. It is
+   used to specify the time system that should be used in creating
+   the time string (in this case Barycentric Dynamical Time).
+
+   <b>timout_c</b> does not recognize all of the parts of the time format
+   picture in the example above. The list of recognized parts and
+   unrecognized parts is shown in the table below.
+
+     Recognized       Unrecognized
+     ----------       ------------
+     &quot;MON&quot;            &quot; &quot;
+     &quot;DD&quot;             &quot;,&quot;
+     &quot;YYYY&quot;           &quot;  &quot;
+     &quot;HR&quot;             &quot;:&quot;
+     &quot;MN&quot;             &quot;(TDB)&quot;
+     &quot;SC&quot;
+     &quot;.####&quot;
+     &quot;::TDB&quot;
+
+   The unrecognized parts are called literal markers. They are
+   copied exactly as they appear in `pictur' into the output string.
+   The recognized parts of the picture are replaced by a
+   component of time or, as in the case of &quot;::TDB&quot; are used
+   as instructions about the overall properties of the time
+   string.
+
+   The full list of recognized markers, their classification
+   and meaning are given below.
+
+   MARKER       CLASS     MEANING
+   -----------  --------  -----------------------------------------
+   &quot;.##...&quot;     modifier  represents a numeric component that
+                          immediately precedes this in a decimal
+                          format. Number of decimal places
+                          equals the number of '#' characters
+   &quot;::GCAL&quot;     meta      dates are reported in Gregorian calendar
+   &quot;::JCAL&quot;     meta      dates are reported in Julian calendar
+   &quot;::MCAL&quot;     meta      dates after 15 October, 1582 are reported
+                          in Gregorian calendar; before that
+                          dates are reported in Julian calendar
+
+   &quot;::RND&quot;      meta      round output to places specified by
+                          least significant component
+
+   &quot;::TDB&quot;      meta      all components should be TDB
+
+   &quot;::TDT&quot;      meta      all components should be TT (TDT)
+
+   &quot;::TT&quot;       meta      all components should be TT (TDT)
+
+   &quot;::TRNC&quot;     meta      truncate all output components (default)
+   &quot;::UTC&quot;      meta      all components should be UTC (default)
+   &quot;::UTC+h:m&quot;  meta      all components in UTC offset by +h (hours)
+                          and +m (minutes) so as to allow time zones.
+   &quot;::UTC-h:m&quot;  meta      all components in UTC offset by -h (hours)
+                          and -m (minutes) so as to allow time zones.
+   &quot;AMPM&quot;       string    String (either &quot;A.M.&quot; or &quot;P.M.&quot;)
+                          indicating whether hours are before
+                          or after noon.
+   &quot;ampm&quot;       string    String (either &quot;a.m.&quot; or &quot;p.m.&quot;)
+                          indicating whether hours are before
+                          or after noon.
+   &quot;AP&quot;         numeric   AM/PM equivalents of the hour component
+                          of a time.
+   &quot;DD&quot;         numeric   Day of month
+   &quot;DOY&quot;        numeric   Day of year
+   &quot;ERA&quot;        string    String (either &quot;B.C.&quot; or &quot;A.D.&quot;) giving
+                          era associated with an epoch.
+   &quot;?ERA?&quot;      string    String: either &quot; B.C. &quot; or &quot; A.D. &quot; if the
+                          year is before 1000 A.D. otherwise a
+                          blank: &quot; &quot;.
+   &quot;era&quot;        string    String (either &quot;b.c.&quot; or &quot;a.d.&quot;) giving
+                          era associated with an epoch.
+   &quot;?era?&quot;      string    String: either &quot; b.c. &quot; or &quot; a.d. &quot; if the
+                          year is before 1000 A.D. otherwise a
+                          blank: &quot; &quot;.
+   &quot;HR&quot;         numeric   hour component of time
+   &quot;JULIAND&quot;    numeric   Julian date component of time
+   &quot;MM&quot;         numeric   numeric representation of month component
+   &quot;MN&quot;         numeric   minute component of time
+   &quot;MON&quot;        string    upper case three letter abbreviation for
+                          month
+   &quot;Mon&quot;        string    capitalized three letter abbreviation for
+                          month
+   &quot;mon&quot;        string    lower case three letter abbreviation for
+                          month
+   &quot;MONTH&quot;      string    upper case full name of month
+   &quot;Month&quot;      string    capitalized full name of month
+   &quot;month&quot;      string    lower case full name of month
+   &quot;SC&quot;         numeric   seconds component of time
+   &quot;SP1950&quot;     numeric   seconds past 1950 component of time
+   &quot;SP2000&quot;     numeric   seconds past 2000 component of time
+   &quot;YR&quot;         numeric   last two digits of year component of time
+   &quot;YYYY&quot;       numeric   year component of time
+   &quot;WEEKDAY&quot;    string    upper case day of week
+   &quot;Weekday&quot;    string    capitalized day of week
+   &quot;weekday&quot;    string    lower case day of week
+   &quot;WKD&quot;        string    upper case three letter abbreviation for
+                          day of week.
+   &quot;Wkd&quot;        string    capitalized three letter abbreviation for
+                          day of week.
+   &quot;wkd&quot;        string    lower case three letter abbreviation for
+                          day of week.
+
+   String Markers
+
+      String markers are portions of the format picture that will
+      be replaced with a character string that represents the
+      corresponding component of a time.
+
+   Numeric Markers
+
+      Numeric markers are portions of the format picture that will
+      be replaced with a decimal string that represents the
+      corresponding component of a time.
+
+   Meta Markers
+
+      Meta markers (listed under the class ``meta'' in the
+      table above) are used to indicate &quot;global&quot; properties of
+      your time string. You may specify time scale and how
+      rounding should be performed on the components of time
+      in your output string. Meta markers may be placed anywhere
+      in your format picture. They do not contribute to placement
+      of characters in output time strings. Also there are no
+      restrictions on how many meta markers you may place in
+      the format picture. However, if you supply conflicting
+      `meta' markers (for example &quot;::TDT&quot; and &quot;::TDB&quot;) in your
+      picture the first marker listed (in left to right order)
+      overrules the conflicting marker that appears later in
+      the picture.
+
+   Default Meta Markers
+
+      If you do not specify a time system, calendar, or time
+      zone through the use of a Meta Marker, <b>timout_c</b> uses the
+      values returned by the SPICE routine <a href="timdef_c.html">timdef_c</a>. The default
+      time system, calendar returned by <a href="timdef_c.html">timdef_c</a> are UTC and
+      the Gregorian calendar. The default time zone returned
+      by <a href="timdef_c.html">timdef_c</a> is a blank indicating that no time zone offset
+      should be used.
+
+      See the header for the routine <a href="timdef_c.html">timdef_c</a> for a more complete
+      discussion of setting and retrieving default values.
+
+   Modifier Markers
+
+      The numeric markers listed in the table above stand
+      for integers unless they are modified through use of a
+      modifier marker. The strings
+
+         .#
+         .##
+         .###
+         .####
+
+      are used to this end. When a numeric marker is followed
+      immediately by one of these modifiers, the corresponding time
+      component will be written with the number of decimal places
+      indicated by the number of successive occurrences of the
+      character '#'. Any numeric token may be modified.
+
+   Rounding vs. Truncation
+
+      The meta markers ::TRNC and ::RND allow you to control
+      how the output time picture is rounded. If you specify
+      ::TRNC all components of time are simply truncated to
+      the precision specified by the marker and any modifier.
+      If you specify ::RND the output time is rounded to the
+      least significant component of the format picture. The
+      default action is truncation.
+
+      Whether an output time string should be rounded or
+      truncated depends upon what you plan to do with the
+      string. For example suppose you simply want to get the
+      calendar date associated with a time and not the time of
+      day. Then you probably do not want to round your output.
+      Rounding 1992 Dec 31, 13:12:00 to the nearest day
+      produces 1993 Jan 1. Thus in this case rounding is probably
+      not appropriate.
+
+      However, if you are producing output for plotting using
+      Julian Date, seconds past 1950 or seconds past 2000, you will
+      probably want your output rounded so as to produce a smoother
+      plot.
+
+   Time Systems
+
+      <b>timout_c</b> can produce output strings for epochs relative to
+      any of the systems UTC, TT or TDT, or TDB. If you do not
+      explicitly specify a time system, <b>timout_c</b> will produce strings
+      relative to the time system returned by the SPICE routine
+      <a href="timdef_c.html">timdef_c</a>. Unless you call <a href="timdef_c.html">timdef_c</a> and change it, the default time
+      system is UTC. However, by using one of the Meta Markers
+      ::UTC, ::TT, ::TDT, or ::TDB you may specify that <b>timout_c</b>
+      produce time strings relative to the UTC, TT or TDT, or TDB
+      system respectively.
+
+   Time Zones
+
+      The meta markers ::UTC+h:m  and ::UTC-h:m  allow you to
+      offset UTC times so that you may represent times in a time
+      zone other than GMT. For example you can output times in
+      Pacific Standard time by placing the meta-marker ::UTC-8 in
+      your format picture.
+
+      For instance, if you use the picture
+
+         YYYY Mon DD, HR:MN:SC ::UTC
+
+      you will get output strings such as:
+
+         1995 Jan 03, 12:00:00
+
+      If you use the picture
+
+
+         YYYY Mon DD, HR:MN:SC ::UTC-8
+
+      you will get output strings such as:
+
+         1995 Jan 03, 04:00:00
+
+      Finally, if you use the picture
+
+         YYYY Mon DD, HR:MN:SC ::UTC-8:15
+
+      you will get output string
+
+         1995 Jan 03, 03:45:00
+
+      Note that the minutes are always added or subtracted based on
+      the sign present in the time zone specifier. In the case of
+      ::UTC+h:m, minutes are added. In the case ::UTC-h:m, minutes
+      are subtracted.
+
+      The unsigned part of the hours component can be no more than
+      12. The unsigned part of the minutes component can be no
+      more than 59.
+
+   Calendars
+
+      The calendar currently used by western countries is the
+      Gregorian calendar. This calendar begins on Oct 15, 1582.
+      Prior to Gregorian calendar the Julian calendar was used. The
+      last Julian calendar date prior to the beginning of the
+      Gregorian calendar is Oct 5, 1582.
+
+      The primary difference between the Julian and Gregorian
+      calendars is in the determination of leap years. Nevertheless,
+      both can be formally extended backward and forward in time
+      indefinitely.
+
+      By default <b>timout_c</b> uses the default calendar returned by
+      <a href="timdef_c.html">timdef_c</a>. Under most circumstances this will be the Gregorian
+      calendar (::GCAL). However you may specify that <b>timout_c</b> use a
+      specific calendar through use of one of the calendar Meta
+      Markers. You may specify that <b>timout_c</b> use the Julian calendar
+      (::JCAL), the Gregorian calendar (::GCAL)  or a mixture of
+      both (::MCAL).
+
+      If you specify ::MCAL, epochs that occur after the beginning
+      of the Gregorian calendar will be represented using the
+      Gregorian calendar, and epochs prior to the beginning of the
+      Gregorian calendar will be represented using the Julian
+      calendar.
+
+   Getting Software to Construct Pictures for You.
+
+      Although it is not difficult to construct time format
+      pictures, you do need to be aware of the various markers that
+      may appear in a format picture.
+
+      There is an alternative means for getting a format picture.
+      The routine <a href="tpictr_c.html">tpictr_c</a> constructs format pictures from a sample
+      time string. For example, suppose you would like your time
+      strings to look like the basic pattern of the string below.
+
+         &quot;Fri Jul 26 12:22:09 PDT 1996&quot;
+
+      You can call <a href="tpictr_c.html">tpictr_c</a> with this string, and it will create the
+      appropriate `pictur' for use with <b>timout_c</b>.
+
+         <a href="tpictr_c.html">tpictr_c</a> ( &quot;Fri Jul 26 12:22:09 PDT 1996&quot;, LENPIC, LENERR,
+                    pictur, &amp;ok, errmsg );
+
+      The result will be:
+
+         &quot;Wkd Mon DD HR:MN:SC (PDT) ::UTC-7&quot;
+
+      Note: not every date that you can read is interpretable by
+      <a href="tpictr_c.html">tpictr_c</a>. For example, you might be able to understand that
+      19960212121116 is Feb 2 1996, 12:11:16. However, <a href="tpictr_c.html">tpictr_c</a>
+      cannot recognize this string. Thus it is important to check
+      the logical output OK to make sure that <a href="tpictr_c.html">tpictr_c</a> was able to
+      understand the time picture you provided.
+
+      Even thought <a href="tpictr_c.html">tpictr_c</a> can not recognize every time pattern that
+      has been used by various people, it does recognize nearly all
+      patterns that you use when you want to communicate outside
+      your particular circle of colleagues.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for these examples may differ across
+   platforms. The results depend on the SPICE kernels used as input,
+   the compiler and supporting libraries, and the machine specific
+   arithmetic implementation.
+
+   1) Given a sample with the format of the UNIX date string
+      local to California, create a SPICE time picture for use
+      in <b>timout_c</b>.
+
+      Using that SPICE time picture, convert a series of ephemeris
+      times to that picture format.
+
+      Use the LSK kernel below to load the leap seconds and time
+      constants required for the conversions.
+
+         naif0012.tls
+
+
+      Example code begins here.
+
+
+      /.
+         Program timout_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define ERRLEN       400
+         #define TIMLEN       65
+
+         /.
+         Local variables
+         ./
+         SpiceBoolean         ok;
+
+         SpiceChar            err    [ERRLEN];
+         SpiceChar            pictur [TIMLEN];
+         SpiceChar          * sample;
+         SpiceChar            timstr [TIMLEN];
+         SpiceChar          * utcstr;
+
+         SpiceDouble          et;
+
+
+         /.
+         Load LSK file.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( &quot;naif0012.tls&quot; );
+
+         /.
+         Create the required time picture.
+         ./
+         sample = &quot;Thu Oct 01 11:11:11 PDT 1111&quot;;
+
+         <a href="tpictr_c.html">tpictr_c</a> ( sample, ERRLEN, TIMLEN, pictur, &amp;ok, err );
+
+         if ( ! ok )
+         {
+
+            printf( &quot;Invalid time picture.\n&quot; );
+            printf( &quot;%s\n&quot;, err );
+
+         }
+         else
+         {
+
+            /.
+            Convert the input UTC time to ephemeris time.
+            ./
+            utcstr = &quot;24 Mar 2018  16:23:00 UTC&quot;;
+            <a href="str2et_c.html">str2et_c</a> ( utcstr, &amp;et );
+
+            /.
+            Now convert `et' to the desired output format.
+            ./
+            <b>timout_c</b> ( et, pictur, TIMLEN, timstr );
+
+            printf( &quot;Sample format:  %s\n&quot;, sample );
+            printf( &quot;Time picture :  %s\n&quot;, pictur );
+            printf( &quot;\n&quot; );
+            printf( &quot;Input UTC    :  %s\n&quot;, utcstr );
+            printf( &quot;Output       :  %s\n&quot;, timstr );
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Sample format:  Thu Oct 01 11:11:11 PDT 1111
+      Time picture :  Wkd Mon DD HR:MN:SC PDT YYYY ::UTC-7
+
+      Input UTC    :  24 Mar 2018  16:23:00 UTC
+      Output       :  Sat Mar 24 09:23:00 PDT 2018
+
+
+   2) Convert a UTC time to a string that contains both the
+      calendar representations of the date as well as the Julian
+      date; for example a string of the form:
+
+         &quot;Thu Aug 01 09:47:16 PDT 1996 (2450297.1994 JDUTC)&quot;
+
+      Use the LSK kernel below to load the leap seconds and time
+      constants required for the conversions.
+
+         naif0012.tls
+
+
+      Example code begins here.
+
+
+      /.
+         Program timout_ex2
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define TIMLEN       80
+
+         /.
+         Local variables
+         ./
+         SpiceChar          * pictur;
+         SpiceChar            timstr [TIMLEN];
+         SpiceChar          * utcstr;
+
+         SpiceDouble          et;
+
+         /.
+         Load LSK file.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( &quot;naif0012.tls&quot; );
+
+         /.
+         Convert the input UTC time to ephemeris time.
+         ./
+         utcstr = &quot;24 Mar 2018  16:23:00 UTC&quot;;
+         <a href="str2et_c.html">str2et_c</a> ( utcstr, &amp;et );
+
+         /.
+         Create the required time picture. This could be done
+         using <a href="tpictr_c.html">tpictr_c</a>.
+         ./
+         pictur = &quot;Wkd Mon DD HR:MN ::UTC-7 YYYY (JULIAND.#### JDUTC)&quot;;
+
+         /.
+         Now convert `et' to the desired output format.
+         ./
+         <b>timout_c</b> ( et, pictur, TIMLEN, timstr );
+         printf( &quot;Input UTC:  %s\n&quot;, utcstr );
+         printf( &quot;Output   :  %s\n&quot;, timstr );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Input UTC:  24 Mar 2018  16:23:00 UTC
+      Output   :  Sat Mar 24 09:23  2018 (2458202.1826 JDUTC)
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.2.0, 10-AUG-2021 (EDW) (JDR) (NJB)
+
+       Changed the input argument name &quot;lenout&quot; to &quot;outlen&quot; for
+       consistency with other routines.
+
+       Corrected typo preventing correct calculation of decimal
+       values for HR.###... and MN.###... markers with ::UTC+N:M
+       and ::UTC-N:M meta tags.
+
+       Added &quot;::TT&quot; as a time system meta marker equivalent-to/
+       alias-for &quot;::TDT&quot;. No change to functionality.
+
+       Edited the header to comply with NAIF standard. Converted the
+       existing code fragments into complete examples and added
+       references to required LSKs.
+
+       Updated -Exceptions section, rewording the existing entry
+       and adding three additional cases. Fixed call to <a href="tpictr_c.html">tpictr_c</a> in
+       -Particulars.
+
+       Corrected header example string: changed token HH to HR.
+
+       Updated &quot;output&quot; argument description in -Detailed_Output.
+
+   -CSPICE Version 1.1.1, 14-AUG-2006 (EDW)
+
+       Edited incorrect description of output. Replace mention of
+       <a href="ldpool_c.html">ldpool_c</a> with <a href="furnsh_c.html">furnsh_c</a>.
+
+   -CSPICE Version 1.1.0, 09-FEB-1998 (NJB)
+
+       Re-implemented routine without dynamically allocated, temporary
+       strings. Updated the -Exceptions header section.
+
+   -CSPICE Version 1.0.0, 25-OCT-1997 (EDW)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   Convert and format d.p. seconds past J2000 as a string
+</PRE>
+<h4>Link to routine timout_c source file <a href='../../../src/cspice/timout_c.c'>timout_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:14 2021</pre>
+
+</body>
+</html>
+

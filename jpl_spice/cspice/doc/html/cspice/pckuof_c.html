@@ -1,0 +1,382 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>pckuof_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>pckuof_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   pckuof_c ( PCK, unload binary file ) 
+
+   void pckuof_c ( SpiceInt handle )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Unload a binary PCK file so that it will no longer be searched by
+   the readers.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/daf.html">DAF</a>
+   <a href="../req/pck.html">PCK</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   FILES
+   PCK
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   handle     I   Handle of file to be unloaded
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   handle      is the integer handle assigned to the PCK file upon
+               loading.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  Unloading a file that has not been loaded is a no-op.
+       No error is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   The file referred to by `handle' is unloaded.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   A PCK file is removed from consideration during a search by the
+   readers by a call to <b>pckuof_c</b>.
+
+   The file table entry corresponding to the file referenced by
+   `handle' is removed and the file is closed. Any segment table
+   entry which came from the specified file is also deleted.
+
+   If the file specified by `handle' is not currently loaded in the
+   PCK system, no action is taken.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for these examples may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Unload a binary PCK kernel specified by an integer handle, making
+      room to load another PCK.
+
+         <b>pckuof_c</b> ( handle );
+
+
+   2) Load a high precision PCK file for the Earth and compute the
+      position transformation matrix from ITRF93 to J2000 at
+      2000 Jan 01 12:00:00 TDB.
+
+      Use the PCK kernel below to load the required triaxial
+      ellipsoidal shape model and orientation data for the Earth.
+
+         earth_720101_070426.bpc
+
+
+      Example code begins here.
+
+
+      /.
+         Program pckuof_ex2
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main()
+      {
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble             xform  [3][3];
+
+         SpiceInt                handle;
+         SpiceInt                i;
+
+         /.
+         Open the PCK for read access. This call may be replaced (as
+         recommended by NAIF) by <a href="furnsh_c.html">furnsh_c</a>.
+         ./
+         <a href="pcklof_c.html">pcklof_c</a> ( &quot;earth_720101_070426.bpc&quot;, &amp;handle );
+
+         /.
+         Find the position transformation matrix at
+
+            2000 Jan 01 12:00:00 TDB
+
+         which corresponds to ephemeris time 0.
+         ./
+         <a href="pxform_c.html">pxform_c</a>( &quot;ITRF93&quot;, &quot;J2000&quot;, 0.0, xform );
+
+         /.
+         Display the results.
+         ./
+         printf (&quot;Position transformation from ITRF93 to J2000 frame:\n\n&quot; );
+         for ( i = 0; i &lt; 3; i++ )
+         {
+            printf(&quot;%20.10f %19.10f %19.10f\n&quot;,
+                    xform[i][0], xform[i][1], xform[i][2] );
+         }
+
+         /.
+         Close the PCK file. This call may be replaced (as
+         recommended by NAIF) by <a href="unload_c.html">unload_c</a>, if <a href="furnsh_c.html">furnsh_c</a> has
+         been used to load the file.
+         ./
+         <b>pckuof_c</b> ( handle );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Position transformation from ITRF93 to J2000 frame:
+
+              0.1769805935        0.9842143409       -0.0000251874
+             -0.9842143410        0.1769805928       -0.0000274792
+             -0.0000225878        0.0000296531        0.9999999993
+
+
+   3) The following example extracts the first 20 lines of the
+      comment area of a binary PCK, displaying the comments on
+      the terminal screen.
+
+
+      Example code begins here.
+
+
+      /.
+         Program pckuof_ex3
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main()
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define FILSIZ          256
+         #define LINLEN          1001
+         #define BUFFSZ          20
+
+         /.
+         Local variables.
+         ./
+         SpiceBoolean            done;
+
+         SpiceChar               pcknam [FILSIZ];
+         SpiceChar               buffer [BUFFSZ][LINLEN];
+
+         SpiceInt                handle;
+         SpiceInt                i;
+         SpiceInt                n;
+
+
+         <a href="prompt_c.html">prompt_c</a> ( &quot;Enter name of PCK &gt; &quot;, FILSIZ, pcknam );
+
+         /.
+         Open the PCK for read access. This operation could have
+         been done with <a href="dafopr_c.html">dafopr_c</a>.
+         ./
+         <a href="pcklof_c.html">pcklof_c</a> ( pcknam, &amp;handle );
+
+         /.
+         Extract up to 20 lines from the comment area of the
+         loaded PCK file and display them on the terminal screen.
+         ./
+         <a href="dafec_c.html">dafec_c</a> ( handle, BUFFSZ, LINLEN, &amp;n, buffer, &amp;done );
+
+         for ( i = 0;  i &lt; n;  i++ )
+         {
+               printf ( &quot;%s\n&quot;, buffer[i] );
+         }
+
+         /.
+         Close the PCK file. This operation could have been done
+         with <a href="dafcls_c.html">dafcls_c</a>.
+         ./
+         <b>pckuof_c</b> ( handle );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, using the hight precision PCK file for the Earth named
+      earth_720101_070426.bpc as input PCK file, the output was:
+
+
+      Enter name of PCK &gt; earth_720101_070426.bpc
+
+
+      Binary &quot;High Accuracy&quot; Earth PCK File
+      ======================================
+
+      Created 27-APR-2007 by NJB (NAIF/JPL)
+      Original file name:   earth_720101_070426.bpc
+
+      Data Source
+
+         Input file:           EOP file 2007_04_26_long.eop
+                               (Copied from WWW URL
+                               http://epic.jpl.nasa.gov/nav/eop/latest.long)
+
+      Coverage
+
+         ET Start time:             1972 JAN 01 00:00:42.183
+         ET Stop time:              2007 APR 26 00:01:05.185
+
+         UTC Epoch of last datum:   26-APR-2007
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   K.S. Zukor          (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.1, 10-AUG-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Added complete
+       code examples.
+
+       Improved the documentation of -Keywords, -Exceptions, -Particulars
+       and -Index_Entries sections.
+
+   -CSPICE Version 1.0.0, 08-FEB-1998 (NJB) (KSZ)
+
+       Based on SPICELIB Version 1.0.0, 16-MAR-1994 (KSZ)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   unload PCK file
+</PRE>
+<h4>Link to routine pckuof_c source file <a href='../../../src/cspice/pckuof_c.c'>pckuof_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:10 2021</pre>
+
+</body>
+</html>
+

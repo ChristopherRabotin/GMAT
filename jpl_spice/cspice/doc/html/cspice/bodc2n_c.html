@@ -1,0 +1,442 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>bodc2n_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>bodc2n_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   bodc2n_c ( Body ID code to name translation ) 
+
+   void bodc2n_c ( SpiceInt        code,
+                   SpiceInt        namlen,
+                   SpiceChar     * name,
+                   SpiceBoolean  * found   )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Translate the SPICE integer code of a body into a common name
+   for that body.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/naif_ids.html">NAIF_IDS</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   BODY
+   CONVERSION
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   code       I   Integer ID code to be translated into a name.
+   namlen     I   Available length in the output string `name'.
+   name       O   A common name for the body identified by `code'.
+   found      O   SPICETRUE if translated, otherwise false.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   code        is an integer code for a body ---
+               a planet, satellite, barycenter, spacecraft,
+               asteroid, comet, or other ephemeris object.
+
+   namlen      is the maximum allowed length of the output name,
+               including the terminating null character. For example,
+               if the caller wishes to be able to accept a 32-character
+               name, `namlen' must be set to (at least) 33. The current
+               maximum name length is 32 characters, so a value of 33
+               for `namlen' will suffice.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   name        is a common name of the body identified by `code'.
+               If `code' has more than one translation, then the
+               most recently defined `name' corresponding to `code'
+               is returned.  `name' will have the exact format (case
+               and blanks) as when the name/code pair was defined.
+
+               No more than `namlen' characters, including the
+               terminating null, will be written to `name'. A terminating
+               null will always be written.
+
+   found       is SPICETRUE if `code' has a translation. Otherwise, `found'
+               is SPICEFALSE.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   MAXL        is the maximum allowable length of a body name. The
+               current value of this parameter is 36.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If there is any problem with the body name-ID mapping kernel
+       variables present in the kernel pool, an error is signaled by
+       a routine in the call tree of this routine.
+
+   2)  If the `name' output string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   3)  If the `name' output string has length less than two
+       characters, the error SPICE(STRINGTOOSHORT) is signaled, since
+       the output string is too short to contain one character of
+       output data plus a null terminator.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   Body-name mappings may be defined at run time by loading text
+   kernels containing kernel variable assignments of the form
+
+      NAIF_BODY_NAME += ( &lt;name 1&gt;, ... )
+      NAIF_BODY_CODE += ( &lt;code 1&gt;, ... )
+
+   See naif_ids.req for details.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   <b>bodc2n_c</b> is one of five related subroutines,
+
+      <a href="bods2c_c.html">bods2c_c</a>      Body string to code
+      <a href="bodc2s_c.html">bodc2s_c</a>      Body code to string
+      <a href="bodn2c_c.html">bodn2c_c</a>      Body name to code
+      <b>bodc2n_c</b>      Body code to name
+      <a href="boddef_c.html">boddef_c</a>      Body name/code definition
+
+   <a href="bods2c_c.html">bods2c_c</a>, <a href="bodc2s_c.html">bodc2s_c</a>, <a href="bodn2c_c.html">bodn2c_c</a>, and <b>bodc2n_c</b> perform translations between
+   body names and their corresponding integer ID codes which are
+   used in SPICE files and routines.
+
+   <a href="bods2c_c.html">bods2c_c</a> is a slightly more general version of <a href="bodn2c_c.html">bodn2c_c</a>: support
+   for strings containing ID codes in string format enables a caller
+   to identify a body using a string, even when no name is
+   associated with that body.
+
+   <a href="bodc2s_c.html">bodc2s_c</a> is a general version of <b>bodc2n_c</b>; the routine returns either
+   the name assigned in the body ID to name mapping or a string
+   representation of the CODE value if no mapping exists.
+
+   <a href="boddef_c.html">boddef_c</a> assigns a body name to ID mapping. The mapping has priority
+   in name-to-ID and ID-to-name translations.
+
+   Refer to naif_id.req for the list of name/code associations built into
+   SPICE, and for details concerning adding new name/code
+   associations at run time by loading text kernels.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for these examples may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Suppose you ran the utility program SPACIT to summarize
+      an SPK ephemeris file and the following data was output
+      to the terminal screen.
+
+         ----------------------------------------------------------
+         Segment identifier: JPL archive 21354
+         Body        : -77                         Center     : 399
+         From        : 1990 DEC 08 18:00:00.000
+         To          : 1990 DEC 10 21:10:00.000
+         Reference   : DE-200                      SPK Type    :1
+         ----------------------------------------------------------
+
+      Write a program to translate the body codes shown in the SPACIT
+      output.
+
+      Example code begins here.
+
+
+      /.
+         Program bodc2n_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+         /.
+         Local constants.
+         ./
+         #define MAXLEN          32
+
+         SpiceInt                code[] = { -77, 399 };
+
+         /.
+         Local variables.
+         ./
+         SpiceBoolean            found;
+         SpiceChar               name  [ MAXLEN ];
+         SpiceInt                i;
+
+         for ( i = 0; i &lt; 2; i++ )
+         {
+            <b>bodc2n_c</b> ( code[i], MAXLEN, name, &amp;found );
+
+            if ( found )
+            {
+               printf ( &quot;body ID %d =  %s\n&quot;, (int)code[i], name );
+            }
+            else
+            {
+               printf ( &quot;No name corresponding to code: %d\n&quot;,
+                        (int)code[i]                         );
+            }
+         }
+
+         return ( 0 );
+
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      body ID -77 =  GALILEO ORBITER
+      body ID 399 =  EARTH
+
+
+      Note, you could also read the body and center codes directly from
+      the SPK files, using the appropriate DAF routines, and then
+      translate them, as above.
+
+   2) Apply the <b>bodc2n_c</b> call to several IDs representing codes
+      included in the default SPICE ID-name lists and codes not
+      included in the list.
+
+      Example code begins here.
+
+
+      /.
+         Program bodc2n_ex2
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main()
+      {
+         /.
+         Local constants.
+         ./
+         #define  LENNAM         37
+
+         /.
+         Local variables.
+         ./
+         SpiceBoolean            found;
+         SpiceChar               name [LENNAM];
+         SpiceInt                i;
+
+         /.
+         Assign an array of body ID codes. Not all the listed codes
+         map to a body name.
+         ./
+         SpiceInt                code[] = { 399, 0, 3, -77,
+                                            11, -1, 6000001 };
+
+         /.
+         Loop over the `code' array, call <b>bodc2n_c</b> for each
+         element of `code'.
+         ./
+         printf( &quot;Code      Name\n&quot; );
+         printf( &quot;-------   -----------------------\n&quot; );
+
+         for (i=0; i&lt;7; i++ )
+         {
+            <b>bodc2n_c</b> ( code[i], LENNAM, name, &amp;found );
+
+            if ( found )
+            {
+               printf( &quot;%7d   %s\n&quot;, (int)code[i], name );
+            }
+            else
+            {
+               printf( &quot;%7d   *** NOT FOUND ***\n&quot;, (int)code[i] );
+            }
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Code      Name
+      -------   -----------------------
+          399   EARTH
+            0   SOLAR SYSTEM BARYCENTER
+            3   EARTH BARYCENTER
+          -77   GALILEO ORBITER
+           11   *** NOT FOUND ***
+           -1   GEOTAIL
+      6000001   *** NOT FOUND ***
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   B.V. Semenov        (JPL)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 2.3.0, 10-AUG-2021 (JDR)
+
+       Changed the argument name &quot;lenout&quot; to &quot;namlen&quot; and edited the
+       header comments to comply with NAIF standard.
+
+       Edited the header to comply with NAIF standard. Added complete
+       code examples.
+
+       Added description of MAXL parameter. Added -Exceptions, -Restrictions
+       and -Files.
+
+   -CSPICE Version 2.2.2, 24-APR-2010 (EDW)
+
+       Edit to -Particulars section to document the <a href="bodc2s_c.html">bodc2s_c</a> routine.
+       Minor edit to code comments eliminating typo.
+
+   -CSPICE Version 2.2.1, 27-FEB-2008 (BVS)
+
+       Corrected the contents of the -Required_Reading section of
+       the header.
+
+   -CSPICE Version 2.2.0, 02-SEP-1999 (NJB)
+
+       Local type logical variable now used for found flag used in
+       interface of bodc2n_.
+
+   -CSPICE Version 2.1.1, 25-MAR-1998 (EDW)
+
+       Minor corrections to header.
+
+   -CSPICE Version 2.1.0, 09-FEB-1998 (NJB)
+
+       Re-implemented routine without dynamically allocated, temporary
+       strings. Updated the -Exceptions header section.
+
+   -CSPICE Version 2.0.1, 16-JAN-1998 (EDW)
+
+       Corrected and clarified header entries.
+
+   -CSPICE Version 1.0.0, 25-OCT-1997 (NJB)
+
+       Based on SPICELIB Version 1.0.0, 23-JAN-1996 (KRG)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   body id code to name
+</PRE>
+<h4>Link to routine bodc2n_c source file <a href='../../../src/cspice/bodc2n_c.c'>bodc2n_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:02 2021</pre>
+
+</body>
+</html>
+

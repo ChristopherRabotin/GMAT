@@ -1,0 +1,507 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>ekops_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>ekops_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   ekops_c ( EK, open scratch file ) 
+
+   void ekops_c ( SpiceInt   * handle )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Open a scratch (temporary) E-kernel file and prepare the file
+   for writing.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/ek.html">EK</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   EK
+   FILES
+   UTILITY
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   handle     O   File handle attached to new EK file.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   handle      is the EK file handle of the file opened by this
+               routine. This handle is used to identify the file
+               to other EK routines.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   SPICE_DAS_FTSIZE
+
+               is the maximum number of DAS files that a user can
+               have open simultaneously. This includes any files used
+               by the DAS system.
+
+               See the header file SpiceDAS.h for the actual value of
+               this parameter.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the indicated file cannot be opened, an error is signaled
+       by a routine in the call tree of this routine. The new file
+       will be deleted.
+
+   2)  If an I/O error occurs while reading or writing the indicated
+       file, the error is signaled by a routine in the call tree of
+       this routine.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   This routine creates a temporary EK file; the file is deleted
+   when the calling program terminates or when the file is closed
+   using the CSPICE routine <a href="ekcls_c.html">ekcls_c</a>.
+
+   See the EK Required Reading for a discussion of the EK file
+   format.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine operates by side effects: it opens and prepares
+   an EK for addition of data. &quot;Scratch&quot; files are automatically
+   deleted when the calling program terminates normally or when
+   closed using the CSPICE routine <a href="ekcls_c.html">ekcls_c</a>.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Suppose we want to create an E-kernel which contains a table
+      of items that have been ordered but we do not want to keep
+      the file. The columns of this table are shown below:
+
+         DATAITEMS
+
+            Column Name     Data Type
+            -----------     ---------
+            ITEM_ID         INTEGER
+            ORDER_ID        INTEGER
+            ITEM_NAME       CHARACTER*(*)
+            DESCRIPTION     CHARACTER*(*)
+            PRICE           DOUBLE PRECISION
+
+
+      This examples demonstrates how to open a scratch EK file;
+      create the segment described above, how to insert a new record
+      into it, and how to summarize its contents.
+
+
+      Example code begins here.
+
+
+      /.
+         Program ekops_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &lt;string.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters
+         ./
+         #define TABLE        &quot;DATAITEMS&quot;
+         #define DECLEN       201
+         #define DESCLN       81
+
+         /.
+         One value per row/column element.
+         ./
+         #define MAXVAL       1
+         #define NAMLEN       41
+         #define COLSLN       5
+
+         static SpiceChar     EKDTYP [4][5] = { &quot;CHR&quot;, &quot;DP&quot;, &quot;INT&quot;, &quot;TIME&quot; };
+
+         /.
+         Local variables
+         ./
+         SpiceChar            cdecls [SPICE_EK_MXCLSG][DECLEN];
+         SpiceChar            cnames [SPICE_EK_MXCLSG][SPICE_EK_CSTRLN];
+         SpiceChar            cvals  [MAXVAL][NAMLEN];
+         SpiceChar            descrp [DESCLN];
+         SpiceChar            itemnm [NAMLEN];
+
+         SpiceDouble          dvals  [MAXVAL];
+         SpiceDouble          price;
+
+
+         SpiceEKSegSum        segsum;
+
+         SpiceInt             esize;
+         SpiceInt             handle;
+         SpiceInt             i;
+         SpiceInt             itemid;
+         SpiceInt             ivals  [MAXVAL];
+         SpiceInt             nseg;
+         SpiceInt             nvals;
+         SpiceInt             ordid;
+         SpiceInt             recno;
+         SpiceInt             segno;
+
+         SpiceBoolean         isnull;
+
+         /.
+         Open a scratch EK file to use for temporary
+         storage.
+         ./
+         <b>ekops_c</b> ( &amp;handle );
+
+         /.
+         Set up the table and column names and declarations
+         for the DATAITEMS segment.  We'll index all of
+         the columns.  All columns are scalar, so we omit
+         the size declaration.
+         ./
+         strncpy( cnames[0], &quot;ITEM_ID&quot;, 8 );
+         strncpy( cdecls[0], &quot;DATATYPE = INTEGER, INDEXED = TRUE&quot;, 35 );
+
+         strncpy( cnames[1], &quot;ORDER_ID&quot;, 9 );
+         strncpy( cdecls[1], &quot;DATATYPE = INTEGER, INDEXED = TRUE&quot;, 35 );
+
+         strncpy( cnames[2], &quot;ITEM_NAME&quot;, 10 );
+         strncpy( cdecls[2], &quot;DATATYPE = CHARACTER*(*),INDEXED  = TRUE&quot;, 41 );
+
+         strncpy( cnames[3], &quot;DESCRIPTION&quot;, 12 );
+         strncpy( cdecls[3], &quot;DATATYPE = CHARACTER*(*),INDEXED  = TRUE&quot;, 41 );
+
+         strncpy( cnames[4], &quot;PRICE&quot;, 6 );
+         strncpy( cdecls[4], &quot;DATATYPE = DOUBLE PRECISION,INDEXED  = TRUE&quot;,
+                  44 );
+
+         /.
+         Start the segment. Since we have no data for this
+         segment, start the segment by just defining the new
+         segment's schema.
+         ./
+         <a href="ekbseg_c.html">ekbseg_c</a> ( handle, TABLE,  COLSLN, SPICE_EK_CSTRLN,
+                    cnames, DECLEN, cdecls, &amp;segno );
+
+         /.
+         Append a new, empty record to the DATAITEMS
+         table. Recall that the DATAITEMS table
+         is the first segment.  The call will return
+         the number of the new, empty record.
+         ./
+         segno = 0;
+         <a href="ekappr_c.html">ekappr_c</a> ( handle, segno, &amp;recno );
+
+         /.
+         At this point, the new record is empty. We fill in the
+         data here.  Data items are filled in one column at a
+         time. The order in which the columns are filled in is
+         not important.  We use the different add column entry
+         routines to fill in column entries.  We'll assume
+         that no entries are null.  All entries are scalar,
+         so the entry size is 1.
+         ./
+         isnull   =  SPICEFALSE;
+         esize    =  1;
+
+         /.
+         The following variables will contain the data for
+         the new record.
+         ./
+         ordid    =   10011;
+         itemid   =   531;
+         strncpy( itemnm, &quot;Sample item&quot;, 12 );
+         strncpy( descrp, &quot;This sample item is used only in tests.&quot;, 40 );
+         price    =   1345.67;
+
+         /.
+         Note that the names of the routines called
+         correspond to the data types of the columns.
+         ./
+         <a href="ekacei_c.html">ekacei_c</a> ( handle, segno, recno, &quot;ORDER_ID&quot;, esize, &amp;ordid, isnull );
+
+         <a href="ekacei_c.html">ekacei_c</a> ( handle, segno, recno, &quot;ITEM_ID&quot;, esize, &amp;itemid, isnull );
+
+         <a href="ekacec_c.html">ekacec_c</a> ( handle, segno,  recno,  &quot;ITEM_NAME&quot;,
+                    esize,  NAMLEN, itemnm, isnull );
+
+         <a href="ekacec_c.html">ekacec_c</a> ( handle, segno,  recno,  &quot;DESCRIPTION&quot;,
+                    esize,  DESCLN, descrp, isnull );
+
+         <a href="ekaced_c.html">ekaced_c</a> ( handle, segno, recno, &quot;price&quot;, esize, &amp;price, isnull );
+
+         /.
+         At this point, we could perform read operations
+         on the EK.
+
+         Return the number of segments in the EK. Dump the
+         desired summary information for each one.
+         ./
+         nseg = <a href="eknseg_c.html">eknseg_c</a> ( handle );
+         printf( &quot;Number of segments = %2d\n&quot;, (int)nseg );
+         printf( &quot;\n&quot; );
+
+         for ( segno = 0; segno &lt; nseg; segno++ )
+         {
+
+            <a href="ekssum_c.html">ekssum_c</a> ( handle, segno, &amp;segsum );
+
+            printf( &quot;Table containing segment: %s\n&quot;, segsum.tabnam );
+            printf( &quot;Number of rows          : %2d\n&quot;, (int)segsum.nrows  );
+            printf( &quot;Number of columns       : %2d\n&quot;, (int)segsum.ncols  );
+            printf( &quot;Table data              :\n&quot; );
+
+            for ( i = 0; i &lt; segsum.ncols; i++ )
+            {
+               printf( &quot;  Column: %s\n&quot;, segsum.cnames[i] );
+               printf( &quot;  Type  : %s\n&quot;, EKDTYP[ segsum.cdescrs[i].dtype ] );
+
+               for ( recno = 0; recno &lt; segsum.nrows; recno++ )
+               {
+                  if ( segsum.cdescrs[i].dtype == SPICE_CHR )
+                  {
+                     <a href="ekrcec_c.html">ekrcec_c</a> ( handle,  segno, recno,  segsum.cnames[i],
+                                NAMLEN, &amp;nvals, cvals, &amp;isnull           );
+
+                     if ( isnull )
+                     {
+                        printf( &quot;  Data  : &lt;null&gt;\n&quot; );
+                     }
+                     else
+                     {
+                        printf( &quot;  Data  : %s\n&quot;, cvals[0] );
+                     }
+                  }
+                  else if ( segsum.cdescrs[i].dtype == SPICE_DP )
+                  {
+                     <a href="ekrced_c.html">ekrced_c</a> (  handle,  segno,  recno,  segsum.cnames[i],
+                                &amp;nvals,   dvals, &amp;isnull                   );
+
+                     if ( isnull )
+                     {
+                        printf( &quot;  Data  : &lt;null&gt;\n&quot; );
+                     }
+                     else
+                     {
+                        printf( &quot;  Data  : %9.2f\n&quot;, dvals[0] );
+                     }
+                  }
+                  else if ( segsum.cdescrs[i].dtype == SPICE_INT )
+                  {
+                     <a href="ekrcei_c.html">ekrcei_c</a> (  handle,  segno,  recno,  segsum.cnames[i],
+                                &amp;nvals,   ivals, &amp;isnull                   );
+
+                     if ( isnull )
+                     {
+                        printf( &quot;  Data  : &lt;null&gt;\n&quot; );
+                     }
+                     else
+                     {
+                        printf( &quot;  Data  : %6d\n&quot;, ivals[0] );
+                     }
+                  }
+
+                  /.
+                  There is no time data. Otherwise, we would need
+                  to use an LSK and <a href="ekrced_c.html">ekrced_c</a> to read it
+                  (internally, it is stored as double precision).
+                  ./
+                  printf( &quot;\n&quot; );
+               }
+            }
+
+            printf( &quot;----------------------------------------\n&quot; );
+         }
+
+         /.
+         Close the file. This will delete the scratch file
+         and all the data will be lost.
+         ./
+         <a href="ekcls_c.html">ekcls_c</a> ( handle );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Number of segments =  1
+
+      Table containing segment: DATAITEMS
+      Number of rows          :  1
+      Number of columns       :  5
+      Table data              :
+        Column: ITEM_ID
+        Type  : INT
+        Data  :    531
+
+        Column: ORDER_ID
+        Type  : INT
+        Data  :  10011
+
+        Column: ITEM_NAME
+        Type  : CHR
+        Data  : Sample item
+
+        Column: DESCRIPTION
+        Type  : CHR
+        Data  : This sample item is used only in tests.
+
+        Column: PRICE
+        Type  : DP
+        Data  :   1345.67
+
+      ----------------------------------------
+
+
+      Note that after run completion, there is no EK file in the
+      output directory as scratch files are deleted when they are
+      closed or when the calling program terminates.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  No more than SPICE_DAS_FTSIZE DAS files may be opened simultaneously.
+       See the header file SpiceDAS.h for the value of SPICE_DAS_FTSIZE.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.1, 31-JUL-2020 (JDR)
+
+       Edited the header to comply with NAIF standard and improved
+       the API documentation. Added complete code example.
+
+       Added SPICE_DAS_FTSIZE parameter description.
+
+   -CSPICE Version 1.0.0, 02-APR-1998 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   open scratch E-kernel
+   open scratch EK
+</PRE>
+<h4>Link to routine ekops_c source file <a href='../../../src/cspice/ekops_c.c'>ekops_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:06 2021</pre>
+
+</body>
+</html>
+

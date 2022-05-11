@@ -1,0 +1,439 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>dafac_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>dafac_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   dafac_c ( DAF add comments ) 
+
+   void dafac_c ( SpiceInt      handle,
+                  SpiceInt      n,
+                  SpiceInt      buflen,
+                  const void  * buffer  )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Add comments from a buffer of character strings to the comment
+   area of a binary DAF file, appending them to any comments which
+   are already present in the file's comment area.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/daf.html">DAF</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   FILES
+   UTILITY
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   handle     I    handle of a DAF opened with write access.
+   n          I    Number of comments to put into the comment area.
+   buflen     I    Length of elements
+   buffer     I    Buffer of comments to put into the comment area.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   handle      is the file handle of a binary DAF which has been opened
+               with write access.
+
+   n           is the number of rows in the array `buffer'. This is
+               also the number of comment lines in `buffer' that are to
+               be added to the comment area of the binary DAF attached
+               to `handle'.
+
+   buffer      is a string buffer containing comments which are to be
+               added to the comment area of the binary DAF attached to
+               `handle'.  `buffer' should be declared by the caller has
+               follows:
+
+                  SpiceChar    buffer[n][buflen];
+
+               Each row of the buffer should contain one comment line.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the number of comments to be added is not positive, the
+       error SPICE(INVALIDARGUMENT) is signaled by a routine in the
+       call tree of this routine.
+
+   2)  If a non printing ASCII character is encountered in the
+       comments, the error SPICE(ILLEGALCHARACTER) is signaled by a
+       routine in the call tree of this routine.
+
+   3)  If the binary DAF file attached to `handle' is not open with
+       write access, an error is signaled by a routine in the call
+       tree of this routine.
+
+   4)  If the end of the comments cannot be found, i.e., the end of
+       comments marker is missing on the last comment record, the
+       error SPICE(BADCOMMENTAREA) is signaled by a routine in the
+       call tree of this routine.
+
+   5)  If the `buffer' input array pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   6)  If the `buffer' input array strings have length less than two
+       characters, the error SPICE(EMPTYSTRING) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See argument `handle' in -Detailed_Input.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   A binary DAF contains a data area which is reserved for storing
+   annotations or descriptive textual information about the data
+   contained in a file. This area is referred to as the &quot;comment
+   area&quot; of the file. The comment area of a DAF is a line oriented
+   medium for storing textual information. The comment area preserves
+   leading or embedded white space in the line(s) of text which are
+   stored so that the appearance of the information will be unchanged
+   when it is retrieved (extracted) at some other time. Trailing
+   blanks, however, are NOT preserved, due to the way that character
+   strings are represented in standard Fortran 77.
+
+   This routine will take a buffer of text lines and add (append) them
+   to the comment area of a binary DAF. If there are no comments in the
+   comment area of the file, then space will be allocated and the text
+   lines in `buffer' will be placed into the comment area. The text lines
+   may contain only printable ASCII characters (decimal values 32 -
+   126).
+
+   There is NO maximum length imposed on the significant portion of a
+   text line that may be placed into the comment area of a DAF. The
+   maximum length of a line stored in the comment area should be
+   reasonable, however, so that they may be easily extracted. A good
+   maximum value for this would be 255 characters, as this can easily
+   accommodate &quot;screen width&quot; lines as well as long lines which may
+   contain some other form of information.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) This example demonstrates how to append new comments to the
+      comment area of a DAF file.
+
+      Use the SPK kernel below as input DAF file for the program.
+
+         earthstns_itrf93_201023.bsp
+
+
+      Example code begins here.
+
+
+      /.
+         Program dafac_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters
+         ./
+         #define KERNEL       &quot;earthstns_itrf93_201023.bsp&quot;
+         #define BUFFSZ       25
+         #define CMTSIZ       7
+         #define LINLEN       1000
+
+         /.
+         Local variables.
+         ./
+         SpiceChar            buffer [BUFFSZ][LINLEN];
+
+         SpiceInt             handle;
+         SpiceInt             i;
+         SpiceInt             n;
+
+         SpiceBoolean         done;
+
+         /.
+         Set the new comments to be added to the DAF file.
+         ./
+         SpiceChar            newcmt [CMTSIZ][LINLEN] = {
+            &quot;================== NEW COMMENTS ==================&quot;,
+            &quot;&quot;,
+            &quot;   New comments can be appended to the end of the&quot;,
+            &quot;   comment area of a DAF file, with a single&quot;,
+            &quot;   operation.&quot;,
+            &quot;&quot;,
+            &quot;================ END NEW COMMENTS ================&quot; };
+
+         /.
+         Open a DAF for write. Return a `handle' referring to the
+         file.
+         ./
+         <a href="dafopw_c.html">dafopw_c</a> ( KERNEL, &amp;handle );
+
+         /.
+         Print the end of comment area from the DAF file.
+         (Maximum 15 lines.)
+         ./
+         done = SPICEFALSE;
+
+         while ( ! done )
+         {
+            <a href="dafec_c.html">dafec_c</a> ( handle, 15, LINLEN, &amp;n, buffer, &amp;done );
+
+            if ( done )
+            {
+
+               printf( &quot;End of comment area of input DAF file &quot;
+                       &quot;(max. 15 lines):\n&quot; );
+               printf( &quot;-------------------------------&quot;
+                       &quot;-------------------------------\n&quot; );
+
+               for ( i = 0; i &lt; n; i++ )
+               {
+                  printf( &quot;%s\n&quot;, buffer[i] );
+               }
+
+               printf( &quot;-------------------------------&quot;
+                       &quot;-------------------------------\n&quot; );
+
+            }
+         }
+
+         /.
+         Append the new comments to the DAF file.
+         ./
+         <b>dafac_c</b> ( handle, CMTSIZ, LINLEN, newcmt );
+
+         /.
+         Safely close the DAF.
+         ./
+         <a href="dafcls_c.html">dafcls_c</a> ( handle );
+
+         /.
+         Check if the comments have indeed appended.
+
+         Open a DAF for read.
+         ./
+         <a href="dafopr_c.html">dafopr_c</a> ( KERNEL, &amp;handle );
+         done = SPICEFALSE;
+
+         while ( ! done )
+         {
+            <a href="dafec_c.html">dafec_c</a> ( handle, BUFFSZ, LINLEN, &amp;n, buffer, &amp;done );
+
+            if ( done )
+            {
+
+               printf( &quot;End of comment area of input DAF file &quot;
+                       &quot;(max. 25 lines):\n&quot; );
+               printf( &quot;-------------------------------&quot;
+                       &quot;-------------------------------\n&quot; );
+
+               for ( i = 0; i &lt; n; i++ )
+               {
+                  printf( &quot;%s\n&quot;, buffer[i] );
+               }
+
+               printf( &quot;-------------------------------&quot;
+                       &quot;-------------------------------\n&quot; );
+
+            }
+         }
+
+         /.
+         Safely close the DAF.
+         ./
+         <a href="dafcls_c.html">dafcls_c</a> ( handle );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      End of comment area of input DAF file (max. 15 lines):
+      --------------------------------------------------------------
+         DSS-65_DXYZ       =    (    -0.0100          0.0242          0.0156***
+         DSS-65_TOPO_EPOCH =       @2020-OCT-23/00:00
+         DSS-65_UP         =       'Z'
+         DSS-65_NORTH      =       'X'
+
+      \begintext
+      --------------------------------------------------------------
+      End of comment area of input DAF file (max. 25 lines):
+      --------------------------------------------------------------
+         DSS-65_DXYZ       =    (    -0.0100          0.0242          0.0156***
+         DSS-65_TOPO_EPOCH =       @2020-OCT-23/00:00
+         DSS-65_UP         =       'Z'
+         DSS-65_NORTH      =       'X'
+
+      \begintext
+      ================== NEW COMMENTS ==================
+
+         New comments can be appended to the end of the
+         comment area of a DAF file, with a single
+         operation.
+
+      ================ END NEW COMMENTS ================
+      --------------------------------------------------------------
+
+
+      Warning: incomplete output. 2 lines extended past the right
+      margin of the header and have been truncated. These lines are
+      marked by &quot;***&quot; at the end of each line.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  This routine uses constants that are specific to the ASCII
+       character sequence. The results of using this routine with
+       a different character sequence are unpredictable.
+
+   2)  This routine is only used to extract records on environments
+       whose characters are a single byte in size. Updates to this
+       routine and routines in its call tree may be required to
+       properly handle other cases.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   K.R. Gehringer      (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.0, 25-NOV-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Added complete code
+       example.
+
+       Changed input argument name &quot;lenvals&quot; to &quot;buflen&quot; for
+       consistency with other routines.
+
+   -CSPICE Version 1.0.0, 16-NOV-2006 (NJB) (KRG)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   add comments to a binary DAF file
+   append comments to a DAF file comment area
+</PRE>
+<h4>Link to routine dafac_c source file <a href='../../../src/cspice/dafac_c.c'>dafac_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:03 2021</pre>
+
+</body>
+</html>
+

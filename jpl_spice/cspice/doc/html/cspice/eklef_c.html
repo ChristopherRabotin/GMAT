@@ -1,0 +1,495 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>eklef_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>eklef_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   eklef_c ( EK, load event file ) 
+
+   void eklef_c ( ConstSpiceChar  * fname,
+                  SpiceInt        * handle )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Load an EK file, making it accessible to the EK readers.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/ek.html">EK</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   EK
+   FILES
+   SEARCH
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   fname      I   Name of EK file to load.
+   handle     O   File handle of loaded EK file.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   fname       is the name of a binary EK file to be loaded.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   handle      is the handle of the EK file. The file is
+               accessible by the EK reader routines once it
+               has been loaded.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the EK file indicated by `fname' contains a column whose name
+       matches that of a column in an already loaded EK, but whose
+       declared attributes don't match those of the loaded column of
+       the same name, the error SPICE(BADATTRIBUTES) is signaled by a
+       routine in the call tree of this routine. `handle' is is
+       undefined in this case.
+
+   2)  Loading an EK file that is already loaded does not cause side
+       effects. The handle already associated with the file will be
+       returned.
+
+   3)  If a file open error occurs, the error is signaled by a
+       routine in the call tree of this routine. `handle' is undefined
+       in this case.
+
+   4)  If loading the input file would cause the maximum number of
+       loaded EK files to be exceeded, the error
+       SPICE(EKFILETABLEFULL) is signaled by a routine in the call
+       tree of this routine. `handle' is undefined in this case. This
+       routine will attempt to unload the file from the DAS system.
+
+   5)  If loading the input file would cause the maximum number of
+       loaded DAS files to be exceeded, an error is signaled by a
+       routine in the call tree of this routine. `handle' is undefined
+       in this case. This routine will attempt to unload the file
+       from the DAS system.
+
+   6)  If loading the input file would cause the maximum number of
+       segments allowed in loaded EK files to be exceeded, the error
+       SPICE(EKSEGMENTTABLEFULL) is signaled by a routine in the call
+       tree of this routine. `handle' is undefined in this case. This
+       routine will attempt to unload the file from the DAS system.
+
+   7)  If loading the input file would cause the maximum number of
+       columns allowed in loaded EK files to be exceeded, the error
+       SPICE(EKCOLDESCTABLEFULL) is signaled by a routine in the call
+       tree of this routine. `handle' is undefined in this case. This
+       routine will attempt to unload the file from the DAS system.
+
+   8)  If loading the input file would cause the maximum allowed
+       number of columns having distinct attributes in loaded EK
+       files to be exceeded, the error SPICE(EKCOLATTRTABLEFULL) is
+       signaled by a routine in the call tree of this routine. `handle'
+       is undefined in this case. This routine will attempt to unload
+       the file from the DAS system.
+
+   9)  If loading the input file would cause the maximum number of
+       instrument codes allowed in loaded EK files to be exceeded,
+       the error SPICE(EKIDTABLEFULL) is signaled by a routine in the
+       call tree of this routine. `handle' is undefined in this case.
+       This routine will attempt to unload the file from the DAS
+       system.
+
+   10) If the input file does not contain at least one segment, the
+       error SPICE(EKNOSEGMENTS) is signaled by a routine in the call
+       tree of this routine.
+
+   11) If the `fname' input string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   12) If the `fname' input string has zero length, the error
+       SPICE(EMPTYSTRING) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See description of `fname' in -Detailed_Input.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine makes EK files known to the EK system. It is
+   necessary to load EK files using this routine in order to
+   query the files using the EK readers.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for these examples may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Load two EK files and perform a query on them. During query
+      execution, all files will be searched.
+
+      Use the EK kernel below to load the Cassini Science Plan
+      SPICE E-Kernel File based upon the integrated science
+      plan #78.
+
+         S78_CIMSSSUPa.bep
+
+      Use the EK kernel below to load the data based upon the
+      integrated science plan #79.
+
+         S79_CIMSSSUPa.bep
+
+
+      Example code begins here.
+
+
+      /.
+         Program eklef_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define EKNMLN       18
+         #define ERRLEN       1841
+
+         /.
+         Local variables
+         ./
+         SpiceChar            errmsg [ERRLEN];
+         SpiceChar          * query;
+
+         SpiceInt             handle;
+         SpiceInt             i;
+         SpiceInt             nmrows;
+
+         SpiceBoolean         error;
+
+         /.
+         Set up the array holding the EK file names.
+         ./
+         SpiceChar            eknams [2][EKNMLN] = {
+                                   &quot;S78_CIMSSSUPa.bep&quot;, &quot;S79_CIMSSSUPa.bep&quot; };
+
+         /.
+         Load the EK files. This call could be replaced by a call
+         to <a href="furnsh_c.html">furnsh_c</a> (in this case, a meta-kernel listing the EKs
+         to be loaded could also be used).
+         ./
+         for ( i = 0; i &lt; 2; i++ )
+         {
+
+            <b>eklef_c</b> ( eknams[i], &amp;handle );
+            printf( &quot;Loading EK: %s\n&quot;, eknams[i] );
+
+         }
+
+         /.
+         The EK files contain a table &quot;CASSINI_SP_OBSERVATION&quot;,
+         that contains columns named:
+
+            NOTES, OBSERVATION_ID, OBSERVATION_TITLE,
+            OBS_DESCRIPTION, SCIENCE_OBJECTIVE, SEQUENCE,
+            SUBSYSTEM
+
+         Define a set of constraints to perform a query on all
+         loaded EK files (the SELECT clause).
+         ./
+         query = &quot;Select SUBSYSTEM, SCIENCE_OBJECTIVE, OBSERVATION_ID from &quot;
+                 &quot;CASSINI_SP_OBSERVATION order by SUBSYSTEM&quot;;
+
+         /.
+         Query the EK system for data rows matching the
+         SELECT constraints.
+         ./
+         <a href="ekfind_c.html">ekfind_c</a> ( query, ERRLEN, &amp;nmrows, &amp;error, errmsg );
+
+         /.
+         Check whether an error occurred while processing the
+         SELECT clause. If so, output the error message.
+         ./
+         printf( &quot;\n&quot; );
+         if ( error )
+         {
+            printf( &quot;SELECT clause error: %s\n&quot;, errmsg );
+         }
+         else
+         {
+
+            /.
+            If no error, `nmrows' contains the number of rows
+            matching the constraints specified in the query
+            string.
+            ./
+            printf( &quot;Number of matching rows:  %2d\n&quot;, nmrows );
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Loading EK: S78_CIMSSSUPa.bep
+      Loading EK: S79_CIMSSSUPa.bep
+
+      Number of matching rows:   9
+
+
+   2) Repeat the previous exercise, using the same input kernels,
+      but this time unloading the previous file before each new
+      file is loaded. Unloading files prevents them from being
+      searched during query execution.
+
+
+      Example code begins here.
+
+
+      /.
+         Program eklef_ex2
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define EKNMLN       18
+         #define ERRLEN       1841
+
+         /.
+         Local variables
+         ./
+         SpiceChar            errmsg [ERRLEN];
+         SpiceChar          * query;
+
+         SpiceInt             handle;
+         SpiceInt             i;
+         SpiceInt             nmrows;
+
+         SpiceBoolean         error;
+
+         /.
+         Set up the array holding the EK file names.
+         ./
+         SpiceChar            eknams [2][EKNMLN] = {
+                                   &quot;S78_CIMSSSUPa.bep&quot;, &quot;S79_CIMSSSUPa.bep&quot; };
+
+         /.
+         The EK files contain a table &quot;CASSINI_SP_OBSERVATION&quot;,
+         that contains columns named:
+
+            NOTES, OBSERVATION_ID, OBSERVATION_TITLE,
+            OBS_DESCRIPTION, SCIENCE_OBJECTIVE, SEQUENCE,
+            SUBSYSTEM
+
+         Define a set of constraints to perform a query on all
+         loaded EK files (the SELECT clause).
+         ./
+         query = &quot;Select SUBSYSTEM, SCIENCE_OBJECTIVE, OBSERVATION_ID from &quot;
+                 &quot;CASSINI_SP_OBSERVATION order by SUBSYSTEM&quot;;
+
+         /.
+         Load the EK files. This call could be replaced by a call
+         to <a href="furnsh_c.html">furnsh_c</a>.
+         ./
+         for ( i = 0; i &lt; 2; i++ )
+         {
+
+            <b>eklef_c</b> ( eknams[i], &amp;handle );
+            printf( &quot;Loading EK: %s\n&quot;, eknams[i] );
+
+            /.
+            Query the EK system for data rows matching the
+            SELECT constraints.
+            ./
+            <a href="ekfind_c.html">ekfind_c</a> ( query, ERRLEN, &amp;nmrows, &amp;error, errmsg );
+
+            /.
+            Check whether an error occurred while processing the
+            SELECT clause. If so, output the error message.
+            ./
+            if ( error )
+            {
+               printf( &quot;SELECT clause error: %s\n&quot;, errmsg );
+            }
+            else
+            {
+               /.
+               If no error, `nmrows' contains the number of rows
+               matching the constraints specified in the query
+               string.
+               ./
+               printf( &quot;Number of matching rows:  %2d\n&quot;, nmrows );
+            }
+
+            /.
+            Unload the current file. Unloading files prevents
+            them from being searched during query execution.
+            ./
+            <a href="ekuef_c.html">ekuef_c</a> ( handle );
+            printf( &quot;Unloading EK: %s\n&quot;, eknams[i] );
+            printf( &quot;\n&quot; );
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Loading EK: S78_CIMSSSUPa.bep
+      Number of matching rows:   4
+      Unloading EK: S78_CIMSSSUPa.bep
+
+      Loading EK: S79_CIMSSSUPa.bep
+      Number of matching rows:   5
+      Unloading EK: S79_CIMSSSUPa.bep
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  EK files containing columns having the same name but
+       inconsistent declarations are not diagnosed. Such kernels
+       are invalid in any case.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.1, 10-AUG-2021 (NJB) (JDR)
+
+       Edited the header to comply with NAIF standard. Added complete
+       code examples based on existing fragments.
+
+   -CSPICE Version 1.0.0, 26-MAR-1998 (NJB)
+
+       Based on SPICELIB Version 1.0.1, 07-JUL-1996 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   load EK file
+   load E-Kernel
+</PRE>
+<h4>Link to routine eklef_c source file <a href='../../../src/cspice/eklef_c.c'>eklef_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:06 2021</pre>
+
+</body>
+</html>
+

@@ -1,0 +1,324 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>cnmfrm_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>cnmfrm_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   cnmfrm_c ( Center name to associated frame ) 
+
+   void cnmfrm_c ( ConstSpiceChar   * cname,
+                   SpiceInt           frnlen,
+                   SpiceInt         * frcode,
+                   SpiceChar        * frname,
+                   SpiceBoolean     * found   )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Retrieve frame ID code and name to associate with an object.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   FRAMES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   cname      I   Name of the object to find a frame for.
+   frnlen     I   Maximum length available for frame name.
+   frcode     O   The ID code of the frame associated with cname.
+   frname     O   The name of the frame with ID frcode.
+   found      O   SPICETRUE if the requested information is available.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   cname       is the name for object for which there is a
+               preferred reference frame.
+
+   frnlen      is the amount of space available, counting the
+               space required for the terminating null character,
+               in the output string `frname'. Normally `frnlen' is
+               the declared length of `frname'.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   frcode      is the frame ID code to associate with a the object
+               specified by `cname'.
+
+   frname      is the name of the frame that should be associated
+               with the object specified by `cname'. `frname' should be
+               declared as SpiceChar[33] to ensure that it can
+               contain the full name of the frame. If `frname' does
+               not have enough room to hold the full name of the
+               frame, the name will be truncated on the right.
+
+   found       is SPICETRUE if the appropriate frame ID code and frame
+               name can be determined. Otherwise `found' is returned
+               with the value SPICEFALSE.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If `frname' does not have enough room to contain the frame name,
+       the name will be truncated on the right. (Declaring `frname' to
+       be SpiceChar[33] will ensure that the name will not be truncated).
+
+   2)  If the `cname' input string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   3)  If the `cname' input string has zero length, the error
+       SPICE(EMPTYSTRING) is signaled.
+
+   4)  If the `frname' output string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   5)  If the `frname' output string has length less than two
+       characters, the error SPICE(STRINGTOOSHORT) is signaled, since
+       the output string is too short to contain one character of
+       output data plus a null terminator.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine allows the caller to determine the frame that should
+   be associated with a particular object. For example, if you
+   need the frame to associate with the Io, you can call <b>cnmfrm_c</b>
+   to determine the frame name and id-code for the bodyfixed frame
+   of Io.
+
+   The preferred frame to use with an object is specified via one
+   of the kernel pool variables:
+
+       OBJECT_&lt;cname&gt;_FRAME
+
+   where &lt;cname&gt; is the non-blank portion of the string CNAME.
+
+   For those PCK objects that have &quot;built-in&quot; frame names this
+   routine returns the corresponding &quot;IAU&quot; frame and frame ID code.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Retrieve the ID code and name of the preferred frame
+      associated with a set of body names.
+
+      Example code begins here.
+
+
+      /.
+         Program cnmfrm_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+         /.
+         Local constants.
+         ./
+         #define FRNMLN          33
+
+         /.
+         Local variables.
+         ./
+         SpiceBoolean            found;
+
+         SpiceChar               frname [ FRNMLN ];
+         SpiceInt                frcode;
+
+         SpiceInt                i;
+
+         /.
+         Assign an array of body names. Not all the listed names
+         have a frame associated to them.
+         ./
+         SpiceChar             * body[] = { &quot;IO&quot;,   &quot;EARTH&quot;,
+                                            &quot;MOON&quot;, &quot;HALO_DELTA&quot; };
+
+         /.
+         Loop over the `body' array, call <b>cnmfrm_c</b> for each
+         element of `body'.
+         ./
+         printf( &quot;   Body     Frame ID  Frame name\n&quot; );
+         printf( &quot;----------  --------  ----------\n&quot; );
+
+         for (i = 0; i &lt; 4; i++ )
+         {
+            <b>cnmfrm_c</b> ( body[i], FRNMLN, &amp;frcode, frname, &amp;found );
+
+            if ( found )
+            {
+               printf( &quot;%10s %9d  %s\n&quot;, body[i], (int)frcode, frname );
+            }
+            else
+            {
+               printf( &quot;%10s  No frame associated with body\n&quot;, body[i] );
+            }
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+         Body     Frame ID  Frame name
+      ----------  --------  ----------
+              IO     10023  IAU_IO
+           EARTH     10013  IAU_EARTH
+            MOON     10020  IAU_MOON
+      HALO_DELTA  No frame associated with body
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   W.L. Taber          (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.0, 02-AUG-2021 (JDR)
+
+       Changed the input argument name &quot;lenout&quot; to &quot;frnlen&quot; for
+       consistency with other routines.
+
+       Edited the header to comply with NAIF standard. Added
+       complete code example.
+
+       Updated -Detailed_Output and -Exceptions to indicate the
+       required minimum length for the output frame character
+       string to not be truncated.
+
+   -CSPICE Version 1.0.0, 25-JUN-1999 (NJB) (WLT)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   Fetch reference frame attributes
+</PRE>
+<h4>Link to routine cnmfrm_c source file <a href='../../../src/cspice/cnmfrm_c.c'>cnmfrm_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:03 2021</pre>
+
+</body>
+</html>
+

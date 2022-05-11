@@ -1,0 +1,400 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>vdist_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>vdist_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   vdist_c ( Vector distance ) 
+
+   SpiceDouble vdist_c ( ConstSpiceDouble v1[3],
+                         ConstSpiceDouble v2[3] )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Return the distance between two three-dimensional vectors.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   VECTOR
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+
+   v1,
+   v2         I   Two 3-vectors.
+
+   The function returns the distance between v1 and v2.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   v1,
+   v2          are two vectors in three-dimensional space, the
+               distance between which is desired.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   The function returns the distance between v1 and v2. This is
+   defined as
+
+            ||  v1 - v2  ||,
+
+   where || x || indicates the Euclidean norm of the vector x.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   Error free.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This function is simply shorthand for the code
+
+      <a href="vsub_c.html">vsub_c</a> ( v1, v2, diff );
+
+      dist = <a href="vnorm_c.html">vnorm_c</a> ( diff );
+
+   Using this function saves you the annoyance of declaring local
+   storage for the difference vector `diff'.
+
+
+   The Euclidean norm of a three-dimensional vector (x, y, z) is
+   defined as
+
+                                   1/2
+           2        2        2
+      (   x    +   y    +   z    ).
+
+
+   This number is the distance of the point (x, y, z) from the
+   origin. If `a' and `b' are two vectors whose components are
+
+      ( a[0], a[1], a[2] )    and    ( b[0], b[1], b[2] ),
+
+   then the distance between `a' and `b' is the norm of the difference
+   a - b, which has components
+
+
+      (  a[0] - b[0],  a[1] - b[1],  a[2] - b[2]  ).
+
+
+   A related routine is <a href="vdistg_c.html">vdistg_c</a>, which computes the distance between
+   two vectors of general dimension.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for these examples may differ across
+   platforms. The results depend on the SPICE kernels used as input,
+   the compiler and supporting libraries, and the machine specific
+   arithmetic implementation.
+
+   1) Define two three-dimensional vectors and calculate the distance
+      between them.
+
+      Example code begins here.
+
+
+      /.
+         Program vdist_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+         /.
+         Local variables.
+         ./
+         SpiceDouble             dist;
+
+         /.
+         Define the vectors, and calculate the distance between the
+         coordinates.
+         ./
+         SpiceDouble             v1  [ 3 ]  = { 1.0, 0.0, 0.0 };
+         SpiceDouble             v2  [ 3 ]  = { 0.0, 1.0, 0.0 };
+
+         dist = <b>vdist_c</b> ( v1, v2 );
+         printf( &quot; Distance between v1 and v2: %12.6f\n&quot;, dist );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+       Distance between v1 and v2:     1.414214
+
+
+   2) Given the planetocentric coordinates of a point on the surface of
+      Mars, compute the distance between that point and Phobos.
+
+      Use the meta-kernel shown below to load the required SPICE
+      kernels.
+
+
+         KPL/MK
+
+         File: vdist_ex2.tm
+
+         This meta-kernel is intended to support operation of SPICE
+         example programs. The kernels shown here should not be
+         assumed to contain adequate or correct versions of data
+         required by SPICE-based user applications.
+
+         In order for an application to use this meta-kernel, the
+         kernels referenced here must be present in the user's
+         current working directory.
+
+         The names and contents of the kernels referenced
+         by this meta-kernel are as follows:
+
+            File name                        Contents
+            ---------                        --------
+            de430.bsp                        Planetary ephemeris
+            mar097.bsp                       Mars satellite ephemeris
+            pck00010.tpc                     Planet orientation and
+                                             radii
+            naif0011.tls                     Leapseconds
+
+
+         \begindata
+
+            KERNELS_TO_LOAD = ( 'de430.bsp',
+                                'mar097.bsp',
+                                'pck00010.tpc',
+                                'naif0011.tls'  )
+
+         \begintext
+
+         End of meta-kernel
+
+
+      Example code begins here.
+
+
+      /.
+         Program vdist_ex2
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+         /.
+         Local variables
+         ./
+         SpiceChar             * epoch;
+
+         SpiceDouble             dist;
+         SpiceDouble             et;
+         SpiceDouble             lat;
+         SpiceDouble             lon;
+         SpiceDouble             lt;
+         SpiceDouble             pos    [ 3 ];
+         SpiceDouble             radius;
+         SpiceDouble             rover  [ 3 ];
+
+         /.
+         Load the kernels.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a>( &quot;vdist_ex2.tm&quot; );
+
+         /.
+         Define the point on the surface of Mars by its planetocentric
+         coordinates, and the epoch.
+         ./
+         epoch  = &quot;2018-07-25 17:14&quot;;
+         lon    =    8.544377 * <a href="rpd_c.html">rpd_c</a>( );
+         lat    =   42.880602 * <a href="rpd_c.html">rpd_c</a>( );
+         radius = 3380.0;
+
+         /.
+         Convert that point coordinates to rectangular.
+         ./
+         <a href="latrec_c.html">latrec_c</a> ( radius, lon, lat, rover );
+
+         /.
+         Convert the UTC epoch to ephemeris time.
+         ./
+         <a href="str2et_c.html">str2et_c</a> ( epoch, &amp;et );
+
+         /.
+         Compute the position of Phobos with respect to Mars in IAU_MARS
+         body-fixed reference frame.
+         ./
+         <a href="spkpos_c.html">spkpos_c</a> ( &quot;PHOBOS&quot;, et,  &quot;IAU_MARS&quot;, &quot;NONE&quot;, &quot;MARS&quot;,
+                     pos,    &amp;lt                              );
+
+         /.
+         Compute the distance between Phobos and the point on the surface
+         of Mars.
+         ./
+         dist = <b>vdist_c</b> ( rover, pos );
+         printf( &quot; Epoch: %s\n&quot;, epoch );
+         printf( &quot; Distance between location and Phobos (km): %12.6f\n&quot;,
+                                                                  dist );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+       Epoch: 2018-07-25 17:14
+       Distance between location and Phobos (km):  7174.781393
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.2.1, 25-AUG-2021 (JDR)
+
+       Edited the header to comply with NAIF standard.
+
+       Added two complete examples to the -Examples section.
+
+   -CSPICE Version 1.2.0, 22-OCT-1998 (NJB)
+
+       Made input vectors const. Removed #include of SpiceZfc.h.
+
+   -CSPICE Version 1.1.0, 06-MAR-1998 (EDW)
+
+       Removed non printing character.
+
+   -CSPICE Version 1.0.0, 08-FEB-1998 (EDW)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   distance between 3-dimensional vectors
+</PRE>
+<h4>Link to routine vdist_c source file <a href='../../../src/cspice/vdist_c.c'>vdist_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:14 2021</pre>
+
+</body>
+</html>
+

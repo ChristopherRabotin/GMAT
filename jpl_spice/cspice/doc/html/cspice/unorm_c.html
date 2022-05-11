@@ -1,0 +1,278 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>unorm_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>unorm_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   unorm_c ( Unit vector and norm, 3 dimensional ) 
+
+   void unorm_c ( ConstSpiceDouble     v1[3],
+                  SpiceDouble          vout[3],
+                  SpiceDouble        * vmag    )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Normalize a double precision 3-vector and return its magnitude.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   VECTOR
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   v1         I     Vector to be normalized.
+   vout       O     Unit vector v1 / |v1|.
+   vmag       O     Magnitude of v1, i.e. |v1|.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   v1          is an arbitrary 3-vector, including the
+               zero vector.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   vout        is the unit vector in the direction  of `v1'. If `v1' is
+               the zero vector, then `vout' will also be the zero
+               vector.
+
+   vmag        is the magnitude of `v1'.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   Error free.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   <b>unorm_c</b> references a function called <a href="vnorm_c.html">vnorm_c</a> (which itself is
+   numerically stable) to calculate the norm of the input vector `v1'.
+   If the norm is equal to zero, then each component of the output
+   vector `vout' is set to zero. Otherwise, `vout' is calculated by
+   dividing `v1' by the norm.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Define a set of vectors and compute their corresponding unit
+      vector and magnitude.
+
+
+      Example code begins here.
+
+
+      /.
+         Program unorm_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define SETSIZ       2
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble          vmag;
+         SpiceDouble          vout   [3];
+
+         SpiceInt             i;
+
+         /.
+         Define the vector set.
+         ./
+         SpiceDouble          seta   [SETSIZ][3] = {
+                                   {5.0,  12.0,  0.0},
+                                   {1.e-7,  2.e-7, 2.e-7} };
+
+         /.
+         Calculate the unit vectors and magnitudes.
+         ./
+         for ( i = 0; i &lt; SETSIZ; i++ )
+         {
+
+            <b>unorm_c</b> ( seta[i], vout, &amp;vmag );
+
+            printf( &quot;Vector     :  %12.8f %12.8f %12.8f\n&quot;,
+                         seta[i][0], seta[i][1], seta[i][2] );
+            printf( &quot;Unit vector:  %12.8f %12.8f %12.8f\n&quot;,
+                                  vout[0], vout[1], vout[2] );
+            printf( &quot;Magnitude  :  %12.8f\n&quot;, vmag );
+            printf( &quot; \n&quot; );
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Vector     :    5.00000000  12.00000000   0.00000000
+      Unit vector:    0.38461538   0.92307692   0.00000000
+      Magnitude  :   13.00000000
+
+      Vector     :    0.00000010   0.00000020   0.00000020
+      Unit vector:    0.33333333   0.66666667   0.66666667
+      Magnitude  :    0.00000030
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   W.M. Owen           (JPL)
+   W.L. Taber          (JPL)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.1, 10-AUG-2021 (JDR)
+
+       Updated the header to comply with NAIF standard. Added
+       complete code example to -Examples section.
+
+       Header sections have been reordered.
+
+   -CSPICE Version 1.1.0, 22-OCT-1998 (NJB)
+
+       Made input vector const.
+
+   -CSPICE Version 1.0.0, 17-OCT-1997 (EDW) (WMO) (WLT)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   3-dimensional unit vector and norm
+</PRE>
+<h4>Link to routine unorm_c source file <a href='../../../src/cspice/unorm_c.c'>unorm_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:14 2021</pre>
+
+</body>
+</html>
+

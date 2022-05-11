@@ -1,0 +1,341 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>ektnam_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>ektnam_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   ektnam_c ( EK, return name of loaded table ) 
+
+   void ektnam_c ( SpiceInt     n,
+                   SpiceInt     tablen,
+                   SpiceChar  * table  )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Return the name of a specified, loaded table.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/ek.html">EK</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   EK
+   FILES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   n          I   Index of table.
+   tablen     I   Maximum table name length.
+   table      O   Name of table.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   n           is the index of the table whose name is desired.
+               The value of `n' ranges from 0 to the number of
+               loaded tables minus 1, which count may be obtained
+               from <a href="ekntab_c.html">ekntab_c</a>.
+
+   tablen      is the maximum allowed table name length, including
+               space for the terminating null character. Normally
+               the caller should allow enough room for
+               SPICE_EK_TSTRLN characters; this parameter is
+               declared in the header SpiceEK.h.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   table       is the name of the n'th loaded table. If `table'
+               is too small to accommodate the name, the name will
+               be truncated on the right.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   SPICE_EK_TSTRLN
+
+               is the maximum allowed table name length, including
+               space for the terminating null character. See the
+               header file SpiceEK.h for the actual value of
+               this parameter.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If this routine is called when no files are loaded, the error
+       SPICE(NOLOADEDFILES) is signaled by a routine in the call tree
+       of this routine.
+
+   2)  If the input `n' is out of range, the error SPICE(INVALDINDEX)
+       is signaled by a routine in the call tree of this routine.
+
+   3)  If the `table' output string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   4)  If the `table' output string has length less than two
+       characters, the error SPICE(STRINGTOOSHORT) is signaled, since
+       the output string is too short to contain one character of
+       output data plus a null terminator.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   The returned name is based on the currently loaded EK files.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine is a utility that provides the caller with the
+   name of a specified loaded table. The index of a table with
+   a given name depends on the kernels loaded and possibly on
+   the order in which the files have been loaded.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Dump the names of all the loaded tables.
+
+      Use the meta-kernel shown below to load the required SPICE
+      kernels.
+
+
+         KPL/MK
+
+         File name: ektnam_ex1.tm
+
+         This meta-kernel is intended to support operation of SPICE
+         example programs. The kernels shown here should not be
+         assumed to contain adequate or correct versions of data
+         required by SPICE-based user applications.
+
+         In order for an application to use this meta-kernel, the
+         kernels referenced here must be present in the user's
+         current working directory.
+
+         The names and contents of the kernels referenced
+         by this meta-kernel are as follows:
+
+            File name                 Contents
+            ---------                 --------
+            S78_CIMSSSUPa.bep         Cassini Science Plan #78
+            S79_CIMSSSUPa.bep         Cassini Science Plan #79
+            S79_status_pf.bes         Cassini Spacecraft Sequence
+                                      Status #79
+
+
+         \begindata
+
+            KERNELS_TO_LOAD = ( 'S78_CIMSSSUPa.bep',
+                                'S79_CIMSSSUPa.bep',
+                                'S79_status_pf.bes'  )
+
+         \begintext
+
+         End of meta-kernel
+
+
+      Example code begins here.
+
+
+      /.
+         Program ektnam_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define META         &quot;ektnam_ex1.tm&quot;
+
+         /.
+         Local variables.
+         ./
+         SpiceChar            tabnam [SPICE_EK_TSTRLN];
+
+         SpiceInt             ntab;
+         SpiceInt             tab;
+
+         /.
+         Load the EK files. Use a meta-kernel for convenience.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( META );
+
+         /.
+         Get the number of loaded tables. The count refers to the
+         number of logical tables; if multiple EKs contain data
+         for the same table, these EKs collectively contribute
+         only one table to the count.
+         ./
+         <a href="ekntab_c.html">ekntab_c</a> ( &amp;ntab );
+
+         printf( &quot;Number of tables in EK subsystem: %2d\n&quot;, ntab );
+
+         for ( tab = 0; tab &lt; ntab; tab++ )
+         {
+
+            /.
+            Get the name of the current table, and display it.
+            ./
+            <b>ektnam_c</b> ( tab, SPICE_EK_TSTRLN, tabnam );
+            printf( &quot;   TABLE = %s\n&quot;, tabnam );
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Number of tables in EK subsystem:  4
+         TABLE = CASSINI_SP_REQUEST
+         TABLE = CASSINI_SP_OBSERVATION
+         TABLE = CASSINI_SP_REQ_OBS
+         TABLE = CASSINI_STATUS
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.0, 02-AUG-2021 (JDR)
+
+       Changed the input argument name &quot;lenout&quot; to &quot;tablen&quot; for consistency
+       with other routines.
+
+       Edited the header to comply with NAIF standard. Added complete
+       code example.
+
+       Added description of SPICE_EK_TSTRLN parameter.
+
+   -CSPICE Version 1.0.1, 26-MAR-2003 (NJB)
+
+       Fixed description of exception (5): replaced &quot;tablen-1&quot;
+       with &quot;tablen.&quot; Removed spurious word &quot;clock&quot; from string
+       description.
+
+   -CSPICE Version 1.0.0, 07-JAN-2002 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   return name of a loaded table
+</PRE>
+<h4>Link to routine ektnam_c source file <a href='../../../src/cspice/ektnam_c.c'>ektnam_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:06 2021</pre>
+
+</body>
+</html>
+

@@ -1,0 +1,304 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>vproj_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>vproj_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   vproj_c ( Vector projection, 3 dimensions ) 
+
+   void vproj_c ( ConstSpiceDouble   a[3],
+                  ConstSpiceDouble   b[3],
+                  SpiceDouble        p[3] )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Compute the projection of one 3-dimensional vector onto another
+   3-dimensional vector.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   VECTOR
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   a          I   The vector to be projected.
+   b          I   The vector onto which `a' is to be projected.
+   p          O   The projection of `a' onto `b'.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   a           is a double precision, 3-dimensional vector. This
+               vector is to be projected onto the vector `b'.
+
+   b           is a double precision, 3-dimensional vector. This
+               vector is the vector which receives the projection.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   p           is a double precision, 3-dimensional vector containing
+               the projection of `a' onto `b'. (`p' is necessarily parallel
+               to `b'.) If `b' is the zero vector then `p' will be returned
+               as the zero vector.
+
+               `p' may overwrite either `a' or `b'.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   Error free.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   Given any vectors `a' and `b', there is a unique decomposition of
+   `a' as a sum v + p such that `v', the dot product of `v' and `b', is zero,
+   and the dot product of `p' with `b' is equal the product of the
+   lengths of `p' and `b'. `p' is called the projection of `a' onto `b'. It
+   can be expressed mathematically as
+
+      dot(a,b)
+      -------- * b
+      dot(b,b)
+
+   (This is not necessarily the prescription used to compute the
+   projection. It is intended only for descriptive purposes.)
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Define two sets of vectors and compute the projection of
+      each vector of the first set on the corresponding vector of
+      the second set.
+
+      Example code begins here.
+
+
+      /.
+         Program vproj_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define NDIM         3
+         #define SETSIZ       4
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble          pvec   [NDIM];
+
+         SpiceInt             i;
+
+         /.
+         Define the two vector sets.
+         ./
+         SpiceDouble          seta   [SETSIZ][NDIM] =
+
+                                     { {6.0,  6.0,  6.0},
+                                       {6.0,  6.0,  6.0},
+                                       {6.0,  6.0,  0.0},
+                                       {6.0,  0.0,  0.0} };
+
+         SpiceDouble          setb   [SETSIZ][NDIM] =
+
+                                     { { 2.0,  0.0,  0.0},
+                                       {-3.0,  0.0,  0.0},
+                                       { 0.0,  7.0,  0.0},
+                                       { 0.0,  0.0,  9.0} };
+
+         /.
+         Calculate the projection
+         ./
+         for ( i = 0; i &lt; SETSIZ; i++ )
+         {
+
+            <b>vproj_c</b> ( seta[i], setb[i], pvec );
+
+            printf( &quot;Vector A  :  %4.1f %4.1f %4.1f\n&quot;,
+                    seta[i][0], seta[i][1], seta[i][2] );
+            printf( &quot;Vector B  :  %4.1f %4.1f %4.1f\n&quot;,
+                    setb[i][0], setb[i][1], setb[i][2] );
+            printf( &quot;Projection:  %4.1f %4.1f %4.1f\n&quot;,
+                    pvec[0], pvec[1], pvec[2]          );
+            printf( &quot; \n&quot; );
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Vector A  :   6.0  6.0  6.0
+      Vector B  :   2.0  0.0  0.0
+      Projection:   6.0  0.0  0.0
+
+      Vector A  :   6.0  6.0  6.0
+      Vector B  :  -3.0  0.0  0.0
+      Projection:   6.0 -0.0 -0.0
+
+      Vector A  :   6.0  6.0  0.0
+      Vector B  :   0.0  7.0  0.0
+      Projection:   0.0  6.0  0.0
+
+      Vector A  :   6.0  0.0  0.0
+      Vector B  :   0.0  0.0  9.0
+      Projection:   0.0  0.0  0.0
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  An implicit assumption exists that `a' and `b' are specified in
+       the same reference frame. If this is not the case, the
+       numerical result has no meaning.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   [1]  G. Thomas and R. Finney, &quot;Calculus and Analytic Geometry,&quot;
+        7th Edition, Addison Wesley, 1988.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   J. Diaz del Rio     (ODC Space)
+   W.L. Taber          (JPL)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.1, 01-NOV-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Added complete example
+       to the -Examples section. Added entry to -Restrictions section.
+
+   -CSPICE Version 1.0.0, 08-FEB-1998 (EDW) (WLT)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   3-dimensional vector projection
+</PRE>
+<h4>Link to routine vproj_c source file <a href='../../../src/cspice/vproj_c.c'>vproj_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:15 2021</pre>
+
+</body>
+</html>
+

@@ -1,0 +1,322 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>size_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>size_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   size_c ( Size of a cell ) 
+
+   SpiceInt size_c ( SpiceCell  * cell )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Return the size (maximum cardinality) of a SPICE cell of any
+   data type.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/cells.html">CELLS</a>
+   <a href="../req/sets.html">SETS</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   CELLS
+   SETS
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   cell       I   Input cell.
+
+   The function returns the size of the input cell.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   cell        is a SPICE cell of any data type.
+
+               `cell' must be declared as a character, double precision or
+               integer SpiceCell.
+
+               CSPICE provides the following macros, which declare and
+               initialize the cell
+
+                  SPICECHAR_CELL          ( cell, CELLSZ, CELLMLEN );
+                  SPICEDOUBLE_CELL        ( cell, CELLSZ );
+                  SPICEINT_CELL           ( cell, CELLSZ );
+
+               where CELLSZ is the maximum capacity of `cell' and CELLMLEN is
+               the maximum length of any member in the character cell.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   The function returns the size of (maximum number of elements in)
+   the input cell.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the input `cell' cell argument does not have a recognized data
+       type, the error SPICE(NOTSUPPORTED) is signaled.
+
+   2)  If the input `cell' has invalid cardinality, the error
+       SPICE(INVALIDCARDINALITY) is signaled by a routine in the call
+       tree of this routine. <b>size_c</b> returns an unspecified value in this
+       case.
+
+   3)  If the input `cell' has invalid size, the error
+       SPICE(INVALIDSIZE) is signaled by a routine in the call tree of
+       this routine. <b>size_c</b> returns an unspecified value in this case.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) The <b>size_c</b> function is typically used in conjunction
+      with the <a href="card_c.html">card_c</a> function to predict (and subsequently
+      avoid) overflows when manipulating cells. In the following
+      example, <a href="card_c.html">card_c</a> and <b>size_c</b> are used to determine whether
+      the union of two sets is safe.
+
+
+      Example code begins here.
+
+
+      /.
+         Program size_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+
+      int main( )
+      {
+
+         /.
+         Local constants.
+         ./
+         #define SETDIM       5
+
+         /.
+         Local variables.
+
+         Declare two SPICE cells.
+         ./
+         SPICEINT_CELL      ( seta, SETDIM );
+         SPICEINT_CELL      ( setb, SETDIM );
+         SPICEINT_CELL      ( setc, SETDIM );
+
+         SpiceInt             i;
+
+         /.
+         Create a list of items and even numbers.
+         ./
+         SpiceInt             even   [SETDIM] = {  0,  2,  4,  4,  8 };
+
+         SpiceInt             items  [SETDIM] = {  0,  1,  1,  2,  8 };
+
+         /.
+         Initialize the empty sets.
+         ./
+         <a href="valid_c.html">valid_c</a> ( SETDIM, 0, &amp;seta );
+         <a href="valid_c.html">valid_c</a> ( SETDIM, 0, &amp;setb );
+
+         /.
+         Insert `even' on `seta' and `items' on `setb'
+         ./
+         for ( i = 0; i &lt; SETDIM; i++ )
+         {
+            <a href="insrti_c.html">insrti_c</a> ( even[i],  &amp;seta );
+            <a href="insrti_c.html">insrti_c</a> ( items[i], &amp;setb );
+         }
+
+         /.
+         Perform the union if possible.
+         ./
+         if ( <a href="card_c.html">card_c</a> ( &amp;seta ) + <a href="card_c.html">card_c</a> ( &amp;setb ) &lt;= <b>size_c</b> ( &amp;setc ) )
+         {
+            printf( &quot;Union will not overflow the output set.\n&quot; );
+            <a href="union_c.html">union_c</a> ( &amp;seta, &amp;setb, &amp;setc );
+         }
+         else
+         {
+            printf( &quot;Union may overflow...\n&quot; );
+            <a href="inter_c.html">inter_c</a> ( &amp;seta, &amp;setb, &amp;setc );
+
+            if ( <a href="card_c.html">card_c</a> ( &amp;seta ) + <a href="card_c.html">card_c</a> ( &amp;setb ) - <a href="card_c.html">card_c</a> ( &amp;setc ) &lt;=
+                 <b>size_c</b> ( &amp;setc ) )
+            {
+               printf( &quot;   ... but <a href="inter_c.html">inter_c</a> indicates it is safe!\n&quot; );
+               <a href="union_c.html">union_c</a> ( &amp;seta, &amp;setb, &amp;setc );
+            }
+            else
+            {
+               printf( &quot;  ... and <a href="inter_c.html">inter_c</a> confirms it!\n&quot; );
+            }
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Union may overflow...
+         ... but <a href="inter_c.html">inter_c</a> indicates it is safe!
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   C.A. Curzon         (JPL)
+   J. Diaz del Rio     (ODC Space)
+   H.A. Neilan         (JPL)
+   W.L. Taber          (JPL)
+   I.M. Underwood      (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.1, 27-AUG-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Added complete
+       code example based on existing example fragments.
+
+       Added SETS to the list of required readings and keywords.
+
+       Extended description of argument &quot;cell&quot; in -Detailed_Input to include
+       type and preferred declaration method.
+
+       Added entry #1 in -Exceptions section.
+
+   -CSPICE Version 1.0.0, 06-AUG-2002 (NJB) (CAC) (HAN) (WLT) (IMU)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   size of a cell
+</PRE>
+<h4>Link to routine size_c source file <a href='../../../src/cspice/size_c.c'>size_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:12 2021</pre>
+
+</body>
+</html>
+

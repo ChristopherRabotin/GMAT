@@ -1,0 +1,352 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>pckopn_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>pckopn_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   pckopn_c ( PCK, open new file ) 
+
+   void pckopn_c ( ConstSpiceChar   * name,
+                   ConstSpiceChar   * ifname,
+                   SpiceInt           ncomch,
+                   SpiceInt         * handle  )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Create a new PCK file, returning the handle of the opened file.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/pck.html">PCK</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   PCK
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   name       I   The name of the PCK file to be opened.
+   ifname     I   The internal filename for the PCK.
+   ncomch     I   The number of characters to reserve for comments.
+   handle     O   The handle of the opened PCK file.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   name        is the name of the PCK file to be created.
+
+   ifname      is the internal filename for the PCK file that is being
+               created. The internal filename may be up to 60 characters
+               long. `ifname' may not contain non-printing characters;
+               otherwise there are no restrictions on its contents.
+
+   ncomch      is the space, measured in characters, to be
+               initially set aside for the comment area when a new PCK
+               file is opened. The amount of space actually set aside
+               may be greater than the amount requested, due to the
+               manner in which comment records are allocated in an PCK
+               file. However, the amount of space set aside for comments
+               will always be at least the amount that was requested.
+
+               The value of ncomch should be greater than or equal to
+               zero, i.e., 0 &lt;= ncomch. A negative value, should one
+               occur, will be assumed to be zero.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   handle      is the handle of the opened PCK file. If an error occurs
+               when opening the file, the value of this variable should
+               not be used, as it will not represent a valid handle.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the value of `ncomch' is negative, a value of zero (0) will
+       be used for the number of comment characters to be set aside
+       for comments.
+
+   2)  If an error occurs while attempting to open a CK file the
+       value of `handle' will not represent a valid file handle.
+
+   3)  If any of the `name' or `ifname' input string pointers is
+       null, the error SPICE(NULLPOINTER) is signaled.
+
+   4)  If any of the `name' or `ifname' input strings has zero
+       length, the error SPICE(EMPTYSTRING) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See descriptions of `name' and `handle'.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   Open a new PCK file, reserving room for comments if requested.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Suppose that you have sets of Chebyshev polynomial
+      coefficients in an array pertaining to the orientation of
+      the Moon body-fixed frame with the frame class ID 301
+      relative to the J2000 reference frame, and want
+      to put these into a type 2 segment PCK file. The following
+      example could be used to add one new type 2 segment. To add
+      multiple segments, put the call to <a href="pckw02_c.html">pckw02_c</a> in a loop.
+
+
+      Example code begins here.
+
+
+      /.
+         Program pckopn_ex1
+      ./
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters
+         ./
+         #define FNAME        &quot;pckopn_ex1.bpc&quot;
+         #define BODY         301
+         #define POLYDG       9
+         #define SZCDAT       60
+
+         /.
+         Local variables
+         ./
+         SpiceChar          * ifname;
+         SpiceChar          * segid;
+
+         SpiceDouble          btime;
+         SpiceDouble          first;
+         SpiceDouble          intlen;
+         SpiceDouble          last;
+
+         SpiceInt             handle;
+         SpiceInt             n;
+         SpiceInt             nresvc;
+
+         /.
+         Set the input data: RA/DEC/W coefficients,
+         begin time for the first record, start/end times
+         for the segment, length of the time covered by
+         each record, and number of logical records.
+
+         `cdata' contains the ra/dec/w coefficients: first the
+         the polydeg + 1 for the RA first record, then the
+         polydeg + 1 for the DEC first record, then the
+         polydeg +1 for W first record, then the polydeg + 1
+         for the RA second record, and so on.
+         ./
+         SpiceDouble          cdata  [SZCDAT] = {
+                       -5.4242086033301107e-002, -5.2241405162792561e-005,
+                        8.9751456289930307e-005, -1.5288696963234620e-005,
+                        1.3218870864581395e-006,  5.9822156790328180e-007,
+                       -6.5967702052551211e-008, -9.9084309118396298e-009,
+                        4.9276055963541578e-010,  1.1612267413829385e-010,
+                        0.42498898565916610,      1.3999219324235620e-004,
+                       -1.8855140511098865e-005, -2.1964684808526649e-006,
+                        1.4229817868138752e-006, -1.6991716166847001e-007,
+                       -3.4824688140649506e-008,  2.9208428745895990e-009,
+                        4.4217757657060300e-010, -3.9211207055305402e-012,
+                        2565.0633504619473,       0.92003769451305328,
+                       -8.0503797901914501e-005,  1.1960860244433900e-005,
+                       -1.2237900518372542e-006, -5.3651349407824562e-007,
+                        6.0843372260403005e-008,  9.0211287487688797e-009,
+                       -4.6460429330339309e-010, -1.0446918704281774e-010,
+                       -5.3839796353225056e-002,  4.3378021974424991e-004,
+                        4.8130091384819459e-005, -1.2283066272873327e-005,
+                       -5.4099296265403208e-006, -4.4237368347319652e-007,
+                        1.3004982445546169e-007,  1.9017128275284284e-008,
+                       -7.0368223839477803e-011, -1.7119414526133175e-010,
+                        0.42507987850614548,     -7.1844899448557937e-005,
+                       -5.1052122872412865e-005, -8.9810401387721321e-006,
+                       -1.4611718567948972e-007,  4.0883847771062547e-007,
+                        4.6812854485029333e-008, -4.5698075960784951e-009,
+                       -9.8679875320349531e-010, -7.9392503778178240e-011,
+                        2566.9029069934054,       0.91952244801740568,
+                       -6.0426151041179828e-005,  1.0850559330577959e-005,
+                        5.1756033678137497e-006,  4.2127585555214782e-007,
+                       -1.1774737441872970e-007, -1.7397191490163833e-008,
+                        5.8908810244396165e-012,  1.4594279337955166e-010 };
+
+         first  =   -43200.0;
+         last   =  1339200.0;
+         btime  =  first;
+         intlen =   691200.0;
+         n      =  2;
+
+         /.
+         Open a new PCK file.  For simplicity, we will not
+         reserve any space for the comment area, so the
+         number of reserved comment characters is zero.
+         The variable `ifname' is the internal file name.
+         ./
+         nresvc  =  0;
+         ifname  =  &quot;Test PCK/Created 04-SEP-2019&quot;;
+
+         <b>pckopn_c</b> ( FNAME, ifname, nresvc, &amp;handle );
+
+         /.
+         Create a segment identifier.
+         ./
+         segid = &quot;MY_SAMPLE_PCK_TYPE_2_SEGMENT&quot;;
+
+         /.
+         Write the segment.
+         ./
+         <a href="pckw02_c.html">pckw02_c</a> ( handle, BODY, &quot;J2000&quot;, first, last, segid,
+                    intlen, n,    POLYDG,  cdata, btime       );
+
+         /.
+         Close the file.
+         ./
+         <a href="pckcls_c.html">pckcls_c</a> ( handle );
+
+         return ( 0 );
+      }
+
+
+      When this program is executed, no output is presented on
+      screen. After run completion, a new PCK type 2 exists in
+      the output directory.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   K.R. Gehringer      (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.1, 04-AUG-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Added
+       complete code examples based on existing fragment.
+
+   -CSPICE Version 1.0.0, 16-DEC-2016 (NJB) (KRG)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   open a new PCK file
+</PRE>
+<h4>Link to routine pckopn_c source file <a href='../../../src/cspice/pckopn_c.c'>pckopn_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:10 2021</pre>
+
+</body>
+</html>
+

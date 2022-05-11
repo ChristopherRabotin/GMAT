@@ -1,0 +1,548 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>ekbseg_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>ekbseg_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   ekbseg_c ( EK, start new segment ) 
+
+   void ekbseg_c ( SpiceInt           handle,
+                   ConstSpiceChar   * tabnam,
+                   SpiceInt           ncols,
+                   SpiceInt           cnamln,
+                   const void       * cnames,
+                   SpiceInt           declen,
+                   const void       * decls,
+                   SpiceInt         * segno  )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Start a new segment in an E-kernel.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/ek.html">EK</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   EK
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   handle     I   File handle.
+   tabnam     I   Table name.
+   ncols      I   Number of columns in the segment.
+   cnamln     I   Length of names in column name array.
+   cnames     I   Names of columns.
+   declen     I   Length of declaration strings in declaration array.
+   decls      I   Declarations of columns.
+   segno      O   Segment number.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   handle      is the handle of an EK file that is open for writing.
+
+   tabnam      is the name of the EK table to which the current
+               segment belongs. All segments in the EK file
+               designated by handle must have identical column
+               attributes. tabnam must not exceed SPICE_EK_TNAMSZ
+               characters (see SpiceEK.h) in length. Case is not
+               significant. Table names must start with a letter and
+               contain only characters from the set
+               {A-Z,a-z,0-9,$,_}.
+
+   ncols       is the number of columns in a new segment.
+
+   cnamln,
+   cnames      are, respectively, the length of the column name
+               strings in the column name array, and the base
+               address of the array itself. The array should have
+               dimensions
+
+                  [ncols][cnamln]
+
+   declen,
+   decls       are, respectively, the length of the declaration
+               strings in the declaration array, and the base
+               address of the array itself. The array should have
+               dimensions
+
+                  [ncols][declen]
+
+               The Ith element of cnames and the Ith element of decls
+               apply to the Ith column in the segment.
+
+               Column names must not exceed CSPICE_EK_CNAMSZ
+               characters (see SpiceEK.h) in length. Case is not
+               significant. Column names must start with a letter
+               and contain only characters from the set
+               {A-Z,a-z,0-9,$,_}.
+
+               The declarations are strings that contain
+               &quot;keyword=value&quot; assignments that define the
+               attributes of the columns to which they apply. The
+               column attributes that are defined by a column
+               declaration are:
+
+                  DATATYPE
+                  SIZE
+                  &lt;is the column indexed?&gt;
+                  &lt;does the column allow null values?&gt;
+
+               The form of a declaration is
+
+                  &quot;DATATYPE  = &lt;type&gt;,
+                   SIZE      = &lt;size&gt;,
+                   INDEXED   = &lt;boolean&gt;,
+                   NULLS_OK  = &lt;boolean&gt;&quot;
+
+               For example, an indexed, scalar, integer column
+               that allows null values would have the declaration
+
+                  &quot;DATATYPE  = INTEGER,
+                   SIZE      = 1,
+                   INDEXED   = TRUE,
+                   NULLS_OK  = TRUE&quot;
+
+               Commas are required to separate the assignments
+               within declarations; white space is optional;
+               case is not significant.
+
+               The order in which the attribute keywords are
+               listed in declaration is not significant.
+
+               Every column in a segment must be declared.
+
+               Each column entry is effectively an array, each
+               element of which has the declared data type. The
+               SIZE keyword indicates how many elements are in
+               each entry of the column in whose declaration the
+               keyword appears. Note that only scalar-valued
+               columns (those for which SIZE = 1) may be
+               referenced in query constraints. A size
+               assignment has the syntax
+
+                  SIZE = &lt;integer&gt;
+
+               or
+                  SIZE = VARIABLE
+
+               The size value defaults to 1 if omitted.
+
+               The DATATYPE keyword defines the data type of
+               column entries. The DATATYPE assignment syntax
+               has any of the forms
+
+                  DATATYPE = CHARACTER*(&lt;length&gt;)
+                  DATATYPE = CHARACTER*(*)
+                  DATATYPE = DOUBLE PRECISION
+                  DATATYPE = INTEGER
+                  DATATYPE = TIME
+
+               As the datatype declaration syntax suggests,
+               character strings may have fixed or variable
+               length. Variable-length strings are allowed only
+               in columns of size 1.
+
+               Optionally, scalar-valued columns may be indexed.
+               To create an index for a column, use the assignment
+
+                  INDEXED = TRUE
+
+               By default, columns are not indexed.
+
+               Optionally, any column can allow null values. To
+               indicate that a column may allow null values, use
+               the assignment
+
+                  NULLS_OK = TRUE
+
+               in the column declaration. By default, null
+               values are not allowed in column entries.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   segno       is the number of the segment to which data is to be
+               added. Segments are numbered from 0 to nseg-1, where
+               nseg is the count of segments in the file. Segment
+               numbers are used as unique identifiers by other EK
+               access routines.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If `handle' is invalid, an error is signaled by a routine in the
+       call tree of this routine.
+
+   2)  If `tabnam' is more than SPICE_EK_TNAMSZ characters long, an error
+       is signaled by a routine in the call tree of this routine.
+
+   3)  If `tabnam' contains any nonprintable characters, an error
+       is signaled by a routine in the call tree of this routine.
+
+   4)  If `ncols' is non-positive or greater than the maximum allowed
+       number SPICE_EK_MXCLSG, the error SPICE(INVALIDCOUNT) is signaled by a
+       routine in the call tree of this routine.
+
+   5)  If any column name exceeds SPICE_EK_CNAMSZ characters in length, an
+       error is signaled by a routine in the call tree of this
+       routine.
+
+   6)  If any column name contains non-printable characters, an error
+       is signaled by a routine in the call tree of this routine.
+
+   7)  If a declaration cannot be understood by this routine, an
+       error is signaled by a routine in the call tree of this
+       routine.
+
+   8)  If an non-positive string length or element size is specified,
+       an error is signaled by a routine in the call tree of this
+       routine.
+
+   9)  If an I/O error occurs while reading or writing the indicated
+       file, the error is signaled by a routine in the call tree of
+       this routine.
+
+   10) If the `tabnam' input string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   11) If the `tabnam' input string has zero length, the error
+       SPICE(EMPTYSTRING) is signaled.
+
+   12) If any of the `cnames' or `decls' input array pointers is
+       null, the error SPICE(NULLPOINTER) is signaled.
+
+   13) If any of the `cnames' or `decls' input arrays' strings have
+       length less than two characters, the error
+       SPICE(STRINGTOOSHORT) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See the EK Required Reading for a discussion of the EK file
+   format.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine operates by side effects: it prepares an EK for
+   the addition of a new segment. It is not necessary to take
+   any special action to &quot;complete&quot; a segment; segments are readable
+   after the completion of any record insertion, deletion, write,
+   or update operation.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Suppose we want to create an E-kernel which contains a table
+      of items that have been ordered. The columns of this table
+      are shown below:
+
+         DATAITEMS
+
+            Column Name     Data Type
+            -----------     ---------
+            ITEM_ID         INTEGER
+            ORDER_ID        INTEGER
+            ITEM_NAME       CHARACTER*(*)
+            DESCRIPTION     CHARACTER*(*)
+            PRICE           DOUBLE PRECISION
+
+
+      This EK file will have one segment containing the DATAITEMS
+      table.
+
+      This examples demonstrates how to open a new EK file; create
+      the segment described above and how to insert a new record
+      into it.
+
+
+      Example code begins here.
+
+
+      /.
+         Program ekbseg_ex1
+      ./
+      #include &lt;string.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters
+         ./
+         #define EKNAME       &quot;ekbseg_ex1.bdb&quot;
+         #define TABLE        &quot;DATAITEMS&quot;
+         #define DECLEN       201
+         #define DESCLN       81
+         #define NAMLEN       41
+         #define NCOLS        5
+
+         /.
+         Local variables
+         ./
+         SpiceChar            cdecls [NCOLS][DECLEN];
+         SpiceChar            cnames [NCOLS][SPICE_EK_CSTRLN];
+         SpiceChar          * descrp;
+         SpiceChar          * ifname;
+         SpiceChar          * itemnm;
+
+         SpiceDouble          price;
+
+         SpiceInt             esize;
+         SpiceInt             handle;
+         SpiceInt             itemid;
+         SpiceInt             nresvc;
+         SpiceInt             ordid;
+         SpiceInt             recno;
+         SpiceInt             segno;
+
+         SpiceBoolean         isnull;
+
+         /.
+         Open a new EK file.  For simplicity, we will not
+         reserve any space for the comment area, so the
+         number of reserved comment characters is zero.
+         The variable `ifname' is the internal file name.
+         ./
+         nresvc  =  0;
+         ifname  =  &quot;Test EK;Created 21-JUN-2019&quot;;
+
+         <a href="ekopn_c.html">ekopn_c</a> ( EKNAME, ifname, nresvc, &amp;handle );
+
+         /.
+         Set up the table and column names and declarations
+         for the DATAITEMS segment.  We'll index all of
+         the columns.  All columns are scalar, so we omit
+         the size declaration.
+         ./
+         strcpy( cnames[0], &quot;ITEM_ID&quot; );
+         strcpy( cdecls[0], &quot;DATATYPE = INTEGER, INDEXED = TRUE&quot; );
+
+         strcpy( cnames[1], &quot;ORDER_ID&quot; );
+         strcpy( cdecls[1], &quot;DATATYPE = INTEGER, INDEXED = TRUE&quot; );
+
+         strcpy( cnames[2], &quot;ITEM_NAME&quot; );
+         strcpy( cdecls[2], &quot;DATATYPE = CHARACTER*(*), INDEXED  = TRUE&quot; );
+
+         strcpy( cnames[3], &quot;DESCRIPTION&quot; );
+         strcpy( cdecls[3], &quot;DATATYPE = CHARACTER*(*), INDEXED  = TRUE&quot; );
+
+         strcpy( cnames[4], &quot;PRICE&quot; );
+         strcpy( cdecls[4], &quot;DATATYPE = DOUBLE PRECISION, INDEXED  = TRUE&quot; );
+
+         /.
+         Start the segment. Since we have no data for this
+         segment, start the segment by just defining the new
+         segment's schema.
+         ./
+         <b>ekbseg_c</b> ( handle, TABLE,  NCOLS,   SPICE_EK_CSTRLN,
+                    cnames, DECLEN, cdecls, &amp;segno           );
+
+         /.
+         Append a new, empty record to the DATAITEMS
+         table. Recall that the DATAITEMS table
+         is in segment number 0.  The call will return
+         the number of the new, empty record.
+         ./
+         segno = 0;
+         <a href="ekappr_c.html">ekappr_c</a> ( handle, segno, &amp;recno );
+
+         /.
+         At this point, the new record is empty.  A valid EK
+         cannot contain empty records.  We fill in the data
+         here.  Data items are filled in one column at a time.
+         The order in which the columns are filled in is not
+         important.  We use the ekaceX_c (add column entry)
+         routines to fill in column entries.  We'll assume
+         that no entries are null.  All entries are scalar,
+         so the entry size is 0.
+         ./
+         isnull   =  SPICEFALSE;
+         esize    =  0;
+
+         /.
+         The following variables will contain the data for
+         the new record.
+         ./
+         ordid    =   10011;
+         itemid   =   531;
+         itemnm   =  &quot;Sample item&quot;;
+         descrp   =  &quot;This sample item is used only in tests.&quot;;
+         price    =   1345.678;
+
+         /.
+         Note that the names of the routines called
+         correspond to the data types of the columns:  the
+         last letter of the routine name is C, I, or D,
+         depending on the data type.
+         ./
+         <a href="ekacei_c.html">ekacei_c</a> ( handle, segno, recno, &quot;ORDER_ID&quot;, esize, &amp;ordid, isnull );
+
+         <a href="ekacei_c.html">ekacei_c</a> ( handle, segno, recno, &quot;ITEM_ID&quot;, esize, &amp;itemid, isnull );
+
+         <a href="ekacec_c.html">ekacec_c</a> ( handle, segno,  recno,  &quot;ITEM_NAME&quot;,
+                    esize,  NAMLEN, itemnm,  isnull     );
+
+         <a href="ekacec_c.html">ekacec_c</a> ( handle, segno,  recno,  &quot;DESCRIPTION&quot;,
+                    esize,  DESCLN, descrp,  isnull       );
+
+         <a href="ekaced_c.html">ekaced_c</a> ( handle, segno, recno, &quot;PRICE&quot;, esize, &amp;price, isnull );
+
+         /.
+         Close the file to make the update permanent.
+         ./
+         <a href="ekcls_c.html">ekcls_c</a> ( handle );
+
+         return ( 0 );
+      }
+
+
+      When this program is executed, no output is presented on
+      screen. After run completion, a new EK file exists in the
+      output directory.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.2.0, 13-AUG-2021 (JDR)
+
+       Changed input argument name &quot;cnmlen&quot; to &quot;cnamln&quot; for consistency
+       with other functions.
+
+       Edited the header to comply with NAIF standard. Added
+       complete code example.
+
+   -CSPICE Version 1.1.0, 12-JUL-2002 (NJB)
+
+       Call to C2F_CreateStrArr_Sig replaced with call to C2F_MapStrArr.
+
+   -CSPICE Version 1.0.0, 17-NOV-2001 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   start new E-kernel segment
+   start new EK segment
+</PRE>
+<h4>Link to routine ekbseg_c source file <a href='../../../src/cspice/ekbseg_c.c'>ekbseg_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:05 2021</pre>
+
+</body>
+</html>
+

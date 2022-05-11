@@ -1,0 +1,347 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>convrt_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>convrt_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   convrt_c ( Convert Units ) 
+
+   void convrt_c ( SpiceDouble       x,
+                   ConstSpiceChar  * in,
+                   ConstSpiceChar  * out,
+                   SpiceDouble     * y    )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Take a measurement X, the units associated with
+   X, and units to which X should be converted; return Y ---
+   the value of the measurement in the output units.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   CONVERSION
+   UNITS
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  -------------------------------------------------
+   x          I   Number representing a measurement in some units.
+   in         I   The units in which x is measured.
+   out        I   Desired units for the measurement.
+   y          O   The measurement in the desired units.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   x           is a number representing a measurement in the units
+               specified by in.
+
+   in          represents the units associated with a measurement x.
+               Acceptable units are:
+
+               Angles:                 &quot;RADIANS&quot;
+                                       &quot;DEGREES&quot;
+                                       &quot;ARCMINUTES&quot;
+                                       &quot;ARCSECONDS&quot;
+                                       &quot;HOURANGLE&quot;
+                                       &quot;MINUTEANGLE&quot;
+                                       &quot;SECONDANGLE&quot;
+
+               Metric Distances:       &quot;METERS&quot;
+                                       &quot;M&quot;
+                                       &quot;KILOMETERS&quot;
+                                       &quot;KM&quot;
+                                       &quot;CENTIMETERS&quot;
+                                       &quot;CM&quot;
+                                       &quot;MILLIMETERS&quot;
+                                       &quot;MM&quot;
+
+               English Distances:      &quot;FEET&quot;
+                                       &quot;INCHES&quot;
+                                       &quot;YARDS&quot;
+                                       &quot;STATUTE_MILES&quot;
+                                       &quot;NAUTICAL_MILES&quot;
+
+               Astrometric Distances:  &quot;AU&quot;
+                                       &quot;PARSECS&quot;
+                                       &quot;LIGHTSECS&quot;
+                                       &quot;LIGHTYEARS&quot; julian lightyears
+
+               Time:                   &quot;SECONDS&quot;
+                                       &quot;MINUTES&quot;
+                                       &quot;HOURS&quot;
+                                       &quot;DAYS&quot;
+                                       &quot;JULIAN_YEARS&quot;
+                                       &quot;TROPICAL_YEARS&quot;
+                                       &quot;YEARS&quot; (same as julian years)
+
+
+               The case of the string in is not significant.
+
+
+   out         represents the units desired for the measurement x.
+               See the description of in.
+
+               The case of the string out is not significant.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   y           is the input measurement converted to the desired units.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the input units, output units, or both input and output
+       units are not recognized, the error SPICE(UNITSNOTREC) is
+       signaled by a routine in the call tree of this routine.
+
+   2)  If the units being converted between are incompatible, the
+       error SPICE(INCOMPATIBLEUNITS) is signaled by a routine in the
+       call tree of this routine.
+
+   3)  If any of the `in' or `out' input string pointers is null, the
+       error SPICE(NULLPOINTER) is signaled.
+
+   4)  If any of the `in' or `out' input strings has zero length, the
+       error SPICE(EMPTYSTRING) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine converts a measurement x given in units specified by
+   in to the equivalent value y in units specified by out.
+
+   If a unit is not recognized, an error message is produced that
+   indicates which one was not recognized.
+
+   If input and output units are incompatible (for example angle
+   and distance units) and error message will be produced stating
+   the requested units and associated types.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Convert 300 miles (statute miles) to kilometers and determine
+      the number of lightyears in a parsec.
+
+      Example code begins here.
+
+
+      /.
+         Program convrt_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble               distsm;
+         SpiceDouble               onpars;
+         SpiceDouble               result;
+
+         /.
+         Convert 300 miles (statute miles) to kilometers.
+         ./
+         distsm = 300.0;
+         <b>convrt_c</b> ( distsm, &quot;statute_miles&quot;, &quot;km&quot;, &amp;result );
+         printf ( &quot;300 miles in km  : %16.6f\n&quot;,  result   );
+
+         /.
+         Determine the number of lightyears in a parsec.
+         ./
+         onpars = 1.0;
+         <b>convrt_c</b> ( onpars, &quot;PARSECS&quot;, &quot;LIGHTYEARS&quot;, &amp;result );
+         printf ( &quot;Lightyears/parsec: %16.6f\n&quot;,  result     );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      300 miles in km  :       482.803200
+      Lightyears/parsec:         3.261564
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  This routine does not do any checking for overflow. The caller
+       is required to make sure that the units used for the
+       measurement are such that no floating point overflow will
+       occur when the conversion is performed.
+
+   2)  Some of the units are not &quot;defined&quot; quantities. In such a case
+       a best estimate is provided as of the date of the current
+       version of this routine. Those estimated quantities are:
+
+          AU               The astronomical unit. The value was taken
+                           from the JPL ephemeris DE125. This value
+                           is an approximation and should not be used
+                           for high-accuracy work. It agrees with the
+                           value used in the JPL planetary ephemeris
+                           DE430 (149597870.700 km) at the 100m
+                           level.
+
+          TROPICAL_YEARS   The tropical year is the time from equinox
+                           to equinox. This varies slightly with
+                           time.
+
+          PARSECS          The parsec is the distance to an object
+                           whose parallax angle is one arcsecond. Its
+                           value is dependent upon the value of the
+                           astronomical unit.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   C.A. Curzon         (JPL)
+   J. Diaz del Rio     (ODC Space)
+   H.A. Neilan         (JPL)
+   W.M. Owen           (JPL)
+   W.L. Taber          (JPL)
+   I.M. Underwood      (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 2.0.1, 13-AUG-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Added
+       complete code example.
+
+   -CSPICE Version 2.0.0, 13-MAY-2016 (NJB)
+
+       Updated to support expanded names of metric distance
+       units, as well as to support the abbreviation &quot;M&quot;
+       indicating meters.
+
+   -CSPICE Version 1.0.0, 17-MAY-1999 (NJB) (CAC) (HAN) (WMO) (WLT) (IMU)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   convert units
+</PRE>
+<h4>Link to routine convrt_c source file <a href='../../../src/cspice/convrt_c.c'>convrt_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:03 2021</pre>
+
+</body>
+</html>
+

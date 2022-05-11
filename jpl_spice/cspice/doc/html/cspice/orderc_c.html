@@ -1,0 +1,328 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>orderc_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>orderc_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   orderc_c ( Order of a character array ) 
+
+   void orderc_c ( SpiceInt      arrlen,
+                   const void  * array,
+                   SpiceInt      ndim,
+                   SpiceInt    * iorder  )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Determine the order of elements in an array of character strings.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   ARRAY
+   SORT
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   arrlen     I   String length.
+   array      I   Input array.
+   ndim       I   Dimension of array.
+   iorder     O   Order vector for array.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   arrlen      is the declared length of the strings in the input
+               string array, including null terminators. The input
+               array should be declared with dimension
+
+                  [ndim][arrlen]
+
+   array       is the input array.
+
+   ndim        is the number of elements in the input array.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   iorder      is the order vector for the input array.
+               iorder[0] is the index of the smallest element
+               of array; iorder[1] is the index of the next
+               smallest; and so on. Strings are ordered according
+               to the ASCII collating sequence. Trailing white space
+               is ignored when comparing strings.
+
+               The elements of iorder range from zero to ndim-1.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If ndim &lt; 1, this routine returns immediately. This case is not
+       considered an error.
+
+   2)  If the `array' input array pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   3)  If the `array' input array strings have length less than two
+       characters, the error SPICE(STRINGTOOSHORT) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   <b>orderc_c</b> finds the index of the smallest element of the input
+   array. This becomes the first element of the order vector.
+   The process is repeated for the rest of the elements.
+
+   The order vector returned by <b>orderc_c</b> may be used by any of
+   the reord* routines to sort sets of related arrays, as shown
+   in the example below.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Sort four related arrays containing the names, masses,
+      integer ID codes, and flags indicating whether they have
+      a ring system, for a group of planets.
+
+
+      Example code begins here.
+
+
+      /.
+         Program orderc_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local constants.
+         ./
+         #define NDIM         8
+         #define STRLEN       8
+
+         /.
+         Local variables.
+         ./
+
+         SpiceInt             i;
+         SpiceInt             iorder [NDIM];
+
+         /.
+         Set the arrays containing the names, masses (given as
+         ratios to of Solar GM to barycenter GM), integer ID
+         codes, and flags indicating whether they have a ring
+         system.
+         ./
+         SpiceChar            names  [NDIM][STRLEN] = {
+                                 &quot;MERCURY&quot;, &quot;VENUS&quot;,  &quot;EARTH&quot;,  &quot;MARS&quot;,
+                                 &quot;JUPITER&quot;, &quot;SATURN&quot;, &quot;URANUS&quot;, &quot;NEPTUNE&quot; };
+
+         SpiceDouble          masses [NDIM] = {     22032.080,   324858.599,
+                                                   398600.436,    42828.314,
+                                                126712767.881, 37940626.068,
+                                                  5794559.128,  6836534.065 };
+
+         SpiceInt             codes  [NDIM] = { 199, 299, 399, 499,
+                                                599, 699, 799, 899 };
+
+         SpiceBoolean         rings  [NDIM] = { SPICEFALSE, SPICEFALSE,
+                                                SPICEFALSE, SPICEFALSE,
+                                                SPICETRUE,  SPICETRUE,
+                                                SPICETRUE,  SPICETRUE  };
+
+         /.
+         Sort the object arrays by name.
+         ./
+         <b>orderc_c</b> ( STRLEN, names, NDIM,   iorder );
+
+         <a href="reordc_c.html">reordc_c</a> ( iorder, NDIM,  STRLEN, names  );
+         <a href="reordd_c.html">reordd_c</a> ( iorder, NDIM,  masses         );
+         <a href="reordi_c.html">reordi_c</a> ( iorder, NDIM,  codes          );
+         <a href="reordl_c.html">reordl_c</a> ( iorder, NDIM,  rings          );
+
+         /.
+         Output the resulting table.
+         ./
+         printf( &quot; Planet   Mass(GMS/GM)  ID Code  Rings?\n&quot; );
+         printf( &quot;-------  -------------  -------  ------\n&quot; );
+
+         for ( i = 0; i &lt; NDIM; i++ )
+         {
+
+            printf( &quot;%-7s %14.3f %8d %4d\n&quot;,
+                    names[i], masses[i], codes[i], rings[i] );
+
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+       Planet   Mass(GMS/GM)  ID Code  Rings?
+      -------  -------------  -------  ------
+      EARTH       398600.436      399    0
+      JUPITER  126712767.881      599    1
+      MARS         42828.314      499    0
+      MERCURY      22032.080      199    0
+      NEPTUNE    6836534.065      899    1
+      SATURN    37940626.068      699    1
+      URANUS     5794559.128      799    1
+      VENUS       324858.599      299    0
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  String comparisons performed by this routine are Fortran-style:
+       trailing blanks in the input array or key value are ignored.
+       This gives consistent behavior with CSPICE code generated by
+       the f2c translator, as well as with the Fortran SPICE Toolkit.
+
+       Note that this behavior is not identical to that of the ANSI
+       C library functions strcmp and strncmp.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   I.M. Underwood      (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.0, 04-AUG-2021 (JDR)
+
+       Changed input argument name &quot;lenvals&quot; to &quot;arrlen&quot; for consistency
+       with other routines.
+
+       Edited the header to comply with NAIF standard.
+       Added complete code example.
+
+   -CSPICE Version 1.0.0, 18-JUL-2002 (NJB) (IMU)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   order of a character array
+</PRE>
+<h4>Link to routine orderc_c source file <a href='../../../src/cspice/orderc_c.c'>orderc_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:10 2021</pre>
+
+</body>
+</html>
+

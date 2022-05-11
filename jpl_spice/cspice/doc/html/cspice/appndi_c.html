@@ -1,0 +1,365 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>appndi_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>appndi_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   appndi_c ( Append an item to an integer cell ) 
+
+   void appndi_c ( SpiceInt        item,
+                   SpiceCell     * cell )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Append an item to an integer cell.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/cells.html">CELLS</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   CELLS
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   item       I   The item to append.
+   cell      I-O  The cell to which `item' will be appended.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   item        is an integer value which is to be appended to `cell'.
+
+   cell        is an integer SPICE cell to which `item' will be
+               appended.
+
+               `cell' must be declared as an integer SpiceCell.
+
+               CSPICE provides the following macro, which declares and
+               initializes the cell
+
+                  SPICEINT_CELL           ( cell, CELLSZ );
+
+               where CELLSZ is the maximum capacity of `cell'.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   cell        is the input cell with `item' appended. `item' is the last
+               member of `cell'.
+
+               If `cell' is actually a SPICE set on input and ceases to
+               qualify as a set as result of the requested append
+               operation, the `isSet' member of cell will be set to
+               SPICEFALSE.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the input cell argument doesn't have integer data type,
+       the error SPICE(TYPEMISMATCH) is signaled.
+
+   2)  If the cell is not big enough to accommodate the addition
+       of a new element, the error SPICE(CELLTOOSMALL) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Create a cell for fifteen elements, add a first element to
+      it and then append several more integer numbers. Validate
+      the cell into a set and print the result. Finally, append
+      another integer number. After each operation, check if the
+      cell constitutes a set or not.
+
+
+      Example code begins here.
+
+
+      /.
+         Program appndi_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local constants.
+         ./
+         #define LISTSZ       9
+         #define SETDIM       15
+
+         /.
+         Local variables.
+         ./
+         SPICEINT_CELL      ( a     , SETDIM );
+         SpiceInt             i;
+
+         /.
+         Set the list of integers to be appended to the cell.
+         ./
+         SpiceInt             items  [LISTSZ] = { 3,  1,  1 , 2, 5,
+                                                  8, 21, 13, 34    };
+
+         /.
+         Add a single item to the new cell.
+         ./
+         <b>appndi_c</b> ( 0, &amp;a );
+
+         /.
+         Now insert a list of items.
+         ./
+         for ( i = 0; i &lt; LISTSZ; i++ )
+         {
+            <b>appndi_c</b> ( items[i], &amp;a );
+         }
+
+         /.
+         Output the original contents of cell A.
+         ./
+         printf( &quot;Items in original set A:\n&quot; );
+
+         for ( i = 0; i &lt; <a href="card_c.html">card_c</a>( &amp;a ); i++ )
+         {
+            printf( &quot;%6d&quot;, SPICE_CELL_ELEM_I( &amp;a, i ) );
+         }
+
+         printf( &quot; \n&quot; );
+
+         /.
+         After the append, does the cell key as a set?
+         ./
+         if ( a.isSet )
+         {
+            printf( &quot;Cell is a set after first append\n&quot; );
+         }
+         else
+         {
+            printf ( &quot;Cell is not a set after first append\n&quot; );
+         }
+
+         /.
+         Initialize the set by validating the cell: remove duplicates
+         and sort the elements in increasing order.
+         ./
+         <a href="valid_c.html">valid_c</a> ( SETDIM, <a href="card_c.html">card_c</a>( &amp;a ), &amp;a );
+
+         printf( &quot; \n&quot; );
+         printf( &quot;Items in cell A after <a href="valid_c.html">valid_c</a>:\n&quot; );
+
+         for ( i = 0; i &lt; <a href="card_c.html">card_c</a>( &amp;a ); i++ )
+         {
+            printf( &quot;%6d&quot;, SPICE_CELL_ELEM_I( &amp;a, i ) );
+         }
+
+         printf( &quot; \n&quot; );
+
+         /.
+         After the append, does the cell key as a set?
+         ./
+         if ( a.isSet )
+         {
+            printf( &quot;Cell is a set after <a href="valid_c.html">valid_c</a>\n&quot; );
+         }
+         else
+         {
+            printf ( &quot;Cell is not a set after <a href="valid_c.html">valid_c</a>\n&quot; );
+         }
+
+         /.
+         Append a new value to the cell, the value being less than all
+         other set values.
+         ./
+         <b>appndi_c</b> ( -22, &amp;a );
+
+         printf( &quot; \n&quot; );
+         printf( &quot;Items in cell A after second append:\n&quot; );
+
+         for ( i = 0; i &lt; <a href="card_c.html">card_c</a>( &amp;a ); i++ )
+         {
+            printf( &quot;%6d&quot;, SPICE_CELL_ELEM_I( &amp;a, i ) );
+         }
+
+         printf( &quot; \n&quot; );
+
+         /.
+         After the append, does the cell key as a set?
+         ./
+         if ( a.isSet )
+         {
+            printf( &quot;Cell is a set after second append\n&quot; );
+         }
+         else
+         {
+            printf ( &quot;Cell is not a set after second append\n&quot; );
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Items in original set A:
+           0     3     1     1     2     5     8    21    13    34
+      Cell is not a set after first append
+
+      Items in cell A after <a href="valid_c.html">valid_c</a>:
+           0     1     2     3     5     8    13    21    34
+      Cell is a set after <a href="valid_c.html">valid_c</a>
+
+      Items in cell A after second append:
+           0     1     2     3     5     8    13    21    34   -22
+      Cell is not a set after second append
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   H.A. Neilan         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.1, 27-AUG-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Added complete code
+       example.
+
+       Extended description of argument &quot;cell&quot; in -Detailed_Input to include
+       type and preferred declaration method.
+
+   -CSPICE Version 1.0.0, 01-AUG-2002 (NJB) (HAN)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   append an item to an integer cell
+</PRE>
+<h4>Link to routine appndi_c source file <a href='../../../src/cspice/appndi_c.c'>appndi_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:01 2021</pre>
+
+</body>
+</html>
+

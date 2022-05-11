@@ -1,0 +1,478 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>dasadc_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>dasadc_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   dasadc_c ( DAS, add data, character ) 
+
+   void dasadc_c ( SpiceInt            handle,
+                   SpiceInt            n,
+                   SpiceInt            bpos,
+                   SpiceInt            epos,
+                   SpiceInt            datlen,
+                   const void        * data   )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Add character data to a DAS file.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/das.html">DAS</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   ARRAY
+   ASSIGNMENT
+   DAS
+   FILES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   handle     I   DAS file handle.
+   n          I   Number of characters to add to file.
+   bpos,
+   epos       I   Begin and end positions of substrings.
+   datlen     I   Common length of the character arrays in `data'.
+   data       I   Array providing the set of substrings to be added
+                  to the character data in the DAS file.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   handle      is a file handle of a DAS file opened for writing.
+
+   n           is the total number of characters to add to the specified
+               DAS file.
+
+   bpos,
+   epos        are the begin and end character positions that define the
+               substrings in each of the elements of the input array.
+               This routine writes the first `n' characters from the
+               specified set of substrings to the specified DAS file.
+
+   data        is a two-dimensional character array, some portion of whose
+               contents are to be added to the specified DAS file.
+               Specifically, the first `n' characters of the substrings
+
+                  data[i][bpos:epos],    i = 0, ...
+
+               are appended to the character data in the file.
+
+               `data' must be declared at least as
+
+                  SpiceChar            data   [r][epos+1]
+
+               with the dimension `r' being at least
+
+                  r = int( ( n + sublen - 1 ) / sublen )
+
+               and `sublen', the length of each of the substrings in
+               the array to be added to the DAS file, being
+
+                  sublen  =  epos - bpos + 1
+
+               The order of characters in the input substrings is
+               considered to increase from left to right within each
+               element of `data', and to increase with the indices of the
+               elements of `data'.
+
+   datlen      is the common length of the character arrays in `data'.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   None.
+
+   See -Particulars for a description of the effect of this routine.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the input file handle is invalid, an error is signaled
+       by a routine in the call tree of this routine.
+
+   2)  If `epos' or `bpos' are outside of the range
+
+          [  0,  datlen - 1  ]
+
+       or if epos &lt; bpos, the error SPICE(BADSUBSTRINGBOUNDS) is
+       signaled by a routine in the call tree of this routine.
+
+   3)  If the input count `n' is less than 1, no data will be
+       added to the specified DAS file.
+
+   4)  If an I/O error occurs during the data addition attempted
+       by this routine, the error is signaled by a routine in the
+       call tree of this routine.
+
+   5)  If `n' is greater than the number of characters in the
+       specified set of input substrings, the results of calling
+       this routine are unpredictable. This routine cannot
+       detect this error.
+
+   6)  If the `data' input string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   7)  If the `data' input string has length less than one character,
+       the error SPICE(NODATA) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See the description of the argument `handle' in -Detailed_Input.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   DAS is a low-level format meant to store and transmit data. As
+   such, character data in DAS files are not interpreted by SPICELIB
+   DAS input or output routines. There are no limits on which
+   character values may be placed in the virtual character array of a
+   DAS file.
+
+   This routine adds character data to a DAS file by &quot;appending&quot; them
+   after any character data already in the file. The sense in which
+   the data are &quot;appended&quot; is that the data will occupy a range of
+   logical addresses for character data that immediately follow the
+   last logical address of a character that is occupied at the time
+   this routine is called. The diagram below illustrates this
+   addition:
+
+      +-------------------------+
+      |    (already in use)     |  Character logical address 1
+      +-------------------------+
+                  .
+                  .
+                  .
+      +-------------------------+  last character logical address
+      |   (already in use)      |  in use before call to <b>dasadc_c</b>
+      +-------------------------+
+      |  data[0][bpos]          |  First added character
+      +-------------------------+
+      |  data[0][bpos+1]        |
+      +-------------------------+
+                   .
+                   .
+                   .
+      +-------------------------+
+      |  data[0][epos]          |
+      +-------------------------+
+      |  data[1][bpos]          |
+      +-------------------------+
+                   .
+                   .
+                   .
+      +-------------------------+
+      |  data[r-1][c]           |  n'th added character---here `r' is
+      +-------------------------+
+                                      (SpiceInt)( (n+l-1)/l )
+
+                                   where l = epos - bpos + 1, and
+                                   `c' is
+
+                                      bpos + ( n - (r-1)*l ) - 1
+
+   The logical organization of the characters in the DAS file is
+   independent of the order of addition to the file or physical
+   location of any data of integer or double precision type.
+
+   The actual physical write operations that add the input array
+   `data' to the indicated DAS file may not take place before this
+   routine returns, since the DAS system buffers data that are
+   written as well as data that are read. In any case, the data
+   will be flushed to the file at the time the file is closed, if
+   not earlier. A physical write of all buffered records can be
+   forced by calling the CSPICE routine <a href="daswbr_c.html">daswbr_c</a> (DAS, write
+   buffered records).
+
+   In order to update character logical addresses that already
+   contain data, the CSPICE routine <a href="dasudc_c.html">dasudc_c</a> (DAS, update data,
+   character) should be used.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) The following example demonstrates the capabilities of the
+      DAS character data routines. The reader should notice that
+      in these interfaces, the character data are treated not as
+      strings (or arrays of strings) but as a stream of single
+      characters: DAS character data are not limited to
+      human-readable text. For example, one can store images or
+      DEM data as DAS character data.
+
+      The example shows how to add a variable amount of character
+      data to a new DAS file, how to update some of the character
+      logical addresses within that file, and how to read that
+      data out to a different array.
+
+
+      Example code begins here.
+
+
+      /.
+         Program dasadc_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &lt;string.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define FNAME        &quot;dasadc_ex1.das&quot;
+         #define TYPE         &quot;TEST&quot;
+
+         /.
+         Local variables.
+         ./
+         SpiceChar            cdatin [3][22];
+         SpiceInt             handle;
+         SpiceInt             i;
+
+         SpiceChar            cdastr [31];
+         SpiceChar            cdatou [10][30] = {
+                                           &quot;..............................&quot;,
+                                           &quot;..............................&quot;,
+                                           &quot;..............................&quot;,
+                                           &quot;..............................&quot;,
+                                           &quot;..............................&quot;,
+                                           &quot;..............................&quot;,
+                                           &quot;..............................&quot;,
+                                           &quot;..............................&quot;,
+                                           &quot;         1         2         3&quot;,
+                                           &quot;123456789012345678901234567890&quot; };
+
+         /.
+         Open a new DAS file. Use the file name as the internal
+         file name, and reserve no records for comments.
+         ./
+         <a href="dasonw_c.html">dasonw_c</a> ( FNAME, TYPE, FNAME, 0, &amp;handle );
+
+         /.
+         Set the input data. Note that these data will be
+         considered as a binary data stream: DAS character data
+         are not limited to human-readable text. For example,
+         one can store images or DEM data as DAS character data.
+         ./
+         strncpy( cdatin[0], &quot;--F-345678901234567890&quot;, 22 );
+         strncpy( cdatin[1], &quot;--S-345678901234567890&quot;, 22 );
+         strncpy( cdatin[2], &quot;--T-IRDxxxxxxxxxxxxxxx&quot;, 22 );
+
+         /.
+         Add the last 20 characters of the first two elements
+         of `cdatin', and the 3rd character from the third one.
+         ./
+         <b>dasadc_c</b> ( handle, 41, 2, 21, 22, cdatin );
+
+         /.
+         Update the 10th, 20th and 30th character in the DAS
+         file with a vertical bar.
+         ./
+         for ( i = 1; i &lt; 4; i++ )
+         {
+            <a href="dasudc_c.html">dasudc_c</a> ( handle, i*10, i*10, 0, 0, 1, &quot;|&quot; );
+         }
+
+         /.
+         Close the file.
+         ./
+         <a href="dascls_c.html">dascls_c</a> ( handle );
+
+         /.
+         Now verify the addition of data by opening the
+         file for read access and retrieving the data.
+         ./
+         <a href="dasopr_c.html">dasopr_c</a> ( FNAME, &amp;handle );
+
+         /.
+         Read the 41 characters that we stored on the DAS
+         file. Update the data on the `cdatou' array, placing
+         6 characters on each element, starting from the
+         10th position.
+         ./
+         <a href="dasrdc_c.html">dasrdc_c</a> ( handle, 1, 41, 9, 14, 30, cdatou );
+
+         /.
+         Dump the data to the screen. Note that the last
+         three lines should remain unmodified, and that
+         only 5 characters will be written on the 7th line.
+         ./
+         printf( &quot;\n&quot; );
+         printf( &quot;Data from \&quot;%s\&quot;:\n&quot;, FNAME );
+         printf( &quot;\n&quot; );
+
+         for ( i = 0; i &lt; 10; i++ )
+         {
+
+            /.
+            Add null-terminating character to `cdatou[i]' in order to
+            print it to the screen.
+            ./
+            strncpy( cdastr, cdatou[i], 30 );
+            cdastr[30] = '\0';
+
+            printf( &quot;%s\n&quot;, cdastr );
+         }
+
+         /.
+         Close the file.
+         ./
+         <a href="dascls_c.html">dascls_c</a> ( handle );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Data from &quot;dasadc_ex1.das&quot;:
+
+      .........F-3456...............
+      .........789|12...............
+      .........345678...............
+      .........9|S-34...............
+      .........56789|...............
+      .........123456...............
+      .........7890T................
+      ..............................
+               1         2         3
+      123456789012345678901234567890
+
+
+      Note that after run completion, a new DAS file exists in the
+      output directory.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.0, 19-MAY-2021 (JDR)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   add character data to a DAS file
+</PRE>
+<h4>Link to routine dasadc_c source file <a href='../../../src/cspice/dasadc_c.c'>dasadc_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:03 2021</pre>
+
+</body>
+</html>
+

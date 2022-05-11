@@ -1,0 +1,290 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>dafhsf_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>dafhsf_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   dafhsf_c ( DAF, handle to summary format ) 
+
+   void dafhsf_c ( SpiceInt            handle,
+                   SpiceInt          * nd,
+                   SpiceInt          * ni      )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Return the summary format associated with a handle.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/daf.html">DAF</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   CONVERSION
+   DAF
+   FILES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   handle     I   Handle of a DAF file.
+   nd         O   Number of double precision components in summaries.
+   ni         O   Number of integer components in summaries.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   handle      is the handle associated with a previously opened
+               DAF file.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   nd,
+   ni          are the numbers of double precision and integer
+               components, respectively, in each array summary
+               in the specified file.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the specified handle does not belong to any file that is
+       currently known to be open, the error SPICE(DAFNOSUCHHANDLE)
+       is signaled by a routine in the call tree of this routine.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   The summary format must be known in order to pack or unpack
+   an array summary. See the DAF Required Reading for a discussion
+   of summary formats.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Find the number of d.p. `words' in a DAF having an
+      arbitrary summary format.
+
+      Use the SPK kernel below as input DAF file for the program.
+
+         de421.bsp
+
+
+      Example code begins here.
+
+
+      /.
+         Program dafhsf_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Count the number of d.p. words of data in a
+         `daf'.  Exclude array summaries, reserved records,
+         the file record, and character records.
+         ./
+         #define MAXND        124
+         #define MAXNI        250
+         #define MAXSUM       125
+
+         /.
+         Local variables.
+         ./
+         SpiceChar          * daf;
+
+         SpiceDouble          dc     [MAXND];
+         SpiceDouble          sum    [MAXSUM];
+
+         SpiceInt             fa;
+         SpiceInt             handle;
+         SpiceInt             ia;
+         SpiceInt             ic     [MAXNI];
+         SpiceInt             n;
+         SpiceInt             nd;
+         SpiceInt             ni;
+
+         SpiceBoolean         found;
+
+         daf = &quot;de421.bsp&quot;;
+
+         /.
+         Open the `daf' and find the summary format.
+         ./
+         <a href="dafopr_c.html">dafopr_c</a> ( daf, &amp;handle );
+         <b>dafhsf_c</b> ( handle, &amp;nd, &amp;ni );
+
+         /.
+         Start a forward search and examine each array in
+         turn.
+         ./
+         <a href="dafbfs_c.html">dafbfs_c</a> ( handle );
+         <a href="daffna_c.html">daffna_c</a> ( &amp;found );
+
+         n = 0;
+         while ( found )
+         {
+
+            /.
+            Obtain the array summary, unpack it, and get
+            the initial and final array addresses from
+            the integer descriptor component.
+            ./
+            <a href="dafgs_c.html">dafgs_c</a> ( sum );
+            <a href="dafus_c.html">dafus_c</a> ( sum, nd, ni, dc, ic );
+
+            ia  =  ic[ ni - 2];
+            fa  =  ic[ ni - 1];
+
+            n   =  fa - ia + 1 + n;
+
+            <a href="daffna_c.html">daffna_c</a> ( &amp;found );
+
+         }
+
+         printf( &quot;Number of d.p. words is  %d\n&quot;, n );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Number of d.p. words is  2098004
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.0, 09-JUL-2021 (JDR)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   handle to DAF summary format
+</PRE>
+<h4>Link to routine dafhsf_c source file <a href='../../../src/cspice/dafhsf_c.c'>dafhsf_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:03 2021</pre>
+
+</body>
+</html>
+

@@ -1,0 +1,407 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>ducrss_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>ducrss_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   ducrss_c ( Unit Normalized Cross Product and Derivative ) 
+
+   void ducrss_c ( ConstSpiceDouble    s1     [6],
+                   ConstSpiceDouble    s2     [6],
+                   SpiceDouble         sout   [6] )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Compute the unit vector parallel to the cross product of
+   two 3-dimensional vectors and the derivative of this unit vector.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   DERIVATIVE
+   VECTOR
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   s1         I   Left hand state for cross product and derivative.
+   s2         I   Right hand state for cross product and derivative.
+   sout       O   Unit vector and derivative of the cross product.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   s1          is any state vector. Typically, this might represent the
+               apparent state of a planet or the Sun, which defines the
+               orientation of axes of some coordinate system.
+
+   s2          is any state vector.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   sout        is the unit vector parallel to the cross product of the
+               position components of `s1' and `s2' and the derivative of
+               the unit vector.
+
+               If the cross product of the position components is
+               the zero vector, then the position component of the
+               output will be the zero vector. The velocity component
+               of the output will simply be the derivative of the
+               cross product of the position components of `s1' and `s2'.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   Error free.
+
+   1)  If the position components of `s1' and `s2' cross together to
+       give a zero vector, the position component of the output
+       will be the zero vector. The velocity component of the
+       output will simply be the derivative of the cross product
+       of the position vectors.
+
+   2)  If `s1' and `s2' are large in magnitude (taken together,
+       their magnitude surpasses the limit allowed by the
+       computer) then it may be possible to generate a
+       floating point overflow from an intermediate
+       computation even though the actual cross product and
+       derivative may be well within the range of double
+       precision numbers.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   <b>ducrss_c</b> calculates the unit vector parallel to the cross product
+   of two vectors and the derivative of that unit vector.
+   The results of the computation may overwrite either of the
+   input vectors.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) One can construct non-inertial coordinate frames from apparent
+      positions of objects or defined directions. However, if one
+      wants to convert states in this non-inertial frame to states
+      in an inertial reference frame, the derivatives of the axes of
+      the non-inertial frame are required.
+
+      Define a reference frame with the apparent direction of the
+      Sun as seen from Earth as the primary axis X. Use the Earth
+      pole vector to define with the primary axis the XY plane of
+      the frame, with the primary axis Y pointing in the direction
+      of the pole.
+
+      Use the meta-kernel shown below to load the required SPICE
+      kernels.
+
+
+         KPL/MK
+
+         File name: ducrss_ex1.tm
+
+         This meta-kernel is intended to support operation of SPICE
+         example programs. The kernels shown here should not be
+         assumed to contain adequate or correct versions of data
+         required by SPICE-based user applications.
+
+         In order for an application to use this meta-kernel, the
+         kernels referenced here must be present in the user's
+         current working directory.
+
+         The names and contents of the kernels referenced
+         by this meta-kernel are as follows:
+
+            File name                     Contents
+            ---------                     --------
+            de421.bsp                     Planetary ephemeris
+            pck00008.tpc                  Planet orientation and
+                                          radii
+            naif0009.tls                  Leapseconds
+
+
+         \begindata
+
+            KERNELS_TO_LOAD = ( 'de421.bsp',
+                                'pck00008.tpc',
+                                'naif0009.tls'  )
+
+         \begintext
+
+         End of meta-kernel
+
+
+      Example code begins here.
+
+
+      /.
+         Program ducrss_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local variables
+         ./
+         SpiceDouble          et;
+         SpiceDouble          lt;
+         SpiceDouble          state  [6];
+         SpiceDouble          trans  [6][6];
+         SpiceDouble          x_new  [6];
+         SpiceDouble          y_new  [6];
+         SpiceDouble          z_new  [6];
+         SpiceDouble          zinert [6];
+
+         /.
+         Define the earth body-fixed pole vector (z). The pole
+         has no velocity in the Earth fixed frame IAU_EARTH.
+         ./
+         SpiceDouble          z      [6] = { 0.0, 0.0, 1.0, 0.0, 0.0, 0.0 };
+
+         /.
+         Load SPK, PCK, and LSK kernels, use a meta kernel for
+         convenience.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( &quot;ducrss_ex1.tm&quot; );
+
+         /.
+         Calculate the state transformation between IAU_EARTH and
+         J2000 at an arbitrary epoch.
+         ./
+         <a href="str2et_c.html">str2et_c</a> ( &quot;Jan 1, 2009&quot;, &amp;et );
+         <a href="sxform_c.html">sxform_c</a> ( &quot;IAU_EARTH&quot;, &quot;J2000&quot;, et, trans );
+
+         /.
+         Transform the earth pole vector from the IAU_EARTH frame
+         to J2000.
+         ./
+         <a href="mxvg_c.html">mxvg_c</a> ( trans, z, 6, 6, zinert );
+
+         /.
+         Calculate the apparent state of the Sun from Earth at
+         the epoch `et' in the J2000 frame.
+         ./
+         <a href="spkezr_c.html">spkezr_c</a> ( &quot;Sun&quot;, et, &quot;J2000&quot;, &quot;lt+s&quot;, &quot;Earth&quot;, state, &amp;lt );
+
+         /.
+         Define the z axis of the new frame as the cross product
+         between the apparent direction of the Sun and the Earth
+         pole. `z_new' cross `x_new' defines the Y axis of the
+         derived frame.
+         ./
+         <a href="dvhat_c.html">dvhat_c</a> ( state, x_new );
+         <b>ducrss_c</b> ( state, zinert, z_new );
+         <b>ducrss_c</b> ( z_new, state, y_new );
+
+         /.
+         Display the results.
+         ./
+         printf( &quot;New X-axis:\n&quot; );
+         printf( &quot;   position: %15.12f %15.12f %15.12f\n&quot;,
+                              x_new[0], x_new[1], x_new[2] );
+         printf( &quot;   velocity: %15.12f %15.12f %15.12f\n&quot;,
+                              x_new[3], x_new[4], x_new[5] );
+         printf( &quot;New Y-axis:\n&quot; );
+         printf( &quot;   position: %15.12f %15.12f %15.12f\n&quot;,
+                              y_new[0], y_new[1], y_new[2] );
+         printf( &quot;   velocity: %15.12f %15.12f %15.12f\n&quot;,
+                              y_new[3], y_new[4], y_new[5] );
+         printf( &quot;New Z-axis:\n&quot; );
+         printf( &quot;   position: %15.12f %15.12f %15.12f\n&quot;,
+                              z_new[0], z_new[1], z_new[2] );
+         printf( &quot;   velocity: %15.12f %15.12f %15.12f\n&quot;,
+                              z_new[3], z_new[4], z_new[5] );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      New X-axis:
+         position:  0.183446637633 -0.901919663328 -0.391009273602
+         velocity:  0.000000202450  0.000000034660  0.000000015033
+      New Y-axis:
+         position:  0.078846540163 -0.382978080242  0.920386339077
+         velocity:  0.000000082384  0.000000032309  0.000000006387
+      New Z-axis:
+         position: -0.979862518033 -0.199671507623  0.000857203851
+         velocity:  0.000000044531 -0.000000218531 -0.000000000036
+
+
+      Note that these vectors define the transformation between the
+      new frame and J2000 at the given `et':
+
+             .-            -.
+             |       :      |
+             |   R   :  0   |
+         M = | ......:......|
+             |       :      |
+             | dRdt  :  R   |
+             |       :      |
+             `-            -'
+
+      with
+
+         r    = { {x_new[0], y_new[0], z_new[0]},
+                  {x_new[1], y_new[1], z_new[1]},
+                  {x_new[2], y_new[2], z_new[2]} }
+
+         dRdt = { {x_new[3], y_new[3], z_new[3]},
+                  {x_new[4], y_new[4], z_new[4]},
+                  {x_new[5], y_new[5], z_new[5]} }
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   1)  No checking of `s1' or `s2' is done to prevent floating point
+       overflow. The user is required to determine that the magnitude
+       of each component of the states is within an appropriate range
+       so as not to cause floating point overflow. In almost every
+       case there will be no problem and no checking actually needs
+       to be done.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.0, 02-JUL-2021 (JDR)
+
+       Rebuilt the wrapper to directly call the f2c'd version of the API,
+       which scales the inputs to reduce chance of numeric overflow.
+
+       Edited the header to comply with NAIF standard. Added complete
+       code example.
+
+   -CSPICE Version 1.0.0, 23-NOV-2009 (EDW) (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   Compute a unit cross product and its derivative
+</PRE>
+<h4>Link to routine ducrss_c source file <a href='../../../src/cspice/ducrss_c.c'>ducrss_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:05 2021</pre>
+
+</body>
+</html>
+

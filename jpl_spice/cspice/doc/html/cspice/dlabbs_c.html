@@ -1,0 +1,362 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>dlabbs_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>dlabbs_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   dlabbs_c ( DLA, begin backward search ) 
+
+   void dlabbs_c ( SpiceInt         handle,
+                   SpiceDLADescr  * dladsc,
+                   SpiceBoolean   * found  )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Begin a backward segment search in a DLA file.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/das.html">DAS</a>
+   <a href="../req/dla.html">DLA</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   DAS
+   DLA
+   FILES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   handle     I   Handle of open DLA file.
+   dladsc     O   Descriptor of last segment in DLA file.
+   found      O   Flag indicating whether a segment was found.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   handle      is the integer handle associated with the file to be
+               searched. This handle is used to identify the file in
+               subsequent calls to other DLA or DAS routines.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   dladsc      is the descriptor of the last DLA segment in the
+               file associated with `handle'.
+
+               The segment descriptor layout is:
+
+                  +---------------+
+                  | BACKWARD PTR  | Linked list backward pointer
+                  +---------------+
+                  | FORWARD PTR   | Linked list forward pointer
+                  +---------------+
+                  | BASE INT ADDR | Base DAS integer address
+                  +---------------+
+                  | INT COMP SIZE | Size of integer segment component
+                  +---------------+
+                  | BASE DP ADDR  | Base DAS d.p. address
+                  +---------------+
+                  | DP COMP SIZE  | Size of d.p. segment component
+                  +---------------+
+                  | BASE CHR ADDR | Base DAS character address
+                  +---------------+
+                  | CHR COMP SIZE | Size of character segment component
+                  +---------------+
+
+               `dladsc' is valid only if the output argument `found' is
+               SPICETRUE.
+
+   found       is a logical flag indicating whether a segment was
+               found. `found' has the value SPICETRUE if the file
+               contains at least one segment; otherwise `found' is
+               SPICEFALSE.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the input file handle is invalid, an error is
+       signaled by a routine in the call tree of this routine.
+
+   2)  If an error occurs while reading the DLA file, the error
+       is signaled by a routine in the call tree of this routine.
+
+   3)  If the input descriptor is invalid, this routine will
+       fail in an unpredictable manner.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See description of input argument `handle'.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   DLA files are built using the DAS low-level format; DLA files are
+   a specialized type of DAS file in which data are organized as a
+   doubly linked list of segments. Each segment's data belong to
+   contiguous components of character, double precision, and integer
+   type.
+
+   This routine supports backward traversal of a DLA file's segment
+   list. Note that it is not necessary to call this routine to
+   conduct a backward traversal; all that is necessary is to have
+   access to the last descriptor in the file, which this routine
+   provides.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as input,
+   the compiler and supporting libraries, and the machine specific
+   arithmetic implementation.
+
+   1) Open a DLA file for read access, traverse the segment
+      list from back to front, and display segment address
+      and size attributes.
+
+      Example code begins here.
+
+
+      /.
+         Program dlabbs_ex1
+      ./
+
+      #include &quot;SpiceUsr.h&quot;
+      #include &quot;SpiceDLA.h&quot;
+      #include &lt;stdio.h&gt;
+
+      int main()
+      {
+         /.
+         Local parameters
+         ./
+         #define FILSIZ           256
+
+         /.
+         Local variables
+         ./
+         SpiceBoolean            found;
+         SpiceChar               fname  [ FILSIZ ];
+         SpiceDLADescr           current;
+         SpiceDLADescr           dladsc;
+         SpiceInt                handle;
+         SpiceInt                segno;
+
+         /.
+         Prompt for the name of the file to search.
+         ./
+         <a href="prompt_c.html">prompt_c</a> ( &quot;Name of DLA file &gt; &quot;, FILSIZ, fname );
+
+         /.
+         Open the DLA file for read access.  Since DLA
+         files use the DAS architecture, we can use DAS
+         routines to open and close the file.
+         ./
+         <a href="dasopr_c.html">dasopr_c</a> ( fname, &amp;handle );
+
+         /.
+         Begin a backward search. Let `dladsc' contain
+         the descriptor of the last segment.
+         ./
+         segno = 0;
+
+         <b>dlabbs_c</b> ( handle, &amp;dladsc, &amp;found );
+
+         while ( found )
+         {
+            /.
+            Display the contents of the current segment
+            descriptor.
+            ./
+
+            ++segno;
+
+            printf ( &quot;\n&quot;
+                     &quot;Segment number (offset from end of file) = %d\n&quot;
+                     &quot;\n&quot;
+                     &quot;   Backward segment pointer         = %d\n&quot;
+                     &quot;   Forward segment pointer          = %d\n&quot;
+                     &quot;   Integer component base address   = %d\n&quot;
+                     &quot;   Integer component size           = %d\n&quot;
+                     &quot;   D.p. component base address      = %d\n&quot;
+                     &quot;   D.p. component size              = %d\n&quot;
+                     &quot;   Character component base address = %d\n&quot;
+                     &quot;   Character component size         = %d\n&quot;
+                     &quot;\n&quot;,
+                     (int)(segno),
+                     (int)(dladsc.bwdptr),
+                     (int)(dladsc.fwdptr),
+                     (int)(dladsc.ibase),
+                     (int)(dladsc.isize),
+                     (int)(dladsc.dbase),
+                     (int)(dladsc.dsize),
+                     (int)(dladsc.cbase),
+                     (int)(dladsc.csize)                            );
+
+            /.
+            Find the previous segment.
+            ./
+            current = dladsc;
+
+            <a href="dlafps_c.html">dlafps_c</a> ( handle, &amp;current, &amp;dladsc, &amp;found );
+         }
+
+         /.
+         Close the file using the DAS close routine.
+         ./
+         <a href="dascls_c.html">dascls_c</a> ( handle );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, using the DSK file named phobos512.bds, the output
+      was:
+
+
+      Name of DLA file &gt; phobos512.bds
+
+      Segment number (offset from end of file) = 1
+
+         Backward segment pointer         = -1
+         Forward segment pointer          = -1
+         Integer component base address   = 11
+         Integer component size           = 29692614
+         D.p. component base address      = 0
+         D.p. component size              = 4737076
+         Character component base address = 0
+         Character component size         = 0
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.0, 22-FEB-2021 (JDR)
+
+       Changed the output argument name &quot;descr&quot; to &quot;dladsc&quot; for
+       consistency with other routines.
+
+       Edited the header comments to comply with NAIF standard.
+
+   -CSPICE Version 1.0.0, 10-JAN-2017 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   begin backward search in DLA file
+</PRE>
+<h4>Link to routine dlabbs_c source file <a href='../../../src/cspice/dlabbs_c.c'>dlabbs_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:04 2021</pre>
+
+</body>
+</html>
+

@@ -1,0 +1,355 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>dafps_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>dafps_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   dafps_c ( DAF, pack summary ) 
+
+   void dafps_c ( SpiceInt             nd,
+                  SpiceInt             ni,
+                  ConstSpiceDouble   * dc,
+                  ConstSpiceInt      * ic,
+                  SpiceDouble        * sum )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Pack (assemble) an array summary from its double precision and
+   integer components.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/daf.html">DAF</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   CONVERSION
+   FILES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   nd         I   Number of double precision components.
+   ni         I   Number of integer components.
+   dc         I   Double precision components.
+   ic         I   Integer components.
+   sum        O   Array summary.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   nd          is the number of double precision components in
+               the summary to be packed.
+
+   ni          is the number of integer components in the summary.
+
+   dc          are the double precision components of the summary.
+
+   ic          are the integer components of the summary.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   sum         is an array summary containing the components in `dc'
+               and `ic'. This identifies the contents and location of
+               a single array within a DAF.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   Error free.
+
+   1)  If `nd' is zero or negative, no DP components are stored.
+
+   2)  If `ni' is zero or negative, no integer components are stored.
+
+   3)  If the total size of the summary is greater than 125 double
+       precision words, some components may not be stored. See
+       -Particulars for details.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   The components of array summaries are packed into double
+   precision arrays for reasons outlined in the DAF required reading.
+   Two routines, <b>dafps_c</b> (pack summary) and <a href="dafus_c.html">dafus_c</a> (unpack summary)
+   are provided for packing and unpacking summaries.
+
+   The total size of the summary is
+
+           (NI - 1)
+      ND + -------- + 1
+               2
+
+   double precision words (where the sizes of `dc' and `ic', ND and NI,
+   are non-negative).
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Replace the body ID code 301 (Moon) with a test body ID,
+      e.g. -999, in every descriptor of an SPK file.
+
+
+      Example code begins here.
+
+
+      /.
+         Program dafps_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main ( )
+      {
+         /.
+         Local parameters.
+         ./
+         #define DSCSIZ          5
+         #define FILSIZ          256
+         #define MAXOBJ         1000
+
+         #define ND              2
+         #define NI              6
+
+         #define NEWCODE         ( -999 )
+         #define OLDCODE         (  301 )
+
+         /.
+         Local variables.
+         ./
+         SPICEINT_CELL         ( ids,   MAXOBJ );
+
+         SpiceBoolean            found;
+
+         SpiceChar               fname   [ FILSIZ ];
+
+         SpiceDouble             dc      [ ND ];
+         SpiceDouble             sum     [ DSCSIZ ];
+
+         SpiceInt                handle;
+         SpiceInt                i;
+         SpiceInt                ic      [ NI ];
+         SpiceInt                obj;
+
+         /.
+         Get the SPK file name.
+         ./
+         <a href="prompt_c.html">prompt_c</a> ( &quot;Enter name of the SPK file &gt; &quot;, FILSIZ, fname );
+
+         /.
+         Open for writing the SPK file.
+         ./
+         <a href="dafopw_c.html">dafopw_c</a> ( fname, &amp;handle );
+
+         /.
+         Search the file in forward order.
+         ./
+         <a href="dafbfs_c.html">dafbfs_c</a> ( handle );
+         <a href="daffna_c.html">daffna_c</a> ( &amp;found );
+
+         while ( found )
+         {
+            /.
+            Fetch and unpack the descriptor (aka summary)
+            of the current segment.
+            ./
+            <a href="dafgs_c.html">dafgs_c</a> ( sum  );
+            <a href="dafus_c.html">dafus_c</a> ( sum, ND, NI, dc, ic );
+
+            /.
+            Replace ID codes if necessary.
+            ./
+            if ( ic[0] == OLDCODE )
+            {
+               ic[0] = NEWCODE;
+            }
+            if ( ic[1] == OLDCODE )
+            {
+               ic[1] = NEWCODE;
+            }
+
+            /.
+            Re-pack the descriptor; replace the descriptor
+            in the file.
+            ./
+            <b>dafps_c</b> ( ND, NI, dc, ic, sum );
+            <a href="dafrs_c.html">dafrs_c</a> ( sum );
+
+            /.
+            Find the next segment.
+            ./
+            <a href="daffna_c.html">daffna_c</a> ( &amp;found );
+
+         }
+
+         /.
+         Close the file.
+         ./
+         <a href="dafcls_c.html">dafcls_c</a> ( handle );
+
+         /.
+         Find the set of objects in the SPK file.
+         ./
+         <a href="spkobj_c.html">spkobj_c</a> ( fname, &amp;ids );
+
+         printf( &quot;Objects in the DAF file:\n\n&quot; );
+
+         for ( i = 0;  i &lt; <a href="card_c.html">card_c</a>( &amp;ids );  i++  )
+         {
+            obj  =  SPICE_CELL_ELEM_I( &amp;ids, i );
+            printf( &quot;%4d&quot;, (int)obj );
+         }
+
+         printf( &quot;\n&quot; );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, using the SPK file named de430.bsp, the output was:
+
+
+      Enter name of the SPK file &gt; de430.bsp
+      Objects in the DAF file:
+
+      -999   1   2   3   4   5   6   7   8   9  10 199 299 399
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.1, 09-JUL-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Extended code
+       example to generate outputs and provided example's solution.
+
+   -CSPICE Version 1.0.0, 23-NOV-2004 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   pack DAF summary
+</PRE>
+<h4>Link to routine dafps_c source file <a href='../../../src/cspice/dafps_c.c'>dafps_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:03 2021</pre>
+
+</body>
+</html>
+

@@ -1,0 +1,325 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>cmprss_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>cmprss_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   cmprss_c ( Compress a character string ) 
+
+   void cmprss_c ( SpiceChar          delim,
+                   SpiceInt           n,
+                   ConstSpiceChar   * input,
+                   SpiceInt           outlen,
+                   SpiceChar        * output  )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Compress a character string by removing occurrences of
+   more than N consecutive occurrences of a specified
+   character.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   ASCII
+   CHARACTER
+   STRING
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   delim      I   Delimiter to be compressed.
+   n          I   Maximum consecutive occurrences of delim.
+   input      I   Input string.
+   outlen     I   Available space in output string.
+   output     O   Compressed string.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   delim       is the delimiter to be compressed out of the string.
+               This may be any ASCII character.
+
+   n           is the maximum number of consecutive occurrences
+               of delim that will be allowed to remain in the
+               output string.
+
+   input       is the input string.
+
+   outlen      is the available space in the output string, counting
+               the terminating null. `outlen' is typically the
+               declared length of the output string.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   output      is the output string. This is the input string with all
+               occurrences of more than N consecutive delimiters
+               removed. A null terminator will follow the last
+               character of the string resulting from the compression.
+
+               If `output' is not large enough to hold the compressed
+               string, it is truncated on the right. The output string
+               will always be null-terminated.
+
+               `output' may overwrite `input'.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the output string length is too short to contain the result
+       of compressing the input string, the result is truncated on
+       the right. The output string is still null-terminated.
+
+   2)  If the `input' input string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   3)  If the `output' output string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   4)  If the `output' output string has length less than one
+       character, the error SPICE(STRINGTOOSHORT) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   Occurrences of more than `n' consecutive delimiters are removed
+   from the input string as it is copied to the output string.
+   If the output string is not large enough to hold the compressed
+   string, it is truncated on the right.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Remove multiple occurrences of a character in different strings.
+      As example, compress the occurrences of '.' down to two periods
+      (..), three periods (...) or just one period (.). Also, as a
+      practical example, remove trailing, leading and embedded spaces
+      from an input string.
+
+      Example code begins here.
+
+
+      /.
+         Program cmprss_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+         /.
+         Local constants.
+         ./
+         #define   STRLEN        40
+
+         /.
+         Local variables.
+         ./
+         SpiceChar               output [ STRLEN ];
+
+         /.
+         Assign an array of input character strings to be compressed.
+         ./
+         SpiceChar             * strings[] = {
+                                   &quot;ABC...DE.F...&quot;,
+                                   &quot;...........&quot;,
+                                   &quot;.. ..AB....CD&quot;,
+                                   &quot; Embe dde d -sp   a c  es   &quot; };
+
+         /.
+         Compress multiple occurrences of '.'
+         in the strings array. Compress to
+         two periods...
+         ./
+         <b>cmprss_c</b> ( '.', 2, strings[0], STRLEN, output );
+         printf ( &quot;Input : '%s'\n&quot;,   strings[0] );
+         printf ( &quot;Output: '%s'\n\n&quot;, output     );
+
+         /.
+         ...three periods...
+         ./
+         <b>cmprss_c</b> ( '.', 3, strings[1], STRLEN, output );
+         printf ( &quot;Input : '%s'\n&quot;,   strings[1] );
+         printf ( &quot;Output: '%s'\n\n&quot;, output     );
+
+         /.
+         ...one period.
+         ./
+         <b>cmprss_c</b> ( '.', 1, strings[2], STRLEN, output );
+         printf ( &quot;Input : '%s'\n&quot;,   strings[2] );
+         printf ( &quot;Output: '%s'\n\n&quot;, output     );
+
+         /.
+         Use the call to remove trailing, leading, and
+         embedded spaces.
+         ./
+         <b>cmprss_c</b> ( ' ', 0, strings[3], STRLEN, output );
+         printf ( &quot;Input : '%s'\n&quot;,   strings[3] );
+         printf ( &quot;Output: '%s'\n&quot;, output     );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Input : 'ABC...DE.F...'
+      Output: 'ABC..DE.F..'
+
+      Input : '...........'
+      Output: '...'
+
+      Input : '.. ..AB....CD'
+      Output: '. .AB.CD'
+
+      Input : ' Embe dde d -sp   a c  es   '
+      Output: 'Embedded-spaces'
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   W.L. Taber          (JPL)
+   I.M. Underwood      (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.0, 09-JUL-2021 (JDR)
+
+       Changed the input argument name &quot;lenout&quot; to &quot;outlen&quot; for consistency
+       with other routines.
+
+       Edited the header to comply with NAIF standard. Added
+       complete code example.
+
+   -CSPICE Version 1.0.0, 20-AUG-1999 (WLT) (IMU) (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   compress a character_string
+</PRE>
+<h4>Link to routine cmprss_c source file <a href='../../../src/cspice/cmprss_c.c'>cmprss_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:03 2021</pre>
+
+</body>
+</html>
+

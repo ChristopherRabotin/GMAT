@@ -1,0 +1,363 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>repml_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>repml_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   repml_c ( Replace marker with logical value text ) 
+
+   void repml_c  ( ConstSpiceChar    * in,
+                   ConstSpiceChar    * marker,
+                   SpiceBoolean        value,
+                   SpiceChar           rtcase,
+                   SpiceInt            outlen,
+                   SpiceChar         * out    )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Replace a marker with the text representation of a logical value.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   CHARACTER
+   CONVERSION
+   STRING
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   in         I   Input string.
+   marker     I   Marker to be replaced.
+   value      I   Replacement logical value.
+   rtcase     I   Case of replacement text.
+   outlen     I   Maximum length of output string `out'.
+   out        O   Output string.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   in          is an arbitrary character string.
+
+   marker      is an arbitrary character string. The first occurrence
+               of `marker' in the input string is to be replaced by
+               `value'.
+
+               `marker' is case-sensitive.
+
+               Leading and trailing blanks in `marker' are NOT
+               significant. In particular, no substitution is
+               performed if `marker' is blank or empty.
+
+   value       is an arbitrary logical value, either SPICETRUE or
+               SPICEFALSE.
+
+   rtcase      indicates the case of the replacement text. `rtcase' may
+               be any of the following:
+
+                  rtcase    Meaning        Output values
+                  ------    -----------    ---------------
+                  U, u      Uppercase      &quot;TRUE&quot;, &quot;FALSE&quot;
+
+                  L, l      Lowercase      &quot;true&quot;, &quot;false&quot;
+
+                  C, c      Capitalized    &quot;True&quot;, &quot;False&quot;
+
+   outlen      is the maximum allowed length of the output string `out'.
+               This length must be large enough to hold the output string
+               plus the null-terminator character. If the output string
+               is expected to have N characters, `outlen' should be at
+               least N+1.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   out         is the string obtained by substituting the text
+               representation of `value' for the first occurrence of
+               `marker' in the input string.
+
+               `out' and `in' must be disjoint.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If `out' does not have sufficient length to accommodate the
+       result of the substitution, the result will be truncated on
+       the right.
+
+   2)  If `marker' is blank or empty, or if `marker' is not a substring of
+       `in', this routine leaves the input string unchanged, except that
+       trailing blanks will be trimmed. This case is not considered an error.
+
+   3)  If the value of `rtcase' is not recognized, the error
+       SPICE(INVALIDCASE) is signaled by a routine in the call tree
+       of this routine. `out' is not changed.
+
+   4)  If any of the `in' or `marker' input string pointers is null,
+       the error SPICE(NULLPOINTER) is signaled.
+
+   5)  If the `out' output string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   6)  If the `out' output string has length less than two
+       characters, the error SPICE(STRINGTOOSHORT) is signaled, since
+       the output string is too short to contain one character of
+       output data plus a null terminator.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This is one of a family of related routines for inserting values
+   into strings. They are typically used to construct messages that
+   are partly fixed, and partly determined at run time. For example,
+   a message like
+
+      &quot;Fifty-one pictures were found in directory [USER.DATA].&quot;
+
+   might be constructed from the fixed string
+
+      &quot;#1 pictures were found in directory #2.&quot;
+
+   by the calls
+
+      <a href="repmct_c.html">repmct_c</a> ( string, &quot;#1&quot;,       51, &quot;C&quot;, LENTMP, tmpstr );
+      <a href="repmc_c.html">repmc_c</a>  ( tmpstr, &quot;#2&quot;, &quot;[USER.DATA]&quot;, LENSTR, string );
+
+   which substitute the cardinal text &quot;Fifty-one&quot; and the character
+   string &quot;[USER.DATA]&quot; for the markers &quot;#1&quot; and &quot;#2&quot; respectively.
+
+   The complete list of routines is shown below.
+
+      <a href="repmc_c.html">repmc_c</a>    ( Replace marker with character string value )
+      <a href="repmd_c.html">repmd_c</a>    ( Replace marker with double precision value )
+      <a href="repmf_c.html">repmf_c</a>    ( Replace marker with formatted d.p. value   )
+      <a href="repmi_c.html">repmi_c</a>    ( Replace marker with integer value          )
+      <b>repml_c</b>    ( Replace marker with logical value          )
+      <a href="repmct_c.html">repmct_c</a>   ( Replace marker with cardinal text          )
+      <a href="repmot_c.html">repmot_c</a>   ( Replace marker with ordinal text           )
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) The following example illustrates the use of <b>repml_c</b> to replace
+      a marker within a string with the text representation of a
+      logical value.
+
+
+      Example code begins here.
+
+
+      /.
+         Program repml_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &lt;string.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define STRLEN       81
+
+         /.
+         Local variables.
+         ./
+         SpiceChar            instr  [STRLEN];
+         SpiceChar            marker [STRLEN];
+         SpiceChar            outstr [STRLEN];
+
+         /.
+         1. Uppercase
+         ./
+         strncpy( marker, &quot;#&quot;, 2 );
+         strncpy( instr, &quot;Invalid value. The value was:  #.&quot;, 34 );
+
+         <b>repml_c</b> ( instr, marker, SPICEFALSE, 'U', STRLEN, outstr );
+
+         printf( &quot;Case 1: Replacement text in uppercase.\n&quot; );
+         printf( &quot;   Input : %s\n&quot;, instr );
+         printf( &quot;   Output: %s\n&quot;, outstr );
+         printf( &quot;\n&quot; );
+
+         /.
+         2. Lowercase
+         ./
+         strncpy( marker, &quot; XX &quot;, 5 );
+         strncpy( instr, &quot;Invalid value. The value was:  XX.&quot;, 35 );
+
+         <b>repml_c</b> ( instr, marker, SPICETRUE, 'l', STRLEN, outstr );
+
+         printf( &quot;Case 2: Replacement text in lowercase.\n&quot; );
+         printf( &quot;   Input : %s\n&quot;, instr );
+         printf( &quot;   Output: %s\n&quot;, outstr );
+         printf( &quot;\n&quot; );
+
+         /.
+         2. Capitalized
+         ./
+         strncpy( marker, &quot;#&quot;, 2 );
+         strncpy( instr, &quot;Invalid value. The value was:  #.&quot;, 34 );
+
+         <b>repml_c</b> ( instr, marker, SPICEFALSE, 'c', STRLEN, outstr );
+
+         printf( &quot;Case 3: Replacement text capitalized.\n&quot; );
+         printf( &quot;   Input : %s\n&quot;, instr );
+         printf( &quot;   Output: %s\n&quot;, outstr );
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Case 1: Replacement text in uppercase.
+         Input : Invalid value. The value was:  #.
+         Output: Invalid value. The value was:  FALSE.
+
+      Case 2: Replacement text in lowercase.
+         Input : Invalid value. The value was:  XX.
+         Output: Invalid value. The value was:  true.
+
+      Case 3: Replacement text capitalized.
+         Input : Invalid value. The value was:  #.
+         Output: Invalid value. The value was:  False.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.0, 04-AUG-2021 (JDR)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   replace marker with logical value
+</PRE>
+<h4>Link to routine repml_c source file <a href='../../../src/cspice/repml_c.c'>repml_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:11 2021</pre>
+
+</body>
+</html>
+

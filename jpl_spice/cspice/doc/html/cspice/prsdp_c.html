@@ -1,0 +1,317 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>prsdp_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>prsdp_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   prsdp_c ( Parse d.p. number with error checking ) 
+
+   void prsdp_c ( ConstSpiceChar     * string,
+                  SpiceDouble        * dpval  )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Parse a string as a double precision number, encapsulating error
+   handling.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   NUMBER
+   PARSING
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   string     I   String representing a numeric value.
+   dpval      O   D.p. value obtained by parsing `string'.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   string      is a string representing a numeric value. Commas and
+               spaces may be used in this string for ease of reading
+               and writing the number. They are treated as
+               insignificant but non-error-producing characters.
+
+               For exponential representation any of the characters
+               &quot;E&quot;,&quot;D&quot;,&quot;e&quot;,&quot;d&quot; may be used.
+
+               The following are legitimate numeric expressions
+
+                  +12.2 e-1
+                  -3. 1415 9276
+                  1e12
+                  E10
+
+               The program also recognizes the following  mnemonics
+
+                  &quot;PI&quot;,  &quot;pi&quot;,  &quot;Pi&quot;,  &quot;pI&quot;
+                  &quot;+PI&quot;, &quot;+pi&quot;, &quot;+Pi&quot;, &quot;+pI&quot;
+                  &quot;-PI&quot;, &quot;-pi&quot;, &quot;-Pi&quot;, &quot;-pI&quot;
+
+               and returns the value
+
+                  ( + OR - ) 3.1415 9265 3589 7932 3846 26 ...
+
+               as appropriate.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   dpval       is the double precision number obtained by parsing
+               `string'.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the input string cannot be parsed due to use of an
+       unexpected or misplaced character or due to a string
+       representing a number too large for double precision, the
+       error SPICE(NOTADPNUMBER) is signaled by a routine in the call
+       tree of this routine.
+
+   2)  If the `string' input string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   3)  If the `string' input string has zero length, the error
+       SPICE(EMPTYSTRING) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   The purpose of this routine is to enable safe parsing of double
+   precision numbers without the necessity of in-line error checking.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Parse into a SpiceDouble variable a set of strings
+      representing numeric values.
+
+
+      Example code begins here.
+
+
+      /.
+         Program prsdp_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define SETSIZ       8
+         #define STRLEN       12
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble          dpval;
+
+         SpiceInt             i;
+
+         /.
+         Initialize the array of strings.
+         ./
+         SpiceChar            strval [SETSIZ][STRLEN] = {
+                                   &quot;100,000,000&quot;, &quot; -2 690 192&quot;,
+                                   &quot;  +12.2 e-1&quot;, &quot;-3. 141 592&quot;,
+                                   &quot;     1.2e12&quot;, &quot;        E10&quot;,
+                                   &quot;         Pi&quot;, &quot;        -PI&quot; };
+
+         /.
+         Parse each string into a SpiceDouble variable.
+         ./
+         printf( &quot;   STRVAL               DPVAL\n&quot; );
+         printf( &quot;-----------  --------------------------\n&quot; );
+         for ( i = 0; i &lt; SETSIZ; i++ )
+         {
+            <b>prsdp_c</b> ( strval[i], &amp;dpval );
+
+            printf( &quot;%-11s %27.12f\n&quot;, strval[i], dpval );
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+         STRVAL               DPVAL
+      -----------  --------------------------
+      100,000,000      100000000.000000000000
+       -2 690 192       -2690192.000000000000
+        +12.2 e-1              1.220000000000
+      -3. 141 592             -3.141592000000
+           1.2e12  1200000000000.000000000000
+              E10    10000000000.000000000000
+               Pi              3.141592653590
+              -PI             -3.141592653590
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   E.D. Wright         (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.1.3, 04-AUG-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Added complete
+       code example.
+
+       Updated the header to properly describe its input, output,
+       exceptions and particulars.
+
+   -CSPICE Version 1.1.2, 26-AUG-1999 (NJB)
+
+       Header was updated to list string exceptions.
+
+   -CSPICE Version 1.1.1, 25-MAR-1998 (EDW)
+
+       Minor corrections to header.
+
+   -CSPICE Version 1.1.0, 08-FEB-1998 (NJB)
+
+       References to C2F_CreateStr_Sig were removed; code was
+       cleaned up accordingly. String checks are now done using
+       the macro CHKFSTR.
+
+   -CSPICE Version 1.0.0, 25-OCT-1997 (NJB)
+
+       Based on SPICELIB Version 1.0.0, 22-JUL-1997 (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   parse d.p. number with encapsulated error handling
+</PRE>
+<h4>Link to routine prsdp_c source file <a href='../../../src/cspice/prsdp_c.c'>prsdp_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:10 2021</pre>
+
+</body>
+</html>
+

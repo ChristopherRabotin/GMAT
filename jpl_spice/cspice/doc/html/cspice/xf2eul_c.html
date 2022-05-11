@@ -1,0 +1,547 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>xf2eul_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>xf2eul_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   xf2eul_c ( State transformation to Euler angles ) 
+
+   void xf2eul_c ( ConstSpiceDouble     xform  [6][6],
+                   SpiceInt             axisa,
+                   SpiceInt             axisb,
+                   SpiceInt             axisc,
+                   SpiceDouble          eulang [6],
+                   SpiceBoolean       * unique         )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Convert a state transformation matrix to Euler angles and their
+   derivatives, given a specified set of axes.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/pck.html">PCK</a>
+   <a href="../req/rotation.html">ROTATION</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   ANGLES
+   DERIVATIVES
+   STATE
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   xform      I   A state transformation matrix.
+   axisa      I   Axis A of the Euler angle factorization.
+   axisb      I   Axis B of the Euler angle factorization.
+   axisc      I   Axis C of the Euler angle factorization.
+   eulang     O   An array of Euler angles and their derivatives.
+   unique     O   Indicates if `eulang' is a unique representation.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   xform       is a state transformation matrix from some frame FRAME1
+               to another frame FRAME2. Pictorially, `xform' has the
+               structure shown here.
+
+                  .-             -.
+                  |       |       |
+                  |   r   |   0   |
+                  |       |       |
+                  |-------+-------|
+                  |       |       |
+                  | dr/dt |   r   |
+                  |       |       |
+                  `-             -'
+
+               where `r' is a rotation matrix that varies with respect to
+               time and dr/dt is its time derivative.
+
+               More specifically, if `s1' is the state of some object
+               in FRAME1, then `s2', the state of the same object
+               relative to FRAME2 is given by
+
+                  s2 = xform * s1
+
+               where &quot;*&quot; denotes the matrix vector product.
+
+   axisa,
+   axisb,
+   axisc       are the axes desired for the factorization of `r'.
+
+               All must be in the range from 1 to 3. Moreover
+               it must be the case that `axisa' and `axisb' are distinct
+               and that `axisb' and `axisc' are distinct.
+
+               Every rotation matrix can be represented as a product
+               of three rotation matrices about the principal axes
+               of a reference frame.
+
+                  r =  [ alpha ]      [ beta ]      [ gamma ]
+                                axisa         axisb          axisc
+
+               The value 1 corresponds to the X axis.
+               The value 2 corresponds to the Y axis.
+               The value 3 corresponds to the Z axis.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   eulang      is the set of Euler angles corresponding to the
+               specified factorization.
+
+               If we represent `r' as shown here:
+
+                  r =  [ alpha ]      [ beta ]      [ gamma ]
+                                axisa         axisb          axisc
+
+               then
+
+                  eulang[0] = alpha
+                  eulang[1] = beta
+                  eulang[2] = gamma
+                  eulang[3] = dalpha/dt
+                  eulang[4] = dbeta/dt
+                  eulang[5] = dgamma/dt
+
+               The range of `alpha' and `gamma' is (-pi, pi].
+
+               The range of `beta' depends on the exact set of
+               axes used for the factorization. For
+               factorizations in which the first and third axes
+               are the same, the range of `beta' is [0, pi].
+
+               For factorizations in which the first and third
+               axes are different, the range of `beta' is
+               [-pi/2, pi/2].
+
+               For rotations such that `alpha' and `gamma' are not
+               uniquely determined, `alpha' and dalpha/dt will
+               always be set to zero; `gamma' and dgamma/dt are
+               then uniquely determined.
+
+   unique      is a logical that indicates whether or not the
+               values in `eulang' are uniquely determined. If
+               the values are unique then `unique' will be set to
+               SPICETRUE. If the values are not unique and some
+               components ( eulang[0] and eulang[3] ) have been set
+               to zero, then `unique' will have the value SPICEFALSE.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If any of `axisa', `axisb', or `axisc' do not have values in
+
+          { 1, 2, 3 }
+
+       an error is signaled by a routine in the call tree of this
+       routine.
+
+   2)  If `axisb' is equal to `axisc' or `axisa', an error is signaled by a
+       routine in the call tree of this routine. An arbitrary
+       rotation matrix cannot be expressed using a sequence of Euler
+       angles unless the second rotation axis differs from the other
+       two.
+
+   3)  If the input matrix `xform' is not a rotation matrix, an error
+       is signaled by a routine in the call tree of this routine.
+
+   4)  If eulang[0] and eulang[2] are not uniquely determined,
+       eulang[0] is set to zero, and eulang[2] is determined.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   A word about notation: the symbol
+
+      [ x ]
+           i
+
+   indicates a coordinate system rotation of x radians about the
+   ith coordinate axis. To be specific, the symbol
+
+      [ x ]
+           1
+
+   indicates a coordinate system rotation of x radians about the
+   first, or x-, axis; the corresponding matrix is
+
+      .-                    -.
+      |  1    0        0     |
+      |                      |
+      |  0    cos(x)  sin(x) |
+      |                      |
+      |  0   -sin(x)  cos(x) |
+      `-                    -'
+
+   Remember, this is a COORDINATE SYSTEM rotation by x radians; this
+   matrix, when applied to a vector, rotates the vector by -x
+   radians, not x radians. Applying the matrix to a vector yields
+   the vector's representation relative to the rotated coordinate
+   system.
+
+   The analogous rotation about the second, or y-, axis is
+   represented by
+
+      [ x ]
+           2
+
+   which symbolizes the matrix
+
+      .-                    -.
+      | cos(x)   0   -sin(x) |
+      |                      |
+      |  0       1    0      |
+      |                      |
+      | sin(x)   0    cos(x) |
+      `-                    -'
+
+   and the analogous rotation about the third, or z-, axis is
+   represented by
+
+      [ x ]
+           3
+
+   which symbolizes the matrix
+
+      .-                    -.
+      |  cos(x)  sin(x)   0  |
+      |                      |
+      | -sin(x)  cos(x)   0  |
+      |                      |
+      |  0        0       1  |
+      `-                    -'
+
+   The input matrix is assumed to be the product of three
+   rotation matrices, each one of the form
+
+      .-                    -.
+      |  1      0       0    |
+      |                      |
+      |  0    cos(r)  sin(r) |     (rotation of r radians about the
+      |                      |      x-axis),
+      |  0   -sin(r)  cos(r) |
+      `-                    -'
+
+
+      .-                    -.
+      | cos(s)   0   -sin(s) |
+      |                      |
+      |  0       1      0    |     (rotation of s radians about the
+      |                      |      y-axis),
+      | sin(s)   0    cos(s) |
+      `-                    -'
+
+   or
+
+      .-                    -.
+      |  cos(t)  sin(t)   0  |
+      |                      |
+      | -sin(t)  cos(t)   0  |     (rotation of t radians about the
+      |                      |      z-axis),
+      |  0        0       1  |
+      `-                    -'
+
+   where the second rotation axis is not equal to the first or
+   third. Any rotation matrix can be factored as a sequence of
+   three such rotations, provided that this last criterion is met.
+
+   This routine is related to the routine <a href="eul2xf_c.html">eul2xf_c</a> which produces
+   a state transformation from an input set of axes, Euler angles
+   and derivatives.
+
+   The two function calls shown here will not change
+   `xform' except for round off errors.
+
+      <b>xf2eul_c</b> ( xform,  axisa, axisb, axisc, eulang, &amp;unique );
+      <a href="eul2xf_c.html">eul2xf_c</a> ( eulang, axisa, axisb, axisc, xform           );
+
+   On the other hand the two calls
+
+      <a href="eul2xf_c.html">eul2xf_c</a> ( eulang, axisa, axisb, axisc, xform           );
+      <b>xf2eul_c</b> ( xform,  axisa, axisb, axisc, eulang, &amp;unique );
+
+   will leave `eulang' unchanged only if the components of `eulang'
+   are in the range produced by <b>xf2eul_c</b> and the Euler representation
+   of the rotation component of `xform' is unique within that range.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Determine the rate of change of the right ascension and
+      declination of the pole of the moon, from the state
+      transformation matrix that transforms J2000 states to object
+      fixed states.
+
+      Recall that the rotation component of the state transformation
+      matrix is given by
+
+         [w]  [<a href="halfpi_c.html">halfpi_c</a>-dec]  [ra+<a href="halfpi_c.html">halfpi_c</a>]
+            3               1              3
+
+
+      Use the meta-kernel shown below to load the required SPICE
+      kernels.
+
+
+         KPL/MK
+
+         File name: xf2eul_ex1.tm
+
+         This meta-kernel is intended to support operation of SPICE
+         example programs. The kernels shown here should not be
+         assumed to contain adequate or correct versions of data
+         required by SPICE-based user applications.
+
+         In order for an application to use this meta-kernel, the
+         kernels referenced here must be present in the user's
+         current working directory.
+
+         The names and contents of the kernels referenced
+         by this meta-kernel are as follows:
+
+            File name                     Contents
+            ---------                     --------
+            pck00010.tpc                  Planet orientation and
+                                          radii
+            naif0012.tls                  Leapseconds
+
+
+         \begindata
+
+            KERNELS_TO_LOAD = ( 'pck00010.tpc',
+                                'naif0012.tls'  )
+
+         \begintext
+
+         End of meta-kernel
+
+
+      Example code begins here.
+
+
+      /.
+         Program xf2eul_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define META         &quot;xf2eul_ex1.tm&quot;
+         #define UTCSTR       &quot;May 15, 2007&quot;
+
+         /.
+         Local variables.
+         ./
+         SpiceDouble          eulang [6];
+         SpiceDouble          et;
+         SpiceDouble          ftmtrx [6][6];
+
+         SpiceBoolean         unique;
+
+         /.
+         Load SPICE kernels.
+         ./
+         <a href="furnsh_c.html">furnsh_c</a> ( META );
+
+         /.
+         Convert the input time to seconds past J2000 TDB.
+         ./
+         <a href="str2et_c.html">str2et_c</a> ( UTCSTR, &amp;et );
+
+         /.
+         Get the transformation matrix from J2000 frame to
+         IAU_MOON.
+         ./
+         <a href="sxform_c.html">sxform_c</a> ( &quot;J2000&quot;, &quot;IAU_MOON&quot;, et, ftmtrx );
+
+         /.
+         Convert the transformation matrix to
+         Euler angles (3-1-3).
+         ./
+         <b>xf2eul_c</b> ( ftmtrx, 3, 1, 3, eulang, &amp;unique );
+
+         /.
+         Display the results.
+         ./
+         if ( unique )
+         {
+            printf( &quot;UTC: %s\n&quot;, UTCSTR );
+            printf( &quot;W       =  %19.16f\n&quot;, eulang[0] );
+            printf( &quot;DEC     =  %19.16f\n&quot;, <a href="halfpi_c.html">halfpi_c</a>() - eulang[1] );
+            printf( &quot;RA      =  %19.16f\n&quot;, eulang[2] - <a href="halfpi_c.html">halfpi_c</a>() );
+            printf( &quot;dW/dt   =  %19.16f\n&quot;, eulang[3] );
+            printf( &quot;dDEC/dt =  %19.16f\n&quot;, eulang[4] );
+            printf( &quot;dRA/dt  =  %19.16f\n&quot;, eulang[5] );
+         }
+         else
+         {
+            printf( &quot;The values in EULANG are not uniquely determined.\n&quot; );
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      UTC: May 15, 2007
+      W       =  -2.6490877296701218
+      DEC     =   1.1869108599473206
+      RA      =  -1.5496443908099826
+      dW/dt   =   0.0000026578085601
+      dDEC/dt =   0.0000000004021737
+      dRA/dt  =   0.0000000039334471
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   W.L. Taber          (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.2, 01-NOV-2021 (JDR)
+
+       Edited the header to comply with NAIF standard. Added complete
+       code example based on existing example.
+
+   -CSPICE Version 1.0.1, 05-MAR-2008 (NJB)
+
+       Fixed typo (missing double quote character) in code example.
+       Corrected order of header sections.
+
+   -CSPICE Version 1.0.0, 15-JUN-1999 (WLT) (NJB)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   Euler angles and derivatives from state transformation
+</PRE>
+<h4>Link to routine xf2eul_c source file <a href='../../../src/cspice/xf2eul_c.c'>xf2eul_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:15 2021</pre>
+
+</body>
+</html>
+

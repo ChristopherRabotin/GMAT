@@ -1,0 +1,406 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>dasopw_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>dasopw_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   dasopw_c ( DAS, open for write ) 
+
+   void dasopw_c ( ConstSpiceChar    * fname,
+                   SpiceInt          * handle )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Open a DAS file for writing.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/das.html">DAS</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   DAS
+   FILES
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   fname      I   Name of a DAS file to be opened.
+   handle     O   Handle assigned to the opened DAS file.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   fname       is the name of a DAS file to be opened with write
+               access.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   handle      is the handle that is associated with the file. This
+               handle is used to identify the file in subsequent
+               calls to other DAS routines.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the input filename is blank, an error is signaled by a
+       routine in the call tree of this routine.
+
+   2)  If the specified file does not exist, an error is signaled by
+       a routine in the call tree of this routine.
+
+   3)  If the specified file has already been opened, either by the
+       DAS file routines or by other code, an error is signaled by a
+       routine in the call tree of this routine. Note that this
+       response is not paralleled by <a href="dasopr_c.html">dasopr_c</a>, which allows you to open
+       a DAS file for reading even if it is already open for reading.
+
+   4)  If the specified file cannot be opened without exceeding the
+       maximum allowed number of open DAS files, the error
+       SPICE(DASFTFULL) is signaled by a routine in the call tree of
+       this routine.
+
+   5)  If the specified file cannot be opened properly, an error
+       is signaled by a routine in the call tree of this routine.
+
+   6)  If the file record cannot be read, an error is signaled by a
+       routine in the call tree of this routine.
+
+   7)  If the specified file is not a DAS file, as indicated by the
+       file's ID word, an error is signaled by a routine in the call
+       tree of this routine.
+
+   8)  If no logical units are available, an error is signaled
+       by a routine in the call tree of this routine.
+
+   9)  If the `fname' input string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   10) If the `fname' input string has zero length, the error
+       SPICE(EMPTYSTRING) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   See argument `fname'.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   Most DAS files require only read access. If you do not need to
+   change the contents of a file, you should open it with <a href="dasopr_c.html">dasopr_c</a>.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) Create a new DAS file containing 200 integer addresses set
+      to zero. Re-open the file for write access again, and write
+      to its addresses 1 through 200 in random-access fashion by
+      updating the file.
+
+
+      Example code begins here.
+
+
+      /.
+         Program dasopw_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local Parameters
+         ./
+         #define DASNAM       &quot;dasopw_ex1.das&quot;
+         #define IDATLN       200
+
+         /.
+         Local Variables
+         ./
+         SpiceChar          * type;
+
+         SpiceInt             handle;
+         SpiceInt             i;
+         SpiceInt             idata  [IDATLN];
+         SpiceInt             j;
+
+         /.
+         Open a new DAS file. Reserve no comment records.
+         ./
+         type = &quot;TEST&quot;;
+         <a href="dasonw_c.html">dasonw_c</a> ( DASNAM, type, &quot;TEST/DASOPW_EX1&quot;, 0, &amp;handle );
+
+         /.
+         Append 200 integers to the file; after the data are
+         present, we're free to update it in any order we
+         please. (<a href="cleari_c.html">cleari_c</a> zeros out an integer array.)
+         ./
+         <a href="cleari_c.html">cleari_c</a> ( IDATLN, idata );
+         <a href="dasadi_c.html">dasadi_c</a> ( handle, IDATLN, idata );
+
+         /.
+         Close the file.
+         ./
+         <a href="dascls_c.html">dascls_c</a> ( handle );
+
+         /.
+         Open the file again for writing.
+         ./
+         <b>dasopw_c</b> ( DASNAM, &amp;handle );
+
+         /.
+         Reset the data array, and read the data into it.
+         ./
+         <a href="filli_c.html">filli_c</a> ( -1, IDATLN, idata );
+         <a href="dasrdi_c.html">dasrdi_c</a> ( handle, 1, IDATLN, idata );
+
+         /.
+         Print the contents of the file before updating it.
+         ./
+         printf( &quot;Contents of %s before update:\n&quot;, DASNAM );
+         printf( &quot;\n&quot; );
+         for ( i = 0; i &lt; 20; i++ )
+         {
+            for ( j = 0; j &lt; 10; j++ )
+            {
+               printf( &quot;%5d&quot;, idata[i*10+j] );
+            }
+            printf( &quot;\n&quot; );
+         }
+
+         /.
+         Now the integer logical addresses 1:200 can be
+         written to in random-access fashion. We'll fill them
+         in reverse order.
+         ./
+         for ( i = IDATLN; i &gt;= 1; i -= 1 )
+         {
+            <a href="dasudi_c.html">dasudi_c</a> ( handle, i, i, &amp;i );
+         }
+
+         /.
+         Close the file.
+         ./
+         <a href="dascls_c.html">dascls_c</a> ( handle );
+
+         /.
+         Now make sure that we updated the file properly.
+         Open the file for reading and dump the contents
+         of the integer logical addresses 1:200.
+         ./
+         <a href="dasopr_c.html">dasopr_c</a> ( DASNAM, &amp;handle );
+
+         <a href="cleari_c.html">cleari_c</a> ( IDATLN, idata );
+         <a href="dasrdi_c.html">dasrdi_c</a> ( handle, 1, IDATLN, idata );
+
+         printf( &quot;\n&quot; );
+         printf( &quot;Contents of %s after update:\n&quot;, DASNAM );
+         printf( &quot;\n&quot; );
+         for ( i = 0; i &lt; 20; i++ )
+         {
+            for ( j = 0; j &lt; 10; j++ )
+            {
+               printf( &quot;%5d&quot;, idata[i*10+j] );
+            }
+            printf( &quot;\n&quot; );
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      Contents of dasopw_ex1.das before update:
+
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+          0    0    0    0    0    0    0    0    0    0
+
+      Contents of dasopw_ex1.das after update:
+
+          1    2    3    4    5    6    7    8    9   10
+         11   12   13   14   15   16   17   18   19   20
+         21   22   23   24   25   26   27   28   29   30
+         31   32   33   34   35   36   37   38   39   40
+         41   42   43   44   45   46   47   48   49   50
+         51   52   53   54   55   56   57   58   59   60
+         61   62   63   64   65   66   67   68   69   70
+         71   72   73   74   75   76   77   78   79   80
+         81   82   83   84   85   86   87   88   89   90
+         91   92   93   94   95   96   97   98   99  100
+        101  102  103  104  105  106  107  108  109  110
+        111  112  113  114  115  116  117  118  119  120
+        121  122  123  124  125  126  127  128  129  130
+        131  132  133  134  135  136  137  138  139  140
+        141  142  143  144  145  146  147  148  149  150
+        151  152  153  154  155  156  157  158  159  160
+        161  162  163  164  165  166  167  168  169  170
+        171  172  173  174  175  176  177  178  179  180
+        181  182  183  184  185  186  187  188  189  190
+        191  192  193  194  195  196  197  198  199  200
+
+
+      Note that after run completion, a new DAS file exists in the
+      output directory.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   N.J. Bachman        (JPL)
+   J. Diaz del Rio     (ODC Space)
+   K.R. Gehringer      (JPL)
+   W.L. Taber          (JPL)
+   F.S. Turner         (JPL)
+   I.M. Underwood      (JPL)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.1, 10-AUG-2021 (JDR)
+
+       Improved the -Exceptions section. Updated the header to comply with
+       NAIF standard and added complete code example.
+
+   -CSPICE Version 1.0.0, 11-NOV-2016 (NJB) (KRG) (WLT) (FST) (IMU)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   open a DAS file for writing
+   open a DAS file for write access
+</PRE>
+<h4>Link to routine dasopw_c source file <a href='../../../src/cspice/dasopw_c.c'>dasopw_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:04 2021</pre>
+
+</body>
+</html>
+

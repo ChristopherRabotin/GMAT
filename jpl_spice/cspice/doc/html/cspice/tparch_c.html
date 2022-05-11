@@ -1,0 +1,349 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <TITLE>tparch_c</TITLE>
+</HEAD>
+
+<BODY style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<A name="TOP"></A>
+
+<table style="text-align: left; margin-left: auto; margin-right: auto; width: 800px;"
+ border="0" cellpadding="5" cellspacing="2">
+  <tbody>
+    <tr><td>
+<div align="center">
+Index of Functions: 
+<A HREF="index.html#A">A</A>&nbsp;
+<A HREF="index.html#B">B</A>&nbsp;
+<A HREF="index.html#C">C</A>&nbsp;
+<A HREF="index.html#D">D</A>&nbsp;
+<A HREF="index.html#E">E</A>&nbsp;
+<A HREF="index.html#F">F</A>&nbsp;
+<A HREF="index.html#G">G</A>&nbsp;
+<A HREF="index.html#H">H</A>&nbsp;
+<A HREF="index.html#I">I</A>&nbsp;
+<A HREF="index.html#J">J</A>&nbsp;
+<A HREF="index.html#K">K</A>&nbsp;
+<A HREF="index.html#L">L</A>&nbsp;
+<A HREF="index.html#M">M</A>&nbsp;
+<A HREF="index.html#N">N</A>&nbsp;
+<A HREF="index.html#O">O</A>&nbsp;
+<A HREF="index.html#P">P</A>&nbsp;
+<A HREF="index.html#Q">Q</A>&nbsp;
+<A HREF="index.html#R">R</A>&nbsp;
+<A HREF="index.html#S">S</A>&nbsp;
+<A HREF="index.html#T">T</A>&nbsp;
+<A HREF="index.html#U">U</A>&nbsp;
+<A HREF="index.html#V">V</A>&nbsp;
+<A HREF="index.html#W">W</A>&nbsp;
+<A HREF="index.html#X">X</A>&nbsp;
+</div>
+</td></tr>
+
+    <tr>
+      <td style="background-color: rgb(153, 153, 153); vertical-align: middle; text-align: center;">
+      <div align="right"> 
+      <small><small><a href="index.html">Index Page</a></small></small>
+      </div>
+      <b>tparch_c</b></td>
+    </tr>
+    
+
+    <tr>
+      <td style="vertical-align: top;">
+
+       <br>
+       <div align="left"><b>Table of contents</b></div>
+       <table style="text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+       border="0" cellspacing="2" cellpadding="2">
+        <tbody>
+          <tr>
+            <td style="width: 33%; text-align: center;">
+              <a href="#Procedure">Procedure<br></a>
+              <a href="#Abstract">Abstract<br></a>
+              <a href="#Required_Reading">Required_Reading<br></a>
+              <a href="#Keywords">Keywords<br></a>
+              <a href="#Brief_I/O">Brief_I/O<br></a>
+              <a href="#Detailed_Input">Detailed_Input<br></a>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Detailed_Output">Detailed_Output<br></a>
+              <a href="#Parameters">Parameters<br></a>
+              <a href="#Exceptions">Exceptions<br></a>
+              <a href="#Files">Files<br></a>
+              <a href="#Particulars">Particulars<br></a>
+              <big><b><a href="#Examples">Examples<br></a></b></big>
+
+              </td>
+              <td style="vertical-align: top; width: 33%; text-align: center;">              <a href="#Restrictions">Restrictions<br></a>
+              <a href="#Literature_References">Literature_References<br></a>
+              <a href="#Author_and_Institution">Author_and_Institution<br></a>
+              <a href="#Version">Version<br></a>
+              <a href="#Index_Entries">Index_Entries<br></a>
+            </td>
+          </tr>
+        </tbody>
+</table>
+<hr>
+
+<h4><a name="Procedure">Procedure</a></h4>
+<PRE>
+   tparch_c ( Parse check---check format of strings ) 
+
+   void tparch_c ( ConstSpiceChar    * type )
+
+</PRE>
+<h4><a name="Abstract">Abstract</a></h4>
+<PRE>
+   Restrict the set of strings that are recognized by SPICE time
+   parsing routines to those that have standard values for all time
+   components.
+</PRE>
+<h4><a name="Required_Reading">Required_Reading</a></h4>
+<PRE>
+   <a href="../req/time.html">TIME</a>
+</PRE>
+<h4><a name="Keywords">Keywords</a></h4>
+<PRE>
+   PARSING
+   TIME
+
+
+</PRE>
+<h4><a name="Brief_I/O">Brief_I/O</a></h4>
+<PRE>
+   VARIABLE  I/O  DESCRIPTION
+   --------  ---  --------------------------------------------------
+   type       I   String: Use &quot;YES&quot; to restrict time inputs.
+</PRE>
+<h4><a name="Detailed_Input">Detailed_Input</a></h4>
+<PRE>
+   type        is a character string that is used to adjust the set of
+               strings that will be regarded as valid time strings by
+               SPICE time parsing routines.
+
+               The default behavior of SPICE time software is to allow
+               an extended range of values for the various components
+               (tokens) of a time string. For example, using its default
+               behavior, <a href="tparse_c.html">tparse_c</a> would regard 1993 JAN 367 as a valid
+               time string and return the UTC seconds past the J2000
+               epoch value that corresponds to Jan 2, 1994.
+
+               While this is a &quot;reasonable&quot; interpretation of such a
+               string, there may be occasions when such a string should
+               be regarded as an error.
+
+               By calling <b>tparch_c</b> with a value of &quot;YES&quot;, the action of
+               the time software will be modified. Strings that have
+               components that are out of the range of values used in
+               most English discourse will be regarded as errors. Thus
+               the numeric values of MONTH, DAY, HOUR, MINUTE, and
+               SECOND must satisfy the following conditions to be
+               regarded as legitimate calendar time strings.
+
+                  ITEM     Valid Range
+                  ------   -----------------------------------------
+                  MONTH    1 to 13
+                  DAY      1 to 365 (366 for leap years) when
+                           DAY is interpreted as the day of year
+                           i.e. the month token is empty.
+                           1 to 31  if month is January
+                           1 to 28  (29 in leap years) if month is
+                                    February
+                           1 to 31  if month is March
+                           1 to 30  if month is April
+                           1 to 31  if month is May
+                           1 to 31  if month is June
+                           1 to 30  if month is July
+                           1 to 31  if month is August
+                           1 to 30  if month is September
+                           1 to 31  if month is October
+                           1 to 30  if month is November
+                           1 to 31  if month is December
+                  HOUR     0 to 23
+                  MINUTE   0 to 59
+                  SECOND   0 up to but not including 60 on days that
+                           can not have a leapsecond.
+                           0 up to but not including 61 for times
+                           that are the last second of June or
+                           December. In other words,
+                                JUN 30, 23:59:60.xxxxxx...x
+                           and  DEC 31, 23:59:60.xxxxxx...x
+
+               To reset the action of time software to the default
+               action, set `type' to a value that is not equivalent to
+               &quot;YES&quot; when case and spaces are ignored.
+</PRE>
+<h4><a name="Detailed_Output">Detailed_Output</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Parameters">Parameters</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Exceptions">Exceptions</a></h4>
+<PRE>
+   1)  If the `type' input string pointer is null, the error
+       SPICE(NULLPOINTER) is signaled.
+
+   2)  If the `type' input string has zero length, the error
+       SPICE(EMPTYSTRING) is signaled.
+</PRE>
+<h4><a name="Files">Files</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Particulars">Particulars</a></h4>
+<PRE>
+   This routine is used to alter the collections of strings
+   that SPICE software regards as legitimate calendar strings. The
+   default behavior of SPICE software is to accept strings such
+   as FEB 34, 1993 and to interpret these in a &quot;natural way&quot;
+   (FEB 34, 1993 is regarded as MARCH 6, 1993.) This behavior
+   is sometimes useful for &quot;private&quot; programs that you write.
+   However, such a string may be a typo (a finger accidentally hit
+   two keys for the day instead of one). Given that this string
+   does not appear in common usage, you may want to consider
+   that it is more likely the result of erroneous input. You
+   can alter the behavior of SPICE software so that it will
+   treat such a string as an error. To do this call this entry
+   point with `type' having the value &quot;YES&quot;.
+
+      <b>tparch_c</b> ( &quot;YES&quot; );
+
+   Until the behavior is reset by calling <b>tparch_c</b> with a value
+   other than &quot;YES&quot; (such as &quot;NO&quot;), SPICE software will treat all
+   out-of-bound components of time strings as errors.
+
+   If you are happy with the SPICE default interpretation of
+   strings, you do not need to make any calls to <b>tparch_c</b>.
+
+   All time parsing routines --including the top-level APIs <a href="tparse_c.html">tparse_c</a>
+   and <a href="utc2et_c.html">utc2et_c</a>-- respect the setting assigned by <b>tparch_c</b>, except the
+   CSPICE routine <a href="str2et_c.html">str2et_c</a>.
+</PRE>
+<h4><a name="Examples">Examples</a></h4>
+<PRE>
+   The numerical results shown for this example may differ across
+   platforms. The results depend on the SPICE kernels used as
+   input, the compiler and supporting libraries, and the machine
+   specific arithmetic implementation.
+
+   1) When accepting times as input interactively, you usually
+      read a string typed at a keyboard and then pass that string
+      to the SPICE time system to convert it to an ephemeris time.
+      The default behavior of SPICE software is to accept strings
+      such as FEB 34, 1993 and to interpret these in a &quot;natural way&quot;
+      (FEB 34, 1993 is regarded as MARCH 6, 1993.) The following
+      example code demonstrates how to modify this behavior.
+
+
+      Example code begins here.
+
+
+      /.
+         Program tparch_ex1
+      ./
+      #include &lt;stdio.h&gt;
+      #include &lt;string.h&gt;
+      #include &quot;SpiceUsr.h&quot;
+
+      int main( )
+      {
+
+         /.
+         Local parameters.
+         ./
+         #define TIMSTR       &quot;FEB 34, 1993&quot;
+         #define ERRMLN       1001
+
+         /.
+         Local variables.
+         ./
+         SpiceChar            errmsg [ERRMLN];
+
+         SpiceDouble          sp2000;
+
+         /.
+         First, demonstrate the default behavior of SPICE.
+         Let's get the number of UTC seconds past J2000 epoch.
+         ./
+         <a href="tparse_c.html">tparse_c</a> ( TIMSTR, ERRMLN, &amp;sp2000, errmsg );
+
+         if ( !strncmp( errmsg, &quot;&quot;, 1 ) )
+         {
+            printf( &quot;UTC (s):  %17.6f\n&quot;, sp2000 );
+         }
+         else
+         {
+            printf( &quot;Error  : %s\n&quot;, errmsg );
+         }
+
+         /.
+         Now, turn error checking on and parse the time string
+         again.
+         ./
+         <b>tparch_c</b> ( &quot;YES&quot; );
+         <a href="tparse_c.html">tparse_c</a> ( TIMSTR, ERRMLN, &amp;sp2000, errmsg );
+
+         if ( !strncmp( errmsg, &quot;&quot;, 1 ) )
+         {
+            printf( &quot;UTC (s):  %17.6f\n&quot;, sp2000 );
+         }
+         else
+         {
+            printf( &quot;Error  : %s\n&quot;, errmsg );
+         }
+
+         return ( 0 );
+      }
+
+
+      When this program was executed on a Mac/Intel/cc/64-bit
+      platform, the output was:
+
+
+      UTC (s):  -215352000.000000
+      Error  : The day of the month specified for the month of February was ***
+
+
+      Warning: incomplete output. 1 line extended past the right
+      margin of the header and has been truncated. This line is
+      marked by &quot;***&quot; at the end of the line.
+</PRE>
+<h4><a name="Restrictions">Restrictions</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Literature_References">Literature_References</a></h4>
+<PRE>
+   None.
+</PRE>
+<h4><a name="Author_and_Institution">Author_and_Institution</a></h4>
+<PRE>
+   J. Diaz del Rio     (ODC Space)
+</PRE>
+<h4><a name="Version">Version</a></h4>
+<PRE>
+   -CSPICE Version 1.0.0, 01-NOV-2021 (JDR)
+</PRE>
+<h4><a name="Index_Entries">Index_Entries</a></h4>
+<PRE>
+   Restrict time strings to proper form
+</PRE>
+<h4>Link to routine tparch_c source file <a href='../../../src/cspice/tparch_c.c'>tparch_c.c</a> </h4>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+   <pre>Fri Dec 31 18:41:14 2021</pre>
+
+</body>
+</html>
+
