@@ -1,0 +1,578 @@
+Performing C++ SOURCE FILE Test CXX_FLAG_Wimplicit_atomic_properties failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_5f795/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_5f795.dir/build.make CMakeFiles/cmTC_5f795.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_5f795.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -DCXX_FLAG_Wimplicit_atomic_properties   -Wimplicit-atomic-properties -std=gnu++14 -o CMakeFiles/cmTC_5f795.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+c++: error: unrecognized command-line option '-Wimplicit-atomic-properties'
+gmake[1]: *** [CMakeFiles/cmTC_5f795.dir/build.make:85: CMakeFiles/cmTC_5f795.dir/src.cxx.o] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_5f795/fast] Error 2
+
+
+Source file was:
+int main() { return 0; }
+Determining if the include file machine/endian.h exists failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_b057d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_b057d.dir/build.make CMakeFiles/cmTC_b057d.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_b057d.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_b057d.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx:1:10: fatal error: machine/endian.h: No such file or directory
+    1 | #include <machine/endian.h>
+      |          ^~~~~~~~~~~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_b057d.dir/build.make:85: CMakeFiles/cmTC_b057d.dir/CheckIncludeFile.cxx.o] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_b057d/fast] Error 2
+
+
+
+Determining if the function stricmp exists failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_0ba30/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_0ba30.dir/build.make CMakeFiles/cmTC_0ba30.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_0ba30.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=stricmp -o CMakeFiles/cmTC_0ba30.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_0ba30
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0ba30.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=stricmp -rdynamic CMakeFiles/cmTC_0ba30.dir/CheckFunctionExists.c.o -o cmTC_0ba30 
+/usr/bin/ld: CMakeFiles/cmTC_0ba30.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x10): undefined reference to `stricmp'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_0ba30.dir/build.make:106: cmTC_0ba30] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_0ba30/fast] Error 2
+
+
+
+Determining if the function strnicmp exists failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_7e4ec/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_7e4ec.dir/build.make CMakeFiles/cmTC_7e4ec.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_7e4ec.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=strnicmp -o CMakeFiles/cmTC_7e4ec.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_7e4ec
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7e4ec.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=strnicmp -rdynamic CMakeFiles/cmTC_7e4ec.dir/CheckFunctionExists.c.o -o cmTC_7e4ec 
+/usr/bin/ld: CMakeFiles/cmTC_7e4ec.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x10): undefined reference to `strnicmp'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_7e4ec.dir/build.make:106: cmTC_7e4ec] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_7e4ec/fast] Error 2
+
+
+
+Determining if the function wcsupr exists failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_97ae5/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_97ae5.dir/build.make CMakeFiles/cmTC_97ae5.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_97ae5.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=wcsupr -o CMakeFiles/cmTC_97ae5.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_97ae5
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_97ae5.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=wcsupr -rdynamic CMakeFiles/cmTC_97ae5.dir/CheckFunctionExists.c.o -o cmTC_97ae5 
+/usr/bin/ld: CMakeFiles/cmTC_97ae5.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x10): undefined reference to `wcsupr'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_97ae5.dir/build.make:106: cmTC_97ae5] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_97ae5/fast] Error 2
+
+
+
+Determining if the function wcslwr exists failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_21257/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_21257.dir/build.make CMakeFiles/cmTC_21257.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_21257.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=wcslwr -o CMakeFiles/cmTC_21257.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_21257
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_21257.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=wcslwr -rdynamic CMakeFiles/cmTC_21257.dir/CheckFunctionExists.c.o -o cmTC_21257 
+/usr/bin/ld: CMakeFiles/cmTC_21257.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x10): undefined reference to `wcslwr'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_21257.dir/build.make:106: cmTC_21257] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_21257/fast] Error 2
+
+
+
+Determining if the function wcsnicmp exists failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_33e32/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_33e32.dir/build.make CMakeFiles/cmTC_33e32.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_33e32.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=wcsnicmp -o CMakeFiles/cmTC_33e32.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_33e32
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_33e32.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=wcsnicmp -rdynamic CMakeFiles/cmTC_33e32.dir/CheckFunctionExists.c.o -o cmTC_33e32 
+/usr/bin/ld: CMakeFiles/cmTC_33e32.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x10): undefined reference to `wcsnicmp'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_33e32.dir/build.make:106: cmTC_33e32] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_33e32/fast] Error 2
+
+
+
+Determining if the function wcsicmp exists failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_ec8b3/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_ec8b3.dir/build.make CMakeFiles/cmTC_ec8b3.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ec8b3.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=wcsicmp -o CMakeFiles/cmTC_ec8b3.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_ec8b3
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ec8b3.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=wcsicmp -rdynamic CMakeFiles/cmTC_ec8b3.dir/CheckFunctionExists.c.o -o cmTC_ec8b3 
+/usr/bin/ld: CMakeFiles/cmTC_ec8b3.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x10): undefined reference to `wcsicmp'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_ec8b3.dir/build.make:106: cmTC_ec8b3] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_ec8b3/fast] Error 2
+
+
+
+Determining size of __int64 failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_ca4ba/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_ca4ba.dir/build.make CMakeFiles/cmTC_ca4ba.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ca4ba.dir/SIZEOF___INT64.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_ca4ba.dir/SIZEOF___INT64.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF___INT64.c
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF___INT64.c:27:22: error: '__int64' undeclared here (not in a function); did you mean '__int64_t'?
+   27 | #define SIZE (sizeof(__int64))
+      |                      ^~~~~~~
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF___INT64.c:29:12: note: in expansion of macro 'SIZE'
+   29 |   ('0' + ((SIZE / 10000)%10)),
+      |            ^~~~
+gmake[1]: *** [CMakeFiles/cmTC_ca4ba.dir/build.make:85: CMakeFiles/cmTC_ca4ba.dir/SIZEOF___INT64.c.o] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_ca4ba/fast] Error 2
+
+
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF___INT64.c:
+#include <sys/types.h>
+#include <stdint.h>
+#include <stddef.h>
+
+
+#undef KEY
+#if defined(__i386)
+# define KEY '_','_','i','3','8','6'
+#elif defined(__x86_64)
+# define KEY '_','_','x','8','6','_','6','4'
+#elif defined(__PPC64__)
+# define KEY '_','_','P','P','C','6','4','_','_'
+#elif defined(__ppc64__)
+# define KEY '_','_','p','p','c','6','4','_','_'
+#elif defined(__PPC__)
+# define KEY '_','_','P','P','C','_','_'
+#elif defined(__ppc__)
+# define KEY '_','_','p','p','c','_','_'
+#elif defined(__aarch64__)
+# define KEY '_','_','a','a','r','c','h','6','4','_','_'
+#elif defined(__ARM_ARCH_7A__)
+# define KEY '_','_','A','R','M','_','A','R','C','H','_','7','A','_','_'
+#elif defined(__ARM_ARCH_7S__)
+# define KEY '_','_','A','R','M','_','A','R','C','H','_','7','S','_','_'
+#endif
+
+#define SIZE (sizeof(__int64))
+static char info_size[] =  {'I', 'N', 'F', 'O', ':', 's','i','z','e','[',
+  ('0' + ((SIZE / 10000)%10)),
+  ('0' + ((SIZE / 1000)%10)),
+  ('0' + ((SIZE / 100)%10)),
+  ('0' + ((SIZE / 10)%10)),
+  ('0' +  (SIZE    % 10)),
+  ']',
+#ifdef KEY
+  ' ','k','e','y','[', KEY, ']',
+#endif
+  '\0'};
+
+#ifdef __CLASSIC_C__
+int main(argc, argv) int argc; char *argv[];
+#else
+int main(int argc, char *argv[])
+#endif
+{
+  int require = 0;
+  require += info_size[argc];
+  (void)argv;
+  return require;
+}
+
+
+Determining size of unsigned __int64 failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_4182b/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_4182b.dir/build.make CMakeFiles/cmTC_4182b.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_4182b.dir/SIZEOF_UNSIGNED__INT64.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_4182b.dir/SIZEOF_UNSIGNED__INT64.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED__INT64.c
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED__INT64.c:27:31: error: expected ')' before '__int64'
+   27 | #define SIZE (sizeof(unsigned __int64))
+      |                     ~         ^~~~~~~
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED__INT64.c:29:12: note: in expansion of macro 'SIZE'
+   29 |   ('0' + ((SIZE / 10000)%10)),
+      |            ^~~~
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED__INT64.c:27:31: error: expected ')' before '__int64'
+   27 | #define SIZE (sizeof(unsigned __int64))
+      |                     ~         ^~~~~~~
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED__INT64.c:30:12: note: in expansion of macro 'SIZE'
+   30 |   ('0' + ((SIZE / 1000)%10)),
+      |            ^~~~
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED__INT64.c:27:31: error: expected ')' before '__int64'
+   27 | #define SIZE (sizeof(unsigned __int64))
+      |                     ~         ^~~~~~~
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED__INT64.c:31:12: note: in expansion of macro 'SIZE'
+   31 |   ('0' + ((SIZE / 100)%10)),
+      |            ^~~~
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED__INT64.c:27:31: error: expected ')' before '__int64'
+   27 | #define SIZE (sizeof(unsigned __int64))
+      |                     ~         ^~~~~~~
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED__INT64.c:32:12: note: in expansion of macro 'SIZE'
+   32 |   ('0' + ((SIZE / 10)%10)),
+      |            ^~~~
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED__INT64.c:27:31: error: expected ')' before '__int64'
+   27 | #define SIZE (sizeof(unsigned __int64))
+      |                     ~         ^~~~~~~
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED__INT64.c:33:12: note: in expansion of macro 'SIZE'
+   33 |   ('0' +  (SIZE    % 10)),
+      |            ^~~~
+gmake[1]: *** [CMakeFiles/cmTC_4182b.dir/build.make:85: CMakeFiles/cmTC_4182b.dir/SIZEOF_UNSIGNED__INT64.c.o] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_4182b/fast] Error 2
+
+
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED__INT64.c:
+#include <sys/types.h>
+#include <stdint.h>
+#include <stddef.h>
+
+
+#undef KEY
+#if defined(__i386)
+# define KEY '_','_','i','3','8','6'
+#elif defined(__x86_64)
+# define KEY '_','_','x','8','6','_','6','4'
+#elif defined(__PPC64__)
+# define KEY '_','_','P','P','C','6','4','_','_'
+#elif defined(__ppc64__)
+# define KEY '_','_','p','p','c','6','4','_','_'
+#elif defined(__PPC__)
+# define KEY '_','_','P','P','C','_','_'
+#elif defined(__ppc__)
+# define KEY '_','_','p','p','c','_','_'
+#elif defined(__aarch64__)
+# define KEY '_','_','a','a','r','c','h','6','4','_','_'
+#elif defined(__ARM_ARCH_7A__)
+# define KEY '_','_','A','R','M','_','A','R','C','H','_','7','A','_','_'
+#elif defined(__ARM_ARCH_7S__)
+# define KEY '_','_','A','R','M','_','A','R','C','H','_','7','S','_','_'
+#endif
+
+#define SIZE (sizeof(unsigned __int64))
+static char info_size[] =  {'I', 'N', 'F', 'O', ':', 's','i','z','e','[',
+  ('0' + ((SIZE / 10000)%10)),
+  ('0' + ((SIZE / 1000)%10)),
+  ('0' + ((SIZE / 100)%10)),
+  ('0' + ((SIZE / 10)%10)),
+  ('0' +  (SIZE    % 10)),
+  ']',
+#ifdef KEY
+  ' ','k','e','y','[', KEY, ']',
+#endif
+  '\0'};
+
+#ifdef __CLASSIC_C__
+int main(argc, argv) int argc; char *argv[];
+#else
+int main(int argc, char *argv[])
+#endif
+{
+  int require = 0;
+  require += info_size[argc];
+  (void)argv;
+  return require;
+}
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_db2a1/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_db2a1.dir/build.make CMakeFiles/cmTC_db2a1.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_db2a1.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD -o CMakeFiles/cmTC_db2a1.dir/src.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_db2a1
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_db2a1.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD -rdynamic CMakeFiles/cmTC_db2a1.dir/src.c.o -o cmTC_db2a1 
+/usr/bin/ld: CMakeFiles/cmTC_db2a1.dir/src.c.o: in function `main':
+src.c:(.text+0x34): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x3c): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x44): undefined reference to `pthread_cancel'
+/usr/bin/ld: src.c:(.text+0x50): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_db2a1.dir/build.make:106: cmTC_db2a1] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_db2a1/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_cancel(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_da15e/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_da15e.dir/build.make CMakeFiles/cmTC_da15e.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_da15e.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create -o CMakeFiles/cmTC_da15e.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_da15e
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_da15e.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create -rdynamic CMakeFiles/cmTC_da15e.dir/CheckFunctionExists.c.o -o cmTC_da15e  -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_da15e.dir/build.make:106: cmTC_da15e] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_da15e/fast] Error 2
+
+
+
+Performing C++ SOURCE FILE Test CXX_NEEDS_msse2 failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_0303d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_0303d.dir/build.make CMakeFiles/cmTC_0303d.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_0303d.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -msse2 -DCXX_NEEDS_msse2 -std=gnu++14 -o CMakeFiles/cmTC_0303d.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+c++: error: unrecognized command-line option '-msse2'
+gmake[1]: *** [CMakeFiles/cmTC_0303d.dir/build.make:85: CMakeFiles/cmTC_0303d.dir/src.cxx.o] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_0303d/fast] Error 2
+
+
+Source file was:
+
+#include <emmintrin.h>
+
+int main() {
+  __m128i one;
+  return 0;
+}
+Performing C++ SOURCE FILE Test XERCES_HAVE_INTRIN_H failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_82d8d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_82d8d.dir/build.make CMakeFiles/cmTC_82d8d.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_82d8d.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DXERCES_HAVE_INTRIN_H -std=gnu++14 -o CMakeFiles/cmTC_82d8d.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:2:10: fatal error: intrin.h: No such file or directory
+    2 | #include <intrin.h>
+      |          ^~~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_82d8d.dir/build.make:85: CMakeFiles/cmTC_82d8d.dir/src.cxx.o] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_82d8d/fast] Error 2
+
+
+Source file was:
+
+#include <intrin.h>
+
+int main() {
+  return 0;
+}
+Performing C++ SOURCE FILE Test XERCES_HAVE_EMMINTRIN_H failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_7b959/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_7b959.dir/build.make CMakeFiles/cmTC_7b959.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_7b959.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DXERCES_HAVE_EMMINTRIN_H -std=gnu++14 -o CMakeFiles/cmTC_7b959.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:2:10: fatal error: emmintrin.h: No such file or directory
+    2 | #include <emmintrin.h>
+      |          ^~~~~~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_7b959.dir/build.make:85: CMakeFiles/cmTC_7b959.dir/src.cxx.o] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_7b959/fast] Error 2
+
+
+Source file was:
+
+#include <emmintrin.h>
+
+int main() {
+  return 0;
+}
+Performing C++ SOURCE FILE Test HAVE_CPUID_H failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_b97f6/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_b97f6.dir/build.make CMakeFiles/cmTC_b97f6.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_b97f6.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_CPUID_H -std=gnu++14 -o CMakeFiles/cmTC_b97f6.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:2:10: fatal error: cpuid.h: No such file or directory
+    2 | #include <cpuid.h>
+      |          ^~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_b97f6.dir/build.make:85: CMakeFiles/cmTC_b97f6.dir/src.cxx.o] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_b97f6/fast] Error 2
+
+
+Source file was:
+
+#include <cpuid.h>
+
+int main() {
+  return 0;
+}
+Performing C++ SOURCE FILE Test XERCES_HAVE_CPUID_INTRINSIC failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_d0719/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_d0719.dir/build.make CMakeFiles/cmTC_d0719.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_d0719.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DXERCES_HAVE_CPUID_INTRINSIC -std=gnu++14 -o CMakeFiles/cmTC_d0719.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:2:10: fatal error: intrin.h: No such file or directory
+    2 | #include <intrin.h>
+      |          ^~~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_d0719.dir/build.make:85: CMakeFiles/cmTC_d0719.dir/src.cxx.o] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_d0719/fast] Error 2
+
+
+Source file was:
+
+#include <intrin.h>
+
+int main() {
+  int CPUInfo[4];
+  __cpuid(CPUInfo, 1);
+  return 0;
+}
+Performing C++ SOURCE FILE Test XERCES_HAVE_GETCPUID failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_ebd2e/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_ebd2e.dir/build.make CMakeFiles/cmTC_ebd2e.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_ebd2e.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DXERCES_HAVE_GETCPUID -std=gnu++14 -o CMakeFiles/cmTC_ebd2e.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:2:10: fatal error: cpuid.h: No such file or directory
+    2 | #include <cpuid.h>
+      |          ^~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_ebd2e.dir/build.make:85: CMakeFiles/cmTC_ebd2e.dir/src.cxx.o] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_ebd2e/fast] Error 2
+
+
+Source file was:
+
+#include <cpuid.h>
+
+int main() {
+  unsigned int eax, ebx, ecx, edx;
+  __get_cpuid (1, &eax, &ebx, &ecx, &edx);
+  return 0;
+}
+Performing C++ SOURCE FILE Test XERCES_HAVE_SSE2_INTRINSIC failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_44606/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_44606.dir/build.make CMakeFiles/cmTC_44606.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_44606.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DXERCES_HAVE_SSE2_INTRINSIC -std=gnu++14 -o CMakeFiles/cmTC_44606.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:2:10: fatal error: emmintrin.h: No such file or directory
+    2 | #include <emmintrin.h>
+      |          ^~~~~~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_44606.dir/build.make:85: CMakeFiles/cmTC_44606.dir/src.cxx.o] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_44606/fast] Error 2
+
+
+Source file was:
+
+#include <emmintrin.h>
+
+int main() {
+  __m128i* one=(__m128i*)_mm_malloc(4, 16);
+  __m128i* two=(__m128i*)_mm_malloc(4, 16);
+  __m128i xmm1 = _mm_load_si128(one);
+  __m128i xmm2 = _mm_load_si128(two);
+  __m128i xmm3 = _mm_or_si128(xmm1, xmm2);
+  _mm_store_si128(one, xmm3);
+  _mm_free(one);
+  _mm_free(two);
+  return 0;
+}
+Performing C++ SOURCE FILE Test ICONV_USES_CONST_POINTER failed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_b8799/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_b8799.dir/build.make CMakeFiles/cmTC_b8799.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_b8799.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DICONV_USES_CONST_POINTER -std=gnu++14 -o CMakeFiles/cmTC_b8799.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: In function 'int main()':
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:10:13: error: invalid conversion from 'const char**' to 'char**' [-fpermissive]
+   10 |   iconv(cv, &fromPtr, &fromLen, &toPtr, &toLen);
+      |             ^~~~~~~~
+      |             |
+      |             const char**
+In file included from /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:2:
+/usr/include/iconv.h:42:54: note:   initializing argument 2 of 'size_t iconv(iconv_t, char**, size_t*, char**, size_t*)'
+   42 | extern size_t iconv (iconv_t __cd, char **__restrict __inbuf,
+      |                                    ~~~~~~~~~~~~~~~~~~^~~~~~~
+gmake[1]: *** [CMakeFiles/cmTC_b8799.dir/build.make:85: CMakeFiles/cmTC_b8799.dir/src.cxx.o] Error 1
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_b8799/fast] Error 2
+
+
+Source file was:
+
+#include <iconv.h>
+
+int main(void) {
+  const char *fromPtr=0;
+  size_t     fromLen=0;
+  char       *toPtr=0;
+  size_t     toLen=0;
+  iconv_t    cv=0;
+  iconv(cv, &fromPtr, &fromLen, &toPtr, &toLen);
+  return 0;
+}

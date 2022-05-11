@@ -1,0 +1,8 @@
+gmodule_supported=true
+
+Name: GModule Uninstalled
+Description: Dynamic module loader for GLib, Not Installed
+Requires: glib-2.0-uninstalled
+Version: 2.9.6
+Libs: -Wl,--export-dynamic ${pc_top_builddir}/${pcfiledir}/gmodule/libgmodule-2.0.la -ldl
+Cflags: -I${pc_top_builddir}/${pcfiledir}/./gmodule

@@ -1,0 +1,452 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module __user__routines
+    interface
+       subroutine qphx(nnh,x,hx,nstate,cu,lencu,iu,leniu,ru,lenru)
+         integer optional,intent(in),check(len(x)>=nnh),depend(x) :: nnh=len(x)
+         double precision dimension(nnh),intent(in) :: x
+         double precision dimension(nnh),intent(in,out) :: hx
+         integer intent(in) :: nstate
+         !character(len=8) dimension(lencu),intent(inplace) :: cu
+         character*8 dimension(lencu),intent(inplace) :: cu
+         integer, optional,intent(in),check(len(cu)>=lencu),depend(cu) :: lencu=len(cu)
+         integer dimension(leniu),intent(inplace) :: iu
+         integer, optional,intent(in),check(len(iu)>=leniu),depend(iu) :: leniu=len(iu)
+         double precision dimension(lenru),intent(inplace) :: ru
+         integer, optional,intent(in),check(len(ru)>=lenru),depend(ru) :: lenru=len(ru)
+       end subroutine qphx
+       subroutine usrfunc(mode,nnobj,nncon,nnjac,nnl,nejac,x,fobj,gobj,fcon,gcon,statususer,cu,lencu,iu,leniu,ru,lenru)
+         integer intent(in,out) :: mode
+         integer optional, intent(in) :: nnobj
+         integer optional,intent(in),check(len(fcon)>=nncon),depend(fcon) :: nncon=len(fcon)
+         integer intent(in) :: nnjac
+         integer optional,intent(in),check(len(x)>=nnl),depend(x) :: nnl=len(x)
+         integer optional,intent(in),check(len(gcon)>=nejac),depend(gcon) :: nejac=len(gcon)
+         double precision dimension(nnl),intent(in) :: x
+         double precision intent(in,out) :: fobj
+         double precision dimension(nnobj),intent(in,out),depend(nnobj) :: gobj
+         double precision dimension(nncon),intent(in,out) :: fcon
+         double precision dimension(nejac),intent(in,out) :: gcon
+         integer intent(in) :: statususer
+         !character(len=8) dimension(lencu),intent(inplace) :: cu
+         character*8 dimension(lencu),intent(inplace) :: cu
+         integer, optional,intent(in),check(len(cu)>=lencu),depend(cu) :: lencu=len(cu)
+         integer dimension(leniu),intent(inplace) :: iu
+         integer, optional,intent(in),check(len(iu)>=leniu),depend(iu) :: leniu=len(iu)
+         double precision dimension(lenru),intent(inplace) :: ru
+         integer, optional,intent(in),check(len(ru)>=lenru),depend(ru) :: lenru=len(ru)
+       end subroutine usrfunc
+       subroutine funcon(modec,nncon,nnjac,negcon,x,fcon,gcon,statususer,cu,lencu,iu,leniu,ru,lenru)
+         integer intent(in,out) :: modec
+         integer optional,intent(in),check(len(fcon)>=nncon),depend(fcon) :: nncon=len(fcon)
+         integer optional,intent(in),check(len(x)>=nnjac),depend(x) :: nnjac=len(x)
+!	 integer optional,intent(in), depend(nncon,nnjac) :: negcon=nncon*nnjac
+         integer optional,intent(in),check(len(gcon)>=negcon),depend(gcon) :: negcon=len(gcon)
+         double precision dimension(nnjac),intent(in) :: x
+         double precision dimension(nncon),intent(in,out) :: fcon
+!         double precision dimension(nncon,nnjac),intent(out) :: gcon
+         double precision dimension(negcon),intent(in,out) :: gcon
+         integer intent(in) :: statususer
+         !character(len=8) dimension(lencu),intent(inplace) :: cu
+         character*8 dimension(lencu),intent(inplace) :: cu
+         integer, optional,intent(in),check(len(cu)>=lencu),depend(cu) :: lencu=len(cu)
+         integer dimension(leniu),intent(inplace) :: iu
+         integer, optional,intent(in),check(len(iu)>=leniu),depend(iu) :: leniu=len(iu)
+         double precision dimension(lenru),intent(inplace) :: ru
+         integer, optional,intent(in),check(len(ru)>=lenru),depend(ru) :: lenru=len(ru)
+       end subroutine funcon
+       subroutine funobj(modef,nnobju,x,fobj,gobj,statususer,cu,lencu,iu,leniu,ru,lenru)
+         integer intent(in,out) :: modef
+         integer optional, intent(in) :: nnobju
+         double precision dimension(nnobju),intent(in),depend(nnobju) :: x
+         double precision intent(in,out) :: fobj
+         double precision dimension(nnobju),intent(in,out),depend(nnobju) :: gobj
+         integer intent(in) :: statususer
+         !character(len=8) dimension(lencu),intent(inplace) :: cu
+         character*8 dimension(lencu),intent(inplace) :: cu
+         integer, optional,intent(in),check(len(cu)>=lencu),depend(cu) :: lencu=len(cu)
+         integer dimension(leniu),intent(inplace) :: iu
+         integer, optional,intent(in),check(len(iu)>=leniu),depend(iu) :: leniu=len(iu)
+         double precision dimension(lenru),intent(inplace) :: ru
+         integer, optional,intent(in),check(len(ru)>=lenru),depend(ru) :: lenru=len(ru)
+       end subroutine funobj
+       subroutine usrfun(status,n,x,needf,nf,f,needg,leng,g,cu,lencu,iu,leniu,ru,lenru)
+         integer intent(in,out) :: status
+         integer, optional,intent(in),check(len(x)>=n),depend(x) :: n=len(x)
+         integer intent(in) :: needf
+         integer, optional,intent(in),check(len(f)>=nf),depend(f) :: nf=len(f)
+         integer intent(in) :: needg
+         integer, optional,intent(in),check(len(g)>=leng),depend(g) :: leng=len(g)
+         double precision dimension(n),intent(in) :: x
+         double precision dimension(nf),intent(in,out) :: f
+         double precision dimension(leng),intent(in,out) :: g
+         !character(len=8) dimension(lencu),intent(inplace) :: cu
+         character*8 dimension(lencu),intent(inplace) :: cu
+         integer, optional,intent(in),check(len(cu)>=lencu),depend(cu) :: lencu=len(cu)
+         integer dimension(leniu),intent(inplace) :: iu
+         integer, optional,intent(in),check(len(iu)>=leniu),depend(iu) :: leniu=len(iu)
+         double precision dimension(lenru),intent(inplace) :: ru
+         integer, optional,intent(in),check(len(ru)>=lenru),depend(ru) :: lenru=len(ru)
+       end subroutine usrfun
+    end interface
+end python module __user__routines
+
+python module snopt7_python ! in
+    interface  ! in :snopt7_python
+!        subroutine sntitle_wrap(iw,leniw) ! in :snopt7_python:snopt7_python.f90
+!            integer dimension(leniw),intent(in,out) :: iw
+!            integer, optional,intent(in),check(len(iw)>=leniw),depend(iw) :: leniw=len(iw)
+!        end subroutine sntitle_wrap
+        subroutine copyoptions(option,errors,cw,lencw,iw,leniw,rw,lenrw) ! in :snopt7_python:snopt7_python.f90
+            character*(*) intent(in) :: option
+            integer intent(out) :: errors
+            !character(len=8) dimension(lencw),intent(in,out) :: cw
+            character*8 dimension(lencw),intent(inplace) :: cw
+            integer, optional,intent(in),check(len(cw)>=lencw),depend(cw) :: lencw=len(cw)
+            integer dimension(leniw),intent(inplace) :: iw
+            integer, optional,intent(in),check(len(iw)>=leniw),depend(iw) :: leniw=len(iw)
+            double precision dimension(lenrw),intent(inplace) :: rw
+            integer, optional,intent(in),check(len(rw)>=lenrw),depend(rw) :: lenrw=len(rw)
+        end subroutine copyoptions
+        subroutine sninit_wrap(prtfile,summon,cw,lencw,iw,leniw,rw,lenrw) ! in :snopt7_python:snopt7_python.f90
+            character*(*) intent(in) :: prtfile
+            integer intent(in) :: summon
+            !character(len=8) dimension(lencw),intent(in,out) :: cw
+            character*8 dimension(lencw),intent(inplace) :: cw
+            integer, optional,intent(in),check(len(cw)>=lencw),depend(cw) :: lencw=len(cw)
+            integer dimension(leniw),intent(inplace) :: iw
+            integer, optional,intent(in),check(len(iw)>=leniw),depend(iw) :: leniw=len(iw)
+            double precision dimension(lenrw),intent(inplace) :: rw
+            integer, optional,intent(in),check(len(rw)>=lenrw),depend(rw) :: lenrw=len(rw)
+        end subroutine sninit_wrap
+        subroutine snspec_wrap(info,spcfile,cw,lencw,iw,leniw,rw,lenrw) ! in :snopt7_python:snopt7_python.f90
+            integer intent(out) :: info
+            character*(*) intent(in) :: spcfile
+            !character(len=8) dimension(lencw),intent(in,out) :: cw
+            character*8 dimension(lencw),intent(inplace) :: cw
+            integer, optional,intent(in),check(len(cw)>=lencw),depend(cw) :: lencw=len(cw)
+            integer dimension(leniw),intent(inplace) :: iw
+            integer, optional,intent(in),check(len(iw)>=leniw),depend(iw) :: leniw=len(iw)
+            double precision dimension(lenrw),intent(inplace) :: rw
+            integer, optional,intent(in),check(len(rw)>=lenrw),depend(rw) :: lenrw=len(rw)
+        end subroutine snspec_wrap
+        subroutine snmema_wrap(info,nf,n,nxname,nfname,nea,neg,mincw,miniw,minrw,cw,lencw,iw,leniw,rw,lenrw) ! in :snopt7_python:snopt7_python.f90
+            integer intent(out) :: info
+            integer intent(out) :: mincw
+            integer intent(out) :: miniw
+            integer intent(out) :: minrw
+            integer intent(in) :: nf
+            integer intent(in) :: n
+            integer intent(in) :: nxname
+            integer intent(in) :: nfname
+            integer intent(in) :: nea
+            integer intent(in) :: neg
+            !character(len=8) dimension(lencw),intent(in,out) :: cw
+            character*8 dimension(lencw),intent(inplace) :: cw
+            integer, optional,intent(in),check(len(cw)>=lencw),depend(cw) :: lencw=len(cw)
+            integer dimension(leniw),intent(inplace) :: iw
+            integer, optional,intent(in),check(len(iw)>=leniw),depend(iw) :: leniw=len(iw)
+            double precision dimension(lenrw),intent(inplace) :: rw
+            integer, optional,intent(in),check(len(rw)>=lenrw),depend(rw) :: lenrw=len(rw)
+        end subroutine snmema_wrap
+        subroutine snmem_wrap(info,m,n,ne,neg,nncon,nnjac,nnobj,mincw,miniw,minrw,cw,lencw,iw,leniw,rw,lenrw) ! in :snopt7_python:snopt7_python.f90
+            integer intent(out) :: info
+            integer intent(out) :: mincw
+            integer intent(out) :: miniw
+            integer intent(out) :: minrw
+            integer intent(in) :: m
+            integer intent(in) :: n
+            integer intent(in) :: ne
+            integer intent(in) :: neg
+            integer intent(in) :: nncon
+            integer intent(in) :: nnjac
+            integer intent(in) :: nnobj
+            !character(len=8) dimension(lencw),intent(in,out) :: cw
+            character*8 dimension(lencw),intent(inplace) :: cw
+            integer, optional,intent(in),check(len(cw)>=lencw),depend(cw) :: lencw=len(cw)
+            integer dimension(leniw),intent(inplace) :: iw
+            integer, optional,intent(in),check(len(iw)>=leniw),depend(iw) :: leniw=len(iw)
+            double precision dimension(lenrw),intent(inplace) :: rw
+            integer, optional,intent(in),check(len(rw)>=lenrw),depend(rw) :: lenrw=len(rw)
+        end subroutine snmem_wrap
+        subroutine snjac_wrap(info,nf,n,usrfun,iafun,javar,lena,nea,a,igfun,jgvar,leng,neg,x,xlow,xupp,mincw,miniw,minrw,cu,lencu,iu,leniu,ru,lenru,cw,lencw,iw,leniw,rw,lenrw) ! in :snopt7_python:snopt7_python.f90
+          use __user__routines
+            integer intent(out) :: info
+            integer intent(in) :: nf
+            integer, optional,intent(in),check(len(x)>=n),depend(x) :: n=len(x)
+            external usrfun
+            integer dimension(lena),intent(out),depend(lena) :: iafun
+            integer dimension(lena),intent(out),depend(lena) :: javar
+            integer intent(in) :: lena
+            integer intent(out) :: nea
+            double precision dimension(lena),intent(out),depend(lena) :: a
+            integer dimension(leng),intent(out),depend(leng) :: igfun
+            integer dimension(leng),intent(out),depend(leng) :: jgvar
+            integer intent(in) :: leng
+            integer intent(out) :: neg
+            double precision dimension(n),intent(in) :: x
+            double precision dimension(n),intent(in),depend(n) :: xlow
+            double precision dimension(n),intent(in),depend(n) :: xupp
+            integer intent(out) :: mincw
+            integer intent(out) :: miniw
+            integer intent(out) :: minrw
+            !character(len=8) dimension(lencu),intent(inplace) :: cu
+            character*8 dimension(lencu),intent(inplace) :: cu
+            integer, optional,intent(in),check(len(cu)>=lencu),depend(cu) :: lencu=len(cu)
+            integer dimension(leniu),intent(inplace) :: iu
+            integer, optional,intent(in),check(len(iu)>=leniu),depend(iu) :: leniu=len(iu)
+            double precision dimension(lenru),intent(inplace) :: ru
+            integer, optional,intent(in),check(len(ru)>=lenru),depend(ru) :: lenru=len(ru)
+            !character(len=8) dimension(lencw),intent(inplace) :: cw
+            character*8 dimension(lencw),intent(inplace) :: cw
+            integer, optional,intent(in),check(len(cw)>=lencw),depend(cw) :: lencw=len(cw)
+            integer dimension(leniw),intent(inplace) :: iw
+            integer, optional,intent(in),check(len(iw)>=leniw),depend(iw) :: leniw=len(iw)
+            double precision dimension(lenrw),intent(inplace) :: rw
+            integer, optional,intent(in),check(len(rw)>=lenrw),depend(rw) :: lenrw=len(rw)
+        end subroutine snjac_wrap
+        subroutine snopta_wrap(start,nf,n,nxname,nfname,objuadd,objrow,prob,usrfun,iafun,javar,lena,nea,a,igfun,jgvar,leng,neg,xlow,xupp,xnames,flow,fupp,fnames,x,xstate,xmul,f,fstate,fmul,info,itn,mjritn,mincw,miniw,minrw,ns,ninf,sinf,obj,cu,lencu,iu,leniu,ru,lenru,cw,lencw,iw,leniw,rw,lenrw) ! in :snopt7_python:snopt7_python.f90
+          use __user__routines
+            integer intent(in) :: start
+            integer, optional,intent(in),check(len(flow)>=nf),depend(flow) :: nf=len(flow)
+            integer, optional,intent(in),check(len(xlow)>=n),depend(xlow) :: n=len(xlow)
+            integer intent(in) :: nxname
+            integer intent(in) :: nfname
+            double precision intent(in) :: objuadd
+            integer intent(in) :: objrow
+            character*8 intent(in) :: prob
+            external usrfun
+            integer dimension(lena),intent(in) :: iafun
+            integer dimension(lena),intent(in),depend(lena) :: javar
+            integer, optional,intent(in),check(len(iafun)>=lena),depend(iafun) :: lena=len(iafun)
+            integer intent(in) :: nea
+            double precision dimension(lena),intent(in),depend(lena) :: a
+            integer dimension(leng),intent(in) :: igfun
+            integer dimension(leng),intent(in),depend(leng) :: jgvar
+            integer, optional,intent(in),check(len(igfun)>=leng),depend(igfun) :: leng=len(igfun)
+            integer intent(in) :: neg
+            double precision dimension(n),intent(in) :: xlow
+            double precision dimension(n),intent(in),depend(n) :: xupp
+            !character(len=8) dimension(nxname),intent(in),depend(nxname) :: xnames
+            character*8 dimension(nxname),intent(in),depend(nxname) :: xnames
+            double precision dimension(nf),intent(in) :: flow
+            double precision dimension(nf),intent(in),depend(nf) :: fupp
+            !character(len=8) dimension(nfname),intent(in),depend(nfname) :: fnames
+            character*8 dimension(nfname),intent(in),depend(nfname) :: fnames
+            double precision dimension(n),intent(in,out,copy),depend(n) :: x
+            integer dimension(n),intent(in,out,copy),depend(n) :: xstate
+            double precision dimension(n),intent(in,out,copy),depend(n) :: xmul
+            double precision dimension(nf),intent(in,out,copy),depend(nf) :: f
+            integer dimension(nf),intent(in,out,copy),depend(nf) :: fstate
+            double precision dimension(nf),intent(in,out,copy),depend(nf) :: fmul
+            integer intent(out) :: info
+            integer intent(out) :: itn
+            integer intent(out) :: mjritn
+            integer intent(out) :: mincw
+            integer intent(out) :: miniw
+            integer intent(out) :: minrw
+            integer intent(out) :: ns
+            integer intent(out) :: ninf
+            double precision intent(out) :: sinf
+            double precision intent(out) :: obj
+            !character(len=8) dimension(lencu),intent(in,out) :: cu
+            character*8 dimension(lencu),intent(inplace) :: cu
+            integer, optional,intent(in),check(len(cu)>=lencu),depend(cu) :: lencu=len(cu)
+            integer dimension(leniu),intent(inplace) :: iu
+            integer, optional,intent(in),check(len(iu)>=leniu),depend(iu) :: leniu=len(iu)
+            double precision dimension(lenru),intent(inplace) :: ru
+            integer, optional,intent(in),check(len(ru)>=lenru),depend(ru) :: lenru=len(ru)
+            !character(len=8) dimension(lencw),intent(inplace) :: cw
+            character*8 dimension(lencw),intent(inplace) :: cw
+            integer, optional,intent(in),check(len(cw)>=lencw),depend(cw) :: lencw=len(cw)
+            integer dimension(leniw),intent(inplace) :: iw
+            integer, optional,intent(in),check(len(iw)>=leniw),depend(iw) :: leniw=len(iw)
+            double precision dimension(lenrw),intent(inplace) :: rw
+            integer, optional,intent(in),check(len(rw)>=lenrw),depend(rw) :: lenrw=len(rw)
+        end subroutine snopta_wrap
+        subroutine snoptb_wrap(start,m,n,nej,nnames,nncon,nnobju,nnjac,iobju,objuadd,prob,funcon,funobj,valj,indj,locj,bl,bu,names,hs,x,pi,rc,info,itn,mjritn,mincw,miniw,minrw,ns,ninf,sinf,obj,cu,lencu,iu,leniu,ru,lenru,cw,lencw,iw,leniw,rw,lenrw) ! in :snopt7_python:snopt7_python.f90
+          use __user__routines
+            character*(*) intent(in) :: start
+            integer, optional,intent(in),check(len(pi)>=m),depend(pi) :: m=len(pi)
+            integer, optional,intent(in),check((len(locj)-1)>=n),depend(locj) :: n=(len(locj)-1)
+            integer, optional,intent(in),check(len(valj)>=nej),depend(valj) :: nej=len(valj)
+            !integer, optional,intent(in),check(len(names)>=nnames),depend(names) :: nnames=len(names)
+            integer intent(in) :: nnames
+            integer intent(in) :: nncon
+            integer intent(in) :: nnobju
+            integer intent(in) :: nnjac
+            integer intent(in) :: iobju
+            double precision intent(in) :: objuadd
+            character*8 intent(in) :: prob
+            external funcon
+            external funobj
+            double precision dimension(nej),intent(in) :: valj
+            integer dimension(nej),intent(in),depend(nej) :: indj
+            integer dimension(n + 1),intent(in) :: locj
+            double precision dimension(n+m),intent(in),depend(m,n) :: bl
+            double precision dimension(n+m),intent(in),depend(m,n) :: bu
+            !character(len=8) dimension(nnames),intent(in) :: names
+            character*8 dimension(nnames),intent(in),depend(nnames) :: names
+            integer dimension(n+m),intent(in,out,copy),depend(m,n) :: hs
+            double precision dimension(n+m),intent(in,out,copy),depend(m,n) :: x
+            double precision dimension(m),intent(in,out,copy) :: pi
+            double precision dimension(n+m),intent(out),depend(m,n) :: rc
+            integer intent(out) :: info
+            integer intent(out) :: itn
+            integer intent(out) :: mjritn
+            integer intent(out) :: mincw
+            integer intent(out) :: miniw
+            integer intent(out) :: minrw
+            integer intent(out) :: ns
+            integer intent(out) :: ninf
+            double precision intent(out) :: sinf
+            double precision intent(out) :: obj
+            !character(len=8) dimension(lencu),intent(in,out) :: cu
+            character*8 dimension(lencu),intent(inplace) :: cu
+            integer, optional,intent(in),check(len(cu)>=lencu),depend(cu) :: lencu=len(cu)
+            integer dimension(leniu),intent(inplace) :: iu
+            integer, optional,intent(in),check(len(iu)>=leniu),depend(iu) :: leniu=len(iu)
+            double precision dimension(lenru),intent(inplace) :: ru
+            integer, optional,intent(in),check(len(ru)>=lenru),depend(ru) :: lenru=len(ru)
+            !character(len=8) dimension(lencw),intent(inplace) :: cw
+            character*8 dimension(lencw),intent(inplace) :: cw
+            integer, optional,intent(in),check(len(cw)>=lencw),depend(cw) :: lencw=len(cw)
+            integer dimension(leniw),intent(inplace) :: iw
+            integer, optional,intent(in),check(len(iw)>=leniw),depend(iw) :: leniw=len(iw)
+            double precision dimension(lenrw),intent(inplace) :: rw
+            integer, optional,intent(in),check(len(rw)>=lenrw),depend(rw) :: lenrw=len(rw)
+        end subroutine snoptb_wrap
+        subroutine snoptc_wrap(start,m,n,nej,nnames,nncon,nnobju,nnjac,iobju,objuadd,prob,usrfunc,valj,indj,locj,bl,bu,names,hs,x,pi,rc,info,itn,mjritn,mincw,miniw,minrw,ns,ninf,sinf,obj,cu,lencu,iu,leniu,ru,lenru,cw,lencw,iw,leniw,rw,lenrw) ! in :snopt7_python:snopt7_python.f90
+          use __user__routines
+            character*(*) intent(in) :: start
+            integer, optional,intent(in),check(len(pi)>=m),depend(pi) :: m=len(pi)
+            integer, optional,intent(in),check((len(locj)-1)>=n),depend(locj) :: n=(len(locj)-1)
+            integer, optional,intent(in),check(len(valj)>=nej),depend(valj) :: nej=len(valj)
+            !integer, optional,intent(in),check(len(names)>=nnames),depend(names) :: nnames=len(names)
+            integer intent(in) :: nnames
+            integer intent(in) :: nncon
+            integer intent(in) :: nnobju
+            integer intent(in) :: nnjac
+            integer intent(in) :: iobju
+            double precision intent(in) :: objuadd
+            character*8 intent(in) :: prob
+            external usrfunc
+            double precision dimension(nej),intent(in) :: valj
+            integer dimension(nej),intent(in),depend(nej) :: indj
+            integer dimension(n + 1),intent(in) :: locj
+            double precision dimension(n+m),intent(in),depend(m,n) :: bl
+            double precision dimension(n+m),intent(in),depend(m,n) :: bu
+            !character(len=8) dimension(nnames),intent(in) :: names
+            character*8 dimension(nnames),intent(in),depend(nnames) :: names
+            integer dimension(n+m),intent(in,out,copy),depend(m,n) :: hs
+            double precision dimension(n+m),intent(in,out,copy),depend(m,n) :: x
+            double precision dimension(m),intent(in,out,copy) :: pi
+            double precision dimension(n+m),intent(out),depend(m,n) :: rc
+            integer intent(out) :: info
+            integer intent(out) :: itn
+            integer intent(out) :: mjritn
+            integer intent(out) :: mincw
+            integer intent(out) :: miniw
+            integer intent(out) :: minrw
+            integer intent(out) :: ns
+            integer intent(out) :: ninf
+            double precision intent(out) :: sinf
+            double precision intent(out) :: obj
+            !character(len=8) dimension(lencu),intent(in,out) :: cu
+            character*8 dimension(lencu),intent(inplace) :: cu
+            integer, optional,intent(in),check(len(cu)>=lencu),depend(cu) :: lencu=len(cu)
+            integer dimension(leniu),intent(inplace) :: iu
+            integer, optional,intent(in),check(len(iu)>=leniu),depend(iu) :: leniu=len(iu)
+            double precision dimension(lenru),intent(inplace) :: ru
+            integer, optional,intent(in),check(len(ru)>=lenru),depend(ru) :: lenru=len(ru)
+            !character(len=8) dimension(lencw),intent(inplace) :: cw
+            character*8 dimension(lencw),intent(inplace) :: cw
+            integer, optional,intent(in),check(len(cw)>=lencw),depend(cw) :: lencw=len(cw)
+            integer dimension(leniw),intent(inplace) :: iw
+            integer, optional,intent(in),check(len(iw)>=leniw),depend(iw) :: leniw=len(iw)
+            double precision dimension(lenrw),intent(inplace) :: rw
+            integer, optional,intent(in),check(len(rw)>=lenrw),depend(rw) :: lenrw=len(rw)
+        end subroutine snoptc_wrap
+        subroutine sqinit_wrap(prtfile,summon,cw,lencw,iw,leniw,rw,lenrw) ! in :snopt7_python:snopt7_python.f90
+            character*(*) intent(in) :: prtfile
+            integer intent(in) :: summon
+            !character(len=8) dimension(lencw),intent(in,out) :: cw
+            character*8 dimension(lencw),intent(inplace) :: cw
+            integer, optional,intent(in),check(len(cw)>=lencw),depend(cw) :: lencw=len(cw)
+            integer dimension(leniw),intent(inplace) :: iw
+            integer, optional,intent(in),check(len(iw)>=leniw),depend(iw) :: leniw=len(iw)
+            double precision dimension(lenrw),intent(inplace) :: rw
+            integer, optional,intent(in),check(len(rw)>=lenrw),depend(rw) :: lenrw=len(rw)
+        end subroutine sqinit_wrap
+        subroutine sqspec_wrap(info,spcfile,cw,lencw,iw,leniw,rw,lenrw) ! in :snopt7_python:snopt7_python.f90
+            integer intent(out) :: info
+            character*(*) intent(in) :: spcfile
+            !character(len=8) dimension(lencw),intent(in,out) :: cw
+            character*8 dimension(lencw),intent(inplace) :: cw
+            integer, optional,intent(in),check(len(cw)>=lencw),depend(cw) :: lencw=len(cw)
+            integer dimension(leniw),intent(inplace) :: iw
+            integer, optional,intent(in),check(len(iw)>=leniw),depend(iw) :: leniw=len(iw)
+            double precision dimension(lenrw),intent(inplace) :: rw
+            integer, optional,intent(in),check(len(rw)>=lenrw),depend(rw) :: lenrw=len(rw)
+        end subroutine sqspec_wrap
+        subroutine sqopt_wrap(start,qphx,m,n,nea,nnames,ncobj,nnh,iobj,objadd,prob,vala,inda,loca,bl,bu,cobj,names,etype,hs,x,pi,rc,info,itn,mincw,miniw,minrw,ns,ninf,sinf,obj,cu,lencu,iu,leniu,ru,lenru,cw,lencw,iw,leniw,rw,lenrw) ! in :snopt7_python:snopt7_python.f90
+          use __user__routines
+            character*(*) intent(in) :: start
+            external qphx
+            integer, optional,intent(in),check(len(pi)>=m),depend(pi) :: m=len(pi)
+            integer, optional,intent(in),check((len(loca)-1)>=n),depend(loca) :: n=(len(loca)-1)
+            integer, optional,intent(in),check(len(vala)>=nea),depend(vala) :: nea=len(vala)
+            integer, optional,intent(in),check(len(cobj)>=ncobj),depend(cobj) :: ncobj=len(cobj)
+            integer intent(in) :: nnames
+            integer intent(in) :: nnh
+            integer intent(in) :: iobj
+            double precision intent(in) :: objadd
+            character*8 intent(in) :: prob
+            double precision dimension(nea),intent(in) :: vala
+            integer dimension(nea),intent(in),depend(nea) :: inda
+            integer dimension(n + 1),intent(in) :: loca
+            double precision dimension(n+m),intent(in),depend(m,n) :: bl
+            double precision dimension(n+m),intent(in),depend(m,n) :: bu
+            double precision dimension(ncobj),intent(in) :: cobj
+            character*8 dimension(nnames),intent(in),depend(nnames) :: names
+            integer dimension(n+m),intent(in),depend(m,n) :: etype
+            integer dimension(n+m),intent(in,out,copy),depend(m,n) :: hs
+            double precision dimension(n+m),intent(in,out,copy),depend(m,n) :: x
+            double precision dimension(m),intent(in,out,copy) :: pi
+            double precision dimension(n+m),intent(out),depend(m,n) :: rc
+            integer intent(out) :: info
+            integer intent(out) :: itn
+            integer intent(out) :: mincw
+            integer intent(out) :: miniw
+            integer intent(out) :: minrw
+            integer intent(out) :: ns
+            integer intent(out) :: ninf
+            double precision intent(out) :: sinf
+            double precision intent(out) :: obj
+            character*8 dimension(lencu),intent(inplace) :: cu
+            integer, optional,intent(in),check(len(cu)>=lencu),depend(cu) :: lencu=len(cu)
+            integer dimension(leniu),intent(inplace) :: iu
+            integer, optional,intent(in),check(len(iu)>=leniu),depend(iu) :: leniu=len(iu)
+            double precision dimension(lenru),intent(inplace) :: ru
+            integer, optional,intent(in),check(len(ru)>=lenru),depend(ru) :: lenru=len(ru)
+            character*8 dimension(lencw),intent(inplace) :: cw
+            integer, optional,intent(in),check(len(cw)>=lencw),depend(cw) :: lencw=len(cw)
+            integer dimension(leniw),intent(inplace) :: iw
+            integer, optional,intent(in),check(len(iw)>=leniw),depend(iw) :: leniw=len(iw)
+            double precision dimension(lenrw),intent(inplace) :: rw
+            integer, optional,intent(in),check(len(rw)>=lenrw),depend(rw) :: lenrw=len(rw)
+        end subroutine sqopt_wrap
+        subroutine snend_wrap(cw,lencw,iw,leniw,rw,lenrw) ! in :snopt7_python:snopt7_python.f90
+            character*8 dimension(lencw),intent(inplace) :: cw
+            integer, optional,intent(in),check(len(cw)>=lencw),depend(cw) :: lencw=len(cw)
+            integer dimension(leniw),intent(inplace) :: iw
+            integer, optional,intent(in),check(len(iw)>=leniw),depend(iw) :: leniw=len(iw)
+            double precision dimension(lenrw),intent(inplace) :: rw
+            integer, optional,intent(in),check(len(rw)>=lenrw),depend(rw) :: lenrw=len(rw)
+        end subroutine snend_wrap
+    end interface
+end python module snopt7_python
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

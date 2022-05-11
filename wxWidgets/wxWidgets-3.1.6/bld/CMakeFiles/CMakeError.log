@@ -1,0 +1,60 @@
+Determining if the GDK_WINDOWING_WAYLAND exist failed with the following output:
+Change Dir: /home/rb/wxWidgets-3.1.6/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_91aef/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_91aef.dir/build.make CMakeFiles/cmTC_91aef.dir/build
+gmake[1]: Entering directory '/home/rb/wxWidgets-3.1.6/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_91aef.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_91aef.dir/CheckSymbolExists.c.o -c /home/rb/wxWidgets-3.1.6/bld/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/rb/wxWidgets-3.1.6/bld/CMakeFiles/CMakeTmp/CheckSymbolExists.c:2:10: fatal error: gdk/gdk.h: No such file or directory
+    2 | #include <gdk/gdk.h>
+      |          ^~~~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_91aef.dir/build.make:85: CMakeFiles/cmTC_91aef.dir/CheckSymbolExists.c.o] Error 1
+gmake[1]: Leaving directory '/home/rb/wxWidgets-3.1.6/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_91aef/fast] Error 2
+
+
+File /home/rb/wxWidgets-3.1.6/bld/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <gdk/gdk.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef GDK_WINDOWING_WAYLAND
+  return ((int*)(&GDK_WINDOWING_WAYLAND))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the GDK_WINDOWING_X11 exist failed with the following output:
+Change Dir: /home/rb/wxWidgets-3.1.6/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_3e850/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_3e850.dir/build.make CMakeFiles/cmTC_3e850.dir/build
+gmake[1]: Entering directory '/home/rb/wxWidgets-3.1.6/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_3e850.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_3e850.dir/CheckSymbolExists.c.o -c /home/rb/wxWidgets-3.1.6/bld/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/rb/wxWidgets-3.1.6/bld/CMakeFiles/CMakeTmp/CheckSymbolExists.c:2:10: fatal error: gdk/gdk.h: No such file or directory
+    2 | #include <gdk/gdk.h>
+      |          ^~~~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_3e850.dir/build.make:85: CMakeFiles/cmTC_3e850.dir/CheckSymbolExists.c.o] Error 1
+gmake[1]: Leaving directory '/home/rb/wxWidgets-3.1.6/bld/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:140: cmTC_3e850/fast] Error 2
+
+
+File /home/rb/wxWidgets-3.1.6/bld/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <gdk/gdk.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef GDK_WINDOWING_X11
+  return ((int*)(&GDK_WINDOWING_X11))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}

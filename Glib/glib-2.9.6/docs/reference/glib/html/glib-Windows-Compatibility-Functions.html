@@ -1,0 +1,460 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Windows Compatibility Functions</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.69.1">
+<link rel="start" href="index.html" title="GLib Reference Manual">
+<link rel="up" href="glib-utilities.html" title="GLib Utilities">
+<link rel="prev" href="glib-Key-value-file-parser.html" title="Key-value file parser">
+<link rel="next" href="glib-data-types.html" title="GLib Data Types">
+<meta name="generator" content="GTK-Doc V1.4 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="glib.html" title="GLib Overview">
+<link rel="chapter" href="glib-fundamentals.html" title="GLib Fundamentals">
+<link rel="chapter" href="glib-core.html" title="GLib Core Application Support">
+<link rel="chapter" href="glib-utilities.html" title="GLib Utilities">
+<link rel="chapter" href="glib-data-types.html" title="GLib Data Types">
+<link rel="chapter" href="tools.html" title="GLib Tools">
+<link rel="index" href="ix01.html" title="Index">
+<link rel="index" href="ix02.html" title="Index of deprecated symbols">
+<link rel="index" href="ix03.html" title="Index of new symbols in 2.2">
+<link rel="index" href="ix04.html" title="Index of new symbols in 2.4">
+<link rel="index" href="ix05.html" title="Index of new symbols in 2.6">
+<link rel="index" href="ix06.html" title="Index of new symbols in 2.8">
+<link rel="index" href="ix07.html" title="Index of new symbols in 2.10">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="glib-Key-value-file-parser.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="glib-utilities.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">GLib Reference Manual</th>
+<td><a accesskey="n" href="glib-data-types.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#top_of_page" class="shortcut">Top</a>
+                  &#160;|&#160;
+                  <a href="#desc" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="glib-Windows-Compatibility-Functions"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="top_of_page"></a>Windows Compatibility Functions</span></h2>
+<p>Windows Compatibility Functions &#8212; UNIX emulation on Windows.</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;glib.h&gt;
+
+
+#define     <a href="glib-Windows-Compatibility-Functions.html#MAXPATHLEN:CAPS">MAXPATHLEN</a>
+#define     <a href="glib-Windows-Compatibility-Functions.html#pipe">pipe</a>                            (phandles)
+<a href="glib-Basic-Types.html#gchar">gchar</a>*      <a href="glib-Windows-Compatibility-Functions.html#g-win32-error-message">g_win32_error_message</a>           (<a href="glib-Basic-Types.html#gint">gint</a> error);
+<a href="glib-Basic-Types.html#gchar">gchar</a>*      <a href="glib-Windows-Compatibility-Functions.html#g-win32-getlocale">g_win32_getlocale</a>               (void);
+<a href="glib-Basic-Types.html#gchar">gchar</a>*      <a href="glib-Windows-Compatibility-Functions.html#g-win32-get-package-installation-directory">g_win32_get_package_installation_directory</a>
+                                            (<a href="glib-Basic-Types.html#gchar">gchar</a> *package,
+                                             <a href="glib-Basic-Types.html#gchar">gchar</a> *dll_name);
+<a href="glib-Basic-Types.html#gchar">gchar</a>*      <a href="glib-Windows-Compatibility-Functions.html#g-win32-get-package-installation-subdirectory">g_win32_get_package_installation_subdirectory</a>
+                                            (<a href="glib-Basic-Types.html#gchar">gchar</a> *package,
+                                             <a href="glib-Basic-Types.html#gchar">gchar</a> *dll_name,
+                                             <a href="glib-Basic-Types.html#gchar">gchar</a> *subdir);
+<a href="glib-Basic-Types.html#guint">guint</a>       <a href="glib-Windows-Compatibility-Functions.html#g-win32-get-windows-version">g_win32_get_windows_version</a>     (void);
+<a href="glib-Basic-Types.html#gchar">gchar</a>*      <a href="glib-Windows-Compatibility-Functions.html#g-win32-locale-filename-from-utf8">g_win32_locale_filename_from_utf8</a>
+                                            (const <a href="glib-Basic-Types.html#gchar">gchar</a> *utf8filename);
+#define     <a href="glib-Windows-Compatibility-Functions.html#G-WIN32-DLLMAIN-FOR-DLL-NAME:CAPS">G_WIN32_DLLMAIN_FOR_DLL_NAME</a>    (static, dll_name)
+#define     <a href="glib-Windows-Compatibility-Functions.html#G-WIN32-HAVE-WIDECHAR-API:CAPS">G_WIN32_HAVE_WIDECHAR_API</a>       ()
+#define     <a href="glib-Windows-Compatibility-Functions.html#G-WIN32-IS-NT-BASED:CAPS">G_WIN32_IS_NT_BASED</a>             ()
+
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="desc"></a><h2>Description</h2>
+<p>
+These functions provide some level of UNIX emulation on the Windows platform.
+If your application really needs the POSIX APIs, we suggest you try the Cygwin
+project.
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="id3089968"></a><h3>
+<a name="MAXPATHLEN:CAPS"></a>MAXPATHLEN</h3>
+<a class="indexterm" name="id3089980"></a><pre class="programlisting">#define MAXPATHLEN 1024
+</pre>
+<p>
+Provided for UNIX emulation on Windows; equivalent to UNIX 
+macro <code class="literal">MAXPATHLEN</code>, which is the maximum length of a filename
+(including full path).
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3090002"></a><h3>
+<a name="pipe"></a>pipe()</h3>
+<a class="indexterm" name="id3090015"></a><pre class="programlisting">#define pipe(phandles)	_pipe (phandles, 4096, _O_BINARY)
+</pre>
+<p>
+Provided for UNIX emulation on Windows; see documentation for <code class="function"><a href="glib-Windows-Compatibility-Functions.html#pipe"><code class="function">pipe()</code></a></code>
+in any UNIX manual.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td>
+<span class="term"><em class="parameter"><code>phandles</code></em>&#160;:</span></td>
+<td>file descriptors, the first one for reading, the second one for writing.
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3090065"></a><h3>
+<a name="g-win32-error-message"></a>g_win32_error_message ()</h3>
+<a class="indexterm" name="id3090078"></a><pre class="programlisting"><a href="glib-Basic-Types.html#gchar">gchar</a>*      g_win32_error_message           (<a href="glib-Basic-Types.html#gint">gint</a> error);</pre>
+<p>
+Translate a Win32 error code (as returned by <code class="function">GetLastError()</code>) into
+the corresponding message. The message is either language neutral,
+or in the thread's language, or the user's language, the system's
+language, or US English (see docs for <code class="function">FormatMessage()</code>). The
+returned string is in UTF-8. It should be deallocated with
+<a href="glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>error</code></em>&#160;:</span></td>
+<td> error code.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> newly-allocated error message
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3090176"></a><h3>
+<a name="g-win32-getlocale"></a>g_win32_getlocale ()</h3>
+<a class="indexterm" name="id3090189"></a><pre class="programlisting"><a href="glib-Basic-Types.html#gchar">gchar</a>*      g_win32_getlocale               (void);</pre>
+<p>
+The <code class="function">setlocale()</code> function in the Microsoft C library uses locale
+names of the form "English_United States.1252" etc. We want the
+UNIXish standard form "en_US", "zh_TW" etc. This function gets the
+current thread locale from Windows - without any encoding info -
+and returns it as a string of the above form for use in forming
+file names etc. The returned string should be deallocated with
+<a href="glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> newly-allocated locale name.
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3090256"></a><h3>
+<a name="g-win32-get-package-installation-directory"></a>g_win32_get_package_installation_directory ()</h3>
+<a class="indexterm" name="id3090271"></a><pre class="programlisting"><a href="glib-Basic-Types.html#gchar">gchar</a>*      g_win32_get_package_installation_directory
+                                            (<a href="glib-Basic-Types.html#gchar">gchar</a> *package,
+                                             <a href="glib-Basic-Types.html#gchar">gchar</a> *dll_name);</pre>
+<p>
+Try to determine the installation directory for a software package.
+Typically used by GNU software packages.
+</p>
+<p>
+<em class="parameter"><code>package</code></em> should be a short identifier for the package. Typically it
+is the same identifier as used for
+<code class="literal">GETTEXT_PACKAGE</code> in software configured according
+to GNU standards. The function first looks in the Windows Registry
+for the value <code class="literal">#InstallationDirectory</code> in the key
+<code class="literal">#HKLM\Software\<em class="parameter"><code>package</code></em></code>, and if that value
+exists and is a string, returns that.
+</p>
+<p>
+If <em class="parameter"><code>package</code></em> is <code class="literal">NULL</code>, or the above value isn't found in the
+Registry, but <em class="parameter"><code>dll_name</code></em> is non-<code class="literal">NULL</code>, it should name a DLL loaded
+into the current process. Typically that would be the name of the
+DLL calling this function, looking for its installation
+directory. The function then asks Windows what directory that DLL
+was loaded from. If that directory's last component is "bin" or
+"lib", the parent directory is returned, otherwise the directory
+itself. If that DLL isn't loaded, the function proceeds as if
+<em class="parameter"><code>dll_name</code></em> was <code class="literal">NULL</code>.
+</p>
+<p>
+If both <em class="parameter"><code>package</code></em> and <em class="parameter"><code>dll_name</code></em> are <code class="literal">NULL</code>, the directory from where
+the main executable of the process was loaded is used instead in
+the same way as above.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>package</code></em>&#160;:</span></td>
+<td> An identifier for a software package, or <code class="literal">NULL</code>, in UTF-8
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>dll_name</code></em>&#160;:</span></td>
+<td> The name of a DLL that a package provides, or <code class="literal">NULL</code>, in UTF-8
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> a string containing the installation directory for
+<em class="parameter"><code>package</code></em>. The string is in the GLib file name encoding, i.e. UTF-8
+on Windows. The return value should be freed with <a href="glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a> when not
+needed any longer.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3090494"></a><h3>
+<a name="g-win32-get-package-installation-subdirectory"></a>g_win32_get_package_installation_subdirectory ()</h3>
+<a class="indexterm" name="id3090508"></a><pre class="programlisting"><a href="glib-Basic-Types.html#gchar">gchar</a>*      g_win32_get_package_installation_subdirectory
+                                            (<a href="glib-Basic-Types.html#gchar">gchar</a> *package,
+                                             <a href="glib-Basic-Types.html#gchar">gchar</a> *dll_name,
+                                             <a href="glib-Basic-Types.html#gchar">gchar</a> *subdir);</pre>
+<p>
+Returns a newly-allocated string containing the path of the
+subdirectory <em class="parameter"><code>subdir</code></em> in the return value from calling
+<a href="glib-Windows-Compatibility-Functions.html#g-win32-get-package-installation-directory"><code class="function">g_win32_get_package_installation_directory()</code></a> with the <em class="parameter"><code>package</code></em> and
+<em class="parameter"><code>dll_name</code></em> parameters.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>package</code></em>&#160;:</span></td>
+<td> An identifier for a software package, in UTF-8, or <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>dll_name</code></em>&#160;:</span></td>
+<td> The name of a DLL that a package provides, in UTF-8, or <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>subdir</code></em>&#160;:</span></td>
+<td> A subdirectory of the package installation directory, also in UTF-8
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> a string containing the complete path to <em class="parameter"><code>subdir</code></em> inside
+the installation directory of <em class="parameter"><code>package</code></em>. The returned string is in
+the GLib file name encoding, i.e. UTF-8 on Windows. The return
+value should be freed with <a href="glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a> when no longer needed.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3090684"></a><h3>
+<a name="g-win32-get-windows-version"></a>g_win32_get_windows_version ()</h3>
+<a class="indexterm" name="id3090699"></a><pre class="programlisting"><a href="glib-Basic-Types.html#guint">guint</a>       g_win32_get_windows_version     (void);</pre>
+<p>
+Returns version information for the Windows operating system the
+code is running on. See MSDN documentation for the <code class="function">GetVersion()</code>
+function. To summarize, the most significant bit is one on Win9x,
+and zero on NT-based systems. The least significant byte is 4 on
+Windows NT 4, 5 on Windows XP. Software that needs really detailled
+version and feature information should use Win32 API like
+<code class="function">GetVersionEx()</code> and <code class="function">VerifyVersionInfo()</code>.
+</p>
+<p>
+If there is an environment variable <code class="envar">G_WIN32_PRETEND_WIN9X</code> 
+defined (with any value), this function always returns a version 
+code for Windows 9x. This is mainly an internal debugging aid for 
+GTK+ and GLib developers, to be able to check the code paths for 
+Windows 9x.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> The version information.
+
+</td>
+</tr></tbody>
+</table></div>
+<p>Since  2.6
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3090795"></a><h3>
+<a name="g-win32-locale-filename-from-utf8"></a>g_win32_locale_filename_from_utf8 ()</h3>
+<a class="indexterm" name="id3090811"></a><pre class="programlisting"><a href="glib-Basic-Types.html#gchar">gchar</a>*      g_win32_locale_filename_from_utf8
+                                            (const <a href="glib-Basic-Types.html#gchar">gchar</a> *utf8filename);</pre>
+<p>
+Converts a filename from UTF-8 to the system codepage.
+</p>
+<p>
+On NT-based Windows, on NTFS file systems, file names are in
+Unicode. It is quite possible that Unicode file names contain
+characters not representable in the system codepage. (For instance,
+Greek or Cyrillic characters on Western European or US Windows
+installations, or various less common CJK characters on CJK Windows
+installations.)
+</p>
+<p>
+In such a case, and if the filename refers to an existing file, and
+the file system stores alternate short (8.3) names for directory
+entries, the short form of the filename is returned. Note that the
+"short" name might in fact be longer than the Unicode name if the
+Unicode name has very short pathname components containing
+non-ASCII characters. If no system codepage name for the file is
+possible, <code class="literal">NULL</code> is returned.
+</p>
+<p>
+The return value is dynamically allocated and should be freed with
+<a href="glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a> when no longer needed.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>utf8filename</code></em>&#160;:</span></td>
+<td> a UTF-8 encoded filename.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> The converted filename, or <code class="literal">NULL</code> on conversion
+failure and lack of short names.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p>Since  2.8
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3090925"></a><h3>
+<a name="G-WIN32-DLLMAIN-FOR-DLL-NAME:CAPS"></a>G_WIN32_DLLMAIN_FOR_DLL_NAME()</h3>
+<a class="indexterm" name="id3090938"></a><pre class="programlisting">#define     G_WIN32_DLLMAIN_FOR_DLL_NAME(static, dll_name)</pre>
+<p>
+On Windows, this macro defines a <code class="function"><code class="function">DllMain()</code></code> function 
+that stores the actual DLL name that the code being compiled will be 
+included in.
+</p>
+<p>
+On non-Windows platforms, expands to nothing.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>static</code></em>&#160;:</span></td>
+<td>empty or "static".
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>dll_name</code></em>&#160;:</span></td>
+<td>the name of the (pointer to the) char array where the DLL name 
+   will be stored. If this is used, you must also include 
+   <code class="filename">windows.h</code>. If you need a more complex DLL entry 
+   point function, you cannot use this.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3091016"></a><h3>
+<a name="G-WIN32-HAVE-WIDECHAR-API:CAPS"></a>G_WIN32_HAVE_WIDECHAR_API()</h3>
+<a class="indexterm" name="id3091032"></a><pre class="programlisting">#define G_WIN32_HAVE_WIDECHAR_API() (G_WIN32_IS_NT_BASED ())
+</pre>
+<p>
+On Windows, this macro defines an expression which evaluates to <code class="literal">TRUE</code>
+if the code is running on a version of Windows where the wide
+character versions of the Win32 API functions, and the wide chaacter
+versions of the C library functions work. (They are always present in
+the DLLs, but don't work on Windows 9x and Me.)
+</p>
+<p>
+On non-Windows platforms, it is not defined.
+</p>
+<p>Since 2.6
+
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3091067"></a><h3>
+<a name="G-WIN32-IS-NT-BASED:CAPS"></a>G_WIN32_IS_NT_BASED()</h3>
+<a class="indexterm" name="id3091082"></a><pre class="programlisting">#define G_WIN32_IS_NT_BASED() (g_win32_get_windows_version () &lt; 0x80000000)
+</pre>
+<p>
+On Windows, this macro defines an expression which evaluates to <code class="literal">TRUE</code> 
+if the code is running on an NT-based Windows operating system.
+</p>
+<p>
+On non-Windows platforms, it is not defined.
+</p>
+<p>Since 2.6
+
+
+</p>
+</div>
+</div>
+</div>
+</body>
+</html>

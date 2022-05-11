@@ -1,0 +1,560 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>GTypeModule</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.69.1">
+<link rel="start" href="index.html" title="GObject Reference Manual">
+<link rel="up" href="rn01.html" title="API Reference">
+<link rel="prev" href="GTypePlugin.html" title="GTypePlugin">
+<link rel="next" href="gobject-The-Base-Object-Type.html" title="GObject">
+<meta name="generator" content="GTK-Doc V1.4 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="preface" href="pr01.html" title="Introduction">
+<link rel="part" href="pt01.html" title="Part&#160;I.&#160;Concepts">
+<link rel="chapter" href="ch01.html" title="Background">
+<link rel="chapter" href="ch02.html" title="The Glib Dynamic Type System">
+<link rel="chapter" href="chapter-gobject.html" title="The GObject base class">
+<link rel="chapter" href="chapter-signal.html" title="The GObject messaging system">
+<link rel="reference" href="rn01.html" title="API Reference">
+<link rel="reference" href="rn02.html" title="Tools Reference">
+<link rel="part" href="pt02.html" title="Part&#160;IV.&#160;Tutorial">
+<link rel="chapter" href="howto-gobject.html" title="How To define and implement a new GObject?">
+<link rel="chapter" href="howto-interface.html" title="How To define and implement Interfaces?">
+<link rel="chapter" href="howto-signals.html" title="Howto create and use signals">
+<link rel="part" href="pt03.html" title="Part&#160;V.&#160;Related Tools">
+<link rel="chapter" href="tools-gob.html" title="GObject builder">
+<link rel="chapter" href="tools-ginspector.html" title="Graphical inspection of Gobjects">
+<link rel="chapter" href="tools-refdb.html" title="Debugging reference count problems">
+<link rel="chapter" href="tools-gtkdoc.html" title="Writing API docs">
+<link rel="index" href="ix01.html" title="Index">
+<link rel="index" href="ix02.html" title="Index of deprecated symbols">
+<link rel="index" href="ix03.html" title="Index of new symbols in 2.2">
+<link rel="index" href="ix04.html" title="Index of new symbols in 2.4">
+<link rel="index" href="ix05.html" title="Index of new symbols in 2.6">
+<link rel="index" href="ix06.html" title="Index of new symbols in 2.8">
+<link rel="index" href="ix07.html" title="Index of new symbols in 2.10">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="GTypePlugin.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="rn01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">GObject Reference Manual</th>
+<td><a accesskey="n" href="gobject-The-Base-Object-Type.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#top_of_page" class="shortcut">Top</a>
+                  &#160;|&#160;
+                  <a href="#desc" class="shortcut">Description</a>
+                  &#160;|&#160;
+                  <a href="#object_hierarchy" class="shortcut">Object Hierarchy</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="GTypeModule"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="top_of_page"></a>GTypeModule</span></h2>
+<p>GTypeModule &#8212; Type loading modules</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;glib-object.h&gt;
+
+
+            <a href="GTypeModule.html#GTypeModule-struct">GTypeModule</a>;
+            <a href="GTypeModule.html#GTypeModuleClass">GTypeModuleClass</a>;
+<a
+href="../glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>    <a href="GTypeModule.html#g-type-module-use">g_type_module_use</a>               (<a href="GTypeModule.html" title="GTypeModule">GTypeModule</a> *module);
+void        <a href="GTypeModule.html#g-type-module-unuse">g_type_module_unuse</a>             (<a href="GTypeModule.html" title="GTypeModule">GTypeModule</a> *module);
+void        <a href="GTypeModule.html#g-type-module-set-name">g_type_module_set_name</a>          (<a href="GTypeModule.html" title="GTypeModule">GTypeModule</a> *module,
+                                             const <a
+href="../glib/glib-Basic-Types.html#gchar"
+>gchar</a> *name);
+<a href="gobject-Type-Information.html#GType">GType</a>       <a href="GTypeModule.html#g-type-module-register-type">g_type_module_register_type</a>     (<a href="GTypeModule.html" title="GTypeModule">GTypeModule</a> *module,
+                                             <a href="gobject-Type-Information.html#GType">GType</a> parent_type,
+                                             const <a
+href="../glib/glib-Basic-Types.html#gchar"
+>gchar</a> *type_name,
+                                             const <a href="gobject-Type-Information.html#GTypeInfo">GTypeInfo</a> *type_info,
+                                             <a href="gobject-Type-Information.html#GTypeFlags">GTypeFlags</a> flags);
+void        <a href="GTypeModule.html#g-type-module-add-interface">g_type_module_add_interface</a>     (<a href="GTypeModule.html" title="GTypeModule">GTypeModule</a> *module,
+                                             <a href="gobject-Type-Information.html#GType">GType</a> instance_type,
+                                             <a href="gobject-Type-Information.html#GType">GType</a> interface_type,
+                                             const <a href="gobject-Type-Information.html#GInterfaceInfo">GInterfaceInfo</a> *interface_info);
+<a href="gobject-Type-Information.html#GType">GType</a>       <a href="GTypeModule.html#g-type-module-register-enum">g_type_module_register_enum</a>     (<a href="GTypeModule.html" title="GTypeModule">GTypeModule</a> *module,
+                                             const <a
+href="../glib/glib-Basic-Types.html#gchar"
+>gchar</a> *name,
+                                             const <a href="gobject-Enumeration-and-Flag-Types.html#GEnumValue">GEnumValue</a> *const_static_values);
+<a href="gobject-Type-Information.html#GType">GType</a>       <a href="GTypeModule.html#g-type-module-register-flags">g_type_module_register_flags</a>    (<a href="GTypeModule.html" title="GTypeModule">GTypeModule</a> *module,
+                                             const <a
+href="../glib/glib-Basic-Types.html#gchar"
+>gchar</a> *name,
+                                             const <a href="gobject-Enumeration-and-Flag-Types.html#GFlagsValue">GFlagsValue</a> *const_static_values);
+
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="object_hierarchy"></a><h2>Object Hierarchy</h2>
+<pre class="synopsis">
+
+  <a href="gobject-The-Base-Object-Type.html#GObject">GObject</a>
+   +----GTypeModule
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="impl_interfaces"></a><h2>Implemented Interfaces</h2>
+<p>
+GTypeModule implements
+ <a href="GTypePlugin.html" title="GTypePlugin">GTypePlugin</a>.</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="desc"></a><h2>Description</h2>
+<p>
+<a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a> provides a simple implementation of the <a href="GTypePlugin.html" title="GTypePlugin"><span class="type">GTypePlugin</span></a>
+interface. The model of <a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a> is a dynamically loaded module
+which implements some number of types and interface
+implementations. When the module is loaded, it registers its types
+and interfaces using <a href="GTypeModule.html#g-type-module-register-type"><code class="function">g_type_module_register_type()</code></a> and
+<a href="GTypeModule.html#g-type-module-add-interface"><code class="function">g_type_module_add_interface()</code></a>.  As long as any instances of these
+types and interface implementations are in use, the module is kept
+loaded. When the types and interfaces are gone, the module may be
+unloaded. If the types and interfaces become used again, the module
+will be reloaded.
+</p>
+<p>
+Keeping track of whether the module should be loaded or not is done by
+using a use count - it starts at zero, and whenever it is greater than
+zero, the module is loaded. The use count is maintained internally by
+the type system, but also can be explicitly controlled by
+<a href="GTypeModule.html#g-type-module-use"><code class="function">g_type_module_use()</code></a> and <a href="GTypeModule.html#g-type-module-unuse"><code class="function">g_type_module_unuse()</code></a>. Typically, when loading
+a module for the first type, <a href="GTypeModule.html#g-type-module-use"><code class="function">g_type_module_use()</code></a> will be used to load
+it so that it can initialize its types. At some later point, when the
+module no longer needs to be loaded except for the type
+implementations it contains, <a href="GTypeModule.html#g-type-module-unuse"><code class="function">g_type_module_unuse()</code></a> is called.
+</p>
+<p>
+<a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a> does not actually provide any implementation of module
+loading and unloading. To create a particular module type you must
+derive from <a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a> and implement the load and unload functions
+in <a href="GTypeModule.html#GTypeModuleClass"><span class="type">GTypeModuleClass</span></a>.
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="id2860234"></a><h3>
+<a name="GTypeModule-struct"></a>GTypeModule</h3>
+<a class="indexterm" name="id2860246"></a><pre class="programlisting">typedef struct {
+  gchar *name;
+} GTypeModule;
+</pre>
+<p>
+The members of the <span class="structname">GTypeModule</span> structure should not 
+be accessed directly, except for the <em class="parameter"><code>name</code></em> field.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td>
+<span class="term"><a
+href="../glib/glib-Basic-Types.html#gchar"
+>gchar</a>&#160;*<em class="structfield"><code>name</code></em>;</span></td>
+<td>the name of the module
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2860297"></a><h3>
+<a name="GTypeModuleClass"></a>GTypeModuleClass</h3>
+<a class="indexterm" name="id2860309"></a><pre class="programlisting">typedef struct {
+  GObjectClass parent_class;
+
+  gboolean (* load)   (GTypeModule *module);
+  void     (* unload) (GTypeModule *module);
+} GTypeModuleClass;
+</pre>
+<p>
+In order to implement dynamic loading of types based on <a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a>, 
+the <em class="parameter"><code>load</code></em> and <em class="parameter"><code>unload</code></em> functions in <a href="GTypeModule.html#GTypeModuleClass"><span class="type">GTypeModuleClass</span></a> must be implemented.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><a href="gobject-The-Base-Object-Type.html#GObjectClass">GObjectClass</a>&#160;<em class="structfield"><code>parent_class</code></em>;</span></td>
+<td>the parent class
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="structfield"><code>load</code></em>&#160;()</span></td>
+<td>loads the module and registers one or more types using
+  <a href="GTypeModule.html#g-type-module-register-type"><code class="function">g_type_module_register_type()</code></a>.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="structfield"><code>unload</code></em>&#160;()</span></td>
+<td>unloads the module
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2860422"></a><h3>
+<a name="g-type-module-use"></a>g_type_module_use ()</h3>
+<a class="indexterm" name="id2860436"></a><pre class="programlisting"><a
+href="../glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>    g_type_module_use               (<a href="GTypeModule.html" title="GTypeModule">GTypeModule</a> *module);</pre>
+<p>
+Increases the use count of a <a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a> by one. If the
+use count was zero before, the plugin will be loaded.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>module</code></em>&#160;:</span></td>
+<td>a <a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>
+<code class="literal">FALSE</code> if the plugin needed to be loaded and
+          loading the plugin failed.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2860515"></a><h3>
+<a name="g-type-module-unuse"></a>g_type_module_unuse ()</h3>
+<a class="indexterm" name="id2860528"></a><pre class="programlisting">void        g_type_module_unuse             (<a href="GTypeModule.html" title="GTypeModule">GTypeModule</a> *module);</pre>
+<p>
+Decreases the use count of a <a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a> by one. If the
+result is zero, the module will be unloaded. (However, the
+<a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a> will not be freed, and types associated with the
+<a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a> are not unregistered. Once a <a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a> is 
+initialized, it must exist forever.)
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td>
+<span class="term"><em class="parameter"><code>module</code></em>&#160;:</span></td>
+<td>a <a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a>
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2860616"></a><h3>
+<a name="g-type-module-set-name"></a>g_type_module_set_name ()</h3>
+<a class="indexterm" name="id2860630"></a><pre class="programlisting">void        g_type_module_set_name          (<a href="GTypeModule.html" title="GTypeModule">GTypeModule</a> *module,
+                                             const <a
+href="../glib/glib-Basic-Types.html#gchar"
+>gchar</a> *name);</pre>
+<p>
+Sets the name for a <a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a> 
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>module</code></em>&#160;:</span></td>
+<td>a <a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a>.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>name</code></em>&#160;:</span></td>
+<td>a human-readable name to use in error messages.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2860714"></a><h3>
+<a name="g-type-module-register-type"></a>g_type_module_register_type ()</h3>
+<a class="indexterm" name="id2860727"></a><pre class="programlisting"><a href="gobject-Type-Information.html#GType">GType</a>       g_type_module_register_type     (<a href="GTypeModule.html" title="GTypeModule">GTypeModule</a> *module,
+                                             <a href="gobject-Type-Information.html#GType">GType</a> parent_type,
+                                             const <a
+href="../glib/glib-Basic-Types.html#gchar"
+>gchar</a> *type_name,
+                                             const <a href="gobject-Type-Information.html#GTypeInfo">GTypeInfo</a> *type_info,
+                                             <a href="gobject-Type-Information.html#GTypeFlags">GTypeFlags</a> flags);</pre>
+<p>
+Looks up or registers a type that is implemented with a particular
+type plugin. If a type with name <em class="parameter"><code>type_name</code></em> was previously registered,
+the <a href="gobject-Type-Information.html#GType"><span class="type">GType</span></a> identifier for the type is returned, otherwise the type
+is newly registered, and the resulting <a href="gobject-Type-Information.html#GType"><span class="type">GType</span></a> identifier returned.
+</p>
+<p>
+When reregistering a type (typically because a module is unloaded
+then reloaded, and reinitialized), <em class="parameter"><code>module</code></em> and <em class="parameter"><code>parent_type</code></em> must
+be the same as they were previously.
+</p>
+<p>
+As long as any instances of the type exist, the type plugin will
+not be unloaded.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>module</code></em>&#160;:</span></td>
+<td> a <a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>parent_type</code></em>&#160;:</span></td>
+<td>   the type for the parent class
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>type_name</code></em>&#160;:</span></td>
+<td>     name for the type
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>type_info</code></em>&#160;:</span></td>
+<td>     type information structure
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>flags</code></em>&#160;:</span></td>
+<td>         flags field providing details about the type
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>the new or existing type ID
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2860928"></a><h3>
+<a name="g-type-module-add-interface"></a>g_type_module_add_interface ()</h3>
+<a class="indexterm" name="id2860941"></a><pre class="programlisting">void        g_type_module_add_interface     (<a href="GTypeModule.html" title="GTypeModule">GTypeModule</a> *module,
+                                             <a href="gobject-Type-Information.html#GType">GType</a> instance_type,
+                                             <a href="gobject-Type-Information.html#GType">GType</a> interface_type,
+                                             const <a href="gobject-Type-Information.html#GInterfaceInfo">GInterfaceInfo</a> *interface_info);</pre>
+<p>
+Registers an additional interface for a type, whose interface
+lives in the given type plugin. If the interface was already registered
+for the type in this plugin, nothing will be done. 
+</p>
+<p>
+As long as any instances of the type exist, the type plugin will
+not be unloaded.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>module</code></em>&#160;:</span></td>
+<td>a <a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>instance_type</code></em>&#160;:</span></td>
+<td>type to which to add the interface.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>interface_type</code></em>&#160;:</span></td>
+<td>interface type to add
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>interface_info</code></em>&#160;:</span></td>
+<td>type information structure
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2861069"></a><h3>
+<a name="g-type-module-register-enum"></a>g_type_module_register_enum ()</h3>
+<a class="indexterm" name="id2861085"></a><pre class="programlisting"><a href="gobject-Type-Information.html#GType">GType</a>       g_type_module_register_enum     (<a href="GTypeModule.html" title="GTypeModule">GTypeModule</a> *module,
+                                             const <a
+href="../glib/glib-Basic-Types.html#gchar"
+>gchar</a> *name,
+                                             const <a href="gobject-Enumeration-and-Flag-Types.html#GEnumValue">GEnumValue</a> *const_static_values);</pre>
+<p>
+Looks up or registers an enumeration that is implemented with a particular
+type plugin. If a type with name <em class="parameter"><code>type_name</code></em> was previously registered,
+the <a href="gobject-Type-Information.html#GType"><span class="type">GType</span></a> identifier for the type is returned, otherwise the type
+is newly registered, and the resulting <a href="gobject-Type-Information.html#GType"><span class="type">GType</span></a> identifier returned.
+</p>
+<p>
+As long as any instances of the type exist, the type plugin will
+not be unloaded.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>module</code></em>&#160;:</span></td>
+<td>             a <a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>name</code></em>&#160;:</span></td>
+<td>               name for the type
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>const_static_values</code></em>&#160;:</span></td>
+<td>an array of <a href="gobject-Enumeration-and-Flag-Types.html#GEnumValue"><span class="type">GEnumValue</span></a> structs for the possible
+  enumeration values. The array is terminated by a struct with all 
+  members being 0.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>the new or existing type ID
+</td>
+</tr>
+</tbody>
+</table></div>
+<p>Since 2.6
+
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2861238"></a><h3>
+<a name="g-type-module-register-flags"></a>g_type_module_register_flags ()</h3>
+<a class="indexterm" name="id2861254"></a><pre class="programlisting"><a href="gobject-Type-Information.html#GType">GType</a>       g_type_module_register_flags    (<a href="GTypeModule.html" title="GTypeModule">GTypeModule</a> *module,
+                                             const <a
+href="../glib/glib-Basic-Types.html#gchar"
+>gchar</a> *name,
+                                             const <a href="gobject-Enumeration-and-Flag-Types.html#GFlagsValue">GFlagsValue</a> *const_static_values);</pre>
+<p>
+Looks up or registers a flags type that is implemented with a particular
+type plugin. If a type with name <em class="parameter"><code>type_name</code></em> was previously registered,
+the <a href="gobject-Type-Information.html#GType"><span class="type">GType</span></a> identifier for the type is returned, otherwise the type
+is newly registered, and the resulting <a href="gobject-Type-Information.html#GType"><span class="type">GType</span></a> identifier returned.
+</p>
+<p>
+As long as any instances of the type exist, the type plugin will
+not be unloaded.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>module</code></em>&#160;:</span></td>
+<td>             a <a href="GTypeModule.html" title="GTypeModule"><span class="type">GTypeModule</span></a>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>name</code></em>&#160;:</span></td>
+<td>               name for the type
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>const_static_values</code></em>&#160;:</span></td>
+<td>an array of <a href="gobject-Enumeration-and-Flag-Types.html#GFlagsValue"><span class="type">GFlagsValue</span></a> structs for the possible
+  flags values. The array is terminated by a struct with all 
+  members being 0.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>the new or existing type ID
+</td>
+</tr>
+</tbody>
+</table></div>
+<p>Since 2.6
+
+
+</p>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2861409"></a><h2>See Also</h2>
+<p>
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><a href="GTypePlugin.html" title="GTypePlugin"><span class="type">GTypePlugin</span></a></span></td>
+<td><p>The abstract type loader interface.</p></td>
+</tr>
+<tr>
+<td>
+<span class="term"><a
+href="../glib/glib-Dynamic-Loading-of-Modules.html#GModule"
+><span class="type">GModule</span></a></span></td>
+<td><p>Portable mechanism for dynamically loaded modules.</p></td>
+</tr>
+</tbody>
+</table></div>
+<p>
+</p>
+</div>
+</div>
+</body>
+</html>

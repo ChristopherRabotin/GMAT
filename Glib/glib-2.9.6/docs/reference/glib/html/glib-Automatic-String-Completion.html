@@ -1,0 +1,498 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Automatic String Completion</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.69.1">
+<link rel="start" href="index.html" title="GLib Reference Manual">
+<link rel="up" href="glib-utilities.html" title="GLib Utilities">
+<link rel="prev" href="glib-Lexical-Scanner.html" title="Lexical Scanner">
+<link rel="next" href="glib-Timers.html" title="Timers">
+<meta name="generator" content="GTK-Doc V1.4 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="glib.html" title="GLib Overview">
+<link rel="chapter" href="glib-fundamentals.html" title="GLib Fundamentals">
+<link rel="chapter" href="glib-core.html" title="GLib Core Application Support">
+<link rel="chapter" href="glib-utilities.html" title="GLib Utilities">
+<link rel="chapter" href="glib-data-types.html" title="GLib Data Types">
+<link rel="chapter" href="tools.html" title="GLib Tools">
+<link rel="index" href="ix01.html" title="Index">
+<link rel="index" href="ix02.html" title="Index of deprecated symbols">
+<link rel="index" href="ix03.html" title="Index of new symbols in 2.2">
+<link rel="index" href="ix04.html" title="Index of new symbols in 2.4">
+<link rel="index" href="ix05.html" title="Index of new symbols in 2.6">
+<link rel="index" href="ix06.html" title="Index of new symbols in 2.8">
+<link rel="index" href="ix07.html" title="Index of new symbols in 2.10">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="glib-Lexical-Scanner.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="glib-utilities.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">GLib Reference Manual</th>
+<td><a accesskey="n" href="glib-Timers.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#top_of_page" class="shortcut">Top</a>
+                  &#160;|&#160;
+                  <a href="#desc" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="glib-Automatic-String-Completion"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="top_of_page"></a>Automatic String Completion</span></h2>
+<p>Automatic String Completion &#8212; support for automatic completion using a group of target strings.</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;glib.h&gt;
+
+
+            <a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a>;
+<a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a>* <a href="glib-Automatic-String-Completion.html#g-completion-new">g_completion_new</a>               (<a href="glib-Automatic-String-Completion.html#GCompletionFunc">GCompletionFunc</a> func);
+<a href="glib-Basic-Types.html#gchar">gchar</a>*      (<a href="glib-Automatic-String-Completion.html#GCompletionFunc">*GCompletionFunc</a>)              (<a href="glib-Basic-Types.html#gpointer">gpointer</a>);
+void        <a href="glib-Automatic-String-Completion.html#g-completion-add-items">g_completion_add_items</a>          (<a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a> *cmp,
+                                             <a href="glib-Doubly-Linked-Lists.html#GList">GList</a> *items);
+void        <a href="glib-Automatic-String-Completion.html#g-completion-remove-items">g_completion_remove_items</a>       (<a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a> *cmp,
+                                             <a href="glib-Doubly-Linked-Lists.html#GList">GList</a> *items);
+void        <a href="glib-Automatic-String-Completion.html#g-completion-clear-items">g_completion_clear_items</a>        (<a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a> *cmp);
+<a href="glib-Doubly-Linked-Lists.html#GList">GList</a>*      <a href="glib-Automatic-String-Completion.html#g-completion-complete">g_completion_complete</a>           (<a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a> *cmp,
+                                             const <a href="glib-Basic-Types.html#gchar">gchar</a> *prefix,
+                                             <a href="glib-Basic-Types.html#gchar">gchar</a> **new_prefix);
+<a href="glib-Doubly-Linked-Lists.html#GList">GList</a>*      <a href="glib-Automatic-String-Completion.html#g-completion-complete-utf8">g_completion_complete_utf8</a>      (<a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a> *cmp,
+                                             const <a href="glib-Basic-Types.html#gchar">gchar</a> *prefix,
+                                             <a href="glib-Basic-Types.html#gchar">gchar</a> **new_prefix);
+void        <a href="glib-Automatic-String-Completion.html#g-completion-set-compare">g_completion_set_compare</a>        (<a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a> *cmp,
+                                             <a href="glib-Automatic-String-Completion.html#GCompletionStrncmpFunc">GCompletionStrncmpFunc</a> strncmp_func);
+<a href="glib-Basic-Types.html#gint">gint</a>        (<a href="glib-Automatic-String-Completion.html#GCompletionStrncmpFunc">*GCompletionStrncmpFunc</a>)       (const <a href="glib-Basic-Types.html#gchar">gchar</a> *s1,
+                                             const <a href="glib-Basic-Types.html#gchar">gchar</a> *s2,
+                                             <a href="glib-Basic-Types.html#gsize">gsize</a> n);
+void        <a href="glib-Automatic-String-Completion.html#g-completion-free">g_completion_free</a>               (<a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a> *cmp);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="desc"></a><h2>Description</h2>
+<p>
+<a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a> provides support for automatic completion of a string using
+any group of target strings. It is typically used for file name completion
+as is common in many UNIX shells.
+</p>
+<p>
+A <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a> is created using <a href="glib-Automatic-String-Completion.html#g-completion-new"><code class="function">g_completion_new()</code></a>.
+Target items are added and removed with
+<a href="glib-Automatic-String-Completion.html#g-completion-add-items"><code class="function">g_completion_add_items()</code></a>, <a href="glib-Automatic-String-Completion.html#g-completion-remove-items"><code class="function">g_completion_remove_items()</code></a> and
+<a href="glib-Automatic-String-Completion.html#g-completion-clear-items"><code class="function">g_completion_clear_items()</code></a>.
+A completion attempt is requested with <a href="glib-Automatic-String-Completion.html#g-completion-complete"><code class="function">g_completion_complete()</code></a> or 
+<a href="glib-Automatic-String-Completion.html#g-completion-complete-utf8"><code class="function">g_completion_complete_utf8()</code></a>.
+When no longer needed, the <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a> is freed with <a href="glib-Automatic-String-Completion.html#g-completion-free"><code class="function">g_completion_free()</code></a>.
+</p>
+<p>
+Items in the completion can be simple strings (e.g. filenames),
+or pointers to arbitrary data structures. If data structures are used
+you must provide a <a href="glib-Automatic-String-Completion.html#GCompletionFunc"><span class="type">GCompletionFunc</span></a> in <a href="glib-Automatic-String-Completion.html#g-completion-new"><code class="function">g_completion_new()</code></a>,
+which retrieves the item's string from the data structure.
+You can change the way in which strings are compared by setting
+a different <a href="glib-Automatic-String-Completion.html#GCompletionStrncmpFunc"><span class="type">GCompletionStrncmpFunc</span></a> in <a href="glib-Automatic-String-Completion.html#g-completion-set-compare"><code class="function">g_completion_set_compare()</code></a>.
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="id3024652"></a><h3>
+<a name="GCompletion"></a>GCompletion</h3>
+<a class="indexterm" name="id3024664"></a><pre class="programlisting">typedef struct {
+  GList* items;
+  GCompletionFunc func;
+ 
+  gchar* prefix;
+  GList* cache;
+  GCompletionStrncmpFunc strncmp_func;
+} GCompletion;
+</pre>
+<p>
+The data structure used for automatic completion.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><a href="glib-Doubly-Linked-Lists.html#GList">GList</a>&#160;*<em class="structfield"><code>items</code></em>;</span></td>
+<td>list of target items (strings or data structures).
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><a href="glib-Automatic-String-Completion.html#GCompletionFunc">GCompletionFunc</a>&#160;<em class="structfield"><code>func</code></em>;</span></td>
+<td>function which is called to get the string associated with a target 
+  item. It is <code class="literal">NULL</code> if the target items are strings.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><a href="glib-Basic-Types.html#gchar">gchar</a>&#160;*<em class="structfield"><code>prefix</code></em>;</span></td>
+<td>the last prefix passed to <a href="glib-Automatic-String-Completion.html#g-completion-complete"><code class="function">g_completion_complete()</code></a> or 
+  <a href="glib-Automatic-String-Completion.html#g-completion-complete-utf8"><code class="function">g_completion_complete_utf8()</code></a>.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><a href="glib-Doubly-Linked-Lists.html#GList">GList</a>&#160;*<em class="structfield"><code>cache</code></em>;</span></td>
+<td>the list of items which begin with <em class="parameter"><code>prefix</code></em>.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><a href="glib-Automatic-String-Completion.html#GCompletionStrncmpFunc">GCompletionStrncmpFunc</a>&#160;<em class="structfield"><code>strncmp_func</code></em>;</span></td>
+<td>The function to use when comparing strings. 
+  Use <a href="glib-Automatic-String-Completion.html#g-completion-set-compare"><code class="function">g_completion_set_compare()</code></a> to modify this function.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3024837"></a><h3>
+<a name="g-completion-new"></a>g_completion_new ()</h3>
+<a class="indexterm" name="id3024850"></a><pre class="programlisting"><a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a>* g_completion_new               (<a href="glib-Automatic-String-Completion.html#GCompletionFunc">GCompletionFunc</a> func);</pre>
+<p>
+Creates a new <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>func</code></em>&#160;:</span></td>
+<td>the function to be called to return the string representing an item
+in the <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a>, or <code class="literal">NULL</code> if strings are going to be used as the
+<a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a> items.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>the new <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a>.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3024946"></a><h3>
+<a name="GCompletionFunc"></a>GCompletionFunc ()</h3>
+<a class="indexterm" name="id3024959"></a><pre class="programlisting"><a href="glib-Basic-Types.html#gchar">gchar</a>*      (*GCompletionFunc)              (<a href="glib-Basic-Types.html#gpointer">gpointer</a>);</pre>
+<p>
+Specifies the type of the function passed to <a href="glib-Automatic-String-Completion.html#g-completion-new"><code class="function">g_completion_new()</code></a>.
+It should return the string corresponding to the given target item.
+This is used when you use data structures as <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a> items.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>Param1</code></em>&#160;:</span></td>
+<td>the completion item.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>the string corresponding to the item.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3025038"></a><h3>
+<a name="g-completion-add-items"></a>g_completion_add_items ()</h3>
+<a class="indexterm" name="id3025051"></a><pre class="programlisting">void        g_completion_add_items          (<a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a> *cmp,
+                                             <a href="glib-Doubly-Linked-Lists.html#GList">GList</a> *items);</pre>
+<p>
+Adds items to the <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>cmp</code></em>&#160;:</span></td>
+<td>the <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a>.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>items</code></em>&#160;:</span></td>
+<td>the list of items to add.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3025135"></a><h3>
+<a name="g-completion-remove-items"></a>g_completion_remove_items ()</h3>
+<a class="indexterm" name="id3025149"></a><pre class="programlisting">void        g_completion_remove_items       (<a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a> *cmp,
+                                             <a href="glib-Doubly-Linked-Lists.html#GList">GList</a> *items);</pre>
+<p>
+Removes items from a <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>cmp</code></em>&#160;:</span></td>
+<td>the <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a>.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>items</code></em>&#160;:</span></td>
+<td>the items to remove.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3025232"></a><h3>
+<a name="g-completion-clear-items"></a>g_completion_clear_items ()</h3>
+<a class="indexterm" name="id3025245"></a><pre class="programlisting">void        g_completion_clear_items        (<a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a> *cmp);</pre>
+<p>
+Removes all items from the <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td>
+<span class="term"><em class="parameter"><code>cmp</code></em>&#160;:</span></td>
+<td>the <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a>.
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3025308"></a><h3>
+<a name="g-completion-complete"></a>g_completion_complete ()</h3>
+<a class="indexterm" name="id3025321"></a><pre class="programlisting"><a href="glib-Doubly-Linked-Lists.html#GList">GList</a>*      g_completion_complete           (<a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a> *cmp,
+                                             const <a href="glib-Basic-Types.html#gchar">gchar</a> *prefix,
+                                             <a href="glib-Basic-Types.html#gchar">gchar</a> **new_prefix);</pre>
+<p>
+Attempts to complete the string <em class="parameter"><code>prefix</code></em> using the <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a> target items.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>cmp</code></em>&#160;:</span></td>
+<td>the <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a>.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>prefix</code></em>&#160;:</span></td>
+<td>the prefix string, typically typed by the user, which is compared
+with each of the items.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>new_prefix</code></em>&#160;:</span></td>
+<td>if non-<code class="literal">NULL</code>, returns the longest prefix which is common to all
+items that matched <em class="parameter"><code>prefix</code></em>, or <code class="literal">NULL</code> if no items matched <em class="parameter"><code>prefix</code></em>.
+This string should be freed when no longer needed.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>the list of items whose strings begin with <em class="parameter"><code>prefix</code></em>. This should
+not be changed.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3025477"></a><h3>
+<a name="g-completion-complete-utf8"></a>g_completion_complete_utf8 ()</h3>
+<a class="indexterm" name="id3025494"></a><pre class="programlisting"><a href="glib-Doubly-Linked-Lists.html#GList">GList</a>*      g_completion_complete_utf8      (<a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a> *cmp,
+                                             const <a href="glib-Basic-Types.html#gchar">gchar</a> *prefix,
+                                             <a href="glib-Basic-Types.html#gchar">gchar</a> **new_prefix);</pre>
+<p>
+Attempts to complete the string <em class="parameter"><code>prefix</code></em> using the <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a> target items.
+In contrast to <a href="glib-Automatic-String-Completion.html#g-completion-complete"><code class="function">g_completion_complete()</code></a>, this function returns the largest common
+prefix that is a valid UTF-8 string, omitting a possible common partial 
+character.
+</p>
+<p>
+You should use this function instead of <a href="glib-Automatic-String-Completion.html#g-completion-complete"><code class="function">g_completion_complete()</code></a> if your 
+items are UTF-8 strings.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>cmp</code></em>&#160;:</span></td>
+<td> the <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>prefix</code></em>&#160;:</span></td>
+<td> the prefix string, typically used by the user, which is compared
+   with each of the items
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>new_prefix</code></em>&#160;:</span></td>
+<td> if non-<code class="literal">NULL</code>, returns the longest prefix which is common to all
+   items that matched <em class="parameter"><code>prefix</code></em>, or <code class="literal">NULL</code> if no items matched <em class="parameter"><code>prefix</code></em>.
+   This string should be freed when no longer needed.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td> the list of items whose strings begin with <em class="parameter"><code>prefix</code></em>. This should
+not be changed.
+
+</td>
+</tr>
+</tbody>
+</table></div>
+<p>Since  2.4
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3025686"></a><h3>
+<a name="g-completion-set-compare"></a>g_completion_set_compare ()</h3>
+<a class="indexterm" name="id3025700"></a><pre class="programlisting">void        g_completion_set_compare        (<a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a> *cmp,
+                                             <a href="glib-Automatic-String-Completion.html#GCompletionStrncmpFunc">GCompletionStrncmpFunc</a> strncmp_func);</pre>
+<p>
+Sets the function to use for string comparisons. The default
+string comparison function is <code class="function">strncmp()</code>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>cmp</code></em>&#160;:</span></td>
+<td>a <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a>.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>strncmp_func</code></em>&#160;:</span></td>
+<td>the string comparison function.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3025789"></a><h3>
+<a name="GCompletionStrncmpFunc"></a>GCompletionStrncmpFunc ()</h3>
+<a class="indexterm" name="id3025802"></a><pre class="programlisting"><a href="glib-Basic-Types.html#gint">gint</a>        (*GCompletionStrncmpFunc)       (const <a href="glib-Basic-Types.html#gchar">gchar</a> *s1,
+                                             const <a href="glib-Basic-Types.html#gchar">gchar</a> *s2,
+                                             <a href="glib-Basic-Types.html#gsize">gsize</a> n);</pre>
+<p>
+Specifies the type of the function passed to <a href="glib-Automatic-String-Completion.html#g-completion-set-compare"><code class="function">g_completion_set_compare()</code></a>.
+This is used when you use strings as <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a> items.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>s1</code></em>&#160;:</span></td>
+<td>string to compare with <em class="parameter"><code>s2</code></em>.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>s2</code></em>&#160;:</span></td>
+<td>string to compare with <em class="parameter"><code>s1</code></em>.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>n</code></em>&#160;:</span></td>
+<td>maximal number of bytes to compare.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>an integer less than, equal to, or greater than zero if the 
+first <em class="parameter"><code>n</code></em> bytes of <em class="parameter"><code>s1</code></em> is found, respectively, to be less than, to match, 
+or to be greater than the first <em class="parameter"><code>n</code></em> bytes of <em class="parameter"><code>s2</code></em>.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id3025959"></a><h3>
+<a name="g-completion-free"></a>g_completion_free ()</h3>
+<a class="indexterm" name="id3025972"></a><pre class="programlisting">void        g_completion_free               (<a href="glib-Automatic-String-Completion.html#GCompletion">GCompletion</a> *cmp);</pre>
+<p>
+Frees all memory used by the <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td>
+<span class="term"><em class="parameter"><code>cmp</code></em>&#160;:</span></td>
+<td>the <a href="glib-Automatic-String-Completion.html#GCompletion"><span class="type">GCompletion</span></a>.
+
+
+</td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+</div>
+</body>
+</html>

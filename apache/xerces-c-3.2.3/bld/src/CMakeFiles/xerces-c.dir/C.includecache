@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/rb/xerces-c-3.2.3/src/stricmp.c
+stricmp.h
+/home/rb/xerces-c-3.2.3/src/stricmp.h
+config.h
+/home/rb/xerces-c-3.2.3/src/config.h
+string.h
+-
+strings.h
+-
+
+/home/rb/xerces-c-3.2.3/src/stricmp.h
+
+/home/rb/xerces-c-3.2.3/src/strnicmp.c
+strnicmp.h
+/home/rb/xerces-c-3.2.3/src/strnicmp.h
+config.h
+/home/rb/xerces-c-3.2.3/src/config.h
+string.h
+-
+strings.h
+-
+
+/home/rb/xerces-c-3.2.3/src/strnicmp.h
+stddef.h
+-
+
+config.h
+cstdint
+-
+stdint.h
+-
+inttypes.h
+-
+

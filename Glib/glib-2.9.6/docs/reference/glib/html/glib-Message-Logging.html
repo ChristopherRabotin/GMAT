@@ -1,0 +1,968 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Message Logging</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.69.1">
+<link rel="start" href="index.html" title="GLib Reference Manual">
+<link rel="up" href="glib-core.html" title="GLib Core Application Support">
+<link rel="prev" href="glib-Warnings-and-Assertions.html" title="Message Output and Debugging Functions">
+<link rel="next" href="glib-utilities.html" title="GLib Utilities">
+<meta name="generator" content="GTK-Doc V1.4 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="glib.html" title="GLib Overview">
+<link rel="chapter" href="glib-fundamentals.html" title="GLib Fundamentals">
+<link rel="chapter" href="glib-core.html" title="GLib Core Application Support">
+<link rel="chapter" href="glib-utilities.html" title="GLib Utilities">
+<link rel="chapter" href="glib-data-types.html" title="GLib Data Types">
+<link rel="chapter" href="tools.html" title="GLib Tools">
+<link rel="index" href="ix01.html" title="Index">
+<link rel="index" href="ix02.html" title="Index of deprecated symbols">
+<link rel="index" href="ix03.html" title="Index of new symbols in 2.2">
+<link rel="index" href="ix04.html" title="Index of new symbols in 2.4">
+<link rel="index" href="ix05.html" title="Index of new symbols in 2.6">
+<link rel="index" href="ix06.html" title="Index of new symbols in 2.8">
+<link rel="index" href="ix07.html" title="Index of new symbols in 2.10">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="glib-Warnings-and-Assertions.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="glib-core.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">GLib Reference Manual</th>
+<td><a accesskey="n" href="glib-utilities.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#top_of_page" class="shortcut">Top</a>
+                  &#160;|&#160;
+                  <a href="#desc" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="glib-Message-Logging"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="top_of_page"></a>Message Logging</span></h2>
+<p>Message Logging &#8212; versatile support for logging messages with different levels of importance.</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;glib.h&gt;
+
+
+#define     <a href="glib-Message-Logging.html#G-LOG-DOMAIN:CAPS">G_LOG_DOMAIN</a>
+#define     <a href="glib-Message-Logging.html#G-LOG-FATAL-MASK:CAPS">G_LOG_FATAL_MASK</a>
+#define     <a href="glib-Message-Logging.html#G-LOG-LEVEL-USER-SHIFT:CAPS">G_LOG_LEVEL_USER_SHIFT</a>
+void        (<a href="glib-Message-Logging.html#GLogFunc">*GLogFunc</a>)                     (const <a href="glib-Basic-Types.html#gchar">gchar</a> *log_domain,
+                                             <a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> log_level,
+                                             const <a href="glib-Basic-Types.html#gchar">gchar</a> *message,
+                                             <a href="glib-Basic-Types.html#gpointer">gpointer</a> user_data);
+enum        <a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a>;
+
+void        <a href="glib-Message-Logging.html#g-log">g_log</a>                           (const <a href="glib-Basic-Types.html#gchar">gchar</a> *log_domain,
+                                             <a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> log_level,
+                                             const <a href="glib-Basic-Types.html#gchar">gchar</a> *format,
+                                             ...);
+void        <a href="glib-Message-Logging.html#g-logv">g_logv</a>                          (const <a href="glib-Basic-Types.html#gchar">gchar</a> *log_domain,
+                                             <a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> log_level,
+                                             const <a href="glib-Basic-Types.html#gchar">gchar</a> *format,
+                                             va_list args);
+#define     <a href="glib-Message-Logging.html#g-message">g_message</a>                       (...)
+#define     <a href="glib-Message-Logging.html#g-warning">g_warning</a>                       (...)
+#define     <a href="glib-Message-Logging.html#g-critical">g_critical</a>                      (...)
+#define     <a href="glib-Message-Logging.html#g-error">g_error</a>                         (...)
+#define     <a href="glib-Message-Logging.html#g-debug">g_debug</a>                         (...)
+
+<a href="glib-Basic-Types.html#guint">guint</a>       <a href="glib-Message-Logging.html#g-log-set-handler">g_log_set_handler</a>               (const <a href="glib-Basic-Types.html#gchar">gchar</a> *log_domain,
+                                             <a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> log_levels,
+                                             <a href="glib-Message-Logging.html#GLogFunc">GLogFunc</a> log_func,
+                                             <a href="glib-Basic-Types.html#gpointer">gpointer</a> user_data);
+void        <a href="glib-Message-Logging.html#g-log-remove-handler">g_log_remove_handler</a>            (const <a href="glib-Basic-Types.html#gchar">gchar</a> *log_domain,
+                                             <a href="glib-Basic-Types.html#guint">guint</a> handler_id);
+<a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> <a href="glib-Message-Logging.html#g-log-set-always-fatal">g_log_set_always_fatal</a>       (<a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> fatal_mask);
+<a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> <a href="glib-Message-Logging.html#g-log-set-fatal-mask">g_log_set_fatal_mask</a>         (const <a href="glib-Basic-Types.html#gchar">gchar</a> *log_domain,
+                                             <a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> fatal_mask);
+void        <a href="glib-Message-Logging.html#g-log-default-handler">g_log_default_handler</a>           (const <a href="glib-Basic-Types.html#gchar">gchar</a> *log_domain,
+                                             <a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> log_level,
+                                             const <a href="glib-Basic-Types.html#gchar">gchar</a> *message,
+                                             <a href="glib-Basic-Types.html#gpointer">gpointer</a> unused_data);
+<a href="glib-Message-Logging.html#GLogFunc">GLogFunc</a>    <a href="glib-Message-Logging.html#g-log-set-default-handler">g_log_set_default_handler</a>       (<a href="glib-Message-Logging.html#GLogFunc">GLogFunc</a> log_func,
+                                             <a href="glib-Basic-Types.html#gpointer">gpointer</a> user_data);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="desc"></a><h2>Description</h2>
+<p>
+These functions provide support for logging error messages or messages 
+used for debugging. 
+</p>
+<p>
+There are several built-in levels of messages, defined in <a href="glib-Message-Logging.html#GLogLevelFlags"><span class="type">GLogLevelFlags</span></a>.
+These can be extended with user-defined levels.
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="id2911683"></a><h3>
+<a name="G-LOG-DOMAIN:CAPS"></a>G_LOG_DOMAIN</h3>
+<a class="indexterm" name="id2911695"></a><pre class="programlisting">#define G_LOG_DOMAIN    ((gchar*) 0)
+</pre>
+<p>
+Defines the log domain.
+For applications, this is typically left as the default <code class="literal">NULL</code> (or "") domain.
+Libraries should define this so that any messages which they log can
+be differentiated from messages from other libraries and application code.
+But be careful not to define it in any public header files.
+</p>
+<p>
+For example, GTK+ uses this in its Makefile.am:
+</p>
+<div class="informalexample"><pre class="programlisting">
+INCLUDES = -DG_LOG_DOMAIN=\"Gtk\"
+</pre></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2911733"></a><h3>
+<a name="G-LOG-FATAL-MASK:CAPS"></a>G_LOG_FATAL_MASK</h3>
+<a class="indexterm" name="id2911746"></a><pre class="programlisting">#define G_LOG_FATAL_MASK        (G_LOG_FLAG_RECURSION | G_LOG_LEVEL_ERROR)
+</pre>
+<p>
+GLib log levels that are considered fatal by default.
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2911764"></a><h3>
+<a name="G-LOG-LEVEL-USER-SHIFT:CAPS"></a>G_LOG_LEVEL_USER_SHIFT</h3>
+<a class="indexterm" name="id2911776"></a><pre class="programlisting">#define G_LOG_LEVEL_USER_SHIFT  (8)
+</pre>
+<p>
+Log level shift offset for user defined log levels (0-7 are used by GLib).
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2911793"></a><h3>
+<a name="GLogFunc"></a>GLogFunc ()</h3>
+<a class="indexterm" name="id2911806"></a><pre class="programlisting">void        (*GLogFunc)                     (const <a href="glib-Basic-Types.html#gchar">gchar</a> *log_domain,
+                                             <a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> log_level,
+                                             const <a href="glib-Basic-Types.html#gchar">gchar</a> *message,
+                                             <a href="glib-Basic-Types.html#gpointer">gpointer</a> user_data);</pre>
+<p>
+Specifies the prototype of log handler functions.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>log_domain</code></em>&#160;:</span></td>
+<td>the log domain of the message.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>log_level</code></em>&#160;:</span></td>
+<td>the log level of the message (including the fatal and recursion
+flags).
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>message</code></em>&#160;:</span></td>
+<td>the message to process.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></td>
+<td>user data, set in <a href="glib-Message-Logging.html#g-log-set-handler"><code class="function">g_log_set_handler()</code></a>.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2911931"></a><h3>
+<a name="GLogLevelFlags"></a>enum GLogLevelFlags</h3>
+<a class="indexterm" name="id2911944"></a><pre class="programlisting">typedef enum
+{
+  /* log flags */
+  G_LOG_FLAG_RECURSION          = 1 &lt;&lt; 0,
+  G_LOG_FLAG_FATAL              = 1 &lt;&lt; 1,
+
+  /* GLib log levels */
+  G_LOG_LEVEL_ERROR             = 1 &lt;&lt; 2,       /* always fatal */
+  G_LOG_LEVEL_CRITICAL          = 1 &lt;&lt; 3,
+  G_LOG_LEVEL_WARNING           = 1 &lt;&lt; 4,
+  G_LOG_LEVEL_MESSAGE           = 1 &lt;&lt; 5,
+  G_LOG_LEVEL_INFO              = 1 &lt;&lt; 6,
+  G_LOG_LEVEL_DEBUG             = 1 &lt;&lt; 7,
+
+  G_LOG_LEVEL_MASK              = ~(G_LOG_FLAG_RECURSION | G_LOG_FLAG_FATAL)
+} GLogLevelFlags;
+</pre>
+<p>
+Flags specifying the level of log messages.
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2911973"></a><h3>
+<a name="g-log"></a>g_log ()</h3>
+<a class="indexterm" name="id2911986"></a><pre class="programlisting">void        g_log                           (const <a href="glib-Basic-Types.html#gchar">gchar</a> *log_domain,
+                                             <a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> log_level,
+                                             const <a href="glib-Basic-Types.html#gchar">gchar</a> *format,
+                                             ...);</pre>
+<p>
+Logs an error or debugging message.
+If the log level has been set as fatal, the <code class="function">abort()</code>
+function is called to terminate the program.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>log_domain</code></em>&#160;:</span></td>
+<td>the log domain, usually <a href="glib-Message-Logging.html#G-LOG-DOMAIN:CAPS"><span class="type">G_LOG_DOMAIN</span></a>.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>log_level</code></em>&#160;:</span></td>
+<td>the log level, either from <a href="glib-Message-Logging.html#GLogLevelFlags"><span class="type">GLogLevelFlags</span></a> or a user-defined level.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>format</code></em>&#160;:</span></td>
+<td>the message format. See the <code class="function">printf()</code>
+documentation.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>the parameters to insert into the format string.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2912132"></a><h3>
+<a name="g-logv"></a>g_logv ()</h3>
+<a class="indexterm" name="id2912145"></a><pre class="programlisting">void        g_logv                          (const <a href="glib-Basic-Types.html#gchar">gchar</a> *log_domain,
+                                             <a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> log_level,
+                                             const <a href="glib-Basic-Types.html#gchar">gchar</a> *format,
+                                             va_list args);</pre>
+<p>
+Logs an error or debugging message.
+If the log level has been set as fatal, the <code class="function">abort()</code>
+function is called to terminate the program.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>log_domain</code></em>&#160;:</span></td>
+<td>the log domain.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>log_level</code></em>&#160;:</span></td>
+<td>the log level.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>format</code></em>&#160;:</span></td>
+<td>the message format. See the <code class="function">printf()</code>
+documentation.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>args</code></em>&#160;:</span></td>
+<td>the parameters to insert into the format string.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2912280"></a><h3>
+<a name="g-message"></a>g_message()</h3>
+<a class="indexterm" name="id2912293"></a><pre class="programlisting">#define     g_message(...)</pre>
+<p>
+A convenience function/macro to log a normal message.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>format string, followed by parameters to insert into the format string (as with <code class="function">printf()</code>)
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2912444"></a><h3>
+<a name="g-warning"></a>g_warning()</h3>
+<a class="indexterm" name="id2912456"></a><pre class="programlisting">#define     g_warning(...)</pre>
+<p>
+A convenience function/macro to log a warning message.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>format string, followed by parameters to insert into the format string (as with <code class="function">printf()</code>)
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2912607"></a><h3>
+<a name="g-critical"></a>g_critical()</h3>
+<a class="indexterm" name="id2912619"></a><pre class="programlisting">#define     g_critical(...)</pre>
+<p>
+Logs a "critical warning" (<span class="type">G_LOG_LEVEL_CRITICAL</span>). It's more or less
+application-defined what constitutes a critical vs. a regular
+warning. You could call <a href="glib-Message-Logging.html#g-log-set-always-fatal"><code class="function">g_log_set_always_fatal()</code></a> to make critical
+warnings exit the program, then use <a href="glib-Message-Logging.html#g-critical"><code class="function">g_critical()</code></a> for fatal errors, for
+example.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>format string, followed by parameters to insert into the format string (as with <code class="function">printf()</code>)
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2912804"></a><h3>
+<a name="g-error"></a>g_error()</h3>
+<a class="indexterm" name="id2912817"></a><pre class="programlisting">#define     g_error(...)</pre>
+<p>
+A convenience function/macro to log an error message.
+Error messages are always fatal, resulting in a call to
+<code class="function">abort()</code> to terminate the application.
+This function will result in a core dump; don't use it for errors you
+expect. Using this function indicates a bug in your program, i.e. an
+assertion failure.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>the parameters to insert into the format string.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2912971"></a><h3>
+<a name="g-debug"></a>g_debug()</h3>
+<a class="indexterm" name="id2912986"></a><pre class="programlisting">#define     g_debug(...)</pre>
+<p>
+A convenience function/macro to log a debug message.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>format string, followed by parameters to insert into the format string (as with <code class="function">printf()</code>)
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>...</code></em>&#160;:</span></td>
+<td>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p>Since 2.6
+
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2913141"></a><h3>
+<a name="g-log-set-handler"></a>g_log_set_handler ()</h3>
+<a class="indexterm" name="id2913155"></a><pre class="programlisting"><a href="glib-Basic-Types.html#guint">guint</a>       g_log_set_handler               (const <a href="glib-Basic-Types.html#gchar">gchar</a> *log_domain,
+                                             <a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> log_levels,
+                                             <a href="glib-Message-Logging.html#GLogFunc">GLogFunc</a> log_func,
+                                             <a href="glib-Basic-Types.html#gpointer">gpointer</a> user_data);</pre>
+<p>
+Sets the log handler for a domain and a set of log levels.
+To handle fatal and recursive messages the <em class="parameter"><code>log_levels</code></em> parameter
+must be combined with the <span class="type">G_LOG_FLAG_FATAL</span> and <span class="type">G_LOG_FLAG_RECURSION</span> 
+bit flags.
+</p>
+<p>
+Note that since the <span class="type">G_LOG_LEVEL_ERROR</span> log level is always fatal, if 
+you want to set a handler for this log level you must combine it with 
+<span class="type">G_LOG_FLAG_FATAL</span>.
+</p>
+<div class="example">
+<a name="id2913260"></a><p class="title"><b>Example&#160;13.&#160;Adding a log handler for all warning messages in the default 
+(application) domain</b></p>
+<pre class="programlisting">
+  g_log_set_handler (NULL, G_LOG_LEVEL_WARNING | G_LOG_FLAG_FATAL
+                     | G_LOG_FLAG_RECURSION, my_log_handler, NULL);
+</pre>
+</div>
+<div class="example">
+<a name="id2913276"></a><p class="title"><b>Example&#160;14.&#160;Adding a log handler for all critical messages from GTK+</b></p>
+<pre class="programlisting">
+  g_log_set_handler ("Gtk", G_LOG_LEVEL_CRITICAL | G_LOG_FLAG_FATAL
+                     | G_LOG_FLAG_RECURSION, my_log_handler, NULL);
+</pre>
+</div>
+<div class="example">
+<a name="id2913291"></a><p class="title"><b>Example&#160;15.&#160;Adding a log handler for <span class="emphasis"><em>all</em></span> messages from 
+GLib</b></p>
+<pre class="programlisting">
+  g_log_set_handler ("GLib", G_LOG_LEVEL_MASK | G_LOG_FLAG_FATAL
+                     | G_LOG_FLAG_RECURSION, my_log_handler, NULL);
+</pre>
+</div>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>log_domain</code></em>&#160;:</span></td>
+<td>the log domain, or <code class="literal">NULL</code> for the default "" application domain.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>log_levels</code></em>&#160;:</span></td>
+<td>the log levels to apply the log handler for. To handle fatal
+and recursive messages as well, combine the log levels with the
+<span class="type">G_LOG_FLAG_FATAL</span> and <span class="type">G_LOG_FLAG_RECURSION</span> bit flags.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>log_func</code></em>&#160;:</span></td>
+<td>the log handler function.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></td>
+<td>data passed to the log handler.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>the id of the new handler.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2913406"></a><h3>
+<a name="g-log-remove-handler"></a>g_log_remove_handler ()</h3>
+<a class="indexterm" name="id2913420"></a><pre class="programlisting">void        g_log_remove_handler            (const <a href="glib-Basic-Types.html#gchar">gchar</a> *log_domain,
+                                             <a href="glib-Basic-Types.html#guint">guint</a> handler_id);</pre>
+<p>
+Removes the log handler.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>log_domain</code></em>&#160;:</span></td>
+<td>the log domain.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>handler_id</code></em>&#160;:</span></td>
+<td>the id of the handler, which was returned in <a href="glib-Message-Logging.html#g-log-set-handler"><code class="function">g_log_set_handler()</code></a>.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2913500"></a><h3>
+<a name="g-log-set-always-fatal"></a>g_log_set_always_fatal ()</h3>
+<a class="indexterm" name="id2913513"></a><pre class="programlisting"><a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> g_log_set_always_fatal       (<a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> fatal_mask);</pre>
+<p>
+Sets the message levels which are always fatal, in any log domain.
+When a message with any of these levels is logged the program terminates.
+You can only set the levels defined by GLib to be fatal.
+<code class="literal">G_LOG_LEVEL_ERROR</code> is always fatal.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>fatal_mask</code></em>&#160;:</span></td>
+<td>the mask containing bits set for each level of error which is
+to be fatal.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>the old fatal mask.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2913581"></a><h3>
+<a name="g-log-set-fatal-mask"></a>g_log_set_fatal_mask ()</h3>
+<a class="indexterm" name="id2913595"></a><pre class="programlisting"><a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> g_log_set_fatal_mask         (const <a href="glib-Basic-Types.html#gchar">gchar</a> *log_domain,
+                                             <a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> fatal_mask);</pre>
+<p>
+Sets the log levels which are fatal in the given domain.
+<code class="literal">G_LOG_LEVEL_ERROR</code> is always fatal.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>log_domain</code></em>&#160;:</span></td>
+<td>the log domain.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>fatal_mask</code></em>&#160;:</span></td>
+<td>the new fatal mask.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>the old fatal mask for the log domain.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2913682"></a><h3>
+<a name="g-log-default-handler"></a>g_log_default_handler ()</h3>
+<a class="indexterm" name="id2913695"></a><pre class="programlisting">void        g_log_default_handler           (const <a href="glib-Basic-Types.html#gchar">gchar</a> *log_domain,
+                                             <a href="glib-Message-Logging.html#GLogLevelFlags">GLogLevelFlags</a> log_level,
+                                             const <a href="glib-Basic-Types.html#gchar">gchar</a> *message,
+                                             <a href="glib-Basic-Types.html#gpointer">gpointer</a> unused_data);</pre>
+<p>
+The default log handler set up by GLib; <a href="glib-Message-Logging.html#g-log-set-default-handler"><code class="function">g_log_set_default_handler()</code></a> 
+allows to install an alternate default log handler.
+This is used if no log handler has been set for the particular log domain
+and log level combination. It outputs the message to stderr or stdout
+and if the log level is fatal it calls <code class="function">abort()</code>.
+</p>
+<p>
+stderr is used for levels <code class="literal">G_LOG_LEVEL_ERROR</code>, <code class="literal">G_LOG_LEVEL_CRITICAL</code>,
+<code class="literal">G_LOG_LEVEL_WARNING</code> and <code class="literal">G_LOG_LEVEL_MESSAGE</code>. stdout is used for the rest.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>log_domain</code></em>&#160;:</span></td>
+<td>the log domain of the message.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>log_level</code></em>&#160;:</span></td>
+<td>the level of the message.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>message</code></em>&#160;:</span></td>
+<td>the message.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>unused_data</code></em>&#160;:</span></td>
+<td>data passed from <a href="glib-Message-Logging.html#g-log"><code class="function">g_log()</code></a> which is unused.
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2913872"></a><h3>
+<a name="g-log-set-default-handler"></a>g_log_set_default_handler ()</h3>
+<a class="indexterm" name="id2913889"></a><pre class="programlisting"><a href="glib-Message-Logging.html#GLogFunc">GLogFunc</a>    g_log_set_default_handler       (<a href="glib-Message-Logging.html#GLogFunc">GLogFunc</a> log_func,
+                                             <a href="glib-Basic-Types.html#gpointer">gpointer</a> user_data);</pre>
+<p>
+Installs a default log handler which is used is used if no 
+log handler has been set for the particular log domain
+and log level combination. By default, GLib uses 
+<a href="glib-Message-Logging.html#g-log-default-handler"><code class="function">g_log_default_handler()</code></a> as default log handler.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>log_func</code></em>&#160;:</span></td>
+<td>the log handler function.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></td>
+<td>data passed to the log handler.
+</td>
+</tr>
+<tr>
+<td>
+<span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></td>
+<td>the previous default log handler
+</td>
+</tr>
+</tbody>
+</table></div>
+<p>Since 2.6
+
+
+</p>
+</div>
+</div>
+</div>
+</body>
+</html>

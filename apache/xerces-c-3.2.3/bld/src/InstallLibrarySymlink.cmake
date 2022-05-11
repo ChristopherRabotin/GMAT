@@ -1,0 +1,1 @@
+execute_process(COMMAND ln -sf "libxerces-c-3.2.so" "$ENV{DESTDIR}/usr/local/lib/libxerces-c.so")

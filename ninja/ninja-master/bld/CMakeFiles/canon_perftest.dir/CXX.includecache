@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/rb/ninja-master/src/canon_perftest.cc
+stdio.h
+-
+string.h
+-
+util.h
+/home/rb/ninja-master/src/util.h
+metrics.h
+/home/rb/ninja-master/src/metrics.h
+
+/home/rb/ninja-master/src/metrics.h
+string
+-
+vector
+-
+util.h
+/home/rb/ninja-master/src/util.h
+
+/home/rb/ninja-master/src/util.h
+win32port.h
+/home/rb/ninja-master/src/win32port.h
+stdint.h
+-
+stdarg.h
+-
+string
+-
+vector
+-
+
+/home/rb/ninja-master/src/win32port.h
+inttypes.h
+-
+

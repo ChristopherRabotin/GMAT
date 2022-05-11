@@ -1,0 +1,59 @@
+gpattern.lo: gpattern.c /usr/include/stdc-predef.h ../config.h \
+ /usr/include/string.h \
+ /usr/include/aarch64-linux-gnu/bits/libc-header-start.h \
+ /usr/include/features.h /usr/include/aarch64-linux-gnu/sys/cdefs.h \
+ /usr/include/aarch64-linux-gnu/bits/wordsize.h \
+ /usr/include/aarch64-linux-gnu/bits/long-double.h \
+ /usr/include/aarch64-linux-gnu/gnu/stubs.h \
+ /usr/include/aarch64-linux-gnu/gnu/stubs-lp64.h \
+ /usr/lib/gcc/aarch64-linux-gnu/10/include/stddef.h \
+ /usr/include/aarch64-linux-gnu/bits/types/locale_t.h \
+ /usr/include/aarch64-linux-gnu/bits/types/__locale_t.h \
+ /usr/include/strings.h gpattern.h ../glib/gtypes.h ../glibconfig.h \
+ ../glib/gmacros.h /usr/lib/gcc/aarch64-linux-gnu/10/include/limits.h \
+ /usr/lib/gcc/aarch64-linux-gnu/10/include/syslimits.h \
+ /usr/include/limits.h /usr/include/aarch64-linux-gnu/bits/posix1_lim.h \
+ /usr/include/aarch64-linux-gnu/bits/local_lim.h \
+ /usr/include/linux/limits.h \
+ /usr/include/aarch64-linux-gnu/bits/posix2_lim.h \
+ /usr/lib/gcc/aarch64-linux-gnu/10/include/float.h gmacros.h gmessages.h \
+ /usr/lib/gcc/aarch64-linux-gnu/10/include/stdarg.h gmem.h \
+ ../glib/gslice.h gunicode.h ../glib/gerror.h ../glib/gquark.h gutils.h \
+ galias.h galiasdef.c
+/usr/include/stdc-predef.h:
+../config.h:
+/usr/include/string.h:
+/usr/include/aarch64-linux-gnu/bits/libc-header-start.h:
+/usr/include/features.h:
+/usr/include/aarch64-linux-gnu/sys/cdefs.h:
+/usr/include/aarch64-linux-gnu/bits/wordsize.h:
+/usr/include/aarch64-linux-gnu/bits/long-double.h:
+/usr/include/aarch64-linux-gnu/gnu/stubs.h:
+/usr/include/aarch64-linux-gnu/gnu/stubs-lp64.h:
+/usr/lib/gcc/aarch64-linux-gnu/10/include/stddef.h:
+/usr/include/aarch64-linux-gnu/bits/types/locale_t.h:
+/usr/include/aarch64-linux-gnu/bits/types/__locale_t.h:
+/usr/include/strings.h:
+gpattern.h:
+../glib/gtypes.h:
+../glibconfig.h:
+../glib/gmacros.h:
+/usr/lib/gcc/aarch64-linux-gnu/10/include/limits.h:
+/usr/lib/gcc/aarch64-linux-gnu/10/include/syslimits.h:
+/usr/include/limits.h:
+/usr/include/aarch64-linux-gnu/bits/posix1_lim.h:
+/usr/include/aarch64-linux-gnu/bits/local_lim.h:
+/usr/include/linux/limits.h:
+/usr/include/aarch64-linux-gnu/bits/posix2_lim.h:
+/usr/lib/gcc/aarch64-linux-gnu/10/include/float.h:
+gmacros.h:
+gmessages.h:
+/usr/lib/gcc/aarch64-linux-gnu/10/include/stdarg.h:
+gmem.h:
+../glib/gslice.h:
+gunicode.h:
+../glib/gerror.h:
+../glib/gquark.h:
+gutils.h:
+galias.h:
+galiasdef.c:

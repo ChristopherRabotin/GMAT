@@ -1,0 +1,2433 @@
+The system is: Linux - 5.10.101-14962-gede4ccb2bf53 - aarch64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: /usr/bin/cc 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+
+The C compiler identification is GNU, found in "/home/rb/xerces-c-3.2.3/bld/CMakeFiles/3.18.4/CompilerIdC/a.out"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: /usr/bin/c++ 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+
+The CXX compiler identification is GNU, found in "/home/rb/xerces-c-3.2.3/bld/CMakeFiles/3.18.4/CompilerIdCXX/a.out"
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_c2759/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_c2759.dir/build.make CMakeFiles/cmTC_c2759.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o
+/usr/bin/cc   -v -o CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o -c /usr/share/cmake-3.18/Modules/CMakeCCompilerABI.c
+Using built-in specs.
+COLLECT_GCC=/usr/bin/cc
+Target: aarch64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Debian 10.2.1-6' --with-bugurl=file:///usr/share/doc/gcc-10/README.Bugs --enable-languages=c,ada,c++,go,d,fortran,objc,obj-c++,m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-10 --program-prefix=aarch64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-libquadmath --disable-libquadmath-support --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --enable-fix-cortex-a53-843419 --disable-werror --enable-checking=release --build=aarch64-linux-gnu --host=aarch64-linux-gnu --target=aarch64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-mutex
+Thread model: posix
+Supported LTO compression algorithms: zlib zstd
+gcc version 10.2.1 20210110 (Debian 10.2.1-6) 
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o' '-c' '-mlittle-endian' '-mabi=lp64'
+ /usr/lib/gcc/aarch64-linux-gnu/10/cc1 -quiet -v -imultiarch aarch64-linux-gnu /usr/share/cmake-3.18/Modules/CMakeCCompilerABI.c -quiet -dumpbase CMakeCCompilerABI.c -mlittle-endian -mabi=lp64 -auxbase-strip CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o -version -fasynchronous-unwind-tables -o /tmp/cckoi7p6.s
+GNU C17 (Debian 10.2.1-6) version 10.2.1 20210110 (aarch64-linux-gnu)
+	compiled by GNU C version 10.2.1 20210110, GMP version 6.2.1, MPFR version 4.1.0, MPC version 1.2.0, isl version isl-0.23-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "/usr/local/include/aarch64-linux-gnu"
+ignoring nonexistent directory "/usr/lib/gcc/aarch64-linux-gnu/10/include-fixed"
+ignoring nonexistent directory "/usr/lib/gcc/aarch64-linux-gnu/10/../../../../aarch64-linux-gnu/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/lib/gcc/aarch64-linux-gnu/10/include
+ /usr/local/include
+ /usr/include/aarch64-linux-gnu
+ /usr/include
+End of search list.
+GNU C17 (Debian 10.2.1-6) version 10.2.1 20210110 (aarch64-linux-gnu)
+	compiled by GNU C version 10.2.1 20210110, GMP version 6.2.1, MPFR version 4.1.0, MPC version 1.2.0, isl version isl-0.23-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+Compiler executable checksum: 09f7dee817ee0ac81dbfe2e711a5f862
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o' '-c' '-mlittle-endian' '-mabi=lp64'
+ as -v -EL -mabi=lp64 -o CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o /tmp/cckoi7p6.s
+GNU assembler version 2.35.2 (aarch64-linux-gnu) using BFD version (GNU Binutils for Debian) 2.35.2
+COMPILER_PATH=/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/
+LIBRARY_PATH=/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib/:/lib/aarch64-linux-gnu/:/lib/../lib/:/usr/lib/aarch64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o' '-c' '-mlittle-endian' '-mabi=lp64'
+Linking C executable cmTC_c2759
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c2759.dir/link.txt --verbose=1
+/usr/bin/cc  -v -rdynamic CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o -o cmTC_c2759 
+Using built-in specs.
+COLLECT_GCC=/usr/bin/cc
+COLLECT_LTO_WRAPPER=/usr/lib/gcc/aarch64-linux-gnu/10/lto-wrapper
+Target: aarch64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Debian 10.2.1-6' --with-bugurl=file:///usr/share/doc/gcc-10/README.Bugs --enable-languages=c,ada,c++,go,d,fortran,objc,obj-c++,m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-10 --program-prefix=aarch64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-libquadmath --disable-libquadmath-support --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --enable-fix-cortex-a53-843419 --disable-werror --enable-checking=release --build=aarch64-linux-gnu --host=aarch64-linux-gnu --target=aarch64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-mutex
+Thread model: posix
+Supported LTO compression algorithms: zlib zstd
+gcc version 10.2.1 20210110 (Debian 10.2.1-6) 
+COMPILER_PATH=/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/
+LIBRARY_PATH=/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib/:/lib/aarch64-linux-gnu/:/lib/../lib/:/usr/lib/aarch64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_c2759' '-mlittle-endian' '-mabi=lp64'
+ /usr/lib/gcc/aarch64-linux-gnu/10/collect2 -plugin /usr/lib/gcc/aarch64-linux-gnu/10/liblto_plugin.so -plugin-opt=/usr/lib/gcc/aarch64-linux-gnu/10/lto-wrapper -plugin-opt=-fresolution=/tmp/ccsWPwmu.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib/ld-linux-aarch64.so.1 -X -EL -maarch64linux --fix-cortex-a53-843419 -pie -o cmTC_c2759 /usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/Scrt1.o /usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/crti.o /usr/lib/gcc/aarch64-linux-gnu/10/crtbeginS.o -L/usr/lib/gcc/aarch64-linux-gnu/10 -L/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu -L/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib -L/lib/aarch64-linux-gnu -L/lib/../lib -L/usr/lib/aarch64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/aarch64-linux-gnu/10/../../.. CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/aarch64-linux-gnu/10/crtendS.o /usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/crtn.o
+COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_c2759' '-mlittle-endian' '-mabi=lp64'
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Parsed C implicit include dir info from above output: rv=done
+  found start of include info
+  found start of implicit include info
+    add: [/usr/lib/gcc/aarch64-linux-gnu/10/include]
+    add: [/usr/local/include]
+    add: [/usr/include/aarch64-linux-gnu]
+    add: [/usr/include]
+  end of search list found
+  collapse include dir [/usr/lib/gcc/aarch64-linux-gnu/10/include] ==> [/usr/lib/gcc/aarch64-linux-gnu/10/include]
+  collapse include dir [/usr/local/include] ==> [/usr/local/include]
+  collapse include dir [/usr/include/aarch64-linux-gnu] ==> [/usr/include/aarch64-linux-gnu]
+  collapse include dir [/usr/include] ==> [/usr/include]
+  implicit include dirs: [/usr/lib/gcc/aarch64-linux-gnu/10/include;/usr/local/include;/usr/include/aarch64-linux-gnu;/usr/include]
+
+
+Parsed C implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command(s):/usr/bin/gmake cmTC_c2759/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_c2759.dir/build.make CMakeFiles/cmTC_c2759.dir/build]
+  ignore line: [gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp']
+  ignore line: [Building C object CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o]
+  ignore line: [/usr/bin/cc   -v -o CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o -c /usr/share/cmake-3.18/Modules/CMakeCCompilerABI.c]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/cc]
+  ignore line: [Target: aarch64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Debian 10.2.1-6' --with-bugurl=file:///usr/share/doc/gcc-10/README.Bugs --enable-languages=c ada c++ go d fortran objc obj-c++ m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-10 --program-prefix=aarch64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-libquadmath --disable-libquadmath-support --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --enable-fix-cortex-a53-843419 --disable-werror --enable-checking=release --build=aarch64-linux-gnu --host=aarch64-linux-gnu --target=aarch64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-mutex]
+  ignore line: [Thread model: posix]
+  ignore line: [Supported LTO compression algorithms: zlib zstd]
+  ignore line: [gcc version 10.2.1 20210110 (Debian 10.2.1-6) ]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o' '-c' '-mlittle-endian' '-mabi=lp64']
+  ignore line: [ /usr/lib/gcc/aarch64-linux-gnu/10/cc1 -quiet -v -imultiarch aarch64-linux-gnu /usr/share/cmake-3.18/Modules/CMakeCCompilerABI.c -quiet -dumpbase CMakeCCompilerABI.c -mlittle-endian -mabi=lp64 -auxbase-strip CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o -version -fasynchronous-unwind-tables -o /tmp/cckoi7p6.s]
+  ignore line: [GNU C17 (Debian 10.2.1-6) version 10.2.1 20210110 (aarch64-linux-gnu)]
+  ignore line: [	compiled by GNU C version 10.2.1 20210110  GMP version 6.2.1  MPFR version 4.1.0  MPC version 1.2.0  isl version isl-0.23-GMP]
+  ignore line: []
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [ignoring nonexistent directory "/usr/local/include/aarch64-linux-gnu"]
+  ignore line: [ignoring nonexistent directory "/usr/lib/gcc/aarch64-linux-gnu/10/include-fixed"]
+  ignore line: [ignoring nonexistent directory "/usr/lib/gcc/aarch64-linux-gnu/10/../../../../aarch64-linux-gnu/include"]
+  ignore line: [#include "..." search starts here:]
+  ignore line: [#include <...> search starts here:]
+  ignore line: [ /usr/lib/gcc/aarch64-linux-gnu/10/include]
+  ignore line: [ /usr/local/include]
+  ignore line: [ /usr/include/aarch64-linux-gnu]
+  ignore line: [ /usr/include]
+  ignore line: [End of search list.]
+  ignore line: [GNU C17 (Debian 10.2.1-6) version 10.2.1 20210110 (aarch64-linux-gnu)]
+  ignore line: [	compiled by GNU C version 10.2.1 20210110  GMP version 6.2.1  MPFR version 4.1.0  MPC version 1.2.0  isl version isl-0.23-GMP]
+  ignore line: []
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [Compiler executable checksum: 09f7dee817ee0ac81dbfe2e711a5f862]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o' '-c' '-mlittle-endian' '-mabi=lp64']
+  ignore line: [ as -v -EL -mabi=lp64 -o CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o /tmp/cckoi7p6.s]
+  ignore line: [GNU assembler version 2.35.2 (aarch64-linux-gnu) using BFD version (GNU Binutils for Debian) 2.35.2]
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib/:/lib/aarch64-linux-gnu/:/lib/../lib/:/usr/lib/aarch64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o' '-c' '-mlittle-endian' '-mabi=lp64']
+  ignore line: [Linking C executable cmTC_c2759]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c2759.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/cc  -v -rdynamic CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o -o cmTC_c2759 ]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/cc]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/aarch64-linux-gnu/10/lto-wrapper]
+  ignore line: [Target: aarch64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Debian 10.2.1-6' --with-bugurl=file:///usr/share/doc/gcc-10/README.Bugs --enable-languages=c ada c++ go d fortran objc obj-c++ m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-10 --program-prefix=aarch64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-libquadmath --disable-libquadmath-support --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --enable-fix-cortex-a53-843419 --disable-werror --enable-checking=release --build=aarch64-linux-gnu --host=aarch64-linux-gnu --target=aarch64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-mutex]
+  ignore line: [Thread model: posix]
+  ignore line: [Supported LTO compression algorithms: zlib zstd]
+  ignore line: [gcc version 10.2.1 20210110 (Debian 10.2.1-6) ]
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib/:/lib/aarch64-linux-gnu/:/lib/../lib/:/usr/lib/aarch64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_c2759' '-mlittle-endian' '-mabi=lp64']
+  link line: [ /usr/lib/gcc/aarch64-linux-gnu/10/collect2 -plugin /usr/lib/gcc/aarch64-linux-gnu/10/liblto_plugin.so -plugin-opt=/usr/lib/gcc/aarch64-linux-gnu/10/lto-wrapper -plugin-opt=-fresolution=/tmp/ccsWPwmu.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib/ld-linux-aarch64.so.1 -X -EL -maarch64linux --fix-cortex-a53-843419 -pie -o cmTC_c2759 /usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/Scrt1.o /usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/crti.o /usr/lib/gcc/aarch64-linux-gnu/10/crtbeginS.o -L/usr/lib/gcc/aarch64-linux-gnu/10 -L/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu -L/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib -L/lib/aarch64-linux-gnu -L/lib/../lib -L/usr/lib/aarch64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/aarch64-linux-gnu/10/../../.. CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/aarch64-linux-gnu/10/crtendS.o /usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/crtn.o]
+    arg [/usr/lib/gcc/aarch64-linux-gnu/10/collect2] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [/usr/lib/gcc/aarch64-linux-gnu/10/liblto_plugin.so] ==> ignore
+    arg [-plugin-opt=/usr/lib/gcc/aarch64-linux-gnu/10/lto-wrapper] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/ccsWPwmu.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [--hash-style=gnu] ==> ignore
+    arg [--as-needed] ==> ignore
+    arg [-export-dynamic] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib/ld-linux-aarch64.so.1] ==> ignore
+    arg [-X] ==> ignore
+    arg [-EL] ==> ignore
+    arg [-maarch64linux] ==> ignore
+    arg [--fix-cortex-a53-843419] ==> ignore
+    arg [-pie] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTC_c2759] ==> ignore
+    arg [/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/Scrt1.o] ==> ignore
+    arg [/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/crti.o] ==> ignore
+    arg [/usr/lib/gcc/aarch64-linux-gnu/10/crtbeginS.o] ==> ignore
+    arg [-L/usr/lib/gcc/aarch64-linux-gnu/10] ==> dir [/usr/lib/gcc/aarch64-linux-gnu/10]
+    arg [-L/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu] ==> dir [/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu]
+    arg [-L/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib] ==> dir [/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib]
+    arg [-L/lib/aarch64-linux-gnu] ==> dir [/lib/aarch64-linux-gnu]
+    arg [-L/lib/../lib] ==> dir [/lib/../lib]
+    arg [-L/usr/lib/aarch64-linux-gnu] ==> dir [/usr/lib/aarch64-linux-gnu]
+    arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
+    arg [-L/usr/lib/gcc/aarch64-linux-gnu/10/../../..] ==> dir [/usr/lib/gcc/aarch64-linux-gnu/10/../../..]
+    arg [CMakeFiles/cmTC_c2759.dir/CMakeCCompilerABI.c.o] ==> ignore
+    arg [-lgcc] ==> lib [gcc]
+    arg [--push-state] ==> ignore
+    arg [--as-needed] ==> ignore
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [--pop-state] ==> ignore
+    arg [-lc] ==> lib [c]
+    arg [-lgcc] ==> lib [gcc]
+    arg [--push-state] ==> ignore
+    arg [--as-needed] ==> ignore
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [--pop-state] ==> ignore
+    arg [/usr/lib/gcc/aarch64-linux-gnu/10/crtendS.o] ==> ignore
+    arg [/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/crtn.o] ==> ignore
+  collapse library dir [/usr/lib/gcc/aarch64-linux-gnu/10] ==> [/usr/lib/gcc/aarch64-linux-gnu/10]
+  collapse library dir [/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu] ==> [/usr/lib/aarch64-linux-gnu]
+  collapse library dir [/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib] ==> [/usr/lib]
+  collapse library dir [/lib/aarch64-linux-gnu] ==> [/lib/aarch64-linux-gnu]
+  collapse library dir [/lib/../lib] ==> [/lib]
+  collapse library dir [/usr/lib/aarch64-linux-gnu] ==> [/usr/lib/aarch64-linux-gnu]
+  collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+  collapse library dir [/usr/lib/gcc/aarch64-linux-gnu/10/../../..] ==> [/usr/lib]
+  implicit libs: [gcc;gcc_s;c;gcc;gcc_s]
+  implicit dirs: [/usr/lib/gcc/aarch64-linux-gnu/10;/usr/lib/aarch64-linux-gnu;/usr/lib;/lib/aarch64-linux-gnu;/lib]
+  implicit fwks: []
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_1a31b/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_1a31b.dir/build.make CMakeFiles/cmTC_1a31b.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o
+/usr/bin/c++   -v -std=gnu++14 -o CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.18/Modules/CMakeCXXCompilerABI.cpp
+Using built-in specs.
+COLLECT_GCC=/usr/bin/c++
+Target: aarch64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Debian 10.2.1-6' --with-bugurl=file:///usr/share/doc/gcc-10/README.Bugs --enable-languages=c,ada,c++,go,d,fortran,objc,obj-c++,m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-10 --program-prefix=aarch64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-libquadmath --disable-libquadmath-support --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --enable-fix-cortex-a53-843419 --disable-werror --enable-checking=release --build=aarch64-linux-gnu --host=aarch64-linux-gnu --target=aarch64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-mutex
+Thread model: posix
+Supported LTO compression algorithms: zlib zstd
+gcc version 10.2.1 20210110 (Debian 10.2.1-6) 
+COLLECT_GCC_OPTIONS='-v' '-std=gnu++14' '-o' 'CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64'
+ /usr/lib/gcc/aarch64-linux-gnu/10/cc1plus -quiet -v -imultiarch aarch64-linux-gnu -D_GNU_SOURCE /usr/share/cmake-3.18/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpbase CMakeCXXCompilerABI.cpp -mlittle-endian -mabi=lp64 -auxbase-strip CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o -std=gnu++14 -version -fasynchronous-unwind-tables -o /tmp/ccEKdH60.s
+GNU C++14 (Debian 10.2.1-6) version 10.2.1 20210110 (aarch64-linux-gnu)
+	compiled by GNU C version 10.2.1 20210110, GMP version 6.2.1, MPFR version 4.1.0, MPC version 1.2.0, isl version isl-0.23-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring duplicate directory "/usr/include/aarch64-linux-gnu/c++/10"
+ignoring nonexistent directory "/usr/local/include/aarch64-linux-gnu"
+ignoring nonexistent directory "/usr/lib/gcc/aarch64-linux-gnu/10/include-fixed"
+ignoring nonexistent directory "/usr/lib/gcc/aarch64-linux-gnu/10/../../../../aarch64-linux-gnu/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/include/c++/10
+ /usr/include/aarch64-linux-gnu/c++/10
+ /usr/include/c++/10/backward
+ /usr/lib/gcc/aarch64-linux-gnu/10/include
+ /usr/local/include
+ /usr/include/aarch64-linux-gnu
+ /usr/include
+End of search list.
+GNU C++14 (Debian 10.2.1-6) version 10.2.1 20210110 (aarch64-linux-gnu)
+	compiled by GNU C version 10.2.1 20210110, GMP version 6.2.1, MPFR version 4.1.0, MPC version 1.2.0, isl version isl-0.23-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+Compiler executable checksum: 7ff9b3e77ba341f92c3fc11acba5d5f9
+COLLECT_GCC_OPTIONS='-v' '-std=gnu++14' '-o' 'CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64'
+ as -v -EL -mabi=lp64 -o CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o /tmp/ccEKdH60.s
+GNU assembler version 2.35.2 (aarch64-linux-gnu) using BFD version (GNU Binutils for Debian) 2.35.2
+COMPILER_PATH=/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/
+LIBRARY_PATH=/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib/:/lib/aarch64-linux-gnu/:/lib/../lib/:/usr/lib/aarch64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-std=gnu++14' '-o' 'CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64'
+Linking CXX executable cmTC_1a31b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1a31b.dir/link.txt --verbose=1
+/usr/bin/c++  -v -rdynamic CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_1a31b 
+Using built-in specs.
+COLLECT_GCC=/usr/bin/c++
+COLLECT_LTO_WRAPPER=/usr/lib/gcc/aarch64-linux-gnu/10/lto-wrapper
+Target: aarch64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Debian 10.2.1-6' --with-bugurl=file:///usr/share/doc/gcc-10/README.Bugs --enable-languages=c,ada,c++,go,d,fortran,objc,obj-c++,m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-10 --program-prefix=aarch64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-libquadmath --disable-libquadmath-support --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --enable-fix-cortex-a53-843419 --disable-werror --enable-checking=release --build=aarch64-linux-gnu --host=aarch64-linux-gnu --target=aarch64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-mutex
+Thread model: posix
+Supported LTO compression algorithms: zlib zstd
+gcc version 10.2.1 20210110 (Debian 10.2.1-6) 
+COMPILER_PATH=/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/
+LIBRARY_PATH=/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib/:/lib/aarch64-linux-gnu/:/lib/../lib/:/usr/lib/aarch64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_1a31b' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64'
+ /usr/lib/gcc/aarch64-linux-gnu/10/collect2 -plugin /usr/lib/gcc/aarch64-linux-gnu/10/liblto_plugin.so -plugin-opt=/usr/lib/gcc/aarch64-linux-gnu/10/lto-wrapper -plugin-opt=-fresolution=/tmp/ccZwPB6t.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib/ld-linux-aarch64.so.1 -X -EL -maarch64linux --fix-cortex-a53-843419 -pie -o cmTC_1a31b /usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/Scrt1.o /usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/crti.o /usr/lib/gcc/aarch64-linux-gnu/10/crtbeginS.o -L/usr/lib/gcc/aarch64-linux-gnu/10 -L/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu -L/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib -L/lib/aarch64-linux-gnu -L/lib/../lib -L/usr/lib/aarch64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/aarch64-linux-gnu/10/../../.. CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/aarch64-linux-gnu/10/crtendS.o /usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/crtn.o
+COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_1a31b' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64'
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Parsed CXX implicit include dir info from above output: rv=done
+  found start of include info
+  found start of implicit include info
+    add: [/usr/include/c++/10]
+    add: [/usr/include/aarch64-linux-gnu/c++/10]
+    add: [/usr/include/c++/10/backward]
+    add: [/usr/lib/gcc/aarch64-linux-gnu/10/include]
+    add: [/usr/local/include]
+    add: [/usr/include/aarch64-linux-gnu]
+    add: [/usr/include]
+  end of search list found
+  collapse include dir [/usr/include/c++/10] ==> [/usr/include/c++/10]
+  collapse include dir [/usr/include/aarch64-linux-gnu/c++/10] ==> [/usr/include/aarch64-linux-gnu/c++/10]
+  collapse include dir [/usr/include/c++/10/backward] ==> [/usr/include/c++/10/backward]
+  collapse include dir [/usr/lib/gcc/aarch64-linux-gnu/10/include] ==> [/usr/lib/gcc/aarch64-linux-gnu/10/include]
+  collapse include dir [/usr/local/include] ==> [/usr/local/include]
+  collapse include dir [/usr/include/aarch64-linux-gnu] ==> [/usr/include/aarch64-linux-gnu]
+  collapse include dir [/usr/include] ==> [/usr/include]
+  implicit include dirs: [/usr/include/c++/10;/usr/include/aarch64-linux-gnu/c++/10;/usr/include/c++/10/backward;/usr/lib/gcc/aarch64-linux-gnu/10/include;/usr/local/include;/usr/include/aarch64-linux-gnu;/usr/include]
+
+
+Parsed CXX implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command(s):/usr/bin/gmake cmTC_1a31b/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_1a31b.dir/build.make CMakeFiles/cmTC_1a31b.dir/build]
+  ignore line: [gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp']
+  ignore line: [Building CXX object CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o]
+  ignore line: [/usr/bin/c++   -v -std=gnu++14 -o CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.18/Modules/CMakeCXXCompilerABI.cpp]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/c++]
+  ignore line: [Target: aarch64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Debian 10.2.1-6' --with-bugurl=file:///usr/share/doc/gcc-10/README.Bugs --enable-languages=c ada c++ go d fortran objc obj-c++ m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-10 --program-prefix=aarch64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-libquadmath --disable-libquadmath-support --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --enable-fix-cortex-a53-843419 --disable-werror --enable-checking=release --build=aarch64-linux-gnu --host=aarch64-linux-gnu --target=aarch64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-mutex]
+  ignore line: [Thread model: posix]
+  ignore line: [Supported LTO compression algorithms: zlib zstd]
+  ignore line: [gcc version 10.2.1 20210110 (Debian 10.2.1-6) ]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-std=gnu++14' '-o' 'CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64']
+  ignore line: [ /usr/lib/gcc/aarch64-linux-gnu/10/cc1plus -quiet -v -imultiarch aarch64-linux-gnu -D_GNU_SOURCE /usr/share/cmake-3.18/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpbase CMakeCXXCompilerABI.cpp -mlittle-endian -mabi=lp64 -auxbase-strip CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o -std=gnu++14 -version -fasynchronous-unwind-tables -o /tmp/ccEKdH60.s]
+  ignore line: [GNU C++14 (Debian 10.2.1-6) version 10.2.1 20210110 (aarch64-linux-gnu)]
+  ignore line: [	compiled by GNU C version 10.2.1 20210110  GMP version 6.2.1  MPFR version 4.1.0  MPC version 1.2.0  isl version isl-0.23-GMP]
+  ignore line: []
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [ignoring duplicate directory "/usr/include/aarch64-linux-gnu/c++/10"]
+  ignore line: [ignoring nonexistent directory "/usr/local/include/aarch64-linux-gnu"]
+  ignore line: [ignoring nonexistent directory "/usr/lib/gcc/aarch64-linux-gnu/10/include-fixed"]
+  ignore line: [ignoring nonexistent directory "/usr/lib/gcc/aarch64-linux-gnu/10/../../../../aarch64-linux-gnu/include"]
+  ignore line: [#include "..." search starts here:]
+  ignore line: [#include <...> search starts here:]
+  ignore line: [ /usr/include/c++/10]
+  ignore line: [ /usr/include/aarch64-linux-gnu/c++/10]
+  ignore line: [ /usr/include/c++/10/backward]
+  ignore line: [ /usr/lib/gcc/aarch64-linux-gnu/10/include]
+  ignore line: [ /usr/local/include]
+  ignore line: [ /usr/include/aarch64-linux-gnu]
+  ignore line: [ /usr/include]
+  ignore line: [End of search list.]
+  ignore line: [GNU C++14 (Debian 10.2.1-6) version 10.2.1 20210110 (aarch64-linux-gnu)]
+  ignore line: [	compiled by GNU C version 10.2.1 20210110  GMP version 6.2.1  MPFR version 4.1.0  MPC version 1.2.0  isl version isl-0.23-GMP]
+  ignore line: []
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [Compiler executable checksum: 7ff9b3e77ba341f92c3fc11acba5d5f9]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-std=gnu++14' '-o' 'CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64']
+  ignore line: [ as -v -EL -mabi=lp64 -o CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o /tmp/ccEKdH60.s]
+  ignore line: [GNU assembler version 2.35.2 (aarch64-linux-gnu) using BFD version (GNU Binutils for Debian) 2.35.2]
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib/:/lib/aarch64-linux-gnu/:/lib/../lib/:/usr/lib/aarch64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-std=gnu++14' '-o' 'CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64']
+  ignore line: [Linking CXX executable cmTC_1a31b]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1a31b.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/c++  -v -rdynamic CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_1a31b ]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/c++]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/aarch64-linux-gnu/10/lto-wrapper]
+  ignore line: [Target: aarch64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Debian 10.2.1-6' --with-bugurl=file:///usr/share/doc/gcc-10/README.Bugs --enable-languages=c ada c++ go d fortran objc obj-c++ m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-10 --program-prefix=aarch64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-libquadmath --disable-libquadmath-support --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --enable-fix-cortex-a53-843419 --disable-werror --enable-checking=release --build=aarch64-linux-gnu --host=aarch64-linux-gnu --target=aarch64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-mutex]
+  ignore line: [Thread model: posix]
+  ignore line: [Supported LTO compression algorithms: zlib zstd]
+  ignore line: [gcc version 10.2.1 20210110 (Debian 10.2.1-6) ]
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/usr/lib/gcc/aarch64-linux-gnu/10/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib/:/lib/aarch64-linux-gnu/:/lib/../lib/:/usr/lib/aarch64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/aarch64-linux-gnu/10/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_1a31b' '-shared-libgcc' '-mlittle-endian' '-mabi=lp64']
+  link line: [ /usr/lib/gcc/aarch64-linux-gnu/10/collect2 -plugin /usr/lib/gcc/aarch64-linux-gnu/10/liblto_plugin.so -plugin-opt=/usr/lib/gcc/aarch64-linux-gnu/10/lto-wrapper -plugin-opt=-fresolution=/tmp/ccZwPB6t.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib/ld-linux-aarch64.so.1 -X -EL -maarch64linux --fix-cortex-a53-843419 -pie -o cmTC_1a31b /usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/Scrt1.o /usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/crti.o /usr/lib/gcc/aarch64-linux-gnu/10/crtbeginS.o -L/usr/lib/gcc/aarch64-linux-gnu/10 -L/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu -L/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib -L/lib/aarch64-linux-gnu -L/lib/../lib -L/usr/lib/aarch64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/aarch64-linux-gnu/10/../../.. CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/aarch64-linux-gnu/10/crtendS.o /usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/crtn.o]
+    arg [/usr/lib/gcc/aarch64-linux-gnu/10/collect2] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [/usr/lib/gcc/aarch64-linux-gnu/10/liblto_plugin.so] ==> ignore
+    arg [-plugin-opt=/usr/lib/gcc/aarch64-linux-gnu/10/lto-wrapper] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/ccZwPB6t.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [--hash-style=gnu] ==> ignore
+    arg [--as-needed] ==> ignore
+    arg [-export-dynamic] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib/ld-linux-aarch64.so.1] ==> ignore
+    arg [-X] ==> ignore
+    arg [-EL] ==> ignore
+    arg [-maarch64linux] ==> ignore
+    arg [--fix-cortex-a53-843419] ==> ignore
+    arg [-pie] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTC_1a31b] ==> ignore
+    arg [/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/Scrt1.o] ==> ignore
+    arg [/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/crti.o] ==> ignore
+    arg [/usr/lib/gcc/aarch64-linux-gnu/10/crtbeginS.o] ==> ignore
+    arg [-L/usr/lib/gcc/aarch64-linux-gnu/10] ==> dir [/usr/lib/gcc/aarch64-linux-gnu/10]
+    arg [-L/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu] ==> dir [/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu]
+    arg [-L/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib] ==> dir [/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib]
+    arg [-L/lib/aarch64-linux-gnu] ==> dir [/lib/aarch64-linux-gnu]
+    arg [-L/lib/../lib] ==> dir [/lib/../lib]
+    arg [-L/usr/lib/aarch64-linux-gnu] ==> dir [/usr/lib/aarch64-linux-gnu]
+    arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
+    arg [-L/usr/lib/gcc/aarch64-linux-gnu/10/../../..] ==> dir [/usr/lib/gcc/aarch64-linux-gnu/10/../../..]
+    arg [CMakeFiles/cmTC_1a31b.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+    arg [-lstdc++] ==> lib [stdc++]
+    arg [-lm] ==> lib [m]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lc] ==> lib [c]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [/usr/lib/gcc/aarch64-linux-gnu/10/crtendS.o] ==> ignore
+    arg [/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu/crtn.o] ==> ignore
+  collapse library dir [/usr/lib/gcc/aarch64-linux-gnu/10] ==> [/usr/lib/gcc/aarch64-linux-gnu/10]
+  collapse library dir [/usr/lib/gcc/aarch64-linux-gnu/10/../../../aarch64-linux-gnu] ==> [/usr/lib/aarch64-linux-gnu]
+  collapse library dir [/usr/lib/gcc/aarch64-linux-gnu/10/../../../../lib] ==> [/usr/lib]
+  collapse library dir [/lib/aarch64-linux-gnu] ==> [/lib/aarch64-linux-gnu]
+  collapse library dir [/lib/../lib] ==> [/lib]
+  collapse library dir [/usr/lib/aarch64-linux-gnu] ==> [/usr/lib/aarch64-linux-gnu]
+  collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+  collapse library dir [/usr/lib/gcc/aarch64-linux-gnu/10/../../..] ==> [/usr/lib]
+  implicit libs: [stdc++;m;gcc_s;gcc;c;gcc_s;gcc]
+  implicit dirs: [/usr/lib/gcc/aarch64-linux-gnu/10;/usr/lib/aarch64-linux-gnu;/usr/lib;/lib/aarch64-linux-gnu;/lib]
+  implicit fwks: []
+
+
+Performing C++ SOURCE FILE Test CXX_FLAG_Wall succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_4661d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_4661d.dir/build.make CMakeFiles/cmTC_4661d.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_4661d.dir/src.cxx.o
+/usr/bin/c++   -DCXX_FLAG_Wall   -Wall -std=gnu++14 -o CMakeFiles/cmTC_4661d.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_4661d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4661d.dir/link.txt --verbose=1
+/usr/bin/c++  -DCXX_FLAG_Wall -rdynamic CMakeFiles/cmTC_4661d.dir/src.cxx.o -o cmTC_4661d 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_FLAG_Wcast_align succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_76c4e/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_76c4e.dir/build.make CMakeFiles/cmTC_76c4e.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_76c4e.dir/src.cxx.o
+/usr/bin/c++   -Wall -DCXX_FLAG_Wcast_align   -Wcast-align -std=gnu++14 -o CMakeFiles/cmTC_76c4e.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_76c4e
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_76c4e.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -DCXX_FLAG_Wcast_align -rdynamic CMakeFiles/cmTC_76c4e.dir/src.cxx.o -o cmTC_76c4e 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_FLAG_Wcast_qual succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_cf6de/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_cf6de.dir/build.make CMakeFiles/cmTC_cf6de.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_cf6de.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -DCXX_FLAG_Wcast_qual   -Wcast-qual -std=gnu++14 -o CMakeFiles/cmTC_cf6de.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_cf6de
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cf6de.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -DCXX_FLAG_Wcast_qual -rdynamic CMakeFiles/cmTC_cf6de.dir/src.cxx.o -o cmTC_cf6de 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_FLAG_Wctor_dtor_privacy succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_f93e7/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_f93e7.dir/build.make CMakeFiles/cmTC_f93e7.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_f93e7.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -DCXX_FLAG_Wctor_dtor_privacy   -Wctor-dtor-privacy -std=gnu++14 -o CMakeFiles/cmTC_f93e7.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_f93e7
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f93e7.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -DCXX_FLAG_Wctor_dtor_privacy -rdynamic CMakeFiles/cmTC_f93e7.dir/src.cxx.o -o cmTC_f93e7 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_FLAG_Wextra succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_93f2d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_93f2d.dir/build.make CMakeFiles/cmTC_93f2d.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_93f2d.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -DCXX_FLAG_Wextra   -Wextra -std=gnu++14 -o CMakeFiles/cmTC_93f2d.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_93f2d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_93f2d.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -DCXX_FLAG_Wextra -rdynamic CMakeFiles/cmTC_93f2d.dir/src.cxx.o -o cmTC_93f2d 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_FLAG_Wformat_2 succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_5ac97/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_5ac97.dir/build.make CMakeFiles/cmTC_5ac97.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_5ac97.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -DCXX_FLAG_Wformat_2   -Wformat=2 -std=gnu++14 -o CMakeFiles/cmTC_5ac97.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_5ac97
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5ac97.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -DCXX_FLAG_Wformat_2 -rdynamic CMakeFiles/cmTC_5ac97.dir/src.cxx.o -o cmTC_5ac97 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_FLAG_Wmissing_declarations succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_4a0d4/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_4a0d4.dir/build.make CMakeFiles/cmTC_4a0d4.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_4a0d4.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -DCXX_FLAG_Wmissing_declarations   -Wmissing-declarations -std=gnu++14 -o CMakeFiles/cmTC_4a0d4.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_4a0d4
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4a0d4.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -DCXX_FLAG_Wmissing_declarations -rdynamic CMakeFiles/cmTC_4a0d4.dir/src.cxx.o -o cmTC_4a0d4 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_FLAG_Wno_long_long succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_27396/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_27396.dir/build.make CMakeFiles/cmTC_27396.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_27396.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -DCXX_FLAG_Wno_long_long   -Wno-long-long -std=gnu++14 -o CMakeFiles/cmTC_27396.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_27396
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_27396.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -DCXX_FLAG_Wno_long_long -rdynamic CMakeFiles/cmTC_27396.dir/src.cxx.o -o cmTC_27396 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_FLAG_Woverlength_strings succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_48c4e/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_48c4e.dir/build.make CMakeFiles/cmTC_48c4e.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_48c4e.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -DCXX_FLAG_Woverlength_strings   -Woverlength-strings -std=gnu++14 -o CMakeFiles/cmTC_48c4e.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_48c4e
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_48c4e.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -DCXX_FLAG_Woverlength_strings -rdynamic CMakeFiles/cmTC_48c4e.dir/src.cxx.o -o cmTC_48c4e 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_FLAG_Woverloaded_virtual succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_6f93d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_6f93d.dir/build.make CMakeFiles/cmTC_6f93d.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_6f93d.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -DCXX_FLAG_Woverloaded_virtual   -Woverloaded-virtual -std=gnu++14 -o CMakeFiles/cmTC_6f93d.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_6f93d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6f93d.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -DCXX_FLAG_Woverloaded_virtual -rdynamic CMakeFiles/cmTC_6f93d.dir/src.cxx.o -o cmTC_6f93d 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_FLAG_Wredundant_decls succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_30b60/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_30b60.dir/build.make CMakeFiles/cmTC_30b60.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_30b60.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -DCXX_FLAG_Wredundant_decls   -Wredundant-decls -std=gnu++14 -o CMakeFiles/cmTC_30b60.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_30b60
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_30b60.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -DCXX_FLAG_Wredundant_decls -rdynamic CMakeFiles/cmTC_30b60.dir/src.cxx.o -o cmTC_30b60 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_FLAG_Wreorder succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_fa412/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_fa412.dir/build.make CMakeFiles/cmTC_fa412.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_fa412.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -DCXX_FLAG_Wreorder   -Wreorder -std=gnu++14 -o CMakeFiles/cmTC_fa412.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_fa412
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fa412.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -DCXX_FLAG_Wreorder -rdynamic CMakeFiles/cmTC_fa412.dir/src.cxx.o -o cmTC_fa412 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_FLAG_Wswitch_default succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_bee27/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_bee27.dir/build.make CMakeFiles/cmTC_bee27.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_bee27.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -DCXX_FLAG_Wswitch_default   -Wswitch-default -std=gnu++14 -o CMakeFiles/cmTC_bee27.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_bee27
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bee27.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -DCXX_FLAG_Wswitch_default -rdynamic CMakeFiles/cmTC_bee27.dir/src.cxx.o -o cmTC_bee27 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_FLAG_Wunused_variable succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_19c51/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_19c51.dir/build.make CMakeFiles/cmTC_19c51.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_19c51.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -DCXX_FLAG_Wunused_variable   -Wunused-variable -std=gnu++14 -o CMakeFiles/cmTC_19c51.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_19c51
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_19c51.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -DCXX_FLAG_Wunused_variable -rdynamic CMakeFiles/cmTC_19c51.dir/src.cxx.o -o cmTC_19c51 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_FLAG_Wwrite_strings succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_e896e/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_e896e.dir/build.make CMakeFiles/cmTC_e896e.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_e896e.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -DCXX_FLAG_Wwrite_strings   -Wwrite-strings -std=gnu++14 -o CMakeFiles/cmTC_e896e.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_e896e
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e896e.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -DCXX_FLAG_Wwrite_strings -rdynamic CMakeFiles/cmTC_e896e.dir/src.cxx.o -o cmTC_e896e 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_FLAG_Wno_variadic_macros succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_6904d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_6904d.dir/build.make CMakeFiles/cmTC_6904d.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_6904d.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -DCXX_FLAG_Wno_variadic_macros   -Wno-variadic-macros -std=gnu++14 -o CMakeFiles/cmTC_6904d.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_6904d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6904d.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -DCXX_FLAG_Wno_variadic_macros -rdynamic CMakeFiles/cmTC_6904d.dir/src.cxx.o -o cmTC_6904d 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_FLAG_fstrict_aliasing succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_0025f/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_0025f.dir/build.make CMakeFiles/cmTC_0025f.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_0025f.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -DCXX_FLAG_fstrict_aliasing   -fstrict-aliasing -std=gnu++14 -o CMakeFiles/cmTC_0025f.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_0025f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0025f.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -DCXX_FLAG_fstrict_aliasing -rdynamic CMakeFiles/cmTC_0025f.dir/src.cxx.o -o cmTC_0025f 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Determining if the include file arpa/inet.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_6e059/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_6e059.dir/build.make CMakeFiles/cmTC_6e059.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_6e059.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_6e059.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_6e059
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6e059.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_6e059.dir/CheckIncludeFile.cxx.o -o cmTC_6e059 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file dlfcn.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_5673f/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_5673f.dir/build.make CMakeFiles/cmTC_5673f.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_5673f.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_5673f.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_5673f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5673f.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_5673f.dir/CheckIncludeFile.cxx.o -o cmTC_5673f 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file fcntl.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_fbab9/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_fbab9.dir/build.make CMakeFiles/cmTC_fbab9.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_fbab9.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_fbab9.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_fbab9
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fbab9.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_fbab9.dir/CheckIncludeFile.cxx.o -o cmTC_fbab9 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file float.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_601f5/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_601f5.dir/build.make CMakeFiles/cmTC_601f5.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_601f5.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_601f5.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_601f5
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_601f5.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_601f5.dir/CheckIncludeFile.cxx.o -o cmTC_601f5 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file langinfo.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_62d14/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_62d14.dir/build.make CMakeFiles/cmTC_62d14.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_62d14.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_62d14.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_62d14
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_62d14.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_62d14.dir/CheckIncludeFile.cxx.o -o cmTC_62d14 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file limits.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_24762/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_24762.dir/build.make CMakeFiles/cmTC_24762.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_24762.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_24762.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_24762
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_24762.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_24762.dir/CheckIncludeFile.cxx.o -o cmTC_24762 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file locale.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_406e7/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_406e7.dir/build.make CMakeFiles/cmTC_406e7.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_406e7.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_406e7.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_406e7
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_406e7.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_406e7.dir/CheckIncludeFile.cxx.o -o cmTC_406e7 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file memory.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_e15cf/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_e15cf.dir/build.make CMakeFiles/cmTC_e15cf.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_e15cf.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_e15cf.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_e15cf
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e15cf.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_e15cf.dir/CheckIncludeFile.cxx.o -o cmTC_e15cf 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file netdb.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_0db76/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_0db76.dir/build.make CMakeFiles/cmTC_0db76.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_0db76.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_0db76.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_0db76
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0db76.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_0db76.dir/CheckIncludeFile.cxx.o -o cmTC_0db76 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file netinet/in.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_71bed/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_71bed.dir/build.make CMakeFiles/cmTC_71bed.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_71bed.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_71bed.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_71bed
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_71bed.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_71bed.dir/CheckIncludeFile.cxx.o -o cmTC_71bed 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file nl_types.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_17172/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_17172.dir/build.make CMakeFiles/cmTC_17172.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_17172.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_17172.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_17172
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_17172.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_17172.dir/CheckIncludeFile.cxx.o -o cmTC_17172 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file stdbool.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_3f8b2/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_3f8b2.dir/build.make CMakeFiles/cmTC_3f8b2.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_3f8b2.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_3f8b2.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_3f8b2
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3f8b2.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_3f8b2.dir/CheckIncludeFile.cxx.o -o cmTC_3f8b2 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file stddef.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_07d75/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_07d75.dir/build.make CMakeFiles/cmTC_07d75.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_07d75.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_07d75.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_07d75
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_07d75.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_07d75.dir/CheckIncludeFile.cxx.o -o cmTC_07d75 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file stdlib.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_84de7/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_84de7.dir/build.make CMakeFiles/cmTC_84de7.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_84de7.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_84de7.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_84de7
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_84de7.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_84de7.dir/CheckIncludeFile.cxx.o -o cmTC_84de7 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file string.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_5544d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_5544d.dir/build.make CMakeFiles/cmTC_5544d.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_5544d.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_5544d.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_5544d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5544d.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_5544d.dir/CheckIncludeFile.cxx.o -o cmTC_5544d 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file strings.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_b9f3d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_b9f3d.dir/build.make CMakeFiles/cmTC_b9f3d.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_b9f3d.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_b9f3d.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_b9f3d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b9f3d.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_b9f3d.dir/CheckIncludeFile.cxx.o -o cmTC_b9f3d 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file sys/param.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_6717d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_6717d.dir/build.make CMakeFiles/cmTC_6717d.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_6717d.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_6717d.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_6717d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6717d.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_6717d.dir/CheckIncludeFile.cxx.o -o cmTC_6717d 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file sys/socket.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_8c45c/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_8c45c.dir/build.make CMakeFiles/cmTC_8c45c.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_8c45c.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_8c45c.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_8c45c
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8c45c.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_8c45c.dir/CheckIncludeFile.cxx.o -o cmTC_8c45c 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file sys/stat.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_59011/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_59011.dir/build.make CMakeFiles/cmTC_59011.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_59011.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_59011.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_59011
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_59011.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_59011.dir/CheckIncludeFile.cxx.o -o cmTC_59011 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file sys/time.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_20e1a/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_20e1a.dir/build.make CMakeFiles/cmTC_20e1a.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_20e1a.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_20e1a.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_20e1a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_20e1a.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_20e1a.dir/CheckIncludeFile.cxx.o -o cmTC_20e1a 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file sys/timeb.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_e60fc/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_e60fc.dir/build.make CMakeFiles/cmTC_e60fc.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_e60fc.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_e60fc.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_e60fc
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e60fc.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_e60fc.dir/CheckIncludeFile.cxx.o -o cmTC_e60fc 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file sys/types.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_d0f2c/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_d0f2c.dir/build.make CMakeFiles/cmTC_d0f2c.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_d0f2c.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_d0f2c.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_d0f2c
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d0f2c.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_d0f2c.dir/CheckIncludeFile.cxx.o -o cmTC_d0f2c 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file unistd.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_85d07/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_85d07.dir/build.make CMakeFiles/cmTC_85d07.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_85d07.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_85d07.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_85d07
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_85d07.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_85d07.dir/CheckIncludeFile.cxx.o -o cmTC_85d07 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file wchar.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_a36b8/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_a36b8.dir/build.make CMakeFiles/cmTC_a36b8.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_a36b8.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_a36b8.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_a36b8
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a36b8.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_a36b8.dir/CheckIncludeFile.cxx.o -o cmTC_a36b8 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file wctype.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_7f479/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_7f479.dir/build.make CMakeFiles/cmTC_7f479.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_7f479.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_7f479.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_7f479
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7f479.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_7f479.dir/CheckIncludeFile.cxx.o -o cmTC_7f479 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file endian.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_cb2f8/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_cb2f8.dir/build.make CMakeFiles/cmTC_cb2f8.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_cb2f8.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_cb2f8.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_cb2f8
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cb2f8.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_cb2f8.dir/CheckIncludeFile.cxx.o -o cmTC_cb2f8 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file arpa/nameser_compat.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_7f502/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_7f502.dir/build.make CMakeFiles/cmTC_7f502.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_7f502.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_7f502.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_7f502
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7f502.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_7f502.dir/CheckIncludeFile.cxx.o -o cmTC_7f502 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function getcwd exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_7cc14/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_7cc14.dir/build.make CMakeFiles/cmTC_7cc14.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_7cc14.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=getcwd -o CMakeFiles/cmTC_7cc14.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_7cc14
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7cc14.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=getcwd -rdynamic CMakeFiles/cmTC_7cc14.dir/CheckFunctionExists.c.o -o cmTC_7cc14 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function pathconf exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_7b6fb/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_7b6fb.dir/build.make CMakeFiles/cmTC_7b6fb.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_7b6fb.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pathconf -o CMakeFiles/cmTC_7b6fb.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_7b6fb
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7b6fb.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pathconf -rdynamic CMakeFiles/cmTC_7b6fb.dir/CheckFunctionExists.c.o -o cmTC_7b6fb 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function realpath exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_ce841/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_ce841.dir/build.make CMakeFiles/cmTC_ce841.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ce841.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=realpath -o CMakeFiles/cmTC_ce841.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_ce841
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ce841.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=realpath -rdynamic CMakeFiles/cmTC_ce841.dir/CheckFunctionExists.c.o -o cmTC_ce841 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function getaddrinfo exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_99c27/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_99c27.dir/build.make CMakeFiles/cmTC_99c27.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_99c27.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=getaddrinfo -o CMakeFiles/cmTC_99c27.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_99c27
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_99c27.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=getaddrinfo -rdynamic CMakeFiles/cmTC_99c27.dir/CheckFunctionExists.c.o -o cmTC_99c27 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function gethostbyaddr exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_1f5eb/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_1f5eb.dir/build.make CMakeFiles/cmTC_1f5eb.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1f5eb.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=gethostbyaddr -o CMakeFiles/cmTC_1f5eb.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_1f5eb
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1f5eb.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=gethostbyaddr -rdynamic CMakeFiles/cmTC_1f5eb.dir/CheckFunctionExists.c.o -o cmTC_1f5eb 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function gethostbyname exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_ea34f/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_ea34f.dir/build.make CMakeFiles/cmTC_ea34f.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ea34f.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=gethostbyname -o CMakeFiles/cmTC_ea34f.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_ea34f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ea34f.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=gethostbyname -rdynamic CMakeFiles/cmTC_ea34f.dir/CheckFunctionExists.c.o -o cmTC_ea34f 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function socket exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_bf314/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_bf314.dir/build.make CMakeFiles/cmTC_bf314.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_bf314.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=socket -o CMakeFiles/cmTC_bf314.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_bf314
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bf314.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=socket -rdynamic CMakeFiles/cmTC_bf314.dir/CheckFunctionExists.c.o -o cmTC_bf314 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function clock_gettime exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_bf3e6/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_bf3e6.dir/build.make CMakeFiles/cmTC_bf3e6.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_bf3e6.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=clock_gettime -o CMakeFiles/cmTC_bf3e6.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_bf3e6
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bf3e6.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=clock_gettime -rdynamic CMakeFiles/cmTC_bf3e6.dir/CheckFunctionExists.c.o -o cmTC_bf3e6 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function ftime exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_4c663/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_4c663.dir/build.make CMakeFiles/cmTC_4c663.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_4c663.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=ftime -o CMakeFiles/cmTC_4c663.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_4c663
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4c663.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=ftime -rdynamic CMakeFiles/cmTC_4c663.dir/CheckFunctionExists.c.o -o cmTC_4c663 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function gettimeofday exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_c4042/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_c4042.dir/build.make CMakeFiles/cmTC_c4042.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_c4042.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=gettimeofday -o CMakeFiles/cmTC_c4042.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_c4042
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c4042.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=gettimeofday -rdynamic CMakeFiles/cmTC_c4042.dir/CheckFunctionExists.c.o -o cmTC_c4042 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function gmtime_r exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_3daea/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_3daea.dir/build.make CMakeFiles/cmTC_3daea.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_3daea.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=gmtime_r -o CMakeFiles/cmTC_3daea.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_3daea
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3daea.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=gmtime_r -rdynamic CMakeFiles/cmTC_3daea.dir/CheckFunctionExists.c.o -o cmTC_3daea 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function memmove exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_f6cf4/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_f6cf4.dir/build.make CMakeFiles/cmTC_f6cf4.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_f6cf4.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=memmove -o CMakeFiles/cmTC_f6cf4.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function 'memmove'; expected 'void *(void *, const void *, long unsigned int)' [-Wbuiltin-declaration-mismatch]
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro 'CHECK_FUNCTION_EXISTS'
+    7 |   CHECK_FUNCTION_EXISTS(void);
+      |   ^~~~~~~~~~~~~~~~~~~~~
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:1:1: note: 'memmove' is declared in header '<string.h>'
+  +++ |+#include <string.h>
+    1 | #ifdef CHECK_FUNCTION_EXISTS
+Linking C executable cmTC_f6cf4
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f6cf4.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=memmove -rdynamic CMakeFiles/cmTC_f6cf4.dir/CheckFunctionExists.c.o -o cmTC_f6cf4 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function memset exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_7b24e/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_7b24e.dir/build.make CMakeFiles/cmTC_7b24e.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_7b24e.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=memset -o CMakeFiles/cmTC_7b24e.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function 'memset'; expected 'void *(void *, int,  long unsigned int)' [-Wbuiltin-declaration-mismatch]
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro 'CHECK_FUNCTION_EXISTS'
+    7 |   CHECK_FUNCTION_EXISTS(void);
+      |   ^~~~~~~~~~~~~~~~~~~~~
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:1:1: note: 'memset' is declared in header '<string.h>'
+  +++ |+#include <string.h>
+    1 | #ifdef CHECK_FUNCTION_EXISTS
+Linking C executable cmTC_7b24e
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7b24e.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=memset -rdynamic CMakeFiles/cmTC_7b24e.dir/CheckFunctionExists.c.o -o cmTC_7b24e 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function nl_langinfo exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_67cb5/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_67cb5.dir/build.make CMakeFiles/cmTC_67cb5.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_67cb5.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=nl_langinfo -o CMakeFiles/cmTC_67cb5.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_67cb5
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_67cb5.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=nl_langinfo -rdynamic CMakeFiles/cmTC_67cb5.dir/CheckFunctionExists.c.o -o cmTC_67cb5 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function setlocale exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_c6245/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_c6245.dir/build.make CMakeFiles/cmTC_c6245.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_c6245.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=setlocale -o CMakeFiles/cmTC_c6245.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_c6245
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c6245.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=setlocale -rdynamic CMakeFiles/cmTC_c6245.dir/CheckFunctionExists.c.o -o cmTC_c6245 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function localeconv exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_74316/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_74316.dir/build.make CMakeFiles/cmTC_74316.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_74316.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=localeconv -o CMakeFiles/cmTC_74316.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_74316
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_74316.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=localeconv -rdynamic CMakeFiles/cmTC_74316.dir/CheckFunctionExists.c.o -o cmTC_74316 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function snprintf exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_a142b/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_a142b.dir/build.make CMakeFiles/cmTC_a142b.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_a142b.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=snprintf -o CMakeFiles/cmTC_a142b.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function 'snprintf'; expected 'int(char *, long unsigned int,  const char *, ...)' [-Wbuiltin-declaration-mismatch]
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro 'CHECK_FUNCTION_EXISTS'
+    7 |   CHECK_FUNCTION_EXISTS(void);
+      |   ^~~~~~~~~~~~~~~~~~~~~
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:1:1: note: 'snprintf' is declared in header '<stdio.h>'
+  +++ |+#include <stdio.h>
+    1 | #ifdef CHECK_FUNCTION_EXISTS
+Linking C executable cmTC_a142b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a142b.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=snprintf -rdynamic CMakeFiles/cmTC_a142b.dir/CheckFunctionExists.c.o -o cmTC_a142b 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function strcasecmp exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_e9ca3/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_e9ca3.dir/build.make CMakeFiles/cmTC_e9ca3.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_e9ca3.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=strcasecmp -o CMakeFiles/cmTC_e9ca3.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function 'strcasecmp'; expected 'int(const char *, const char *)' [-Wbuiltin-declaration-mismatch]
+<command-line>: note: in definition of macro 'CHECK_FUNCTION_EXISTS'
+Linking C executable cmTC_e9ca3
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e9ca3.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=strcasecmp -rdynamic CMakeFiles/cmTC_e9ca3.dir/CheckFunctionExists.c.o -o cmTC_e9ca3 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function strncasecmp exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_3821b/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_3821b.dir/build.make CMakeFiles/cmTC_3821b.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_3821b.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=strncasecmp -o CMakeFiles/cmTC_3821b.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function 'strncasecmp'; expected 'int(const char *, const char *, long unsigned int)' [-Wbuiltin-declaration-mismatch]
+<command-line>: note: in definition of macro 'CHECK_FUNCTION_EXISTS'
+Linking C executable cmTC_3821b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3821b.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=strncasecmp -rdynamic CMakeFiles/cmTC_3821b.dir/CheckFunctionExists.c.o -o cmTC_3821b 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function strchr exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_8af54/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_8af54.dir/build.make CMakeFiles/cmTC_8af54.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_8af54.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=strchr -o CMakeFiles/cmTC_8af54.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function 'strchr'; expected 'char *(const char *, int)' [-Wbuiltin-declaration-mismatch]
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro 'CHECK_FUNCTION_EXISTS'
+    7 |   CHECK_FUNCTION_EXISTS(void);
+      |   ^~~~~~~~~~~~~~~~~~~~~
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:1:1: note: 'strchr' is declared in header '<string.h>'
+  +++ |+#include <string.h>
+    1 | #ifdef CHECK_FUNCTION_EXISTS
+Linking C executable cmTC_8af54
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8af54.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=strchr -rdynamic CMakeFiles/cmTC_8af54.dir/CheckFunctionExists.c.o -o cmTC_8af54 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function strdup exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_b5419/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_b5419.dir/build.make CMakeFiles/cmTC_b5419.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_b5419.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=strdup -o CMakeFiles/cmTC_b5419.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function 'strdup'; expected 'char *(const char *)' [-Wbuiltin-declaration-mismatch]
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro 'CHECK_FUNCTION_EXISTS'
+    7 |   CHECK_FUNCTION_EXISTS(void);
+      |   ^~~~~~~~~~~~~~~~~~~~~
+Linking C executable cmTC_b5419
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b5419.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=strdup -rdynamic CMakeFiles/cmTC_b5419.dir/CheckFunctionExists.c.o -o cmTC_b5419 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function strrchr exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_b068d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_b068d.dir/build.make CMakeFiles/cmTC_b068d.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_b068d.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=strrchr -o CMakeFiles/cmTC_b068d.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function 'strrchr'; expected 'char *(const char *, int)' [-Wbuiltin-declaration-mismatch]
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro 'CHECK_FUNCTION_EXISTS'
+    7 |   CHECK_FUNCTION_EXISTS(void);
+      |   ^~~~~~~~~~~~~~~~~~~~~
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:1:1: note: 'strrchr' is declared in header '<string.h>'
+  +++ |+#include <string.h>
+    1 | #ifdef CHECK_FUNCTION_EXISTS
+Linking C executable cmTC_b068d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b068d.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=strrchr -rdynamic CMakeFiles/cmTC_b068d.dir/CheckFunctionExists.c.o -o cmTC_b068d 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function strstr exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_87892/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_87892.dir/build.make CMakeFiles/cmTC_87892.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_87892.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=strstr -o CMakeFiles/cmTC_87892.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function 'strstr'; expected 'char *(const char *, const char *)' [-Wbuiltin-declaration-mismatch]
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro 'CHECK_FUNCTION_EXISTS'
+    7 |   CHECK_FUNCTION_EXISTS(void);
+      |   ^~~~~~~~~~~~~~~~~~~~~
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:1:1: note: 'strstr' is declared in header '<string.h>'
+  +++ |+#include <string.h>
+    1 | #ifdef CHECK_FUNCTION_EXISTS
+Linking C executable cmTC_87892
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_87892.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=strstr -rdynamic CMakeFiles/cmTC_87892.dir/CheckFunctionExists.c.o -o cmTC_87892 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function strtol exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_d481b/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_d481b.dir/build.make CMakeFiles/cmTC_d481b.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_d481b.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=strtol -o CMakeFiles/cmTC_d481b.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_d481b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d481b.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=strtol -rdynamic CMakeFiles/cmTC_d481b.dir/CheckFunctionExists.c.o -o cmTC_d481b 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function strtoul exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_1d67e/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_1d67e.dir/build.make CMakeFiles/cmTC_1d67e.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1d67e.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=strtoul -o CMakeFiles/cmTC_1d67e.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_1d67e
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1d67e.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=strtoul -rdynamic CMakeFiles/cmTC_1d67e.dir/CheckFunctionExists.c.o -o cmTC_1d67e 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function timegm exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_fb863/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_fb863.dir/build.make CMakeFiles/cmTC_fb863.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_fb863.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=timegm -o CMakeFiles/cmTC_fb863.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_fb863
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fb863.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=timegm -rdynamic CMakeFiles/cmTC_fb863.dir/CheckFunctionExists.c.o -o cmTC_fb863 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function towupper exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_b0a9c/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_b0a9c.dir/build.make CMakeFiles/cmTC_b0a9c.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_b0a9c.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=towupper -o CMakeFiles/cmTC_b0a9c.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function 'towupper'; expected 'unsigned int(unsigned int)' [-Wbuiltin-declaration-mismatch]
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro 'CHECK_FUNCTION_EXISTS'
+    7 |   CHECK_FUNCTION_EXISTS(void);
+      |   ^~~~~~~~~~~~~~~~~~~~~
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:1:1: note: 'towupper' is declared in header '<wctype.h>'
+  +++ |+#include <wctype.h>
+    1 | #ifdef CHECK_FUNCTION_EXISTS
+Linking C executable cmTC_b0a9c
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b0a9c.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=towupper -rdynamic CMakeFiles/cmTC_b0a9c.dir/CheckFunctionExists.c.o -o cmTC_b0a9c 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function towlower exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_db8db/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_db8db.dir/build.make CMakeFiles/cmTC_db8db.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_db8db.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=towlower -o CMakeFiles/cmTC_db8db.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function 'towlower'; expected 'unsigned int(unsigned int)' [-Wbuiltin-declaration-mismatch]
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro 'CHECK_FUNCTION_EXISTS'
+    7 |   CHECK_FUNCTION_EXISTS(void);
+      |   ^~~~~~~~~~~~~~~~~~~~~
+/usr/share/cmake-3.18/Modules/CheckFunctionExists.c:1:1: note: 'towlower' is declared in header '<wctype.h>'
+  +++ |+#include <wctype.h>
+    1 | #ifdef CHECK_FUNCTION_EXISTS
+Linking C executable cmTC_db8db
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_db8db.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=towlower -rdynamic CMakeFiles/cmTC_db8db.dir/CheckFunctionExists.c.o -o cmTC_db8db 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function mblen exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_3d0d1/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_3d0d1.dir/build.make CMakeFiles/cmTC_3d0d1.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_3d0d1.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=mblen -o CMakeFiles/cmTC_3d0d1.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_3d0d1
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3d0d1.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=mblen -rdynamic CMakeFiles/cmTC_3d0d1.dir/CheckFunctionExists.c.o -o cmTC_3d0d1 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file cstdint exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_0d85e/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_0d85e.dir/build.make CMakeFiles/cmTC_0d85e.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_0d85e.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_0d85e.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_0d85e
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0d85e.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_0d85e.dir/CheckIncludeFile.cxx.o -o cmTC_0d85e 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Performing C++ SOURCE FILE Test CSTDINT_FUNCTIONAL succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_f6ac2/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_f6ac2.dir/build.make CMakeFiles/cmTC_f6ac2.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_f6ac2.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DCSTDINT_FUNCTIONAL -std=gnu++14 -o CMakeFiles/cmTC_f6ac2.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: In function 'int main()':
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:5:12: warning: unused variable 'v1' [-Wunused-variable]
+    5 |   uint32_t v1 = 342;
+      |            ^~
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:6:11: warning: unused variable 'v2' [-Wunused-variable]
+    6 |   int64_t v2 = -23;
+      |           ^~
+Linking CXX executable cmTC_f6ac2
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f6ac2.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DCSTDINT_FUNCTIONAL -rdynamic CMakeFiles/cmTC_f6ac2.dir/src.cxx.o -o cmTC_f6ac2 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+
+#include <cstdint>
+
+int main() {
+  uint32_t v1 = 342;
+  int64_t v2 = -23;
+  return 0;
+}
+Determining if the include file stdint.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_1140a/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_1140a.dir/build.make CMakeFiles/cmTC_1140a.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_1140a.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_1140a.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_1140a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1140a.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_1140a.dir/CheckIncludeFile.cxx.o -o cmTC_1140a 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file inttypes.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_7fa80/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_7fa80.dir/build.make CMakeFiles/cmTC_7fa80.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_7fa80.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_7fa80.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_7fa80
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7fa80.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_7fa80.dir/CheckIncludeFile.cxx.o -o cmTC_7fa80 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining size of off_t passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_cfea1/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_cfea1.dir/build.make CMakeFiles/cmTC_cfea1.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_cfea1.dir/SIZEOF_OFF_T.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_cfea1.dir/SIZEOF_OFF_T.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_OFF_T.c
+Linking C executable cmTC_cfea1
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cfea1.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_cfea1.dir/SIZEOF_OFF_T.c.o -o cmTC_cfea1 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining size of size_t passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_67655/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_67655.dir/build.make CMakeFiles/cmTC_67655.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_67655.dir/SIZEOF_SIZE_T.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_67655.dir/SIZEOF_SIZE_T.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_SIZE_T.c
+Linking C executable cmTC_67655
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_67655.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_67655.dir/SIZEOF_SIZE_T.c.o -o cmTC_67655 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining size of ssize_t passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_6267c/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_6267c.dir/build.make CMakeFiles/cmTC_6267c.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_6267c.dir/SIZEOF_SSIZE_T.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_6267c.dir/SIZEOF_SSIZE_T.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_SSIZE_T.c
+Linking C executable cmTC_6267c
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6267c.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_6267c.dir/SIZEOF_SSIZE_T.c.o -o cmTC_6267c 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining size of wchar_t passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_fa2b3/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_fa2b3.dir/build.make CMakeFiles/cmTC_fa2b3.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_fa2b3.dir/SIZEOF_WCHAR_T.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_fa2b3.dir/SIZEOF_WCHAR_T.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_WCHAR_T.c
+Linking C executable cmTC_fa2b3
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fa2b3.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_fa2b3.dir/SIZEOF_WCHAR_T.c.o -o cmTC_fa2b3 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining size of signed short passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_fb651/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_fb651.dir/build.make CMakeFiles/cmTC_fb651.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_fb651.dir/SIZEOF_SHORT.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_fb651.dir/SIZEOF_SHORT.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_SHORT.c
+Linking C executable cmTC_fb651
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fb651.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_fb651.dir/SIZEOF_SHORT.c.o -o cmTC_fb651 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining size of unsigned short passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_1b4e3/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_1b4e3.dir/build.make CMakeFiles/cmTC_1b4e3.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1b4e3.dir/SIZEOF_UNSIGNED_SHORT.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_1b4e3.dir/SIZEOF_UNSIGNED_SHORT.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED_SHORT.c
+Linking C executable cmTC_1b4e3
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1b4e3.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_1b4e3.dir/SIZEOF_UNSIGNED_SHORT.c.o -o cmTC_1b4e3 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining size of signed int passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_1124d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_1124d.dir/build.make CMakeFiles/cmTC_1124d.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1124d.dir/SIZEOF_INT.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_1124d.dir/SIZEOF_INT.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_INT.c
+Linking C executable cmTC_1124d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1124d.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_1124d.dir/SIZEOF_INT.c.o -o cmTC_1124d 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining size of unsigned int passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_f3bdc/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_f3bdc.dir/build.make CMakeFiles/cmTC_f3bdc.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_f3bdc.dir/SIZEOF_UNSIGNED_INT.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_f3bdc.dir/SIZEOF_UNSIGNED_INT.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED_INT.c
+Linking C executable cmTC_f3bdc
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f3bdc.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_f3bdc.dir/SIZEOF_UNSIGNED_INT.c.o -o cmTC_f3bdc 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining size of signed long passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_6dca3/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_6dca3.dir/build.make CMakeFiles/cmTC_6dca3.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_6dca3.dir/SIZEOF_LONG.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_6dca3.dir/SIZEOF_LONG.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_LONG.c
+Linking C executable cmTC_6dca3
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6dca3.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_6dca3.dir/SIZEOF_LONG.c.o -o cmTC_6dca3 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining size of unsigned long passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_d6bbb/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_d6bbb.dir/build.make CMakeFiles/cmTC_d6bbb.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_d6bbb.dir/SIZEOF_UNSIGNED_LONG.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_d6bbb.dir/SIZEOF_UNSIGNED_LONG.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED_LONG.c
+Linking C executable cmTC_d6bbb
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d6bbb.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_d6bbb.dir/SIZEOF_UNSIGNED_LONG.c.o -o cmTC_d6bbb 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining size of signed long long passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_794a8/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_794a8.dir/build.make CMakeFiles/cmTC_794a8.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_794a8.dir/SIZEOF_LONG_LONG.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_794a8.dir/SIZEOF_LONG_LONG.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_LONG_LONG.c
+Linking C executable cmTC_794a8
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_794a8.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_794a8.dir/SIZEOF_LONG_LONG.c.o -o cmTC_794a8 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining size of unsigned long long passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_8b50d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_8b50d.dir/build.make CMakeFiles/cmTC_8b50d.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_8b50d.dir/SIZEOF_UNSIGNED_LONG_LONG.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_8b50d.dir/SIZEOF_UNSIGNED_LONG_LONG.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED_LONG_LONG.c
+Linking C executable cmTC_8b50d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8b50d.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_8b50d.dir/SIZEOF_UNSIGNED_LONG_LONG.c.o -o cmTC_8b50d 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining size of unsigned char * passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_76d37/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_76d37.dir/build.make CMakeFiles/cmTC_76d37.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_76d37.dir/SIZEOF_UNSIGNED_CHAR_P.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_76d37.dir/SIZEOF_UNSIGNED_CHAR_P.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_UNSIGNED_CHAR_P.c
+Linking C executable cmTC_76d37
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_76d37.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_76d37.dir/SIZEOF_UNSIGNED_CHAR_P.c.o -o cmTC_76d37 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file pthread.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_00103/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_00103.dir/build.make CMakeFiles/cmTC_00103.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_00103.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_00103.dir/CheckIncludeFile.c.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_00103
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_00103.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_00103.dir/CheckIncludeFile.c.o -o cmTC_00103 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function pthread_create exists in the pthread passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_20a40/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_20a40.dir/build.make CMakeFiles/cmTC_20a40.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_20a40.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create -o CMakeFiles/cmTC_20a40.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_20a40
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_20a40.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create -rdynamic CMakeFiles/cmTC_20a40.dir/CheckFunctionExists.c.o -o cmTC_20a40  -lpthread 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Performing C++ SOURCE FILE Test XERCES_HAVE_STD_THREAD succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_e323d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_e323d.dir/build.make CMakeFiles/cmTC_e323d.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_e323d.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DXERCES_HAVE_STD_THREAD -std=gnu++14 -o CMakeFiles/cmTC_e323d.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_e323d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e323d.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DXERCES_HAVE_STD_THREAD -rdynamic CMakeFiles/cmTC_e323d.dir/src.cxx.o -o cmTC_e323d  -pthread 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+#include <thread>
+#include <mutex>
+#include <iostream>
+
+namespace
+{
+
+  std::mutex m1;
+  std::recursive_mutex m2;
+
+  void
+  threadmain()
+  {
+    std::lock_guard<std::mutex> lock1(m1);
+    std::lock_guard<std::recursive_mutex> lock2(m2);
+    std::cout << "In thread" << std::endl;
+  }
+
+}
+
+int main() {
+  std::thread foo(threadmain);
+  foo.join();
+
+  return 0;
+}
+Determining if the include file nl_types.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_a564d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_a564d.dir/build.make CMakeFiles/cmTC_a564d.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_a564d.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_a564d.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_a564d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a564d.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_a564d.dir/CheckIncludeFile.cxx.o -o cmTC_a564d 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function catopen exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_f5a58/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_f5a58.dir/build.make CMakeFiles/cmTC_f5a58.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_f5a58.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=catopen -o CMakeFiles/cmTC_f5a58.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_f5a58
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f5a58.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=catopen -rdynamic CMakeFiles/cmTC_f5a58.dir/CheckFunctionExists.c.o -o cmTC_f5a58 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function catclose exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_e40ed/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_e40ed.dir/build.make CMakeFiles/cmTC_e40ed.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_e40ed.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=catclose -o CMakeFiles/cmTC_e40ed.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_e40ed
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e40ed.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=catclose -rdynamic CMakeFiles/cmTC_e40ed.dir/CheckFunctionExists.c.o -o cmTC_e40ed 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function catgets exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_7b0b0/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_7b0b0.dir/build.make CMakeFiles/cmTC_7b0b0.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_7b0b0.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=catgets -o CMakeFiles/cmTC_7b0b0.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_7b0b0
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7b0b0.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=catgets -rdynamic CMakeFiles/cmTC_7b0b0.dir/CheckFunctionExists.c.o -o cmTC_7b0b0 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file iconv.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_ecb73/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_ecb73.dir/build.make CMakeFiles/cmTC_ecb73.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_ecb73.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_ecb73.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_ecb73
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ecb73.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_ecb73.dir/CheckIncludeFile.cxx.o -o cmTC_ecb73 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file stdio.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_b7c62/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_b7c62.dir/build.make CMakeFiles/cmTC_b7c62.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_b7c62.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_b7c62.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_b7c62
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b7c62.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_b7c62.dir/CheckIncludeFile.cxx.o -o cmTC_b7c62 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file ctype.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_816e7/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_816e7.dir/build.make CMakeFiles/cmTC_816e7.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_816e7.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_816e7.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_816e7
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_816e7.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_816e7.dir/CheckIncludeFile.cxx.o -o cmTC_816e7 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file errno.h exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_f6379/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_f6379.dir/build.make CMakeFiles/cmTC_f6379.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_f6379.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_f6379.dir/CheckIncludeFile.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_f6379
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f6379.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_f6379.dir/CheckIncludeFile.cxx.o -o cmTC_f6379 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function iconv_open exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_2dd2f/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_2dd2f.dir/build.make CMakeFiles/cmTC_2dd2f.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_2dd2f.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=iconv_open -o CMakeFiles/cmTC_2dd2f.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_2dd2f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2dd2f.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=iconv_open -rdynamic CMakeFiles/cmTC_2dd2f.dir/CheckFunctionExists.c.o -o cmTC_2dd2f 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function iconv_close exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_f6dee/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_f6dee.dir/build.make CMakeFiles/cmTC_f6dee.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_f6dee.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=iconv_close -o CMakeFiles/cmTC_f6dee.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_f6dee
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f6dee.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=iconv_close -rdynamic CMakeFiles/cmTC_f6dee.dir/CheckFunctionExists.c.o -o cmTC_f6dee 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function iconv exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_bcee4/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_bcee4.dir/build.make CMakeFiles/cmTC_bcee4.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_bcee4.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=iconv -o CMakeFiles/cmTC_bcee4.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_bcee4
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bcee4.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=iconv -rdynamic CMakeFiles/cmTC_bcee4.dir/CheckFunctionExists.c.o -o cmTC_bcee4 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function wcstombs exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_28c6f/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_28c6f.dir/build.make CMakeFiles/cmTC_28c6f.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_28c6f.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=wcstombs -o CMakeFiles/cmTC_28c6f.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_28c6f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_28c6f.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=wcstombs -rdynamic CMakeFiles/cmTC_28c6f.dir/CheckFunctionExists.c.o -o cmTC_28c6f 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function mbstowcs exists passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_e3edc/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_e3edc.dir/build.make CMakeFiles/cmTC_e3edc.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_e3edc.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=mbstowcs -o CMakeFiles/cmTC_e3edc.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_e3edc
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e3edc.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=mbstowcs -rdynamic CMakeFiles/cmTC_e3edc.dir/CheckFunctionExists.c.o -o cmTC_e3edc 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Performing C++ SOURCE FILE Test HAVE_STD_char16_t succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_167ce/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_167ce.dir/build.make CMakeFiles/cmTC_167ce.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_167ce.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_STD_char16_t -std=gnu++14 -o CMakeFiles/cmTC_167ce.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: In function 'int main()':
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:3:19: warning: unused variable 'unicode' [-Wunused-variable]
+    3 |   const char16_t *unicode = u"Test ünícodè → ©";
+      |                   ^~~~~~~
+Linking CXX executable cmTC_167ce
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_167ce.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_STD_char16_t -rdynamic CMakeFiles/cmTC_167ce.dir/src.cxx.o -o cmTC_167ce 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+
+int main() {
+  const char16_t *unicode = u"Test ünícodè → ©";
+  return 0;
+}
+Determining size of char16_t passed with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_b7c44/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_b7c44.dir/build.make CMakeFiles/cmTC_b7c44.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_b7c44.dir/SIZEOF_CHAR16_T.cpp.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -std=gnu++14 -o CMakeFiles/cmTC_b7c44.dir/SIZEOF_CHAR16_T.cpp.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CheckTypeSize/SIZEOF_CHAR16_T.cpp
+Linking CXX executable cmTC_b7c44
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b7c44.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing  -rdynamic CMakeFiles/cmTC_b7c44.dir/SIZEOF_CHAR16_T.cpp.o -o cmTC_b7c44 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+
+Performing C++ SOURCE FILE Test CXX_matching-delete-operator succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_6d810/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_6d810.dir/build.make CMakeFiles/cmTC_6d810.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_6d810.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DCXX_matching-delete-operator -std=gnu++14 -o CMakeFiles/cmTC_6d810.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+<command-line>: warning: ISO C++11 requires whitespace after the macro name
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: In static member function 'static void* XMemory::operator new(size_t)':
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:6:41: warning: 'operator new' must not return NULL unless it is declared 'throw()' (or '-fcheck-new' is in effect)
+    6 |   void* operator new(size_t s) { return 0; }
+      |                                         ^
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:6:29: warning: unused parameter 's' [-Wunused-parameter]
+    6 |   void* operator new(size_t s) { return 0; }
+      |                      ~~~~~~~^
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: In static member function 'static void* XMemory::operator new(size_t, void*)':
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:7:52: warning: 'operator new' must not return NULL unless it is declared 'throw()' (or '-fcheck-new' is in effect)
+    7 |   void* operator new(size_t s, void* ptr) { return 0; }
+      |                                                    ^
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:7:29: warning: unused parameter 's' [-Wunused-parameter]
+    7 |   void* operator new(size_t s, void* ptr) { return 0; }
+      |                      ~~~~~~~^
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:7:38: warning: unused parameter 'ptr' [-Wunused-parameter]
+    7 |   void* operator new(size_t s, void* ptr) { return 0; }
+      |                                ~~~~~~^~~
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: In static member function 'static void XMemory::operator delete(void*)':
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:8:30: warning: unused parameter 'p' [-Wunused-parameter]
+    8 |   void operator delete(void* p) {}
+      |                        ~~~~~~^
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: In static member function 'static void XMemory::operator delete(void*, void*)':
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:9:30: warning: unused parameter 'p' [-Wunused-parameter]
+    9 |   void operator delete(void* p, void* ptr) {}
+      |                        ~~~~~~^
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:9:39: warning: unused parameter 'ptr' [-Wunused-parameter]
+    9 |   void operator delete(void* p, void* ptr) {}
+      |                                 ~~~~~~^~~
+Linking CXX executable cmTC_6d810
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6d810.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DCXX_matching-delete-operator -rdynamic CMakeFiles/cmTC_6d810.dir/src.cxx.o -o cmTC_6d810 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+
+#include <stdlib.h>
+
+class XMemory {
+public:
+  void* operator new(size_t s) { return 0; }
+  void* operator new(size_t s, void* ptr) { return 0; }
+  void operator delete(void* p) {}
+  void operator delete(void* p, void* ptr) {}
+};
+
+int main() {
+  return 0;
+}
+Performing C++ SOURCE FILE Test HAVE_BOOL succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_eb74a/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_eb74a.dir/build.make CMakeFiles/cmTC_eb74a.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_eb74a.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_BOOL -std=gnu++14 -o CMakeFiles/cmTC_eb74a.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:2:5: warning: no previous declaration for 'int f(int)' [-Wmissing-declarations]
+    2 | int f(int  x){return 1;}
+      |     ^
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: In function 'int f(int)':
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:2:12: warning: unused parameter 'x' [-Wunused-parameter]
+    2 | int f(int  x){return 1;}
+      |       ~~~~~^
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: At global scope:
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:3:5: warning: no previous declaration for 'int f(char)' [-Wmissing-declarations]
+    3 | int f(char x){return 1;}
+      |     ^
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: In function 'int f(char)':
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:3:12: warning: unused parameter 'x' [-Wunused-parameter]
+    3 | int f(char x){return 1;}
+      |       ~~~~~^
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: At global scope:
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:4:5: warning: no previous declaration for 'int f(bool)' [-Wmissing-declarations]
+    4 | int f(bool x){return 1;}
+      |     ^
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: In function 'int f(bool)':
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:4:12: warning: unused parameter 'x' [-Wunused-parameter]
+    4 | int f(bool x){return 1;}
+      |       ~~~~~^
+Linking CXX executable cmTC_eb74a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_eb74a.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_BOOL -rdynamic CMakeFiles/cmTC_eb74a.dir/src.cxx.o -o cmTC_eb74a 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+
+int f(int  x){return 1;}
+int f(char x){return 1;}
+int f(bool x){return 1;}
+
+int main() {
+  bool b = true;
+  return f(b);
+}
+Performing C++ SOURCE FILE Test HAVE_CONST succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_80bca/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_80bca.dir/build.make CMakeFiles/cmTC_80bca.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_80bca.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_CONST -std=gnu++14 -o CMakeFiles/cmTC_80bca.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: In function 'int main()':
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:3:15: warning: unused variable 's' [-Wunused-variable]
+    3 |   const char *s = "Test";
+      |               ^
+Linking CXX executable cmTC_80bca
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_80bca.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_CONST -rdynamic CMakeFiles/cmTC_80bca.dir/src.cxx.o -o cmTC_80bca 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+
+int main() {
+  const char *s = "Test";
+  return 0;
+}
+Performing C++ SOURCE FILE Test CXX_HAS_inline succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_d2371/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_d2371.dir/build.make CMakeFiles/cmTC_d2371.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_d2371.dir/src.cxx.o
+/usr/bin/c++ -Dinline=inline  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DCXX_HAS_inline -std=gnu++14 -o CMakeFiles/cmTC_d2371.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:4:15: warning: no previous declaration for 'foo_t foo()' [-Wmissing-declarations]
+    4 |         foo_t foo(){return 0;}
+      |               ^~~
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: In function 'int main(int, char**)':
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:5:22: warning: unused parameter 'argc' [-Wunused-parameter]
+    5 |         int main(int argc, char *argv[]) {return 0;}
+      |                  ~~~~^~~~
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:5:34: warning: unused parameter 'argv' [-Wunused-parameter]
+    5 |         int main(int argc, char *argv[]) {return 0;}
+      |                            ~~~~~~^~~~~~
+Linking CXX executable cmTC_d2371
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d2371.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DCXX_HAS_inline -rdynamic CMakeFiles/cmTC_d2371.dir/src.cxx.o -o cmTC_d2371 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+
+        typedef int foo_t;
+        static inline foo_t static_foo() {return 0;}
+        foo_t foo(){return 0;}
+        int main(int argc, char *argv[]) {return 0;}
+Performing C++ SOURCE FILE Test HAVE_VOLATILE succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_36b49/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_36b49.dir/build.make CMakeFiles/cmTC_36b49.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_36b49.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_VOLATILE -std=gnu++14 -o CMakeFiles/cmTC_36b49.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: In function 'int main()':
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:3:16: warning: unused variable 'i' [-Wunused-variable]
+    3 |   volatile int i = 1;
+      |                ^
+Linking CXX executable cmTC_36b49
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_36b49.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_VOLATILE -rdynamic CMakeFiles/cmTC_36b49.dir/src.cxx.o -o cmTC_36b49 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+
+int main() {
+  volatile int i = 1;
+  return 0;
+}
+Performing C++ SOURCE FILE Test HAVE_LSTRING succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_a7712/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_a7712.dir/build.make CMakeFiles/cmTC_a7712.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_a7712.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_LSTRING -std=gnu++14 -o CMakeFiles/cmTC_a7712.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: In function 'int main()':
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:3:18: warning: unused variable 's' [-Wunused-variable]
+    3 |   const wchar_t* s=L"wide string";
+      |                  ^
+Linking CXX executable cmTC_a7712
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a7712.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_LSTRING -rdynamic CMakeFiles/cmTC_a7712.dir/src.cxx.o -o cmTC_a7712 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+
+int main() {
+  const wchar_t* s=L"wide string";
+  return 0;
+}
+Performing C++ SOURCE FILE Test HAVE_NAMESPACES succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_c4bce/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_c4bce.dir/build.make CMakeFiles/cmTC_c4bce.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_c4bce.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_NAMESPACES -std=gnu++14 -o CMakeFiles/cmTC_c4bce.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_c4bce
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c4bce.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_NAMESPACES -rdynamic CMakeFiles/cmTC_c4bce.dir/src.cxx.o -o cmTC_c4bce 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+
+namespace Outer {
+  namespace Inner {
+    int i = 0;
+  }
+}
+
+int main() {
+  using namespace Outer::Inner;
+  return i;
+}
+Performing C++ SOURCE FILE Test HAVE_STD_LIBS succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_c02e5/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_c02e5.dir/build.make CMakeFiles/cmTC_c02e5.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_c02e5.dir/src.cxx.o
+/usr/bin/c++ -DHAVE_NAMESPACES  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_STD_LIBS -std=gnu++14 -o CMakeFiles/cmTC_c02e5.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_c02e5
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c02e5.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_STD_LIBS -rdynamic CMakeFiles/cmTC_c02e5.dir/src.cxx.o -o cmTC_c02e5 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+
+#include <map>
+#include <iomanip>
+#include <cmath>
+#ifdef HAVE_NAMESPACES
+using namespace std;
+#endif
+
+int main() {
+  return 0;
+}
+Performing C++ SOURCE FILE Test HAVE_STD_NAMESPACE succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_5a1bd/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_5a1bd.dir/build.make CMakeFiles/cmTC_5a1bd.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_5a1bd.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_STD_NAMESPACE -std=gnu++14 -o CMakeFiles/cmTC_5a1bd.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_5a1bd
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5a1bd.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_STD_NAMESPACE -rdynamic CMakeFiles/cmTC_5a1bd.dir/src.cxx.o -o cmTC_5a1bd 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+
+#include <iostream>
+std::istream& is = std::cin;
+
+int main() {
+  return 0;
+}
+Performing C++ SOURCE FILE Test HAVE_PATH_MAX succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_eaa34/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_eaa34.dir/build.make CMakeFiles/cmTC_eaa34.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_eaa34.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_PATH_MAX -std=gnu++14 -o CMakeFiles/cmTC_eaa34.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx: In function 'int main()':
+/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx:4:8: warning: unused variable 'dummy' [-Wunused-variable]
+    4 |   char dummy[PATH_MAX];
+      |        ^~~~~
+Linking CXX executable cmTC_eaa34
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_eaa34.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_PATH_MAX -rdynamic CMakeFiles/cmTC_eaa34.dir/src.cxx.o -o cmTC_eaa34 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+
+#include <limits.h>
+int main(void) {
+  char dummy[PATH_MAX];
+  return 0;
+}
+Performing C++ SOURCE FILE Test HAVE_MBRLEN succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_5e7f0/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_5e7f0.dir/build.make CMakeFiles/cmTC_5e7f0.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_5e7f0.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_MBRLEN -std=gnu++14 -o CMakeFiles/cmTC_5e7f0.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_5e7f0
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5e7f0.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_MBRLEN -rdynamic CMakeFiles/cmTC_5e7f0.dir/src.cxx.o -o cmTC_5e7f0 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+
+#include <wchar.h>
+int main(void) {
+  mbstate_t st;
+  mbrlen( "t", 5, &st );
+  return 0;
+}
+Performing C++ SOURCE FILE Test HAVE_WCSRTOMBS succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_d0b63/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_d0b63.dir/build.make CMakeFiles/cmTC_d0b63.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_d0b63.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_WCSRTOMBS -std=gnu++14 -o CMakeFiles/cmTC_d0b63.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_d0b63
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d0b63.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_WCSRTOMBS -rdynamic CMakeFiles/cmTC_d0b63.dir/src.cxx.o -o cmTC_d0b63 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+
+#include <wchar.h>
+int main(void) {
+  mbstate_t st;
+  char buffer[2];
+  const wchar_t* src=0;
+  wcsrtombs(buffer, &src, 2, &st);
+  return 0;
+}
+Performing C++ SOURCE FILE Test HAVE_MBSRTOWCS succeeded with the following output:
+Change Dir: /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_48675/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_48675.dir/build.make CMakeFiles/cmTC_48675.dir/build
+gmake[1]: Entering directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_48675.dir/src.cxx.o
+/usr/bin/c++   -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_MBSRTOWCS -std=gnu++14 -o CMakeFiles/cmTC_48675.dir/src.cxx.o -c /home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_48675
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_48675.dir/link.txt --verbose=1
+/usr/bin/c++  -Wall -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wextra -Wformat=2 -Wmissing-declarations -Wno-long-long -Woverlength-strings -Woverloaded-virtual -Wredundant-decls -Wreorder -Wswitch-default -Wunused-variable -Wwrite-strings -Wno-variadic-macros -fstrict-aliasing -DHAVE_MBSRTOWCS -rdynamic CMakeFiles/cmTC_48675.dir/src.cxx.o -o cmTC_48675 
+gmake[1]: Leaving directory '/home/rb/xerces-c-3.2.3/bld/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+
+#include <wchar.h>
+int main(void) {
+  mbstate_t st;
+  wchar_t buffer[2];
+  const char* src=0;
+  mbsrtowcs(buffer, &src, 2, &st);
+  return 0;
+}
